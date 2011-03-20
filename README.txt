@@ -1,3 +1,8 @@
+Copyright (C) 2011 Xavier Antoviaque <xavier@antoviaque.org> (gameplay and specifications)
+Copyright (C) 2011 David Blanchard <david@blanchard.name> (gameplay and specifications)
+Copyright (C) 2011 tartarugafeliz <contact@tartarugafeliz.com> (artwork)
+Copyright (C) 2011 Loic Dachary <loic@dachary.org> (software)
+
 The game includes a deck of cards.
 
     * A player (who we will call the author) creates a new game. 
