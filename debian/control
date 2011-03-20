@@ -1,0 +1,30 @@
+Source: cardstories
+Section: python
+Priority: optional
+Maintainer: Loic Dachary <loic@debian.org>
+Build-Depends: debhelper (>= 7), python-support (>= 0.8.5), python-coverage, python-twisted-web (>= 10.2)
+Standards-Version: 3.8.0
+Vcs-Git: git://cardstories.dachary.org/cardstories.git
+Homepage: http://cardstories.dachary.org/
+X-Python-Version: all
+
+Package: python-cardstories
+Section: python
+Architecture: all
+Depends: ${misc:Depends}, adduser, python-twisted-web (>= 10.2), python-openssl, ${python:Depends}
+Provides: ${python:Provides}
+Description: Find out a card using a sentence made up by another player
+  The game includes a deck of cards.
+  .
+    * A player (who we will call the author) creates a new game. 
+          o He chooses a card,
+          o picks a word or a sentence to describe it,
+          o offers players to play the session 
+    * the participant players choose a card in their own deck that matches 
+      the author's sentence
+    * Once enough players have chosen the card, the author displays all chosen
+      cards, and the players try to figure out which one is the author's
+    * The author wins if at least one of his friends gesses right, but not all
+      of them do. Then the winners are the author and the friends who guessed right. 
+  .
+  If the author loses, all the other players win. 

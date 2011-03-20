@@ -1,0 +1,105 @@
+#!/bin/sh
+# Copyright (C) 2011 Dachary <loic@dachary.org>
+#
+# This software's license gives you freedom; you can copy, convey,
+# propagate, redistribute and/or modify this program under the terms of
+# the GNU Affero General Public License (AGPL) as published by the Free
+# Software Foundation (FSF), either version 3 of the License, or (at your
+# option) any later version of the AGPL published by the FSF.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero
+# General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program in a file in the toplevel directory called
+# "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
+#
+
+### BEGIN INIT INFO
+# Provides:          cardstories
+# Required-Start:    $all
+# Required-Stop:     $all
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Starts a service for the Twisted plugin '$PLUGIN'
+# Description:       Generic plugin starter for twistd plugins
+### END INIT INFO
+# Author: Garret Heaton (powdahound@gmail.com)
+
+PLUGIN="cardstories"
+
+DAEMON=/usr/bin/twistd
+PIDFILE=/var/run/$PLUGIN/pid
+LOGFILE=/var/log/$PLUGIN/access.log
+CARDSTORIES_USER=cardstories
+CARDSTORIES_GROUP=nogroup
+[ -r /etc/default/$PLUGIN ] && . /etc/default/$PLUGIN
+# Load the VERBOSE setting and other rcS variables
+. /lib/init/vars.sh
+
+# Define LSB log_* functions.
+# Depend on lsb-base (>= 3.0-6) to ensure that this file is present.
+. /lib/lsb/init-functions
+
+export PYTHONPATH=/etc/cardstories
+
+DAEMON_OPTS="--pidfile=$PIDFILE --logfile=$LOGFILE -u "$CARDSTORIES_USER" -g "$CARDSTORIES_GROUP" $PLUGIN --interface 0.0.0.0"
+
+if [ ! -x $DAEMON ]; then
+  echo "ERROR: Can't execute $DAEMON."
+  exit 1
+fi
+
+start_service() {
+  echo -n " * Starting $PLUGIN... "
+  if [ ! -d "/var/run/$PLUGIN" ]; then
+      mkdir -p /var/run/$PLUGIN
+      chown $CARDSTORIES_USER:nogroup /var/run/$PLUGIN
+  fi
+  start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON -- $DAEMON_OPTS 
+  e=$?
+  if [ $e -eq 1 ]; then
+    echo "already running"
+    return
+  fi
+
+  if [ $e -eq 255 ]; then
+    echo "couldn't start :("
+    return
+  fi
+
+  echo "done"
+}
+
+stop_service() {
+  echo -n " * Stopping $PLUGIN... "
+  start-stop-daemon --stop --quiet --retry 10 --pidfile $PIDFILE
+  e=$?
+  if [ $e -eq 1 ]; then
+    echo "not running"
+    return
+  fi
+
+  echo "done"
+}
+
+case "$1" in
+  start)
+    start_service
+    ;;
+  stop)
+    stop_service
+    ;;
+  restart|force-reload)
+    stop_service
+    start_service
+    ;;
+  *)
+    echo "Usage: /etc/init.d/$PLUGIN {force-reload|start|stop|restart}" >&2
+    exit 1   
+    ;;
+esac
+
+exit 0

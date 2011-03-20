@@ -1,0 +1,5 @@
+# User to run the daemons as.
+CARDSTORIES_USER=cardstories
+
+# Group to run the daemons as.
+CARDSTORIES_GROUP=nogroup
