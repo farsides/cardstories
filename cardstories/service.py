@@ -41,14 +41,33 @@ class CardstoriesService(service.Service):
             c.execute(
                 "CREATE TABLE games ( " +
                 "  id INTEGER PRIMARY KEY, " +
-                "  card TINYINT, " +
                 "  sentence TEXT, " +
+                "  cards VARCHAR(36), " +
                 "  state VARCHAR(8) DEFAULT 'picking', " +
                 "  created DATETIME, " +
                 "  completed DATETIME" +
                 "); ")
             c.execute(
-                "CREATE INDEX games ON games (id); "
+                "CREATE INDEX games_idx ON games (id); "
+                )
+            c.execute(
+                "CREATE TABLE players ( " +
+                "  id INTEGER PRIMARY KEY, " +
+                "  name TEXT, " +
+                "  created DATETIME " +
+                "); ")
+            c.execute(
+                "CREATE INDEX players_idx ON players (id); "
+                )
+            c.execute(
+                "CREATE TABLE player2game ( " +
+                "  player_id INTEGER, " +
+                "  game_id INTEGER, " +
+                "  cards VARCHAR(7), " +
+                "  win BOOL " +
+                "); ")
+            c.execute(
+                "CREATE INDEX player2game_idx ON player2game (player_id, game_id); "
                 )
             db.commit()
             db.close()
@@ -60,13 +79,13 @@ class CardstoriesService(service.Service):
     def stopService(self):
         return defer.succeed(None)
 
-    def create(self, args):
-        d = self.db.runOperation("INSERT INTO games (card, sentence, created) VALUES (?, ?, date('now'))", [args['url'][0], args['sentence'][0]])
+    def create(self):
+        d = self.db.runOperation("INSERT INTO games (created) VALUES (date('now'))")
         d.addCallback(lambda result: {})
         return d
 
-    def autocomplete(self):
-        pass
+    def tick(self):
+        return defer.succeed(True)
 
     def run(self, count):
         self.completed = defer.Deferred()
@@ -74,7 +93,7 @@ class CardstoriesService(service.Service):
         return self.completed
 
     def run_once(self, count):
-        d = self.autocomplete()
+        d = self.tick()
         count -= 1
         def again(result):
             if count != 0:
