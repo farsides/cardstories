@@ -54,7 +54,7 @@ class CardstoriesService(service.Service):
                 "  sentence TEXT, " +
                 "  cards VARCHAR(%d), " % self.NCARDS +
                 "  board VARCHAR(%d), " % self.NPLAYERS +
-                "  state VARCHAR(8) DEFAULT 'invitation', " + # invitation, vote
+                "  state VARCHAR(8) DEFAULT 'invitation', " + # invitation, vote, complete
                 "  created DATETIME, " +
                 "  completed DATETIME" +
                 "); ")
@@ -76,7 +76,7 @@ class CardstoriesService(service.Service):
                 "  game_id INTEGER, " +
                 "  cards VARCHAR(%d), " % self.CARDS_PER_PLAYER +
                 "  picked CHAR(1), " +
-                "  vote CHAR(1), " +
+                "  vote INTEGER, " +
                 "  win CHAR(1) DEFAULT 'n' " +
                 "); ")
             c.execute(
@@ -139,7 +139,7 @@ class CardstoriesService(service.Service):
         owner_id = int(args['owner_id'][0])
         rows = yield self.db.runQuery("SELECT picked FROM player2game WHERE game_id = %d AND picked IS NOT NULL ORDER BY picked" % game_id)
         board = ''.join(map(lambda row: row[0], rows))
-        yield self.db.runOperation("UPDATE games SET board = ?, state = 'voting' WHERE id = %d AND owner_id = %d" % ( game_id, owner_id ), [ board ])
+        yield self.db.runOperation("UPDATE games SET board = ?, state = 'vote' WHERE id = %d AND owner_id = %d" % ( game_id, owner_id ), [ board ])
         defer.returnValue({})
 
     @defer.inlineCallbacks
@@ -163,6 +163,14 @@ class CardstoriesService(service.Service):
         game_id = int(args['game_id'][0])
         card = int(args['card'][0])
         yield self.db.runOperation("UPDATE player2game SET picked = ? WHERE game_id = %d AND player_id = %d" % ( game_id, player_id ), [ chr(card) ])
+        defer.returnValue({})
+
+    @defer.inlineCallbacks
+    def vote(self, args):
+        player_id = int(args['player_id'][0])
+        game_id = int(args['game_id'][0])
+        vote = int(args['vote'][0])
+        yield self.db.runOperation("UPDATE player2game SET vote = %d WHERE game_id = %d AND player_id = %d" % ( vote, game_id, player_id ))
         defer.returnValue({})
 
     def handle(self, args):

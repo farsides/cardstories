@@ -159,29 +159,66 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         c.close()
             
     @defer.inlineCallbacks
-    def test04_voting(self):
+    def test04_state_vote(self):
         card = 5
         sentence = 'SENTENCE'
         owner_id = 15
         game = yield self.service.create({ 'card': [card],
                                            'sentence': [sentence],
                                            'owner_id': [owner_id]})
-        player2card = {}
+        cards = [card]
         for player_id in ( 16, 17 ):
             yield self.service.participate({ 'player_id': [player_id],
                                              'game_id': [game['game_id']] })
             player = yield self.service.player2game({ 'player_id': [player_id],
                                                       'game_id': [game['game_id']] })
-            player2card[player_id] = player['cards'][0]
+            card = player['cards'][0]
+            cards.append(card)
             yield self.service.pick({ 'player_id': [player_id],
                                       'game_id': [game['game_id']],
-                                      'card': [ player2card[player_id] ] })
+                                      'card': [card] })
         
         yield self.service.voting({ 'game_id': [game['game_id']],
                                     'owner_id': [owner_id] })
         c = self.db.cursor()
-        c.execute("SELECT board FROM games WHERE id = %d" % ( game['game_id'] ))
-        self.assertEquals('', c.fetchone()[0])
+        c.execute("SELECT board, state FROM games WHERE id = %d" % ( game['game_id'] ))
+        row = c.fetchone()
+        board = map(lambda c: ord(c), row[0])
+        board.sort()
+        cards.sort()
+        self.assertEquals(board, cards)
+        self.assertEquals(u'vote', row[1])
+        c.close()
+
+    @defer.inlineCallbacks
+    def test04_vote(self):
+        card = 5
+        sentence = 'SENTENCE'
+        owner_id = 15
+        game = yield self.service.create({ 'card': [card],
+                                           'sentence': [sentence],
+                                           'owner_id': [owner_id]})
+        for player_id in ( 16, 17 ):
+            yield self.service.participate({ 'player_id': [player_id],
+                                             'game_id': [game['game_id']] })
+            player = yield self.service.player2game({ 'player_id': [player_id],
+                                                      'game_id': [game['game_id']] })
+            card = player['cards'][0]
+            yield self.service.pick({ 'player_id': [player_id],
+                                      'game_id': [game['game_id']],
+                                      'card': [card] })
+        
+        yield self.service.voting({ 'game_id': [game['game_id']],
+                                    'owner_id': [owner_id] })
+        
+        c = self.db.cursor()
+        for player_id in ( owner_id, 16, 17 ):
+            vote = 1
+            yield self.service.vote({ 'game_id': [game['game_id']],
+                                      'player_id': [player_id],
+                                      'vote': [vote] })
+            c.execute("SELECT vote FROM player2game WHERE game_id = %d AND player_id = %d" % ( game['game_id'], player_id ))
+            self.assertEqual(vote, c.fetchone()[0])
         c.close()
             
 def Run():
