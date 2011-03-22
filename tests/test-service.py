@@ -156,6 +156,33 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         for player_id in ( 16, 17 ):
             c.execute("SELECT picked FROM player2game WHERE game_id = %d AND player_id = %d" % ( game['game_id'], player_id ))
             self.assertEquals(player2card[player_id], ord(c.fetchone()[0]))
+        c.close()
+            
+    @defer.inlineCallbacks
+    def test04_voting(self):
+        card = 5
+        sentence = 'SENTENCE'
+        owner_id = 15
+        game = yield self.service.create({ 'card': [card],
+                                           'sentence': [sentence],
+                                           'owner_id': [owner_id]})
+        player2card = {}
+        for player_id in ( 16, 17 ):
+            yield self.service.participate({ 'player_id': [player_id],
+                                             'game_id': [game['game_id']] })
+            player = yield self.service.player2game({ 'player_id': [player_id],
+                                                      'game_id': [game['game_id']] })
+            player2card[player_id] = player['cards'][0]
+            yield self.service.pick({ 'player_id': [player_id],
+                                      'game_id': [game['game_id']],
+                                      'card': [ player2card[player_id] ] })
+        
+        yield self.service.voting({ 'game_id': [game['game_id']],
+                                    'owner_id': [owner_id] })
+        c = self.db.cursor()
+        c.execute("SELECT board FROM games WHERE id = %d" % ( game['game_id'] ))
+        self.assertEquals('', c.fetchone()[0])
+        c.close()
             
 def Run():
     loader = runner.TestLoader()

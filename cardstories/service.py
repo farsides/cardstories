@@ -115,32 +115,32 @@ class CardstoriesService(service.Service):
         return d
 
     def participateInteraction(self, transaction, game_id, player_id):
-        try:
-            transaction.execute("SELECT players, cards FROM games WHERE id = %d" % game_id)
-            ( players, cards ) = transaction.fetchall()[0]
-            no_room = Exception('player %d cannot join game %d because the %d players limit is reached' % ( player_id, game_id, self.NPLAYERS ))
-            if players >= self.NPLAYERS:
-                raise no_room
-            transaction.execute("UPDATE games SET cards = ?, players = players + 1 WHERE id = %d AND players = %d" % ( game_id, players ), [ cards[self.CARDS_PER_PLAYER:] ])
-            if transaction.rowcount == 0:
-                raise no_room
-            transaction.execute("INSERT INTO player2game (game_id, player_id, cards) VALUES (?, ?, ?)", [ game_id, player_id, cards[:self.CARDS_PER_PLAYER] ])
-            return {}
-        except Exception, e:
-            return {'error': e.args[0]}
+        transaction.execute("SELECT players, cards FROM games WHERE id = %d" % game_id)
+        ( players, cards ) = transaction.fetchall()[0]
+        no_room = UserWarning('player %d cannot join game %d because the %d players limit is reached' % ( player_id, game_id, self.NPLAYERS ))
+        if players >= self.NPLAYERS:
+            raise no_room
+        transaction.execute("UPDATE games SET cards = ?, players = players + 1 WHERE id = %d AND players = %d" % ( game_id, players ), [ cards[self.CARDS_PER_PLAYER:] ])
+        if transaction.rowcount == 0:
+            raise no_room
+        transaction.execute("INSERT INTO player2game (game_id, player_id, cards) VALUES (?, ?, ?)", [ game_id, player_id, cards[:self.CARDS_PER_PLAYER] ])
+        return {}
 
+    @defer.inlineCallbacks
     def participate(self, args):
         player_id = int(args['player_id'][0])
         game_id = int(args['game_id'][0])
-        return self.db.runInteraction(self.participateInteraction, game_id, player_id)
+        yield self.db.runInteraction(self.participateInteraction, game_id, player_id)
+        defer.returnValue({})
 
     @defer.inlineCallbacks
     def voting(self, args):
         game_id = int(args['game_id'][0])
         owner_id = int(args['owner_id'][0])
-        rows = yield self.db.runQuery("SELECT picked FROM player2game WHERE game_id = %d AND picked IS NOT NULL")
+        rows = yield self.db.runQuery("SELECT picked FROM player2game WHERE game_id = %d AND picked IS NOT NULL ORDER BY picked" % game_id)
         board = ''.join(map(lambda row: row[0], rows))
         yield self.db.runOperation("UPDATE games SET board = ?, state = 'voting' WHERE id = %d AND owner_id = %d" % ( game_id, owner_id ), [ board ])
+        defer.returnValue({})
 
     @defer.inlineCallbacks
     def player2game(self, args):
@@ -157,11 +157,21 @@ class CardstoriesService(service.Service):
                             'vote': c(rows[0][2]),
                             'win': rows[0][3] })
 
+    @defer.inlineCallbacks
     def pick(self, args):
         player_id = int(args['player_id'][0])
         game_id = int(args['game_id'][0])
         card = int(args['card'][0])
-        return self.db.runOperation("UPDATE player2game SET picked = ? WHERE game_id = %d AND player_id = %d" % ( game_id, player_id ), [ chr(card) ])
+        yield self.db.runOperation("UPDATE player2game SET picked = ? WHERE game_id = %d AND player_id = %d" % ( game_id, player_id ), [ chr(card) ])
+        defer.returnValue({})
+
+    def handle(self, args):
+        try:
+            action = args['action'][0]
+            if action in ( 'pick', 'create', 'voting', 'participate' ):
+                return self[action](args)
+        except UserWarning, e:
+            return {'error': e.args[0]}
 
     def tick(self):
         return defer.succeed(True)
