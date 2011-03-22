@@ -221,6 +221,46 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
             self.assertEqual(vote, c.fetchone()[0])
         c.close()
             
+    @defer.inlineCallbacks
+    def test05_complete(self):
+        winner_card = 5
+        sentence = 'SENTENCE'
+        owner_id = 15
+        game = yield self.service.create({ 'card': [winner_card],
+                                           'sentence': [sentence],
+                                           'owner_id': [owner_id]})
+        for player_id in ( 16, 17 ):
+            yield self.service.participate({ 'player_id': [player_id],
+                                             'game_id': [game['game_id']] })
+            player = yield self.service.player2game({ 'player_id': [player_id],
+                                                      'game_id': [game['game_id']] })
+            card = player['cards'][0]
+            yield self.service.pick({ 'player_id': [player_id],
+                                      'game_id': [game['game_id']],
+                                      'card': [card] })
+        
+        yield self.service.voting({ 'game_id': [game['game_id']],
+                                    'owner_id': [owner_id] })
+
+        c = self.db.cursor()
+        c.execute("SELECT board FROM games WHERE id = %d" % game['game_id'])
+        board = c.fetchone()[0]
+        winner_position = board.index(chr(winner_card))
+        winner_id = 16
+        yield self.service.vote({ 'game_id': [game['game_id']],
+                                  'player_id': [winner_id],
+                                  'vote': [winner_position] })
+        loser_id = 17
+        yield self.service.vote({ 'game_id': [game['game_id']],
+                                  'player_id': [loser_id],
+                                  'vote': [5555] })
+        yield self.service.complete({ 'game_id': [game['game_id']],
+                                      'owner_id': [owner_id] })
+        c.execute("SELECT win FROM player2game WHERE game_id = %d AND player_id IN ( %d, %d )" % ( game['game_id'], winner_id, owner_id ))
+        self.assertEqual(u'y', c.fetchone()[0])
+        self.assertEqual(u'y', c.fetchone()[0])
+        c.close()
+            
 def Run():
     loader = runner.TestLoader()
 #    loader.methodPrefix = "test_trynow"

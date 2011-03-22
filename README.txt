@@ -11,9 +11,9 @@ The game includes a deck of cards.
           o offers players to play the session 
     * the participant players choose a card in their own deck that matches the author's sentence
     * Once enough players have chosen the card, the author displays all chosen cards, and the players try to figure out which one is the author's
-    * The author wins if at least one of his friends gesses right, but not all of them do. Then the winners are the author and the friends who guessed right. 
-
-If the author loses, all the other players win. 
+    * The author wins if at least one of his friends guesses right, but not all of them do. 
+      Then the winners are the author and the friends who guessed right. 
+    * If the author loses, all the other players win. 
 
 # display usage
 PYTHONPATH=.:etc/cardstories twistd --nodaemon cardstories --help

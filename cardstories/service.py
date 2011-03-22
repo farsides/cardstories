@@ -138,7 +138,8 @@ class CardstoriesService(service.Service):
         game_id = int(args['game_id'][0])
         owner_id = int(args['owner_id'][0])
         rows = yield self.db.runQuery("SELECT picked FROM player2game WHERE game_id = %d AND picked IS NOT NULL ORDER BY picked" % game_id)
-        board = ''.join(map(lambda row: row[0], rows))
+        cards = map(lambda row: row[0], rows)
+        board = ''.join(cards)
         yield self.db.runOperation("UPDATE games SET board = ?, state = 'vote' WHERE id = %d AND owner_id = %d" % ( game_id, owner_id ), [ board ])
         defer.returnValue({})
 
@@ -173,10 +174,43 @@ class CardstoriesService(service.Service):
         yield self.db.runOperation("UPDATE player2game SET vote = %d WHERE game_id = %d AND player_id = %d" % ( vote, game_id, player_id ))
         defer.returnValue({})
 
+    def completeInteraction(self, transaction, game_id, owner_id):
+        transaction.execute("SELECT cards FROM player2game WHERE game_id = %d AND player_id = %d" % ( game_id, owner_id ))
+        winner_card = transaction.fetchone()[0]
+        transaction.execute("SELECT board FROM games WHERE id = %d" % game_id)
+        board = transaction.fetchone()[0]
+        winner_position = board.index(winner_card)
+        transaction.execute("SELECT vote, player_id FROM player2game WHERE game_id = %d AND player_id != %d AND vote IS NOT NULL" % ( game_id, owner_id ))
+        players_count = 0
+        guessed = []
+        failed = []
+        for ( vote, player_id ) in transaction.fetchall():
+            players_count += 1
+            if vote == winner_position:
+                guessed.append(player_id)
+            else:
+                failed.append(player_id)
+        if len(guessed) > 0 and len(guessed) < players_count:
+            winners = guessed + [ owner_id ]
+        else:
+            winners = failed + guessed
+        transaction.execute("UPDATE player2game SET win = 'y' WHERE " + 
+                            "  game_id = %d AND " % game_id + 
+                            "  player_id IN ( %s ) " % ','.join(map(lambda id: str(id), winners)))
+        transaction.execute("UPDATE games SET completed = date('now'), state = 'complete' WHERE id = %d" % game_id)
+        return {}
+
+    @defer.inlineCallbacks
+    def complete(self, args):
+        owner_id = int(args['owner_id'][0])
+        game_id = int(args['game_id'][0])
+        yield self.db.runInteraction(self.completeInteraction, game_id, owner_id)
+        defer.returnValue({})
+
     def handle(self, args):
         try:
             action = args['action'][0]
-            if action in ( 'pick', 'create', 'voting', 'participate' ):
+            if action in ( 'pick', 'create', 'voting', 'participate', 'complete' ):
                 return self[action](args)
         except UserWarning, e:
             return {'error': e.args[0]}
