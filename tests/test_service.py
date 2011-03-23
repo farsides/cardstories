@@ -276,6 +276,30 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         self.assertEqual(u'y', c.fetchone()[0])
         c.close()
             
+    @defer.inlineCallbacks
+    def test08_game(self):
+        winner_card = 5
+        sentence = 'SENTENCE'
+        owner_id = 15
+        game = yield self.service.create({ 'card': [winner_card],
+                                           'sentence': [sentence],
+                                           'owner_id': [owner_id]})
+        player1 = 16
+        player2 = 17
+        for player_id in ( player1, player2 ):
+            yield self.service.participate({ 'player_id': [player_id],
+                                             'game_id': [game['game_id']] })
+
+        game_info = yield self.service.game({ 'game_id': [game['game_id']] })
+        self.assertEquals({'board': None,
+                           'cards': None,
+                           'owner_id': owner_id,
+                           'players': [[owner_id, None, u'n'], [player1, None, u'n'], [player2, None, u'n']],
+                           'self': None,
+                           'sentence': u'SENTENCE',
+                           'state': u'invitation'}, game_info)
+        
+
 def Run():
     loader = runner.TestLoader()
 #    loader.methodPrefix = "test_trynow"

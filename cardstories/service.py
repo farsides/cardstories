@@ -72,7 +72,7 @@ class CardstoriesService(service.Service):
     NCARDS = 36
     NPLAYERS = 6
     CARDS_PER_PLAYER = 7
-    ACTIONS = ( 'create', 'participate', 'voting', 'player2game', 'pick', 'vote', 'complete' )
+    ACTIONS = ( 'create', 'game', 'participate', 'voting', 'player2game', 'pick', 'vote', 'complete' )
 
     def __init__(self, settings):
         self.settings = settings
@@ -148,10 +148,45 @@ class CardstoriesService(service.Service):
         d.addCallback(lambda game_id: {'game_id': game_id})
         return d
 
-    def creationKit(self):
+    def deck(self):
         d = defer.succeed(True)
         d.addCallback(lambda result: { 'cards': range(1, self.NCARDS + 1) })
         return d
+
+    @defer.inlineCallbacks
+    def game(self, args):
+        self.required(args, 'game', 'game_id')
+        game_id = int(args['game_id'][0])
+        if args.has_key('player_id'):
+            player_id = int(args['player_id'][0])
+        else:
+            player_id = None
+        rows = yield self.db.runQuery("SELECT owner_id, sentence, cards, board, state, created, completed FROM games WHERE id = ?", [game_id])
+        ( owner_id, sentence, cards, board, state, created, completed ) = rows[0]
+        if owner_id == player_id:
+            cards = [ chr(c) for c in cards ]
+        else:
+            cards = None
+        if state == 'invitation':
+            board = None
+        rows = yield self.db.runQuery("SELECT player_id, cards, picked, vote, win FROM player2game WHERE game_id = ?", [ game_id ])
+        players = []
+        myself = None
+        for player in rows:
+            if player[0] == player_id:
+                myself = [ player[1], player[2], player[3] ]
+            if state == 'complete':
+                vote = player[3]
+            else:
+                vote = None
+            players.append([ player[0], vote, player[4] ])
+        defer.returnValue({ 'owner_id': owner_id, 
+                            'sentence': sentence,
+                            'cards': cards, 
+                            'board': board, 
+                            'state': state,
+                            'self': myself,
+                            'players': players})
 
     def participateInteraction(self, transaction, game_id, player_id):
         transaction.execute("SELECT players, cards FROM games WHERE id = %d" % game_id)
