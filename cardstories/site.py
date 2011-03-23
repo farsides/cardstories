@@ -55,15 +55,7 @@ class CardstoriesResource(resource.Resource):
         return d
 
     def handle(self, result, request):
-        if request.method == 'GET':
-            return self.service.get()
-        elif request.method == 'POST':
-            if request.args.has_key('submit'):
-                return self.service.submit(request.args)
-            else:
-                raise Exception('Unknown POST request %s' % str(request.args))
-        else:
-            raise Exception('Unknown method %s (only GET and POST are supported)' % request.method)
+        return self.service.handle(request.args)
 
 class CardstoriesTree(resource.Resource):
 

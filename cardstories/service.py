@@ -258,16 +258,15 @@ class CardstoriesService(service.Service):
                 raise UserWarning, '%s must be given a %s value' % ( method, key )
         return True
 
-    @defer.inlineCallbacks
     def handle(self, args):
         try:
             action = args['action'][0]
             if action in self.ACTIONS:
-                yield getattr(self, action)(args)
+                return getattr(self, action)(args)
             else:
                 raise UserWarning('action ' + action + ' is not among the allowed actions ' + ','.join(self.ACTIONS))
         except UserWarning, e:
-            defer.returnValue({'error': e.args[0]})
+            return defer.succeed({'error': e.args[0]})
 
     def tick(self):
         return defer.succeed(True)

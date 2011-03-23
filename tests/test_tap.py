@@ -153,5 +153,5 @@ if __name__ == '__main__':
 
 # Interpreted by emacs
 # Local Variables:
-# compile-command: "python-coverage -e ; python-coverage -x test-tap.py ; python-coverage -m -a -r ../cardstories/tap.py"
+# compile-command: "python-coverage -e ; python-coverage -x test_tap.py ; python-coverage -m -a -r ../cardstories/tap.py"
 # End:

@@ -34,9 +34,7 @@ class CardstoriesServiceMockup:
     def __init__(self):
         self.settings = {'static': os.getcwd() }
 
-    def get(self): return 'get'
-
-    def submit(self, args): return 'submit'
+    def handle(self, args): return 'handle'
 
 class CardstoriesSiteTest(unittest.TestCase):
 
@@ -71,7 +69,7 @@ class CardstoriesSiteTest(unittest.TestCase):
         r.queued = 0
         d = r.notifyFinish()
         def finish(result):
-            self.assertSubstring('\r\n\r\n"get"', r.transport.getvalue())
+            self.assertSubstring('\r\n\r\n"handle"', r.transport.getvalue())
         d.addCallback(finish)
         r.requestReceived('GET', '/resource', '')
         return d
@@ -100,7 +98,7 @@ class CardstoriesSiteTest(unittest.TestCase):
         request.method = 'GET'
         d = resource.wrap_http(request)
         def finish(result):
-            self.assertSubstring('\r\n\r\n"get"', request.transport.getvalue())
+            self.assertSubstring('\r\n\r\n"handle"', request.transport.getvalue())
         d.addCallback(finish)
         return d
 
@@ -123,35 +121,11 @@ class CardstoriesSiteTest(unittest.TestCase):
         self.site = server.Site(resource)
         request = server.Request(self.Channel(self.site), True)
 
-        # get
         request.method = 'GET'
-        self.assertEquals('get', resource.handle(True, request))
+        self.assertEquals('handle', resource.handle(True, request))
 
-        # unknown method
-        caught = False
-        try:
-            request.method = 'PUT'
-            resource.handle(True, request)
-        except Exception, e:
-            caught = True
-            self.assertSubstring('PUT', e.args[0])
-        self.assertTrue(caught)
-
-        # unknown post argument
         request.method = 'POST'
-        request.args = {}
-        caught = False
-        try:
-            resource.handle(True, request)
-        except Exception, e:
-            caught = True
-            self.assertSubstring('Unknown POST', e.args[0])
-        self.assertTrue(caught)
-
-        # submit
-        request.method = 'POST'
-        request.args = {'submit': True}
-        self.assertEquals('submit', resource.handle(True, request))
+        self.assertEquals('handle', resource.handle(True, request))
 
 def Run():
     loader = runner.TestLoader()
@@ -172,5 +146,5 @@ if __name__ == '__main__':
 
 # Interpreted by emacs
 # Local Variables:
-# compile-command: "python-coverage -e ; PYTHONPATH=.. python-coverage -x test-site.py ; python-coverage -m -a -r ../cardstories/site.py"
+# compile-command: "python-coverage -e ; PYTHONPATH=.. python-coverage -x test_site.py ; python-coverage -m -a -r ../cardstories/site.py"
 # End:
