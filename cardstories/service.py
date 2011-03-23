@@ -16,6 +16,46 @@
 # along with this program in a file in the toplevel directory called
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
+# A user is identified by a number (in the 20 to 30 range below).
+# The creator of the game choses one card out of 36 and sends the
+# action=create&owner_id=25&card=1&sentence=wtf
+# message which returns the newly created game identifier
+# {'game_id': 101}
+# The newly created game is in the 'invitation' state and
+# up to five players can join by sending the 
+# action=participate&player_id=26&game_id=101
+# message which returns
+# {}
+# on success or 
+# {'error': 'error message'}
+# if it fails. The player then asks to see the cards it was dealt 
+# by sending the 
+# action=player2game&player_id=26&game_id=101
+# message which returns
+# {'cards': [12, 8, 2, 5, 6, 10, 15], 'picked': None }
+# The player then picks the card that is closer to the sentence (wtf)
+# by sending a 
+# action=pick&player_id=26&game_id=101&card=10
+# message. The player can send the message more than once to change the
+# value of the picked card.
+# The game owner decides to move to the voting phase by sending the
+# action=voting&owner_id=25&game_id=101
+# message. The game is now in the 'vote' state and each player who
+# chose to participate can vote for one of the cards picked by the
+# owner or the other players by sending the message
+# action=vote&player_id=26&game_id=101&vote=2
+# where vote is the index of the chosen card in the range [0-6].
+# The player can send the message more than once to change the
+# vote.
+# The game owner decides to move to the voting phase by sending the
+# action=complete&owner_id=25&game_id=101
+# message. The game is now in the 'complete' state and the winners
+# are calculated as follows: 
+#     * The owner wins if at least one of the players guesses right, 
+#       but not all of them do. Then the winners are the owner and the
+#       players who guessed right. 
+#     * If the owner loses, all the other players win. 
+# 
 import os
 import random
 
@@ -210,7 +250,7 @@ class CardstoriesService(service.Service):
     def handle(self, args):
         try:
             action = args['action'][0]
-            if action in ( 'pick', 'create', 'voting', 'participate', 'complete' ):
+            if action in ( 'pick', 'create', 'voting', 'player2game', 'participate', 'complete' ):
                 return self[action](args)
         except UserWarning, e:
             return {'error': e.args[0]}

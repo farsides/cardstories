@@ -17,7 +17,7 @@ The game includes a deck of cards.
 
 # display usage
 PYTHONPATH=.:etc/cardstories twistd --nodaemon cardstories --help
-# exercise the webservice without polling urls
+# exercise the webservice
 PYTHONPATH=.:etc/cardstories twistd --nodaemon cardstories --port 4923 --db /tmp/cardstories.sqlite
 # retrieve the list of URLs and their status
 curl --silent http://localhost:4923/resource
