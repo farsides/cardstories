@@ -165,13 +165,11 @@ class CardstoriesService(service.Service):
         transaction.execute("INSERT INTO player2game (game_id, player_id, cards) VALUES (?, ?, ?)", [ game_id, player_id, cards[:self.CARDS_PER_PLAYER] ])
         return {}
 
-    @defer.inlineCallbacks
     def participate(self, args):
         self.required(args, 'participate', 'player_id', 'game_id')
         player_id = int(args['player_id'][0])
         game_id = int(args['game_id'][0])
-        yield self.db.runInteraction(self.participateInteraction, game_id, player_id)
-        defer.returnValue({})
+        return self.db.runInteraction(self.participateInteraction, game_id, player_id)
 
     @defer.inlineCallbacks
     def voting(self, args):
@@ -262,7 +260,14 @@ class CardstoriesService(service.Service):
         try:
             action = args['action'][0]
             if action in self.ACTIONS:
-                return getattr(self, action)(args)
+                d = getattr(self, action)(args)
+                def error(reason):
+                    if reason.type is UserWarning:
+                        return {'error': reason.getErrorMessage()}
+                    else:
+                        return reason
+                d.addErrback(error)
+                return d
             else:
                 raise UserWarning('action ' + action + ' is not among the allowed actions ' + ','.join(self.ACTIONS))
         except UserWarning, e:
