@@ -66,6 +66,21 @@ class CardstoriesServiceTestRun(unittest.TestCase):
         d.addCallback(lambda result: self.assertTrue(result))
         return d
 
+class CardstoriesServiceTestHandle(CardstoriesServiceTest):
+
+    def test01_required(self):
+        self.assertTrue(CardstoriesService.required({ 'key1': ['a'],
+                                                      'key2': ['b'] }, 'method', 'key1'))
+        
+        self.failUnlessRaises(UserWarning, CardstoriesService.required, { }, 'method', 'key1')
+
+    @defer.inlineCallbacks
+    def test02_handle(self):
+        for action in self.service.ACTIONS:
+            result = yield self.service.handle({ 'action': [action] })
+            self.failUnlessSubstring(action, result['error'])
+            self.failUnlessSubstring('must be given', result['error'])
+
 class CardstoriesServiceTest(CardstoriesServiceTest):
 
     def test01_create(self):
@@ -134,7 +149,7 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         self.assertEquals(u'n', player['win'])
 
     @defer.inlineCallbacks
-    def test03_pick(self):
+    def test04_pick(self):
         card = 5
         sentence = 'SENTENCE'
         owner_id = 15
@@ -159,7 +174,7 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         c.close()
             
     @defer.inlineCallbacks
-    def test04_state_vote(self):
+    def test05_state_vote(self):
         card = 5
         sentence = 'SENTENCE'
         owner_id = 15
@@ -191,7 +206,7 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         c.close()
 
     @defer.inlineCallbacks
-    def test04_vote(self):
+    def test06_vote(self):
         card = 5
         sentence = 'SENTENCE'
         owner_id = 15
@@ -222,7 +237,7 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         c.close()
             
     @defer.inlineCallbacks
-    def test05_complete(self):
+    def test07_complete(self):
         winner_card = 5
         sentence = 'SENTENCE'
         owner_id = 15
@@ -267,6 +282,7 @@ def Run():
     suite = loader.suiteFactory()
     suite.addTest(loader.loadClass(CardstoriesServiceTestInit))
     suite.addTest(loader.loadClass(CardstoriesServiceTest))
+    suite.addTest(loader.loadClass(CardstoriesServiceTestHandle))
     suite.addTest(loader.loadClass(CardstoriesServiceTestRun))
 
     return runner.TrialRunner(
@@ -282,5 +298,5 @@ if __name__ == '__main__':
 
 # Interpreted by emacs
 # Local Variables:
-# compile-command: "python-coverage -e ; PYTHONPATH=.. python-coverage -x test-service.py ; python-coverage -m -a -r ../cardstories/service.py"
+# compile-command: "python-coverage -e ; PYTHONPATH=.. python-coverage -x test_service.py ; python-coverage -m -a -r ../cardstories/service.py"
 # End:

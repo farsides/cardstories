@@ -67,17 +67,15 @@ from twisted.enterprise import adbapi
 
 from OpenSSL import SSL
 
-NCARDS = 36
-NPLAYERS = 6
-CARDS_PER_PLAYER = 7
-
 class CardstoriesService(service.Service):
+
+    NCARDS = 36
+    NPLAYERS = 6
+    CARDS_PER_PLAYER = 7
+    ACTIONS = ( 'create', 'participate', 'voting', 'player2game', 'pick', 'vote', 'complete' )
 
     def __init__(self, settings):
         self.settings = settings
-        self.NCARDS = NCARDS
-        self.NPLAYERS = NPLAYERS
-        self.CARDS_PER_PLAYER = CARDS_PER_PLAYER
 
     def startService(self):
         database = self.settings['db']
@@ -87,37 +85,37 @@ class CardstoriesService(service.Service):
             db = sqlite3.connect(database)
             c = db.cursor()
             c.execute(
-                "CREATE TABLE games ( " +
-                "  id INTEGER PRIMARY KEY, " +
-                "  owner_id INTEGER, " +
-                "  players INTEGER DEFAULT 1, " +
-                "  sentence TEXT, " +
+                "CREATE TABLE games ( " 
+                "  id INTEGER PRIMARY KEY, "
+                "  owner_id INTEGER, " 
+                "  players INTEGER DEFAULT 1, "
+                "  sentence TEXT, "
                 "  cards VARCHAR(%d), " % self.NCARDS +
                 "  board VARCHAR(%d), " % self.NPLAYERS +
                 "  state VARCHAR(8) DEFAULT 'invitation', " + # invitation, vote, complete
-                "  created DATETIME, " +
-                "  completed DATETIME" +
+                "  created DATETIME, " 
+                "  completed DATETIME" 
                 "); ")
             c.execute(
                 "CREATE INDEX games_idx ON games (id); "
                 )
             c.execute(
-                "CREATE TABLE players ( " +
-                "  id INTEGER PRIMARY KEY, " +
-                "  name TEXT, " +
-                "  created DATETIME " +
+                "CREATE TABLE players ( "
+                "  id INTEGER PRIMARY KEY, "
+                "  name TEXT, "
+                "  created DATETIME "
                 "); ")
             c.execute(
                 "CREATE INDEX players_idx ON players (id); "
                 )
             c.execute(
-                "CREATE TABLE player2game ( " +
-                "  player_id INTEGER, " +
-                "  game_id INTEGER, " +
+                "CREATE TABLE player2game ( "
+                "  player_id INTEGER, "
+                "  game_id INTEGER, " 
                 "  cards VARCHAR(%d), " % self.CARDS_PER_PLAYER +
-                "  picked CHAR(1), " +
-                "  vote INTEGER, " +
-                "  win CHAR(1) DEFAULT 'n' " +
+                "  picked CHAR(1), " 
+                "  vote INTEGER, " 
+                "  win CHAR(1) DEFAULT 'n' "
                 "); ")
             c.execute(
                 "CREATE UNIQUE INDEX player2game_idx ON player2game (player_id, game_id); "
@@ -142,6 +140,7 @@ class CardstoriesService(service.Service):
         return game_id
 
     def create(self, args):
+        self.required(args, 'create', 'card', 'sentence', 'owner_id')
         card = chr(int(args['card'][0]))
         sentence = args['sentence'][0]
         owner_id = int(args['owner_id'][0])
@@ -168,6 +167,7 @@ class CardstoriesService(service.Service):
 
     @defer.inlineCallbacks
     def participate(self, args):
+        self.required(args, 'participate', 'player_id', 'game_id')
         player_id = int(args['player_id'][0])
         game_id = int(args['game_id'][0])
         yield self.db.runInteraction(self.participateInteraction, game_id, player_id)
@@ -175,16 +175,17 @@ class CardstoriesService(service.Service):
 
     @defer.inlineCallbacks
     def voting(self, args):
+        self.required(args, 'voting', 'owner_id', 'game_id')
         game_id = int(args['game_id'][0])
         owner_id = int(args['owner_id'][0])
         rows = yield self.db.runQuery("SELECT picked FROM player2game WHERE game_id = %d AND picked IS NOT NULL ORDER BY picked" % game_id)
-        cards = map(lambda row: row[0], rows)
-        board = ''.join(cards)
+        board = ''.join(card for (card,) in rows)
         yield self.db.runOperation("UPDATE games SET board = ?, state = 'vote' WHERE id = %d AND owner_id = %d" % ( game_id, owner_id ), [ board ])
         defer.returnValue({})
 
     @defer.inlineCallbacks
     def player2game(self, args):
+        self.required(args, 'player2game', 'player_id', 'game_id')
         player_id = int(args['player_id'][0])
         game_id = int(args['game_id'][0])
         rows = yield self.db.runQuery("SELECT cards, picked, vote, win FROM player2game WHERE game_id = %d AND player_id = %d" % ( game_id, player_id ))
@@ -200,6 +201,7 @@ class CardstoriesService(service.Service):
 
     @defer.inlineCallbacks
     def pick(self, args):
+        self.required(args, 'pick', 'player_id', 'game_id', 'card')
         player_id = int(args['player_id'][0])
         game_id = int(args['game_id'][0])
         card = int(args['card'][0])
@@ -208,6 +210,7 @@ class CardstoriesService(service.Service):
 
     @defer.inlineCallbacks
     def vote(self, args):
+        self.required(args, 'vote', 'player_id', 'game_id', 'vote')
         player_id = int(args['player_id'][0])
         game_id = int(args['game_id'][0])
         vote = int(args['vote'][0])
@@ -234,26 +237,37 @@ class CardstoriesService(service.Service):
             winners = guessed + [ owner_id ]
         else:
             winners = failed + guessed
-        transaction.execute("UPDATE player2game SET win = 'y' WHERE " + 
+        transaction.execute("UPDATE player2game SET win = 'y' WHERE "
                             "  game_id = %d AND " % game_id + 
-                            "  player_id IN ( %s ) " % ','.join(map(lambda id: str(id), winners)))
+                            "  player_id IN ( %s ) " % ','.join([ str(id) for id in winners ]))
         transaction.execute("UPDATE games SET completed = date('now'), state = 'complete' WHERE id = %d" % game_id)
         return {}
 
     @defer.inlineCallbacks
     def complete(self, args):
+        self.required(args, 'complete', 'owner_id', 'game_id')
         owner_id = int(args['owner_id'][0])
         game_id = int(args['game_id'][0])
         yield self.db.runInteraction(self.completeInteraction, game_id, owner_id)
         defer.returnValue({})
 
+    @staticmethod
+    def required(args, method, *keys):
+        for key in keys:
+            if not args.has_key(key):
+                raise UserWarning, '%s must be given a %s value' % ( method, key )
+        return True
+
+    @defer.inlineCallbacks
     def handle(self, args):
         try:
             action = args['action'][0]
-            if action in ( 'pick', 'create', 'voting', 'player2game', 'participate', 'complete' ):
-                return self[action](args)
+            if action in self.ACTIONS:
+                yield getattr(self, action)(args)
+            else:
+                raise UserWarning('action ' + action + ' is not among the allowed actions ' + ','.join(self.ACTIONS))
         except UserWarning, e:
-            return {'error': e.args[0]}
+            defer.returnValue({'error': e.args[0]})
 
     def tick(self):
         return defer.succeed(True)

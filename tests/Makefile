@@ -20,9 +20,9 @@ all:
 
 check:
 	python-coverage -e
-	PYTHONPATH=.. python-coverage -x test-service.py
-	PYTHONPATH=.. python-coverage -x test-site.py
-	PYTHONPATH=.. python-coverage -x test-tap.py
+	PYTHONPATH=.. python-coverage -x test_service.py
+	PYTHONPATH=.. python-coverage -x test_site.py
+	PYTHONPATH=.. python-coverage -x test_tap.py
 	python-coverage -m -a -r ../cardstories/*.py
 
 clean:
