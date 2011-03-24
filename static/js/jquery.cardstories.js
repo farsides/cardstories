@@ -57,11 +57,20 @@
 	},
 
 	invitation: function(player_id, game, element) {
-	    if(game.self != null) {
-		this.invitation_pick(player_id, game, $('.cardstories_pick', element));
+	    if(game.owner) {
+		this.invitation_owner(player_id, game, $('.cardstories_owner', element));
 	    } else {
-		this.invitation_participate(player_id, game, $('.cardstories_participate', element));
+		if(game.self != null) {
+		    this.invitation_pick(player_id, game, $('.cardstories_pick', element));
+		} else {
+		    this.invitation_participate(player_id, game, $('.cardstories_participate', element));
+		}
 	    }
+	},
+
+	invitation_owner: function(player_id, game, element) {
+	    $('a.cardstories_invite').attr('href', '?game_id=' + game.id);
+	    $('a.cardstories_refresh').attr('href', '?player_id=' + player_id + '&game_id=' + game.id);
 	},
 
 	invitation_pick: function(player_id, game, element) {

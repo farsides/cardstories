@@ -86,6 +86,22 @@ test("game", function() {
     $.cardstories.game(player_id, game_id, $('#qunit-fixture .cardstories'));
 });
 
+test("invitation_owner", function() {
+    setup();
+    expect(2);
+
+    var player_id = 15;
+    var game_id = 101;
+
+    var game = {
+	'id': game_id,
+	'owner': true
+    };
+    $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories_invitation'));
+    equal($('#qunit-fixture .cardstories_owner .cardstories_invite').attr('href'), '?game_id=' + game.id);
+    equal($('#qunit-fixture .cardstories_owner .cardstories_refresh').attr('href'), '?player_id=' + player_id + '&game_id=' + game.id);
+});
+
 test("invitation_participate", function() {
     setup();
     expect(3);
