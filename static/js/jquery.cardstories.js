@@ -22,7 +22,7 @@
         error: function(error) { alert(error); },
 
         xhr_error: function(xhr, status, error) {
-	    $this.error(error);
+	    $.cardstories.error(error);
         },
 
         setTimeout: function(cb, delay) { return window.setTimeout(cb, delay); },
@@ -77,6 +77,7 @@
 		async: false,
 		timeout: 30000,
 		url: $this.url,
+		url: $this.url + '?action=game&game_id=' + game_id + '&player_id=' + player_id,
 		type: 'GET',
 		dataType: 'json',
 		global: false,

@@ -164,22 +164,28 @@ class CardstoriesService(service.Service):
         rows = yield self.db.runQuery("SELECT owner_id, sentence, cards, board, state, created, completed FROM games WHERE id = ?", [game_id])
         ( owner_id, sentence, cards, board, state, created, completed ) = rows[0]
         if owner_id == player_id:
-            cards = [ chr(c) for c in cards ]
+            cards = [ ord(c) for c in cards ]
         else:
             cards = None
-        if state == 'invitation':
+        if owner_id != player_id and state == 'invitation':
             board = None
+        else:
+            board = [ ord(c) for c in board ]
         rows = yield self.db.runQuery("SELECT player_id, cards, picked, vote, win FROM player2game WHERE game_id = ?", [ game_id ])
         players = []
         myself = None
         for player in rows:
             if player[0] == player_id:
-                myself = [ player[1], player[2], player[3] ]
+                myself = [ ord(player[2]), player[3] ]
             if state == 'complete':
                 vote = player[3]
             else:
                 vote = None
-            players.append([ player[0], vote, player[4] ])
+            if player[0] == player_id or owner_id == player_id:
+                player_cards = [ ord(c) for c in player[1] ]
+            else:
+                player_cards = None
+            players.append([ player[0], vote, player[4], player_cards ])
         defer.returnValue({ 'owner_id': owner_id, 
                             'sentence': sentence,
                             'cards': cards, 

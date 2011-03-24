@@ -294,11 +294,25 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         self.assertEquals({'board': None,
                            'cards': None,
                            'owner_id': owner_id,
-                           'players': [[owner_id, None, u'n'], [player1, None, u'n'], [player2, None, u'n']],
+                           'players': [[owner_id, None, u'n', None], [player1, None, u'n', None], [player2, None, u'n', None]],
                            'self': None,
                            'sentence': u'SENTENCE',
                            'state': u'invitation'}, game_info)
         
+        game_info = yield self.service.game({ 'game_id': [game['game_id']], 'player_id': [owner_id] })
+        self.assertEquals([winner_card], game_info['board'])
+        self.assertTrue(winner_card not in game_info['cards'])
+        self.assertEquals(self.service.NCARDS, len(game_info['cards']) + sum(map(lambda player: len(player[3]), game_info['players'])))
+        self.assertEquals(owner_id, game_info['owner_id'])
+        self.assertEquals(owner_id, game_info['players'][0][0])
+        self.assertEquals(1, len(game_info['players'][0][3]))
+        self.assertEquals(player1, game_info['players'][1][0])
+        self.assertEquals(self.service.CARDS_PER_PLAYER, len(game_info['players'][1][3]))
+        self.assertEquals(player2, game_info['players'][2][0])
+        self.assertEquals(self.service.CARDS_PER_PLAYER, len(game_info['players'][2][3]))
+        self.assertEquals([winner_card, None], game_info['self'])
+        self.assertEquals(u'SENTENCE', game_info['sentence'])
+        self.assertEquals(u'invitation', game_info['state'])
 
 def Run():
     loader = runner.TestLoader()
