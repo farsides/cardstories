@@ -2,7 +2,7 @@ Source: cardstories
 Section: python
 Priority: optional
 Maintainer: Loic Dachary <loic@debian.org>
-Build-Depends: debhelper (>= 7), python-support (>= 0.8.5), python-coverage, python-twisted-web (>= 10.2)
+Build-Depends: debhelper (>= 7), python-support (>= 0.8.5), python-coverage, python-twisted-web (>= 10.2), jscoverage
 Standards-Version: 3.8.0
 Vcs-Git: git://cardstories.dachary.org/cardstories.git
 Homepage: http://cardstories.dachary.org/

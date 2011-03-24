@@ -18,19 +18,81 @@
 
     $.cardstories = {
         url: "../resource",
-        error: function(what) { alert(what); },
+
+        error: function(error) { alert(error); },
+
+        xhr_error: function(xhr, status, error) {
+	    $this.error(error);
+        },
+
         setTimeout: function(cb, delay) { return window.setTimeout(cb, delay); },
+
         ajax: function(o) { return jQuery.ajax(o); },
-        html: '' +
-            '<div class=\'cardstories\'>' +
-            '</div>'
+
+	create: function(player_id, element) {
+	    var $this = this;
+            $('input[type=submit]', element).click(function() {
+                var success = function(data, status) {
+                    if('error' in data) {
+                        $this.error(data.error);
+                    } else {
+                        $this.setTimeout(function() { $this.game(player_id, data.game_id, element); }, 30);
+		    }
+                };
+                var sentence = encodeURIComponent($('input[name=sentence]', element).val());
+		var card = $('input[name="card"]:checked', element).val();
+                $this.ajax({
+                    async: false,
+                    timeout: 30000,
+                    url: $this.url + '?action=create&owner_id=' + player_id + '&card=' + card,
+                    type: 'POST',
+                    data: 'sentence=' + sentence,
+                    dataType: 'json',
+                    global: false,
+                    success: success,
+		    error: $this.xhr_error
+		});
+	    });
+	},
+
+	invitation: function(game, element) {
+	},
+
+	vote: function(game, element) {
+	},
+
+	complete: function(game, element) {
+	},
+
+	game: function(player_id, game_id, element) {
+	    var $this = this;
+            var success = function(data, status) {
+		if('error' in data) {
+                    $this.error(data.error);
+		} else {
+		    $this[$data.state](data, $('.cardstories_' + $data.state, element));
+		}
+            };
+            $this.ajax({
+		async: false,
+		timeout: 30000,
+		url: $this.url,
+		type: 'GET',
+		dataType: 'json',
+		global: false,
+		success: success,
+		error: xhr_error
+            });
+	}
     };
 
-    $.fn.cardstories = function(options) {
-        var opts = $.extend({}, $.cardstories, options);
+    $.fn.cardstories = function(player_id, game_id) {
         return this.each(function() {
-            var $this = $(this);
-            $this.append(opts.html);
+	    if(game_id === undefined) {
+		$.cardstories.create(player_id, $(this));
+	    } else {
+		$.cardstories.game(player_id, game_id, $(this));
+	    }
             return this;
         });
     };

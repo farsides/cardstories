@@ -21,16 +21,23 @@ function setup() {
     $.cardstories.ajax = function(o) { return jQuery.ajax(o); };
 }
 
-test("cardstories", function() {
+test("create", function() {
     setup();
-    expect(0);
+    expect(3);
+
+    var player_id = 15;
+    var card = 1;
+    var sentence = 'SENTENCE';
 
     $.cardstories.ajax = function(options) {
-        equal(options.type, 'GET');
-        options.success({}, true);
+        equal(options.type, 'POST');
+        equal(options.url, $.cardstories.url + '?action=create&owner_id=' + player_id + '&card=' + card);
+	equal(options.data, 'sentence=' + sentence);
     };
 
-    $('#qunit-fixture').cardstories();
+    $.cardstories.create(player_id, $('#qunit-fixture .cardstories_create'));
+    $('#qunit-fixture .cardstories_create .cardstories_sentence').val(sentence);
+    $('#qunit-fixture .cardstories_create .cardstories_submit').click();
 });
 
 
