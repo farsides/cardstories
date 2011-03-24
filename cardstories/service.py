@@ -187,16 +187,16 @@ class CardstoriesService(service.Service):
         players = []
         myself = None
         for player in rows:
-            if player[0] == player_id:
-                myself = [ ord(player[2]), player[3] ]
-            if state == 'complete':
-                vote = player[3]
-            else:
-                vote = None
             if player[0] == player_id or owner_id == player_id:
                 player_cards = [ ord(c) for c in player[1] ]
             else:
                 player_cards = None
+            if player[0] == player_id:
+                myself = [ ord(player[2]), player[3], player_cards ]
+            if state == 'complete':
+                vote = player[3]
+            else:
+                vote = None
             players.append([ player[0], vote, player[4], player_cards ])
         defer.returnValue({ 'id': game_id,
                             'sentence': sentence,

@@ -102,6 +102,34 @@ test("invitation_owner", function() {
     equal($('#qunit-fixture .cardstories_owner .cardstories_refresh').attr('href'), '?player_id=' + player_id + '&game_id=' + game.id);
 });
 
+test("invitation_pick", function() {
+    setup();
+    expect(3);
+
+    var player_id = 15;
+    var game_id = 101;
+    var picked_before = 3;
+    var picked_after = 5;
+    var cards = [1,2,picked_before,4,picked_after,7];
+    var sentence = 'SENTENCE';
+
+    $.cardstories.ajax = function(options) {
+        equal(options.type, 'GET');
+        equal(options.url, $.cardstories.url + '?action=pick&player_id=' + player_id + '&game_id=' + game_id + '&card=' + picked_after);
+    };
+
+    var game = {
+	'id': game_id,
+	'self': [picked_before, null, cards],
+	'sentence': sentence
+    };
+    $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories_invitation'));
+    equal($('#qunit-fixture .cardstories_pick .cardstories_sentence').text(), sentence);
+    equal($('#qunit-fixture .cardstories_pick .cardstories_card1').metadata().card, 1);
+    equal($('#qunit-fixture .cardstories_pick .cardstories_card7').metadata().card, 7);
+//    $('#qunit-fixture .cardstories_participate .cardstories_submit').click();
+});
+
 test("invitation_participate", function() {
     setup();
     expect(3);

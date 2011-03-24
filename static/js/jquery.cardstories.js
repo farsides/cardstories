@@ -60,7 +60,7 @@
 	    if(game.owner) {
 		this.invitation_owner(player_id, game, $('.cardstories_owner', element));
 	    } else {
-		if(game.self != null) {
+		if(game.self !== null && game.self !== undefined) {
 		    this.invitation_pick(player_id, game, $('.cardstories_pick', element));
 		} else {
 		    this.invitation_participate(player_id, game, $('.cardstories_participate', element));
@@ -74,7 +74,32 @@
 	},
 
 	invitation_pick: function(player_id, game, element) {
-	    
+	    var $this = this;
+	    $('.cardstories_sentence', element).text(game.sentence);
+            $('.cardstories_card', element).click(function() {
+                var success = function(data, status) {
+		    if('error' in data) {
+                        $this.error(data.error);
+		    } else {
+                        $this.setTimeout(function() { $this.game(player_id, game.id, element); }, 30);
+		    }
+                };
+		var card = $(this).metadata().card;
+                $this.ajax({
+		    async: false,
+		    timeout: 30000,
+		    url: $this.url + '?action=pick&player_id=' + player_id + '&game_id=' + game.id + '&card=' + card,
+		    type: 'GET',
+		    dataType: 'json',
+		    global: false,
+		    success: success,
+		    error: $this.xhr_error
+		});
+	    });
+	    var cards = game.self[2];
+	    $('.cardstories_card', element).each(function(index) {
+		$(this).attr('class', 'cardstories_card cardstories_card' + cards[index] + ' {card:' + cards[index] + '}');
+	    });
 	},
 
 	invitation_participate: function(player_id, game, element) {
@@ -131,7 +156,7 @@
 
     $.fn.cardstories = function(player_id, game_id) {
         return this.each(function() {
-	    if(game_id === undefined || game_id == '') {
+	    if(game_id === undefined || game_id === '') {
 		$.cardstories.create(player_id, $('.cardstories_create', this));
 	    } else {
 		$.cardstories.game(player_id, game_id, $(this));
