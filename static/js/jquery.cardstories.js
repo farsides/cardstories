@@ -81,7 +81,7 @@
 		dataType: 'json',
 		global: false,
 		success: success,
-		error: xhr_error
+		error: $this.xhr_error
             });
 	}
     };
