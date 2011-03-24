@@ -31,7 +31,6 @@
 
 	create: function(player_id, element) {
 	    var $this = this;
-	    $('input[name="card"]:nth(0)', element).attr('checked','checked');
             $('input[type=submit]', element).click(function() {
                 var success = function(data, status) {
                     if('error' in data) {
