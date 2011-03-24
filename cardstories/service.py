@@ -21,8 +21,20 @@
 # action=create&owner_id=25&card=1&sentence=wtf
 # message which returns the newly created game identifier
 # {'game_id': 101}
-# The newly created game is in the 'invitation' state and
-# up to five players can join by sending the 
+# The newly created game is in the 'invitation' state. It
+# can be displayed by sending the message:
+# action=game&player_id=22&game_id=101
+# and because the player_id is not the owner of the game, 
+# the cards of each participant is not shown:
+# {
+#  'board': None,
+#  'cards': None,
+#  'players': [[25, None, u'n', None]],
+#  'self': None,
+#  'sentence': 'wtf',
+#  'state': 'invitation'
+# }
+# Up to five players can join by sending the 
 # action=participate&player_id=26&game_id=101
 # message which returns
 # {}
@@ -171,7 +183,7 @@ class CardstoriesService(service.Service):
             board = None
         else:
             board = [ ord(c) for c in board ]
-        rows = yield self.db.runQuery("SELECT player_id, cards, picked, vote, win FROM player2game WHERE game_id = ?", [ game_id ])
+        rows = yield self.db.runQuery("SELECT player_id, cards, picked, vote, win FROM player2game WHERE game_id = ? ORDER BY player_id", [ game_id ])
         players = []
         myself = None
         for player in rows:
@@ -186,13 +198,14 @@ class CardstoriesService(service.Service):
             else:
                 player_cards = None
             players.append([ player[0], vote, player[4], player_cards ])
-        defer.returnValue({ 'owner_id': owner_id, 
+        defer.returnValue({ 'id': game_id,
                             'sentence': sentence,
                             'cards': cards, 
                             'board': board, 
                             'state': state,
                             'self': myself,
-                            'players': players})
+                            'owner': owner_id == player_id,
+                            'players': players })
 
     def participateInteraction(self, transaction, game_id, player_id):
         transaction.execute("SELECT players, cards FROM games WHERE id = %d" % game_id)

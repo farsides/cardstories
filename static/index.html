@@ -9,6 +9,7 @@
 	<script type="text/javascript" src="tablesorter/jquery.tablesorter.pager.js"></script>
 	<script type="text/javascript" src="js/jquery.metadata.js"></script>
 	<script type="text/javascript" src="js/jquery.cardstories.js"></script>
+	<script type="text/javascript" src="js/jquery.query-2.1.7.js"></script>
 </head>
 <body>
       <div class="cardstories">
@@ -28,9 +29,15 @@
 	    </div>
 	  </div>
 	  <input class="cardstories_sentence" type="text" name="sentence" />
-	  <input class="cardstories_submit" type="submit" name="submit" />
+	  <input class="cardstories_submit" type="submit" name="submit" value="create" />
 	</div>
 	<div class="cardstories_invitation">
+	  <div class="cardstories_participate">
+	    <div class="cardstories_sentence"></div>
+	    <input class="cardstories_submit" type="submit" name="submit" value="participate" />
+	  </div>
+	  <div class="cardstories_pick">
+	  </div>
 	</div>
 	<div class="cardstories_vote">
 	</div>
@@ -39,8 +46,7 @@
 	Copyright (C)
       </div>
       <script>
-	var player_id = 10;
-        $('.cardstories').cardstories(player_id);
+        $('.cardstories').cardstories($.query.get('player_id'), $.query.get('game_id'));
       </script>
 </body>
 </html>

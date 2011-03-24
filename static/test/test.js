@@ -58,3 +58,77 @@ test("widget create", function() {
     $('#qunit-fixture .cardstories_create .cardstories_sentence').val(sentence);
     $('#qunit-fixture .cardstories_create .cardstories_submit').click();
 });
+
+test("game", function() {
+    setup();
+    expect(4);
+
+    var player_id = 15;
+    var game_id = 101;
+    var card = 1;
+    var sentence = 'SENTENCE';
+
+    $.cardstories.fake_state = function(inner_player_id, game, element) {
+	equal(inner_player_id, player_id);
+	equal(game.id, game_id);
+    };
+
+    $.cardstories.ajax = function(options) {
+        equal(options.type, 'GET');
+        equal(options.url, $.cardstories.url + '?action=game&game_id=' + game_id + '&player_id=' + player_id);
+	var game = {
+	    'id': game_id,
+	    'state': 'fake_state'
+	};
+	options.success(game);
+    };
+
+    $.cardstories.game(player_id, game_id, $('#qunit-fixture .cardstories'));
+});
+
+test("invitation_participate", function() {
+    setup();
+    expect(3);
+
+    var player_id = 15;
+    var game_id = 101;
+    var card = 1;
+    var sentence = 'SENTENCE';
+
+    $.cardstories.ajax = function(options) {
+        equal(options.type, 'GET');
+        equal(options.url, $.cardstories.url + '?action=participate&player_id=' + player_id + '&game_id=' + game_id);
+    };
+
+    var game = {
+	'id': game_id,
+	'self': null,
+	'sentence': sentence
+    };
+    $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories_invitation'));
+    equal($('#qunit-fixture .cardstories_participate .cardstories_sentence').text(), sentence);
+    $('#qunit-fixture .cardstories_participate .cardstories_submit').click();
+});
+
+test("widget invitation", function() {
+    setup();
+    expect(3);
+
+    var player_id = 15;
+    var game_id = 101;
+    var sentence = 'SENTENCE';
+
+    $.cardstories.ajax = function(options) {
+        equal(options.type, 'GET');
+        equal(options.url, $.cardstories.url + '?action=game&game_id=' + game_id + '&player_id=' + player_id);
+	var game = {
+	    'id': game_id,
+	    'state': 'invitation',
+	    'sentence': sentence
+	};
+	options.success(game);
+	equal($('#qunit-fixture .cardstories_participate .cardstories_sentence').text(), sentence);
+    };
+
+    $('#qunit-fixture .cardstories').cardstories(player_id, game_id);
+});

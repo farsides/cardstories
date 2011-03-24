@@ -31,6 +31,7 @@
 
 	create: function(player_id, element) {
 	    var $this = this;
+	    $('input[name="card"]:nth(0)', element).attr('checked', 'checked');
             $('input[type=submit]', element).click(function() {
                 var success = function(data, status) {
                     if('error' in data) {
@@ -55,13 +56,46 @@
 	    });
 	},
 
-	invitation: function(game, element) {
+	invitation: function(player_id, game, element) {
+	    if(game.self != null) {
+		this.invitation_pick(player_id, game, $('.cardstories_pick', element));
+	    } else {
+		this.invitation_participate(player_id, game, $('.cardstories_participate', element));
+	    }
 	},
 
-	vote: function(game, element) {
+	invitation_pick: function(player_id, game, element) {
+	    
 	},
 
-	complete: function(game, element) {
+	invitation_participate: function(player_id, game, element) {
+	    var $this = this;
+	    $('.cardstories_sentence', element).text(game.sentence);
+            $('input[type=submit]', element).click(function() {
+                var success = function(data, status) {
+                    if('error' in data) {
+                        $this.error(data.error);
+                    } else {
+                        $this.setTimeout(function() { $this.game(player_id, game.id, element); }, 30);
+		    }
+                };
+                $this.ajax({
+                    async: false,
+                    timeout: 30000,
+                    url: $this.url + '?action=participate&player_id=' + player_id + '&game_id=' + game.id,
+                    type: 'GET',
+                    dataType: 'json',
+                    global: false,
+                    success: success,
+		    error: $this.xhr_error
+		});
+	    });
+	},
+
+	vote: function(player_id, game, element) {
+	},
+
+	complete: function(player_id, game, element) {
 	},
 
 	game: function(player_id, game_id, element) {
@@ -70,13 +104,12 @@
 		if('error' in data) {
                     $this.error(data.error);
 		} else {
-		    $this[$data.state](data, $('.cardstories_' + $data.state, element));
+		    $this[data.state](player_id, data, $('.cardstories_' + data.state, element));
 		}
             };
             $this.ajax({
 		async: false,
 		timeout: 30000,
-		url: $this.url,
 		url: $this.url + '?action=game&game_id=' + game_id + '&player_id=' + player_id,
 		type: 'GET',
 		dataType: 'json',
@@ -89,7 +122,7 @@
 
     $.fn.cardstories = function(player_id, game_id) {
         return this.each(function() {
-	    if(game_id === undefined) {
+	    if(game_id === undefined || game_id == '') {
 		$.cardstories.create(player_id, $('.cardstories_create', this));
 	    } else {
 		$.cardstories.game(player_id, game_id, $(this));

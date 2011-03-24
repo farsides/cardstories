@@ -293,7 +293,8 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         game_info = yield self.service.game({ 'game_id': [game['game_id']] })
         self.assertEquals({'board': None,
                            'cards': None,
-                           'owner_id': owner_id,
+                           'id': game['game_id'],
+                           'owner': False,
                            'players': [[owner_id, None, u'n', None], [player1, None, u'n', None], [player2, None, u'n', None]],
                            'self': None,
                            'sentence': u'SENTENCE',
@@ -303,7 +304,8 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         self.assertEquals([winner_card], game_info['board'])
         self.assertTrue(winner_card not in game_info['cards'])
         self.assertEquals(self.service.NCARDS, len(game_info['cards']) + sum(map(lambda player: len(player[3]), game_info['players'])))
-        self.assertEquals(owner_id, game_info['owner_id'])
+        self.assertTrue(game_info['owner'])
+        self.assertEquals(game['game_id'], game_info['id'])
         self.assertEquals(owner_id, game_info['players'][0][0])
         self.assertEquals(1, len(game_info['players'][0][3]))
         self.assertEquals(player1, game_info['players'][1][0])
