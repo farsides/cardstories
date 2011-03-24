@@ -40,4 +40,21 @@ test("create", function() {
     $('#qunit-fixture .cardstories_create .cardstories_submit').click();
 });
 
+test("widget create", function() {
+    setup();
+    expect(3);
 
+    var player_id = 15;
+    var card = 1;
+    var sentence = 'SENTENCE';
+
+    $.cardstories.ajax = function(options) {
+        equal(options.type, 'POST');
+        equal(options.url, $.cardstories.url + '?action=create&owner_id=' + player_id + '&card=' + card);
+	equal(options.data, 'sentence=' + sentence);
+    };
+
+    $('#qunit-fixture .cardstories').cardstories(player_id);
+    $('#qunit-fixture .cardstories_create .cardstories_sentence').val(sentence);
+    $('#qunit-fixture .cardstories_create .cardstories_submit').click();
+});

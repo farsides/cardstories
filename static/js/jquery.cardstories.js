@@ -31,6 +31,7 @@
 
 	create: function(player_id, element) {
 	    var $this = this;
+	    $('input[name="card"]:nth(0)', element).attr('checked','checked');
             $('input[type=submit]', element).click(function() {
                 var success = function(data, status) {
                     if('error' in data) {
@@ -39,7 +40,7 @@
                         $this.setTimeout(function() { $this.game(player_id, data.game_id, element); }, 30);
 		    }
                 };
-                var sentence = encodeURIComponent($('input[name=sentence]', element).val());
+                var sentence = encodeURIComponent($('input[name="sentence"]', element).val());
 		var card = $('input[name="card"]:checked', element).val();
                 $this.ajax({
                     async: false,
@@ -89,7 +90,7 @@
     $.fn.cardstories = function(player_id, game_id) {
         return this.each(function() {
 	    if(game_id === undefined) {
-		$.cardstories.create(player_id, $(this));
+		$.cardstories.create(player_id, $('.cardstories_create', this));
 	    } else {
 		$.cardstories.game(player_id, game_id, $(this));
 	    }
