@@ -279,7 +279,7 @@ test("vote_viewer", function() {
 
     var player_id = 15;
     var game_id = 101;
-    var board = [1,2,3,4,5,6,7]
+    var board = [1,2,3,4,5,6,7];
     var sentence = 'SENTENCE';
 
     var game = {
