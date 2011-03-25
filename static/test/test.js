@@ -273,6 +273,27 @@ test("vote_voter", function() {
     $('#qunit-fixture .cardstories_voter .cardstories_card' + voted_after).click();
 });
 
+test("vote_viewer", function() {
+    setup();
+    expect(3);
+
+    var player_id = 15;
+    var game_id = 101;
+    var board = [1,2,3,4,5,6,7]
+    var sentence = 'SENTENCE';
+
+    var game = {
+	'id': game_id,
+	'board': board,
+	'self': null,
+	'sentence': sentence
+    };
+    $.cardstories.vote(player_id, game, $('#qunit-fixture .cardstories_vote'));
+    equal($('#qunit-fixture .cardstories_viewer .cardstories_sentence').text(), sentence);
+    equal($('#qunit-fixture .cardstories_viewer .cardstories_card1').metadata().card, 1);
+    equal($('#qunit-fixture .cardstories_viewer .cardstories_card7').metadata().card, 7);
+});
+
 test("vote_owner", function() {
     setup();
     expect(7);

@@ -110,10 +110,20 @@
 		if(game.self !== null && game.self !== undefined) {
 		    this.vote_voter(player_id, game, $('.cardstories_voter', element));
 		} else {
-		    this.vote_viewer(player_id, game, $('.cardstories_participate', element));
+		    this.vote_viewer(player_id, game, $('.cardstories_viewer', element));
 		}
 	    }
 
+	},
+
+	vote_viewer: function(player_id, game, element) {
+	    var $this = this;
+	    $('.cardstories_sentence', element).text(game.sentence);
+	    var cards = game.board;
+	    $('.cardstories_card', element).each(function(index) {
+		var c = 'cardstories_card cardstories_card' + cards[index] + ' {card:' + cards[index] + '}';
+		$(this).attr('class', c);
+	    });
 	},
 
 	vote_voter: function(player_id, game, element) {
