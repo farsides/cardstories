@@ -69,8 +69,32 @@
 	},
 
 	invitation_owner: function(player_id, game, element) {
+	    var $this = this;
 	    $('a.cardstories_invite').attr('href', '?game_id=' + game.id);
 	    $('a.cardstories_refresh').attr('href', '?player_id=' + player_id + '&game_id=' + game.id);
+            var voting = $('.cardstories_voting', element);
+	    voting.toggleClass('cardstories_ready', game.ready);
+	    if(game.ready) {
+		voting.click(function() {
+                    var success = function(data, status) {
+			if('error' in data) {
+                            $this.error(data.error);
+			} else {
+                            $this.setTimeout(function() { $this.game(player_id, game.id, element); }, 30);
+			}
+                    };
+                    $this.ajax({
+			async: false,
+			timeout: 30000,
+			url: $this.url + '?action=voting&owner_id=' + player_id + '&game_id=' + game.id,
+			type: 'GET',
+			dataType: 'json',
+			global: false,
+			success: success,
+			error: $this.xhr_error
+		    });
+		});
+	    }
 	},
 
 	invitation_pick: function(player_id, game, element) {

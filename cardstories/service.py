@@ -81,6 +81,7 @@ from OpenSSL import SSL
 
 class CardstoriesService(service.Service):
 
+    MIN_PICKED = 3 # there needs to be at least 3 cards to move to the voting phase
     NCARDS = 36
     NPLAYERS = 6
     CARDS_PER_PLAYER = 7
@@ -184,6 +185,8 @@ class CardstoriesService(service.Service):
         else:
             board = [ ord(c) for c in board ]
         rows = yield self.db.runQuery("SELECT player_id, cards, picked, vote, win FROM player2game WHERE game_id = ? ORDER BY player_id", [ game_id ])
+        picked_count = 0
+        vote_count = 0
         players = []
         myself = None
         for player in rows:
@@ -191,6 +194,8 @@ class CardstoriesService(service.Service):
                 player_cards = [ ord(c) for c in player[1] ]
             else:
                 player_cards = None
+            if player[2] != None:
+                picked_count += 1
             if player[0] == player_id:
                 picked = player[2]
                 if picked != None:
@@ -200,12 +205,20 @@ class CardstoriesService(service.Service):
                 vote = player[3]
             else:
                 vote = None
+            if player[3] != None:
+                vote_count += 1
             players.append([ player[0], vote, player[4], player_cards ])
+        ready = None
+        if state == 'invitation':
+            ready = picked_count >= self.MIN_PICKED
+        elif state == 'vote':
+            ready = picked_count == vote_count + 1 # + 1 is because the owner does not get to vote
         defer.returnValue({ 'id': game_id,
                             'sentence': sentence,
                             'cards': cards, 
                             'board': board, 
                             'state': state,
+                            'ready': ready,
                             'self': myself,
                             'owner': owner_id == player_id,
                             'players': players })
