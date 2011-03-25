@@ -41,11 +41,11 @@
 		    }
                 };
                 var sentence = encodeURIComponent($('input[name="sentence"]', element).val());
-		var card = $('input[name="card"]:checked', element).val();
+ 		var card = $('input[name="card"]:checked', element).val();
                 $this.ajax({
                     async: false,
                     timeout: 30000,
-                    url: $this.url + '?action=create&owner_id=' + player_id + '&card=' + card,
+                    url: $this.url + '?action=create&owner_id=' + player_id + '&card='+ card,
                     type: 'POST',
                     data: 'sentence=' + sentence,
                     dataType: 'json',
@@ -76,23 +76,7 @@
 	    voting.toggleClass('cardstories_ready', game.ready);
 	    if(game.ready) {
 		voting.click(function() {
-                    var success = function(data, status) {
-			if('error' in data) {
-                            $this.error(data.error);
-			} else {
-                            $this.setTimeout(function() { $this.game(player_id, game.id, element); }, 30);
-			}
-                    };
-                    $this.ajax({
-			async: false,
-			timeout: 30000,
-			url: $this.url + '?action=voting&owner_id=' + player_id + '&game_id=' + game.id,
-			type: 'GET',
-			dataType: 'json',
-			global: false,
-			success: success,
-			error: $this.xhr_error
-		    });
+		    $this.send(player_id, game.id, element, 'action=voting&owner_id=' + player_id + '&game_id=' + game.id);
 		});
 	    }
 	},
@@ -101,24 +85,8 @@
 	    var $this = this;
 	    $('.cardstories_sentence', element).text(game.sentence);
             $('.cardstories_card', element).click(function() {
-                var success = function(data, status) {
-		    if('error' in data) {
-                        $this.error(data.error);
-		    } else {
-                        $this.setTimeout(function() { $this.game(player_id, game.id, element); }, 30);
-		    }
-                };
 		var card = $(this).metadata().card;
-                $this.ajax({
-		    async: false,
-		    timeout: 30000,
-		    url: $this.url + '?action=pick&player_id=' + player_id + '&game_id=' + game.id + '&card=' + card,
-		    type: 'GET',
-		    dataType: 'json',
-		    global: false,
-		    success: success,
-		    error: $this.xhr_error
-		});
+		$this.send(player_id, game.id, element, 'action=pick&player_id=' + player_id + '&game_id=' + game.id + '&card=' + card);
 	    });
 	    var cards = game.self[2];
 	    $('.cardstories_card', element).each(function(index) {
@@ -130,23 +98,7 @@
 	    var $this = this;
 	    $('.cardstories_sentence', element).text(game.sentence);
             $('input[type=submit]', element).click(function() {
-                var success = function(data, status) {
-                    if('error' in data) {
-                        $this.error(data.error);
-                    } else {
-                        $this.setTimeout(function() { $this.game(player_id, game.id, element); }, 30);
-		    }
-                };
-                $this.ajax({
-                    async: false,
-                    timeout: 30000,
-                    url: $this.url + '?action=participate&player_id=' + player_id + '&game_id=' + game.id,
-                    type: 'GET',
-                    dataType: 'json',
-                    global: false,
-                    success: success,
-		    error: $this.xhr_error
-		});
+		$this.send(player_id, game.id, element, 'action=participate&player_id=' + player_id + '&game_id=' + game.id);
 	    });
 	},
 
@@ -155,7 +107,7 @@
 		this.vote_owner(player_id, game, $('.cardstories_owner', element));
 	    } else {
 		if(game.self !== null && game.self !== undefined) {
-		    this.vote_voter(player_id, game, $('.cardstories_pick', element));
+		    this.vote_voter(player_id, game, $('.cardstories_voter', element));
 		} else {
 		    this.vote_viewer(player_id, game, $('.cardstories_participate', element));
 		}
@@ -166,33 +118,54 @@
 	vote_voter: function(player_id, game, element) {
 	    var $this = this;
 	    $('.cardstories_sentence', element).text(game.sentence);
-            $('.cardstories_card', element).click(function() {
-                var success = function(data, status) {
-		    if('error' in data) {
-                        $this.error(data.error);
-		    } else {
-                        $this.setTimeout(function() { $this.game(player_id, game.id, element); }, 30);
-		    }
-                };
-		var card = $(this).metadata().card;
-                $this.ajax({
-		    async: false,
-		    timeout: 30000,
-		    url: $this.url + '?action=vote&player_id=' + player_id + '&game_id=' + game.id + '&card=' + card,
-		    type: 'GET',
-		    dataType: 'json',
-		    global: false,
-		    success: success,
-		    error: $this.xhr_error
-		});
-	    });
 	    var cards = game.board;
+	    var picked = game.self[0];
+	    var voted = game.self[1];
 	    $('.cardstories_card', element).each(function(index) {
-		$(this).attr('class', 'cardstories_card cardstories_card' + cards[index] + ' {card:' + cards[index] + '}');
+		var c = 'cardstories_card cardstories_card' + cards[index] + ' {card:' + cards[index] + '}';
+		if(picked == cards[index]) {
+		    c += ' cardstories_picked';
+		}
+		if(voted && voted == cards[index]) {
+		    c += ' cardstories_voted';
+		}
+		$(this).attr('class', c);
+	    });
+            $('.cardstories_card', element).not('.cardstories_picked').click(function() {
+		var card = $(this).metadata().card;
+		$this.send(player_id, game.id, element, 'action=vote&player_id=' + player_id + '&game_id=' + game.id + '&vote=' + card);
 	    });
 	},
 
 	complete: function(player_id, game, element) {
+	},
+
+	send: function(player_id, game_id, element, query, data) {
+	    var $this = this;
+	    var root = $(element).parents('.cardstories_root');
+            var success = function(data, status) {
+		if('error' in data) {
+                    $this.error(data.error);
+		} else {
+                    $this.setTimeout(function() { $this.game(player_id, game_id, root); }, 30);
+		}
+            };
+	    var request = {
+		async: false,
+		timeout: 30000,
+		url: $this.url + '?' + query,
+		dataType: 'json',
+		global: false,
+		success: success,
+		error: $this.xhr_error
+	    };
+	    if(data !== undefined) {
+		request.type = 'POST';
+		request.data = data;
+	    } else {
+		request.type = 'GET';
+	    }
+            $this.ajax(request);
 	},
 
 	game: function(player_id, game_id, element) {
@@ -219,6 +192,9 @@
 
     $.fn.cardstories = function(player_id, game_id) {
         return this.each(function() {
+	    if(!$(this).hasClass('cardstories_root')) {
+		$(this).addClass('cardstories_root');
+	    }
 	    if(game_id === undefined || game_id === '') {
 		$.cardstories.create(player_id, $('.cardstories_create', this));
 	    } else {

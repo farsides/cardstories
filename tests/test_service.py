@@ -333,10 +333,11 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
                                            'game_id': [game['game_id']],
                                            'card': [card2] })
         self.assertEquals(result, {})
+
         # invitation state, owner point of view
         game_info = yield self.service.game({ 'game_id': [game['game_id']], 'player_id': [owner_id] })
-        
         self.assertTrue(game_info['ready'])
+
         # move to vote state
         result = yield self.service.voting({ 'game_id': [game['game_id']],
                                              'owner_id': [owner_id] })
@@ -359,15 +360,28 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         self.assertEquals(u'SENTENCE', game_info['sentence'])
         self.assertEquals(u'vote', game_info['state'])
 
-        # move to complete state
+        # every player vote
         result = yield self.service.vote({ 'game_id': [game['game_id']],
                                            'player_id': [player1],
-                                           'vote': [0] })
+                                           'vote': [card2] })
         self.assertEquals(result, {})
         result = yield self.service.vote({ 'game_id': [game['game_id']],
                                            'player_id': [player2],
-                                           'vote': [1] })
+                                           'vote': [card1] })
         self.assertEquals(result, {})
+        # vote state, player point of view
+        game_info = yield self.service.game({ 'game_id': [game['game_id']], 'player_id': [player1] })
+        player1_cards = game_info['players'][1][3]
+        self.assertEquals({'board': [winner_card, card1, card2],
+                           'cards': None,
+                           'id': game['game_id'],
+                           'ready': True,
+                           'owner': False,
+                           'players': [[owner_id, None, u'n', None], [player1, None, u'n', player1_cards], [player2, None, u'n', None]],
+                           'self': [card1, card2, player1_cards],
+                           'sentence': u'SENTENCE',
+                           'state': u'vote'}, game_info)
+        # move to complete state
 
 def Run():
     loader = runner.TestLoader()

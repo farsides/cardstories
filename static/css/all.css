@@ -1,3 +1,4 @@
 .cardstories_card { background-repeat: no-repeat; width: 33px; height: 45px; float: left; }
 .cardstories_card:hover { width: 333px; height: 451px; }
-
+.cardstories_vote .cardstories_picked { border: 3px solid #567300; }
+.cardstories_vote .cardstories_voted { border: 3px solid #ff0000; }

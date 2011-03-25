@@ -145,12 +145,9 @@ class CardstoriesService(service.Service):
             if player[2] != None:
                 picked_count += 1
             if player[0] == player_id:
-                picked = player[2]
-                if picked != None:
-                    picked = ord(picked)
-                myself = [ picked, player[3], player_cards ]
+                myself = [ self.ord(player[2]), self.ord(player[3]), player_cards ]
             if state == 'complete':
-                vote = ord(player[3])
+                vote = self.ord(player[3])
             else:
                 vote = None
             if player[3] != None:
@@ -204,14 +201,9 @@ class CardstoriesService(service.Service):
         player_id = int(args['player_id'][0])
         game_id = int(args['game_id'][0])
         rows = yield self.db.runQuery("SELECT cards, picked, vote, win FROM player2game WHERE game_id = %d AND player_id = %d" % ( game_id, player_id ))
-        def c(c):
-            if c:
-                return ord(c)
-            else:
-                return c
         defer.returnValue({ 'cards': map(lambda c: ord(c), rows[0][0]),
-                            'picked': c(rows[0][2]),
-                            'vote': c(rows[0][2]),
+                            'picked': self.ord(rows[0][2]),
+                            'vote': self.ord(rows[0][2]),
                             'win': rows[0][3] })
 
     @defer.inlineCallbacks
@@ -262,6 +254,13 @@ class CardstoriesService(service.Service):
         game_id = int(args['game_id'][0])
         yield self.db.runInteraction(self.completeInteraction, game_id, owner_id)
         defer.returnValue({})
+
+    @staticmethod
+    def ord(c):
+        if c:
+            return ord(c)
+        else:
+            return c
 
     @staticmethod
     def required(args, method, *keys):
