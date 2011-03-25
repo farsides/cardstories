@@ -84,7 +84,7 @@
 	invitation_pick: function(player_id, game, element) {
 	    var $this = this;
 	    $('.cardstories_sentence', element).text(game.sentence);
-            $('.cardstories_card', element).click(function() {
+            $('.cardstories_card', element).unbind('click').click(function() {
 		var card = $(this).metadata().card;
 		$this.send(player_id, game.id, element, 'action=pick&player_id=' + player_id + '&game_id=' + game.id + '&card=' + card);
 	    });
@@ -131,7 +131,7 @@
 		}
 		$(this).attr('class', c);
 	    });
-            $('.cardstories_card', element).not('.cardstories_picked').click(function() {
+            $('.cardstories_card', element).not('.cardstories_picked').unbind('click').click(function() {
 		var card = $(this).metadata().card;
 		$this.send(player_id, game.id, element, 'action=vote&player_id=' + player_id + '&game_id=' + game.id + '&vote=' + card);
 	    });
