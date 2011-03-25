@@ -233,7 +233,7 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
                                       'player_id': [player_id],
                                       'vote': [vote] })
             c.execute("SELECT vote FROM player2game WHERE game_id = %d AND player_id = %d" % ( game['game_id'], player_id ))
-            self.assertEqual(vote, c.fetchone()[0])
+            self.assertEqual(chr(vote), c.fetchone()[0])
         c.close()
             
     @defer.inlineCallbacks
@@ -260,15 +260,14 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         c = self.db.cursor()
         c.execute("SELECT board FROM games WHERE id = %d" % game['game_id'])
         board = c.fetchone()[0]
-        winner_position = board.index(chr(winner_card))
         winner_id = 16
         yield self.service.vote({ 'game_id': [game['game_id']],
                                   'player_id': [winner_id],
-                                  'vote': [winner_position] })
+                                  'vote': [winner_card] })
         loser_id = 17
         yield self.service.vote({ 'game_id': [game['game_id']],
                                   'player_id': [loser_id],
-                                  'vote': [5555] })
+                                  'vote': [120] })
         yield self.service.complete({ 'game_id': [game['game_id']],
                                       'owner_id': [owner_id] })
         c.execute("SELECT win FROM player2game WHERE game_id = %d AND player_id IN ( %d, %d )" % ( game['game_id'], winner_id, owner_id ))

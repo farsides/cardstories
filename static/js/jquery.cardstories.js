@@ -151,6 +151,45 @@
 	},
 
 	vote: function(player_id, game, element) {
+	    if(game.owner) {
+		this.vote_owner(player_id, game, $('.cardstories_owner', element));
+	    } else {
+		if(game.self !== null && game.self !== undefined) {
+		    this.vote_voter(player_id, game, $('.cardstories_pick', element));
+		} else {
+		    this.vote_viewer(player_id, game, $('.cardstories_participate', element));
+		}
+	    }
+
+	},
+
+	vote_voter: function(player_id, game, element) {
+	    var $this = this;
+	    $('.cardstories_sentence', element).text(game.sentence);
+            $('.cardstories_card', element).click(function() {
+                var success = function(data, status) {
+		    if('error' in data) {
+                        $this.error(data.error);
+		    } else {
+                        $this.setTimeout(function() { $this.game(player_id, game.id, element); }, 30);
+		    }
+                };
+		var card = $(this).metadata().card;
+                $this.ajax({
+		    async: false,
+		    timeout: 30000,
+		    url: $this.url + '?action=vote&player_id=' + player_id + '&game_id=' + game.id + '&card=' + card,
+		    type: 'GET',
+		    dataType: 'json',
+		    global: false,
+		    success: success,
+		    error: $this.xhr_error
+		});
+	    });
+	    var cards = game.board;
+	    $('.cardstories_card', element).each(function(index) {
+		$(this).attr('class', 'cardstories_card cardstories_card' + cards[index] + ' {card:' + cards[index] + '}');
+	    });
 	},
 
 	complete: function(player_id, game, element) {

@@ -16,58 +16,6 @@
 # along with this program in a file in the toplevel directory called
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
-# A user is identified by a number (in the 20 to 30 range below).
-# The creator of the game choses one card out of 36 and sends the
-# action=create&owner_id=25&card=1&sentence=wtf
-# message which returns the newly created game identifier
-# {'game_id': 101}
-# The newly created game is in the 'invitation' state. It
-# can be displayed by sending the message:
-# action=game&player_id=22&game_id=101
-# and because the player_id is not the owner of the game, 
-# the cards of each participant is not shown:
-# {
-#  'board': None,
-#  'cards': None,
-#  'players': [[25, None, u'n', None]],
-#  'self': None,
-#  'sentence': 'wtf',
-#  'state': 'invitation'
-# }
-# Up to five players can join by sending the 
-# action=participate&player_id=26&game_id=101
-# message which returns
-# {}
-# on success or 
-# {'error': 'error message'}
-# if it fails. The player then asks to see the cards it was dealt 
-# by sending the 
-# action=player2game&player_id=26&game_id=101
-# message which returns
-# {'cards': [12, 8, 2, 5, 6, 10, 15], 'picked': None }
-# The player then picks the card that is closer to the sentence (wtf)
-# by sending a 
-# action=pick&player_id=26&game_id=101&card=10
-# message. The player can send the message more than once to change the
-# value of the picked card.
-# The game owner decides to move to the voting phase by sending the
-# action=voting&owner_id=25&game_id=101
-# message. The game is now in the 'vote' state and each player who
-# chose to participate can vote for one of the cards picked by the
-# owner or the other players by sending the message
-# action=vote&player_id=26&game_id=101&vote=2
-# where vote is the index of the chosen card in the range [0-6].
-# The player can send the message more than once to change the
-# vote.
-# The game owner decides to move to the voting phase by sending the
-# action=complete&owner_id=25&game_id=101
-# message. The game is now in the 'complete' state and the winners
-# are calculated as follows: 
-#     * The owner wins if at least one of the players guesses right, 
-#       but not all of them do. Then the winners are the owner and the
-#       players who guessed right. 
-#     * If the owner loses, all the other players win. 
-# 
 import os
 import random
 
@@ -85,7 +33,7 @@ class CardstoriesService(service.Service):
     NCARDS = 36
     NPLAYERS = 6
     CARDS_PER_PLAYER = 7
-    ACTIONS = ( 'create', 'game', 'participate', 'voting', 'player2game', 'pick', 'vote', 'complete' )
+    ACTIONS = ( 'create', 'game', 'participate', 'voting', 'pick', 'vote', 'complete' )
 
     def __init__(self, settings):
         self.settings = settings
@@ -127,7 +75,7 @@ class CardstoriesService(service.Service):
                 "  game_id INTEGER, " 
                 "  cards VARCHAR(%d), " % self.CARDS_PER_PLAYER +
                 "  picked CHAR(1), " 
-                "  vote INTEGER, " 
+                "  vote CHAR(1), " 
                 "  win CHAR(1) DEFAULT 'n' "
                 "); ")
             c.execute(
@@ -202,7 +150,7 @@ class CardstoriesService(service.Service):
                     picked = ord(picked)
                 myself = [ picked, player[3], player_cards ]
             if state == 'complete':
-                vote = player[3]
+                vote = ord(player[3])
             else:
                 vote = None
             if player[3] != None:
@@ -253,7 +201,6 @@ class CardstoriesService(service.Service):
 
     @defer.inlineCallbacks
     def player2game(self, args):
-        self.required(args, 'player2game', 'player_id', 'game_id')
         player_id = int(args['player_id'][0])
         game_id = int(args['game_id'][0])
         rows = yield self.db.runQuery("SELECT cards, picked, vote, win FROM player2game WHERE game_id = %d AND player_id = %d" % ( game_id, player_id ))
@@ -282,22 +229,19 @@ class CardstoriesService(service.Service):
         player_id = int(args['player_id'][0])
         game_id = int(args['game_id'][0])
         vote = int(args['vote'][0])
-        yield self.db.runOperation("UPDATE player2game SET vote = %d WHERE game_id = %d AND player_id = %d" % ( vote, game_id, player_id ))
+        yield self.db.runOperation("UPDATE player2game SET vote = ? WHERE game_id = %d AND player_id = %d" % ( game_id, player_id ), [ chr(vote) ])
         defer.returnValue({})
 
     def completeInteraction(self, transaction, game_id, owner_id):
         transaction.execute("SELECT cards FROM player2game WHERE game_id = %d AND player_id = %d" % ( game_id, owner_id ))
         winner_card = transaction.fetchone()[0]
-        transaction.execute("SELECT board FROM games WHERE id = %d" % game_id)
-        board = transaction.fetchone()[0]
-        winner_position = board.index(winner_card)
         transaction.execute("SELECT vote, player_id FROM player2game WHERE game_id = %d AND player_id != %d AND vote IS NOT NULL" % ( game_id, owner_id ))
         players_count = 0
         guessed = []
         failed = []
         for ( vote, player_id ) in transaction.fetchall():
             players_count += 1
-            if vote == winner_position:
+            if vote == winner_card:
                 guessed.append(player_id)
             else:
                 failed.append(player_id)
