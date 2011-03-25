@@ -37,7 +37,8 @@
                     if('error' in data) {
                         $this.error(data.error);
                     } else {
-                        $this.setTimeout(function() { $this.game(player_id, data.game_id, element); }, 30);
+                        var root = $(element).parents('.cardstories_root');
+                        $this.setTimeout(function() { $this.game(player_id, data.game_id, root); }, 30);
 		    }
                 };
                 var sentence = encodeURIComponent($('input[name="sentence"]', element).val());
@@ -192,9 +193,7 @@
 
     $.fn.cardstories = function(player_id, game_id) {
         return this.each(function() {
-	    if(!$(this).hasClass('cardstories_root')) {
-		$(this).addClass('cardstories_root');
-	    }
+	    $(this).toggleClass('cardstories_root', true);
 	    if(game_id === undefined || game_id === '') {
 		$.cardstories.create(player_id, $('.cardstories_create', this));
 	    } else {

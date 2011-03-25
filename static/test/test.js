@@ -95,7 +95,7 @@ test("create", function() {
 
 test("widget create", function() {
     setup();
-    expect(3);
+    expect(5);
 
     var player_id = 15;
     var card = 1;
@@ -107,7 +107,9 @@ test("widget create", function() {
 	equal(options.data, 'sentence=' + sentence);
     };
 
+    ok(!$('#qunit-fixture .cardstories').hasClass('cardstories_root'), 'no cardstories_root');
     $('#qunit-fixture .cardstories').cardstories(player_id);
+    ok($('#qunit-fixture .cardstories').hasClass('cardstories_root'), 'cardstories_root');
     $('#qunit-fixture .cardstories_create .cardstories_sentence').val(sentence);
     $('#qunit-fixture .cardstories_create .cardstories_submit').click();
 });
