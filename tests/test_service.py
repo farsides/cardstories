@@ -304,6 +304,7 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
                            'players': [[owner_id, None, u'n', None], [player1, None, u'n', None], [player2, None, u'n', None]],
                            'self': None,
                            'sentence': u'SENTENCE',
+                           'winner_card': None,
                            'state': u'invitation'}, game_info)
         
         # invitation state, owner point of view
@@ -313,6 +314,7 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         self.assertEquals(self.service.NCARDS, len(game_info['cards']) + sum(map(lambda player: len(player[3]), game_info['players'])))
         self.assertTrue(game_info['owner'])
         self.assertFalse(game_info['ready'])
+        self.assertEquals(winner_card, game_info['winner_card'])
         self.assertEquals(game['game_id'], game_info['id'])
         self.assertEquals(owner_id, game_info['players'][0][0])
         self.assertEquals(1, len(game_info['players'][0][3]))
@@ -380,6 +382,7 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
                            'players': [[owner_id, None, u'n', None], [player1, None, u'n', player1_cards], [player2, None, u'n', None]],
                            'self': [card1, card2, player1_cards],
                            'sentence': u'SENTENCE',
+                           'winner_card': None,
                            'state': u'vote'}, game_info)
         # move to complete state
 

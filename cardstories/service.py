@@ -61,15 +61,6 @@ class CardstoriesService(service.Service):
                 "CREATE INDEX games_idx ON games (id); "
                 )
             c.execute(
-                "CREATE TABLE players ( "
-                "  id INTEGER PRIMARY KEY, "
-                "  name TEXT, "
-                "  created DATETIME "
-                "); ")
-            c.execute(
-                "CREATE INDEX players_idx ON players (id); "
-                )
-            c.execute(
                 "CREATE TABLE player2game ( "
                 "  player_id INTEGER, "
                 "  game_id INTEGER, " 
@@ -136,6 +127,7 @@ class CardstoriesService(service.Service):
         picked_count = 0
         vote_count = 0
         players = []
+        winner_card = None
         myself = None
         for player in rows:
             if player[0] == player_id or owner_id == player_id:
@@ -147,6 +139,8 @@ class CardstoriesService(service.Service):
             if player[0] == player_id:
                 myself = [ self.ord(player[2]), self.ord(player[3]), player_cards ]
             if state == 'complete' or owner_id == player_id:
+                if player[0] == owner_id:
+                    winner_card = player_cards[0]
                 vote = self.ord(player[3])
             else:
                 vote = None
@@ -160,6 +154,7 @@ class CardstoriesService(service.Service):
             ready = picked_count == vote_count + 1 # + 1 is because the owner does not get to vote
         defer.returnValue({ 'id': game_id,
                             'sentence': sentence,
+                            'winner_card': winner_card,
                             'cards': cards, 
                             'board': board, 
                             'state': state,
