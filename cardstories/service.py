@@ -192,7 +192,10 @@ class CardstoriesService(service.Service):
             else:
                 player_cards = None
             if player[0] == player_id:
-                myself = [ ord(player[2]), player[3], player_cards ]
+                picked = player[2]
+                if picked != None:
+                    picked = ord(picked)
+                myself = [ picked, player[3], player_cards ]
             if state == 'complete':
                 vote = player[3]
             else:
