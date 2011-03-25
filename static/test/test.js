@@ -340,3 +340,33 @@ test("vote_owner", function() {
     $('.cardstories_complete', vote).click();
 });
 
+test("complete", function() {
+    setup();
+    expect(8);
+
+    var game_id = 101;
+    var player1 = 10;
+    var player2 = 11;
+    var winner_card = 7;
+    var sentence = 'SENTENCE';
+
+    var game = {
+	'id': game_id,
+        'sentence': sentence,
+        'winner_card': winner_card,
+        'players': [ [ player1, null, 'n', [ ] ],
+                     [ player2, null, 'y', [ ] ]
+                   ]
+    };
+
+    var element = $('#qunit-fixture .cardstories_complete');
+    $.cardstories.complete(player1, game, element);
+    equal($('.cardstories_sentence', element).text(), sentence);
+    equal($('.cardstories_card', element).metadata().card, 7);
+    ok(!$('.cardstories_player:nth(0)', element).hasClass('cardstories_win'), 'not cardstories_win');
+    equal($('.cardstories_player:nth(0)', element).text(), player1.toString());
+    ok($('.cardstories_player:nth(1)', element).hasClass('cardstories_win'), 'cardstories_win');
+    equal($('.cardstories_player:nth(1)', element).text(), player2.toString());
+    ok($('.cardstories_player:nth(1)', element).is(':visible'), 'player2 visible');
+    ok(!$('.cardstories_player:nth(2)', element).is(':visible'), 'player3 not visible');
+  });

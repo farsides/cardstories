@@ -140,7 +140,7 @@ class CardstoriesService(service.Service):
                 myself = [ self.ord(player[2]), self.ord(player[3]), player_cards ]
             if state == 'complete' or owner_id == player_id:
                 if player[0] == owner_id:
-                    winner_card = player_cards[0]
+                    winner_card = ord(player[1][0])
                 vote = self.ord(player[3])
             else:
                 vote = None

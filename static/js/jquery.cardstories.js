@@ -193,6 +193,18 @@
         },
 
         complete: function(player_id, game, element) {
+            $('.cardstories_sentence', element).text(game.sentence);
+            $('.cardstories_card', element).attr('class', 'cardstories_card cardstories_card' + game.winner_card + ' {card:' + game.winner_card + '}');
+            $('.cardstories_player', element).each(function(index) {
+                if(index < game.players.length) {
+                  var player = game.players[index];
+                  $(this).toggleClass('cardstories_win', player[2] == 'y');
+                  $(this).text(player[0]);
+                  $(this).show();
+                } else {
+                  $(this).hide();
+                }
+              });
         },
 
         send: function(player_id, game_id, element, query, data) {
