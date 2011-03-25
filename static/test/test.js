@@ -272,3 +272,50 @@ test("vote_voter", function() {
     $('#qunit-fixture .cardstories_voter .cardstories_picked').click(); // must do nothing
     $('#qunit-fixture .cardstories_voter .cardstories_card' + voted_after).click();
 });
+
+test("vote_owner", function() {
+    setup();
+    expect(7);
+
+    var player_id = 15;
+    var game_id = 101;
+
+    var voter11 = 11;
+    var voter12 = 12;
+    var voter21 = 21;
+
+    var board1 = 30;
+    var board2 = 31;
+    var board = [ board1, board2 ];
+
+    var sentence = 'SENTENCE';
+
+    var game = {
+	'id': game_id,
+	'owner': true,
+        'sentence': sentence,
+        'board': board,
+        'players': [ [ voter11, board1, 'n', [ ] ],
+                     [ voter12, board2, 'n', [ ] ],
+                     [ voter21, board1, 'n', [ ] ]
+                   ],
+	'ready': true
+    };
+
+    $.cardstories.ajax = function(options) {
+        equal(options.type, 'GET');
+        equal(options.url, $.cardstories.url + '?action=complete&owner_id=' + player_id + '&game_id=' + game_id);
+    };
+
+    $.cardstories.vote(player_id, game, $('#qunit-fixture .cardstories_vote'));
+    var vote = $('#qunit-fixture .cardstories_vote .cardstories_owner');
+    equal($('.cardstories_sentence', vote).text(), sentence);
+    ok($('.cardstories_complete', vote).hasClass('cardstories_ready'), 'cardstories_ready');
+    var first = $('.cardstories_card:nth(0)', vote);
+    equal($('.cardstories_votes:nth(0) .cardstories_voter:nth(0)', vote).text(), voter11.toString());
+    equal($('.cardstories_votes:nth(0) .cardstories_voter:nth(1)', vote).text(), voter21.toString());
+    equal($('.cardstories_votes:nth(1) .cardstories_voter:nth(0)', vote).text(), voter12.toString());
+    
+    $('.cardstories_complete', vote).click();
+});
+

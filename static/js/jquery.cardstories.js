@@ -138,6 +138,50 @@
 	    });
 	},
 
+	vote_owner: function(player_id, game, element) {
+	    var $this = this;
+	    $('.cardstories_sentence', element).text(game.sentence);
+            var complete = $('.cardstories_complete', element);
+	    complete.toggleClass('cardstories_ready', game.ready);
+	    if(game.ready) {
+		complete.click(function() {
+		    $this.send(player_id, game.id, element, 'action=complete&owner_id=' + player_id + '&game_id=' + game.id);
+		});
+	    }
+
+            var i;
+            var board2voters = {};
+            for(i = 0; i < game.board.length; i++) {
+              board2voters[game.board[i]] = [];
+            }
+            for(i = 0; i < game.players.length; i++) {
+              var vote = game.players[i][1];
+              var voters = board2voters[vote];
+              if(voters !== undefined) {
+                voters.push(game.players[i][0]);
+              }
+            }
+	    var cards = game.board;
+	    $('.cardstories_card', element).each(function(index) {
+                var card = cards[index];
+		var c = 'cardstories_card cardstories_card' + card + ' {card:' + card + '}';
+		$(this).attr('class', c);
+                
+                var voters = board2voters[card];
+                if(voters !== undefined) {
+                  var siblings = $(this).siblings('.cardstories_voters');
+                  $('.cardstories_voter', siblings).each(function(voter_index) {
+                      if(voters.length > voter_index) {
+                        $(this).text(voters[voter_index]);
+                        $(this).show();
+                      } else {
+                        $(this).hide();
+                      }
+                    });
+                }
+	    });
+	},
+
 	complete: function(player_id, game, element) {
 	},
 

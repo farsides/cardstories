@@ -146,7 +146,7 @@ class CardstoriesService(service.Service):
                 picked_count += 1
             if player[0] == player_id:
                 myself = [ self.ord(player[2]), self.ord(player[3]), player_cards ]
-            if state == 'complete':
+            if state == 'complete' or owner_id == player_id:
                 vote = self.ord(player[3])
             else:
                 vote = None
