@@ -20,6 +20,7 @@ all:
 
 check:
 	python-coverage -e
+	PYTHONPATH=.. python-coverage -x test_auth.py
 	PYTHONPATH=.. python-coverage -x test_service.py
 	PYTHONPATH=.. python-coverage -x test_site.py
 	PYTHONPATH=.. python-coverage -x test_tap.py

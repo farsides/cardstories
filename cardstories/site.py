@@ -20,11 +20,17 @@ import json
 from twisted.web import server, resource, static, http
 from twisted.internet import defer
 
+from cardstories.auth import Auth
+
 class CardstoriesResource(resource.Resource):
 
     def __init__(self, service):
         resource.Resource.__init__(self)
         self.service = service
+        if service.settings.get('auth'):
+            self.auth = Auth(service.settings)
+        else:
+            self.auth = None
         self.isLeaf = True
 
     def render(self, request):
@@ -48,8 +54,12 @@ class CardstoriesResource(resource.Resource):
             request.setHeader("content-type", 'application/json; charset="UTF-8"')
             request.write(content)
             request.finish()
-            
+
+        if self.auth:
+            d.addCallback(self.auth.preprocess, request)
         d.addCallback(self.handle, request)
+        if self.auth:
+            d.addCallback(self.auth.postprocess)
         d.addCallbacks(succeed, failed)
 
         return d

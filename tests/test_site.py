@@ -32,7 +32,7 @@ from cardstories.site import CardstoriesResource, CardstoriesTree
 
 class CardstoriesServiceMockup:
     def __init__(self):
-        self.settings = {'static': os.getcwd() }
+        self.settings = {'static': os.getcwd()}
 
     def handle(self, args): return 'handle'
 

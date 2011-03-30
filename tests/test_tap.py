@@ -46,16 +46,21 @@ class CardstoriesServerTest(unittest.TestCase):
         settings = tap.Options()
         pem = 'cert.pem'
         db = 'base.sqlite'
+        auth = 'basic'
         ssl_port = '8080'
         settings.parseOptions(['--port', self.port,
                                '--ssl-port', ssl_port,
                                '--ssl-pem', pem,
                                '--verbose',
-                               '--db', db
+                               '--db', db,
+                               '--auth', auth,
+                               '--auth-db', 'auth' + db,
                                ])
         self.assertEquals(pem, settings['ssl-pem'])
         self.assertEquals(1, settings['verbose'])
         self.assertEquals(db, settings['db'])
+        self.assertEquals(auth, settings['auth'])
+        self.assertEquals('auth' + db, settings['auth-db'])
         self.assertEquals(int(self.port), settings['port'])
         self.assertEquals(int(ssl_port), settings['ssl-port'])
 
@@ -63,11 +68,12 @@ class CardstoriesServerTest(unittest.TestCase):
                                '-s', ssl_port,
                                '-P', pem,
                                '-v',
-                               '-d', db
+                               '-a', auth,
                                ])
         self.assertEquals(pem, settings['ssl-pem'])
         self.assertEquals(1, settings['verbose'])
         self.assertEquals(db, settings['db'])
+        self.assertEquals(auth, settings['auth'])
         self.assertEquals(int(self.port), settings['port'])
         self.assertEquals(int(ssl_port), settings['ssl-port'])
         

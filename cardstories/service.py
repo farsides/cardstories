@@ -265,6 +265,8 @@ class CardstoriesService(service.Service):
         return True
 
     def handle(self, args):
+        if not args.has_key('action'):
+            return defer.succeed({})
         try:
             action = args['action'][0]
             if action in self.ACTIONS:
