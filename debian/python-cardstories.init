@@ -45,7 +45,7 @@ CARDSTORIES_GROUP=nogroup
 
 export PYTHONPATH=/etc/cardstories
 
-DAEMON_OPTS="--pidfile=$PIDFILE --logfile=$LOGFILE -u "$CARDSTORIES_USER" -g "$CARDSTORIES_GROUP" $PLUGIN --interface 0.0.0.0"
+DAEMON_OPTS="--pidfile=$PIDFILE --logfile=$LOGFILE -u "$CARDSTORIES_USER" -g "$CARDSTORIES_GROUP" $PLUGIN --auth basic --interface 0.0.0.0"
 
 if [ ! -x $DAEMON ]; then
   echo "ERROR: Can't execute $DAEMON."

@@ -10,6 +10,7 @@
     <script type="text/javascript" src="../tablesorter/jquery.tablesorter.pager.js"></script>
 
     <script type="text/javascript" src="../js/jquery.metadata.js"></script>
+    <script type="text/javascript" src="../js/jquery.cookie.js"></script>
     <script type="text/javascript" src="../js/jquery.cardstories.js"></script>
 
     <link rel="stylesheet" href="qunit.css" type="text/css" media="screen">
@@ -24,6 +25,10 @@
     <ol id="qunit-tests"></ol>
     <div id="qunit-fixture">
       <div class="cardstories">
+        <div class="cardstories_subscribe">
+          <input class="cardstories_name" type="text" name="name" />
+          <input class="cardstories_submit" type="submit" name="submit" value="play" />
+        </div>
         <div class="cardstories_create">
           <div class="cardstories_cards">
             <div class="cardstories_card cardstories_card1 {card:1}" >
@@ -89,29 +94,29 @@
 
             <div class="cardstories_votes">
               <div class="cardstories_card"></div>
-              <div class="cardstories_voters">
-                <div class="cardstories_voter"></div>
-                <div class="cardstories_voter"></div>
-                <div class="cardstories_voter"></div>
-                <div class="cardstories_voter"></div>
-                <div class="cardstories_voter"></div>
-                <div class="cardstories_voter"></div>
+              <div class="cardstories_results">
+                <div class="cardstories_result"></div>
+                <div class="cardstories_result"></div>
+                <div class="cardstories_result"></div>
+                <div class="cardstories_result"></div>
+                <div class="cardstories_result"></div>
+                <div class="cardstories_result"></div>
               </div>
             </div>
 
             <div class="cardstories_votes">
               <div class="cardstories_card"></div>
-              <div class="cardstories_voters">
-                <div class="cardstories_voter"></div>
-                <div class="cardstories_voter"></div>
-                <div class="cardstories_voter"></div>
-                <div class="cardstories_voter"></div>
-                <div class="cardstories_voter"></div>
-                <div class="cardstories_voter"></div>
+              <div class="cardstories_results">
+                <div class="cardstories_result"></div>
+                <div class="cardstories_result"></div>
+                <div class="cardstories_result"></div>
+                <div class="cardstories_result"></div>
+                <div class="cardstories_result"></div>
+                <div class="cardstories_result"></div>
               </div>
             </div>
 
-            <div class="cardstories_complete"></div>
+            <div class="cardstories_finish"></div>
           </div>
         </div>
         <div class="cardstories_complete">
