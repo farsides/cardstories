@@ -41,7 +41,7 @@
                 var card = $(this).metadata({type: "attr", name: "data"}).card;
                 $this.create_write_sentence(player_id, card, root);
               });
-            $('.cardstories_cards', element).jqDock();
+            $('.cardstories_cards', element).jqDock({ active: 3 });
         },
 
         create_write_sentence: function(player_id, card, root) {
