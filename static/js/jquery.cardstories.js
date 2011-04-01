@@ -49,7 +49,7 @@
             var element = $('.cardstories_create .cardstories_write_sentence', root);
             this.set_active(root, element);
             $('.cardstories_card', element).attr('class', 'cardstories_card cardstories_card' + card + ' {card:' + card + '}');
-            $('input[type=submit]', element).click(function() {
+            $('.cardstories_submit', element).click(function() {
                 var success = function(data, status) {
                     if('error' in data) {
                         $this.error(data.error);
@@ -58,7 +58,7 @@
                         $this.setTimeout(function() { $this.game(player_id, data.game_id, root); }, 30);
                     }
                 };
-                var sentence = encodeURIComponent($('input[name="sentence"]', element).val());
+                var sentence = encodeURIComponent($('.cardstories_sentence', element).val());
                 $this.ajax({
                     async: false,
                     timeout: 30000,
