@@ -37,11 +37,11 @@
             var $this = this;
             var element = $('.cardstories_create .cardstories_pick_card', root);
             this.set_active(root, element);
-            $('input[name="card"]:nth(0)', element).attr('checked', 'checked');
-            $('input[type=submit]', element).click(function() {
-                var card = $('input[name="card"]:checked', element).val();
+            $('.cardstories_card', element).click(function() {
+                var card = $(this).metadata({type: "attr", name: "data"}).card;
                 $this.create_write_sentence(player_id, card, root);
               });
+            $('.cardstories_cards', element).jqDock();
         },
 
         create_write_sentence: function(player_id, card, root) {
@@ -62,7 +62,7 @@
                 $this.ajax({
                     async: false,
                     timeout: 30000,
-                    url: $this.url + '?action=create&owner_id=' + player_id + '&card='+ card,
+                    url: $this.url + '?action=create&owner_id=' + player_id + '&card=' + card,
                     type: 'POST',
                     data: 'sentence=' + sentence,
                     dataType: 'json',

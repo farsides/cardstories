@@ -1,15 +1,25 @@
+.cardstories { width: 1024px; height: 768px; position: relative; }
+
+.cardstories .cardstories_create .cardstories_pick_card { background-repeat: no-repeat; background-image:url('../mockups/Card_Stories_Interface1.png'); }
+.cardstories .cardstories_create .cardstories_pick_card .cardstories_cards { position: absolute; left: 0px; bottom: 0px; }
+
 .cardstories_card { background-repeat: no-repeat; width: 33px; height: 45px; float: left; }
 .cardstories_card:hover { width: 333px; height: 451px; }
 .cardstories_vote .cardstories_picked { border: 3px solid #567300; }
 .cardstories_vote .cardstories_voted { border: 3px solid #ff0000; }
 .cardstories_complete .cardstories_player.cardstories_win { border: 3px solid #567300; }
 
+.cardstories > div { width: 100%; height: 100%; } 
 .cardstories .cardstories_subscribe, 
 .cardstories .cardstories_create > div, 
 .cardstories .cardstories_invitation > div,
 .cardstories .cardstories_vote > div,
 .cardstories .cardstories_complete 
- { display: none; }
+ { 
+     display: none;
+     width: 100%;
+     height: 100%; 
+ }
 
 .cardstories .cardstories_subscribe.cardstories_active, 
 .cardstories .cardstories_create > div.cardstories_active, 
