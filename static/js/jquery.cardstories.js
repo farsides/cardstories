@@ -30,10 +30,25 @@
         ajax: function(o) { return jQuery.ajax(o); },
 
         create: function(player_id, root) {
+            this.create_pick_card(player_id, root);
+        },
+
+        create_pick_card: function(player_id, root) {
             var $this = this;
-            var element = $('.cardstories_create', root);
+            var element = $('.cardstories_create .cardstories_pick_card', root);
             this.set_active(root, element);
             $('input[name="card"]:nth(0)', element).attr('checked', 'checked');
+            $('input[type=submit]', element).click(function() {
+                var card = $('input[name="card"]:checked', element).val();
+                $this.create_write_sentence(player_id, card, root);
+              });
+        },
+
+        create_write_sentence: function(player_id, card, root) {
+            var $this = this;
+            var element = $('.cardstories_create .cardstories_write_sentence', root);
+            this.set_active(root, element);
+            $('.cardstories_card', element).attr('class', 'cardstories_card cardstories_card' + card + ' {card:' + card + '}');
             $('input[type=submit]', element).click(function() {
                 var success = function(data, status) {
                     if('error' in data) {
@@ -44,7 +59,6 @@
                     }
                 };
                 var sentence = encodeURIComponent($('input[name="sentence"]', element).val());
-                var card = $('input[name="card"]:checked', element).val();
                 $this.ajax({
                     async: false,
                     timeout: 30000,

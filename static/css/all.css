@@ -5,14 +5,14 @@
 .cardstories_complete .cardstories_player.cardstories_win { border: 3px solid #567300; }
 
 .cardstories .cardstories_subscribe, 
-.cardstories .cardstories_create, 
+.cardstories .cardstories_create > div, 
 .cardstories .cardstories_invitation > div,
 .cardstories .cardstories_vote > div,
 .cardstories .cardstories_complete 
  { display: none; }
 
 .cardstories .cardstories_subscribe.cardstories_active, 
-.cardstories .cardstories_create.cardstories_active, 
+.cardstories .cardstories_create > div.cardstories_active, 
 .cardstories .cardstories_invitation > div.cardstories_active,
 .cardstories .cardstories_vote > div.cardstories_active,
 .cardstories .cardstories_complete.cardstories_active 

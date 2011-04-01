@@ -103,7 +103,7 @@ test("send post", function() {
 
 test("create", function() {
     setup();
-    expect(5);
+    expect(10);
 
     var player_id = 15;
     var card = 1;
@@ -115,10 +115,13 @@ test("create", function() {
 	equal(options.data, 'sentence=' + sentence);
     };
 
-    equal($('#qunit-fixture .cardstories_create.cardstories_active').length, 0);
+    equal($('#qunit-fixture .cardstories_create .cardstories_pick_card.cardstories_active').length, 0);
     $.cardstories.create(player_id, $('#qunit-fixture .cardstories'));
-    equal($('#qunit-fixture .cardstories_create.cardstories_active').length, 1);
-    $('#qunit-fixture .cardstories_create .cardstories_sentence').val(sentence);
+    equal($('#qunit-fixture .cardstories_create .cardstories_pick_card.cardstories_active').length, 1);
+    equal($('#qunit-fixture .cardstories_create .cardstories_write_sentence.cardstories_active').length, 0);
+    $('#qunit-fixture .cardstories_create .cardstories_pick_card .cardstories_submit').click();
+    equal($('#qunit-fixture .cardstories_create .cardstories_write_sentence.cardstories_active').length, 1);
+    $('#qunit-fixture .cardstories_create .cardstories_write_sentence .cardstories_sentence').val(sentence);
     $('#qunit-fixture .cardstories_create .cardstories_submit').click();
 });
 
