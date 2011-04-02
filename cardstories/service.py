@@ -134,6 +134,10 @@ class CardstoriesService(service.Service):
                 player_cards = [ ord(c) for c in player[1] ]
             else:
                 player_cards = None
+            if player[2] != None and ( player[0] == player_id or owner_id == player_id ):
+                picked = ord(player[2])
+            else:
+                picked = None
             if player[2] != None:
                 picked_count += 1
             if player[0] == player_id:
@@ -146,7 +150,7 @@ class CardstoriesService(service.Service):
                 vote = None
             if player[3] != None:
                 vote_count += 1
-            players.append([ player[0], vote, player[4], player_cards ])
+            players.append([ player[0], vote, player[4], picked, player_cards ])
         ready = None
         if state == 'invitation':
             ready = picked_count >= self.MIN_PICKED

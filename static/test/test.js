@@ -167,15 +167,20 @@ test("game", function() {
 
 test("invitation_owner", function() {
     setup();
-    expect(6);
+    expect(12);
 
-    var player_id = 15;
+    var player1 = 'player1';
+    var card1 = 5;
+    var player2 = 'player2';
+    var player_id = player1;
     var game_id = 101;
 
     var game = {
 	'id': game_id,
 	'owner': true,
-	'ready': true
+	'ready': true,
+        'players': [ [ player1, null, 'n', card1, [] ],
+                     [ player2, null, 'n', null, [] ] ]
     };
 
     $.cardstories.ajax = function(options) {
@@ -185,6 +190,13 @@ test("invitation_owner", function() {
 
     equal($('#qunit-fixture .cardstories_invitation .cardstories_owner.cardstories_active').length, 0);
     $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
+    var cards = $('#qunit-fixture .cardstories_invitation .cardstories_owner .cardstories_cards');
+    equal($('.cardstories_card:nth(0)', cards).attr('title'), player1);
+    equal($('.cardstories_card:nth(0)', cards).attr('src'), 'PATH/card0' + card1 + '.png');
+    equal($('.cardstories_card:nth(1)', cards).attr('title'), player2);
+    equal($('.cardstories_card:nth(1)', cards).attr('src'), 'PATH/card-back.png');
+    equal($('.cardstories_card:nth(2)', cards).attr('title'), 'Waiting');
+    equal($('.cardstories_card:nth(2)', cards).attr('src'), 'PATH/card-back.png');
     equal($('#qunit-fixture .cardstories_invitation .cardstories_owner.cardstories_active').length, 1);
     equal($('#qunit-fixture .cardstories_owner .cardstories_invite').attr('href'), '?game_id=' + game.id);
     equal($('#qunit-fixture .cardstories_owner .cardstories_refresh').attr('href'), '?player_id=' + player_id + '&game_id=' + game.id);
@@ -353,9 +365,9 @@ test("vote_owner", function() {
 	'owner': true,
         'sentence': sentence,
         'board': board,
-        'players': [ [ voter11, board1, 'n', [ ] ],
-                     [ voter12, board2, 'n', [ ] ],
-                     [ voter21, board1, 'n', [ ] ]
+        'players': [ [ voter11, board1, 'n', null, [ ] ],
+                     [ voter12, board2, 'n', null, [ ] ],
+                     [ voter21, board1, 'n', null, [ ] ]
                    ],
 	'ready': true
     };
@@ -393,8 +405,8 @@ test("complete", function() {
 	'id': game_id,
         'sentence': sentence,
         'winner_card': winner_card,
-        'players': [ [ player1, null, 'n', [ ] ],
-                     [ player2, null, 'y', [ ] ]
+        'players': [ [ player1, null, 'n', null, [ ] ],
+                     [ player2, null, 'y', null, [ ] ]
                    ]
     };
 

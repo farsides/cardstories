@@ -91,6 +91,23 @@
             this.set_active(root, element);
             $('a.cardstories_invite').attr('href', '?game_id=' + game.id);
             $('a.cardstories_refresh').attr('href', '?player_id=' + player_id + '&game_id=' + game.id);
+            var players = game.players;
+            var cards = $('.cardstories_cards', element);
+            var meta = $('.cardstories_cards', element).metadata({type: "attr", name: "data"});
+            $('.cardstories_card', element).each(function(index) {
+                var card_file = meta.nocard;
+                var title = meta.waiting;
+                if(index < players.length) {
+                  title = players[index][0];
+                  var card = players[index][3];
+                  if(card !== null) {
+                    card_file = meta.card.supplant({'card': card});
+                  }
+                }
+                $(this).attr('src', card_file);
+                $(this).attr('title', title);
+              });            
+            $('.cardstories_cards', element).jqDock({ active: 3, labels: 'tc' });
             var voting = $('.cardstories_voting', element);
             voting.toggleClass('cardstories_ready', game.ready);
             if(game.ready) {
@@ -293,6 +310,7 @@
         set_active: function(root, element) { 
             this.unset_active(root);
             $(element).addClass('cardstories_active');
+            $(element).parents('.cardstories_root div').addClass('cardstories_active');
         },
 
         name: function(game_id, root) {
