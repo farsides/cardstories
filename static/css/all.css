@@ -40,18 +40,21 @@
     top: 75px;
 }
 
+.cardstories .cardstories_bubble { 
+    position: absolute;
+    z-index: 1;
+    left: 5%;
+    top: 118px;
+}
+
 /* state create : pick a card */
 
 .cardstories .cardstories_create .cardstories_pick_card .cardstories_cards { position: absolute; left: 0px; bottom: 15%; }
 
 .cardstories .cardstories_create .cardstories_bubble_pick_a_card { 
     background: transparent url('images/pick_a_card.png') no-repeat left top;
-    position: absolute;
     height: 92px;
     width: 287px;
-    z-index: 1;
-    left: 5%;
-    top: 118px;
 }
 
 .cardstories .cardstories_create .cardstories_pick_card .cardstories_counter { 
@@ -128,7 +131,21 @@
     position: absolute;
     bottom: 20%;
     left: 25%;
-    width: 500px;
+    z-index: 1;
+}
+
+/* state invitation : pick a card */
+
+.cardstories .cardstories_invitation .cardstories_bubble_player_pick_a_card { 
+    background: transparent url('images/player_pick_a_card.png') no-repeat left top;
+    height: 95px;
+    width: 421px;
+}
+
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_cards {
+    position: absolute;
+    bottom: 12%;
+    left: 3%;
     z-index: 1;
 }
 

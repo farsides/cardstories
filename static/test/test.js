@@ -205,13 +205,13 @@ test("invitation_owner", function() {
 
 test("invitation_pick", function() {
     setup();
-    expect(5);
+    expect(7);
 
     var player_id = 15;
     var game_id = 101;
     var picked_before = 3;
     var picked_after = 5;
-    var cards = [1,2,picked_before,4,picked_after,7];
+    var cards = [1,2,picked_before,4,picked_after,5];
     var sentence = 'SENTENCE';
 
     $.cardstories.ajax = function(options) {
@@ -227,10 +227,11 @@ test("invitation_pick", function() {
     equal($('#qunit-fixture .cardstories_invitation .cardstories_pick.cardstories_active').length, 0);    
     $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
     equal($('#qunit-fixture .cardstories_invitation .cardstories_pick.cardstories_active').length, 1);    
-    equal($('#qunit-fixture .cardstories_pick .cardstories_sentence').text(), sentence);
-    equal($('#qunit-fixture .cardstories_pick .cardstories_card1').metadata().card, 1);
-    equal($('#qunit-fixture .cardstories_pick .cardstories_card7').metadata().card, 7);
-    $('#qunit-fixture .cardstories_participate .cardstories_card' + picked_after).click();
+    equal($('#qunit-fixture .cardstories_invitation .cardstories_pick .cardstories_sentence').text(), sentence);
+    var element = $('#qunit-fixture .cardstories_invitation .cardstories_pick .cardstories_cards');
+    equal($('.cardstories_card:nth(0)', element).attr('src'), 'PATH/card0' + cards[0] + '.png');
+    equal($('.cardstories_card:nth(5)', element).attr('src'), 'PATH/card0' + cards[5] + '.png');
+    $('.cardstories_card:nth(4)', element).click();
 });
 
 test("invitation_participate", function() {

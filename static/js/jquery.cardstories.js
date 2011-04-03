@@ -92,7 +92,6 @@
             $('a.cardstories_invite').attr('href', '?game_id=' + game.id);
             $('a.cardstories_refresh').attr('href', '?player_id=' + player_id + '&game_id=' + game.id);
             var players = game.players;
-            var cards = $('.cardstories_cards', element);
             var meta = $('.cardstories_cards', element).metadata({type: "attr", name: "data"});
             $('.cardstories_card', element).each(function(index) {
                 var card_file = meta.nocard;
@@ -123,13 +122,18 @@
             this.set_active(root, element);
             $('.cardstories_sentence', element).text(game.sentence);
             $('.cardstories_card', element).unbind('click').click(function() {
-                var card = $(this).metadata().card;
+                var card = $(this).metadata({type: "attr", name: "data"}).card;
                 $this.send(player_id, game.id, element, 'action=pick&player_id=' + player_id + '&game_id=' + game.id + '&card=' + card);
             });
             var cards = game.self[2];
+            var meta = $('.cardstories_cards', element).metadata({type: "attr", name: "data"});
             $('.cardstories_card', element).each(function(index) {
-                $(this).attr('class', 'cardstories_card cardstories_card' + cards[index] + ' {card:' + cards[index] + '}');
-            });
+                var card = cards[index];
+                var card_file = meta.card.supplant({'card': card});
+                $(this).attr('src', card_file);
+                $(this).metadata({type: "attr", name: "data"}).card = card;
+              });            
+            $('.cardstories_cards', element).jqDock({ active: 3});
         },
 
         invitation_participate: function(player_id, game, root) {
