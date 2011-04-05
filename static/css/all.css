@@ -47,6 +47,43 @@
     top: 118px;
 }
 
+/* state where a sentence is displayed below the top line */
+
+.cardstories .cardstories_sentence_container {
+    position: relative;
+    top: 30%;
+    left: 0px;
+}
+
+.cardstories .cardstories_sentence_container > div {
+    line-height: 28px; /* brace image size */
+    text-align: center;
+    height: 28px;
+}
+
+.cardstories .cardstories_sentence_container > div > div {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.cardstories .cardstories_brace {
+    width: 12px;
+    height: 28px;
+}
+
+.cardstories .cardstories_sentence {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.cardstories .cardstories_brace_open {
+    background-image: url('images/brace_open.png');
+}
+
+.cardstories .cardstories_brace_close {
+    background-image: url('images/brace_close.png');
+}
+
 /* state create : pick a card */
 
 .cardstories .cardstories_create .cardstories_pick_card .cardstories_cards { position: absolute; left: 0px; bottom: 15%; }
@@ -144,9 +181,27 @@
 
 .cardstories .cardstories_invitation .cardstories_pick .cardstories_cards {
     position: absolute;
-    bottom: 12%;
-    left: 3%;
+    bottom: 15%;
+    left: 5%;
     z-index: 1;
+}
+
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_mask_pick_a_card {
+    position: absolute;
+    top: 25%;
+    right: 0%;
+    background: transparent url('images/mask_pick_a_card.png') no-repeat left top;
+    height: 223px;
+    width: 319px;
+}
+
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_submit {
+    position: absolute;
+    bottom: 10%;
+    right: 0%;
+    background: transparent url('images/ok_pick_a_card.png') no-repeat left top;
+    height: 90px;
+    width: 130px;
 }
 
 .cardstories_card { background-repeat: no-repeat; width: 333px; height: 451px; }
