@@ -288,19 +288,19 @@ test("widget invitation", function() {
 
 test("vote_voter", function() {
     setup();
-    expect(9);
+    expect(14);
 
     var player_id = 15;
     var game_id = 101;
     var picked = 2;
     var voted_before = 3;
     var voted_after = 5;
-    var board = [1,picked,voted_before,4,voted_after,7];
+    var board = [1,picked,voted_before,4,voted_after];
     var sentence = 'SENTENCE';
 
     $.cardstories.ajax = function(options) {
         equal(options.type, 'GET');
-        equal(options.url, $.cardstories.url + '?action=vote&player_id=' + player_id + '&game_id=' + game_id + '&vote=' + voted_after);
+        equal(options.url, $.cardstories.url + '?action=vote&player_id=' + player_id + '&game_id=' + game_id + '&card=' + voted_after);
     };
 
     var game = {
@@ -309,16 +309,21 @@ test("vote_voter", function() {
 	'self': [picked, voted_before, [11,12,13,14,15,16,17]],
 	'sentence': sentence
     };
+    var element = $('#qunit-fixture .cardstories_vote .cardstories_voter');
+    $('.cardstories_card:nth(0)', element).attr('title', 'SOMETHING');
+    equal($('.cardstories_card:nth(1)', element).attr('title'), '');
     equal($('#qunit-fixture .cardstories_vote .cardstories_voter.cardstories_active').length, 0);
     $.cardstories.vote(player_id, game, $('#qunit-fixture .cardstories'));
     equal($('#qunit-fixture .cardstories_vote .cardstories_voter.cardstories_active').length, 1);
     equal($('#qunit-fixture .cardstories_voter .cardstories_sentence').text(), sentence);
-    equal($('#qunit-fixture .cardstories_voter .cardstories_card1').metadata().card, 1);
-    equal($('#qunit-fixture .cardstories_voter .cardstories_card7').metadata().card, 7);
-    ok($('#qunit-fixture .cardstories_voter .cardstories_card' + voted_before).hasClass('cardstories_voted'), 'cardstories_voted');
-    ok($('#qunit-fixture .cardstories_voter .cardstories_card' + picked).hasClass('cardstories_picked'), 'cardstories_picked');
-    $('#qunit-fixture .cardstories_voter .cardstories_picked').click(); // must do nothing
-    $('#qunit-fixture .cardstories_voter .cardstories_card' + voted_after).click();
+    for(var i = 0; i < board.length; i++) {
+      equal($('.cardstories_card:nth(' + i + ')', element).attr('src'), 'PATH/card0' + board[i] + '.png');
+    }
+    equal($('.cardstories_card:nth(0)', element).attr('title'), '');
+    equal($('.cardstories_card:nth(1)', element).attr('title'), 'My Card');
+    equal($('.cardstories_card:nth(5)', element).attr('src'), 'PATH/nocard.png');
+    $('.cardstories_picked', element).click(); // must do nothing
+    $('.cardstories_card:nth(4)', element).click();
 });
 
 test("vote_viewer", function() {

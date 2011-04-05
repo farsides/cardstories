@@ -40,13 +40,6 @@
     top: 75px;
 }
 
-.cardstories .cardstories_bubble { 
-    position: absolute;
-    z-index: 1;
-    left: 5%;
-    top: 118px;
-}
-
 /* state where a sentence is displayed below the top line */
 
 .cardstories .cardstories_sentence_container {
@@ -171,35 +164,55 @@
     z-index: 1;
 }
 
-/* state invitation : pick a card */
+/* state invitation, player point of view : pick a card */
 
 .cardstories .cardstories_invitation .cardstories_bubble_player_pick_a_card { 
+    position: absolute;
+    z-index: 1;
+    left: 5%;
+    top: 118px;
     background: transparent url('images/player_pick_a_card.png') no-repeat left top;
     height: 95px;
     width: 421px;
 }
 
-.cardstories .cardstories_invitation .cardstories_pick .cardstories_cards {
+/* state vote, player point of view : vote for a card */
+
+.cardstories .cardstories_vote .cardstories_bubble_player_vote_for_a_card { 
+    position: absolute;
+    z-index: 1;
+    left: 5%;
+    top: 95px;
+    background: transparent url('images/player_vote_for_a_card.png') no-repeat left top;
+    height: 122px;
+    width: 461px;
+}
+
+/* state invitation and vote, player point of view : chose a card */
+
+.cardstories .cardstories_mask_chose_a_card {
+    position: absolute;
+    top: 25%;
+    right: 0%;
+    background: transparent url('images/mask_chose_a_card.png') no-repeat left top;
+    height: 223px;
+    width: 319px;
+}
+
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_cards,
+.cardstories .cardstories_vote .cardstories_voter .cardstories_cards {
     position: absolute;
     bottom: 15%;
     left: 5%;
     z-index: 1;
 }
 
-.cardstories .cardstories_invitation .cardstories_pick .cardstories_mask_pick_a_card {
-    position: absolute;
-    top: 25%;
-    right: 0%;
-    background: transparent url('images/mask_pick_a_card.png') no-repeat left top;
-    height: 223px;
-    width: 319px;
-}
-
-.cardstories .cardstories_invitation .cardstories_pick .cardstories_submit {
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_submit,
+.cardstories .cardstories_vote .cardstories_voter .cardstories_submit {
     position: absolute;
     bottom: 10%;
     right: 0%;
-    background: transparent url('images/ok_pick_a_card.png') no-repeat left top;
+    background: transparent url('images/ok_chose_a_card.png') no-repeat left top;
     height: 90px;
     width: 130px;
 }

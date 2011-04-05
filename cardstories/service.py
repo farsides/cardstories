@@ -216,10 +216,10 @@ class CardstoriesService(service.Service):
 
     @defer.inlineCallbacks
     def vote(self, args):
-        self.required(args, 'vote', 'player_id', 'game_id', 'vote')
+        self.required(args, 'vote', 'player_id', 'game_id', 'card')
         player_id = int(args['player_id'][0])
         game_id = int(args['game_id'][0])
-        vote = int(args['vote'][0])
+        vote = int(args['card'][0])
         yield self.db.runOperation("UPDATE player2game SET vote = ? WHERE game_id = %d AND player_id = %d" % ( game_id, player_id ), [ chr(vote) ])
         defer.returnValue({})
 

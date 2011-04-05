@@ -231,7 +231,7 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
             vote = 1
             yield self.service.vote({ 'game_id': [game['game_id']],
                                       'player_id': [player_id],
-                                      'vote': [vote] })
+                                      'card': [vote] })
             c.execute("SELECT vote FROM player2game WHERE game_id = %d AND player_id = %d" % ( game['game_id'], player_id ))
             self.assertEqual(chr(vote), c.fetchone()[0])
         c.close()
@@ -263,11 +263,11 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         winner_id = 16
         yield self.service.vote({ 'game_id': [game['game_id']],
                                   'player_id': [winner_id],
-                                  'vote': [winner_card] })
+                                  'card': [winner_card] })
         loser_id = 17
         yield self.service.vote({ 'game_id': [game['game_id']],
                                   'player_id': [loser_id],
-                                  'vote': [120] })
+                                  'card': [120] })
         yield self.service.complete({ 'game_id': [game['game_id']],
                                       'owner_id': [owner_id] })
         c.execute("SELECT win FROM player2game WHERE game_id = %d AND player_id IN ( %d, %d )" % ( game['game_id'], winner_id, owner_id ))
@@ -371,11 +371,11 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         # every player vote
         result = yield self.service.vote({ 'game_id': [game['game_id']],
                                            'player_id': [player1],
-                                           'vote': [card2] })
+                                           'card': [card2] })
         self.assertEquals(result, {})
         result = yield self.service.vote({ 'game_id': [game['game_id']],
                                            'player_id': [player2],
-                                           'vote': [card1] })
+                                           'card': [card1] })
         self.assertEquals(result, {})
         # vote state, player point of view
         game_info = yield self.service.game({ 'game_id': [game['game_id']], 'player_id': [player1] })

@@ -120,20 +120,28 @@
             var $this = this;
             var element = $('.cardstories_invitation .cardstories_pick', root);
             this.set_active(root, element);
-            $('.cardstories_sentence', element).text(game.sentence);
+            this.player_select_card(player_id, game.id, game.sentence, game.self[2], 'pick', element, root);
+            $('.cardstories_cards', element).jqDock({ active: game.self[2].length / 2});
+        },
+
+        player_select_card: function(player_id, game_id, sentence, cards, action, element, root) {
+            var $this = this;
+            this.set_active(root, element);
+            $('.cardstories_sentence', element).text(sentence);
             $('.cardstories_card', element).unbind('click').click(function() {
                 var card = $(this).metadata({type: "attr", name: "data"}).card;
-                $this.send(player_id, game.id, element, 'action=pick&player_id=' + player_id + '&game_id=' + game.id + '&card=' + card);
+                $this.send(player_id, game_id, element, 'action=' + action + '&player_id=' + player_id + '&game_id=' + game_id + '&card=' + card);
             });
-            var cards = game.self[2];
             var meta = $('.cardstories_cards', element).metadata({type: "attr", name: "data"});
             $('.cardstories_card', element).each(function(index) {
                 var card = cards[index];
-                var card_file = meta.card.supplant({'card': card});
+                var card_file = meta.nocard;
+                if(index < cards.length) {
+                  card_file = meta.card.supplant({'card': cards[index]});
+                }
                 $(this).attr('src', card_file);
                 $(this).metadata({type: "attr", name: "data"}).card = card;
               });            
-            $('.cardstories_cards', element).jqDock({ active: 3});
         },
 
         invitation_participate: function(player_id, game, root) {
@@ -172,27 +180,25 @@
         },
 
         vote_voter: function(player_id, game, root) {
-            var $this = this;
             var element = $('.cardstories_vote .cardstories_voter', root);
             this.set_active(root, element);
-            $('.cardstories_sentence', element).text(game.sentence);
             var cards = game.board;
+            var $this = this;
             var picked = game.self[0];
             var voted = game.self[1];
             $('.cardstories_card', element).each(function(index) {
-                var c = 'cardstories_card cardstories_card' + cards[index] + ' {card:' + cards[index] + '}';
-                if(picked == cards[index]) {
-                    c += ' cardstories_picked';
+                var is_picked = picked == cards[index];
+                if(is_picked) {
+                  $(this).unbind('click');
                 }
-                if(voted && voted == cards[index]) {
-                    c += ' cardstories_voted';
+                if(is_picked) {
+                  $(this).attr('title', 'My Card');
+                } else {
+                  $(this).removeAttr('title');
                 }
-                $(this).attr('class', c);
             });
-            $('.cardstories_card', element).not('.cardstories_picked').unbind('click').click(function() {
-                var card = $(this).metadata().card;
-                $this.send(player_id, game.id, element, 'action=vote&player_id=' + player_id + '&game_id=' + game.id + '&vote=' + card);
-            });
+            this.player_select_card(player_id, game.id, game.sentence, cards, 'vote', element, root);
+            $('.cardstories_cards', element).jqDock({ active: cards.length / 2, labels: 'tc'});
         },
 
         vote_owner: function(player_id, game, root) {
