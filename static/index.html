@@ -13,16 +13,19 @@
 	<link rel="stylesheet" href="css/all.css" type="text/css" media="screen">
 	<link rel="stylesheet" href="css/images.css" type="text/css" media="screen">
 	<script type="text/javascript" src="js/jquery.cardstories.js"></script>
+	<script type="text/javascript" src="test/skin.js"></script>
 	<script type="text/javascript" src="js/jquery.query-2.1.7.js"></script>
 </head>
 <body>
       <div class="cardstories">
         <div class="cardstories_logo"></div>
         <div class="cardstories_line cardstories_line_top"></div>
+
         <div class="cardstories_subscribe">
           <input class="cardstories_name" type="text" name="name" />
           <input class="cardstories_submit" type="submit" name="submit" value="play" />
         </div>
+
 	<div class="cardstories_create">
           <div class="cardstories_pick_card">
             <div class="cardstories_bubble cardstories_bubble_pick_a_card"></div>
@@ -77,6 +80,14 @@
             </div>
           </div>
 	</div>
+
+	<div class="cardstories_advertise">
+          <div class="cardstories_counter"></div>
+          <div class="cardstories_frame"></div>
+          <div class="cardstories_submit"></div>
+          <textarea class="cardstories_text" cols="100" rows="10" name="sentence">Friends</textarea>
+        </div>
+
 	<div class="cardstories_invitation">
 	  <div class="cardstories_participate">
 	    <div class="cardstories_sentence"></div>
@@ -138,14 +149,12 @@
               <img class="cardstories_card"></img>
             </div>
 	  </div>
-
           <div class="cardstories_owner">
             <div class="cardstories_sentence"></div>
-
-
             <div class="cardstories_finish">COMPLETE</div>
           </div>
 	</div>
+
         <div class="cardstories_complete">
           <div class="cardstories_sentence_container">
             <div>
@@ -215,7 +224,12 @@
 	Copyright (C)
       </div>
       <script>
-        $('.cardstories').cardstories($.query.get('player_id'), $.query.get('game_id'));
+        var skin = $.query.get('skin');
+        if(skin !== '') {
+          $.cardstories.skin(skin, $('.cardstories'));
+        } else {
+          $('.cardstories').cardstories($.query.get('player_id'), $.query.get('game_id'));
+        }
       </script>
 </body>
 </html>

@@ -461,3 +461,21 @@ test("complete", function() {
     ok(!$('.cardstories_voter:nth(0)', column).is(':visible'), 'col 2, first vote hidden');
     
   });
+
+test("advertise", function() {
+    setup();
+    expect(2);
+    
+    var owner_id = 15;
+    var game_id = 100;
+
+    $.cardstories.ajax = function(options) {
+        equal(options.type, 'GET');
+        equal(options.url, $.cardstories.url + '?action=invite&owner_id=' + owner_id + '&game_id=' + game_id + '&player_id=player1&player_id=player2');
+    };
+
+    var element = $('#qunit-fixture .cardstories_advertise');
+    $('.cardstories_text', element).text(" \n \t player1 \n\n   \nplayer2");
+    $.cardstories.advertise(owner_id, game_id, $('#qunit-fixture .cardstories'));
+    $('.cardstories_submit', element).click();
+  });

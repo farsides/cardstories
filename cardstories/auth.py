@@ -49,14 +49,17 @@ class Auth:
         
     @defer.inlineCallbacks
     def preprocess(self, result, request):
-        for (key, value) in request.args.iteritems():
+        for (key, values) in request.args.iteritems():
             if key == 'player_id' or key == 'owner_id':
-                row = yield self.db.runQuery("SELECT id FROM players WHERE name = ?", [ value[0] ])
-                if len(row) == 0:
-                    id = yield self.db.runInteraction(self.create, value[0])
-                else:
-                    id = row[0][0]
-                request.args[key] = [ id ]
+                new_values = []
+                for value in values:
+                    row = yield self.db.runQuery("SELECT id FROM players WHERE name = ?", [ value ])
+                    if len(row) == 0:
+                        id = yield self.db.runInteraction(self.create, value)
+                    else:
+                        id = row[0][0]
+                    new_values.append(id)
+                request.args[key] = new_values
         defer.returnValue(result)
 
     @defer.inlineCallbacks

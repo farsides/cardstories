@@ -33,7 +33,7 @@ class CardstoriesService(service.Service):
     NCARDS = 36
     NPLAYERS = 6
     CARDS_PER_PLAYER = 7
-    ACTIONS = ( 'create', 'game', 'participate', 'voting', 'pick', 'vote', 'complete' )
+    ACTIONS = ( 'create', 'game', 'participate', 'voting', 'pick', 'vote', 'complete', 'invite' )
 
     def __init__(self, settings):
         self.settings = settings
@@ -71,6 +71,14 @@ class CardstoriesService(service.Service):
                 "); ")
             c.execute(
                 "CREATE UNIQUE INDEX player2game_idx ON player2game (player_id, game_id); "
+                )
+            c.execute(
+                "CREATE TABLE invitations ( "
+                "  player_id INTEGER, "
+                "  game_id INTEGER" 
+                "); ")
+            c.execute(
+                "CREATE UNIQUE INDEX invitations_idx ON invitations (player_id, game_id); "
                 )
             db.commit()
             db.close()
@@ -177,6 +185,7 @@ class CardstoriesService(service.Service):
         if transaction.rowcount == 0:
             raise no_room
         transaction.execute("INSERT INTO player2game (game_id, player_id, cards) VALUES (?, ?, ?)", [ game_id, player_id, cards[:self.CARDS_PER_PLAYER] ])
+        transaction.execute("DELETE FROM invitations WHERE game_id = ? AND player_id = ?", [ game_id, player_id ])
         return {}
 
     def participate(self, args):
@@ -193,6 +202,7 @@ class CardstoriesService(service.Service):
         rows = yield self.db.runQuery("SELECT picked FROM player2game WHERE game_id = %d AND picked IS NOT NULL ORDER BY picked" % game_id)
         board = ''.join(card for (card,) in rows)
         yield self.db.runOperation("UPDATE games SET board = ?, state = 'vote' WHERE id = %d AND owner_id = %d" % ( game_id, owner_id ), [ board ])
+        yield self.cancelInvitations(game_id)
         defer.returnValue({})
 
     @defer.inlineCallbacks
@@ -252,6 +262,17 @@ class CardstoriesService(service.Service):
         owner_id = int(args['owner_id'][0])
         game_id = int(args['game_id'][0])
         yield self.db.runInteraction(self.completeInteraction, game_id, owner_id)
+        defer.returnValue({})
+
+    def cancelInvitations(self, game_id):
+        return self.db.runQuery("DELETE FROM invitations WHERE game_id = ?", [ game_id ])
+
+    @defer.inlineCallbacks
+    def invite(self, args):
+        self.required(args, 'invite', 'owner_id', 'player_id', 'game_id')
+        game_id = args['game_id'][0]
+        for player_id in args['player_id']:
+            yield self.db.runQuery("INSERT INTO invitations (player_id, game_id) VALUES (?, ?)", [ player_id, game_id ])
         defer.returnValue({})
 
     @staticmethod

@@ -49,13 +49,13 @@
             var element = $('.cardstories_create .cardstories_write_sentence', root);
             this.set_active(root, element);
             $('.cardstories_card', element).attr('class', 'cardstories_card cardstories_card' + card + ' {card:' + card + '}');
-            $('.cardstories_submit', element).click(function() {
+            $('.cardstories_submit', element).unbind('click').click(function() {
                 var success = function(data, status) {
                     if('error' in data) {
                         $this.error(data.error);
                     } else {
                         var root = $(element).parents('.cardstories_root');
-                        $this.setTimeout(function() { $this.game(player_id, data.game_id, root); }, 30);
+                        $this.setTimeout(function() { $this.advertise(player_id, data.game_id, root); }, 30);
                     }
                 };
                 var sentence = encodeURIComponent($('.cardstories_sentence', element).val());
@@ -71,6 +71,22 @@
                     error: $this.xhr_error
                 });
             });
+        },
+
+        advertise: function(owner_id, game_id, root) {
+            var $this = this;
+            var element = $('.cardstories_advertise', root);
+            this.set_active(root, element);
+            $('.cardstories_submit', element).unbind('click').click(function() {
+                var text = $('.cardstories_text', element).val();
+                var invites = text.split(/\s+/).
+                              filter(function(s) { return s !== ''; }).
+                              map(function(s) {
+                                  return 'player_id=' + encodeURIComponent(s);
+                                });
+                
+                $this.send(owner_id, game_id, element, 'action=invite&owner_id=' + owner_id + '&game_id=' + game_id + '&' + invites.join('&'));
+              });
         },
 
         invitation: function(player_id, game, root) {
@@ -270,7 +286,7 @@
             $('.cardstories_column', element).each(function(index) {
                 if(index < cards.length) {
                   var card = cards[index];
-                  var c = 'cardstories_card cardstories_card' + card + ' {card:' + card + '}';
+                  var c = 'cardstories_card cardstories_complete_card' + card + ' {card:' + card + '}';
                   $('.cardstories_card', this).attr('class', c);
                   var player = board2player[card];
                   $('.cardstories_player', this).toggleClass('cardstories_win', player[2] == 'y');

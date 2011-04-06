@@ -82,6 +82,10 @@
 .cardstories .cardstories_create .cardstories_pick_card .cardstories_cards { position: absolute; left: 0px; bottom: 15%; }
 
 .cardstories .cardstories_create .cardstories_bubble_pick_a_card { 
+    position: absolute;
+    z-index: 1;
+    left: 5%;
+    top: 118px;
     background: transparent url('images/pick_a_card.png') no-repeat left top;
     height: 92px;
     width: 287px;
@@ -101,6 +105,11 @@
     position: absolute;
     left: 2%;
     top: 210px;
+    background-repeat: no-repeat;
+    background-color: transparent;
+    background-position: top left;
+    width: 333px;
+    height: 451px;
 }
 
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_write {
@@ -133,6 +142,37 @@
     height: 61px;
     width: 88px;
     z-index: 1;
+}
+
+/* advertise the game and invite players */
+
+.cardstories .cardstories_advertise .cardstories_frame {
+    position: absolute;
+    background: transparent url('images/invite_frame.png') no-repeat left top;
+    top: 30%;
+    left: 10%;
+    height: 379px;
+    width: 833px;
+}
+
+.cardstories .cardstories_advertise .cardstories_submit {
+    position: absolute;
+    background: transparent url('images/send_invitations.png') no-repeat left top;
+    bottom: 15%;
+    left: 5%;
+    height: 69px;
+    width: 89px;
+}
+
+.cardstories .cardstories_advertise .cardstories_text {
+    position: absolute;
+    top: 40%;
+    left: 15%;
+    border: 0px;
+}
+
+.cardstories .cardstories_advertise .cardstories_counter { 
+    background: transparent url('images/counter_3_of_4.png') no-repeat left top;
 }
 
 /* state invitation : owner */
@@ -266,6 +306,7 @@
 .cardstories .cardstories_subscribe, 
 .cardstories .cardstories_create,
 .cardstories .cardstories_create > div, 
+.cardstories .cardstories_advertise,
 .cardstories .cardstories_invitation,
 .cardstories .cardstories_invitation > div,
 .cardstories .cardstories_vote,
@@ -279,6 +320,7 @@
 .cardstories .cardstories_subscribe, 
 .cardstories .cardstories_create,
 .cardstories .cardstories_create > div,
+.cardstories .cardstories_advertise,
 .cardstories .cardstories_invitation,
 .cardstories .cardstories_invitation > div,
 .cardstories .cardstories_vote,

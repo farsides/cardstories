@@ -392,6 +392,34 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
                            'state': u'vote'}, game_info)
         # move to complete state
 
+    @defer.inlineCallbacks
+    def test09_invitation(self):
+        winner_card = 5
+        sentence = 'SENTENCE'
+        owner_id = 15
+        invited = [20,21]
+        game = yield self.service.create({ 'card': [winner_card],
+                                           'sentence': [sentence],
+                                           'owner_id': [owner_id]})
+        result = yield self.service.invite({ 'game_id': [game['game_id']],
+                                             'player_id': invited,
+                                             'owner_id': [owner_id] })
+        self.assertEquals(result, {})
+        c = self.db.cursor()
+        c.execute("SELECT * FROM invitations WHERE game_id = %d" % game['game_id'])
+        self.assertEquals(c.fetchall(), [(invited[0], game['game_id']),
+                                         (invited[1], game['game_id'])])
+        participation = yield self.service.participate({ 'player_id': [invited[0]],
+                                                         'game_id': [game['game_id']] })
+        self.assertEquals({}, participation)
+        c.execute("SELECT * FROM invitations WHERE game_id = %d" % game['game_id'])
+        self.assertEquals(c.fetchall(), [(invited[1], game['game_id'])])
+        yield self.service.voting({ 'game_id': [game['game_id']],
+                                    'owner_id': [owner_id] })
+        c.execute("SELECT * FROM invitations WHERE game_id = %d" % game['game_id'])
+        self.assertEquals(c.fetchall(), [])
+        c.close()
+        
 def Run():
     loader = runner.TestLoader()
 #    loader.methodPrefix = "test_trynow"

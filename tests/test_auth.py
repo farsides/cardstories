@@ -49,25 +49,28 @@ class AuthTest(unittest.TestCase):
     @defer.inlineCallbacks
     def test00(self):
         player = u'player@domain.com'
+        invited = u'invited@self.org'
         owner = u'owner@domain.com'
         class request:
             def __init__(self):
-                self.args = { 'player_id': [ player ], 'owner_id': [ owner ] }
+                self.args = { 'player_id': [ player, invited ], 'owner_id': [ owner ] }
         request1 = request()
         result_in = 'RESULT'
         result_out = yield self.auth.preprocess(result_in, request1)
         self.assertEquals(result_in, result_out)
         self.assertEquals(int, type(request1.args['player_id'][0]))
+        self.assertEquals(int, type(request1.args['player_id'][1]))
         self.assertEquals(int, type(request1.args['owner_id'][0]))
         self.assertNotEquals(request1.args['player_id'], request1.args['owner_id'])
         request2 = request()
         result_in = 'RESULT'
         result_out = yield self.auth.preprocess(result_in, request2)
         self.assertEquals(request1.args['player_id'][0], request2.args['player_id'][0])
+        self.assertEquals(request1.args['player_id'][1], request2.args['player_id'][1])
         self.assertEquals(request1.args['owner_id'][0], request2.args['owner_id'][0])
         c = self.db.cursor()
         c.execute("SELECT id FROM players")
-        self.assertEquals([(1,),(2,)], c.fetchall())
+        self.assertEquals([(1,),(2,),(3,)], c.fetchall())
 
         result_in = { 'players': [ [ request1.args['player_id'][0] ],
                                    [ request1.args['owner_id'][0] ]
