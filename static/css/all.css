@@ -217,10 +217,51 @@
     width: 130px;
 }
 
-.cardstories_card { background-repeat: no-repeat; width: 333px; height: 451px; }
+/* state complete */
+
+.cardstories .cardstories_complete {
+    background: transparent url('images/vote_wall.png') no-repeat 60px bottom;
+}
+
+.cardstories .cardstories_complete .cardstories_votes {
+    margin-top: 25%;
+    margin-left: 20%;
+}
+
+.cardstories .cardstories_complete .cardstories_column {
+    width: 120px;
+    display: inline-block;
+    vertical-align: top;
+}
+
+.cardstories .cardstories_complete .cardstories_column .cardstories_card {
+    background-repeat: no-repeat;
+    background-color: transparent;
+    background-position: center center;
+    wdith: 100px;
+    height: 135px;
+    margin-bottom: 5px;
+}
+
+.cardstories .cardstories_complete .cardstories_column .cardstories_player {
+    background: transparent url('images/complete_other_card_bubble.png') no-repeat center center;
+    height: 50px;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.cardstories .cardstories_complete .cardstories_column .cardstories_voter {
+    background: transparent url('images/complete_player.png') no-repeat center center;
+    height: 43px;
+    margin-bottom: 5px;
+}
+
+.cardstories_complete .cardstories_player.cardstories_win {
+    border: 3px solid #567300;
+}
+
 .cardstories_vote .cardstories_picked { border: 3px solid #567300; }
 .cardstories_vote .cardstories_voted { border: 3px solid #ff0000; }
-.cardstories_complete .cardstories_player.cardstories_win { border: 3px solid #567300; }
 
 .cardstories .cardstories_subscribe, 
 .cardstories .cardstories_create,

@@ -251,17 +251,48 @@
             var element = $('.cardstories_complete', root);
             this.set_active(root, element);
             $('.cardstories_sentence', element).text(game.sentence);
-            $('.cardstories_card', element).attr('class', 'cardstories_card cardstories_card' + game.winner_card + ' {card:' + game.winner_card + '}');
-            $('.cardstories_player', element).each(function(index) {
-                if(index < game.players.length) {
-                  var player = game.players[index];
-                  $(this).toggleClass('cardstories_win', player[2] == 'y');
-                  $(this).text(player[0]);
+            var i;
+            var board2voters = {};
+            for(i = 0; i < game.board.length; i++) {
+              board2voters[game.board[i]] = [];
+            }
+            var board2player = {};
+            for(i = 0; i < game.players.length; i++) {
+              var vote = game.players[i][1];
+              var picked = game.players[i][3];
+              var voters = board2voters[vote];
+              if(voters !== undefined) {
+                voters.push(game.players[i][0]);
+              }
+              board2player[picked] = game.players[i];
+            }
+            var cards = game.board;
+            $('.cardstories_column', element).each(function(index) {
+                if(index < cards.length) {
+                  var card = cards[index];
+                  var c = 'cardstories_card cardstories_card' + card + ' {card:' + card + '}';
+                  $('.cardstories_card', this).attr('class', c);
+                  var player = board2player[card];
+                  $('.cardstories_player', this).toggleClass('cardstories_win', player[2] == 'y');
+                  $('.cardstories_player', this).text(player[0]);
+                  var voters = board2voters[card];
+                  if(voters !== undefined) {
+                    $('.cardstories_voter', this).each(function(voter_index) {
+                        if(voters.length > voter_index) {
+                          $(this).text(voters[voter_index]);
+                          $(this).show();
+                        } else {
+                          $(this).hide();
+                        }
+                      });
+                  } else {
+                    $('.cardstories_voter', this).hide();
+                  }
                   $(this).show();
                 } else {
                   $(this).hide();
                 }
-              });
+            });
         },
 
         send: function(player_id, game_id, element, query, data) {

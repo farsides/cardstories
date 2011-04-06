@@ -134,7 +134,7 @@ class CardstoriesService(service.Service):
                 player_cards = [ ord(c) for c in player[1] ]
             else:
                 player_cards = None
-            if player[2] != None and ( player[0] == player_id or owner_id == player_id ):
+            if player[2] != None and ( state == 'complete' or player[0] == player_id or owner_id == player_id ):
                 picked = ord(player[2])
             else:
                 picked = None
