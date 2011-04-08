@@ -420,9 +420,109 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         self.assertEquals(c.fetchall(), [])
         c.close()
         
+    @defer.inlineCallbacks
+    def test10_lobby(self):
+        player1 = 10
+        player2 = 11
+        game1 = 100
+        sentence1 = 'SENTENCE1'
+        game2 = 101
+        sentence2 = 'SENTENCE2'
+        game3 = 102
+        sentence3 = 'SENTENCE3'
+        game4 = 103
+        sentence4 = 'SENTENCE4'
+        c = self.db.cursor()
+        # in progress
+        c.execute("INSERT INTO games ( id, owner_id, sentence, state, created ) VALUES ( %d, %d, '%s', 'invitation', '2011-02-01' )" % ( game1, player2, sentence1 )) 
+        c.execute("INSERT INTO invitations ( player_id, game_id ) VALUES ( %d, %d )" % ( player1, game1 ))
+        c.execute("INSERT INTO player2game ( player_id, game_id ) VALUES ( %d, %d )" % ( player2, game1 ))
+
+        c.execute("INSERT INTO games ( id, owner_id, sentence, state, created ) VALUES ( %d, %d, '%s', 'invitation', '2011-05-01' )" % ( game2, player1, sentence2 )) 
+        c.execute("INSERT INTO player2game ( player_id, game_id, win ) VALUES ( %d, %d, 'n' )" % ( player1, game2 ))
+        # complete
+        c.execute("INSERT INTO games ( id, owner_id, sentence, state, created ) VALUES ( %d, %d, '%s', 'complete', '2011-03-01' )" % ( game3, player1, sentence3 )) 
+        c.execute("INSERT INTO player2game ( player_id, game_id, win ) VALUES ( %d, %d, 'y' )" % ( player1, game3 ))
+
+        c.execute("INSERT INTO games ( id, owner_id, sentence, state, created ) VALUES ( %d, %d, '%s', 'complete', '2011-06-01' )" % ( game4, player2, sentence4 )) 
+        c.close()
+        self.db.commit()
+        #
+        # Show all games, in progress, with wins from player2.
+        #
+        result = yield self.service.lobby({ 'in_progress': ['true'],
+                                            'player_id': [player2] })
+        # game2 shows before game1 because it is created before
+        self.assertEquals(result, {
+                #         player2 does not participate in game2
+                'games': [(101, u'SENTENCE2', u'invitation', 0, u'2011-05-01'),
+                #         player2 participates in game1 and is the author
+                          (100, u'SENTENCE1', u'invitation', 1, u'2011-02-01')],
+                #         player2 did not yet win game1
+                'win': {100: u'n'}
+                })
+
+        #
+        # Show player2 games, in progress, with wins from player2.
+        #
+        result = yield self.service.lobby({ 'in_progress': ['true'],
+                                            'player_id': [player2],
+                                            'my': ['true'] })
+        self.assertEquals(result, {
+                #         player2 participates in game1 and is the author
+                'games': [(100, u'SENTENCE1', u'invitation', 1, u'2011-02-01')],
+                #         player2 does not participate in game2 therefore it is not shown
+                #         player2 did not yet win game1
+                'win': {100: u'n'}
+                })
+
+        #
+        # Show all games, complete, with wins from player1.
+        #
+        result = yield self.service.lobby({ 'in_progress': ['false'],
+                                            'player_id': [player1] })
+        # game4 shows before game3 because it is created before
+        self.assertEquals(result, {
+                #         player1 did not participate in game3
+                'games': [(103, u'SENTENCE4', u'complete', 0, u'2011-06-01'),
+                #         player1 participated in game3 and was the author
+                          (102, u'SENTENCE3', u'complete', 1, u'2011-03-01')],
+                #         player1 won game3
+                'win': {102: u'y'}
+                })
+
+        #
+        # Show player1 games, complete, with wins from player1.
+        #
+        result = yield self.service.lobby({ 'in_progress': ['false'],
+                                            'player_id': [player1],
+                                            'my': ['true']})
+        self.assertEquals(result, {
+                #         player1 participated in game3 and was the author
+                'games': [(102, u'SENTENCE3', u'complete', 1, u'2011-03-01')],
+                #         player1 did not participate in game3
+                #         player1 won game3
+                'win': {102: u'y'}
+                })
+
+        #
+        # Show player1 games, in progress, with wins from player1.
+        #
+        result = yield self.service.lobby({ 'in_progress': ['true'],
+                                            'player_id': [player1],
+                                            'my': ['true']})
+        self.assertEquals(result, {
+                #         player1 participates in game2 and was the author
+                'games': [(101, u'SENTENCE2', u'invitation', 1, u'2011-05-01'),
+                #         player1 was invited to game1
+                          (100, u'SENTENCE1', u'invitation', 0, u'2011-02-01')],
+                #         player1 won game3
+                'win': {101: u'n'}
+                })
+
 def Run():
     loader = runner.TestLoader()
-#    loader.methodPrefix = "test_trynow"
+#    loader.methodPrefix = "test10_"
     suite = loader.suiteFactory()
     suite.addTest(loader.loadClass(CardstoriesServiceTestInit))
     suite.addTest(loader.loadClass(CardstoriesServiceTest))

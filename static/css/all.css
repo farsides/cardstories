@@ -144,6 +144,90 @@
     z-index: 1;
 }
 
+/* lobby */
+
+.cardstories .cardstories_lobby .cardstories_tab {
+    position: absolute;
+    top: 230px;
+    left: 130px;
+    height: 81px;
+    width: 208px;
+}
+
+.cardstories .cardstories_lobby .cardstories_template {
+     display: none;
+}
+
+.cardstories .cardstories_lobby .cardstories_lobby_owner {
+    background: transparent url('images/lobby_owner.png') no-repeat left top;
+    width: 95px;
+    height: 33px;
+}
+    
+.cardstories .cardstories_lobby .cardstories_lobby_player {
+    background: transparent url('images/lobby_player.png') no-repeat left top;
+    width: 85px;
+    height: 33px;
+}
+    
+/* lobby for in progress games */
+
+.cardstories .cardstories_lobby .cardstories_in_progress {
+    background: transparent url('images/in_progress_background.png') no-repeat 100px 260px;
+}
+
+.cardstories .cardstories_lobby .cardstories_in_progress .cardstories_tab_in_progress {
+    background: transparent url('images/in_progress.png') no-repeat left top;
+}
+
+.cardstories .cardstories_lobby .cardstories_in_progress .cardstories_start_story {
+    position: absolute;
+    background: transparent url('images/start_story.png') no-repeat left top;
+    top: 215px;
+    right: 130px;
+    height: 89px;
+    width: 140px;
+}
+
+.cardstories .cardstories_lobby .cardstories_in_progress .cadrstories_games_display {
+    position: relative;
+    width: 800px;
+    height: 300px;
+    left: 110px;
+    top: 310px;
+}
+
+.cardstories .cardstories_lobby .cardstories_in_progress .cardstories_games {
+}
+
+/* lobby for finished games */
+
+.cardstories .cardstories_lobby .cardstories_finished {
+    background: transparent url('images/finished_background.png') no-repeat 100px 260px;
+}
+
+.cardstories .cardstories_lobby .cardstories_finished .cardstories_tab_finished {
+    background: transparent url('images/in_progress.png') no-repeat left top;
+}
+
+.cardstories .cardstories_lobby .cardstories_finished .cardstories_start_story {
+    position: absolute;
+    background: transparent url('images/start_story.png') no-repeat left top;
+    top: 330px;
+    right: 150px;
+    height: 89px;
+    width: 140px;
+}
+
+.cardstories .cardstories_lobby .cardstories_finished .cardstories_invite {
+    position: absolute;
+    background: transparent url('images/lobby_invite.png') no-repeat left top;
+    top: 480px;
+    right: 150px;
+    height: 117px;
+    width: 126px;
+}
+
 /* advertise the game and invite players */
 
 .cardstories .cardstories_advertise .cardstories_frame {
@@ -304,6 +388,8 @@
 .cardstories_vote .cardstories_voted { border: 3px solid #ff0000; }
 
 .cardstories .cardstories_subscribe, 
+.cardstories .cardstories_lobby,
+.cardstories .cardstories_lobby > div,
 .cardstories .cardstories_create,
 .cardstories .cardstories_create > div, 
 .cardstories .cardstories_advertise,
@@ -318,6 +404,8 @@
  }
 
 .cardstories .cardstories_subscribe, 
+.cardstories .cardstories_lobby,
+.cardstories .cardstories_lobby > div,
 .cardstories .cardstories_create,
 .cardstories .cardstories_create > div,
 .cardstories .cardstories_advertise,

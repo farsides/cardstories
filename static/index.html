@@ -81,6 +81,46 @@
           </div>
 	</div>
 
+	<div class="cardstories_lobby">
+          <div class="cardstories_in_progress">
+            <div class="cardstories_tab cardstories_tab_in_progress"></div>
+            <div class="cardstories_start_story"></div>
+            <div class="cadrstories_games_display">
+              <table class="cardstories_template">
+                <tbody>
+                  <tr>
+                    <td><div class="cardstories_lobby_role {role}"></div></td>
+                    <td><div class="cardstories_lobby_state">{state}</div></td>
+                    <td><div class="cardstories_lobby_sentence" data="{game_id:{game_id}}">{sentence}</div></td>
+                  </tr>
+                </tbody>
+              </table>
+              <table class="cardstories_games tablesorter {widthFixed: true, sortlist: []}" cellspacing="1">
+                <thead><tr><th>ROLE</th><th>SATUS</th><th>STORY</th></tr></thead>
+                <tbody></tbody>
+              </table>
+              <div class="cardstories_pager pager"> 
+	        <form> 
+	          <span class="first">first</span>  
+	          <span class="prev">prev</span>  
+	          <span class="next">next</span>  
+	          <span class="last">last</span>  
+	          <select class="pagesize">  
+	            <option selected="selected" value="5">5</option>  
+	            <option value="20">20</option>  
+	            <option value="100">100</option>  
+                  </select>  
+                </form> 
+              </div> 
+            </div>
+          </div>
+          <div class="cardstories_finished">
+            <div class="cardstories_tab cardstories_tab_finished"></div>
+            <div class="cardstories_start_story"></div>
+            <div class="cardstories_invite"></div>
+          </div>
+        </div>
+
 	<div class="cardstories_advertise">
           <div class="cardstories_counter"></div>
           <div class="cardstories_frame"></div>

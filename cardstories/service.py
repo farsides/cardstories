@@ -33,7 +33,7 @@ class CardstoriesService(service.Service):
     NCARDS = 36
     NPLAYERS = 6
     CARDS_PER_PLAYER = 7
-    ACTIONS = ( 'create', 'game', 'participate', 'voting', 'pick', 'vote', 'complete', 'invite' )
+    ACTIONS = ( 'create', 'game', 'participate', 'voting', 'pick', 'vote', 'complete', 'invite', 'lobby' )
 
     def __init__(self, settings):
         self.settings = settings
@@ -288,6 +288,33 @@ class CardstoriesService(service.Service):
             if not args.has_key(key):
                 raise UserWarning, '%s must be given a %s value' % ( method, key )
         return True
+
+    @defer.inlineCallbacks
+    def lobby(self, args):
+        self.required(args, 'lobby', 'player_id', 'in_progress')
+        if args['in_progress'][0] == 'true':
+            complete = 'state != "complete"'
+        else:
+            complete = 'state = "complete"'
+        order = " ORDER BY created DESC"
+        if args.has_key('my') and args['my'][0] == 'true':
+            sql =  ""
+            sql += " SELECT id, sentence, state, owner_id = player_id, created FROM games, player2game WHERE player2game.player_id = ? AND " + complete + " AND games.id = player2game.game_id"
+            sql += " UNION "
+            sql += " SELECT id, sentence, state, owner_id = player_id, created FROM games, invitations WHERE invitations.player_id = ? AND " + complete + " AND games.id = invitations.game_id"
+            sql += order
+            games = yield self.db.runQuery(sql, [ args['player_id'][0], args['player_id'][0] ])
+        else:
+            sql = "SELECT id, sentence, state, owner_id = ?, created FROM games WHERE " + complete
+            sql += order
+            games = yield self.db.runQuery(sql, [ args['player_id'][0] ])
+        sql = "SELECT id, win FROM games, player2game WHERE player2game.player_id = ? AND " + complete + " AND games.id = player2game.game_id"
+        rows = yield self.db.runQuery(sql, [ args['player_id'][0] ])
+        wins = {}
+        for row in rows:
+            wins[row[0]] = row[1]
+        defer.returnValue({'games': games,
+                           'win': wins})
 
     def handle(self, args):
         if not args.has_key('action'):
