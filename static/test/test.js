@@ -17,9 +17,17 @@
 module("cardstories");
 
 function setup() {
-    $.cardstories.setTimeout = function(cb, delay) { return window.setTimeout(cb, delay); };
-    $.cardstories.ajax = function(o) { return jQuery.ajax(o); };
+    $.cardstories.setTimeout = function(cb, delay) { console.log("timeout"); return window.setTimeout(cb, delay); };
+    $.cardstories.ajax = function(o) { throw o; };
+    $.cardstories.reload = $.cardstories.game_or_lobby;
+    $.cardstories.confirm_participate = true;
 }
+
+test("permalink", function() {
+    expect(2);
+    equal($.cardstories.permalink(5), '?player_id=5');
+    equal($.cardstories.permalink(6, 7), '?player_id=6&game_id=7');
+  });
 
 test("subscribe", function() {
     setup();
@@ -27,6 +35,7 @@ test("subscribe", function() {
 
     var player_id = 'PLAYER';
     var game_id = undefined;
+    $.cookie('CARDSTORIES_ID', null);
     equal($('#qunit-fixture .cardstories_subscribe.cardstories_active').length, 0);
     $.cardstories.name(game_id, $('#qunit-fixture .cardstories'));
     equal($('#qunit-fixture .cardstories_subscribe.cardstories_active').length, 1);
@@ -241,7 +250,7 @@ test("invitation_pick", function() {
 
 test("invitation_participate", function() {
     setup();
-    expect(5);
+    expect(7);
 
     var player_id = 15;
     var game_id = 101;
@@ -263,6 +272,9 @@ test("invitation_participate", function() {
     equal($('#qunit-fixture .cardstories_invitation .cardstories_participate.cardstories_active').length, 1);
     equal($('#qunit-fixture .cardstories_participate .cardstories_sentence').text(), sentence);
     $('#qunit-fixture .cardstories_participate .cardstories_submit').click();
+    $.cardstories.confirm_participate = false;
+    $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
+    $.cardstories.confirm_participate = true;
 });
 
 test("widget invitation", function() {
@@ -485,9 +497,9 @@ test("advertise", function() {
     $('.cardstories_submit', element).click();
   });
 
-test("lobbyInProgress", function() {
+test("lobbyGames", function() {
     setup();
-    expect(29);
+    expect(24);
 
     var player_id = 10;
     var game1 = 100;
@@ -500,20 +512,12 @@ test("lobbyInProgress", function() {
                            [game2, sentence2, 'vote', 1],
                            [game3, sentence3, 'invitation', 0]
                           ],
-                 'wins': {}
+                 'win': {}
                 };
-    games.wins[game1] = 'n';
-    games.wins[game2] = 'n';
-    equal($('#qunit-fixture .cardstories_lobby .cardstories_in_progress.cardstories_active').length, 0, 'in_progress not active');
-    $.cardstories.lobbyInProgress(player_id, games, $('#qunit-fixture .cardstories'));
-    equal($('#qunit-fixture .cardstories_lobby .cardstories_in_progress.cardstories_active').length, 1, 'in_progress active');
-    var element = $('#qunit-fixture .cardstories_in_progress');
-    // lobby tab
-    $.cardstories.ajax = function(options) {
-        equal(options.type, 'GET');
-        equal(options.url, $.cardstories.url + '?action=lobby&player_id=' + player_id + '&in_progress=false&my=true');
-    };
-    $('.cardstories_tab', element).click();
+    games.win[game1] = 'n';
+    games.win[game2] = 'y';
+    $.cardstories.lobbyGames(player_id, games, $('#qunit-fixture .cardstories .cardstories_games_test'), $('#qunit-fixture .cardstories'));
+    var element = $('#qunit-fixture .cardstories_games_test');
     // list of games
     ok($('.cardstories_games tbody tr:nth(0)', element).is(':visible'), 'first row is visible');
     ok($('.cardstories_games tbody tr:nth(1)', element).is(':visible'), 'second row is visible');
@@ -522,6 +526,7 @@ test("lobbyInProgress", function() {
     var first = $('.cardstories_games tbody tr:nth(0)', element);
     ok($('.cardstories_lobby_role', first).hasClass('cardstories_lobby_player'), 'role player');
     equal($('.cardstories_lobby_state', first).text(), 'invitation');
+    equal($('.cardstories_lobby_win', first).text(), 'n');
     equal($('.cardstories_lobby_sentence', first).text(), sentence1);
     equal($('.cardstories_lobby_sentence', first).metadata({type: "attr", name: "data"}).game_id, game1);
     $.cardstories.ajax = function(options) {
@@ -532,6 +537,7 @@ test("lobbyInProgress", function() {
     var second = $('.cardstories_games tbody tr:nth(1)', element);
     ok($('.cardstories_lobby_role', second).hasClass('cardstories_lobby_owner'), 'role owner');
     equal($('.cardstories_lobby_state', second).text(), 'vote');
+    equal($('.cardstories_lobby_win', second).text(), 'y');
     equal($('.cardstories_lobby_sentence', second).text(), sentence2);
     equal($('.cardstories_lobby_sentence', second).metadata({type: "attr", name: "data"}).game_id, game2);
     $.cardstories.ajax = function(options) {
@@ -557,9 +563,65 @@ test("lobbyInProgress", function() {
     // go to previous page
     $('.cardstories_pager .prev', element).click();
     equal($('.cardstories_games tbody tr:nth(0) .cardstories_lobby_sentence', element).text(), sentence1);
+  });
+
+test("lobbyInProgress", function() {
+    setup();
+    expect(8);
+
+    var player_id = 10;
+    var game1 = 100;
+    var sentence1 = 'sentence1';
+    var games = {'games': [[game1, sentence1, 'invitation', 0]
+                          ],
+                 'win': {}
+                };
+    equal($('#qunit-fixture .cardstories_lobby .cardstories_in_progress.cardstories_active').length, 0, 'in_progress not active');
+    $.cardstories.lobbyInProgress(player_id, games, $('#qunit-fixture .cardstories'));
+    equal($('#qunit-fixture .cardstories_lobby .cardstories_in_progress.cardstories_active').length, 1, 'in_progress active');
+    var element = $('#qunit-fixture .cardstories_in_progress');
+    // lobby tab
+    $.cardstories.ajax = function(options) {
+        equal(options.type, 'GET');
+        equal(options.url, $.cardstories.url + '?action=lobby&player_id=' + player_id + '&in_progress=false&my=true');
+    };
+    $('.cardstories_tab', element).click();
+    // list of games
+    ok($('.cardstories_games tbody tr', element).length > 0, 'rows were inserted');
     // create game
     equal($('#qunit-fixture .cardstories_create .cardstories_pick_card.cardstories_active').length, 0, 'pick_card not active');
     $('.cardstories_start_story', element).click();
     equal($('#qunit-fixture .cardstories_lobby .cardstories_in_progress.cardstories_active').length, 0, 'in_progress not active');
+    equal($('#qunit-fixture .cardstories_create .cardstories_pick_card.cardstories_active').length, 1, 'pick_card active');
+  });
+
+test("lobbyFinished", function() {
+    setup();
+    expect(8);
+
+    var player_id = 10;
+    var game1 = 100;
+    var sentence1 = 'sentence1';
+    var games = {'games': [[game1, sentence1, 'complete', 0]
+                          ],
+                 'win': {}
+                };
+    games.win[game1] = 'y';
+    equal($('#qunit-fixture .cardstories_lobby .cardstories_finished.cardstories_active').length, 0, 'finished not active');
+    $.cardstories.lobbyFinished(player_id, games, $('#qunit-fixture .cardstories'));
+    equal($('#qunit-fixture .cardstories_lobby .cardstories_finished.cardstories_active').length, 1, 'finished active');
+    var element = $('#qunit-fixture .cardstories_finished');
+    // lobby tab
+    $.cardstories.ajax = function(options) {
+        equal(options.type, 'GET');
+        equal(options.url, $.cardstories.url + '?action=lobby&player_id=' + player_id + '&in_progress=true&my=true');
+    };
+    $('.cardstories_tab', element).click();
+    // list of games
+    ok($('.cardstories_games tbody tr', element).length > 0, 'rows were inserted');
+    // create game
+    equal($('#qunit-fixture .cardstories_create .cardstories_pick_card.cardstories_active').length, 0, 'pick_card not active');
+    $('.cardstories_start_story', element).click();
+    equal($('#qunit-fixture .cardstories_lobby .cardstories_finished.cardstories_active').length, 0, 'finished not active');
     equal($('#qunit-fixture .cardstories_create .cardstories_pick_card.cardstories_active').length, 1, 'pick_card active');
   });

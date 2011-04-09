@@ -94,7 +94,7 @@ class CardstoriesService(service.Service):
         cards = [ chr(x) for x in range(1, self.NCARDS + 1) ]
         cards.remove(card)
         random.shuffle(cards)
-        transaction.execute("INSERT INTO games (sentence, cards, board, owner_id, created) VALUES (?, ?, ?, ?, date('now'))", [sentence, ''.join(cards), card, owner_id])
+        transaction.execute("INSERT INTO games (sentence, cards, board, owner_id, created) VALUES (?, ?, ?, ?, datetime('now'))", [sentence, ''.join(cards), card, owner_id])
         game_id = transaction.lastrowid
         transaction.execute("INSERT INTO player2game (game_id, player_id, cards, picked) VALUES (?, ?, ?, ?)", [ game_id, owner_id, card, card ])
         return game_id
@@ -253,7 +253,7 @@ class CardstoriesService(service.Service):
         transaction.execute("UPDATE player2game SET win = 'y' WHERE "
                             "  game_id = %d AND " % game_id + 
                             "  player_id IN ( %s ) " % ','.join([ str(id) for id in winners ]))
-        transaction.execute("UPDATE games SET completed = date('now'), state = 'complete' WHERE id = %d" % game_id)
+        transaction.execute("UPDATE games SET completed = datetime('now'), state = 'complete' WHERE id = %d" % game_id)
         return {}
 
     @defer.inlineCallbacks
