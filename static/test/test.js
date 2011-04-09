@@ -60,7 +60,7 @@ test("widget subscribe", function() {
     equal($('#qunit-fixture .cardstories_subscribe.cardstories_active').length, 1);
 });
 
-test("sendGame get", function() {
+test("send_game get", function() {
     setup();
     expect(5);
     stop();
@@ -83,10 +83,10 @@ test("sendGame get", function() {
     };
 
     $('#qunit-fixture .cardstories').addClass('cardstories_root');
-    $.cardstories.sendGame(player_id, game_id, $('#qunit-fixture .cardstories_create'), 'QUERY');
+    $.cardstories.send_game(player_id, game_id, $('#qunit-fixture .cardstories_create'), 'QUERY');
 });
 
-test("sendGame post", function() {
+test("send_game post", function() {
     setup();
     expect(6);
     stop();
@@ -110,7 +110,7 @@ test("sendGame post", function() {
     };
 
     $('#qunit-fixture .cardstories').addClass('cardstories_root');
-    $.cardstories.sendGame(player_id, game_id, $('#qunit-fixture .cardstories_create'), 'QUERY', 'DATA');
+    $.cardstories.send_game(player_id, game_id, $('#qunit-fixture .cardstories_create'), 'QUERY', 'DATA');
 });
 
 test("create", function() {
@@ -497,7 +497,7 @@ test("advertise", function() {
     $('.cardstories_submit', element).click();
   });
 
-test("lobbyGames", function() {
+test("lobby_games", function() {
     setup();
     expect(24);
 
@@ -516,7 +516,7 @@ test("lobbyGames", function() {
                 };
     games.win[game1] = 'n';
     games.win[game2] = 'y';
-    $.cardstories.lobbyGames(player_id, games, $('#qunit-fixture .cardstories .cardstories_games_test'), $('#qunit-fixture .cardstories'));
+    $.cardstories.lobby_games(player_id, games, $('#qunit-fixture .cardstories .cardstories_games_test'), $('#qunit-fixture .cardstories'));
     var element = $('#qunit-fixture .cardstories_games_test');
     // list of games
     ok($('.cardstories_games tbody tr:nth(0)', element).is(':visible'), 'first row is visible');
@@ -565,7 +565,7 @@ test("lobbyGames", function() {
     equal($('.cardstories_games tbody tr:nth(0) .cardstories_lobby_sentence', element).text(), sentence1);
   });
 
-test("lobbyInProgress", function() {
+test("lobby_in_progress", function() {
     setup();
     expect(8);
 
@@ -577,7 +577,7 @@ test("lobbyInProgress", function() {
                  'win': {}
                 };
     equal($('#qunit-fixture .cardstories_lobby .cardstories_in_progress.cardstories_active').length, 0, 'in_progress not active');
-    $.cardstories.lobbyInProgress(player_id, games, $('#qunit-fixture .cardstories'));
+    $.cardstories.lobby_in_progress(player_id, games, $('#qunit-fixture .cardstories'));
     equal($('#qunit-fixture .cardstories_lobby .cardstories_in_progress.cardstories_active').length, 1, 'in_progress active');
     var element = $('#qunit-fixture .cardstories_in_progress');
     // lobby tab
@@ -595,7 +595,7 @@ test("lobbyInProgress", function() {
     equal($('#qunit-fixture .cardstories_create .cardstories_pick_card.cardstories_active').length, 1, 'pick_card active');
   });
 
-test("lobbyFinished", function() {
+test("lobby_finished", function() {
     setup();
     expect(8);
 
@@ -608,7 +608,7 @@ test("lobbyFinished", function() {
                 };
     games.win[game1] = 'y';
     equal($('#qunit-fixture .cardstories_lobby .cardstories_finished.cardstories_active').length, 0, 'finished not active');
-    $.cardstories.lobbyFinished(player_id, games, $('#qunit-fixture .cardstories'));
+    $.cardstories.lobby_finished(player_id, games, $('#qunit-fixture .cardstories'));
     equal($('#qunit-fixture .cardstories_lobby .cardstories_finished.cardstories_active').length, 1, 'finished active');
     var element = $('#qunit-fixture .cardstories_finished');
     // lobby tab

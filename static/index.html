@@ -17,6 +17,20 @@
 	<script type="text/javascript" src="js/jquery.query-2.1.7.js"></script>
 </head>
 <body>
+      <div class="cardstories_skin" style="display: none">
+        <a href="?skin=advertise">advertise</a>
+        <a href="?skin=in_progress">in_progress</a>
+        <a href="?skin=finished">finished</a>
+        <a href="?skin=create_pick_card">create_pick_card</a>
+        <a href="?skin=create_write_sentence">create_write_sentence</a>
+        <a href="?skin=invitation_owner">invitation_owner</a>
+        <a href="?skin=invitation_pick">invitation_pick</a>
+        <a href="?skin=vote_voter">vote_voter</a>
+        <a href="?skin=vote_viewer">vote_viewer</a>
+        <a href="?skin=vote_owner">vote_owner</a>
+        <a href="?skin=complete">complete</a>
+        <a href="?skin=name">name</a>
+      </div>
       <div class="cardstories">
         <div class="cardstories_logo"></div>
         <div class="cardstories_line cardstories_line_top"></div>
@@ -294,6 +308,7 @@
       <script>
         var skin = $.query.get('skin');
         if(skin !== '') {
+          $('.cardstories_skin').show();
           $.cardstories.skin(skin, $('.cardstories'));
         } else {
           $('.cardstories').cardstories($.query.get('player_id'), $.query.get('game_id'));
