@@ -16,9 +16,9 @@
 # along with this program in a file in the toplevel directory called
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
-import sys
-sys.path.insert(0, "..") # so that for M-x pdb works
 import os
+import sys
+sys.path.insert(0, os.path.abspath("..")) # so that for M-x pdb works
 
 from twisted.trial import unittest, runner, reporter
 from twisted.internet import defer
@@ -28,7 +28,7 @@ from twisted.python import filepath
 from twisted.web.test.test_web import DummyRequest
 from twisted.web.test._util import _render
 
-from cardstories.site import CardstoriesResource, CardstoriesTree
+from cardstories.site import CardstoriesResource, CardstoriesTree, AGPLResource
 
 class CardstoriesServiceMockup:
     def __init__(self):
@@ -39,10 +39,12 @@ class CardstoriesServiceMockup:
 class CardstoriesSiteTest(unittest.TestCase):
 
     class Transport:
+        host = None
+
         def getPeer(self):
             return None
         def getHost(self):
-            return None
+            return self.host
 
     class Channel:
         def __init__(self, site):
@@ -127,11 +129,51 @@ class CardstoriesSiteTest(unittest.TestCase):
         request.method = 'POST'
         self.assertEquals('handle', resource.handle(True, request))
 
+class AGPLResourceTest(unittest.TestCase):
+
+    def setUp(self):
+        if os.path.exists('cardstories.zip'):
+            os.unlink('cardstories.zip')
+        self.service = CardstoriesServiceMockup()
+
+    def tearDown(self):
+        if hasattr(self, 'site'):
+            self.site.stopFactory()
+
+    def test00_render(self):
+        self.site = server.Site(CardstoriesTree(self.service))
+        r = server.Request(CardstoriesSiteTest.Channel(self.site), True)
+        r.site = r.channel.site
+        input = ''
+        r.gotLength(len(input))
+        r.handleContentChunk(input)
+        r.queued = 0
+        d = r.notifyFinish()
+        def finish(result):
+            self.assertSubstring('302 Found', r.transport.getvalue())
+            self.assertSubstring('static/cardstories.zip', r.transport.getvalue())
+        d.addCallback(finish)
+        r.setHost('localhost', 8492) # redirect will use it
+        r.channel.transport.host = r.host
+        r.requestReceived('GET', '/agpl', '')
+        return d
+
+    def test01_agpl(self):
+        import cardstories
+        import zipfile
+        self.assertFalse(os.path.exists('cardstories.zip'))
+        r = AGPLResource('.', 'location', cardstories)
+        r.update()
+        self.assertTrue(os.path.exists('cardstories.zip'))
+        a = zipfile.ZipFile('cardstories.zip')
+        self.assertEquals(a.getinfo('__init__.py').filename, '__init__.py')
+
 def Run():
     loader = runner.TestLoader()
 #    loader.methodPrefix = "test_trynow"
     suite = loader.suiteFactory()
-    suite.addTest(loader.loadClass(CardstoriesSiteTest))
+#    suite.addTest(loader.loadClass(CardstoriesSiteTest))
+    suite.addTest(loader.loadClass(AGPLResourceTest))
 
     return runner.TrialRunner(
         reporter.VerboseTextReporter,

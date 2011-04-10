@@ -18,13 +18,29 @@
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
 
+import os, re
 from distutils.core import setup
+
+data_files = []
+for dirpath, dirnames, filenames in os.walk('static'):
+	    # Ignore dirnames that start with '.'
+	    for i, dirname in enumerate(dirnames):
+	        if dirname.startswith('.'): del dirnames[i]
+                if dirname == 'mockups': del dirnames[i]
+	    if filenames:
+                filenames = filter(lambda f: re.match('.*.(css|js|html|png)$', f), filenames)
+	        data_files.append(['/usr/share/cardstories/' + dirpath.replace('static',''), [os.path.join(dirpath, f) for f in filenames]])
+
+data_files.append(['/etc/default', ['etc/default/cardstories']])
+data_files.append(['/etc/cardstories/twisted/plugins', ['etc/cardstories/twisted/plugins/twisted_cardstories.py']])
 
 setup(name='cardstories',
       version='1.0.0',
-      description='A game where each player tries to guess a card',
+      requires=['twisted (>=10.2.0)'],
+      description='Find out a card using a sentence made up by another player',
       author='Loic Dachary',
       author_email='loic@dachary.org',
       url='http://cardstories.dachary.org/',
       license='GNU AGPLv3+',
+      data_files=data_files,
       packages=['cardstories'])

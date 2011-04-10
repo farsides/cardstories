@@ -17,8 +17,9 @@
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
 import json
-from twisted.web import server, resource, static, http
+from twisted.web import server, resource, static, http, util
 from twisted.internet import defer
+from twisted.python import urlpath
 
 from cardstories.auth import Auth
 
@@ -27,13 +28,14 @@ class CardstoriesResource(resource.Resource):
     def __init__(self, service):
         resource.Resource.__init__(self)
         self.service = service
-        if service.settings.get('auth'):
-            self.auth = Auth(service.settings)
-        else:
-            self.auth = None
         self.isLeaf = True
 
     def render(self, request):
+        if not hasattr(self, 'auth'):
+            if self.service.settings.get('auth'):
+                self.auth = Auth(self.service.settings)
+            else:
+                self.auth = None
         self.wrap_http(request)
         return server.NOT_DONE_YET
 
@@ -55,10 +57,10 @@ class CardstoriesResource(resource.Resource):
             request.write(content)
             request.finish()
 
-        if self.auth:
+        if hasattr(self, 'auth') and self.auth:
             d.addCallback(self.auth.preprocess, request)
         d.addCallback(self.handle, request)
-        if self.auth:
+        if hasattr(self, 'auth') and self.auth:
             d.addCallback(self.auth.postprocess)
         d.addCallbacks(succeed, failed)
 
@@ -67,6 +69,32 @@ class CardstoriesResource(resource.Resource):
     def handle(self, result, request):
         return self.service.handle(request.args)
 
+import os
+import glob
+import zipfile
+
+class AGPLResource(util.Redirect):
+
+    def __init__(self, directory, location, module):
+        self.directory = directory
+        self.module = module
+        self.zipfile = module.__name__ + '.zip'
+        self.location = location + '/' + self.zipfile
+        util.Redirect.__init__(self, self.location)
+
+    def render(self, request):
+        self.url = str(urlpath.URLPath.fromRequest(request).here()) + '/' + self.location
+        self.update()
+        return util.Redirect.render(self, request)
+
+    def update(self):
+        directory = os.path.dirname(self.module.__file__)
+        archive = self.directory + '/' + self.zipfile
+        f = zipfile.ZipFile(archive, 'w')
+        for path in glob.glob(directory + '/*.py'):
+            f.write(path, os.path.basename(path))
+        f.close()
+
 class CardstoriesTree(resource.Resource):
 
     def __init__(self, service):
@@ -74,7 +102,9 @@ class CardstoriesTree(resource.Resource):
         self.service = service
         self.putChild("resource", CardstoriesResource(self.service))
         self.putChild("static", static.File(service.settings['static']))
+        import cardstories
+        self.putChild("agpl", AGPLResource(service.settings['static'], '../static', cardstories))
         self.putChild("", self)
 
     def render_GET(self, request):
-        return "Use /resource or /static"
+        return "Use /resource or /static or /agpl"
