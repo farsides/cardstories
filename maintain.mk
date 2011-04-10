@@ -29,3 +29,5 @@ clean:
 	find . -name '*~' | xargs rm -f
 	find . -name '*.pyc' | xargs rm -f
 	rm -fr dist
+	rm -fr static/cardstories.zip
+	rm MANIFEST

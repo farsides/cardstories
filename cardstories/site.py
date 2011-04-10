@@ -17,7 +17,7 @@
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
 import json
-from twisted.web import server, resource, static, http, util
+from twisted.web import server, resource, static, http
 from twisted.internet import defer
 from twisted.python import urlpath
 
@@ -73,19 +73,17 @@ import os
 import glob
 import zipfile
 
-class AGPLResource(util.Redirect):
+class AGPLResource(static.File):
 
-    def __init__(self, directory, location, module):
+    def __init__(self, directory, module):
         self.directory = directory
         self.module = module
         self.zipfile = module.__name__ + '.zip'
-        self.location = location + '/' + self.zipfile
-        util.Redirect.__init__(self, self.location)
+        static.File.__init__(self, self.directory + '/' + self.zipfile)
 
     def render(self, request):
-        self.url = str(urlpath.URLPath.fromRequest(request).here()) + '/' + self.location
         self.update()
-        return util.Redirect.render(self, request)
+        return static.File.render(self, request)
 
     def update(self):
         directory = os.path.dirname(self.module.__file__)
@@ -103,7 +101,7 @@ class CardstoriesTree(resource.Resource):
         self.putChild("resource", CardstoriesResource(self.service))
         self.putChild("static", static.File(service.settings['static']))
         import cardstories
-        self.putChild("agpl", AGPLResource(service.settings['static'], '../static', cardstories))
+        self.putChild("agpl", AGPLResource(service.settings['static'], cardstories))
         self.putChild("", self)
 
     def render_GET(self, request):

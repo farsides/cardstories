@@ -1,0 +1,6 @@
+recursive-include static *.html *.js *.css *.png
+recursive-include etc/cardstories *.py
+include etc/default/cardstories
+include maintain.mk
+include debian/changelog debian/control debian/compat debian/copyright debian/*.dirs debian/*.init debian/*.install debian/*.postinst debian/*.postrm debian/rules
+

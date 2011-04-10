@@ -141,28 +141,21 @@ class AGPLResourceTest(unittest.TestCase):
             self.site.stopFactory()
 
     def test00_render(self):
-        self.site = server.Site(CardstoriesTree(self.service))
-        r = server.Request(CardstoriesSiteTest.Channel(self.site), True)
-        r.site = r.channel.site
-        input = ''
-        r.gotLength(len(input))
-        r.handleContentChunk(input)
-        r.queued = 0
-        d = r.notifyFinish()
+        tree = CardstoriesTree(self.service)
+        request = DummyRequest(['agpl'])
+        child = resource.getChildForRequest(tree, request)
+        self.assertTrue(isinstance(child, AGPLResource))
+        d = _render(child, request)
         def finish(result):
-            self.assertSubstring('302 Found', r.transport.getvalue())
-            self.assertSubstring('static/cardstories.zip', r.transport.getvalue())
+            self.assertEquals('PK', request.written[0][:2])
         d.addCallback(finish)
-        r.setHost('localhost', 8492) # redirect will use it
-        r.channel.transport.host = r.host
-        r.requestReceived('GET', '/agpl', '')
         return d
 
     def test01_agpl(self):
         import cardstories
         import zipfile
         self.assertFalse(os.path.exists('cardstories.zip'))
-        r = AGPLResource('.', 'location', cardstories)
+        r = AGPLResource('.', cardstories)
         r.update()
         self.assertTrue(os.path.exists('cardstories.zip'))
         a = zipfile.ZipFile('cardstories.zip')
@@ -172,7 +165,7 @@ def Run():
     loader = runner.TestLoader()
 #    loader.methodPrefix = "test_trynow"
     suite = loader.suiteFactory()
-#    suite.addTest(loader.loadClass(CardstoriesSiteTest))
+    suite.addTest(loader.loadClass(CardstoriesSiteTest))
     suite.addTest(loader.loadClass(AGPLResourceTest))
 
     return runner.TrialRunner(
