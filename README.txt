@@ -15,10 +15,8 @@ Copyright (C) 2011 Loic Dachary <loic@dachary.org> (software)
   If the author loses, all the other players win. 
 
 # display usage
-PYTHONPATH=.:etc/cardstories twistd --nodaemon cardstories --help
-# exercise the webservice
-PYTHONPATH=.:etc/cardstories twistd --nodaemon cardstories --port 4923 --db /tmp/cardstories.sqlite
-# retrieve the list of URLs and their status
-curl --silent http://localhost:4923/resource
+PYTHONPATH=.:etc/cardstories twistd cardstories --help
 # run locally with all features activated
-PYTHONPATH=.:etc/cardstories twistd --nodaemon cardstories --interface 0.0.0.0 --port 49238 --static $(pwd)/static --db /tmp/cardstories.sqlite
+PYTHONPATH=.:etc/cardstories twistd --nodaemon cardstories --static $(pwd)/static --port 4923 --db /tmp/cardstories.sqlite --auth basic --auth-db /tmp/authcardstories.sqlite
+# check if the webservice replies. The following must return the {} string
+curl --silent http://localhost:4923/resource

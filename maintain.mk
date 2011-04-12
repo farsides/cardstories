@@ -20,6 +20,7 @@ all:
 
 check:
 	make -C tests check
+	jscoverage --no-instrument=js/jquery.query-2.1.7.js static static-coverage
 
 clean:
 	debuild clean

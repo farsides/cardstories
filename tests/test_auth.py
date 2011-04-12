@@ -17,8 +17,8 @@
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
 import sys
-sys.path.insert(0, "..") # so that for M-x pdb works
 import os
+sys.path.insert(0, os.path.abspath("..")) # so that for M-x pdb works
 import sqlite3
 
 from twisted.trial import unittest, runner, reporter

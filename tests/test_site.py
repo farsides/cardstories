@@ -16,8 +16,8 @@
 # along with this program in a file in the toplevel directory called
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
-import os
 import sys
+import os
 sys.path.insert(0, os.path.abspath("..")) # so that for M-x pdb works
 
 from twisted.trial import unittest, runner, reporter
