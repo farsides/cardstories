@@ -18,9 +18,12 @@
 #
 import random
 
-from twisted.internet import defer
+from twisted.python import runtime
+from twisted.internet import defer, reactor
 
-class CardstoriesGame:
+from cardstories.poll import pollable
+
+class CardstoriesGame(pollable):
 
     MIN_PICKED = 3 # there needs to be at least 3 cards to move to the voting phase
     NCARDS = 36
@@ -31,9 +34,24 @@ class CardstoriesGame:
         self.service = service
         self.settings = service.settings
         self.id = id
+        self.players = []
+        self.invited = []
+        pollable.__init__(self, self.settings.get('poll-timeout', 300))
+
+    def touch(self):
+        return pollable.touch(self, {'game_id': [self.id]})
 
     def get_id(self):
         return self.id
+
+    def get_players(self):
+        return self.players + self.invited
+
+    def load(self, cursor):
+        cursor.execute("SELECT player_id FROM player2game WHERE game_id = %d" % self.id)
+        self.players += [ x[0] for x in cursor.fetchall() ]
+        cursor.execute("SELECT player_id FROM invitations WHERE game_id = %d" % self.id)
+        self.invited += [ x[0] for x in cursor.fetchall() ]
 
     def createInteraction(self, transaction, card, sentence, owner_id):
         cards = [ chr(x) for x in range(1, self.NCARDS + 1) ]
@@ -44,17 +62,16 @@ class CardstoriesGame:
         transaction.execute("INSERT INTO player2game (game_id, player_id, cards, picked) VALUES (?, ?, ?, ?)", [ game_id, owner_id, card, card ])
         return game_id
 
+    @defer.inlineCallbacks
     def create(self, args):
         self.service.required(args, 'create', 'card', 'sentence', 'owner_id')
         card = chr(int(args['card'][0]))
         sentence = args['sentence'][0]
         owner_id = int(args['owner_id'][0])
-        d = self.service.db.runInteraction(self.createInteraction, card, sentence, owner_id)
-        def success(game_id):
-            self.id = game_id
-            return {'game_id': game_id}
-        d.addCallback(success)
-        return d
+        game_id = yield self.service.db.runInteraction(self.createInteraction, card, sentence, owner_id)
+        self.id = game_id
+        self.players.append(owner_id)
+        defer.returnValue({'game_id': game_id})
 
     @defer.inlineCallbacks
     def game(self, args):
@@ -129,13 +146,17 @@ class CardstoriesGame:
             raise no_room
         transaction.execute("INSERT INTO player2game (game_id, player_id, cards) VALUES (?, ?, ?)", [ game_id, player_id, cards[:self.CARDS_PER_PLAYER] ])
         transaction.execute("DELETE FROM invitations WHERE game_id = ? AND player_id = ?", [ game_id, player_id ])
-        return {}
 
+    @defer.inlineCallbacks
     def participate(self, args):
         self.service.required(args, 'participate', 'player_id', 'game_id')
         player_id = int(args['player_id'][0])
         game_id = int(args['game_id'][0])
-        return self.service.db.runInteraction(self.participateInteraction, game_id, player_id)
+        yield self.service.db.runInteraction(self.participateInteraction, game_id, player_id)
+        if player_id in self.invited:
+            self.invited.remove(player_id)
+        self.players.append(player_id)
+        defer.returnValue(self.touch())
 
     @defer.inlineCallbacks
     def voting(self, args):
@@ -146,7 +167,7 @@ class CardstoriesGame:
         board = ''.join(card for (card,) in rows)
         yield self.service.db.runOperation("UPDATE games SET board = ?, state = 'vote' WHERE id = %d AND owner_id = %d" % ( game_id, owner_id ), [ board ])
         yield self.cancelInvitations(game_id)
-        defer.returnValue({})
+        defer.returnValue(self.touch())
 
     @defer.inlineCallbacks
     def player2game(self, args):
@@ -165,7 +186,7 @@ class CardstoriesGame:
         game_id = int(args['game_id'][0])
         card = int(args['card'][0])
         yield self.service.db.runOperation("UPDATE player2game SET picked = ? WHERE game_id = %d AND player_id = %d" % ( game_id, player_id ), [ chr(card) ])
-        defer.returnValue({})
+        defer.returnValue(self.touch())
 
     @defer.inlineCallbacks
     def vote(self, args):
@@ -174,7 +195,7 @@ class CardstoriesGame:
         game_id = int(args['game_id'][0])
         vote = int(args['card'][0])
         yield self.service.db.runOperation("UPDATE player2game SET vote = ? WHERE game_id = %d AND player_id = %d" % ( game_id, player_id ), [ chr(vote) ])
-        defer.returnValue({})
+        defer.returnValue(self.touch())
 
     def completeInteraction(self, transaction, game_id, owner_id):
         transaction.execute("SELECT cards FROM player2game WHERE game_id = %d AND player_id = %d" % ( game_id, owner_id ))
@@ -197,7 +218,6 @@ class CardstoriesGame:
                             "  game_id = %d AND " % game_id + 
                             "  player_id IN ( %s ) " % ','.join([ str(id) for id in winners ]))
         transaction.execute("UPDATE games SET completed = datetime('now'), state = 'complete' WHERE id = %d" % game_id)
-        return {}
 
     @defer.inlineCallbacks
     def complete(self, args):
@@ -205,9 +225,10 @@ class CardstoriesGame:
         owner_id = int(args['owner_id'][0])
         game_id = int(args['game_id'][0])
         yield self.service.db.runInteraction(self.completeInteraction, game_id, owner_id)
-        defer.returnValue({})
+        defer.returnValue(self.touch())
 
     def cancelInvitations(self, game_id):
+        self.invited = []
         return self.service.db.runQuery("DELETE FROM invitations WHERE game_id = ?", [ game_id ])
 
     @defer.inlineCallbacks
@@ -216,7 +237,8 @@ class CardstoriesGame:
         game_id = args['game_id'][0]
         for player_id in args['player_id']:
             yield self.service.db.runQuery("INSERT INTO invitations (player_id, game_id) VALUES (?, ?)", [ player_id, game_id ])
-        defer.returnValue({})
+        self.invited += args['player_id']
+        defer.returnValue(self.touch())
 
     @staticmethod
     def ord(c):

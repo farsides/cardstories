@@ -38,8 +38,9 @@ class Options(usage.Options):
          ["ssl-port", "s", None, "Port on which to listen for SSL", int],
          ["ssl-pem", "P", "/etc/cardstories/cert.pem", "certificate path name", str],
          ["db", "d", "/var/cache/cardstories/cardstories.sqlite", "sqlite3 game database path", str],
-         ["auth", "a", None, "authentication plugin values : basic", str],
+         ["auth", "a", None, "Authentication plugin values : basic", str],
          ["auth-db", "", "/var/cache/cardstories/auth.sqlite", "sqlite3 auth database path", str],
+         ["poll-timeout", "", 300, "Number of seconds before a long poll timesout", str],
          ["loop", "", -1, "Number of ping batchs to run, -1 means forever, 0 means never", int],
          ["static", "", "/usr/share/cardstories", "directory where /static files will be fetched", str]
     ]

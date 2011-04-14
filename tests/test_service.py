@@ -27,6 +27,9 @@ from twisted.web import server, resource, http
 
 from cardstories.service import CardstoriesService
 
+from twisted.internet import base
+base.DelayedCall.debug = True
+
 class CardstoriesServiceTestInit(unittest.TestCase):
 
     def test00_startService(self):
@@ -50,15 +53,18 @@ class CardstoriesServiceTestInit(unittest.TestCase):
         yield service.stopService()
 
         game_id = 100
+        player_id = 20
         db = sqlite3.connect(database)
         c = db.cursor()
         c.execute("INSERT INTO games (id) VALUES (%d)" % game_id)
+        c.execute("INSERT INTO player2game (game_id, player_id) VALUES (%d, %d)" % ( game_id, player_id ))
         db.commit()
         db.close()
 
         service = CardstoriesService({'db': database})
         service.startService()
-        self.assertEquals(service.games[game_id].id, game_id)
+        self.assertEquals(game_id, service.games[game_id].id)
+        self.assertEquals([player_id], service.games[game_id].get_players())
         yield service.stopService()
 
 class CardstoriesServiceTest(unittest.TestCase):
@@ -74,6 +80,7 @@ class CardstoriesServiceTest(unittest.TestCase):
     def tearDown(self):
         self.db.close()
         os.unlink(self.database)
+        return self.service.stopService()
 
 class CardstoriesServiceTestRun(unittest.TestCase):
 
@@ -108,23 +115,21 @@ class CardstoriesServiceTestHandle(CardstoriesServiceTest):
 
 class CardstoriesServiceTest(CardstoriesServiceTest):
 
+    @defer.inlineCallbacks
     def test01_create(self):
         card = 5
         sentence = 'SENTENCE'
         owner_id = 15
-        d = self.service.create({ 'card': [card],
-                                  'sentence': [sentence],
-                                  'owner_id': [owner_id]})
-        def check(result):
-            c = self.db.cursor()
-            c.execute("SELECT * FROM games")
-            rows = c.fetchall()
-            self.assertEquals(1, len(rows))
-            self.assertEquals(result['game_id'], rows[0][0])
-            self.assertEquals(self.service.games[result['game_id']].get_id(), result['game_id'])
-            c.close()
-        d.addCallback(check)
-        return d
+        result = yield self.service.create({ 'card': [card],
+                                             'sentence': [sentence],
+                                             'owner_id': [owner_id]})
+        c = self.db.cursor()
+        c.execute("SELECT * FROM games")
+        rows = c.fetchall()
+        self.assertEquals(1, len(rows))
+        self.assertEquals(result['game_id'], rows[0][0])
+        self.assertEquals(self.service.games[result['game_id']].get_id(), result['game_id'])
+        c.close()
 
     def test02_game_proxy(self):
         game_id = 100
@@ -151,12 +156,13 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
             self.failUnlessSubstring('does not exist', e.args[0])
         self.assertTrue(caught)
         #
-        #
         # route to the game function
         #
         class Game:
             def participate(self, args):
                 self.participated = True
+            def destroy(self):
+                pass
         self.service.games[game_id] = Game()
         self.service.game_proxy({ 'action': ['participate'],
                                   'game_id': [game_id] })
@@ -214,11 +220,11 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         game = yield self.service.create({ 'card': [winner_card],
                                            'sentence': [sentence],
                                            'owner_id': [owner_id]})
-        
         game_info = yield self.service.game({ 'game_id': [game['game_id']] })
         self.assertEquals(game['game_id'], game_info['id'])
         # if there is no in core representation of the game, 
         # a temporary one is created
+        self.service.games[game_info['id']].destroy()
         del self.service.games[game_info['id']]
         game_info = yield self.service.game({ 'game_id': [game['game_id']] })
         self.assertEquals(game['game_id'], game_info['id'])
@@ -323,9 +329,116 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
                 'win': {101: u'n'}
                 })
 
+    def test06_get_or_create_player(self):
+        # create a player that did not exist
+        self.assertEquals({}, self.service.players)
+        player_id = 1
+        player = self.service.get_or_create_player(player_id)
+        self.assertTrue(self.service.players.has_key(player_id))
+        player.timer.cancel()
+        # retrieve the same player
+        self.assertEquals(player, self.service.get_or_create_player(player_id))
+        # create a player and timeout 
+        player_id = 2
+        player = self.service.get_or_create_player(player_id)
+        def check(result):
+            player.deleted = True
+            self.assertTrue(result.has_key('delete'))
+            return result
+        d = player.poll({ 'modified': [player.modified + 100] })
+        d.addCallback(check)
+        player.access_time = 0 # pretend the player has not been accessed for a long time
+        func = player.timer.func
+        player.timer.cancel()
+        self.assertTrue(func())
+        self.assertTrue(player.deleted)
+        self.assertFalse(self.service.players.has_key(player_id))
+        # timeout on a deleted player does nothing
+        self.assertFalse(func())
+
+    @defer.inlineCallbacks
+    def test07_poll_notify_players(self):
+        #
+        # notify player called as a side effect of game.touch
+        #
+        card = 5
+        sentence = 'SENTENCE'
+        owner_id = 15
+        result = yield self.service.create({ 'card': [card],
+                                             'sentence': [sentence],
+                                             'owner_id': [owner_id]})
+        game = self.service.games[result['game_id']]
+        player = self.service.get_or_create_player(owner_id)
+        player.modified -= 10
+        before_modified = player.modified
+        d = self.service.poll_player({ 'modified': [player.modified],
+                                       'player_id': [owner_id] })
+        def check(result):
+            #
+            # the modified time is from the player pollable, not
+            # from the game pollable. 
+            #
+            self.assertTrue(result['modified'][0] > before_modified)
+            self.assertEquals(result['modified'], [player.modified])
+            self.assertEquals(result['player_id'], [owner_id])
+            self.assertEquals(result['game_id'], [game.id])
+            return result
+        d.addCallback(check)
+        game.touch() # calls poll_notify_players indirectly
+        #
+        # calling poll_notify_players on a non existent game is a noop
+        #
+        self.assertFalse(self.service.poll_notify_players({'game_id': [200]}))
+
+    @defer.inlineCallbacks
+    def test08_poll(self):
+        #
+        # missing argument raises exception
+        #
+        caught = False
+        try:
+            self.service.poll({'modified':[0]})
+        except UserWarning, e:
+            caught = True
+            self.failUnlessSubstring('poll requires', e.args[0])
+        self.assertTrue(caught)
+        #
+        # poll player
+        #
+        player_id = 10
+        player = self.service.get_or_create_player(player_id)
+        d = self.service.poll({'modified': [player.modified], 'player_id': [player_id]})
+        def check(result):
+            self.assertTrue(result['ok'])
+            player.ok = True
+            return result
+        d.addCallback(check)
+        player.touch({'ok': True})
+        self.assertTrue(player.ok)
+        #
+        # poll game
+        #
+        card = 5
+        sentence = 'SENTENCE'
+        owner_id = 15
+        result = yield self.service.create({ 'card': [card],
+                                             'sentence': [sentence],
+                                             'owner_id': [owner_id]})
+        game = self.service.games[result['game_id']]
+        d = self.service.poll({'action': ['poll'],
+                               'modified': [game.modified],
+                               'game_id': [game.id]})
+        def check(result):
+            self.assertEquals([game.id], result['game_id'])
+            game.ok = True
+            return result
+        d.addCallback(check)
+        game.touch()
+        self.assertTrue(game.ok)
+        
 def Run():
     loader = runner.TestLoader()
-#    loader.methodPrefix = "test10_"
+#    loader.methodPrefix = "test08_"
     suite = loader.suiteFactory()
     suite.addTest(loader.loadClass(CardstoriesServiceTestInit))
     suite.addTest(loader.loadClass(CardstoriesServiceTest))

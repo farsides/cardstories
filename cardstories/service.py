@@ -19,17 +19,32 @@
 import os
 import random
 
-from twisted.python import log
+from twisted.python import log, runtime
 from twisted.application import service
-from twisted.internet import protocol, reactor, defer
+from twisted.internet import reactor, defer
 from twisted.web import resource, client
 from twisted.enterprise import adbapi
 
 from cardstories.game import CardstoriesGame
+from cardstories.player import CardstoriesPlayer
 
 from OpenSSL import SSL
 
 import sqlite3
+
+from cardstories.poll import pollable
+
+class CardstoriesPlayer(pollable):
+    
+    def __init__(self, service, id):
+        self.service = service
+        self.settings = service.settings
+        self.id = id
+        pollable.__init__(self, self.settings.get('poll-timeout', 300))
+
+    def touch(self, args):
+        args['player_id'] = [self.id]
+        return pollable.touch(self, args)
 
 class CardstoriesService(service.Service):
 
@@ -39,6 +54,7 @@ class CardstoriesService(service.Service):
     def __init__(self, settings):
         self.settings = settings
         self.games = {}
+        self.players = {}
 
     def startService(self):
         database = self.settings['db']
@@ -50,6 +66,7 @@ class CardstoriesService(service.Service):
         else:
             self.create_base(c)
             db.commit()
+        c.close()
         db.close()
         self.db = adbapi.ConnectionPool("sqlite3", database=database)
         loop = self.settings.get('loop', 0)
@@ -57,6 +74,12 @@ class CardstoriesService(service.Service):
             return self.run(loop)
         
     def stopService(self):
+        for game in self.games.values():
+            game.destroy()
+        for player in self.players.values():
+            if player.timer.active():
+                player.timer.cancel()
+            player.destroy()
         return defer.succeed(None)
 
     def create_base(self, c):
@@ -99,13 +122,67 @@ class CardstoriesService(service.Service):
     def load(self, c):
         c.execute("SELECT id FROM games WHERE state != 'complete'")
         for (id,) in c.fetchall():
-            self.games[id] = CardstoriesGame(self, id)
+            game = CardstoriesGame(self, id)
+            game.load(c)
+            self.games[id] = game
+            
+    def poll(self, args):
+        self.required(args, 'poll', 'modified')
+        if args.has_key('game_id'):
+            return self.game_proxy(args)
+        elif args.has_key('player_id'):
+            return self.poll_player(args)
+        else:
+            raise UserWarning, 'poll requires either player_id or game_id but neither were set'
+
+    def poll_player(self, args):
+        player_id = int(args['player_id'][0])
+        return self.get_or_create_player(player_id).poll(args)
+
+    def get_or_create_player(self, player_id):
+        now = int(runtime.seconds() * 1000)
+        if not self.players.has_key(player_id):
+            player = CardstoriesPlayer(self, player_id)
+            player.access_time = now
+            self.players[player_id] = player
+            def timeout():
+                if not self.players.has_key(player_id):
+                    return False
+                player = self.players[player_id]
+                if now - player.access_time > self.settings.get('poll-timeout', 300) * 2:
+                    player.touch({'delete': [now]})
+                    del self.players[player_id]
+                else:
+                    player.timer = reactor.callLater(self.settings.get('poll-timeout', 300), timeout)
+                return True
+            timeout()
+        else:
+            player = self.players[player_id]
+            player.access_time = now
+        return player
+
+    def poll_notify_players(self, args):
+        if args == None:
+            return False
+        game_id = int(args['game_id'][0])
+        if not self.games.has_key(game_id):
+            return False
+        game = self.games[game_id]
+        for player_id in game.get_players():
+            if self.players.has_key(player_id):
+                self.players[player_id].touch(args)
+        d = game.poll(args)
+        d.addCallback(self.poll_notify_players)
+        return True
 
     def create(self, args):
         game = CardstoriesGame(self)
         d = game.create(args)
         def success(value):
             self.games[game.get_id()] = game
+            args['modified'] = [ game.modified ]
+            args['game_id'] = [ game.id ]
+            self.poll_notify_players(args)
             return value
         d.addCallback(success)
         return d
@@ -114,6 +191,7 @@ class CardstoriesService(service.Service):
         d = self.game_proxy(args)
         game_id = int(args['game_id'][0])
         def success(value):
+            self.games[game_id].destroy()
             del self.games[game_id]
             return value
         d.addCallback(success)
