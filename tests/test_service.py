@@ -254,8 +254,11 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         c.execute("INSERT INTO player2game ( player_id, game_id, win ) VALUES ( %d, %d, 'y' )" % ( player1, game3 ))
 
         c.execute("INSERT INTO games ( id, owner_id, sentence, state, created ) VALUES ( %d, %d, '%s', 'complete', '2011-06-01' )" % ( game4, player2, sentence4 )) 
-        c.close()
         self.db.commit()
+        self.service.load(c)
+        c.close()
+        self.service.games[game1].modified = 111
+        self.service.games[game2].modified = 222
         #
         # Show all games, in progress, with wins from player2.
         #
@@ -264,11 +267,12 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         # game2 shows before game1 because it is created before
         self.assertEquals(result, {
                 #         player2 does not participate in game2
-                'games': [(101, u'SENTENCE2', u'invitation', 0, u'2011-05-01'),
+                'games': [(game2, u'SENTENCE2', u'invitation', 0, u'2011-05-01'),
                 #         player2 participates in game1 and is the author
-                          (100, u'SENTENCE1', u'invitation', 1, u'2011-02-01')],
+                          (game1, u'SENTENCE1', u'invitation', 1, u'2011-02-01')],
                 #         player2 did not yet win game1
-                'win': {100: u'n'}
+                'win': {game1: u'n'},
+                'modified': 0
                 })
 
         #
@@ -279,10 +283,11 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
                                             'my': ['true'] })
         self.assertEquals(result, {
                 #         player2 participates in game1 and is the author
-                'games': [(100, u'SENTENCE1', u'invitation', 1, u'2011-02-01')],
+                'games': [(game1, u'SENTENCE1', u'invitation', 1, u'2011-02-01')],
                 #         player2 does not participate in game2 therefore it is not shown
                 #         player2 did not yet win game1
-                'win': {100: u'n'}
+                'win': {game1: u'n'},
+                'modified': self.service.games[game1].modified
                 })
 
         #
@@ -293,11 +298,12 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         # game4 shows before game3 because it is created before
         self.assertEquals(result, {
                 #         player1 did not participate in game3
-                'games': [(103, u'SENTENCE4', u'complete', 0, u'2011-06-01'),
+                'games': [(game4, u'SENTENCE4', u'complete', 0, u'2011-06-01'),
                 #         player1 participated in game3 and was the author
-                          (102, u'SENTENCE3', u'complete', 1, u'2011-03-01')],
+                          (game3, u'SENTENCE3', u'complete', 1, u'2011-03-01')],
                 #         player1 won game3
-                'win': {102: u'y'}
+                'win': {game3: u'y'},
+                'modified': 0
                 })
 
         #
@@ -308,10 +314,14 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
                                             'my': ['true']})
         self.assertEquals(result, {
                 #         player1 participated in game3 and was the author
-                'games': [(102, u'SENTENCE3', u'complete', 1, u'2011-03-01')],
+                'games': [(game3, u'SENTENCE3', u'complete', 1, u'2011-03-01')],
                 #         player1 did not participate in game3
                 #         player1 won game3
-                'win': {102: u'y'}
+                'win': {game3: u'y'},
+                #         player1 is in game2 and the modified field is 
+                #         global to all games in progress, not just the ones 
+                #         returned by the lobby request
+                'modified': self.service.games[game2].modified
                 })
 
         #
@@ -322,11 +332,12 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
                                             'my': ['true']})
         self.assertEquals(result, {
                 #         player1 participates in game2 and was the author
-                'games': [(101, u'SENTENCE2', u'invitation', 1, u'2011-05-01'),
+                'games': [(game2, u'SENTENCE2', u'invitation', 1, u'2011-05-01'),
                 #         player1 was invited to game1
-                          (100, u'SENTENCE1', u'invitation', 0, u'2011-02-01')],
+                          (game1, u'SENTENCE1', u'invitation', 0, u'2011-02-01')],
                 #         player1 won game3
-                'win': {101: u'n'}
+                'win': {game2: u'n'},
+                'modified': self.service.games[game2].modified
                 })
 
     def test06_get_or_create_player(self):
@@ -438,7 +449,7 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         
 def Run():
     loader = runner.TestLoader()
-#    loader.methodPrefix = "test08_"
+#    loader.methodPrefix = "test05_"
     suite = loader.suiteFactory()
     suite.addTest(loader.loadClass(CardstoriesServiceTestInit))
     suite.addTest(loader.loadClass(CardstoriesServiceTest))

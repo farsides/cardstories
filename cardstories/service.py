@@ -49,7 +49,7 @@ class CardstoriesPlayer(pollable):
 class CardstoriesService(service.Service):
 
     ACTIONS_GAME = ( 'game', 'participate', 'voting', 'pick', 'vote', 'complete', 'invite' )
-    ACTIONS = ACTIONS_GAME + ( 'create', 'lobby' )
+    ACTIONS = ACTIONS_GAME + ( 'create', 'lobby', 'poll' )
 
     def __init__(self, settings):
         self.settings = settings
@@ -144,6 +144,16 @@ class CardstoriesService(service.Service):
         if not self.players.has_key(player_id):
             player = CardstoriesPlayer(self, player_id)
             player.access_time = now
+            #
+            # modified time is set to the most recent
+            # modification time of a game in which the player is
+            # involved
+            #
+            player.set_modified(0)
+            for game in self.games.values():
+                if player_id in game.get_players():
+                    if player.get_modified() < game.get_modified():
+                        player.set_modified(game.get_modified())
             self.players[player_id] = player
             def timeout():
                 if not self.players.has_key(player_id):
@@ -227,13 +237,16 @@ class CardstoriesService(service.Service):
             complete = 'state = "complete"'
         order = " ORDER BY created DESC"
         if args.has_key('my') and args['my'][0] == 'true':
+            player_id = args['player_id'][0]
+            modified = self.get_or_create_player(player_id).get_modified()
             sql =  ""
             sql += " SELECT id, sentence, state, owner_id = player_id, created FROM games, player2game WHERE player2game.player_id = ? AND " + complete + " AND games.id = player2game.game_id"
             sql += " UNION "
             sql += " SELECT id, sentence, state, owner_id = player_id, created FROM games, invitations WHERE invitations.player_id = ? AND " + complete + " AND games.id = invitations.game_id"
             sql += order
-            games = yield self.db.runQuery(sql, [ args['player_id'][0], args['player_id'][0] ])
+            games = yield self.db.runQuery(sql, [ player_id, player_id ])
         else:
+            modified = 0
             sql = "SELECT id, sentence, state, owner_id = ?, created FROM games WHERE " + complete
             sql += order
             games = yield self.db.runQuery(sql, [ args['player_id'][0] ])
@@ -242,7 +255,8 @@ class CardstoriesService(service.Service):
         wins = {}
         for row in rows:
             wins[row[0]] = row[1]
-        defer.returnValue({'games': games,
+        defer.returnValue({'modified': modified,
+                           'games': games,
                            'win': wins})
 
     def handle(self, args):

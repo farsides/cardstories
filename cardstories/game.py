@@ -125,6 +125,7 @@ class CardstoriesGame(pollable):
         elif state == 'vote':
             ready = picked_count == vote_count + 1 # + 1 is because the owner does not get to vote
         defer.returnValue({ 'id': game_id,
+                            'modified': self.get_modified(),
                             'sentence': sentence,
                             'winner_card': winner_card,
                             'cards': cards, 

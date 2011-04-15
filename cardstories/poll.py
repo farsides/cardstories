@@ -29,6 +29,12 @@ class pollable:
     def __del__(self):
         self.destroy()
 
+    def get_modified(self):
+        return self.modified
+
+    def set_modified(self, modified):
+        self.modified = modified
+
     def destroy(self):
         pollers = self.pollers
         self.pollers = []

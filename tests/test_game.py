@@ -280,7 +280,6 @@ class CardstoriesGameTest(unittest.TestCase):
         game = yield self.game.create({ 'card': [winner_card],
                                            'sentence': [sentence],
                                            'owner_id': [owner_id]})
-
         # move to invitation state
         player1 = 16
         card1 = 20
@@ -292,6 +291,7 @@ class CardstoriesGameTest(unittest.TestCase):
             self.assertEquals([game['game_id']], result['game_id'])
 
         # invitation state, visitor point of view
+        self.game.modified = 444
         game_info = yield self.game.game({ 'game_id': [game['game_id']] })
         self.assertEquals({'board': None,
                            'cards': None,
@@ -302,7 +302,8 @@ class CardstoriesGameTest(unittest.TestCase):
                            'self': None,
                            'sentence': u'SENTENCE',
                            'winner_card': None,
-                           'state': u'invitation'}, game_info)
+                           'state': u'invitation',
+                           'modified': self.game.modified}, game_info)
         
         # invitation state, owner point of view
         game_info = yield self.game.game({ 'game_id': [game['game_id']], 'player_id': [owner_id] })
@@ -375,6 +376,7 @@ class CardstoriesGameTest(unittest.TestCase):
                                            'card': [card1] })
         self.assertEquals([game['game_id']], result['game_id'])
         # vote state, player point of view
+        self.game.modified = 555
         game_info = yield self.game.game({ 'game_id': [game['game_id']], 'player_id': [player1] })
         player1_cards = game_info['players'][1][4]
         self.assertEquals({'board': [winner_card, card1, card2],
@@ -386,7 +388,8 @@ class CardstoriesGameTest(unittest.TestCase):
                            'self': [card1, card2, player1_cards],
                            'sentence': u'SENTENCE',
                            'winner_card': None,
-                           'state': u'vote'}, game_info)
+                           'state': u'vote',
+                           'modified': self.game.modified}, game_info)
         # move to complete state
 
     @defer.inlineCallbacks

@@ -104,19 +104,85 @@
               });
         },
 
+        poll_timeout: 300 * 1000, // must be identical to the --poll-timeout value 
+                                  // server side
+
+        poll: function(request, root) {
+            var $this = this;
+
+            if($(root).metadata().poll === undefined) {
+              this.poll_ignore(request);
+              return false;
+            }
+
+            $(root).metadata().poll += 1; // make sure pending polls results will be ignored
+            var poll = $(root).metadata().poll;
+            var success = function(answer, status) {
+              if('error' in answer) {
+                $this.error(answer.error);
+              } else {
+                if($(root).metadata().poll != poll) {
+                  $this.poll_ignore(request, answer, $(root).metadata().poll, poll);
+                } else {
+                  if('timeout' in answer) {
+                    $this.poll(request, root);
+                  } else {
+                    $this.reload(request.player_id, request.game_id, root);
+                  }
+                }
+              }
+            };
+            var query = 'modified=' + request.modified;
+            if('player_id' in request) {
+              query += '&player_id=' + request.player_id;
+            }
+            if('game_id' in request) {
+              query += '&game_id=' + request.game_id;
+            }
+            $this.ajax({
+              async: true,
+                  timeout: $this.poll_timeout * 2,
+                  url: $this.url + '?action=poll&' + query,
+                  type: 'GET',
+                  dataType: 'json',
+                  global: false,
+                  success: success,
+                  error: $this.xhr_error
+                  });
+            return true;
+        },
+
+        poll_ignore: function(request, answer, new_poll, old_poll) {
+            if(console && console.log) {
+              if(new_poll !== undefined) {
+                console.log('poll ignored because ' + new_poll + ' higher than ' + old_poll);
+              } else {
+                console.log('poll ignored because metadata is not set');
+              }
+            }
+        },
+
+        poll_discard: function(root) {
+            var meta = $(root).metadata();
+            if(meta.poll !== undefined) {
+              meta.poll += 1;
+            }
+            return meta.poll;
+        },
+
         refresh_lobby: function(player_id, in_progress, my, root) {
             var $this = this;
             var success = function(data, status) {
               if('error' in data) {
                 $this.error(data.error);
               } else {
-                $this.setTimeout(function() {
-                    if(in_progress) {
-                      $this.lobby_in_progress(player_id, data, root);
-                    } else {
-                      $this.lobby_finished(player_id, data, root);
-                    }
-                  }, 30);
+                if(in_progress) {
+                  $this.lobby_in_progress(player_id, data, root);
+                } else {
+                  $this.lobby_finished(player_id, data, root);
+                }
+                // FIXME not activated if the list of tables is empty ???
+                $this.poll({ 'modified': data.modified, 'player_id': player_id }, root);
               }
             };
             var query_in_progress;
@@ -171,6 +237,11 @@
             $('table.cardstories_games', element).tablesorter().tablesorterPager({size: pagesize, positionFixed: false, container: $('.cardstories_pager', element) });
         },
 
+        start_story: function(player_id, root) {
+            this.poll_discard(root);
+            this.create(player_id, root);
+        },
+
         lobby_in_progress: function(player_id, lobby, root) {
             var $this = this;
             var element = $('.cardstories_lobby .cardstories_in_progress', root);
@@ -179,7 +250,7 @@
                 $this.refresh_lobby(player_id, false, true, root);
               });
             $('.cardstories_start_story', element).click(function() {
-                $this.create(player_id, root);
+                $this.start_story(player_id, root);
               });
             this.lobby_games(player_id, lobby, element, root);
         },
@@ -192,20 +263,26 @@
                 $this.refresh_lobby(player_id, true, true, root);
               });
             $('.cardstories_start_story', element).click(function() {
-                $this.create(player_id, root);
+                $this.start_story(player_id, root);
               });
             this.lobby_games(player_id, lobby, element, root);
         },
 
         invitation: function(player_id, game, root) {
+            var poll = true;
             if(game.owner) {
                 this.invitation_owner(player_id, game, root);
             } else {
                 if(game.self !== null && game.self !== undefined) {
                     this.invitation_pick(player_id, game, root);
+                    // do not disturb a player while (s)he is picking a card
+                    poll = game.self[0] !== null;
                 } else {
                     this.invitation_participate(player_id, game, root);
                 }
+            }
+            if(poll) {
+              this.poll({ 'modified': game.modified, 'game_id': game.id, 'player_id': player_id }, root);
             }
         },
 
@@ -285,16 +362,21 @@
         },
 
         vote: function(player_id, game, root) {
+            var poll = true;
             if(game.owner) {
                 this.vote_owner(player_id, game, root);
             } else {
                 if(game.self !== null && game.self !== undefined) {
                     this.vote_voter(player_id, game, root);
+                    // do not disturb a voting player while (s)he is voting
+                    poll = game.self[1] !== null;
                 } else {
                     this.vote_viewer(player_id, game, root);
                 }
             }
-
+            if(poll) {
+                this.poll({ 'modified': game.modified, 'game_id': game.id, 'player_id': player_id }, root);
+            }
         },
 
         vote_viewer: function(player_id, game, root) {
@@ -425,7 +507,7 @@
             });
         },
 
-        send_game: function(player_id, game_id, element, query, data) {
+        send_game: function(player_id, game_id, element, query) {
             var $this = this;
             var root = $(element).parents('.cardstories_root');
             var success = function(data, status) {
@@ -439,17 +521,12 @@
                 async: false,
                 timeout: 30000,
                 url: $this.url + '?' + query,
+                type: 'GET',
                 dataType: 'json',
                 global: false,
                 success: success,
                 error: $this.xhr_error
             };
-            if(data !== undefined) {
-                request.type = 'POST';
-                request.data = data;
-            } else {
-                request.type = 'GET';
-            }
             $this.ajax(request);
         },
 
@@ -519,6 +596,7 @@
         }
         return this.each(function() {
             $(this).toggleClass('cardstories_root', true);
+            $(this).metadata().poll = 1;
             $.cardstories.bootstrap(player_id, game_id, this);
             return this;
         });
