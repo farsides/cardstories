@@ -142,6 +142,7 @@ class CardstoriesService(service.Service):
     def get_or_create_player(self, player_id):
         if not self.players.has_key(player_id):
             player = CardstoriesPlayer(self, player_id)
+            player.access_time = int(runtime.seconds() * 1000)
             #
             # modified time is set to the most recent
             # modification time of a game in which the player is
@@ -168,7 +169,7 @@ class CardstoriesService(service.Service):
             timeout()
         else:
             player = self.players[player_id]
-        player.access_time = int(runtime.seconds() * 1000)
+            player.access_time = int(runtime.seconds() * 1000)
         return player
 
     def poll_notify_players(self, args):
