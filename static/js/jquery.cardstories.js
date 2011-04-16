@@ -607,4 +607,8 @@
         });
     };
 
+    $(window).bind("beforeunload", function() {
+        $.cardstories.error = function(error) { };
+      });
+
 })(jQuery);
