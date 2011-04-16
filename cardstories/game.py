@@ -18,7 +18,7 @@
 #
 import random
 
-from twisted.python import runtime
+from twisted.python import runtime, log
 from twisted.internet import defer, reactor
 
 from cardstories.poll import pollable
@@ -66,7 +66,7 @@ class CardstoriesGame(pollable):
     def create(self, args):
         self.service.required(args, 'create', 'card', 'sentence', 'owner_id')
         card = chr(int(args['card'][0]))
-        sentence = args['sentence'][0]
+        sentence = args['sentence'][0].decode('utf-8')
         owner_id = int(args['owner_id'][0])
         game_id = yield self.service.db.runInteraction(self.createInteraction, card, sentence, owner_id)
         self.id = game_id
