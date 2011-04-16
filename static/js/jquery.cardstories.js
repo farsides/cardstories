@@ -233,8 +233,13 @@
                 var game_id = $(this).metadata({type: "attr", name: "data"}).game_id;
                 $this.reload(player_id, game_id, root);
               });
-            var pagesize = parseInt($('.pagesize option:selected', element).val(), 10);
-            $('table.cardstories_games', element).tablesorter().tablesorterPager({size: pagesize, positionFixed: false, container: $('.cardstories_pager', element) });
+            if(rows.length > 0) {
+              var pagesize = parseInt($('.pagesize option:selected', element).val(), 10);
+              $('.cardstories_pager', element).show();
+              $('table.cardstories_games', element).tablesorter().tablesorterPager({size: pagesize, positionFixed: false, container: $('.cardstories_pager', element) });
+            } else {
+              $('.cardstories_pager', element).hide();
+            }
         },
 
         start_story: function(player_id, root) {
