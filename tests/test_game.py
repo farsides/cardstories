@@ -50,7 +50,7 @@ class CardstoriesGameTest(unittest.TestCase):
         # create a game from scratch
         #
         card = 5
-        sentence = 'SENTENCE'
+        sentence = u'SENTENCE é'
         owner_id = 15
         result = yield self.game.create({ 'card': [card],
                                           'sentence': [sentence],

@@ -140,10 +140,8 @@ class CardstoriesService(service.Service):
         return self.get_or_create_player(player_id).poll(args)
 
     def get_or_create_player(self, player_id):
-        now = int(runtime.seconds() * 1000)
         if not self.players.has_key(player_id):
             player = CardstoriesPlayer(self, player_id)
-            player.access_time = now
             #
             # modified time is set to the most recent
             # modification time of a game in which the player is
@@ -155,20 +153,22 @@ class CardstoriesService(service.Service):
                     if player.get_modified() < game.get_modified():
                         player.set_modified(game.get_modified())
             self.players[player_id] = player
+            poll_timeout = self.settings.get('poll-timeout', 300)
             def timeout():
+                now = int(runtime.seconds() * 1000)
                 if not self.players.has_key(player_id):
                     return False
                 player = self.players[player_id]
-                if now - player.access_time > self.settings.get('poll-timeout', 300) * 2:
+                if now - player.access_time > (poll_timeout * 2 * 1000):
                     player.touch({'delete': [now]})
                     del self.players[player_id]
                 else:
-                    player.timer = reactor.callLater(self.settings.get('poll-timeout', 300), timeout)
+                    player.timer = reactor.callLater(poll_timeout, timeout)
                 return True
             timeout()
         else:
             player = self.players[player_id]
-            player.access_time = now
+        player.access_time = int(runtime.seconds() * 1000)
         return player
 
     def poll_notify_players(self, args):

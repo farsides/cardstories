@@ -285,7 +285,7 @@ test("widget invitation", function() {
 
     var ajax_poll = function(options) {
         equal(options.type, 'GET');
-        equal(options.url, $.cardstories.url + '?action=poll&modified=' + modified + '&game_id=' + game_id);
+        equal(options.url, $.cardstories.url + '?action=poll&modified=' + modified + '&player_id=' + player_id + '&game_id=' + game_id);
     };
 
     $.cardstories.ajax = function(options) {
@@ -790,7 +790,7 @@ test("poll", function() {
         equal(options.type, 'GET', 'poll timeout');
         equal(options.url, $.cardstories.url + '?action=poll&modified=' + modified + '&player_id=' + player_id + '&game_id=' + game_id);
         $.cardstories.ajax = poll_again;
-	options.success({'timeout': true});
+	options.success({'timeout': [modified+1111]});
     };
 
     ok($.cardstories.poll(request, root), 'poll timeout');

@@ -349,9 +349,16 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         player.timer.cancel()
         # retrieve the same player
         self.assertEquals(player, self.service.get_or_create_player(player_id))
-        # create a player and timeout 
+        # create a player and timeout too early : timer is rescheduled
         player_id = 2
         player = self.service.get_or_create_player(player_id)
+        timer1 = player.timer
+        func = player.timer.func
+        func()
+        self.assertNotEqual(timer1, player.timer)
+        timer1.cancel()
+        self.assertTrue(player.timer.active())
+        # player timeout 
         def check(result):
             player.deleted = True
             self.assertTrue(result.has_key('delete'))
