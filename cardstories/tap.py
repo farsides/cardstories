@@ -41,6 +41,7 @@ class Options(usage.Options):
          ["auth", "a", None, "Authentication plugin values : basic", str],
          ["auth-db", "", "/var/cache/cardstories/auth.sqlite", "sqlite3 auth database path", str],
          ["poll-timeout", "", 300, "Number of seconds before a long poll timesout", str],
+         ["game-timeout", "", (24 * 60 * 60), "Number of seconds before a game in progress timesout", str],
          ["loop", "", -1, "Number of ping batchs to run, -1 means forever, 0 means never", int],
          ["static", "", "/usr/share/cardstories", "directory where /static files will be fetched", str]
     ]

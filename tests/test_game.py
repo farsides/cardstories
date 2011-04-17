@@ -28,6 +28,9 @@ from twisted.web import server, resource, http
 from cardstories.game import CardstoriesGame
 from cardstories.service import CardstoriesService
 
+from twisted.internet import base
+base.DelayedCall.debug = True
+
 class CardstoriesGameTest(unittest.TestCase):
 
     def setUp(self):
@@ -40,6 +43,7 @@ class CardstoriesGameTest(unittest.TestCase):
         self.game = CardstoriesGame(self.service)
 
     def tearDown(self):
+        self.game.destroy()
         self.db.close()
         os.unlink(self.database)
         return self.service.stopService()
@@ -73,12 +77,15 @@ class CardstoriesGameTest(unittest.TestCase):
         self.assertEquals(1, len(rows))
         self.assertEquals(chr(card), rows[0][0])
         self.assertEquals(self.game.get_players(), [owner_id])
+        self.assertEquals(self.game.get_owner_id(), owner_id)
         #
         # load an existing game
         #
         game = CardstoriesGame(self.service, self.game.get_id())
         game.load(c)
         self.assertEquals(game.get_players(), [owner_id])
+        self.assertEquals(self.game.get_owner_id(), owner_id)
+        game.destroy()
         c.close()
 
     @defer.inlineCallbacks
@@ -173,27 +180,28 @@ class CardstoriesGameTest(unittest.TestCase):
                                            'sentence': [sentence],
                                            'owner_id': [owner_id]})
         cards = [card]
-        players = [ 16, 17 ]
+        pick_players = [ 16, 17 ]
+        players = pick_players + [ 18 ]
         for player_id in players:
             yield self.game.participate({ 'player_id': [player_id],
-                                             'game_id': [game['game_id']] })
+                                          'game_id': [game['game_id']] })
+        for player_id in pick_players:
             player = yield self.game.player2game({ 'player_id': [player_id],
-                                                      'game_id': [game['game_id']] })
+                                                   'game_id': [game['game_id']] })
             card = player['cards'][0]
             cards.append(card)
             yield self.game.pick({ 'player_id': [player_id],
-                                      'game_id': [game['game_id']],
-                                      'card': [card] })
-        
+                                   'game_id': [game['game_id']],
+                                   'card': [card] })
         invited = 20
         yield self.game.invite({ 'game_id': [game['game_id']],
-                                          'player_id': [invited],
-                                          'owner_id': [owner_id] })
+                                 'player_id': [invited],
+                                 'owner_id': [owner_id] })
         self.assertEquals([owner_id] + players + [invited], self.game.get_players())
         yield self.game.voting({ 'game_id': [game['game_id']],
-                                    'owner_id': [owner_id] })
+                                 'owner_id': [owner_id] })
         self.assertEquals([], self.game.invited)
-        self.assertEquals([owner_id] + players, self.game.get_players())
+        self.assertEquals([owner_id] + pick_players, self.game.get_players())
         c = self.db.cursor()
         c.execute("SELECT board, state FROM games WHERE id = %d" % ( game['game_id'] ))
         row = c.fetchone()
@@ -243,7 +251,9 @@ class CardstoriesGameTest(unittest.TestCase):
         game = yield self.game.create({ 'card': [winner_card],
                                            'sentence': [sentence],
                                            'owner_id': [owner_id]})
-        for player_id in ( 16, 17 ):
+        voting_players = [ 16, 17 ]
+        players = voting_players + [ 18 ]
+        for player_id in players:
             yield self.game.participate({ 'player_id': [player_id],
                                              'game_id': [game['game_id']] })
             player = yield self.game.player2game({ 'player_id': [player_id],
@@ -265,13 +275,16 @@ class CardstoriesGameTest(unittest.TestCase):
                                   'card': [winner_card] })
         loser_id = 17
         yield self.game.vote({ 'game_id': [game['game_id']],
-                                  'player_id': [loser_id],
-                                  'card': [120] })
+                               'player_id': [loser_id],
+                               'card': [120] })
+        self.assertEquals(self.game.get_players(), [owner_id] + players)
         yield self.game.complete({ 'game_id': [game['game_id']],
-                                      'owner_id': [owner_id] })
-        c.execute("SELECT win FROM player2game WHERE game_id = %d AND player_id IN ( %d, %d )" % ( game['game_id'], winner_id, owner_id ))
+                                   'owner_id': [owner_id] })
+        self.assertEquals(self.game.get_players(), [owner_id] + voting_players)
+        c.execute("SELECT win FROM player2game WHERE game_id = %d AND player_id != %d" % ( game['game_id'], owner_id ))
         self.assertEqual(u'y', c.fetchone()[0])
-        self.assertEqual(u'y', c.fetchone()[0])
+        self.assertEqual(u'n', c.fetchone()[0])
+        self.assertEqual(c.fetchone(), None)
         c.close()
             
     @defer.inlineCallbacks
@@ -423,6 +436,7 @@ class CardstoriesGameTest(unittest.TestCase):
         other_game = CardstoriesGame(self.service, self.game.get_id())
         other_game.load(c)
         self.assertEquals(other_game.get_players(), [owner_id] + invited)
+        other_game.destroy()
         participation = yield self.game.participate({ 'player_id': [invited[0]],
                                                          'game_id': [game['game_id']] })
         self.assertEquals([game['game_id']], result['game_id'])
@@ -446,9 +460,186 @@ class CardstoriesGameTest(unittest.TestCase):
         self.assertEquals([game['game_id']], result['game_id'])
         self.assertEquals(self.game.modified, result['modified'][0])
         
+    @defer.inlineCallbacks
+    def test11_leave(self):
+        card = 5
+        sentence = 'SENTENCE'
+        owner_id = 15
+        game = yield self.game.create({ 'card': [card],
+                                           'sentence': [sentence],
+                                           'owner_id': [owner_id]})
+        cards = [card]
+        players = [ 16, 17 ]
+        for player_id in players:
+            yield self.game.participate({ 'player_id': [player_id],
+                                             'game_id': [game['game_id']] })
+            player = yield self.game.player2game({ 'player_id': [player_id],
+                                                      'game_id': [game['game_id']] })
+        modified = self.game.get_modified()
+        self.assertTrue(players[0] in self.game.get_players())
+        self.assertTrue(players[1] in self.game.get_players())
+        result = yield self.game.leave_api({'player_id': players,
+                                            'game_id': [self.game.get_id()] })
+        self.assertTrue(self.game.get_modified() > modified)
+        self.assertEqual(result['deleted'], 2)
+        self.assertFalse(players[0] in self.game.get_players())
+        self.assertFalse(players[1] in self.game.get_players())
+
+    @defer.inlineCallbacks
+    def test12_cancel(self):
+        card = 5
+        sentence = 'SENTENCE'
+        owner_id = 15
+        game = yield self.game.create({ 'card': [card],
+                                        'sentence': [sentence],
+                                        'owner_id': [owner_id]})
+        cards = [card]
+        players = [ 16, 17 ]
+        for player_id in players:
+            yield self.game.participate({ 'player_id': [player_id],
+                                          'game_id': [game['game_id']] })
+        invited = 20
+        yield self.game.invite({ 'game_id': [game['game_id']],
+                                 'player_id': [invited],
+                                 'owner_id': [owner_id] })
+        self.assertEquals([owner_id] + players + [invited], self.game.get_players())
+
+        game_info = yield self.game.game({ 'game_id': [game['game_id']], 'player_id': [owner_id] })
+        self.assertEquals(game_info['state'], u'invitation')
+        self.assertEquals([ player[0] for player in game_info['players']], [owner_id] + players)
+        d = self.game.poll({'modified':[self.game.get_modified()]})
+        def check(result):
+            self.game.canceled = True
+            self.assertEqual(result, None)
+        d.addCallback(check)
+        result = yield self.game.cancel()
+        self.assertTrue(self.game.canceled)
+        self.assertEquals(result, {})
+        game_info = yield self.game.game({ 'game_id': [game['game_id']], 'player_id': [owner_id] })
+        self.assertEquals(game_info['state'], u'canceled')
+        self.assertEquals(game_info['players'], [])
+
+    @defer.inlineCallbacks
+    def test13_state_change(self):
+        winner_card = 5
+        sentence = 'SENTENCE'
+        owner_id = 15
+        game = yield self.game.create({ 'card': [winner_card],
+                                        'sentence': [sentence],
+                                        'owner_id': [owner_id]})
+        players = [ 16, 17 ]
+        for player_id in players:
+            yield self.game.participate({ 'player_id': [player_id],
+                                             'game_id': [game['game_id']] })
+            player = yield self.game.player2game({ 'player_id': [player_id],
+                                                      'game_id': [game['game_id']] })
+            card = player['cards'][0]
+            yield self.game.pick({ 'player_id': [player_id],
+                                      'game_id': [game['game_id']],
+                                      'card': [card] })
+        
+        result = yield self.game.state_change()
+        self.assertEquals(result, CardstoriesGame.STATE_CHANGE_TO_VOTE)
+
+        c = self.db.cursor()
+        c.execute("SELECT board FROM games WHERE id = %d" % game['game_id'])
+        board = c.fetchone()[0]
+        winner_id = 16
+        yield self.game.vote({ 'game_id': [game['game_id']],
+                                  'player_id': [winner_id],
+                                  'card': [winner_card] })
+        loser_id = 17
+        yield self.game.vote({ 'game_id': [game['game_id']],
+                               'player_id': [loser_id],
+                               'card': [120] })
+        result = yield self.game.state_change()
+        self.assertEquals(result, CardstoriesGame.STATE_CHANGE_TO_COMPLETE)
+        c.execute("SELECT win FROM player2game WHERE game_id = %d AND player_id != %d" % ( game['game_id'], owner_id ))
+        self.assertEqual(u'y', c.fetchone()[0])
+        self.assertEqual(u'n', c.fetchone()[0])
+        self.assertEqual(c.fetchone(), None)
+        c.close()
+
+    @defer.inlineCallbacks
+    def test14_state_change_cancel_invitation(self):
+        winner_card = 5
+        sentence = 'SENTENCE'
+        owner_id = 15
+        game = yield self.game.create({ 'card': [winner_card],
+                                        'sentence': [sentence],
+                                        'owner_id': [owner_id]})
+        cards = [winner_card]
+        pick_players = [ 16 ]
+        players = pick_players + [ 18 ]
+        for player_id in players:
+            yield self.game.participate({ 'player_id': [player_id],
+                                          'game_id': [game['game_id']] })
+        for player_id in pick_players:
+            player = yield self.game.player2game({ 'player_id': [player_id],
+                                                   'game_id': [game['game_id']] })
+            card = player['cards'][0]
+            cards.append(card)
+            yield self.game.pick({ 'player_id': [player_id],
+                                   'game_id': [game['game_id']],
+                                   'card': [card] })
+        result = yield self.game.state_change()
+        self.assertEquals(result, CardstoriesGame.STATE_CHANGE_CANCEL)
+
+    @defer.inlineCallbacks
+    def test15_state_change_cancel_voting(self):
+        winner_card = 5
+        sentence = 'SENTENCE'
+        owner_id = 15
+        game = yield self.game.create({ 'card': [winner_card],
+                                           'sentence': [sentence],
+                                           'owner_id': [owner_id]})
+        voting_players = [ 16 ]
+        players = voting_players + [ 17, 18 ]
+        for player_id in players:
+            yield self.game.participate({ 'player_id': [player_id],
+                                             'game_id': [game['game_id']] })
+            player = yield self.game.player2game({ 'player_id': [player_id],
+                                                      'game_id': [game['game_id']] })
+            card = player['cards'][0]
+            yield self.game.pick({ 'player_id': [player_id],
+                                      'game_id': [game['game_id']],
+                                      'card': [card] })
+        
+        yield self.game.voting({ 'game_id': [game['game_id']],
+                                    'owner_id': [owner_id] })
+
+        c = self.db.cursor()
+        c.execute("SELECT board FROM games WHERE id = %d" % game['game_id'])
+        board = c.fetchone()[0]
+        winner_id = 16
+        yield self.game.vote({ 'game_id': [game['game_id']],
+                                  'player_id': [winner_id],
+                                  'card': [winner_card] })
+        self.assertEquals(self.game.get_players(), [owner_id] + players)
+        result = yield self.game.state_change()
+        self.assertEquals(result, CardstoriesGame.STATE_CHANGE_CANCEL)
+
+    @defer.inlineCallbacks
+    def test16_timeout(self):
+        winner_card = 5
+        sentence = 'SENTENCE'
+        owner_id = 15
+        self.game.settings['game-timeout'] = 0.01
+        game = yield self.game.create({ 'card': [winner_card],
+                                           'sentence': [sentence],
+                                           'owner_id': [owner_id]})
+        d = self.game.poll({'modified': [self.game.get_modified()]})
+        def check(result):
+            self.assertEqual(self.game.get_players(), [owner_id])
+            self.assertEqual(result, None)
+            return result
+        d.addCallback(check)
+        result = yield d
+        self.assertEqual(result, None)
+
 def Run():
     loader = runner.TestLoader()
-#    loader.methodPrefix = "test10_"
+#    loader.methodPrefix = "test16_"
     suite = loader.suiteFactory()
     suite.addTest(loader.loadClass(CardstoriesGameTest))
 

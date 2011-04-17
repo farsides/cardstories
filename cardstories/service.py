@@ -120,7 +120,7 @@ class CardstoriesService(service.Service):
             )
 
     def load(self, c):
-        c.execute("SELECT id FROM games WHERE state != 'complete'")
+        c.execute("SELECT id FROM games WHERE state != 'complete' AND state != 'canceled'")
         for (id,) in c.fetchall():
             game = CardstoriesGame(self, id)
             game.load(c)
@@ -172,10 +172,10 @@ class CardstoriesService(service.Service):
             player.access_time = int(runtime.seconds() * 1000)
         return player
 
-    def poll_notify_players(self, args):
+    def game_notify(self, args, game_id):
         if args == None:
+            del self.games[game_id]
             return False
-        game_id = int(args['game_id'][0])
         if not self.games.has_key(game_id):
             return False
         game = self.games[game_id]
@@ -183,7 +183,7 @@ class CardstoriesService(service.Service):
             if self.players.has_key(player_id):
                 self.players[player_id].touch(args)
         d = game.poll(args)
-        d.addCallback(self.poll_notify_players)
+        d.addCallback(self.game_notify, game_id)
         return True
 
     def create(self, args):
@@ -192,8 +192,8 @@ class CardstoriesService(service.Service):
         def success(value):
             self.games[game.get_id()] = game
             args['modified'] = [ game.modified ]
-            args['game_id'] = [ game.id ]
-            self.poll_notify_players(args)
+            args['game_id'] = [ game.get_id() ]
+            self.game_notify(args, game.get_id())
             return value
         d.addCallback(success)
         return d
@@ -203,7 +203,6 @@ class CardstoriesService(service.Service):
         game_id = int(args['game_id'][0])
         def success(value):
             self.games[game_id].destroy()
-            del self.games[game_id]
             return value
         d.addCallback(success)
         return d
@@ -211,10 +210,12 @@ class CardstoriesService(service.Service):
     def game(self, args):
         game_id = self.required_game_id(args)
         if self.games.has_key(game_id):
-            game = self.games[game_id]
+            return self.games[game_id].game(args)
         else:
             game = CardstoriesGame(self, self.required_game_id(args))
-        return game.game(args)
+            game_info = game.game(args)
+            game.destroy()
+            return game_info
 
     def game_proxy(self, args):
         game_id = self.required_game_id(args)
@@ -233,7 +234,7 @@ class CardstoriesService(service.Service):
     def lobby(self, args):
         self.required(args, 'lobby', 'player_id', 'in_progress')
         if args['in_progress'][0] == 'true':
-            complete = 'state != "complete"'
+            complete = 'state != "complete" AND state != "canceled"'
         else:
             complete = 'state = "complete"'
         order = " ORDER BY created DESC"

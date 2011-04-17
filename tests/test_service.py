@@ -225,7 +225,6 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         # if there is no in core representation of the game, 
         # a temporary one is created
         self.service.games[game_info['id']].destroy()
-        del self.service.games[game_info['id']]
         game_info = yield self.service.game({ 'game_id': [game['game_id']] })
         self.assertEquals(game['game_id'], game_info['id'])
 
@@ -375,7 +374,7 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         self.assertFalse(func())
 
     @defer.inlineCallbacks
-    def test07_poll_notify_players(self):
+    def test07_game_notify(self):
         #
         # notify player called as a side effect of game.touch
         #
@@ -402,11 +401,11 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
             self.assertEquals(result['game_id'], [game.id])
             return result
         d.addCallback(check)
-        game.touch() # calls poll_notify_players indirectly
+        game.touch() # calls game_notify indirectly
         #
-        # calling poll_notify_players on a non existent game is a noop
+        # calling game_notify on a non existent game is a noop
         #
-        self.assertFalse(self.service.poll_notify_players({'game_id': [200]}))
+        self.assertFalse(self.service.game_notify({}, 200))
 
     @defer.inlineCallbacks
     def test08_poll(self):
@@ -454,9 +453,34 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         game.touch()
         self.assertTrue(game.ok)
         
+
+    @defer.inlineCallbacks
+    def test09_cancel(self):
+        card = 5
+        sentence = 'SENTENCE'
+        owner_id = 15
+        game = yield self.service.create({ 'action': ['create'],
+                                           'card': [card],
+                                           'sentence': [sentence],
+                                           'owner_id': [owner_id]})
+        players = [ 16, 17 ]
+        for player_id in players:
+            yield self.service.participate({ 'action': ['participate'],
+                                             'player_id': [player_id],
+                                             'game_id': [game['game_id']] })
+        invited = 20
+        yield self.service.invite({ 'action': ['invite'],
+                                    'game_id': [game['game_id']],
+                                    'player_id': [invited],
+                                    'owner_id': [owner_id] })
+        game = self.service.games[game['game_id']]
+        self.assertEquals([owner_id] + players + [invited], game.get_players())
+        yield game.cancel()
+        self.assertFalse(self.service.games.has_key(game.id))
+
 def Run():
     loader = runner.TestLoader()
-#    loader.methodPrefix = "test05_"
+#    loader.methodPrefix = "test09_"
     suite = loader.suiteFactory()
     suite.addTest(loader.loadClass(CardstoriesServiceTestInit))
     suite.addTest(loader.loadClass(CardstoriesServiceTest))
