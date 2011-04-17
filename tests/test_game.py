@@ -50,10 +50,12 @@ class CardstoriesGameTest(unittest.TestCase):
         # create a game from scratch
         #
         card = 5
-        sentence = u'SENTENCE é'
+        str_sentence = 'SENTENCE \xc3\xa9' # str containing unicode because that is what happens when
+                                           # twisted web decodes %c3%a9
+        utf8_sentence = u'SENTENCE \xe9'
         owner_id = 15
         result = yield self.game.create({ 'card': [card],
-                                          'sentence': [sentence],
+                                          'sentence': [str_sentence],
                                           'owner_id': [owner_id]})
         c = self.db.cursor()
         c.execute("SELECT * FROM games")
@@ -63,7 +65,7 @@ class CardstoriesGameTest(unittest.TestCase):
         self.assertEquals(owner_id, rows[0][1])
         one_player = 1
         self.assertEquals(one_player, rows[0][2])
-        self.assertEquals(sentence, rows[0][3])
+        self.assertEquals(utf8_sentence, rows[0][3])
         self.assertFalse(chr(card) in rows[0][4])
         self.assertEquals(chr(card), rows[0][5])
         c.execute("SELECT cards FROM player2game WHERE game_id = %d AND player_id = %d" %  ( result['game_id'], owner_id ))
