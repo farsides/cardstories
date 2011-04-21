@@ -26,7 +26,6 @@ from twisted.web import resource, client
 from twisted.enterprise import adbapi
 
 from cardstories.game import CardstoriesGame
-from cardstories.player import CardstoriesPlayer
 
 from OpenSSL import SSL
 
@@ -187,14 +186,19 @@ class CardstoriesService(service.Service):
         return True
 
     def create(self, args):
+        self.required(args, 'create', 'card', 'sentence', 'owner_id')
+        card = int(args['card'][0])
+        sentence = args['sentence'][0].decode('utf-8')
+        owner_id = int(args['owner_id'][0])
+
         game = CardstoriesGame(self)
-        d = game.create(args)
-        def success(value):
+        d = game.create(card, sentence, owner_id)
+        def success(game_id):
             self.games[game.get_id()] = game
             args['modified'] = [ game.modified ]
             args['game_id'] = [ game.get_id() ]
             self.game_notify(args, game.get_id())
-            return value
+            return {'game_id': game_id}
         d.addCallback(success)
         return d
 

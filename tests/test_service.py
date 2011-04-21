@@ -118,16 +118,20 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
     @defer.inlineCallbacks
     def test01_create(self):
         card = 5
-        sentence = 'SENTENCE'
+        str_sentence = 'SENTENCE \xc3\xa9' # str containing unicode because that is what happens when
+                                           # twisted web decodes %c3%a9
+        utf8_sentence = u'SENTENCE \xe9'
         owner_id = 15
         result = yield self.service.create({ 'card': [card],
-                                             'sentence': [sentence],
+                                             'sentence': [str_sentence],
                                              'owner_id': [owner_id]})
         c = self.db.cursor()
         c.execute("SELECT * FROM games")
         rows = c.fetchall()
         self.assertEquals(1, len(rows))
         self.assertEquals(result['game_id'], rows[0][0])
+        self.assertEquals(utf8_sentence, rows[0][3])
+        self.assertEquals(chr(card), rows[0][5])
         self.assertEquals(self.service.games[result['game_id']].get_id(), result['game_id'])
         c.close()
 

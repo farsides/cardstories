@@ -143,16 +143,13 @@ class CardstoriesGame(pollable):
         return game_id
 
     @defer.inlineCallbacks
-    def create(self, args):
-        self.service.required(args, 'create', 'card', 'sentence', 'owner_id')
-        card = chr(int(args['card'][0]))
-        sentence = args['sentence'][0].decode('utf-8')
-        self.owner_id = int(args['owner_id'][0])
-        game_id = yield self.service.db.runInteraction(self.createInteraction, card, sentence, self.owner_id)
+    def create(self, card, sentence, owner_id):
+        self.owner_id = owner_id
+        game_id = yield self.service.db.runInteraction(self.createInteraction, chr(card), sentence, self.owner_id)
         self.id = game_id
         self.players.append(self.owner_id)
         self.update_timer()
-        defer.returnValue({'game_id': game_id})
+        defer.returnValue(game_id)
 
     @defer.inlineCallbacks
     def game(self, args):
