@@ -234,10 +234,7 @@ class CardstoriesGame(pollable):
         defer.returnValue(self.touch())
 
     @defer.inlineCallbacks
-    def voting(self, args):
-        self.service.required(args, 'voting', 'owner_id', 'game_id')
-        game_id = int(args['game_id'][0])
-        owner_id = int(args['owner_id'][0])
+    def voting(self, owner_id):
         game = yield self.game({ 'player_id': [self.get_owner_id()], 'game_id': [self.get_id()] })
         discarded = []
         board = []
