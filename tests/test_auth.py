@@ -47,10 +47,10 @@ class AuthTest(unittest.TestCase):
         os.unlink(self.database)
 
     @defer.inlineCallbacks
-    def test00(self):
-        player = u'player@domain.com'
-        invited = u'invited@self.org'
-        owner = u'owner@domain.com'
+    def test00_translate(self):
+        player = u'player'
+        invited = u'invited'
+        owner = u'owner'
         class request:
             def __init__(self):
                 self.args = { 'player_id': [ player, invited ], 'owner_id': [ owner ] }
@@ -79,6 +79,37 @@ class AuthTest(unittest.TestCase):
         self.assertEquals(result_out, { 'players': [ [ player ],
                                                      [ owner ] ] })
         
+
+    @defer.inlineCallbacks
+    def test01_invite(self):
+        mails = [ u'mail1@foo.com', u'mail2@foo.com' ]
+        game_id = 20
+        class request:
+            def __init__(self):
+                self.args = { 'player_id': mails,
+                              'game_id': [ game_id ],
+                              'action': [ 'invite' ] }
+        host = 'HOST'
+        self.auth.settings['mail-host'] = host
+        sender = 'FROM'
+        self.auth.settings['mail-from'] = sender
+        subject = 'SUBJECT'
+        self.auth.settings['mail-subject'] = subject
+        body = '%(player_id)s %(game_id)s'
+        self.auth.settings['mail-body'] = body
+        request1 = request()
+        result_in = 'RESULT'
+        self.auth.count = 0
+        def sendmail(_host, _sender, _mail, payload):
+            self.assertEqual(_host, host)
+            self.assertEqual(_sender, sender)
+            self.assertEqual(_mail, mails[self.auth.count])
+            self.failUnlessSubstring(body % { 'player_id': mails[self.auth.count],
+                                              'game_id': game_id }, payload)
+            self.auth.count += 1
+            return defer.succeed(True)
+        self.auth.sendmail = sendmail
+        result_out = yield self.auth.preprocess(result_in, request1)
 
 def Run():
     loader = runner.TestLoader()

@@ -58,7 +58,11 @@ start_service() {
       mkdir -p /var/run/$PLUGIN
       chown $CARDSTORIES_USER:nogroup /var/run/$PLUGIN
   fi
-  start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON -- $DAEMON_OPTS 
+  start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON -- $DAEMON_OPTS \
+      --mail-host $(CARDSTORIES_HOST) \
+      --mail-subject "$(CARDSTORIES_SUBJECT)" \
+      --mail-from "$(CARDSTORIES_FROM)" \
+      --mail-body "$(CARDSTORIES_BODY)"
   e=$?
   if [ $e -eq 1 ]; then
     echo "already running"

@@ -18,13 +18,17 @@
 #
 import os
 
+from email.mime.text import MIMEText
+
 from twisted.internet import defer
 from twisted.enterprise import adbapi
+from twisted.mail.smtp import sendmail
 
 class Auth:
 
     def __init__(self, settings):
         self.settings = settings
+        self.sendmail = sendmail
         database = self.settings['auth-db']
         exists = os.path.exists(database)
         if not exists:
@@ -48,7 +52,26 @@ class Auth:
         return transaction.lastrowid
         
     @defer.inlineCallbacks
+    def invite(self, game_id, player_ids):
+        if game_id and player_ids:
+            mails = filter(lambda player_id: '@' in player_id, player_ids)
+            if len(mails) > 0:
+                body = self.settings.get('mail-body', 'http://localhost:4923/static/?player_id=%(player_id)s&game_id=%(game_id)s')
+                sender = self.settings.get('mail-from', 'cardstories')
+                host = self.settings.get('mail-host', 'localhost')
+                for mail in mails:
+                    msg = MIMEText(body % { 'player_id': mail,
+                                            'game_id': game_id[0] })
+                    msg['Subject'] = self.settings.get('mail-subject', 'Cardstories invitation')
+                    msg['From'] = sender
+                    msg['To'] = mail
+                    yield self.sendmail(host, sender, mail, msg.as_string())
+        defer.returnValue(None)
+        
+    @defer.inlineCallbacks
     def preprocess(self, result, request):
+        if request.args.get('action') == ['invite']:
+            yield self.invite(request.args.get('game_id'), request.args.get('player_id'))
         for (key, values) in request.args.iteritems():
             if key == 'player_id' or key == 'owner_id':
                 new_values = []

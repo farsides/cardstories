@@ -2,7 +2,7 @@ Source: cardstories
 Section: python
 Priority: optional
 Maintainer: Loic Dachary <loic@debian.org>
-Build-Depends: debhelper (>= 7), python-support (>= 0.8.5), python-coverage, python-twisted-web (>= 10.2), jscoverage
+Build-Depends: debhelper (>= 7), python-support (>= 0.8.5), python-coverage, python-twisted-web (>= 10.2), python-twisted-mail, jscoverage
 Standards-Version: 3.9.1
 Vcs-Git: git://cardstories.dachary.org/cardstories.git
 Homepage: http://cardstories.dachary.org/
@@ -11,7 +11,7 @@ X-Python-Version: all
 Package: python-cardstories
 Section: python
 Architecture: all
-Depends: ${misc:Depends}, adduser, python-twisted-web (>= 10.2), python-openssl, ${python:Depends}
+Depends: ${misc:Depends}, adduser, python-twisted-web (>= 10.2), python-twisted-mail, python-openssl, ${python:Depends}
 Provides: ${python:Provides}
 Description: Find out a card using a sentence made up by another player
   A player (who we will call the author) creates a new game. 
