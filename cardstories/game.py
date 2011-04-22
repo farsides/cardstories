@@ -227,11 +227,8 @@ class CardstoriesGame(pollable):
         transaction.execute("DELETE FROM invitations WHERE game_id = ? AND player_id = ?", [ game_id, player_id ])
 
     @defer.inlineCallbacks
-    def participate(self, args):
-        self.service.required(args, 'participate', 'player_id', 'game_id')
-        player_id = int(args['player_id'][0])
-        game_id = int(args['game_id'][0])
-        yield self.service.db.runInteraction(self.participateInteraction, game_id, player_id)
+    def participate(self, player_id):
+        yield self.service.db.runInteraction(self.participateInteraction, self.get_id(), player_id)
         if player_id in self.invited:
             self.invited.remove(player_id)
         self.players.append(player_id)

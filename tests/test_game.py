@@ -98,8 +98,7 @@ class CardstoriesGameTest(unittest.TestCase):
         cards_length = c.fetchone()[0]
         player_id = 23
         self.assertEquals([owner_id], self.game.get_players())
-        participation = yield self.game.participate({ 'player_id': [player_id],
-                                                         'game_id': [game_id] })
+        participation = yield self.game.participate(player_id)
         self.assertEquals([game_id], participation['game_id'])
         self.assertEquals([owner_id, player_id], self.game.get_players())
         c.execute("SELECT LENGTH(cards) FROM games WHERE id = %d" % game_id)
@@ -116,8 +115,7 @@ class CardstoriesGameTest(unittest.TestCase):
                                           'owner_id': [owner_id] })
         self.assertEquals([owner_id, player_id], self.game.players)
         self.assertEquals([invited], self.game.invited)
-        participation = yield self.game.participate({ 'player_id': [invited],
-                                                      'game_id': [game_id] })
+        participation = yield self.game.participate(invited)
         self.assertEquals([game_id], participation['game_id'])
         self.assertEquals([owner_id, player_id, invited], self.game.players)
         self.assertEquals([], self.game.invited)
@@ -130,8 +128,7 @@ class CardstoriesGameTest(unittest.TestCase):
         owner_id = 15
         game_id = yield self.game.create(card, sentence, owner_id)
         player_id = 23
-        yield self.game.participate({ 'player_id': [player_id],
-                                         'game_id': [game_id] })
+        yield self.game.participate(player_id)
         player = yield self.game.player2game({ 'player_id': [player_id],
                                                   'game_id': [game_id] })
         self.assertEquals(self.game.CARDS_PER_PLAYER, len(player['cards']))
@@ -146,8 +143,7 @@ class CardstoriesGameTest(unittest.TestCase):
         game_id = yield self.game.create(card, sentence, owner_id)
         player2card = {}
         for player_id in ( 16, 17 ):
-            yield self.game.participate({ 'player_id': [player_id],
-                                             'game_id': [game_id] })
+            yield self.game.participate(player_id)
             player = yield self.game.player2game({ 'player_id': [player_id],
                                                       'game_id': [game_id] })
             player2card[player_id] = player['cards'][0]
@@ -171,8 +167,7 @@ class CardstoriesGameTest(unittest.TestCase):
         pick_players = [ 16, 17 ]
         players = pick_players + [ 18 ]
         for player_id in players:
-            yield self.game.participate({ 'player_id': [player_id],
-                                          'game_id': [game_id] })
+            yield self.game.participate(player_id)
         for player_id in pick_players:
             player = yield self.game.player2game({ 'player_id': [player_id],
                                                    'game_id': [game_id] })
@@ -207,8 +202,7 @@ class CardstoriesGameTest(unittest.TestCase):
         owner_id = 15
         game_id = yield self.game.create(card, sentence, owner_id)
         for player_id in ( 16, 17 ):
-            yield self.game.participate({ 'player_id': [player_id],
-                                             'game_id': [game_id] })
+            yield self.game.participate(player_id)
             player = yield self.game.player2game({ 'player_id': [player_id],
                                                       'game_id': [game_id] })
             card = player['cards'][0]
@@ -238,8 +232,7 @@ class CardstoriesGameTest(unittest.TestCase):
         voting_players = [ 16, 17 ]
         players = voting_players + [ 18 ]
         for player_id in players:
-            yield self.game.participate({ 'player_id': [player_id],
-                                             'game_id': [game_id] })
+            yield self.game.participate(player_id)
             player = yield self.game.player2game({ 'player_id': [player_id],
                                                       'game_id': [game_id] })
             card = player['cards'][0]
@@ -283,8 +276,7 @@ class CardstoriesGameTest(unittest.TestCase):
         player2 = 17
         card2 = 25
         for player_id in ( player1, player2 ):
-            result = yield self.game.participate({ 'player_id': [player_id],
-                                                      'game_id': [game_id] })
+            result = yield self.game.participate(player_id)
             self.assertEquals([game_id], result['game_id'])
 
         # invitation state, visitor point of view
@@ -417,8 +409,7 @@ class CardstoriesGameTest(unittest.TestCase):
         other_game.load(c)
         self.assertEquals(other_game.get_players(), [owner_id] + invited)
         other_game.destroy()
-        participation = yield self.game.participate({ 'player_id': [invited[0]],
-                                                         'game_id': [game_id] })
+        participation = yield self.game.participate(invited[0])
         self.assertEquals([game_id], result['game_id'])
         c.execute("SELECT * FROM invitations WHERE game_id = %d" % game_id)
         self.assertEquals(c.fetchall(), [(invited[1], game_id)])
@@ -447,8 +438,7 @@ class CardstoriesGameTest(unittest.TestCase):
         cards = [card]
         players = [ 16, 17 ]
         for player_id in players:
-            yield self.game.participate({ 'player_id': [player_id],
-                                             'game_id': [game_id] })
+            yield self.game.participate(player_id)
             player = yield self.game.player2game({ 'player_id': [player_id],
                                                       'game_id': [game_id] })
         modified = self.game.get_modified()
@@ -470,8 +460,7 @@ class CardstoriesGameTest(unittest.TestCase):
         cards = [card]
         players = [ 16, 17 ]
         for player_id in players:
-            yield self.game.participate({ 'player_id': [player_id],
-                                          'game_id': [game_id] })
+            yield self.game.participate(player_id)
         invited = 20
         yield self.game.invite({ 'game_id': [game_id],
                                  'player_id': [invited],
@@ -501,8 +490,7 @@ class CardstoriesGameTest(unittest.TestCase):
         game_id = yield self.game.create(winner_card, sentence, owner_id)
         players = [ 16, 17 ]
         for player_id in players:
-            yield self.game.participate({ 'player_id': [player_id],
-                                             'game_id': [game_id] })
+            yield self.game.participate(player_id)
             player = yield self.game.player2game({ 'player_id': [player_id],
                                                       'game_id': [game_id] })
             card = player['cards'][0]
@@ -542,8 +530,7 @@ class CardstoriesGameTest(unittest.TestCase):
         pick_players = [ 16 ]
         players = pick_players + [ 18 ]
         for player_id in players:
-            yield self.game.participate({ 'player_id': [player_id],
-                                          'game_id': [game_id] })
+            yield self.game.participate(player_id)
         for player_id in pick_players:
             player = yield self.game.player2game({ 'player_id': [player_id],
                                                    'game_id': [game_id] })
@@ -564,8 +551,7 @@ class CardstoriesGameTest(unittest.TestCase):
         voting_players = [ 16 ]
         players = voting_players + [ 17, 18 ]
         for player_id in players:
-            yield self.game.participate({ 'player_id': [player_id],
-                                             'game_id': [game_id] })
+            yield self.game.participate(player_id)
             player = yield self.game.player2game({ 'player_id': [player_id],
                                                       'game_id': [game_id] })
             card = player['cards'][0]
