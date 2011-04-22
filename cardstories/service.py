@@ -251,8 +251,14 @@ class CardstoriesService(service.Service):
         game_id = self.required_game_id(args)
         return self.game_method(game_id, args['action'][0], player_id, card)
 
+    def vote(self, args):
+        self.required(args, 'vote', 'player_id', 'card')
+        player_id = int(args['player_id'][0])
+        card = int(args['card'][0])
+        game_id = self.required_game_id(args)
+        return self.game_method(game_id, args['action'][0], player_id, card)
+
     voting = game_proxy
-    vote = game_proxy
     invite = game_proxy
 
     @defer.inlineCallbacks

@@ -206,9 +206,7 @@ class CardstoriesGameTest(unittest.TestCase):
         c = self.db.cursor()
         for player_id in ( owner_id, 16, 17 ):
             vote = 1
-            yield self.game.vote({ 'game_id': [game_id],
-                                      'player_id': [player_id],
-                                      'card': [vote] })
+            yield self.game.vote(player_id, vote)
             c.execute("SELECT vote FROM player2game WHERE game_id = %d AND player_id = %d" % ( game_id, player_id ))
             self.assertEqual(chr(vote), c.fetchone()[0])
         c.close()
@@ -234,13 +232,9 @@ class CardstoriesGameTest(unittest.TestCase):
         c.execute("SELECT board FROM games WHERE id = %d" % game_id)
         board = c.fetchone()[0]
         winner_id = 16
-        yield self.game.vote({ 'game_id': [game_id],
-                                  'player_id': [winner_id],
-                                  'card': [winner_card] })
+        yield self.game.vote(winner_id, winner_card)
         loser_id = 17
-        yield self.game.vote({ 'game_id': [game_id],
-                               'player_id': [loser_id],
-                               'card': [120] })
+        yield self.game.vote(loser_id, 120)
         self.assertEquals(self.game.get_players(), [owner_id] + players)
         yield self.game.complete({ 'game_id': [game_id],
                                    'owner_id': [owner_id] })
@@ -339,13 +333,9 @@ class CardstoriesGameTest(unittest.TestCase):
         self.assertEquals(u'vote', game_info['state'])
 
         # every player vote
-        result = yield self.game.vote({ 'game_id': [game_id],
-                                           'player_id': [player1],
-                                           'card': [card2] })
+        result = yield self.game.vote(player1, card2)
         self.assertEquals([game_id], result['game_id'])
-        result = yield self.game.vote({ 'game_id': [game_id],
-                                           'player_id': [player2],
-                                           'card': [card1] })
+        result = yield self.game.vote(player2, card1)
         self.assertEquals([game_id], result['game_id'])
         # vote state, player point of view
         self.game.modified = 555
@@ -484,13 +474,9 @@ class CardstoriesGameTest(unittest.TestCase):
         c.execute("SELECT board FROM games WHERE id = %d" % game_id)
         board = c.fetchone()[0]
         winner_id = 16
-        yield self.game.vote({ 'game_id': [game_id],
-                                  'player_id': [winner_id],
-                                  'card': [winner_card] })
+        yield self.game.vote(winner_id, winner_card)
         loser_id = 17
-        yield self.game.vote({ 'game_id': [game_id],
-                               'player_id': [loser_id],
-                               'card': [120] })
+        yield self.game.vote(loser_id, 120)
         result = yield self.game.state_change()
         self.assertEquals(result, CardstoriesGame.STATE_CHANGE_TO_COMPLETE)
         c.execute("SELECT win FROM player2game WHERE game_id = %d AND player_id != %d" % ( game_id, owner_id ))
@@ -539,9 +525,7 @@ class CardstoriesGameTest(unittest.TestCase):
         c.execute("SELECT board FROM games WHERE id = %d" % game_id)
         board = c.fetchone()[0]
         winner_id = 16
-        yield self.game.vote({ 'game_id': [game_id],
-                                  'player_id': [winner_id],
-                                  'card': [winner_card] })
+        yield self.game.vote(winner_id, winner_card)
         self.assertEquals(self.game.get_players(), [owner_id] + players)
         result = yield self.game.state_change()
         self.assertEquals(result, CardstoriesGame.STATE_CHANGE_CANCEL)

@@ -268,12 +268,8 @@ class CardstoriesGame(pollable):
         defer.returnValue(self.touch())
 
     @defer.inlineCallbacks
-    def vote(self, args):
-        self.service.required(args, 'vote', 'player_id', 'game_id', 'card')
-        player_id = int(args['player_id'][0])
-        game_id = int(args['game_id'][0])
-        vote = int(args['card'][0])
-        yield self.service.db.runOperation("UPDATE player2game SET vote = ? WHERE game_id = %d AND player_id = %d" % ( game_id, player_id ), [ chr(vote) ])
+    def vote(self, player_id, vote):
+        yield self.service.db.runOperation("UPDATE player2game SET vote = ? WHERE game_id = ? AND player_id = ?", [ chr(vote), self.get_id(), player_id ])
         defer.returnValue(self.touch())
 
     def completeInteraction(self, transaction, game_id, owner_id):
