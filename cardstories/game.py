@@ -78,7 +78,7 @@ class CardstoriesGame(pollable):
 
     @defer.inlineCallbacks
     def state_change(self):
-        game = yield self.game({ 'player_id': [self.get_owner_id()], 'game_id': [self.get_id()] })
+        game = yield self.game(self.get_owner_id())
         if game['state'] == 'invitation':
             if game['ready']:
                 yield self.voting({ 'owner_id': [self.get_owner_id()],
@@ -151,14 +151,8 @@ class CardstoriesGame(pollable):
         defer.returnValue(game_id)
 
     @defer.inlineCallbacks
-    def game(self, args):
-        self.service.required(args, 'game', 'game_id')
-        game_id = int(args['game_id'][0])
-        if args.has_key('player_id'):
-            player_id = int(args['player_id'][0])
-        else:
-            player_id = None
-        rows = yield self.service.db.runQuery("SELECT owner_id, sentence, cards, board, state FROM games WHERE id = ?", [game_id])
+    def game(self, player_id):
+        rows = yield self.service.db.runQuery("SELECT owner_id, sentence, cards, board, state FROM games WHERE id = ?", [self.get_id()])
         ( owner_id, sentence, cards, board, state ) = rows[0]
         if owner_id == player_id:
             cards = [ ord(c) for c in cards ]
@@ -168,7 +162,7 @@ class CardstoriesGame(pollable):
             board = None
         else:
             board = [ ord(c) for c in board ]
-        rows = yield self.service.db.runQuery("SELECT player_id, cards, picked, vote, win FROM player2game WHERE game_id = ? ORDER BY player_id", [ game_id ])
+        rows = yield self.service.db.runQuery("SELECT player_id, cards, picked, vote, win FROM player2game WHERE game_id = ? ORDER BY player_id", [ self.get_id() ])
         picked_count = 0
         voted_count = 0
         players = []
@@ -201,7 +195,7 @@ class CardstoriesGame(pollable):
             ready = picked_count >= self.MIN_PICKED
         elif state == 'vote':
             ready = voted_count >= self.MIN_VOTED
-        defer.returnValue({ 'id': game_id,
+        defer.returnValue({ 'id': self.get_id(),
                             'modified': self.get_modified(),
                             'sentence': sentence,
                             'winner_card': winner_card,
@@ -235,7 +229,7 @@ class CardstoriesGame(pollable):
 
     @defer.inlineCallbacks
     def voting(self, owner_id):
-        game = yield self.game({ 'player_id': [self.get_owner_id()], 'game_id': [self.get_id()] })
+        game = yield self.game(self.get_owner_id())
         discarded = []
         board = []
         for player in game['players']:
@@ -292,7 +286,7 @@ class CardstoriesGame(pollable):
 
     @defer.inlineCallbacks
     def complete(self, owner_id):
-        game = yield self.game({ 'player_id': [self.get_owner_id()], 'game_id': [self.get_id()] })
+        game = yield self.game(self.get_owner_id())
         no_vote = filter(lambda player: player[1] == None and player[0] != self.get_owner_id(), game['players'])
         yield self.leave([ player[0] for player in no_vote ])
         yield self.service.db.runInteraction(self.completeInteraction, self.get_id(), owner_id)

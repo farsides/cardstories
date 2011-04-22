@@ -254,7 +254,7 @@ class CardstoriesGameTest(unittest.TestCase):
 
         # invitation state, visitor point of view
         self.game.modified = 444
-        game_info = yield self.game.game({ 'game_id': [game_id] })
+        game_info = yield self.game.game(None)
         self.assertEquals({'board': None,
                            'cards': None,
                            'id': game_id,
@@ -268,7 +268,7 @@ class CardstoriesGameTest(unittest.TestCase):
                            'modified': self.game.modified}, game_info)
         
         # invitation state, owner point of view
-        game_info = yield self.game.game({ 'game_id': [game_id], 'player_id': [owner_id] })
+        game_info = yield self.game.game(owner_id)
         self.assertEquals([winner_card], game_info['board'])
         self.assertTrue(winner_card not in game_info['cards'])
         self.assertEquals(self.game.NCARDS, len(game_info['cards']) + sum(map(lambda player: len(player[4]), game_info['players'])))
@@ -296,14 +296,14 @@ class CardstoriesGameTest(unittest.TestCase):
         self.assertEquals([game_id], result['game_id'])
 
         # invitation state, owner point of view
-        game_info = yield self.game.game({ 'game_id': [game_id], 'player_id': [owner_id] })
+        game_info = yield self.game.game(owner_id)
         self.assertTrue(game_info['ready'])
 
         # move to vote state
         result = yield self.game.voting(owner_id)
         self.assertEquals([game_id], result['game_id'])
         # vote state, owner point of view
-        game_info = yield self.game.game({ 'game_id': [game_id], 'player_id': [owner_id] })
+        game_info = yield self.game.game(owner_id)
         self.assertEquals([winner_card, card1, card2], game_info['board'])
         self.assertTrue(winner_card not in game_info['cards'])
         self.assertEquals(self.game.NCARDS, len(game_info['cards']) + sum(map(lambda player: len(player[4]), game_info['players'])))
@@ -330,7 +330,7 @@ class CardstoriesGameTest(unittest.TestCase):
         self.assertEquals([game_id], result['game_id'])
         # vote state, player point of view
         self.game.modified = 555
-        game_info = yield self.game.game({ 'game_id': [game_id], 'player_id': [player1] })
+        game_info = yield self.game.game(player1)
         player1_cards = game_info['players'][1][4]
         self.assertEquals({'board': [winner_card, card1, card2],
                            'cards': None,
@@ -425,7 +425,7 @@ class CardstoriesGameTest(unittest.TestCase):
         yield self.game.invite([invited])
         self.assertEquals([owner_id] + players + [invited], self.game.get_players())
 
-        game_info = yield self.game.game({ 'game_id': [game_id], 'player_id': [owner_id] })
+        game_info = yield self.game.game(owner_id)
         self.assertEquals(game_info['state'], u'invitation')
         self.assertEquals([ player[0] for player in game_info['players']], [owner_id] + players)
         d = self.game.poll({'modified':[self.game.get_modified()]})
@@ -436,7 +436,7 @@ class CardstoriesGameTest(unittest.TestCase):
         result = yield self.game.cancel()
         self.assertTrue(self.game.canceled)
         self.assertEquals(result, {})
-        game_info = yield self.game.game({ 'game_id': [game_id], 'player_id': [owner_id] })
+        game_info = yield self.game.game(owner_id)
         self.assertEquals(game_info['state'], u'canceled')
         self.assertEquals(game_info['players'], [])
 

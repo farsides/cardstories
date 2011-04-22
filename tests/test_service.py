@@ -226,6 +226,11 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
                                            'owner_id': [owner_id]})
         game_info = yield self.service.game({ 'game_id': [game['game_id']] })
         self.assertEquals(game['game_id'], game_info['id'])
+        self.assertEquals(game_info['winner_card'], None)
+        game_info = yield self.service.game({ 'game_id': [game['game_id']],
+                                              'player_id': [owner_id] })
+        self.assertEquals(game['game_id'], game_info['id'])
+        self.assertEquals(game_info['winner_card'], winner_card)
         # if there is no in core representation of the game, 
         # a temporary one is created
         self.service.games[game_info['id']].destroy()

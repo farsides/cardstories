@@ -214,12 +214,17 @@ class CardstoriesService(service.Service):
         return d
 
     def game(self, args):
+        self.required(args, 'game')
         game_id = self.required_game_id(args)
-        if self.games.has_key(game_id):
-            return self.games[game_id].game(args)
+        if args.has_key('player_id'):
+            player_id = int(args['player_id'][0])
         else:
-            game = CardstoriesGame(self, self.required_game_id(args))
-            game_info = game.game(args)
+            player_id = None
+        if self.games.has_key(game_id):
+            return self.games[game_id].game(player_id)
+        else:
+            game = CardstoriesGame(self, game_id)
+            game_info = game.game(player_id)
             game.destroy()
             return game_info
 
