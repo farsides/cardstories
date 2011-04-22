@@ -236,8 +236,7 @@ class CardstoriesGameTest(unittest.TestCase):
         loser_id = 17
         yield self.game.vote(loser_id, 120)
         self.assertEquals(self.game.get_players(), [owner_id] + players)
-        yield self.game.complete({ 'game_id': [game_id],
-                                   'owner_id': [owner_id] })
+        yield self.game.complete(owner_id)
         self.assertEquals(self.game.get_players(), [owner_id] + voting_players)
         c.execute("SELECT win FROM player2game WHERE game_id = %d AND player_id != %d" % ( game_id, owner_id ))
         self.assertEqual(u'y', c.fetchone()[0])

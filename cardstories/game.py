@@ -89,8 +89,7 @@ class CardstoriesGame(pollable):
                 result = self.STATE_CHANGE_CANCEL
         elif game['state'] == 'vote':
             if game['ready']:
-                yield self.complete({ 'owner_id': [self.get_owner_id()],
-                                      'game_id': [self.get_id()] })
+                yield self.complete(self.get_owner_id())
                 result = self.STATE_CHANGE_TO_COMPLETE
             else:
                 yield self.cancel()
@@ -295,14 +294,11 @@ class CardstoriesGame(pollable):
         transaction.execute("UPDATE games SET completed = datetime('now'), state = 'complete' WHERE id = %d" % game_id)
 
     @defer.inlineCallbacks
-    def complete(self, args):
-        self.service.required(args, 'complete', 'owner_id', 'game_id')
-        owner_id = int(args['owner_id'][0])
-        game_id = int(args['game_id'][0])
+    def complete(self, owner_id):
         game = yield self.game({ 'player_id': [self.get_owner_id()], 'game_id': [self.get_id()] })
         no_vote = filter(lambda player: player[1] == None and player[0] != self.get_owner_id(), game['players'])
         yield self.leave([ player[0] for player in no_vote ])
-        yield self.service.db.runInteraction(self.completeInteraction, game_id, owner_id)
+        yield self.service.db.runInteraction(self.completeInteraction, self.get_id(), owner_id)
         defer.returnValue(self.touch())
 
     def cancelInvitations(self):
