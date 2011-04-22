@@ -263,12 +263,8 @@ class CardstoriesGame(pollable):
                             'win': rows[0][3] })
 
     @defer.inlineCallbacks
-    def pick(self, args):
-        self.service.required(args, 'pick', 'player_id', 'game_id', 'card')
-        player_id = int(args['player_id'][0])
-        game_id = int(args['game_id'][0])
-        card = int(args['card'][0])
-        yield self.service.db.runOperation("UPDATE player2game SET picked = ? WHERE game_id = %d AND player_id = %d" % ( game_id, player_id ), [ chr(card) ])
+    def pick(self, player_id, card):
+        yield self.service.db.runOperation("UPDATE player2game SET picked = ? WHERE game_id = ? AND player_id = ?", [ chr(card), self.get_id(), player_id ])
         defer.returnValue(self.touch())
 
     @defer.inlineCallbacks

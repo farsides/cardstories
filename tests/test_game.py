@@ -145,9 +145,7 @@ class CardstoriesGameTest(unittest.TestCase):
             yield self.game.participate(player_id)
             player = yield self.game.player2game(player_id)
             player2card[player_id] = player['cards'][0]
-            yield self.game.pick({ 'player_id': [player_id],
-                                      'game_id': [game_id],
-                                      'card': [ player2card[player_id] ] })
+            yield self.game.pick(player_id, player2card[player_id] )
         
         c = self.db.cursor()
         for player_id in ( 16, 17 ):
@@ -170,9 +168,7 @@ class CardstoriesGameTest(unittest.TestCase):
             player = yield self.game.player2game(player_id)
             card = player['cards'][0]
             cards.append(card)
-            yield self.game.pick({ 'player_id': [player_id],
-                                   'game_id': [game_id],
-                                   'card': [card] })
+            yield self.game.pick(player_id,card)
         invited = 20
         yield self.game.invite({ 'game_id': [game_id],
                                  'player_id': [invited],
@@ -202,9 +198,7 @@ class CardstoriesGameTest(unittest.TestCase):
             yield self.game.participate(player_id)
             player = yield self.game.player2game(player_id)
             card = player['cards'][0]
-            yield self.game.pick({ 'player_id': [player_id],
-                                      'game_id': [game_id],
-                                      'card': [card] })
+            yield self.game.pick(player_id,card)
         
         yield self.game.voting({ 'game_id': [game_id],
                                     'owner_id': [owner_id] })
@@ -231,9 +225,7 @@ class CardstoriesGameTest(unittest.TestCase):
             yield self.game.participate(player_id)
             player = yield self.game.player2game(player_id)
             card = player['cards'][0]
-            yield self.game.pick({ 'player_id': [player_id],
-                                      'game_id': [game_id],
-                                      'card': [card] })
+            yield self.game.pick(player_id,card)
         
         yield self.game.voting({ 'game_id': [game_id],
                                     'owner_id': [owner_id] })
@@ -312,13 +304,9 @@ class CardstoriesGameTest(unittest.TestCase):
         self.assertEquals(u'invitation', game_info['state'])
 
         # players vote
-        result = yield self.game.pick({ 'player_id': [player1],
-                                           'game_id': [game_id],
-                                           'card': [card1] })
+        result = yield self.game.pick(player1,card1)
         self.assertEquals([game_id], result['game_id'])
-        result = yield self.game.pick({ 'player_id': [player2],
-                                           'game_id': [game_id],
-                                           'card': [card2] })
+        result = yield self.game.pick(player2,card2)
         self.assertEquals([game_id], result['game_id'])
 
         # invitation state, owner point of view
@@ -487,9 +475,7 @@ class CardstoriesGameTest(unittest.TestCase):
             yield self.game.participate(player_id)
             player = yield self.game.player2game(player_id)
             card = player['cards'][0]
-            yield self.game.pick({ 'player_id': [player_id],
-                                      'game_id': [game_id],
-                                      'card': [card] })
+            yield self.game.pick(player_id,card)
         
         result = yield self.game.state_change()
         self.assertEquals(result, CardstoriesGame.STATE_CHANGE_TO_VOTE)
@@ -528,9 +514,7 @@ class CardstoriesGameTest(unittest.TestCase):
             player = yield self.game.player2game(player_id)
             card = player['cards'][0]
             cards.append(card)
-            yield self.game.pick({ 'player_id': [player_id],
-                                   'game_id': [game_id],
-                                   'card': [card] })
+            yield self.game.pick(player_id,card)
         result = yield self.game.state_change()
         self.assertEquals(result, CardstoriesGame.STATE_CHANGE_CANCEL)
 
@@ -546,9 +530,7 @@ class CardstoriesGameTest(unittest.TestCase):
             yield self.game.participate(player_id)
             player = yield self.game.player2game(player_id)
             card = player['cards'][0]
-            yield self.game.pick({ 'player_id': [player_id],
-                                      'game_id': [game_id],
-                                      'card': [card] })
+            yield self.game.pick(player_id,card)
         
         yield self.game.voting({ 'game_id': [game_id],
                                     'owner_id': [owner_id] })
