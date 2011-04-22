@@ -255,10 +255,8 @@ class CardstoriesGame(pollable):
         defer.returnValue(self.touch())
 
     @defer.inlineCallbacks
-    def player2game(self, args):
-        player_id = int(args['player_id'][0])
-        game_id = int(args['game_id'][0])
-        rows = yield self.service.db.runQuery("SELECT cards, picked, vote, win FROM player2game WHERE game_id = %d AND player_id = %d" % ( game_id, player_id ))
+    def player2game(self, player_id):
+        rows = yield self.service.db.runQuery("SELECT cards, picked, vote, win FROM player2game WHERE game_id = %d AND player_id = %d" % ( self.get_id(), player_id ))
         defer.returnValue({ 'cards': map(lambda c: ord(c), rows[0][0]),
                             'picked': self.ord(rows[0][2]),
                             'vote': self.ord(rows[0][2]),

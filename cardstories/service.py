@@ -238,7 +238,12 @@ class CardstoriesService(service.Service):
         game_id = self.required_game_id(args)
         return self.game_method(game_id, args['action'][0], player_id)
 
-    player2game = game_proxy
+    def player2game(self, args):
+        self.required(args, 'player2game', 'player_id')
+        player_id = int(args['player_id'][0])
+        game_id = self.required_game_id(args)
+        return self.game_method(game_id, args['action'][0], player_id)
+
     voting = game_proxy
     pick = game_proxy
     vote = game_proxy
