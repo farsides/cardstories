@@ -302,12 +302,10 @@ class CardstoriesGame(pollable):
         return self.service.db.runQuery("DELETE FROM invitations WHERE game_id = ?", [ self.get_id() ])
 
     @defer.inlineCallbacks
-    def invite(self, args):
-        self.service.required(args, 'invite', 'owner_id', 'player_id', 'game_id')
-        game_id = args['game_id'][0]
-        for player_id in args['player_id']:
-            yield self.service.db.runQuery("INSERT INTO invitations (player_id, game_id) VALUES (?, ?)", [ player_id, game_id ])
-        self.invited += args['player_id']
+    def invite(self, player_ids):
+        for player_id in player_ids:
+            yield self.service.db.runQuery("INSERT INTO invitations (player_id, game_id) VALUES (?, ?)", [ player_id, self.get_id() ])
+        self.invited += player_ids
         defer.returnValue(self.touch())
 
     @staticmethod

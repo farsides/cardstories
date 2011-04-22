@@ -110,9 +110,7 @@ class CardstoriesGameTest(unittest.TestCase):
         # assert the difference for when an invited player participates
         #
         invited = 20
-        yield self.game.invite({ 'game_id': [game_id],
-                                          'player_id': [invited],
-                                          'owner_id': [owner_id] })
+        yield self.game.invite([invited])
         self.assertEquals([owner_id, player_id], self.game.players)
         self.assertEquals([invited], self.game.invited)
         participation = yield self.game.participate(invited)
@@ -170,9 +168,7 @@ class CardstoriesGameTest(unittest.TestCase):
             cards.append(card)
             yield self.game.pick(player_id,card)
         invited = 20
-        yield self.game.invite({ 'game_id': [game_id],
-                                 'player_id': [invited],
-                                 'owner_id': [owner_id] })
+        yield self.game.invite([invited])
         self.assertEquals([owner_id] + players + [invited], self.game.get_players())
         yield self.game.voting(owner_id)
         self.assertEquals([], self.game.invited)
@@ -360,9 +356,7 @@ class CardstoriesGameTest(unittest.TestCase):
         invited = [20,21]
         game_id = yield self.game.create(winner_card, sentence, owner_id)
         self.assertEquals([owner_id], self.game.get_players())
-        result = yield self.game.invite({ 'game_id': [game_id],
-                                             'player_id': invited,
-                                             'owner_id': [owner_id] })
+        result = yield self.game.invite(invited)
         self.assertEquals([game_id], result['game_id'])
         self.assertEquals(invited, self.game.invited)
         self.assertEquals([owner_id] + invited, self.game.get_players())
@@ -428,9 +422,7 @@ class CardstoriesGameTest(unittest.TestCase):
         for player_id in players:
             yield self.game.participate(player_id)
         invited = 20
-        yield self.game.invite({ 'game_id': [game_id],
-                                 'player_id': [invited],
-                                 'owner_id': [owner_id] })
+        yield self.game.invite([invited])
         self.assertEquals([owner_id] + players + [invited], self.game.get_players())
 
         game_info = yield self.game.game({ 'game_id': [game_id], 'player_id': [owner_id] })
