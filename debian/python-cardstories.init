@@ -46,6 +46,10 @@ export PYTHONPATH=/etc/cardstories
 
 DAEMON_OPTS="--pidfile=$PIDFILE --logfile=$LOGFILE -u "$CARDSTORIES_USER" -g "$CARDSTORIES_GROUP" $PLUGIN --auth basic --interface 0.0.0.0"
 
+# Redirection of 3 is needed because Debconf uses it and it might 
+# be inherited by webserver. See bug #446324.
+exec 3>/dev/null
+
 if [ ! -x $DAEMON ]; then
   echo "ERROR: Can't execute $DAEMON."
   exit 1
@@ -58,10 +62,10 @@ start_service() {
       chown $CARDSTORIES_USER:nogroup /var/run/$PLUGIN
   fi
   start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON -- $DAEMON_OPTS \
-      --mail-host $(CARDSTORIES_HOST) \
-      --mail-subject "$(CARDSTORIES_SUBJECT)" \
-      --mail-from "$(CARDSTORIES_FROM)" \
-      --mail-body "$(CARDSTORIES_BODY)"
+      --mail-host "$CARDSTORIES_HOST" \
+      --mail-subject "$CARDSTORIES_SUBJECT" \
+      --mail-from "$CARDSTORIES_FROM" \
+      --mail-body "$CARDSTORIES_BODY"
   e=$?
   if [ $e -eq 1 ]; then
     echo "already running"

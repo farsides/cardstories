@@ -21,8 +21,8 @@
 nginx_install() {
     included=/usr/share/cardstories/conf/nginx.conf
     conf=/etc/nginx/sites-available/default
-    if [ -f $conf ] && ! grep $include $conf > /dev/null ; then
-	perl -pi -e "print 'include $included;' if(m:location / {:)" $conf
+    if [ -f $conf ] && ! grep $included $conf > /dev/null ; then
+	perl -pi -e "print \"\tinclude $included;\n\" if(m:location / {:)" $conf
     fi
 }
 
@@ -52,11 +52,13 @@ if [ "$1" = "configure" ]; then
             nginx_install
         fi
 
+	# Redirection of 3 is needed because Debconf uses it and it might 
+	# be inherited by webserver. See bug #446324.
         if [ -f /etc/init.d/$webserver ] ; then
             if [ -x /usr/sbin/invoke-rc.d ]; then
-                invoke-rc.d $webserver reload || true
+                invoke-rc.d $webserver reload 3>/dev/null || true
             else
-                /etc/init.d/$webserver reload || true
+                /etc/init.d/$webserver reload 3>/dev/null || true
             fi
         fi
     done

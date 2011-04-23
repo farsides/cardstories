@@ -13,6 +13,7 @@ Come play with me at
 http://localhost:4923/static/?player_id=%(player_id)s&game_id=%(game_id)s
 
 Cheers
+EOF
 )
 CARDSTORIES_FROM=noreply@localhost
 CARDSTORIES_SUBJECT="Cardstories invitation"

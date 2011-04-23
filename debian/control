@@ -20,7 +20,6 @@ Section: python
 Architecture: all
 Depends: ${misc:Depends},
          adduser,
-         libjs-jquery (= 1.5.1),
          python-twisted-web (>= 10.2),
          python-twisted-mail,
          python-openssl,
