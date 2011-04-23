@@ -1,3 +1,3 @@
 /etc/default
-/var/cache/cardstories
+/var/lib/cardstories
 /var/log/cardstories

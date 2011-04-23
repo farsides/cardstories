@@ -24,6 +24,5 @@ if [ "$1" = "purge" ]; then
     if id -u cardstories >/dev/null 2>&1; then
         userdel cardstories
     fi
-    # Policy says log files "should be" removed.
-    rm -Rf /var/cache/cardstories /var/log/cardstories
+    rm -Rf /var/lib/cardstories /var/log/cardstories
 fi

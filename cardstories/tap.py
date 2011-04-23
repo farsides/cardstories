@@ -28,7 +28,7 @@ from cardstories.service import SSLContextFactory, CardstoriesService
 from cardstories.site import CardstoriesTree, CardstoriesResource
 
 class Options(usage.Options):
-    synopsis = "[-h|--help] [-p|--port=<number>] [-s|--ssl-port=<number>] [-P|--ssl-pem=</etc/cardstories/cert.pem>] [-d|--db=</var/cache/cardstories/cardstories.sqlite>] [-v|--verbose]"
+    synopsis = "[-h|--help] [-p|--port=<number>] [-s|--ssl-port=<number>] [-P|--ssl-pem=</etc/cardstories/cert.pem>] [-d|--db=</var/lib/cardstories/cardstories.sqlite>] [-v|--verbose]"
 
     longdesc = "Find out a card using a sentence made up by another player"
 
@@ -37,9 +37,9 @@ class Options(usage.Options):
          ["port", "p", 4923, "Port on which to listen", int],
          ["ssl-port", "s", None, "Port on which to listen for SSL", int],
          ["ssl-pem", "P", "/etc/cardstories/cert.pem", "certificate path name", str],
-         ["db", "d", "/var/cache/cardstories/cardstories.sqlite", "sqlite3 game database path", str],
+         ["db", "d", "/var/lib/cardstories/cardstories.sqlite", "sqlite3 game database path", str],
          ["auth", "a", None, "Authentication plugin values : basic", str],
-         ["auth-db", "", "/var/cache/cardstories/auth.sqlite", "sqlite3 auth database path", str],
+         ["auth-db", "", "/var/lib/cardstories/auth.sqlite", "sqlite3 auth database path", str],
          ["mail-host", "", "localhost", "SMTP host", str],
          ["mail-from", "", "cardstories", "From: line in invitations", str],
          ["mail-subject", "", "Cardstories invitation", "Subject: line in invitations", str],
