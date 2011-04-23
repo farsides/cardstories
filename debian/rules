@@ -23,3 +23,8 @@
 
 %:
 	dh  $@
+
+override_dh_clean:
+	make -f maintain.mk clean
+	dh_clean
+

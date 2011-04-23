@@ -1,4 +1,3 @@
-#
 # Copyright (C) 2011 Dachary <loic@dachary.org>
 #
 # This software's license gives you freedom; you can copy, convey,
@@ -16,20 +15,9 @@
 # along with this program in a file in the toplevel directory called
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
-all:
-
-check:
-	make -C tests check
-	jscoverage --no-instrument=js/jquery.query-2.1.7.js static static-coverage
-
-clean:
-	make -C tests clean
-	find . -name '*,cover' | xargs rm -f
-	rm -f etc/cardstories/twisted/plugins/dropin.cache
-	find . -name '*~' | xargs rm -f
-	find . -name '*.pyc' | xargs rm -f
-	rm -fr dist
-	rm -fr static/cardstories.zip
-	rm -f MANIFEST
-	rm -fr build
-
+Template: python-cardstories/reconfigure-webserver
+Type: multiselect
+Choices: nginx
+_Description: Web server to reconfigure automatically:
+ Please choose the web server that should be automatically configured
+ to run cardstories.

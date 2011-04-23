@@ -1,8 +1,14 @@
 Source: cardstories
 Section: python
 Priority: optional
-Maintainer: Loic Dachary <loic@debian.org>
-Build-Depends: debhelper (>= 7), python-support (>= 0.8.5), python-coverage, python-twisted-web (>= 10.2), python-twisted-mail, jscoverage, libjs-jquery (= 1.5.1)
+Maintainer: Loic Dachary (OuoU) <loic@debian.org>
+Build-Depends: debhelper (>= 7.0.50~),
+               po-debconf,
+               python-support (>= 0.8.5),
+               python-coverage,
+               python-twisted-web (>= 10.2),
+               python-twisted-mail,
+               jscoverage
 Standards-Version: 3.9.1
 Vcs-Git: http://cardstori.es/cardstories.git
 Vcs-Browser: http://cardstori.es/trac/browser
@@ -12,16 +18,22 @@ X-Python-Version: all
 Package: python-cardstories
 Section: python
 Architecture: all
-Depends: ${misc:Depends}, adduser, libjs-jquery (= 1.5.1), python-twisted-web (>= 10.2), python-twisted-mail, python-openssl, ${python:Depends}
+Depends: ${misc:Depends},
+         adduser,
+         libjs-jquery (= 1.5.1),
+         python-twisted-web (>= 10.2),
+         python-twisted-mail,
+         python-openssl,
+         ${python:Depends}
 Provides: ${python:Provides}
 Description: Find out a card using a sentence made up by another player
-  A player (who we will call the author) creates a new game. 
-  He chooses a card, picks a word or a sentence to describe it
-  and invites players to participate.
-  Each players is given seven cards and are required to pick
-  one that best matches the author's sentence.
-  Once enough players have chosen a card, the author displays all chosen
-  cards and the players try to figure out which one is the author's.
-  The author wins if at least one of the players guesses right, but not all
-  of them do. The winners are the author and the players who guessed right. 
-  If the author loses, all the other players win. 
+ player (who we will call the author) creates a new game. 
+ He chooses a card, picks a word or a sentence to describe it
+ and invites players to participate.
+ Each players is given seven cards and are required to pick
+ one that best matches the author's sentence.
+ Once enough players have chosen a card, the author displays all chosen
+ cards and the players try to figure out which one is the author's.
+ The author wins if at least one of the players guesses right, but not all
+ of them do. The winners are the author and the players who guessed right. 
+ If the author loses, all the other players win. 

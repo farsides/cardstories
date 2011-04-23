@@ -2,6 +2,7 @@ recursive-include static *.html *.js *.css *.png *.jpg *.gif *.svg Makefile
 recursive-include etc/cardstories *.py
 recursive-include tests *.py Makefile
 include etc/default/cardstories
+include conf/*.conf
 include maintain.mk
 include *.ai
 include MANIFEST

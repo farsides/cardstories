@@ -1,7 +1,6 @@
 cardstories (1.0.0-1) unstable; urgency=low
 
-  [ Loic Dachary (OuoU) ]
-  * initial version
+  * cardstories ITP (Closes: #623810).
 
- -- Loic Dachary (OuoU) <loic@debian.org>  Sun, 20 Mar 2011 13:01:25 -0400
+ -- Loic Dachary (OuoU) <loic@debian.org>  Sat, 23 Apr 2011 15:45:44 +0200
 

@@ -24,9 +24,8 @@
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: Starts a service for the Twisted plugin '$PLUGIN'
-# Description:       Generic plugin starter for twistd plugins
+# Description:       cardstories twistd plugin starter
 ### END INIT INFO
-# Author: Garret Heaton (powdahound@gmail.com)
 
 PLUGIN="cardstories"
 
