@@ -4,15 +4,6 @@
 // See: http://javascript.crockford.com/remedial.html
 //
 
-// node.js version
-// if (!String.prototype.supplant) {
-//   Object.defineProperty(String.prototype, "supplant", {value: function (o) {
-//     return this.replace(/\{([^{}]*)\}/g, function (a, b) {
-//       var r = o[b];
-//       return typeof r === 'string' || typeof r === 'number' ? r : a;
-//     });
-//   }});
-// }
 if(!String.prototype.supplant) {
   //
   // Douglas Crockford douglas@crockford.com snippet

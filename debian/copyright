@@ -1,13 +1,16 @@
 This package was debianized by Loic Dachary <loic@dachary.org> on
 Fri, 25 mar 2011 10:27:44 +0000.
 
-It was downloaded from <http://cardstories.dachary.org/>.
+It was downloaded from <http://cardstori.es/>.
 
 cardstories:
 
-   Copyright (c) 2011 Loic Dachary <loic@dachary.org>
+   Copyright (c) 2011 Loic Dachary <loic@dachary.org> (software)
+   Copyright (C) 2011 tartarugafeliz <contact@tartarugafeliz.com> (artwork)
+   Copyright (C) 2011 Xavier Antoviaque <xavier@antoviaque.org> (gameplay)
+   Copyright (C) 2011 David Blanchard <david@blanchard.name> (gameplay)
 
-License:
+cardstories server license:
  
   This software's license gives you freedom; you can copy, convey,
   propagate, redistribute and/or modify this program under the terms of
@@ -24,9 +27,95 @@ License:
   along with this program in a file in the toplevel directory called
   "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 
-static/js/webtoolkit.sha1.js:
-	
-   Copyright (c) 2011 contact@webtoolkit.info
+cardstories javascript client license:
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+static/tablesorter:
+
+ Copyright (c) 2007 Christian Bach
 
 License:
-   http://creativecommons.org/licenses/by/2.0/uk/
+
+ * Dual licensed under the MIT and GPL licenses:
+ * http://www.opensource.org/licenses/mit-license.php
+ * http://www.gnu.org/licenses/gpl.html
+
+static/js/jquery.cookie.js:
+
+ Copyright (c) 2006 Klaus Hartl (stilbuero.de)
+
+License:
+
+ * Dual licensed under the MIT and GPL licenses:
+ * http://www.opensource.org/licenses/mit-license.php
+ * http://www.gnu.org/licenses/gpl.html
+
+static/js/jquery.metadata.js:
+
+ Copyright (c) 2006 John Resig, Yehuda Katz, Jörn Zaefferer, Paul McLanahan
+
+License:
+
+ * Dual licensed under the MIT and GPL licenses:
+ * http://www.opensource.org/licenses/mit-license.php
+ * http://www.gnu.org/licenses/gpl.html
+
+static/test/qunit.js:
+static/test/qunit.css:
+
+  Copyright (c) 2011 John Resig, Jörn Zaefferer
+
+License:
+
+ * Dual licensed under the MIT and GPL licenses:
+ * http://www.opensource.org/licenses/mit-license.php
+ * http://www.gnu.org/licenses/gpl.html
+
+static/js/supplant.js:
+
+  Douglas Crockford douglas@crockford.com snippet
+
+License: 
+
+  The snippet is not copyrighted because it is trivial.
+
+static/js/jquery.query-2.1.7.js:
+
+ Blair Mitchelmore (blair DOT mitchelmore AT gmail DOT com)
+
+License:
+
+ WTFPL (http://sam.zoy.org/wtfpl/).
+
+static/js/jquery.jqDock.js:
+static/js/jquery.jqDock.min.js:
+
+ copyright 2011 Roger Barrett 
+ Copyright (c) 2007 Isaac Roca & icon.cat (iroca@icon.cat)
+
+License:
+
+ * Dual licensed under the MIT and GPL licenses:
+ * http://www.opensource.org/licenses/mit-license.php
+ * http://www.gnu.org/licenses/gpl.html
+ 
+static/js/jquery:
+
+ Copyright 2011, John Resig
+
+License:
+
+ Dual licensed under the MIT or GPL Version 2 licenses.
+ http://jquery.org/license
