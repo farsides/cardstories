@@ -304,6 +304,7 @@ class CardstoriesGameTest(unittest.TestCase):
         self.assertEquals([game_id], result['game_id'])
         # vote state, owner point of view
         game_info = yield self.game.game(owner_id)
+        game_info['board'].sort()
         self.assertEquals([winner_card, card1, card2], game_info['board'])
         self.assertTrue(winner_card not in game_info['cards'])
         self.assertEquals(self.game.NCARDS, len(game_info['cards']) + sum(map(lambda player: len(player[4]), game_info['players'])))
@@ -331,6 +332,7 @@ class CardstoriesGameTest(unittest.TestCase):
         # vote state, player point of view
         self.game.modified = 555
         game_info = yield self.game.game(player1)
+        game_info['board'].sort()
         player1_cards = game_info['players'][1][4]
         self.assertEquals({'board': [winner_card, card1, card2],
                            'cards': None,
