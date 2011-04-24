@@ -26,7 +26,7 @@ Depends: ${misc:Depends},
          ${python:Depends}
 Provides: ${python:Provides}
 Description: Find out a card using a sentence made up by another player
- player (who we will call the author) creates a new game. 
+ A player (who we will call the author) creates a new game. 
  He chooses a card, picks a word or a sentence to describe it
  and invites players to participate.
  Each players is given seven cards and are required to pick
