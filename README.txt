@@ -24,6 +24,6 @@ PYTHONPATH=.:etc/cardstories twistd --nodaemon cardstories --static $(pwd)/stati
 curl --silent http://localhost:4923/resource
 
 To create a source distribution use:
-python setup.py sdist --dist-dir .. ; mv ../cardstories-1.0.0.tar.gz ../cardstories_1.0.0.orig.tar.gz
+v=1.0.1 ; python setup.py sdist --dist-dir .. ; mv ../cardstories-$v.tar.gz ../cardstories_$v.orig.tar.gz
 To create the Debian GNU/Linux package use:
 dpkg-buildpackage -S -uc -us

@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Loic Dachary (OuoU) <loic@debian.org>
 Build-Depends: debhelper (>= 7.0.50~),
                po-debconf,
-               python-support (>= 0.8.5),
+               python-all (>= 2.6.6-3~),
                python-coverage,
                python-twisted-web (>= 10.2),
                python-twisted-mail,
@@ -13,7 +13,7 @@ Standards-Version: 3.9.1
 Vcs-Git: http://cardstori.es/cardstories.git
 Vcs-Browser: http://cardstori.es/trac/browser
 Homepage: http://cardstori.es/
-X-Python-Version: all
+X-Python-Version: >= 2.5
 
 Package: python-cardstories
 Section: python

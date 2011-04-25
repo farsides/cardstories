@@ -1,3 +1,10 @@
+cardstories (1.0.1-1) unstable; urgency=low
+
+  * switch to dh_python2 as explained in 
+    http://wiki.debian.org/Python/PythonSupportToDHPython2
+
+ -- Loic Dachary (OuoU) <loic@debian.org>  Mon, 25 Apr 2011 12:11:01 +0200
+
 cardstories (1.0.0-1) unstable; urgency=low
 
   * cardstories ITP (Closes: #623810).
