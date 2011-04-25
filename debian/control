@@ -4,9 +4,9 @@ Priority: optional
 Maintainer: Loic Dachary (OuoU) <loic@debian.org>
 Build-Depends: debhelper (>= 7.0.50~),
                po-debconf,
-               python-all (>= 2.6.6-3~),
+               python-all (>= 2.6.6-2~),
                python-coverage,
-               python-twisted-web (>= 10.2),
+               python-twisted-web (>= 10.1),
                python-twisted-mail,
                jscoverage
 Standards-Version: 3.9.2
@@ -20,7 +20,7 @@ Section: python
 Architecture: all
 Depends: ${misc:Depends},
          adduser,
-         python-twisted-web (>= 10.2),
+         python-twisted-web (>= 10.1),
          python-twisted-mail,
          python-openssl,
          ${python:Depends}
