@@ -25,6 +25,7 @@ check:
 clean:
 	make -C tests clean
 	find . -name '*,cover' | xargs rm -f
+	rm -fr static-coverage
 	rm -f etc/cardstories/twisted/plugins/dropin.cache
 	find . -name '*~' | xargs rm -f
 	find . -name '*.pyc' | xargs rm -f
