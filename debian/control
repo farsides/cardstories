@@ -9,11 +9,11 @@ Build-Depends: debhelper (>= 7.0.50~),
                python-twisted-web (>= 10.2),
                python-twisted-mail,
                jscoverage
-Standards-Version: 3.9.1
+Standards-Version: 3.9.2
 Vcs-Git: http://cardstori.es/cardstories.git
 Vcs-Browser: http://cardstori.es/trac/browser
 Homepage: http://cardstori.es/
-X-Python-Version: >= 2.5
+X-Python-Version: all
 
 Package: python-cardstories
 Section: python
