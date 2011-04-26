@@ -221,9 +221,12 @@ class CardstoriesService(service.Service):
             return self.games[game_id].game(player_id)
         else:
             game = CardstoriesGame(self, game_id)
-            game_info = game.game(player_id)
-            game.destroy()
-            return game_info
+            d = game.game(player_id)
+            def destroy(game_info):
+                game.destroy()
+                return game_info
+            d.addCallback(destroy)
+            return d
 
     def game_proxy(self, args):
         game_id = self.required_game_id(args)

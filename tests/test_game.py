@@ -438,6 +438,7 @@ class CardstoriesGameTest(unittest.TestCase):
         result = yield self.game.cancel()
         self.assertTrue(self.game.canceled)
         self.assertEquals(result, {})
+        self.game.service = self.service
         game_info = yield self.game.game(owner_id)
         self.assertEquals(game_info['state'], u'canceled')
         self.assertEquals(game_info['players'], [])

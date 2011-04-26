@@ -47,6 +47,8 @@ class CardstoriesGame(pollable):
     def destroy(self):
         if hasattr(self, 'timer') and self.timer.active():
             self.timer.cancel()
+        if hasattr(self, 'service'):
+            del self.service
         return pollable.destroy(self)
 
     def get_id(self):
