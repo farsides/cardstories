@@ -21,6 +21,8 @@ import sys
 from twisted.python import log, usage
 from twisted.application import internet, service, app
 from twisted.web import resource, server
+from twisted.cred import portal, checkers
+from twisted.conch import manhole, manhole_ssh
 
 from OpenSSL import SSL
 
@@ -51,8 +53,20 @@ class Options(usage.Options):
     ]
 
     optFlags = [
-        ["verbose", "v", "verbosity level"]
+        ["verbose", "v", "verbosity level"],
+        ["manhole", "", "allow ssh -p 2222 user@127.0.0.1 with password pass to get a manhole shell"]
         ]
+
+def getManholeFactory(namespace, **passwords):
+    realm = manhole_ssh.TerminalRealm()
+    def getManhole(_):
+        return manhole.Manhole(namespace)
+    realm.chainedProtocolFactory.protocolFactory = getManhole
+    p = portal.Portal(realm)
+    p.registerChecker(
+       checkers.InMemoryUsernamePasswordDatabaseDontUse(**passwords))
+    f = manhole_ssh.ConchFactory(p)
+    return f
 
 def makeService(settings):
     service_collection = service.MultiService()
@@ -60,6 +74,11 @@ def makeService(settings):
     cardstories_service.setServiceParent(service_collection)
 
     site = server.Site(CardstoriesTree(cardstories_service))
+
+    if settings.get('manhole', None):
+        internet.TCPServer(2222,
+                           getManholeFactory(locals(), user="pass"),
+                           interface='127.0.0.1').setServiceParent(service_collection)
 
     internet.TCPServer(settings['port'],
                        site,

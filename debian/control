@@ -8,6 +8,7 @@ Build-Depends: debhelper (>= 7.0.50~),
                python-coverage,
                python-twisted-web (>= 10.1),
                python-twisted-mail,
+               python-twisted-conch,
                jscoverage
 Standards-Version: 3.9.2
 Vcs-Git: http://cardstori.es/cardstories.git
