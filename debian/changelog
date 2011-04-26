@@ -1,3 +1,9 @@
+cardstories (1.0.3-2) unstable; urgency=low
+
+  * upstream release
+
+ -- Loic Dachary (OuoU) <loic@debian.org>  Tue, 26 Apr 2011 17:50:18 +0200
+
 cardstories (1.0.2-1) unstable; urgency=low
 
   * upstream release
