@@ -46,8 +46,8 @@ class Options(usage.Options):
          ["mail-from", "", "cardstories", "From: line in invitations", str],
          ["mail-subject", "", "Cardstories invitation", "Subject: line in invitations", str],
          ["mail-body", "", "http://localhost:4923/static/?player_id=%(player_id)s&game_id=%(game_id)s", "Body of invitations", str],
-         ["poll-timeout", "", 300, "Number of seconds before a long poll timesout", str],
-         ["game-timeout", "", (24 * 60 * 60), "Number of seconds before a game in progress timesout", str],
+         ["poll-timeout", "", 300, "Number of seconds before a long poll timesout", int],
+         ["game-timeout", "", (24 * 60 * 60), "Number of seconds before a game in progress timesout", int],
          ["static", "", "/usr/share/cardstories", "directory where /static files will be fetched", str]
     ]
 
