@@ -68,9 +68,6 @@ class CardstoriesService(service.Service):
         c.close()
         db.close()
         self.db = adbapi.ConnectionPool("sqlite3", database=database)
-        loop = self.settings.get('loop', 0)
-        if loop != 0:
-            return self.run(loop)
         
     def stopService(self):
         for game in self.games.values():
@@ -342,24 +339,6 @@ class CardstoriesService(service.Service):
         if game_id <= 0:
             raise UserWarning, 'game_id=%s must be an integer > 0' % args['game_id']
         return game_id
-
-    def tick(self):
-        return defer.succeed(True)
-
-    def run(self, count):
-        self.completed = defer.Deferred()
-        self.run_once(count)
-        return self.completed
-
-    def run_once(self, count):
-        d = self.tick()
-        count -= 1
-        def again(result):
-            if count != 0:
-                reactor.callLater(self.settings.get('click', 60), lambda: self.run_once(count))
-            else:
-                self.completed.callback(True)
-        d.addCallback(again)
 
 class SSLContextFactory:
 

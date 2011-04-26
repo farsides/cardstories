@@ -28,7 +28,7 @@ class CardstoriesServerTest(unittest.TestCase):
     def setUp(self):
         self.port = '14834'
         options = tap.Options()
-        options.parseOptions(['--port', self.port, '--db', 'test.sqlite', '--loop', '0' ])
+        options.parseOptions(['--port', self.port, '--db', 'test.sqlite' ])
         self.service = tap.makeService(options)
         self.service.startService()
 
@@ -125,7 +125,7 @@ class CardstoriesServerTestSSL(unittest.TestCase):
         fd.write(snake_oil_cert)
         fd.close()
         options = tap.Options()
-        options.parseOptions(['--port', self.port, '--ssl-port', self.ssl_port, '--ssl-pem', pem, '--db', 'test.sqlite', '--loop', '0' ])
+        options.parseOptions(['--port', self.port, '--ssl-port', self.ssl_port, '--ssl-pem', pem, '--db', 'test.sqlite' ])
         self.service = tap.makeService(options)
         self.service.startService()
 

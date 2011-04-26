@@ -82,22 +82,6 @@ class CardstoriesServiceTest(unittest.TestCase):
         os.unlink(self.database)
         return self.service.stopService()
 
-class CardstoriesServiceTestRun(unittest.TestCase):
-
-    def setUp(self):
-        self.database = 'test.sqlite'
-        if os.path.exists(self.database):
-            os.unlink(self.database)
-
-    def tearDown(self):
-        os.unlink(self.database)
-
-    def test00_run(self):
-        self.service = CardstoriesService({'db': self.database, 'loop': 2, 'click': 0.1})
-        d = self.service.startService()
-        d.addCallback(lambda result: self.assertTrue(result))
-        return d
-
 class CardstoriesServiceTestHandle(CardstoriesServiceTest):
 
     def test01_required(self):
@@ -494,7 +478,6 @@ def Run():
     suite.addTest(loader.loadClass(CardstoriesServiceTestInit))
     suite.addTest(loader.loadClass(CardstoriesServiceTest))
     suite.addTest(loader.loadClass(CardstoriesServiceTestHandle))
-    suite.addTest(loader.loadClass(CardstoriesServiceTestRun))
 
     return runner.TrialRunner(
         reporter.VerboseTextReporter,

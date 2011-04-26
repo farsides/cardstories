@@ -48,7 +48,6 @@ class Options(usage.Options):
          ["mail-body", "", "http://localhost:4923/static/?player_id=%(player_id)s&game_id=%(game_id)s", "Body of invitations", str],
          ["poll-timeout", "", 300, "Number of seconds before a long poll timesout", str],
          ["game-timeout", "", (24 * 60 * 60), "Number of seconds before a game in progress timesout", str],
-         ["loop", "", -1, "Number of ping batchs to run, -1 means forever, 0 means never", int],
          ["static", "", "/usr/share/cardstories", "directory where /static files will be fetched", str]
     ]
 
