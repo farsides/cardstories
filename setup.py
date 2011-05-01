@@ -34,6 +34,7 @@ for dirpath, dirnames, filenames in os.walk('static'):
 data_files.append(['/etc/default', ['etc/default/cardstories']])
 data_files.append(['/etc/cardstories/twisted/plugins', ['etc/cardstories/twisted/plugins/twisted_cardstories.py']])
 data_files.append(['/usr/share/cardstories/conf', [ 'conf/nginx.conf' ]])
+data_files.append(['/usr/share/cardstories/conf', [ 'conf/apache2.conf' ]])
 
 setup(name='cardstories',
       version='1.0.2',

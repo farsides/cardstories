@@ -17,7 +17,7 @@
 #
 Template: python-cardstories/reconfigure-webserver
 Type: multiselect
-Choices: nginx
+Choices: nginx, apache2
 _Description: Web server to reconfigure automatically:
  Please choose the web server that should be automatically configured
  to run cardstories. If the web server provides http://localhost/, 
