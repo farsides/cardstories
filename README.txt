@@ -27,3 +27,5 @@ To create a source distribution use:
 v=1.0.1 ; python setup.py sdist --dist-dir .. ; mv ../cardstories-$v.tar.gz ../cardstories_$v.orig.tar.gz
 To create the Debian GNU/Linux package use:
 dpkg-buildpackage -S -uc -us
+
+As of Apr, 26th 2011 there are 321 LOC of JavaScript, 687 LOC of Python = 1008 LOC
