@@ -153,6 +153,35 @@ test("game", function() {
     $.cardstories.game(player_id, game_id, $('#qunit-fixture .cardstories'));
 });
 
+test("invitation_owner_invite_more", function() {
+    setup();
+    expect(4);
+
+    var player1 = 'player1';
+    var card1 = 5;
+    var player2 = 'player2';
+    var player_id = player1;
+    var game_id = 101;
+
+    var game = {
+        'id': game_id,
+        'owner': true,
+        'ready': true,
+        'players': [ [ player1, null, 'n', card1, [] ],
+                     [ player2, null, 'n', null, [] ] ]
+    };
+
+    $.cardstories.poll_ignore = function(ignored_request, ignored_answer, new_poll, old_poll) { }
+    $.cardstories.ajax = function(options) { }
+
+    equal($('#qunit-fixture .cardstories_invitation .cardstories_owner.cardstories_active').length, 0);
+    $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
+    equal($('#qunit-fixture .cardstories_invitation .cardstories_owner.cardstories_active').length, 1);
+    $('#qunit-fixture .cardstories_invitation .cardstories_owner .cardstories_invite_friends').click();
+    equal($('#qunit-fixture .cardstories_invitation .cardstories_owner.cardstories_active').length, 0);
+    equal($('#qunit-fixture .cardstories_create .cardstories_advertise.cardstories_active').length, 1);
+});
+
 test("invitation_owner", function() {
     setup();
     expect(14);

@@ -322,8 +322,7 @@
             }
             var invite_friends = $('.cardstories_invite_friends', element);
             invite_friends.click(function() {
-                var root = $(element).parents('.cardstories_root');
-                $this.setTimeout(function() { $this.advertise(player_id, game.id, root); }, 30);
+                $this.advertise(player_id, game.id, root);
             });
         },
 
