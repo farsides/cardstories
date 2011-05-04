@@ -270,10 +270,20 @@
     position: absolute;
     background: transparent url('images/pending_invitations.png') no-repeat left top;
     top: 25%;
-    left: 5%;
-    height: 424px;
-    width: 794px;
+    left: 1%;
+    height: 530px;
+    width: 1000px;
     z-index: 1;
+}
+
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_invite_friends {
+    position: absolute;
+    background: transparent url('images/invite_friends_button.png') no-repeat left top;
+    top: 58%;
+    left: 83%;
+    height: 121px;
+    width: 129px;
+    z-index: 2;
 }
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_voting {

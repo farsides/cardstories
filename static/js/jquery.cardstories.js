@@ -320,6 +320,11 @@
                     $this.send_game(player_id, game.id, element, 'action=voting&owner_id=' + player_id + '&game_id=' + game.id);
                 });
             }
+            var invite_friends = $('.cardstories_invite_friends', element);
+            invite_friends.click(function() {
+                var root = $(element).parents('.cardstories_root');
+                $this.setTimeout(function() { $this.advertise(player_id, game.id, root); }, 30);
+            });
         },
 
         invitation_pick: function(player_id, game, root) {
