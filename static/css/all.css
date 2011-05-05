@@ -40,6 +40,11 @@
     top: 75px;
 }
 
+/* Change cursor to treat buttons as links */
+.cardstories_card, .cardstories_submit, .cardstories_start_story, .cardstories_invite_friends, .cardstories_ready {
+    cursor: pointer;
+}
+
 /* state where a sentence is displayed below the top line */
 
 .cardstories .cardstories_sentence_container {
@@ -321,7 +326,11 @@
     right: 5%;
     height: 76px;
     width: 109px;
+<<<<<<< HEAD
     z-index: 3;
+=======
+    z-index: 2;
+>>>>>>> 7b83704... http://cardstori.es/trac/ticket/28 - When an item is clickable, the mouse cursor should change from "arrow" to "hand" (missing differentiation between clickable & non-clickable cards)
 }
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_cards {
