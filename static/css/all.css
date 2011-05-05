@@ -1,4 +1,16 @@
-.cardstories { width: 1024px; height: 768px; position: relative; }
+body {
+    background-color: #8697A6;
+}
+
+.cardstories { 
+    width: 1024px; 
+    height: 768px; 
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-top: -364px;
+    margin-left: -512px; 
+}
 
 .cardstories { 
     background: #fff url('images/background.jpg') repeat-x left top;
