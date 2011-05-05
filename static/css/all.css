@@ -45,6 +45,11 @@
     cursor: pointer;
 }
 
+.cardstories_lobby_sentence {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
 /* state where a sentence is displayed below the top line */
 
 .cardstories .cardstories_sentence_container {
