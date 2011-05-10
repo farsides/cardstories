@@ -179,7 +179,7 @@ test("invitation_owner_invite_more", function() {
     equal($('#qunit-fixture .cardstories_invitation .cardstories_owner.cardstories_active').length, 1);
     $('#qunit-fixture .cardstories_invitation .cardstories_owner .cardstories_invite_friends').click();
     equal($('#qunit-fixture .cardstories_invitation .cardstories_owner.cardstories_active').length, 0);
-    equal($('#qunit-fixture .cardstories_create .cardstories_advertise.cardstories_active').length, 1);
+    equal($('#qunit-fixture .cardstories_advertise.cardstories_active').length, 1);
 });
 
 test("invitation_owner", function() {
