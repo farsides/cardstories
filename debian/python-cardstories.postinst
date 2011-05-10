@@ -26,6 +26,14 @@ nginx_install() {
     fi
 }
 
+apache2_install() {
+    included=/usr/share/cardstories/conf/apache2.conf
+    conf=/etc/apache2/conf.d/python-cardstories.conf
+    if [ ! -e $conf ] ; then
+        ln -s $included $conf
+    fi
+}
+
 . /usr/share/debconf/confmodule
 
 if ! id -u cardstories >/dev/null 2>&1; then
@@ -50,6 +58,8 @@ if [ "$1" = "configure" ]; then
         webserver=${webserver%,}
         if [ "$webserver" = "nginx" ] ; then
             nginx_install
+        elif [ "$webserver" = "apache2" ] ; then
+            apache2_install
         fi
 
 	# Redirection of 3 is needed because Debconf uses it and it might 

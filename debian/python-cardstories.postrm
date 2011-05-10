@@ -26,6 +26,11 @@ nginx_remove() {
     fi
 }
 
+apache2_remove() {
+    conf=/etc/apache2/config.d/python-cardstories.conf
+    rm -rf $conf
+}
+
 if [ -f /usr/share/debconf/confmodule ]; then
     . /usr/share/debconf/confmodule
 fi
@@ -50,15 +55,17 @@ if [ "$1" = "remove" ] || [ "$1" = "purge" ]; then
             webserver=${webserver%,}
             if [ "$webserver" = "nginx" ] ; then
                 nginx_remove
+            elif [ "$webserver" = "apache2" ] ; then
+                apache2_remove
             fi
 
 	    # Redirection of 3 is needed because Debconf uses it and it might 
 	    # be inherited by webserver. See bug #446324.
             if [ -f /etc/init.d/$webserver ] ; then
                 if [ -x /usr/sbin/invoke-rc.d ]; then
-                    invoke-rc.d $webserver reload 3>/dev/null || true
+                    invoke-rc.d $webserver restart 3>/dev/null || true
                 else
-                    /etc/init.d/$webserver reload 3>/dev/null || true
+                    /etc/init.d/$webserver restart 3>/dev/null || true
                 fi
             fi
         done
