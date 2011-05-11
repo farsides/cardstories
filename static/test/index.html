@@ -2,7 +2,7 @@
 <html>
   <head>
     <title>QUnit Test Suite</title>
-    <script type="text/javascript" src="../js/jquery/jquery-1.5.js"></script>
+    <script type="text/javascript" src="../js/jquery/jquery-1.6.js"></script>
     <script type="text/javascript" src="../js/supplant.js"></script>
 
     <link rel="stylesheet" href="../tablesorter/blue/style.css" type="text/css" media="screen">
@@ -32,14 +32,23 @@
         </div>
         <div class="cardstories_create">
           <div class="cardstories_pick_card">
-            <div class="cardstories_cards">
-              <img src="css/images/card01.png" class="cardstories_card" data="{card:1}" />
-              <img src="css/images/card02.png" class="cardstories_card" data="{card:2}" />
-              <img src="css/images/card03.png" class="cardstories_card" data="{card:3}" />
-              <img src="css/images/card04.png" class="cardstories_card" data="{card:4}" />
-              <img src="css/images/card05.png" class="cardstories_card" data="{card:5}" />
-              <img src="css/images/card06.png" class="cardstories_card" data="{card:6}" />
-              <img src="css/images/card07.png" class="cardstories_card" data="{card:7}" />
+            <div class="cardstories_card_confirm" data="{middle:3}">
+              <div class="cardstories_card_confirm_ok"></div>
+              <div class="cardstories_card_confirm_cancel"></div>
+            </div>
+            <div class="cardstories_cards_hand" data="{active:2,size:200,distance:200}">
+              <div class="cardstories_cards">
+                <a class="cardstories_card" href="javascript://"><img src="../css/images/card_medium_visiblepart.png" /></a>
+                <a class="cardstories_card" href="javascript://"><img src="../css/images/card_medium_visiblepart.png" /></a>
+                <a class="cardstories_card" href="javascript://"><img src="../css/images/card_medium_visiblepart.png" /></a>
+                <a class="cardstories_card" href="javascript://"><img src="../css/images/card_medium_visiblepart.png" /></a>
+                <a class="cardstories_card" href="javascript://"><img src="../css/images/card_medium_visiblepart.png" /></a>
+                <a class="cardstories_card" href="javascript://"><img src="../css/images/card_medium_visiblepart_full.png" /></a>
+              </div>
+              <div class="cardstories_card_template" data="{card:'../css/images/card0{card}.png',card_bg:'../css/images/card_bg.png',card_bg_selected:'../css/images/card_bg_selected.png',nocard:'../css/images/card-back.png'}">
+                <img class="cardstories_card_foreground" src="" alt="" />
+                <img class="cardstories_card_background" src="" alt="" />
+              </div>
             </div>
           </div>
           <div class="cardstories_write_sentence">

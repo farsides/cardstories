@@ -45,18 +45,29 @@
         },
 
         create: function(player_id, root) {
-            this.create_pick_card(player_id, root);
+            return this.create_pick_card(player_id, root);
+        },
+
+        create_deck: function() {
+            var deck = [];
+            for(var i = 1; i <= 36; i++) {
+                deck.push(i);
+            }
+            var cards = [];
+            for(var i = 0; i < 7; i++) {
+                cards.push(deck.splice(Math.floor(Math.random() * deck.length), 1)[0]);
+            }
+            return cards;
         },
 
         create_pick_card: function(player_id, root) {
             var $this = this;
             var element = $('.cardstories_create .cardstories_pick_card', root);
             this.set_active(root, element);
-            $('.cardstories_card', element).click(function() {
-                var card = $(this).metadata({type: "attr", name: "data"}).card;
+            var ok = function(card) {
                 $this.create_write_sentence(player_id, card, root);
-              });
-            $('.cardstories_cards', element).jqDock({ active: 3 });
+            };
+            return $this.select_cards($this.create_deck(), [], ok, element, {});
         },
 
         create_write_sentence: function(player_id, card, root) {
@@ -332,6 +343,86 @@
             this.set_active(root, element);
             this.player_select_card(player_id, game.id, game.sentence, game.self[2], 'pick', element, root);
             $('.cardstories_cards', element).jqDock({ active: game.self[2].length / 2});
+        },
+
+        select_cards: function(cards, titles, ok, element) {
+            var confirm = $('.cardstories_card_confirm', element);
+            var middle = confirm.metadata({type: "attr", name: "data"}).middle;
+            var confirm_callback = function(card, index, nudge, cards_element) {
+                confirm.toggleClass('cardstories_card_confirm_right', index > middle).show();
+                $('.cardstories_card_confirm_ok', confirm).unbind('click').click(function() {
+                    confirm.hide();
+                    ok(card);
+                    nudge();
+                });
+                $('.cardstories_card_confirm_cancel', confirm).unbind('click').click(function() {
+                    confirm.hide();
+                    nudge();
+                });
+            };
+            var hand = $('.cardstories_cards_hand', element);
+            return this.display_or_select_cards(cards, titles, confirm_callback, hand);
+        },
+
+        display_or_select_cards: function(cards, titles, select_callback, element) {
+            var meta = element.metadata({type: "attr", name: "data"});
+            var options = {
+                'active': meta.active,
+                'size': meta.size,
+                'distance': meta.distance
+            };
+            var template = $('.cardstories_card_template', element);
+            var dock = $('.cardstories_cards', element);
+
+            var deferred = $.Deferred();
+            options.onReady = function(is_ready) {
+                var links = $('a.cardstories_card', element);
+                var html = template.html();
+                var meta = template.metadata({type: "attr", name: "data"});
+                links.each(function(index) {
+                    var link = $(this);
+                    var card = cards[index];
+                    var card_file = meta.nocard;
+                    if(index < cards.length && card !== null) {
+                        card_file = meta.card.supplant({'card': card});
+                    }
+                    link.html(html);
+                    link.css({zIndex: 3 * (links.length - index)});
+                    $('.cardstories_card_background', link).attr('src', meta.card_bg).css({zIndex: links.length - index});
+                    var foreground = $('.cardstories_card_foreground', link);
+                    foreground.attr('src', card_file).css({zIndex: 2 * (links.length - index)});
+                    if(select_callback !== undefined) {
+                        link.metadata({type: "attr", name: "data"}).card = card;
+                        link.unbind('click').click(function() {
+                            link.addClass('cardstories_card_selected');
+                            var nudge = function() {
+                                link.removeClass('cardstories_card_selected');
+                                $('.cardstories_card_background', link).attr('src', meta.card_bg);
+                                dock.jqDock('nudge');
+                            };
+                            $('.cardstories_card_background', this).attr('src', meta.card_bg_selected);
+                            dock.jqDock('freeze');
+                            $(this).blur();
+                            select_callback.call(this, card, index, nudge, element);
+                        });
+                    }
+                });
+                deferred.resolve(is_ready);
+            };
+
+            if(titles.length > 0) {
+                options.setLabel = function(title, index, element) {
+                    var title;
+                    if(index < titles.length && titles[index] !== null) {
+                        title = titles[index];
+                    }
+                    return title;
+                };
+            }
+
+            dock.jqDock(options);
+
+            return deferred;
         },
 
         player_select_card: function(player_id, game_id, sentence, cards, action, element, root) {

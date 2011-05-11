@@ -3,7 +3,7 @@
 <head>
 	<title>Cardstories</title>
         <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
-	<script type="text/javascript" src="js/jquery/jquery-1.5.js"></script>
+	<script type="text/javascript" src="js/jquery/jquery-1.6.js"></script>
         <script type="text/javascript" src="js/supplant.js"></script>
 	<link rel="stylesheet" href="tablesorter/blue/style.css" type="text/css" media="screen">
 	<script type="text/javascript" src="tablesorter/jquery.tablesorter.js"></script>
@@ -45,43 +45,24 @@
           <div class="cardstories_pick_card">
             <div class="cardstories_bubble cardstories_bubble_pick_a_card"></div>
             <div class="cardstories_counter"></div>
-            <div class="cardstories_cards">
-              <img src="css/images/card01.png" class="cardstories_card" data="{card:1}" />
-              <img src="css/images/card02.png" class="cardstories_card" data="{card:2}" />
-              <img src="css/images/card03.png" class="cardstories_card" data="{card:3}" />
-              <img src="css/images/card04.png" class="cardstories_card" data="{card:4}" />
-              <img src="css/images/card05.png" class="cardstories_card" data="{card:5}" />
-              <img src="css/images/card06.png" class="cardstories_card" data="{card:6}" />
-              <img src="css/images/card07.png" class="cardstories_card" data="{card:7}" />
-              <img src="css/images/card08.png" class="cardstories_card" data="{card:8}" />
-              <img src="css/images/card09.png" class="cardstories_card" data="{card:9}" />
-              <img src="css/images/card010.png" class="cardstories_card" data="{card:10}" />
-              <img src="css/images/card011.png" class="cardstories_card" data="{card:11}" />
-              <img src="css/images/card012.png" class="cardstories_card" data="{card:12}" />
-              <img src="css/images/card013.png" class="cardstories_card" data="{card:13}" />
-              <img src="css/images/card014.png" class="cardstories_card" data="{card:14}" />
-              <img src="css/images/card015.png" class="cardstories_card" data="{card:15}" />
-              <img src="css/images/card016.png" class="cardstories_card" data="{card:16}" />
-              <img src="css/images/card017.png" class="cardstories_card" data="{card:17}" />
-              <img src="css/images/card018.png" class="cardstories_card" data="{card:18}" />
-              <img src="css/images/card019.png" class="cardstories_card" data="{card:19}" />
-              <img src="css/images/card020.png" class="cardstories_card" data="{card:20}" />
-              <img src="css/images/card021.png" class="cardstories_card" data="{card:21}" />
-              <img src="css/images/card022.png" class="cardstories_card" data="{card:22}" />
-              <img src="css/images/card023.png" class="cardstories_card" data="{card:23}" />
-              <img src="css/images/card024.png" class="cardstories_card" data="{card:24}" />
-              <img src="css/images/card025.png" class="cardstories_card" data="{card:25}" />
-              <img src="css/images/card026.png" class="cardstories_card" data="{card:26}" />
-              <img src="css/images/card027.png" class="cardstories_card" data="{card:27}" />
-              <img src="css/images/card028.png" class="cardstories_card" data="{card:28}" />
-              <img src="css/images/card029.png" class="cardstories_card" data="{card:29}" />
-              <img src="css/images/card030.png" class="cardstories_card" data="{card:30}" />
-              <img src="css/images/card031.png" class="cardstories_card" data="{card:31}" />
-              <img src="css/images/card032.png" class="cardstories_card" data="{card:32}" />
-              <img src="css/images/card033.png" class="cardstories_card" data="{card:33}" />
-              <img src="css/images/card034.png" class="cardstories_card" data="{card:34}" />
-              <img src="css/images/card035.png" class="cardstories_card" data="{card:35}" />
-              <img src="css/images/card036.png" class="cardstories_card" data="{card:36}" />
+            <div class="cardstories_card_confirm" data="{middle:3}">
+              <div class="cardstories_card_confirm_ok"></div>
+              <div class="cardstories_card_confirm_cancel"></div>
+            </div>
+            <div class="cardstories_cards_hand" data="{active:2,size:200,distance:200}">
+              <div class="cardstories_cards">
+                <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
+                <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
+                <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
+                <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
+                <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
+                <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
+                <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart_full.png" /></a>
+              </div>
+              <div class="cardstories_card_template" data="{card:'css/images/card0{card}.png',card_bg:'css/images/card_bg.png',card_bg_selected:'css/images/card_bg_selected.png',nocard:'css/images/card-back.png'}">
+                <img class="cardstories_card_foreground" src="" alt="" />
+                <img class="cardstories_card_background" src="" alt="" />
+              </div>
             </div>
           </div>
           <div class="cardstories_write_sentence">
