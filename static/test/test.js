@@ -271,8 +271,7 @@ test("invitation_pick", function() {
         };
 
         game.self[0] = picked;
-        $.cardstories.
-            invitation(player_id, game, $('#qunit-fixture .cardstories'));
+        $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
     };
 
     $.cardstories.
@@ -361,6 +360,7 @@ test("widget invitation", function() {
 
 test("vote_voter", function() {
     setup();
+    stop();
     expect(18);
 
     var player_id = 15;
@@ -382,32 +382,43 @@ test("vote_voter", function() {
 	'sentence': sentence
     };
     var element = $('#qunit-fixture .cardstories_vote .cardstories_voter');
-    $('.cardstories_card:nth(0)', element).attr('title', 'SOMETHING');
-    equal($('.cardstories_card:nth(1)', element).attr('title'), undefined);
+    $('.cardstories_card:nth(0) .cardstories_card_foreground', element).attr('alt', 'SOMETHING');
+    equal($('.cardstories_card:nth(1) .cardstories_card_foreground', element).attr('alt'), undefined);
     equal($('#qunit-fixture .cardstories_vote .cardstories_voter.cardstories_active').length, 0);
-    $.cardstories.vote(player_id, game, $('#qunit-fixture .cardstories'));
-    equal($('#qunit-fixture .cardstories_vote .cardstories_voter.cardstories_active').length, 1);
-    equal($('#qunit-fixture .cardstories_voter .cardstories_sentence').text(), sentence);
-    for(var i = 0; i < board.length; i++) {
-      equal($('.cardstories_card:nth(' + i + ')', element).attr('src'), 'PATH/card0' + board[i] + '.png');
-    }
-    equal($('.cardstories_card:nth(0)', element).attr('title'), undefined);
-    equal($('.cardstories_card:nth(1)', element).attr('title'), 'My Card');
-    equal($('.cardstories_card:nth(5)', element).attr('src'), 'PATH/nocard.png');
-    $('.cardstories_picked', element).click(); // must do nothing
-    $('.cardstories_card:nth(4)', element).click();
 
-    //
-    // the poll is not inhibited when a card has already been voted for
-    //
-    $.cardstories.poll_ignore = function(ignored_request, ignored_answer, new_poll, old_poll) {
-      equal(ignored_request.game_id, game_id, 'poll_ignore request game_id');
-      equal(new_poll, undefined, 'poll_ignore metadata not set');
-    }
+    var vote_voted = function() {
+        //
+        // the poll is not inhibited when a card has already been voted for
+        //
+        $.cardstories.poll_ignore = function(ignored_request, ignored_answer, new_poll, old_poll) {
+            equal(ignored_request.game_id, game_id, 'poll_ignore request game_id');
+            equal(new_poll, undefined, 'poll_ignore metadata not set');
+            $('.cardstories_card:nth(4)', element).click();
+            $('#qunit-fixture .cardstories_vote .cardstories_card_confirm_ok').click();
+            start();
+        }
 
-    game.self[1] = voted;
-    $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
-    $('.cardstories_card:nth(4)', element).click();
+        game.self[1] = voted;
+        $.cardstories.vote(player_id, game, $('#qunit-fixture .cardstories'));
+    };
+
+    $.cardstories.
+        vote(player_id, game, $('#qunit-fixture .cardstories')).
+        done(function(is_ready) {
+            equal($('#qunit-fixture .cardstories_vote .cardstories_voter.cardstories_active').length, 1);
+            equal($('#qunit-fixture .cardstories_voter .cardstories_sentence').text(), sentence);
+            for(var i = 0; i < board.length; i++) {
+                equal($('.cardstories_card:nth(' + i + ') .cardstories_card_foreground', element).attr('src'), 'PATH/card0' + board[i] + '.png');
+            }
+            equal($('.cardstories_card:nth(0) .cardstories_card_foreground', element).attr('alt'), '', 'card0 alt was reset');
+            equal($('.cardstories_card:nth(1) .cardstories_card_foreground', element).attr('alt'), 'My Card', 'card1 alt was set');
+            equal($('.cardstories_card:nth(5) .cardstories_card_foreground', element).attr('src'), 'PATH/nocard.png');
+            $('.cardstories_picked', element).click(); // must do nothing
+            $('.cardstories_card:nth(4)', element).click();
+            $('#qunit-fixture .cardstories_vote .cardstories_card_confirm_ok').click();
+
+            window.setTimeout(vote_voted, 50);
+        });
 });
 
 test("vote_viewer", function() {
@@ -875,8 +886,7 @@ test("display_or_select_cards move", function() {
       start();
     };
     $.cardstories.
-        display_or_select_cards([1,2,3,4,5,6],
-                                ['1','2','3','4','5','6'],
+        display_or_select_cards([{'value':1},{'value':2},{'value':3},{'value':4},{'value':5},{'value':6}],
                                 function() {}, 
                                 element).
         done(onReady);
@@ -885,18 +895,26 @@ test("display_or_select_cards move", function() {
 test("display_or_select_cards select", function() {
     setup();
     stop();
-    expect(5);
+    expect(6);
 
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_create .cardstories_cards_hand', root);
-    var cards = [1,2,3,4,5,6];
+    var label = 'LABEL';
+    var cards = [{'value':1},
+                 {'value':2,'label':label},
+                 {'value':3},
+                 {'value':4},
+                 {'value':5},
+                 {'value':6}];
     var selected = 1;
     var onReady = function(is_ready) {
+        var card_element = $('.cardstories_card', element).eq(1);
+        equal($('.cardstories_card_foreground', card_element).attr('alt'), label);
         $('.cardstories_card', element).eq(selected).click();
     };
     var meta = $('.cardstories_card_template', element).metadata({type: "attr", name: "data"});
     var select = function(card, index, nudge, element) {
-        equal(cards[index], card, 'selected card');
+        equal(cards[index].value, card, 'selected card');
         var link = $('.cardstories_card', element).eq(index);
         var background = $('.cardstories_card_background', link);
         ok(link.hasClass('cardstories_card_selected'), 'link has class cardstories_card_selected');
@@ -908,7 +926,6 @@ test("display_or_select_cards select", function() {
     };
     $.cardstories.
         display_or_select_cards(cards,
-                                ['1','2','3','4','5','6'],
                                 select, 
                                 element).
         done(onReady);
@@ -923,20 +940,19 @@ test("select_cards ok", function() {
     var element = $('.cardstories_create', root);
     var confirm = $('.cardstories_card_confirm', element);
     var middle = confirm.metadata({type: "attr", name: "data"}).middle;
-    var cards = [1,2,3,4,5,6];
+    var cards = [{'value':1},{'value':2},{'value':3},{'value':4},{'value':5},{'value':6}];
     var selected = 4;
     var onReady = function(is_ready) {
         $('.cardstories_card', element).eq(selected).click();
         $('.cardstories_card_confirm_ok', element).click();
     };
     var ok_callback = function(card) {
-        equal(cards[selected], card, 'selected card');
+        equal(cards[selected].value, card, 'selected card');
         ok(confirm.hasClass('cardstories_card_confirm_right'), 'selected card is to the right of the middle position defined in the HTML meta data');
         start();
     };
     $.cardstories.
         select_cards(cards,
-                     ['1','2','3','4','5','6'],
                      ok_callback, 
                      element).
         done(onReady);
@@ -951,7 +967,7 @@ test("select_cards cancel", function() {
     var element = $('.cardstories_create', root);
     var confirm = $('.cardstories_card_confirm', element);
     var middle = confirm.metadata({type: "attr", name: "data"}).middle;
-    var cards = [1,2,3,4,5,6];
+    var cards = [{'value':1},{'value':2},{'value':3},{'value':4},{'value':5},{'value':6}];
     var selected = 4;
     var onReady = function(is_ready) {
         $('.cardstories_card', element).eq(selected).click();
@@ -964,7 +980,6 @@ test("select_cards cancel", function() {
     };
     $.cardstories.
         select_cards(cards,
-                     ['1','2','3','4','5','6'],
                      ok_callback, 
                      element).
         done(onReady);

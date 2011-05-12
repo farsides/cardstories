@@ -87,8 +87,9 @@
     height:100%;
 }
 
-.cardstories_cards_hand .jqDockLabel {
-    margin-top: -25px !important; 
+.cardstories_cards_hand .cardstories_card_label {
+    position:absolute;
+    top:-25px;
     font-weight: bold; 
     font-size: 20px; 
     white-space: nowrap; 
@@ -97,6 +98,10 @@
 }
 
 .cardstories_cards_hand .cardstories_card_template {
+    display: none;
+}
+
+.cardstories_card_confirm { 
     display: none;
 }
 
