@@ -311,24 +311,9 @@
             var $this = this;
             var element = $('.cardstories_invitation .cardstories_owner', root);
             this.set_active(root, element);
-            $('a.cardstories_invite').attr('href', '?game_id=' + game.id);
-            $('a.cardstories_refresh').attr('href', '?player_id=' + player_id + '&game_id=' + game.id);
-            var players = game.players;
-            var meta = $('.cardstories_cards', element).metadata({type: "attr", name: "data"});
-            $('.cardstories_card', element).each(function(index) {
-                var card_file = meta.nocard;
-                var title = meta.waiting;
-                if(index < players.length) {
-                  title = players[index][0];
-                  var card = players[index][3];
-                  if(card !== null) {
-                    card_file = meta.card.supplant({'card': card});
-                  }
-                }
-                $(this).attr('src', card_file);
-                $(this).attr('title', title);
-              });            
-            $('.cardstories_cards', element).jqDock({ active: 3, labels: 'tc' });
+            //
+            // Proceed to vote, if possible
+            //
             var voting = $('.cardstories_voting', element);
             voting.toggleClass('cardstories_ready', game.ready);
             if(game.ready) {
@@ -336,10 +321,33 @@
                     $this.send_game(player_id, game.id, element, 'action=voting&owner_id=' + player_id + '&game_id=' + game.id);
                 });
             }
+            //
+            // Navigate to invite more friends, if desired
+            //
             var invite_friends = $('.cardstories_invite_friends', element);
             invite_friends.click(function() {
                 $this.advertise(player_id, game.id, root);
             });
+            //
+            // display the cards picked by the current players
+            //
+            var players = game.players;
+            var waiting = element.metadata({type: "attr", name: "data"}).waiting;
+            var count = $('.cardstories_card', element).length;
+            var cards = [];
+            for(var i = 0; i < count; i++) {
+                var card;
+                if(i < players.length) {
+                    card = { 'value': players[i][3],
+                             'label': players[i][0] };
+                } else {
+                    card = { 'value': null,
+                             'label': waiting };
+                }
+                cards.push(card);
+            };            
+            var hand = $('.cardstories_cards_hand', element);
+            return this.display_or_select_cards(cards, undefined, hand);
         },
 
         invitation_pick: function(player_id, game, root) {
@@ -392,7 +400,7 @@
                     var link = $(this);
                     var card = cards[index];
                     var card_file = meta.nocard;
-                    if(index < cards.length && card !== null) {
+                    if(index < cards.length && card !== null && card.value !== null) {
                         card_file = meta.card.supplant({'card': card.value});
                     }
                     var label = card && card.label ? card.label : '';
