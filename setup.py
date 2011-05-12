@@ -28,7 +28,7 @@ for dirpath, dirnames, filenames in os.walk('static'):
 	        if dirname.startswith('.'): del dirnames[i]
                 if dirname == 'mockups': del dirnames[i]
 	    if filenames:
-                filenames = filter(lambda f: re.match('.*.(css|js|html|png)$', f), filenames)
+                filenames = filter(lambda f: re.match('.*.(css|js|html|png|jpg|gif)$', f), filenames)
 	        data_files.append(['/usr/share/cardstories/' + dirpath.replace('static',''), [os.path.join(dirpath, f) for f in filenames]])
 
 data_files.append(['/etc/default', ['etc/default/cardstories']])
