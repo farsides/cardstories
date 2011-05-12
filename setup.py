@@ -37,7 +37,7 @@ data_files.append(['/usr/share/cardstories/conf', [ 'conf/nginx.conf' ]])
 data_files.append(['/usr/share/cardstories/conf', [ 'conf/apache2.conf' ]])
 
 setup(name='cardstories',
-      version='1.0.2',
+      version='1.0.3',
       requires=['twisted (>=10.1.0)'],
       description='Find out a card using a sentence made up by another player',
       author='Loic Dachary',

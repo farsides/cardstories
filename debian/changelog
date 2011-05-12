@@ -1,8 +1,12 @@
-cardstories (1.0.3-2) unstable; urgency=low
+cardstories (1.0.3-1) unstable; urgency=low
 
   * upstream release
 
- -- Loic Dachary (OuoU) <loic@debian.org>  Tue, 26 Apr 2011 17:50:18 +0200
+  * add apache configuration
+  
+  * Japanese po-debconf template translation (ja.po) (Closes: #626376).
+
+ -- Loic Dachary (OuoU) <loic@debian.org>  Thu, 12 May 2011 14:20:11 +0200
 
 cardstories (1.0.2-1) unstable; urgency=low
 
