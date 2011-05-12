@@ -67,7 +67,7 @@
             var ok = function(card) {
                 $this.create_write_sentence(player_id, card, root);
             };
-            return $this.select_cards($this.create_deck(), [], ok, element, {});
+            return $this.select_cards($this.create_deck(), [], ok, element);
         },
 
         create_write_sentence: function(player_id, card, root) {
@@ -286,20 +286,22 @@
 
         invitation: function(player_id, game, root) {
             var poll = true;
+            var deferred;
             if(game.owner) {
-                this.invitation_owner(player_id, game, root);
+                deferred = this.invitation_owner(player_id, game, root);
             } else {
                 if(game.self !== null && game.self !== undefined) {
-                    this.invitation_pick(player_id, game, root);
+                    deferred = this.invitation_pick(player_id, game, root);
                     // do not disturb a player while (s)he is picking a card
                     poll = game.self[0] !== null;
                 } else {
-                    this.invitation_participate(player_id, game, root);
+                    deferred = this.invitation_participate(player_id, game, root);
                 }
             }
             if(poll) {
               this.poll({ 'modified': game.modified, 'game_id': game.id, 'player_id': player_id }, root);
             }
+            return deferred;
         },
 
         invitation_owner: function(player_id, game, root) {
@@ -341,8 +343,11 @@
             var $this = this;
             var element = $('.cardstories_invitation .cardstories_pick', root);
             this.set_active(root, element);
-            this.player_select_card(player_id, game.id, game.sentence, game.self[2], 'pick', element, root);
-            $('.cardstories_cards', element).jqDock({ active: game.self[2].length / 2});
+            $('.cardstories_sentence', element).text(game.sentence);
+            var ok = function(card) {
+                $this.send_game(player_id, game.id, element, 'action=pick&player_id=' + player_id + '&game_id=' + game.id + '&card=' + card);
+            };
+            return $this.select_cards(game.self[2], [], ok, element);
         },
 
         select_cards: function(cards, titles, ok, element) {

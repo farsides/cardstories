@@ -235,6 +235,7 @@ test("invitation_owner", function() {
 
 test("invitation_pick", function() {
     setup();
+    stop();
     expect(11);
 
     var player_id = 15;
@@ -255,25 +256,38 @@ test("invitation_pick", function() {
     };
 
     equal($('#qunit-fixture .cardstories_invitation .cardstories_pick.cardstories_active').length, 0);
-    $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
-    equal($('#qunit-fixture .cardstories_invitation .cardstories_pick.cardstories_active').length, 1);    
-    equal($('#qunit-fixture .cardstories_invitation .cardstories_pick .cardstories_sentence').text(), sentence);
     var element = $('#qunit-fixture .cardstories_invitation .cardstories_pick .cardstories_cards');
-    equal($('.cardstories_card:nth(0)', element).attr('src'), 'PATH/card0' + cards[0] + '.png');
-    equal($('.cardstories_card:nth(5)', element).attr('src'), 'PATH/card0' + cards[5] + '.png');
-    $('.cardstories_card:nth(4)', element).click();
 
-    //
-    // the poll is not inhibited when a card has already been picked
-    //
-    $.cardstories.poll_ignore = function(ignored_request, ignored_answer, new_poll, old_poll) {
-      equal(ignored_request.game_id, game_id, 'poll_ignore request game_id');
-      equal(new_poll, undefined, 'poll_ignore metadata not set');
-    }
+    var invitation_picked = function() {
+        //
+        // the poll is not inhibited when a card has already been picked
+        //
+        $.cardstories.poll_ignore = function(ignored_request, ignored_answer, new_poll, old_poll) {
+            equal(ignored_request.game_id, game_id, 'poll_ignore request game_id');
+            equal(new_poll, undefined, 'poll_ignore metadata not set');
+            $('.cardstories_card:nth(4)', element).click();
+            $('#qunit-fixture .cardstories_invitation .cardstories_card_confirm_ok').click();
+            start();
+        };
 
-    game.self[0] = picked;
-    $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
-    $('.cardstories_card:nth(4)', element).click();
+        game.self[0] = picked;
+        $.cardstories.
+            invitation(player_id, game, $('#qunit-fixture .cardstories'));
+    };
+
+    $.cardstories.
+        invitation(player_id, game, $('#qunit-fixture .cardstories')).
+        done(function(is_ready) {
+            equal($('#qunit-fixture .cardstories_invitation .cardstories_pick.cardstories_active').length, 1);    
+            equal($('#qunit-fixture .cardstories_invitation .cardstories_pick .cardstories_sentence').text(), sentence);
+            equal($('.cardstories_card:nth(0) .cardstories_card_foreground', element).attr('src'), 'PATH/card0' + cards[0] + '.png');
+            equal($('.cardstories_card:nth(5) .cardstories_card_foreground', element).attr('src'), 'PATH/card0' + cards[5] + '.png');
+            $('.cardstories_card:nth(4)', element).click();
+            $('#qunit-fixture .cardstories_invitation .cardstories_card_confirm_ok').click();
+
+            window.setTimeout(invitation_picked, 50);
+        });
+
 });
 
 test("invitation_participate", function() {
