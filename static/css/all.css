@@ -321,7 +321,7 @@
     right: 5%;
     height: 76px;
     width: 109px;
-    z-index: 1;
+    z-index: 3;
 }
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_cards {
