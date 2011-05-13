@@ -471,6 +471,39 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         yield game.cancel()
         self.assertFalse(self.service.games.has_key(game.id))
 
+    @defer.inlineCallbacks
+    def test10_invite(self):
+        card = 5
+        sentence = 'SENTENCE'
+        owner_id = 15
+        game = yield self.service.create({ 'action': ['create'],
+                                           'card': [card],
+                                           'sentence': [sentence],
+                                           'owner_id': [owner_id]})
+        players = [ 16, 17 ]
+        for player_id in players:
+            yield self.service.participate({ 'action': ['participate'],
+                                             'player_id': [player_id],
+                                             'game_id': [game['game_id']] })
+
+        gameId = game['game_id']
+        yield self.service.invite({ 'action': ['invite'],
+                                    'game_id': [gameId],
+                                    'owner_id': [owner_id] })
+        game = self.service.games[game['game_id']]
+        self.assertEquals([owner_id] + players, game.get_players())
+
+        invited = 20
+        yield self.service.invite({ 'action': ['invite'],
+                                    'game_id': [gameId],
+                                    'player_id': [invited],
+                                    'owner_id': [owner_id] })
+        game = self.service.games[gameId]
+        self.assertEquals([owner_id] + players + [invited], game.get_players())
+
+        yield game.cancel()
+        self.assertFalse(self.service.games.has_key(game.id))
+
 def Run():
     loader = runner.TestLoader()
 #    loader.methodPrefix = "test09_"
