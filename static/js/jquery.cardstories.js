@@ -510,6 +510,7 @@
             var element = $('.cardstories_vote .cardstories_owner', root);
             this.set_active(root, element);
             $('.cardstories_sentence', element).text(game.sentence);
+            // Activate the button to publish the results if the game is ready
             var finish = $('.cardstories_finish', element);
             finish.toggleClass('cardstories_ready', game.ready);
             if(game.ready) {
