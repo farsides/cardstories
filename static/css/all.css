@@ -105,6 +105,11 @@
     display: none;
 }
 
+
+.cardstories_card_selected {
+    z-index: 200 !important;
+}
+
 /* state create : pick a card */
 
 .cardstories .cardstories_create .cardstories_pick_card .cardstories_cards { position: absolute; left: 0px; bottom: 15%; }
