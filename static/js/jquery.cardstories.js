@@ -50,11 +50,12 @@
 
         create_deck: function() {
             var deck = [];
-            for(var i = 1; i <= 36; i++) {
+            var i;
+            for(i = 1; i <= 36; i++) {
                 deck.push(i);
             }
             var cards = [];
-            for(var i = 0; i < 7; i++) {
+            for(i = 0; i < 7; i++) {
                 cards.push(deck.splice(Math.floor(Math.random() * deck.length), 1)[0]);
             }
             return cards;
@@ -238,7 +239,7 @@
                                        'sentence': game[1],
                                        'state': game[2],
                                        'role': role,
-                                       'win': win,
+                                       'win': win
                                       });
               rows.push(row);
             }
@@ -345,7 +346,7 @@
                              'label': waiting };
                 }
                 cards.push(card);
-            };            
+            }
             var hand = $('.cardstories_cards_hand', element);
             return this.display_or_select_cards(cards, undefined, hand);
         },
