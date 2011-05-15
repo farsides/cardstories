@@ -295,9 +295,13 @@
                 deferred = this.invitation_owner(player_id, game, root);
             } else {
                 if(game.self !== null && game.self !== undefined) {
-                    deferred = this.invitation_pick(player_id, game, root);
-                    // do not disturb a player while (s)he is picking a card
-                    poll = game.self[0] !== null;
+                    if(game.self[0] === null) {
+                        deferred = this.invitation_pick(player_id, game, root);
+                        // do not disturb a player while (s)he is picking a card
+                        poll = false;
+                    } else {
+                        deferred = this.invitation_pick_wait(player_id, game, root);
+                    }
                 } else {
                     deferred = this.invitation_participate(player_id, game, root);
                 }
@@ -361,6 +365,18 @@
             };
             var cards = game.self[2].map(function(card) { return {'value':card}; });
             return $this.select_cards(cards, ok, element);
+        },
+
+        invitation_pick_wait: function(player_id, game, root) {
+            var $this = this;
+            var element = $('.cardstories_invitation .cardstories_pick_wait', root);
+            this.set_active(root, element);
+            $('.cardstories_sentence', element).text(game.sentence);
+            var card = game.self[0];
+            $('.cardstories_card', element).attr('class', 'cardstories_card cardstories_card' + card + ' {card:' + card + '}');
+            $('.cardstories_card_change', element).unbind('click').click(function() {
+                $this.invitation_pick(player_id, game, root);
+            });
         },
 
         select_cards: function(cards, ok, element) {

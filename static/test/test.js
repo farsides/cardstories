@@ -239,7 +239,7 @@ test("invitation_owner", function() {
 test("invitation_pick", function() {
     setup();
     stop();
-    expect(11);
+    expect(13);
 
     var player_id = 15;
     var game_id = 101;
@@ -285,11 +285,47 @@ test("invitation_pick", function() {
             equal($('.cardstories_card:nth(0) .cardstories_card_foreground', element).attr('src'), 'PATH/card0' + cards[0] + '.png');
             equal($('.cardstories_card:nth(5) .cardstories_card_foreground', element).attr('src'), 'PATH/card0' + cards[5] + '.png');
             $('.cardstories_card:nth(4)', element).click();
+            var element_wait = $('#qunit-fixture .cardstories_invitation .cardstories_pick_wait');
+            equal($(element_wait).hasClass('cardstories_active'), false, 'pick_wait not active');
             $('#qunit-fixture .cardstories_invitation .cardstories_card_confirm_ok').click();
+            equal($(element_wait).hasClass('cardstories_active'), false, 'pick_wait active');
 
             window.setTimeout(invitation_picked, 50);
         });
 
+});
+
+test("invitation_pick_wait", function() {
+    setup();
+    expect(8);
+
+    var player_id = 15;
+    var game_id = 101;
+    var picked = 5;
+    var cards = [1,2,3,4,picked,5];
+    var sentence = 'SENTENCE';
+
+    var game = {
+	'id': game_id,
+	'self': [picked, null, cards],
+	'sentence': sentence
+    };
+
+    $.cardstories.poll_ignore = function(ignored_request, ignored_answer, new_poll, old_poll) {
+        equal(ignored_request.game_id, game_id, 'poll_ignore request game_id');
+        equal(new_poll, undefined, 'poll_ignore metadata not set');
+    };
+
+    var element = $('#qunit-fixture .cardstories_invitation .cardstories_pick_wait');
+    equal($(element).hasClass('cardstories_active'), false, 'pick_wait not active');
+    $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
+    equal($(element).hasClass('cardstories_active'), true, 'pick_wait active');
+    equal($('.cardstories_sentence', element).text(), sentence);
+    equal($('.cardstories_card', element).metadata().card, picked);
+    var element_pick = $('#qunit-fixture .cardstories_invitation .cardstories_pick');
+    equal($(element_pick).hasClass('cardstories_active'), false, 'pick not active');
+    $('.cardstories_card_change', element).click();
+    equal($(element_pick).hasClass('cardstories_active'), false, 'pick active');
 });
 
 test("invitation_participate", function() {

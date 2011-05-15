@@ -75,6 +75,13 @@
 	'sentence': 'long sentence is in the flux'
       };
       $.cardstories.invitation_pick('PLAYER1', game, root);
+    } else if(skin == 'invitation_pick_wait') {
+      var game = {
+	'id': 100,
+	'self': [5, null, [11,12,13,14,15,16,17]],
+	'sentence': 'long sentence is in the flux'
+      };
+      $.cardstories.invitation_pick_wait('PLAYER1', game, root);
     } else if(skin == 'vote_voter' || skin == 'vote_owner' || skin == 'vote_viewer') {
       var game = {
 	'id': 100,
