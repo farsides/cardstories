@@ -517,44 +517,22 @@
                     $this.send_game(player_id, game.id, element, 'action=complete&owner_id=' + player_id + '&game_id=' + game.id);
                 });
             }
-
-            var i;
-            var board2voters = {};
-            for(i = 0; i < game.board.length; i++) {
-              board2voters[game.board[i]] = [];
-            }
-            for(i = 0; i < game.players.length; i++) {
-              var vote = game.players[i][1];
-              var voters = board2voters[vote];
-              if(voters !== undefined) {
-                voters.push(game.players[i][0]);
-              }
-            }
-            var cards = game.board;
-            $('.cardstories_card', element).each(function(index) {
-                var card = cards[index];
-                var c = 'cardstories_card cardstories_card' + card + ' {card:' + card + '}';
-                $(this).attr('class', c);
-                
-                var voters = board2voters[card];
-                if(voters !== undefined) {
-                  var siblings = $(this).siblings('.cardstories_results');
-                  $('.cardstories_result', siblings).each(function(voter_index) {
-                      if(voters.length > voter_index) {
-                        $(this).text(voters[voter_index]);
-                        $(this).show();
-                      } else {
-                        $(this).hide();
-                      }
-                    });
-                }
-            });
+            
+            // Display the current board state
+            this.results_board(player_id, game, element);
         },
 
         complete: function(player_id, game, root) {
             var element = $('.cardstories_complete', root);
             this.set_active(root, element);
+
+            // Display the current board state
+            this.results_board(player_id, game, element);
+        },
+
+        results_board: function(player_id, game, element) {
             $('.cardstories_sentence', element).text(game.sentence);
+
             var i;
             var board2voters = {};
             for(i = 0; i < game.board.length; i++) {
@@ -577,11 +555,11 @@
                   var c = 'cardstories_card cardstories_complete_card' + card + ' {card:' + card + '}';
                   $('.cardstories_card', this).attr('class', c);
                   var player = board2player[card];
-                  $('.cardstories_player', this).toggleClass('cardstories_win', player[2] == 'y');
-                  $('.cardstories_player', this).text(player[0]);
+                  $('.cardstories_player_name', this).toggleClass('cardstories_win', player[2] == 'y');
+                  $('.cardstories_player_name', this).text(player[0]);
                   var voters = board2voters[card];
                   if(voters !== undefined) {
-                    $('.cardstories_voter', this).each(function(voter_index) {
+                    $('.cardstories_voter_name', this).each(function(voter_index) {
                         if(voters.length > voter_index) {
                           $(this).text(voters[voter_index]);
                           $(this).show();
@@ -590,7 +568,7 @@
                         }
                       });
                   } else {
-                    $('.cardstories_voter', this).hide();
+                    $('.cardstories_voter_name', this).hide();
                   }
                   $(this).show();
                 } else {

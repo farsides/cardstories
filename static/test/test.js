@@ -455,7 +455,7 @@ test("vote_viewer", function() {
 
 test("vote_owner", function() {
     setup();
-    expect(11);
+    expect(8);
 
     var player_id = 15;
     var game_id = 101;
@@ -466,6 +466,7 @@ test("vote_owner", function() {
 
     var board1 = 30;
     var board2 = 31;
+    var board3 = 32;
     var board = [ board1, board2 ];
 
     var sentence = 'SENTENCE';
@@ -475,9 +476,9 @@ test("vote_owner", function() {
 	'owner': true,
         'sentence': sentence,
         'board': board,
-        'players': [ [ voter11, board1, 'n', null, [ ] ],
-                     [ voter12, board2, 'n', null, [ ] ],
-                     [ voter21, board1, 'n', null, [ ] ]
+        'players': [ [ voter11, board1, 'n', board3, [ ] ],
+                     [ voter12, board2, 'n', board1, [ ] ],
+                     [ voter21, board1, 'n', board2, [ ] ]
                    ],
 	'ready': true
     };
@@ -495,21 +496,20 @@ test("vote_owner", function() {
     equal($('#qunit-fixture .cardstories_vote .cardstories_owner.cardstories_active').length, 0);
     $.cardstories.vote(player_id, game, $('#qunit-fixture .cardstories'));
     equal($('#qunit-fixture .cardstories_vote .cardstories_owner.cardstories_active').length, 1);
+
     var vote = $('#qunit-fixture .cardstories_vote .cardstories_owner');
     equal($('.cardstories_sentence', vote).text(), sentence);
+
     ok($('.cardstories_finish', vote).hasClass('cardstories_ready'), 'cardstories_ready');
-    var first = $('.cardstories_card:nth(0)', vote);
-    equal($('.cardstories_votes:nth(0) .cardstories_result:nth(0)', vote).text(), voter11.toString());
-    equal($('.cardstories_votes:nth(0) .cardstories_result:nth(1)', vote).text(), voter21.toString());
-    equal($('.cardstories_votes:nth(1) .cardstories_result:nth(0)', vote).text(), voter12.toString());
-    
+
     $('.cardstories_finish', vote).click();
 });
 
 test("complete", function() {
     setup();
-    expect(21);
+    expect(3);
 
+    var player_id = 15;
     var game_id = 101;
 
     var voter11 = 11;
@@ -519,8 +519,7 @@ test("complete", function() {
     var board1 = 30;
     var board2 = 31;
     var board3 = 32;
-
-    var board = [ board1, board2, board3 ];
+    var board = [ board1, board2 ];
 
     var sentence = 'SENTENCE';
 
@@ -538,10 +537,46 @@ test("complete", function() {
     };
 
     equal($('#qunit-fixture .cardstories_complete.cardstories_active').length, 0);
-    $.cardstories.complete(voter12, game, $('#qunit-fixture .cardstories'));
+    $.cardstories.complete(player_id, game, $('#qunit-fixture .cardstories'));
     equal($('#qunit-fixture .cardstories_complete.cardstories_active').length, 1);
 
+    equal($('#qunit-fixture .cardstories_complete .cardstories_sentence').text(), sentence);
+});
+
+test("results_board", function() {
+    setup();
+    expect(19);
+
+    var player_id = 15;
+    var game_id = 101;
+
+    var voter11 = 11;
+    var voter12 = 12;
+    var voter21 = 21;
+
+    var board1 = 30;
+    var board2 = 31;
+    var board3 = 32;
+    var board = [ board1, board2, board3 ];
+
+    var sentence = 'SENTENCE';
+
+    var game = {
+	'id': game_id,
+	'owner': true,
+        'sentence': sentence,
+        'board': board,
+        'winner_card': board1,
+        'players': [ [ voter11, board1, 'y', board3, [ ] ],
+                     [ voter12, null, 'y', board1, [ ] ],
+                     [ voter21, board1, 'n', board2, [ ] ]
+                   ],
+	'ready': true
+    };
+
     var element = $('#qunit-fixture .cardstories_complete');
+    $.cardstories.results_board(voter12, game, element);
+
     equal($('.cardstories_sentence', element).text(), sentence);
     
     var i;
@@ -555,19 +590,19 @@ test("complete", function() {
     var column;
     column = $('.cardstories_column:nth(0)', element);
     equal($('.cardstories_card', column).metadata().card, board1);
-    equal($('.cardstories_player', column).text(), voter12.toString());
-    ok($('.cardstories_player', column).hasClass('cardstories_win'), 'cardstories_win');
-    equal($('.cardstories_voter:nth(0)', column).text(), voter11.toString());
-    ok($('.cardstories_voter:nth(0)', column).is(':visible'), 'col 1, first vote visible');
-    equal($('.cardstories_voter:nth(1)', column).text(), voter21.toString());
-    ok($('.cardstories_voter:nth(1)', column).is(':visible'), 'col 1, second vote visible');
-    ok(!$('.cardstories_voter:nth(2)', column).is(':visible'), 'col 1, third vote hidden');
+    equal($('.cardstories_player_name', column).text(), voter12.toString());
+    ok($('.cardstories_player_name', column).hasClass('cardstories_win'), 'cardstories_win');
+    equal($('.cardstories_voter_name:nth(0)', column).text(), voter11.toString());
+    ok($('.cardstories_voter_name:nth(0)', column).is(':visible'), 'col 1, first vote visible');
+    equal($('.cardstories_voter_name:nth(1)', column).text(), voter21.toString());
+    ok($('.cardstories_voter_name:nth(1)', column).is(':visible'), 'col 1, second vote visible');
+    ok(!$('.cardstories_voter_name:nth(2)', column).is(':visible'), 'col 1, third vote hidden');
 
     column = $('.cardstories_column:nth(1)', element);
     equal($('.cardstories_card', column).metadata().card, board2);
-    equal($('.cardstories_player', column).text(), voter21.toString());
-    ok(!$('.cardstories_player', column).hasClass('cardstories_win'), 'cardstories_win not set');
-    ok(!$('.cardstories_voter:nth(0)', column).is(':visible'), 'col 2, first vote hidden');
+    equal($('.cardstories_player_name', column).text(), voter21.toString());
+    ok(!$('.cardstories_player_name', column).hasClass('cardstories_win'), 'cardstories_win not set');
+    ok(!$('.cardstories_voter_name:nth(0)', column).is(':visible'), 'col 2, first vote hidden');
     
   });
 
