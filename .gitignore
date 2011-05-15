@@ -2,3 +2,5 @@
 .pc
 MANIFEST
 build
+*.swo
+twistd.pid
