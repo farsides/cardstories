@@ -129,7 +129,7 @@ body {
 
 /* state create : pick a card */
 
-.cardstories .cardstories_create .cardstories_pick_card .cardstories_cards { position: absolute; left: 0px; bottom: 15%; }
+.cardstories .cardstories_create .cardstories_pick_card .cardstories_cards { position: absolute; left: 0px; bottom: 15%; display: none; }
 
 .cardstories .cardstories_create .cardstories_bubble_pick_a_card { 
     position: absolute;
