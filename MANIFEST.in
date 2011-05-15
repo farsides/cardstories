@@ -4,6 +4,5 @@ recursive-include tests *.py Makefile
 include etc/default/cardstories
 include conf/*.conf
 include maintain.mk
-include *.ai
 include MANIFEST
 include MANIFEST.in
