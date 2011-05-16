@@ -93,6 +93,20 @@
     } else if(skin == 'complete') {
       var game = {
 	'id': 100,
+	'owner': false,
+        'sentence': 'the game sentence',
+        'board': [30,31,32],
+        'winner_card': 30,
+        'players': [ [ 'voter11', 30, 'y', 32, [ ] ],
+                     [ 'voter12', null, 'y', 30, [ ] ],
+                     [ 'voter21', 30, 'n', 31, [ ] ]
+                   ],
+	'ready': true
+      };
+      $.cardstories.complete('voter11', game, root);
+    } else if(skin == 'complete_owner') {
+      var game = {
+	'id': 100,
 	'owner': true,
         'sentence': 'the game sentence',
         'board': [30,31,32],

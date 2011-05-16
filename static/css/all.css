@@ -41,13 +41,22 @@ body {
     bottom: 5%;
 }
 
-.cardstories .cardstories_counter { 
+.cardstories .cardstories_progress_owner { 
     position: absolute;
-    height: 45px;
-    width: 81px;
+    height: 184px;
+    width: 182px;
     z-index: 1;
-    right: 5%;
-    top: 75px;
+    right: 10px;
+    top: 20px;
+}
+
+.cardstories .cardstories_progress_player { 
+    position: absolute;
+    height: 180px;
+    width: 198px;
+    z-index: 1;
+    right: 10px;
+    top: 20px;
 }
 
 .cardstories .cardstories_go_lobby { 
@@ -153,14 +162,14 @@ body {
     width: 287px;
 }
 
-.cardstories .cardstories_create .cardstories_pick_card .cardstories_counter { 
-    background: transparent url('images/counter_1_of_4.png') no-repeat left top;
+.cardstories .cardstories_create .cardstories_pick_card .cardstories_progress_owner { 
+    background: transparent url('images/progress_1.png') no-repeat left top;
 }
 
 /* state create : write a sentence */
 
-.cardstories .cardstories_create .cardstories_write_sentence .cardstories_counter { 
-    background: transparent url('images/counter_2_of_4.png') no-repeat left top;
+.cardstories .cardstories_create .cardstories_write_sentence .cardstories_progress_owner { 
+    background: transparent url('images/progress_2.png') no-repeat left top;
 }
 
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_card {
@@ -322,11 +331,15 @@ body {
     border: 0px;
 }
 
-.cardstories .cardstories_advertise .cardstories_counter { 
-    background: transparent url('images/counter_3_of_4.png') no-repeat left top;
+.cardstories .cardstories_advertise .cardstories_progress_owner { 
+    background: transparent url('images/progress_3.png') no-repeat left top;
 }
 
 /* state invitation : owner */
+
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_progress_owner { 
+    background: transparent url('images/progress_4.png') no-repeat left top;
+}
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_pending_invitations {
     position: absolute;
@@ -368,6 +381,10 @@ body {
 
 /* state invitation, player point of view : pick a card */
 
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_progress_player { 
+    background: transparent url('images/player_progress1.png') no-repeat left top;
+}
+
 .cardstories .cardstories_invitation .cardstories_bubble_player_pick_a_card { 
     position: absolute;
     z-index: 1;
@@ -379,6 +396,10 @@ body {
 }
 
 /* state invitation, player point of view : wait for other players to pick a card */
+
+.cardstories .cardstories_invitation .cardstories_pick_wait .cardstories_progress_player { 
+    background: transparent url('images/player_progress2.png') no-repeat left top;
+}
 
 .cardstories .cardstories_invitation .cardstories_pick_wait .cardstories_bubble_player_pick_a_card_wait { 
     position: absolute;
@@ -435,6 +456,10 @@ body {
 
 /* state vote, player point of view : vote for a card */
 
+.cardstories .cardstories_vote .cardstories_voter .cardstories_progress_player { 
+    background: transparent url('images/player_progress3.png') no-repeat left top;
+}
+
 .cardstories .cardstories_vote .cardstories_bubble_player_vote_for_a_card { 
     position: absolute;
     z-index: 1;
@@ -466,6 +491,21 @@ body {
 }
 
 /* state complete */
+
+.cardstories .cardstories_complete .cardstories_progress_player,
+.cardstories .cardstories_complete .cardstories_progress_owner {
+    display: none;
+}
+
+.cardstories .cardstories_complete.cardstories_owner .cardstories_progress_owner { 
+    background: transparent url('images/progress_6.png') no-repeat left top;
+    display: block;
+}
+
+.cardstories .cardstories_complete.cardstories_player .cardstories_progress_player { 
+    background: transparent url('images/player_progress5.png') no-repeat left top;
+    display: block;
+}
 
 .cardstories .cardstories_complete {
     background: transparent url('images/vote_wall.png') no-repeat 60px bottom;
@@ -513,6 +553,10 @@ body {
 
 /* owner view during vote */
 
+.cardstories .cardstories_vote .cardstories_owner .cardstories_progress { 
+    background: transparent url('images/progress_5.png') no-repeat left top;
+}
+
 .cardstories .cardstories_vote .cardstories_owner {
     background: transparent url('images/vote_wall.png') no-repeat 60px bottom;
 }
@@ -550,6 +594,8 @@ body {
     margin-bottom: 5px;
 }
 
+/* Dimensions and initial state of all pages */
+
 .cardstories .cardstories_subscribe, 
 .cardstories .cardstories_lobby,
 .cardstories .cardstories_lobby > div,
@@ -564,21 +610,10 @@ body {
  { 
      width: 100%;
      height: 100%; 
- }
-
-.cardstories .cardstories_subscribe, 
-.cardstories .cardstories_lobby,
-.cardstories .cardstories_lobby > div,
-.cardstories .cardstories_create,
-.cardstories .cardstories_create > div,
-.cardstories .cardstories_advertise,
-.cardstories .cardstories_invitation,
-.cardstories .cardstories_invitation > div,
-.cardstories .cardstories_vote,
-.cardstories .cardstories_vote > div,
-.cardstories .cardstories_complete 
- { 
      display: none;
  }
 
-.cardstories div.cardstories_active { display: block; }
+.cardstories div.cardstories_active
+{
+    display: block;
+}

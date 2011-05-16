@@ -20,11 +20,12 @@
 <body>
       <div class="cardstories">
         <div class="cardstories_skin" style="display: none; position: absolute; top: 0; z-index: 1000">
-          <a href="?skin=advertise">advertise</a>
+          <a href="?skin=name">name</a>
           <a href="?skin=in_progress">in_progress</a>
           <a href="?skin=finished">finished</a>
           <a href="?skin=create_pick_card">create_pick_card</a>
           <a href="?skin=create_write_sentence">create_write_sentence</a>
+          <a href="?skin=advertise">advertise</a>
           <a href="?skin=invitation_owner">invitation_owner</a>
           <a href="?skin=invitation_pick">invitation_pick</a>
           <a href="?skin=invitation_pick_wait">invitation_pick_wait</a>
@@ -32,7 +33,7 @@
           <a href="?skin=vote_viewer">vote_viewer</a>
           <a href="?skin=vote_owner">vote_owner</a>
           <a href="?skin=complete">complete</a>
-          <a href="?skin=name">name</a>
+          <a href="?skin=complete_owner">complete owner</a>
         </div>
         <div class="cardstories_logo"></div>
         <div class="cardstories_line cardstories_line_top"></div>
@@ -46,7 +47,7 @@
           <div class="cardstories_pick_card">
             <a href="index.html" class="cardstories_go_lobby"></a>
             <div class="cardstories_bubble cardstories_bubble_pick_a_card"></div>
-            <div class="cardstories_counter"></div>
+            <div class="cardstories_progress_owner"></div>
             <div class="cardstories_card_confirm" data="{middle:3}">
               <div class="cardstories_card_confirm_ok">OK</div>
               <div class="cardstories_card_confirm_cancel">CANCEL</div>
@@ -69,7 +70,7 @@
           </div>
           <div class="cardstories_write_sentence">
             <a href="index.html" class="cardstories_go_lobby"></a>
-            <div class="cardstories_counter"></div>
+            <div class="cardstories_progress_owner"></div>
             <div class="cardstories_card"></div>
             <div class="cardstories_write">
               <div>
@@ -150,7 +151,7 @@
 
 	<div class="cardstories_advertise">
           <a href="index.html" class="cardstories_go_lobby"></a>
-          <div class="cardstories_counter"></div>
+          <div class="cardstories_progress_owner"></div>
           <div class="cardstories_frame"></div>
           <div class="cardstories_submit"></div>
           <textarea class="cardstories_text" cols="100" rows="10" name="sentence">Friends</textarea>
@@ -164,6 +165,7 @@
 	  </div>
 	  <div class="cardstories_pick">
             <a href="index.html" class="cardstories_go_lobby"></a>
+            <div class="cardstories_progress_player"></div>
             <div class="cardstories_bubble_player_pick_a_card"></div>
             <div class="cardstories_mask_chose_a_card"></div>
             <div class="cardstories_sentence_container">
@@ -194,6 +196,7 @@
 	  </div>
           <div class="cardstories_pick_wait">
             <a href="index.html" class="cardstories_go_lobby"></a>
+            <div class="cardstories_progress_player"></div>
             <div class="cardstories_bubble_player_pick_a_card_wait"></div>
             <div class="cardstories_pick_thanks"></div>
             <div class="cardstories_sentence"></div>
@@ -202,6 +205,7 @@
           </div>
 	  <div class="cardstories_owner">
             <a href="index.html" class="cardstories_go_lobby"></a>
+            <div class="cardstories_progress_owner"></div>
 	    <div class="cardstories_invite_friends"></div>
 	    <div class="cardstories_voting"></div>
 	    <div class="cardstories_pending_invitations"></div>
@@ -225,6 +229,7 @@
 	<div class="cardstories_vote">
 	  <div class="cardstories_voter">
             <a href="index.html" class="cardstories_go_lobby"></a>
+            <div class="cardstories_progress_player"></div>
             <div class="cardstories_bubble_player_vote_for_a_card"></div>
             <div class="cardstories_mask_chose_a_card"></div>
             <div class="cardstories_sentence_container">
@@ -256,6 +261,7 @@
 	  </div>
           <div class="cardstories_owner">
             <a href="index.html" class="cardstories_go_lobby"></a>
+            <div class="cardstories_progress_owner"></div>
             <div class="cardstories_sentence_container">
               <div>
                 <div class="cardstories_brace cardstories_brace_open"></div>
@@ -325,6 +331,8 @@
 
         <div class="cardstories_complete">
           <a href="index.html" class="cardstories_go_lobby"></a>
+          <div class="cardstories_progress_owner"></div>
+          <div class="cardstories_progress_player"></div>
           <div class="cardstories_sentence_container">
             <div>
 	      <div class="cardstories_brace cardstories_brace_open"></div>

@@ -542,7 +542,8 @@
         complete: function(player_id, game, root) {
             var element = $('.cardstories_complete', root);
             this.set_active(root, element);
-
+            element.toggleClass('cardstories_owner', game.owner);
+            element.toggleClass('cardstories_player', !game.owner);
             // Display the current board state
             this.results_board(player_id, game, element);
         },
