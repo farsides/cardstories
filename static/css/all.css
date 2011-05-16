@@ -50,6 +50,19 @@ body {
     top: 75px;
 }
 
+.cardstories .cardstories_go_lobby { 
+    position: absolute;
+    height: 90px;
+    width: 118px;
+    left: 650px;
+    top: 10px;
+    background: transparent url('images/lobby_off.png') no-repeat left top;
+}
+
+.cardstories .cardstories_go_lobby:hover { 
+    background: transparent url('images/lobby_over.png') no-repeat left top;
+}
+
 /* Change cursor to treat buttons as links */
 .cardstories_card, .cardstories_submit, .cardstories_start_story, .cardstories_invite_friends, .cardstories_ready {
     cursor: pointer;
