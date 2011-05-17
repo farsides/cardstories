@@ -422,7 +422,8 @@
                     }
                     var label = card && card.label ? card.label : '';
                     link.html(html.supplant({ 'label': label }));
-                    link.css({zIndex: 3 * (links.length - index)});
+                    var zindex = 3 * (links.length - index);
+                    link.css({zIndex: zindex});
                     $('.cardstories_card_background', link).attr('src', meta.card_bg).css({zIndex: links.length - index});
                     var foreground = $('.cardstories_card_foreground', link);
                     foreground.attr('src', card_file).css({zIndex: 2 * (links.length - index)});
@@ -430,8 +431,10 @@
                         link.metadata({type: "attr", name: "data"}).card = card.value;
                         link.unbind('click').click(function() {
                             link.addClass('cardstories_card_selected');
+                            link.css({zIndex: 200});
                             var nudge = function() {
                                 link.removeClass('cardstories_card_selected');
+                                link.css({zIndex: zindex});
                                 $('.cardstories_card_background', link).attr('src', meta.card_bg);
                                 dock.jqDock('nudge');
                             };

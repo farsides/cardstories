@@ -1006,7 +1006,7 @@ test("display_or_select_cards move", function() {
 test("display_or_select_cards select", function() {
     setup();
     stop();
-    expect(6);
+    expect(8);
 
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_create .cardstories_cards_hand', root);
@@ -1018,9 +1018,12 @@ test("display_or_select_cards select", function() {
                  {'value':5},
                  {'value':6}];
     var selected = 1;
+    var zindex;
     var onReady = function(is_ready) {
         var card_element = $('.cardstories_card', element).eq(1);
-        equal($('.cardstories_card_foreground', card_element).attr('alt'), label);
+        var foreground = $('.cardstories_card_foreground', card_element);
+        equal(foreground.attr('alt'), label);
+        zindex = card_element.css('z-index');
         $('.cardstories_card', element).eq(selected).click();
     };
     var meta = $('.cardstories_card_template', element).metadata({type: "attr", name: "data"});
@@ -1029,10 +1032,12 @@ test("display_or_select_cards select", function() {
         var link = $('.cardstories_card', element).eq(index);
         var background = $('.cardstories_card_background', link);
         ok(link.hasClass('cardstories_card_selected'), 'link has class cardstories_card_selected');
+        equal(link.css('z-index'), '200');
         equal(background.attr('src'), meta.card_bg_selected);
         nudge();
         ok(!link.hasClass('cardstories_card_selected'), 'link no longer has class cardstories_card_selected');
         equal(background.attr('src'), meta.card_bg);
+        equal(link.css('z-index'), zindex);
         start();
     };
     $.cardstories.
