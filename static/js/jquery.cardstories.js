@@ -473,9 +473,13 @@
                 deferred = this.vote_owner(player_id, game, root);
             } else {
                 if(game.self !== null && game.self !== undefined) {
-                    deferred = this.vote_voter(player_id, game, root);
-                    // do not disturb a voting player while (s)he is voting
-                    poll = game.self[1] !== null;
+                    if(game.self[1] === null) {
+                        deferred = this.vote_voter(player_id, game, root);
+                        // do not disturb a voting player while (s)he is voting
+                        poll = false;
+                    } else {
+                        deferred = this.vote_voter_wait(player_id, game, root);
+                    }
                 } else {
                     deferred = this.vote_viewer(player_id, game, root);
                 }
@@ -519,6 +523,18 @@
                 cards.push(card);
             }
             return $this.select_cards(cards, ok, element);
+        },
+
+        vote_voter_wait: function(player_id, game, root) {
+            var $this = this;
+            var element = $('.cardstories_vote .cardstories_voter_wait', root);
+            this.set_active(root, element);
+            $('.cardstories_sentence', element).text(game.sentence);
+            var card = game.self[1];
+            $('.cardstories_card', element).attr('class', 'cardstories_card cardstories_card' + card + ' {card:' + card + '}');
+            $('.cardstories_card_change', element).unbind('click').click(function() {
+                $this.vote_voter(player_id, game, root);
+            });
         },
 
         vote_owner: function(player_id, game, root) {

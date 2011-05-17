@@ -82,7 +82,7 @@
 	'sentence': 'long sentence is in the flux'
       };
       $.cardstories.invitation_pick_wait('PLAYER1', game, root);
-    } else if(skin == 'vote_voter' || skin == 'vote_owner' || skin == 'vote_viewer') {
+    } else if(skin == 'vote_voter' || skin == 'vote_voter_wait' || skin == 'vote_owner' || skin == 'vote_viewer') {
       var game = {
 	'id': 100,
 	'board': [21,22,23,24,25,26],
