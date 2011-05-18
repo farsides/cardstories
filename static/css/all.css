@@ -27,7 +27,7 @@ html, body {
     margin-left: auto;
     margin-right: auto;
     position: relative;
-    background: #fff url('images/background.jpg') repeat-x left top;
+    background: transparent url('images/background.png') repeat-x left top;
 }
 
 .cardstories .cardstories_logo { 
@@ -38,23 +38,6 @@ html, body {
     top: 2%;
     width: 189px;
     height: 131px;
-}
-
-.cardstories .cardstories_line { 
-    background: transparent url('images/background_line.png') repeat-x left top;
-    position: absolute;
-    height: 40px;
-    width: 100%;
-}
-
-.cardstories .cardstories_line_top { 
-    left: 0px;
-    top: 150px;
-}
-
-.cardstories .cardstories_line_bottom { 
-    left: 0px;
-    bottom: 5%;
 }
 
 .cardstories .cardstories_progress_owner { 
