@@ -18,261 +18,328 @@
 	<script type="text/javascript" src="js/jquery.query-2.1.7.js"></script>
 </head>
 <body>
+  <div class="cardstories_skin" style="display: none; position: absolute; top: 0; z-index: 1000">
+    <a href="?skin=name">name</a>
+    <a href="?skin=in_progress">in_progress</a>
+    <a href="?skin=finished">finished</a>
+    <a href="?skin=create_pick_card">create_pick_card</a>
+    <a href="?skin=create_write_sentence">create_write_sentence</a>
+    <a href="?skin=advertise">advertise</a>
+    <a href="?skin=invitation_owner">invitation_owner</a>
+    <a href="?skin=invitation_pick">invitation_pick</a>
+    <a href="?skin=invitation_pick_wait">invitation_pick_wait</a>
+    <a href="?skin=vote_voter">vote_voter</a>
+    <a href="?skin=vote_voter_wait">vote_voter_wait</a>
+    <a href="?skin=vote_viewer">vote_viewer</a>
+    <a href="?skin=vote_owner">vote_owner</a>
+    <a href="?skin=complete">complete</a>
+    <a href="?skin=complete_owner">complete owner</a>
+  </div>
   <div class="cardstories_bg_outer">
     <div class="cardstories_bg_inner">
       <div class="cardstories">
-        <div class="cardstories_skin" style="display: none; position: absolute; top: 0; z-index: 1000">
-          <a href="?skin=name">name</a>
-          <a href="?skin=in_progress">in_progress</a>
-          <a href="?skin=finished">finished</a>
-          <a href="?skin=create_pick_card">create_pick_card</a>
-          <a href="?skin=create_write_sentence">create_write_sentence</a>
-          <a href="?skin=advertise">advertise</a>
-          <a href="?skin=invitation_owner">invitation_owner</a>
-          <a href="?skin=invitation_pick">invitation_pick</a>
-          <a href="?skin=invitation_pick_wait">invitation_pick_wait</a>
-          <a href="?skin=vote_voter">vote_voter</a>
-          <a href="?skin=vote_voter_wait">vote_voter_wait</a>
-          <a href="?skin=vote_viewer">vote_viewer</a>
-          <a href="?skin=vote_owner">vote_owner</a>
-          <a href="?skin=complete">complete</a>
-          <a href="?skin=complete_owner">complete owner</a>
-        </div>
-        <div class="cardstories_logo"></div>
+        <div class="cardstories_game">
+          <div class="cardstories_logo"></div>
 
-        <div class="cardstories_subscribe">
-          <input class="cardstories_name" type="text" name="name" />
-          <input class="cardstories_submit" type="submit" name="submit" value="play" />
-        </div>
-
-	<div class="cardstories_create">
-          <div class="cardstories_pick_card">
-            <a href="index.html" class="cardstories_go_lobby"></a>
-            <div class="cardstories_bubble cardstories_bubble_pick_a_card"></div>
-            <div class="cardstories_progress_owner"></div>
-            <div class="cardstories_card_confirm" data="{middle:3}">
-              <div class="cardstories_card_confirm_ok">OK</div>
-              <div class="cardstories_card_confirm_cancel">CANCEL</div>
-            </div>
-            <div class="cardstories_cards_hand" data="{active:2,size:200,distance:200}">
-              <div class="cardstories_cards">
-                <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
-                <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
-                <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
-                <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
-                <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
-                <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
-                <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart_full.png" /></a>
+          <div class="cardstories_create">
+            <div class="cardstories_pick_card">
+              <a href="index.html" class="cardstories_go_lobby"></a>
+              <div class="cardstories_bubble cardstories_bubble_pick_a_card"></div>
+              <div class="cardstories_progress_owner"></div>
+              <div class="cardstories_card_confirm" data="{middle:3}">
+                <div class="cardstories_card_confirm_ok">OK</div>
+                <div class="cardstories_card_confirm_cancel">CANCEL</div>
               </div>
-              <div class="cardstories_card_template" data="{card:'css/images/card0{card}.png',card_bg:'css/images/card_bg.png',card_bg_selected:'css/images/card_bg_selected.png',nocard:'css/images/card-back.png'}">
-                <img class="cardstories_card_foreground" src="" alt="" />
-                <img class="cardstories_card_background" src="" alt="" />
+              <div class="cardstories_cards_hand" data="{active:2,size:200,distance:200}">
+                <div class="cardstories_cards">
+                  <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
+                  <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
+                  <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
+                  <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
+                  <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
+                  <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
+                  <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart_full.png" /></a>
+                </div>
+                <div class="cardstories_card_template" data="{card:'css/images/card0{card}.png',card_bg:'css/images/card_bg.png',card_bg_selected:'css/images/card_bg_selected.png',nocard:'css/images/card-back.png'}">
+                  <img class="cardstories_card_foreground" src="" alt="" />
+                  <img class="cardstories_card_background" src="" alt="" />
+                </div>
+              </div>
+            </div>
+            <div class="cardstories_write_sentence">
+              <a href="index.html" class="cardstories_go_lobby"></a>
+              <div class="cardstories_progress_owner"></div>
+              <div class="cardstories_card"></div>
+              <div class="cardstories_write">
+                <div>
+                  <textarea class="cardstories_sentence" cols="60" rows="3" name="sentence">A sentence related to the card</textarea>
+                  <div class="cardstories_submit"></div>
+                </div>
               </div>
             </div>
           </div>
-          <div class="cardstories_write_sentence">
-            <a href="index.html" class="cardstories_go_lobby"></a>
-            <div class="cardstories_progress_owner"></div>
-            <div class="cardstories_card"></div>
-            <div class="cardstories_write">
-              <div>
-                <textarea class="cardstories_sentence" cols="60" rows="3" name="sentence">A sentence related to the card</textarea>
-                <div class="cardstories_submit"></div>
-              </div>
-            </div>
-          </div>
-	</div>
 
-	<div class="cardstories_lobby">
-          <div class="cardstories_in_progress">
-            <div class="cardstories_tab cardstories_tab_in_progress"></div>
-            <div class="cardstories_start_story"></div>
-            <div class="cadrstories_games_display">
-              <table class="cardstories_template">
-                <tbody>
-                  <tr>
-                    <td><div class="cardstories_lobby_role {role}"></div></td>
-                    <td><div class="cardstories_lobby_state">{state}</div></td>
-                    <td><div class="cardstories_lobby_sentence" data="{game_id:{game_id}}">{sentence}</div></td>
-                  </tr>
-                </tbody>
-              </table>
-              <table class="cardstories_games tablesorter {widthFixed: true, sortlist: []}" cellspacing="1">
-                <thead><tr><th>ROLE</th><th>SATUS</th><th>STORY</th></tr></thead>
-                <tbody></tbody>
-              </table>
-              <div class="cardstories_pager pager"> 
-	        <form> 
-	          <span class="first">first</span>  
-	          <span class="prev">prev</span>  
-	          <span class="next">next</span>  
-	          <span class="last">last</span>  
-	          <select class="pagesize">  
-	            <option selected="selected" value="5">5</option>  
-	            <option value="20">20</option>  
-	            <option value="100">100</option>  
-                  </select>  
-                </form> 
-              </div> 
+          <div class="cardstories_lobby">
+            <div class="cardstories_in_progress">
+              <div class="cardstories_tab cardstories_tab_in_progress"></div>
+              <div class="cardstories_start_story"></div>
+              <div class="cadrstories_games_display">
+                <table class="cardstories_template">
+                  <tbody>
+                    <tr>
+                      <td><div class="cardstories_lobby_role {role}"></div></td>
+                      <td><div class="cardstories_lobby_state">{state}</div></td>
+                      <td><div class="cardstories_lobby_sentence" data="{game_id:{game_id}}">{sentence}</div></td>
+                    </tr>
+                  </tbody>
+                </table>
+                <table class="cardstories_games tablesorter {widthFixed: true, sortlist: []}" cellspacing="1">
+                  <thead><tr><th>ROLE</th><th>SATUS</th><th>STORY</th></tr></thead>
+                  <tbody></tbody>
+                </table>
+                <div class="cardstories_pager pager"> 
+                  <form> 
+                    <span class="first">first</span>  
+                    <span class="prev">prev</span>  
+                    <span class="next">next</span>  
+                    <span class="last">last</span>  
+                    <select class="pagesize">  
+                      <option selected="selected" value="5">5</option>  
+                      <option value="20">20</option>  
+                      <option value="100">100</option>  
+                    </select>  
+                  </form> 
+                </div> 
+              </div>
+            </div>
+            <div class="cardstories_finished">
+              <div class="cardstories_tab cardstories_tab_finished"></div>
+              <div class="cardstories_start_story"></div>
+              <div class="cardstories_invite"></div>
+              <div class="cadrstories_games_display">
+                <table class="cardstories_template">
+                  <tbody>
+                    <tr>
+                      <td><div class="cardstories_lobby_role {role}"></div></td>
+                      <td><div class="cardstories_lobby_win">{win}</div></td>
+                      <td><div class="cardstories_lobby_sentence" data="{game_id:{game_id}}">{sentence}</div></td>
+                    </tr>
+                  </tbody>
+                </table>
+                <table class="cardstories_games tablesorter {widthFixed: true, sortlist: []}" cellspacing="1">
+                  <thead><tr><th>ROLE</th><th>WIN</th><th>STORY</th></tr></thead>
+                  <tbody></tbody>
+                </table>
+                <div class="cardstories_pager pager"> 
+                  <form> 
+                    <span class="first">first</span>  
+                    <span class="prev">prev</span>  
+                    <span class="next">next</span>  
+                    <span class="last">last</span>  
+                    <select class="pagesize">  
+                      <option selected="selected" value="5">5</option>  
+                      <option value="20">20</option>  
+                      <option value="100">100</option>  
+                    </select>  
+                  </form> 
+                </div> 
+              </div>
             </div>
           </div>
-          <div class="cardstories_finished">
-            <div class="cardstories_tab cardstories_tab_finished"></div>
-            <div class="cardstories_start_story"></div>
-            <div class="cardstories_invite"></div>
-            <div class="cadrstories_games_display">
-              <table class="cardstories_template">
-                <tbody>
-                  <tr>
-                    <td><div class="cardstories_lobby_role {role}"></div></td>
-                    <td><div class="cardstories_lobby_win">{win}</div></td>
-                    <td><div class="cardstories_lobby_sentence" data="{game_id:{game_id}}">{sentence}</div></td>
-                  </tr>
-                </tbody>
-              </table>
-              <table class="cardstories_games tablesorter {widthFixed: true, sortlist: []}" cellspacing="1">
-                <thead><tr><th>ROLE</th><th>WIN</th><th>STORY</th></tr></thead>
-                <tbody></tbody>
-              </table>
-              <div class="cardstories_pager pager"> 
-	        <form> 
-	          <span class="first">first</span>  
-	          <span class="prev">prev</span>  
-	          <span class="next">next</span>  
-	          <span class="last">last</span>  
-	          <select class="pagesize">  
-	            <option selected="selected" value="5">5</option>  
-	            <option value="20">20</option>  
-	            <option value="100">100</option>  
-                  </select>  
-                </form> 
-              </div> 
-            </div>
-          </div>
-        </div>
 
-	<div class="cardstories_advertise">
-          <a href="index.html" class="cardstories_go_lobby"></a>
-          <div class="cardstories_progress_owner"></div>
-          <div class="cardstories_frame"></div>
-          <div class="cardstories_submit"></div>
-          <textarea class="cardstories_text" cols="100" rows="10" name="sentence">Friends</textarea>
-        </div>
-
-	<div class="cardstories_invitation">
-	  <div class="cardstories_participate">
-            <a href="index.html" class="cardstories_go_lobby"></a>
-	    <div class="cardstories_sentence"></div>
-	    <input class="cardstories_submit" type="submit" name="submit" value="participate" />
-	  </div>
-	  <div class="cardstories_pick">
-            <a href="index.html" class="cardstories_go_lobby"></a>
-            <div class="cardstories_progress_player"></div>
-            <div class="cardstories_bubble_player_pick_a_card"></div>
-            <div class="cardstories_mask_chose_a_card"></div>
-            <div class="cardstories_sentence_container">
-              <div>
-	        <div class="cardstories_brace cardstories_brace_open"></div>
-	        <div class="cardstories_sentence"></div>
-	        <div class="cardstories_brace cardstories_brace_close"></div>
-              </div>
-            </div>
-            <div class="cardstories_card_confirm" data="{middle:3}">
-              <div class="cardstories_card_confirm_ok">OK</div>
-              <div class="cardstories_card_confirm_cancel">CANCEL</div>
-            </div>
-            <div class="cardstories_cards_hand" data="{active:2,size:200,distance:200}">
-              <div class="cardstories_cards">
-                <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
-                <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
-                <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
-                <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
-                <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
-                <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart_full.png" /></a>
-              </div>
-              <div class="cardstories_card_template" data="{card:'css/images/card0{card}.png',card_bg:'css/images/card_bg.png',card_bg_selected:'css/images/card_bg_selected.png',nocard:'css/images/card-back.png'}">
-                <img class="cardstories_card_foreground" src="" alt="" />
-                <img class="cardstories_card_background" src="" alt="" />
-              </div>
-            </div>
-	  </div>
-          <div class="cardstories_pick_wait">
-            <a href="index.html" class="cardstories_go_lobby"></a>
-            <div class="cardstories_progress_player"></div>
-            <div class="cardstories_bubble_player_pick_a_card_wait"></div>
-            <div class="cardstories_pick_thanks"></div>
-            <div class="cardstories_sentence"></div>
-            <div class="cardstories_card_change"></div>
-            <div class="cardstories_card"></div>
-          </div>
-	  <div class="cardstories_owner">
+          <div class="cardstories_advertise">
             <a href="index.html" class="cardstories_go_lobby"></a>
             <div class="cardstories_progress_owner"></div>
-	    <div class="cardstories_invite_friends"></div>
-	    <div class="cardstories_voting"></div>
-	    <div class="cardstories_pending_invitations"></div>
-            <div class="cardstories_cards_hand" data="{active:2,size:200,distance:200}">
-              <div class="cardstories_cards">
-                <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
-                <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
-                <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
-                <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
-                <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
-                <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart_full.png" /></a>
+            <div class="cardstories_frame"></div>
+            <div class="cardstories_submit"></div>
+            <textarea class="cardstories_text" cols="100" rows="10" name="sentence">Friends</textarea>
+          </div>
+
+          <div class="cardstories_invitation">
+            <div class="cardstories_participate">
+              <a href="index.html" class="cardstories_go_lobby"></a>
+              <div class="cardstories_sentence"></div>
+              <input class="cardstories_submit" type="submit" name="submit" value="participate" />
+            </div>
+            <div class="cardstories_pick">
+              <a href="index.html" class="cardstories_go_lobby"></a>
+              <div class="cardstories_progress_player"></div>
+              <div class="cardstories_bubble_player_pick_a_card"></div>
+              <div class="cardstories_mask_chose_a_card"></div>
+              <div class="cardstories_sentence_container">
+                <div>
+                  <div class="cardstories_brace cardstories_brace_open"></div>
+                  <div class="cardstories_sentence"></div>
+                  <div class="cardstories_brace cardstories_brace_close"></div>
+                </div>
               </div>
-              <div class="cardstories_card_template" data="{card:'css/images/card0{card}.png',card_bg:'css/images/card_bg.png',card_bg_selected:'css/images/card_bg_selected.png',nocard:'css/images/card-back.png'}">
+              <div class="cardstories_card_confirm" data="{middle:3}">
+                <div class="cardstories_card_confirm_ok">OK</div>
+                <div class="cardstories_card_confirm_cancel">CANCEL</div>
+              </div>
+              <div class="cardstories_cards_hand" data="{active:2,size:200,distance:200}">
+                <div class="cardstories_cards">
+                  <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
+                  <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
+                  <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
+                  <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
+                  <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
+                  <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart_full.png" /></a>
+                </div>
+                <div class="cardstories_card_template" data="{card:'css/images/card0{card}.png',card_bg:'css/images/card_bg.png',card_bg_selected:'css/images/card_bg_selected.png',nocard:'css/images/card-back.png'}">
+                  <img class="cardstories_card_foreground" src="" alt="" />
+                  <img class="cardstories_card_background" src="" alt="" />
+                </div>
+              </div>
+            </div>
+            <div class="cardstories_pick_wait">
+              <a href="index.html" class="cardstories_go_lobby"></a>
+              <div class="cardstories_progress_player"></div>
+              <div class="cardstories_bubble_player_pick_a_card_wait"></div>
+              <div class="cardstories_pick_thanks"></div>
+              <div class="cardstories_sentence"></div>
+              <div class="cardstories_card_change"></div>
+              <div class="cardstories_card"></div>
+            </div>
+            <div class="cardstories_owner">
+              <a href="index.html" class="cardstories_go_lobby"></a>
+              <div class="cardstories_progress_owner"></div>
+              <div class="cardstories_invite_friends"></div>
+              <div class="cardstories_voting"></div>
+              <div class="cardstories_pending_invitations"></div>
+              <div class="cardstories_cards_hand" data="{active:2,size:200,distance:200}">
+                <div class="cardstories_cards">
+                  <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
+                  <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
+                  <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
+                  <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
+                  <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
+                  <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart_full.png" /></a>
+                </div>
+                <div class="cardstories_card_template" data="{card:'css/images/card0{card}.png',card_bg:'css/images/card_bg.png',card_bg_selected:'css/images/card_bg_selected.png',nocard:'css/images/card-back.png'}">
+                  <div class="cardstories_card_label">{label}</div>
+                  <img class="cardstories_card_foreground" src="" alt="" />
+                  <img class="cardstories_card_background" src="" alt="" />
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="cardstories_vote">
+            <div class="cardstories_voter">
+              <a href="index.html" class="cardstories_go_lobby"></a>
+              <div class="cardstories_progress_player"></div>
+              <div class="cardstories_bubble_player_vote_for_a_card"></div>
+              <div class="cardstories_mask_chose_a_card"></div>
+              <div class="cardstories_sentence_container">
+                <div>
+                  <div class="cardstories_brace cardstories_brace_open"></div>
+                  <div class="cardstories_sentence"></div>
+                  <div class="cardstories_brace cardstories_brace_close"></div>
+                </div>
+              </div>
+              <div class="cardstories_card_confirm" data="{middle:3}">
+                <div class="cardstories_card_confirm_ok">OK</div>
+                <div class="cardstories_card_confirm_cancel">CANCEL</div>
+              </div>
+              <div class="cardstories_cards_hand" data="{active:2,size:200,distance:200}">
+                <div class="cardstories_cards">
+                  <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
+                  <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
+                  <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
+                  <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
+                  <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
+                  <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart_full.png" /></a>
+                </div>
+                <div class="cardstories_card_template" data="{card:'css/images/card0{card}.png',card_bg:'css/images/card_bg.png',card_bg_selected:'css/images/card_bg_selected.png',nocard:'css/images/card-back.png'}">
                 <div class="cardstories_card_label">{label}</div>
-                <img class="cardstories_card_foreground" src="" alt="" />
-                <img class="cardstories_card_background" src="" alt="" />
+                  <img class="cardstories_card_foreground" src="" alt="" />
+                  <img class="cardstories_card_background" src="" alt="" />
+                </div>
               </div>
             </div>
-	  </div>
-	</div>
-	<div class="cardstories_vote">
-	  <div class="cardstories_voter">
-            <a href="index.html" class="cardstories_go_lobby"></a>
-            <div class="cardstories_progress_player"></div>
-            <div class="cardstories_bubble_player_vote_for_a_card"></div>
-            <div class="cardstories_mask_chose_a_card"></div>
-            <div class="cardstories_sentence_container">
-              <div>
-	        <div class="cardstories_brace cardstories_brace_open"></div>
-	        <div class="cardstories_sentence"></div>
-	        <div class="cardstories_brace cardstories_brace_close"></div>
-              </div>
+            <div class="cardstories_voter_wait">
+              <a href="index.html" class="cardstories_go_lobby"></a>
+              <div class="cardstories_progress_player"></div>
+              <div class="cardstories_bubble_player_vote_wait"></div>
+              <div class="cardstories_vote_thanks"></div>
+              <div class="cardstories_sentence"></div>
+              <div class="cardstories_card_change"></div>
+              <div class="cardstories_card"></div>
             </div>
-            <div class="cardstories_card_confirm" data="{middle:3}">
-              <div class="cardstories_card_confirm_ok">OK</div>
-              <div class="cardstories_card_confirm_cancel">CANCEL</div>
-            </div>
-            <div class="cardstories_cards_hand" data="{active:2,size:200,distance:200}">
-              <div class="cardstories_cards">
-                <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
-                <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
-                <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
-                <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
-                <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart.png" /></a>
-                <a class="cardstories_card" href="javascript://"><img src="css/images/card_medium_visiblepart_full.png" /></a>
+            <div class="cardstories_owner">
+              <a href="index.html" class="cardstories_go_lobby"></a>
+              <div class="cardstories_progress_owner"></div>
+              <div class="cardstories_sentence_container">
+                <div>
+                  <div class="cardstories_brace cardstories_brace_open"></div>
+                  <div class="cardstories_sentence"></div>
+                  <div class="cardstories_brace cardstories_brace_close"></div>
+                </div>
               </div>
-              <div class="cardstories_card_template" data="{card:'css/images/card0{card}.png',card_bg:'css/images/card_bg.png',card_bg_selected:'css/images/card_bg_selected.png',nocard:'css/images/card-back.png'}">
-                <div class="cardstories_card_label">{label}</div>
-                <img class="cardstories_card_foreground" src="" alt="" />
-                <img class="cardstories_card_background" src="" alt="" />
+              <div class="cardstories_votes">
+                <div class="cardstories_column">
+                  <div class="cardstories_card"></div>
+                  <div class="cardstories_player_name"></div>
+                  <div class="cardstories_voter_name"></div>
+                  <div class="cardstories_voter_name"></div>
+                  <div class="cardstories_voter_name"></div>
+                  <div class="cardstories_voter_name"></div>
+                  <div class="cardstories_voter_name"></div>
+                </div>
+                <div class="cardstories_column">
+                  <div class="cardstories_card"></div>
+                  <div class="cardstories_player_name"></div>
+                  <div class="cardstories_voter_name"></div>
+                  <div class="cardstories_voter_name"></div>
+                  <div class="cardstories_voter_name"></div>
+                  <div class="cardstories_voter_name"></div>
+                  <div class="cardstories_voter_name"></div>
+                </div>
+                <div class="cardstories_column">
+                  <div class="cardstories_card"></div>
+                  <div class="cardstories_player_name"></div>
+                  <div class="cardstories_voter_name"></div>
+                  <div class="cardstories_voter_name"></div>
+                  <div class="cardstories_voter_name"></div>
+                  <div class="cardstories_voter_name"></div>
+                  <div class="cardstories_voter_name"></div>
+                </div>
+                <div class="cardstories_column">
+                  <div class="cardstories_card"></div>
+                  <div class="cardstories_player_name"></div>
+                  <div class="cardstories_voter_name"></div>
+                  <div class="cardstories_voter_name"></div>
+                  <div class="cardstories_voter_name"></div>
+                  <div class="cardstories_voter_name"></div>
+                  <div class="cardstories_voter_name"></div>
+                </div>
+                <div class="cardstories_column">
+                  <div class="cardstories_card"></div>
+                  <div class="cardstories_player_name"></div>
+                  <div class="cardstories_voter_name"></div>
+                  <div class="cardstories_voter_name"></div>
+                  <div class="cardstories_voter_name"></div>
+                  <div class="cardstories_voter_name"></div>
+                  <div class="cardstories_voter_name"></div>
+                </div>
+                <div class="cardstories_column">
+                  <div class="cardstories_card"></div>
+                  <div class="cardstories_player_name"></div>
+                  <div class="cardstories_voter_name"></div>
+                  <div class="cardstories_voter_name"></div>
+                  <div class="cardstories_voter_name"></div>
+                  <div class="cardstories_voter_name"></div>
+                  <div class="cardstories_voter_name"></div>
+                </div>
               </div>
+              <div class="cardstories_finish">COMPLETE</div>
             </div>
-	  </div>
-          <div class="cardstories_voter_wait">
-            <a href="index.html" class="cardstories_go_lobby"></a>
-            <div class="cardstories_progress_player"></div>
-            <div class="cardstories_bubble_player_vote_wait"></div>
-            <div class="cardstories_vote_thanks"></div>
-            <div class="cardstories_sentence"></div>
-            <div class="cardstories_card_change"></div>
-            <div class="cardstories_card"></div>
           </div>
-          <div class="cardstories_owner">
+
+          <div class="cardstories_complete">
             <a href="index.html" class="cardstories_go_lobby"></a>
             <div class="cardstories_progress_owner"></div>
+            <div class="cardstories_progress_player"></div>
             <div class="cardstories_sentence_container">
               <div>
                 <div class="cardstories_brace cardstories_brace_open"></div>
@@ -336,80 +403,15 @@
                 <div class="cardstories_voter_name"></div>
               </div>
             </div>
-            <div class="cardstories_finish">COMPLETE</div>
-          </div>
-	</div>
-
-        <div class="cardstories_complete">
-          <a href="index.html" class="cardstories_go_lobby"></a>
-          <div class="cardstories_progress_owner"></div>
-          <div class="cardstories_progress_player"></div>
-          <div class="cardstories_sentence_container">
-            <div>
-	      <div class="cardstories_brace cardstories_brace_open"></div>
-	      <div class="cardstories_sentence"></div>
-	      <div class="cardstories_brace cardstories_brace_close"></div>
-            </div>
-          </div>
-          <div class="cardstories_votes">
-            <div class="cardstories_column">
-              <div class="cardstories_card"></div>
-              <div class="cardstories_player_name"></div>
-              <div class="cardstories_voter_name"></div>
-              <div class="cardstories_voter_name"></div>
-              <div class="cardstories_voter_name"></div>
-              <div class="cardstories_voter_name"></div>
-              <div class="cardstories_voter_name"></div>
-            </div>
-            <div class="cardstories_column">
-              <div class="cardstories_card"></div>
-              <div class="cardstories_player_name"></div>
-              <div class="cardstories_voter_name"></div>
-              <div class="cardstories_voter_name"></div>
-              <div class="cardstories_voter_name"></div>
-              <div class="cardstories_voter_name"></div>
-              <div class="cardstories_voter_name"></div>
-            </div>
-            <div class="cardstories_column">
-              <div class="cardstories_card"></div>
-              <div class="cardstories_player_name"></div>
-              <div class="cardstories_voter_name"></div>
-              <div class="cardstories_voter_name"></div>
-              <div class="cardstories_voter_name"></div>
-              <div class="cardstories_voter_name"></div>
-              <div class="cardstories_voter_name"></div>
-            </div>
-            <div class="cardstories_column">
-              <div class="cardstories_card"></div>
-              <div class="cardstories_player_name"></div>
-              <div class="cardstories_voter_name"></div>
-              <div class="cardstories_voter_name"></div>
-              <div class="cardstories_voter_name"></div>
-              <div class="cardstories_voter_name"></div>
-              <div class="cardstories_voter_name"></div>
-            </div>
-            <div class="cardstories_column">
-              <div class="cardstories_card"></div>
-              <div class="cardstories_player_name"></div>
-              <div class="cardstories_voter_name"></div>
-              <div class="cardstories_voter_name"></div>
-              <div class="cardstories_voter_name"></div>
-              <div class="cardstories_voter_name"></div>
-              <div class="cardstories_voter_name"></div>
-            </div>
-            <div class="cardstories_column">
-              <div class="cardstories_card"></div>
-              <div class="cardstories_player_name"></div>
-              <div class="cardstories_voter_name"></div>
-              <div class="cardstories_voter_name"></div>
-              <div class="cardstories_voter_name"></div>
-              <div class="cardstories_voter_name"></div>
-              <div class="cardstories_voter_name"></div>
-            </div>
           </div>
         </div>
-        <div class="cardstories_line cardstories_line_bottom"></div>
-	Copyright (C) <a href="../agpl">Sources</a>
+        <div class="cardstories_extras">
+          <div class="cardstories_subscribe">
+            <input class="cardstories_name" type="text" name="name" />
+            <input class="cardstories_submit" type="submit" name="submit" value="play" />
+          </div>
+        </div>
+        <div class="cardstories_copyright">Copyright (C) <a href="../agpl">Sources</a></div>
       </div>
     </div>
   </div>

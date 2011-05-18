@@ -27,7 +27,12 @@ html, body {
     margin-left: auto;
     margin-right: auto;
     position: relative;
-    background: transparent url('images/background.png') repeat-x left top;
+}
+
+.cardstories .cardstories_copyright {
+    position: absolute;
+    bottom: 0px;
+    margin-bottom: -20px;
 }
 
 .cardstories .cardstories_logo { 
@@ -39,6 +44,15 @@ html, body {
     width: 189px;
     height: 131px;
 }
+
+.cardstories_game {
+    background: transparent url('images/background.png') repeat-x left top;
+}
+
+.cardstories_extras {
+    background: transparent url('images/background_plain.png') repeat-x left top;
+}
+
 
 .cardstories .cardstories_progress_owner { 
     position: absolute;
@@ -644,7 +658,9 @@ html, body {
 .cardstories .cardstories_invitation > div,
 .cardstories .cardstories_vote,
 .cardstories .cardstories_vote > div,
-.cardstories .cardstories_complete 
+.cardstories .cardstories_complete,
+.cardstories .cardstories_game,
+.cardstories .cardstories_extras
  { 
      width: 100%;
      height: 100%; 
