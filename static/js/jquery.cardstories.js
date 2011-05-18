@@ -672,6 +672,7 @@
             var $this = this;
             var element = $('.cardstories_subscribe', root);
             $this.set_active(root, element);
+            $('.cardstories_name', element).focus();
             $('.cardstories_submit', element).click(function() {
                 var player_id = encodeURIComponent($('.cardstories_name', element).val());
                 $.cookie('CARDSTORIES_ID', player_id);
