@@ -1112,3 +1112,16 @@ test("create_deck", function() {
         equal(deck.indexOf(card), -1, 'duplicate of ' + card);
     }
   });
+
+test("credits", function() {
+    setup();
+    expect(3);
+
+    var root = $('#qunit-fixture .cardstories');
+    var long = $('.cardstories_credits_long', root);
+    equal(long.is(':visible'), false, 'credits not visible');
+    $.cardstories.credits(root);
+    $('.cardstories_credits_short', root).click();
+    equal(long.is(':visible'), true, 'credits visible');
+    equal($('.jspArrowUp', long).css('background-image').indexOf('url('), 0, 'up arrow for scrolling');
+  });

@@ -1,0 +1,89 @@
+.jspContainer
+{
+	overflow: hidden;
+	position: relative;
+}
+
+.jspPane
+{
+	position: absolute;
+}
+
+.jspVerticalBar
+{
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 10px;
+	height: 100%;
+}
+
+.jspVerticalBar *,
+{
+	margin: 0;
+	padding: 0;
+}
+
+.jspTrack
+{
+        background: transparent url('images/credits_scroll_middle.png') repeat-y left top;
+	position: relative;
+}
+
+.jspDrag
+{
+        background: transparent url('images/credits_thumb_middle.png') repeat-y left top;
+	position: relative;
+	top: 0;
+	left: 0;
+	cursor: pointer;
+}
+
+.jspDragTop
+{
+    position: absolute;
+    top: 0;
+    margin-top: -5px;
+    width: 10px;
+    height: 5px;
+    background: transparent url('images/credits_thumb_top.png') no-repeat left top;
+}
+
+.jspDragBottom
+{
+    position: absolute;
+    bottom: 0;
+    margin-bottom: -5px;
+    width: 10px;
+    height: 5px;
+    background: transparent url('images/credits_thumb_bottom.png') no-repeat left bottom;
+}
+
+.jspArrow
+{
+	text-indent: -20000px;
+	display: block;
+	cursor: pointer;
+}
+
+.jspArrowUp 
+{
+        width: 10px;
+        background: transparent url('images/credits_scroll_top.png') no-repeat left top;
+}
+
+.jspArrowDown
+{
+        width: 10px;
+        background: transparent url('images/credits_scroll_bottom.png') no-repeat left top;
+}
+
+.jspVerticalBar .jspArrow
+{
+	height: 5px;
+}
+
+.jspVerticalBar .jspArrow:focus
+{
+	outline: none;
+}

@@ -681,6 +681,7 @@
         },
 
         bootstrap: function(player_id, game_id, root) {
+            this.credits(root);
             if(player_id === undefined || player_id === null || player_id === '') {
               this.name(game_id, root);
             } else {
@@ -694,6 +695,20 @@
              } else {
                this.game(player_id, game_id, root);
              }
+        },
+
+        credits: function(root) {
+            var element = $('.cardstories_credits', root);
+            var long = $('.cardstories_credits_long', element);
+            $('.cardstories_credits_short', element).click(function() {
+                long.show();
+            });
+            $('.cardstories_credits_close', long).click(function() {
+                long.hide();
+            });
+            long.show(); // jScrollPane needs the element to be visible to calculate its height / width
+            $('.cardstories_credits_text', long).jScrollPane({showArrows: true});
+            long.hide();
         }
 
     };

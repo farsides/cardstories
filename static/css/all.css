@@ -29,12 +29,6 @@ html, body {
     position: relative;
 }
 
-.cardstories .cardstories_copyright {
-    position: absolute;
-    bottom: 0px;
-    margin-bottom: -20px;
-}
-
 .cardstories .cardstories_logo { 
     background-repeat: no-repeat;
     background-image: url('images/logo.png');
@@ -52,7 +46,6 @@ html, body {
 .cardstories_extras {
     background: transparent url('images/background_plain.png') repeat-x left top;
 }
-
 
 .cardstories .cardstories_progress_owner { 
     position: absolute;
@@ -713,14 +706,103 @@ html, body {
 .cardstories .cardstories_vote > div,
 .cardstories .cardstories_complete,
 .cardstories .cardstories_game,
-.cardstories .cardstories_extras
- { 
+.cardstories .cardstories_extras { 
      width: 100%;
      height: 100%; 
      display: none;
  }
 
-.cardstories div.cardstories_active
-{
+.cardstories div.cardstories_active {
     display: block;
+}
+
+/* Credits */
+
+.cardstories_credits_short {
+    position: absolute;
+    bottom: 0px;
+    left: 10px;
+    margin-bottom: -36px;
+    height: 36px;
+    line-height: 36px;
+}
+
+.cardstories_credits_short > div {
+    vertical-align: middle;
+    display: inline-block;
+}
+
+.cardstories_credits_short_left,
+.cardstories_credits_short_right {
+    width: 15px;
+    height: 100%;
+}
+
+.cardstories_credits_short_middle {
+    background: transparent url('images/credits_short_middle.png') repeat-x left top;
+    color: #9D9070;
+    font-size: 12px;
+    font-family: helvetica;
+}
+
+.cardstories_credits_short_middle a {
+    color: #9D9070;
+}
+
+.cardstories_credits_short_left {
+   background: transparent url('images/credits_short_left.png') no-repeat left top;
+}
+
+.cardstories_credits_short_right {
+   background: transparent url('images/credits_short_right.png') no-repeat left top;
+}
+
+.cardstories_credits_long {
+    width: 100%;
+    height: 100%;
+    background: transparent url('images/background_plain.png') repeat-x left top;
+    display: none;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    z-index: 5;
+    text-align: left;
+}
+
+.cardstories_credits_close {
+    width: 26px;
+    height: 28px; 
+    right: 60px;
+    top: 30px;
+    position: absolute;
+    z-index: 10;
+    background: transparent url('images/credits_close_off.png') no-repeat left top;
+}
+
+.cardstories_credits_close:hover {
+    background: transparent url('images/credits_close_over.png') no-repeat left top;
+}
+
+.cardstories_credits_long_bg_inner {
+    width: 735px;
+    left: 50%;
+    margin-left: -355px;
+    height: 711px; 
+    top: 30px;
+    background: transparent url('images/credits_background.png') no-repeat left top;
+    position: absolute;
+}
+
+.cardstories_credits_container {
+    position: relative;
+    padding: 100px 80px;
+}
+
+.cardstories_credits_text {
+    color: #9D9070;
+    font-size: 11px;
+    font-family: helvetica;
+    height: 500px;
+    width: 580px;
+    overflow: auto;
 }

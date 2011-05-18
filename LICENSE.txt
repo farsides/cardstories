@@ -1,10 +1,10 @@
 cardstories:
 
-   Copyright (c) 2011 Loic Dachary  (software)
+   Copyright (c) 2011 Loic Dachary <loic@dachary.org>  (software)
    Copyright (c) 2011 Farsides (software, artwork, gameplay)
 
    Authors:
-    Loic Dachary (software)
+    Loic Dachary <loic@dachary.org> (software)
     tartarugafeliz (artwork)
     Xavier Antoviaque (gameplay, software)
     David Blanchard (gameplay)
