@@ -133,6 +133,59 @@ html, body {
     background-image: url('images/brace_close.png');
 }
 
+/* subscribe (home) */
+
+.cardstories .cardstories_extras .cardstories_subscribe .cardstories_logo_welcome {
+    position: absolute;
+    width: 671px;
+    height: 374px;
+    top: 55px;
+    left: 175px;
+    background: transparent url('images/logo_welcome.png') no-repeat left top;
+}
+
+.cardstories .cardstories_extras .cardstories_subscribe .cardstories_logo_farsides {
+    position: absolute;
+    width: 114px;
+    height: 39px;
+    top: 430px;
+    left: 455px;
+    background: transparent url('images/logo_farsides.png') no-repeat left top;
+}
+
+.cardstories .cardstories_extras .cardstories_subscribe .cardstories_bubble {
+    position: absolute;
+    width: 490px;
+    height: 131px;
+    top: 530px;
+    left: 240px;
+    background: transparent url('images/subscribe_bubble.png') no-repeat left top;
+}
+
+.cardstories .cardstories_extras .cardstories_subscribe .cardstories_name {
+    position: absolute;
+    width: 370px;
+    height: 20px;
+    top: 632px;
+    left: 340px;
+    border: 0;
+    background-color: transparent;
+}
+
+.cardstories .cardstories_extras .cardstories_subscribe .cardstories_submit {
+    position: absolute;
+    background: transparent url('images/next.png') no-repeat left top;
+    top: 593px;
+    left: 673px;
+    border: 0px;
+    height: 73px;
+    width: 106px;
+    z-index: 1;
+}
+.cardstories .cardstories_extras .cardstories_subscribe .cardstories_submit:hover {
+    background: transparent url('images/next_over.png') no-repeat left top;
+}
+
 /* displaying a deck of cards */
 
 .cardstories_cards_hand .cardstories_card_foreground,
