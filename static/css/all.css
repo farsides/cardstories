@@ -1,16 +1,32 @@
-body {
+html, body {
     background-color: #8697A6;
+    height: 100%;
+    margin: 0px;
+    min-height: 768px; /* for ie7*/
+}
+
+.cardstories_bg_outer {
+    height: 100%;
+    width: 100%;
+    display: table;
+    vertical-align: middle;
+}
+
+.cardstories_bg_inner {
+    text-align: center;
+    position: relative;
+    vertical-align: middle;
+    display: table-cell;
+    height: 768px;
 }
 
 .cardstories { 
     width: 1024px; 
     height: 768px; 
-    position: absolute;
-    left: 50%;
-    margin-left: -512px; 
-}
-
-.cardstories { 
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
     background: #fff url('images/background.jpg') repeat-x left top;
 }
 

@@ -18,6 +18,8 @@
 	<script type="text/javascript" src="js/jquery.query-2.1.7.js"></script>
 </head>
 <body>
+  <div class="cardstories_bg_outer">
+    <div class="cardstories_bg_inner">
       <div class="cardstories">
         <div class="cardstories_skin" style="display: none; position: absolute; top: 0; z-index: 1000">
           <a href="?skin=name">name</a>
@@ -410,14 +412,16 @@
         <div class="cardstories_line cardstories_line_bottom"></div>
 	Copyright (C) <a href="../agpl">Sources</a>
       </div>
-      <script>
-        var skin = $.query.get('skin');
-        if(skin !== '') {
-          $('.cardstories_skin').show();
-          $.cardstories.skin(skin, $('.cardstories'));
-        } else {
-          $('.cardstories').cardstories($.query.get('player_id'), $.query.get('game_id'));
-        }
-      </script>
+    </div>
+  </div>
+  <script>
+    var skin = $.query.get('skin');
+    if(skin !== '') {
+      $('.cardstories_skin').show();
+      $.cardstories.skin(skin, $('.cardstories'));
+    } else {
+      $('.cardstories').cardstories($.query.get('player_id'), $.query.get('game_id'));
+    }
+  </script>
 </body>
 </html>
