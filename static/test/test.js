@@ -40,22 +40,22 @@ test("subscribe", function() {
     equal($('#qunit-fixture .cardstories_subscribe.cardstories_active').length, 0);
     $.cardstories.name(game_id, $('#qunit-fixture .cardstories'));
     equal($('#qunit-fixture .cardstories_subscribe.cardstories_active').length, 1);
-    equal($.cookie('CARDSTORIES_ID'), null);
+    equal($.cookie('CARDSTORIES_ID'), '');
     $('#qunit-fixture .cardstories_subscribe .cardstories_name').val(player_id);
     // any ajax issued as indirect side effect of subscribing is ignored because it is
     // not a direct side effect
     $.cardstories.ajax = function(options) {};
     $('#qunit-fixture .cardstories_subscribe .cardstories_submit').click();
     equal($.cookie('CARDSTORIES_ID'), player_id);
-    $.cookie('CARDSTORIES_ID', null);
-    equal($.cookie('CARDSTORIES_ID'), null);
+    $.cookie('CARDSTORIES_ID', '');
+    equal($.cookie('CARDSTORIES_ID'), '');
 });
 
 test("widget subscribe", function() {
     setup();
     expect(3);
 
-    equal($.cookie('CARDSTORIES_ID'), null);
+    equal($.cookie('CARDSTORIES_ID'), '');
     equal($('#qunit-fixture .cardstories_subscribe.cardstories_active').length, 0);
     $('#qunit-fixture .cardstories').cardstories(undefined, undefined);
     equal($('#qunit-fixture .cardstories_subscribe.cardstories_active').length, 1);
@@ -654,10 +654,10 @@ test("results_board", function() {
     
     var i;
     for(i = 0; i < board.length; i++) {
-      ok($('.cardstories_column:nth(' + i + ')', element).is(':visible'), 'column ' + i + ' is visible');
+        equal($('.cardstories_column:nth(' + i + ')', element).css('display'), 'inline-block', 'column ' + i + ' is visible');
     }
     for(i = board.length; i < 6; i++) {
-      ok(!$('.cardstories_column:nth(' + i + ')', element).is(':visible'), 'column ' + i + ' is not visible');
+        equal(!$('.cardstories_column:nth(' + i + ')', element).css('display'), false, 'column ' + i + ' is not visible');
     }
 
     var column;
@@ -666,10 +666,10 @@ test("results_board", function() {
     equal($('.cardstories_player_name', column).text(), voter12.toString());
     ok($('.cardstories_player_name', column).hasClass('cardstories_win'), 'cardstories_win');
     equal($('.cardstories_voter_name:nth(0)', column).text(), voter11.toString());
-    ok($('.cardstories_voter_name:nth(0)', column).is(':visible'), 'col 1, first vote visible');
+    equal($('.cardstories_voter_name:nth(0)', column).css('display'), 'block', 'col 1, first vote visible');
     equal($('.cardstories_voter_name:nth(1)', column).text(), voter21.toString());
-    ok($('.cardstories_voter_name:nth(1)', column).is(':visible'), 'col 1, second vote visible');
-    ok(!$('.cardstories_voter_name:nth(2)', column).is(':visible'), 'col 1, third vote hidden');
+    equal($('.cardstories_voter_name:nth(1)', column).css('display'), 'block', 'col 1, second vote visible');
+    equal(!$('.cardstories_voter_name:nth(2)', column).css('display'), false, 'col 1, third vote hidden');
 
     column = $('.cardstories_column:nth(1)', element);
     equal($('.cardstories_card', column).metadata().card, board2);
@@ -755,8 +755,8 @@ test("lobby_games", function() {
     $.cardstories.lobby_games(player_id, games, $('#qunit-fixture .cardstories .cardstories_games_test'), $('#qunit-fixture .cardstories'));
     var element = $('#qunit-fixture .cardstories_games_test');
     // list of games
-    ok($('.cardstories_games tbody tr:nth(0)', element).is(':visible'), 'first row is visible');
-    ok($('.cardstories_games tbody tr:nth(1)', element).is(':visible'), 'second row is visible');
+    equal($('.cardstories_games tbody tr:nth(0)', element).css('display'), 'table-row', 'first row is visible');
+    equal($('.cardstories_games tbody tr:nth(1)', element).css('display'), 'table-row', 'second row is visible');
     equal($('.cardstories_games tbody tr', element).length, 2, 'only two rows visible');
     // check that the rows content match what is expected
     var first = $('.cardstories_games tbody tr:nth(0)', element);
@@ -785,7 +785,7 @@ test("lobby_games", function() {
     $('.cardstories_pager select', element).val(1);
     $('.cardstories_pager select', element).change();
     equal($('.cardstories_games tbody tr:nth(0) .cardstories_lobby_sentence', element).text(), sentence1);
-    ok($('.cardstories_games tbody tr:nth(0)', element).is(':visible'), 'first row is visible');
+    equal($('.cardstories_games tbody tr:nth(0)', element).css('display'), 'table-row', 'first row is visible');
     equal($('.cardstories_games tbody tr', element).length, 1, 'only one row visible');
     // go to last page
     $('.cardstories_pager .last', element).click();
@@ -986,7 +986,10 @@ test("display_or_select_cards move", function() {
     expect(2);
 
     var root = $('#qunit-fixture .cardstories');
-    var element = $('.cardstories_create .cardstories_cards_hand', root);
+    root.addClass('cardstories_root');
+    $('.cardstories_create .cardstories_pick_card .cardstories_cards', root).show();
+    $.cardstories.set_active(root, $('.cardstories_create .cardstories_pick_card', root));
+    var element = $('.cardstories_create .cardstories_pick_card .cardstories_cards_hand', root);
     var onReady = function(is_ready) {
       var first = $('.cardstories_card:nth(1)', element);
       var offset = $(first).offset();
