@@ -204,6 +204,7 @@ html, body {
 }
 
 .cardstories_card_confirm { 
+    text-align: left;
     display: none;
 }
 
