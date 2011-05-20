@@ -1056,18 +1056,19 @@ test("select_cards ok", function() {
     expect(2);
 
     var root = $('#qunit-fixture .cardstories');
-    var element = $('.cardstories_create', root);
+    var element = $('.cardstories_create .cardstories_pick_card', root);
+    $.cardstories.set_active(root, element);
     var confirm = $('.cardstories_card_confirm', element);
     var middle = confirm.metadata({type: "attr", name: "data"}).middle;
     var cards = [{'value':1},{'value':2},{'value':3},{'value':4},{'value':5},{'value':6}];
-    var selected = 4;
+    var selected = 5;
     var onReady = function(is_ready) {
         $('.cardstories_card', element).eq(selected).click();
         $('.cardstories_card_confirm_ok', element).click();
     };
     var ok_callback = function(card) {
         equal(cards[selected].value, card, 'selected card');
-        ok(confirm.hasClass('cardstories_card_confirm_right'), 'selected card is to the right of the middle position defined in the HTML meta data');
+        ok(element.hasClass('cardstories_card_confirm_right'), 'selected card is to the right of the middle position defined in the HTML meta data');
         start();
     };
     $.cardstories.
