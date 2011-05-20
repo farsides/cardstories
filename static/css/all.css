@@ -163,6 +163,18 @@ html, body {
     left: 340px;
     border: 0;
     background-color: transparent;
+    color: #FFFFFF;
+    font-size: 14px;
+    font-family: helvetica;
+}
+
+.cardstories .cardstories_extras .cardstories_subscribe .cardstories_privacy_notice {
+    position: absolute;
+    top: 661px;
+    left: 338px;
+    color: #90856D;
+    font-size: 10px;
+    font-family: helvetica;
 }
 
 .cardstories .cardstories_extras .cardstories_subscribe .cardstories_submit {
