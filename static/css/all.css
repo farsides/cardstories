@@ -155,7 +155,7 @@ html, body {
     background: transparent url('images/subscribe_bubble.png') no-repeat left top;
 }
 
-.cardstories .cardstories_extras .cardstories_subscribe .cardstories_name {
+.cardstories .cardstories_extras .cardstories_subscribe .cardstories_email {
     position: absolute;
     width: 370px;
     height: 20px;

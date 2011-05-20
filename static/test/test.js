@@ -38,24 +38,43 @@ test("subscribe", function() {
     var game_id = undefined;
     $.cookie('CARDSTORIES_ID', null);
     equal($('#qunit-fixture .cardstories_subscribe.cardstories_active').length, 0);
-    $.cardstories.name(game_id, $('#qunit-fixture .cardstories'));
+    $.cardstories.email(game_id, $('#qunit-fixture .cardstories'));
     equal($('#qunit-fixture .cardstories_subscribe.cardstories_active').length, 1);
-    equal($.cookie('CARDSTORIES_ID'), '');
-    $('#qunit-fixture .cardstories_subscribe .cardstories_name').val(player_id);
+    equal($.cookie('CARDSTORIES_ID'), null);
+    $('#qunit-fixture .cardstories_subscribe .cardstories_email').val(player_id);
     // any ajax issued as indirect side effect of subscribing is ignored because it is
     // not a direct side effect
     $.cardstories.ajax = function(options) {};
     $('#qunit-fixture .cardstories_subscribe .cardstories_submit').click();
     equal($.cookie('CARDSTORIES_ID'), player_id);
-    $.cookie('CARDSTORIES_ID', '');
-    equal($.cookie('CARDSTORIES_ID'), '');
+    $.cookie('CARDSTORIES_ID', null);
+    equal($.cookie('CARDSTORIES_ID'), null);
+});
+
+test("subscribe_press_enter", function() {
+    setup();
+    expect(3);
+
+    var player_id = 'PLAYER';
+    var game_id = undefined;
+    $.cookie('CARDSTORIES_ID', null);
+    $.cardstories.email(game_id, $('#qunit-fixture .cardstories'));
+    equal($.cookie('CARDSTORIES_ID'), null);
+    $('#qunit-fixture .cardstories_subscribe .cardstories_email').val(player_id);
+    // any ajax issued as indirect side effect of subscribing is ignored because it is
+    // not a direct side effect
+    $.cardstories.ajax = function(options) {};
+    $('#qunit-fixture .cardstories_subscribe .cardstories_email').trigger_keypress("13");
+    equal($.cookie('CARDSTORIES_ID'), player_id);
+    $.cookie('CARDSTORIES_ID', null);
+    equal($.cookie('CARDSTORIES_ID'), null);
 });
 
 test("widget subscribe", function() {
     setup();
     expect(3);
 
-    equal($.cookie('CARDSTORIES_ID'), '');
+    equal($.cookie('CARDSTORIES_ID'), null);
     equal($('#qunit-fixture .cardstories_subscribe.cardstories_active').length, 0);
     $('#qunit-fixture .cardstories').cardstories(undefined, undefined);
     equal($('#qunit-fixture .cardstories_subscribe.cardstories_active').length, 1);

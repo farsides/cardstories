@@ -672,22 +672,32 @@
             $(element).parents('.cardstories_root div').addClass('cardstories_active');
         },
 
-        name: function(game_id, root) {
+        email: function(game_id, root) {
             var $this = this;
             var element = $('.cardstories_subscribe', root);
             $this.set_active(root, element);
-            $('.cardstories_name', element).focus();
-            $('.cardstories_submit', element).click(function() {
-                var player_id = encodeURIComponent($('.cardstories_name', element).val());
+
+            var submit = function() {
+                var player_id = encodeURIComponent($('.cardstories_email', element).val());
                 $.cookie('CARDSTORIES_ID', player_id);
                 $this.game_or_lobby(player_id, game_id, root);
-              });
+            };
+
+            $('.cardstories_email', element).focus();
+
+            // Trigger submit upon click on button or enter pressed in input field
+            $('.cardstories_submit', element).click(submit);
+            $('.cardstories_email', element).keypress(function(e) {
+                if(e.which == 13) {
+                    submit();
+                }
+            });
         },
 
         bootstrap: function(player_id, game_id, root) {
             this.credits(root);
             if(player_id === undefined || player_id === null || player_id === '') {
-              this.name(game_id, root);
+              this.email(game_id, root);
             } else {
               this.game_or_lobby(player_id, game_id, root);
             }
@@ -727,6 +737,13 @@
             $.cardstories.bootstrap(player_id, game_id, this);
             return this;
         });
+    };
+
+    $.fn.trigger_keypress = function(key_code) {
+        return $.event.trigger({ type : 'keypress', which : key_code });
+    };
+    $.fn.trigger_keydown = function(key_code) {
+        return $.event.trigger({ type : 'keypress', which : key_code });
     };
 
     $(window).bind("beforeunload", function() {
