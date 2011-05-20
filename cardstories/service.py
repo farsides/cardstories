@@ -19,7 +19,7 @@
 import os
 import random
 
-from twisted.python import log, runtime
+from twisted.python import failure, log, runtime
 from twisted.application import service
 from twisted.internet import reactor, defer
 from twisted.web import resource, client
@@ -67,7 +67,7 @@ class CardstoriesService(service.Service):
             db.commit()
         c.close()
         db.close()
-        self.db = adbapi.ConnectionPool("sqlite3", database=database)
+        self.db = adbapi.ConnectionPool("sqlite3", database=database, cp_noisy=True)
         
     def stopService(self):
         for game in self.games.values():
@@ -329,6 +329,7 @@ class CardstoriesService(service.Service):
             else:
                 raise UserWarning('action ' + action + ' is not among the allowed actions ' + ','.join(self.ACTIONS))
         except UserWarning, e:
+            failure.Failure().printDetailedTraceback()
             return defer.succeed({'error': e.args[0]})
 
     @staticmethod

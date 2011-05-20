@@ -21,6 +21,7 @@ import os
 sys.path.insert(0, os.path.abspath("..")) # so that for M-x pdb works
 import sqlite3
 
+from twisted.python import log
 from twisted.trial import unittest, runner, reporter
 from twisted.internet import defer, reactor
 from twisted.web import server, resource, http
@@ -504,14 +505,66 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         yield game.cancel()
         self.assertFalse(self.service.games.has_key(game.id))
 
+    @defer.inlineCallbacks
+    def test11_complete_and_poll(self):
+        winner_card = 5
+        sentence = 'SENTENCE'
+        owner_id = 15
+        result = yield self.service.create({ 'card': [winner_card],
+                                           'sentence': [sentence],
+                                           'owner_id': [owner_id]})
+        for player_id in ( 16, 17 ):
+            yield self.service.participate({ 'action': ['participate'],
+                                             'player_id': [player_id],
+                                             'game_id': [result['game_id']] })
+            player = yield self.service.player2game({ 'action': ['player2game'],
+                                                      'player_id': [player_id],
+                                                      'game_id': [result['game_id']] })
+            card = player['cards'][0]
+            yield self.service.pick({ 'action': ['pick'],
+                                      'player_id': [player_id],
+                                      'game_id': [result['game_id']],
+                                      'card': [card] })
+        
+        yield self.service.voting({ 'action': ['voting'],
+                                    'game_id': [result['game_id']],
+                                    'owner_id': [owner_id] })
+
+        c = self.db.cursor()
+        c.execute("SELECT board FROM games WHERE id = %d" % result['game_id'])
+        board = c.fetchone()[0]
+        winner_id = 16
+        yield self.service.vote({ 'action': ['vote'],
+                                  'game_id': [result['game_id']],
+                                  'player_id': [winner_id],
+                                  'card': [winner_card] })
+        loser_id = 17
+        yield self.service.vote({ 'action': ['vote'],
+                                  'game_id': [result['game_id']],
+                                  'player_id': [loser_id],
+                                  'card': [120] })
+        self.assertTrue(self.service.games.has_key(result['game_id']))
+        game = self.service.games[result['game_id']]
+        d = self.service.poll({'action': ['poll'],
+                               'modified': [game.modified],
+                               'game_id': [game.id]})
+        def check(result):
+            self.assertEquals([game.id], result['game_id'])
+            return result
+        d.addCallback(check)
+        yield self.service.complete({ 'action': ['complete'],
+                                      'game_id': [result['game_id']],
+                                      'owner_id': [owner_id] })
+        self.assertFalse(self.service.games.has_key(result['game_id']))
+        yield d
+
 def Run():
     loader = runner.TestLoader()
-#    loader.methodPrefix = "test09_"
+#    loader.methodPrefix = "test11_"
     suite = loader.suiteFactory()
     suite.addTest(loader.loadClass(CardstoriesServiceTestInit))
     suite.addTest(loader.loadClass(CardstoriesServiceTest))
     suite.addTest(loader.loadClass(CardstoriesServiceTestHandle))
-
     return runner.TrialRunner(
         reporter.VerboseTextReporter,
         tracebackFormat='default',

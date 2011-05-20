@@ -19,7 +19,7 @@
 import json
 from twisted.web import server, resource, static, http
 from twisted.internet import defer
-from twisted.python import urlpath
+from twisted.python import urlpath, log
 
 from cardstories.auth import Auth
 

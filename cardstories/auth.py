@@ -20,6 +20,7 @@ import os
 
 from email.mime.text import MIMEText
 
+from twisted.python import log
 from twisted.internet import defer
 from twisted.enterprise import adbapi
 from twisted.mail.smtp import sendmail
@@ -45,7 +46,7 @@ class Auth:
                 )
             db.commit()
             db.close()
-        self.db = adbapi.ConnectionPool("sqlite3", database=database)
+        self.db = adbapi.ConnectionPool("sqlite3", database=database, cp_noisy=True)
 
     def create(self, transaction, value):
         transaction.execute("INSERT INTO players (name) VALUES (?)", [ value ])
