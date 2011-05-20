@@ -428,7 +428,14 @@
                     link.html(html.supplant({ 'label': label }));
                     var zindex = 3 * (links.length - index);
                     link.css({zIndex: zindex});
-                    $('.cardstories_card_background', link).attr('src', meta.card_bg).css({zIndex: links.length - index});
+                    var background = $('.cardstories_card_background', link);
+                    var has_bg = meta.card_bg && meta.card_bg.length > 0;
+                    if(has_bg) {
+                        background.attr('src', meta.card_bg);
+                    } else if(background.attr('src') !== undefined) {
+                        background.removeAttr('src');
+                    }
+                    background.css({zIndex: links.length - index})
                     var foreground = $('.cardstories_card_foreground', link);
                     foreground.attr('src', card_file).css({zIndex: 2 * (links.length - index)});
                     if(select_callback !== undefined && card && card.inactive === undefined) {
@@ -439,10 +446,14 @@
                             var nudge = function() {
                                 link.removeClass('cardstories_card_selected');
                                 link.css({zIndex: zindex});
-                                $('.cardstories_card_background', link).attr('src', meta.card_bg);
+                                if(has_bg) {
+                                    background.attr('src', meta.card_bg);
+                                } else {
+                                    background.removeAttr('src');
+                                }
                                 dock.jqDock('nudge');
                             };
-                            $('.cardstories_card_background', this).attr('src', meta.card_bg_selected);
+                            background.attr('src', meta.card_bg_selected);
                             dock.jqDock('freeze');
                             $(this).blur();
                             select_callback.call(this, card.value, index, nudge, element);

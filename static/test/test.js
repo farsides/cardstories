@@ -1069,6 +1069,45 @@ test("display_or_select_cards select", function() {
         done(onReady);
   });
 
+test("display_or_select_cards select no bg", function() {
+    setup();
+    stop();
+    expect(4);
+
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_create .cardstories_cards_hand', root);
+    var label = 'LABEL';
+    var cards = [{'value':1},
+                 {'value':2,'label':label},
+                 {'value':3},
+                 {'value':4},
+                 {'value':5},
+                 {'value':6}];
+    var selected = 1;
+    var onReady = function(is_ready) {
+        var background = $('.cardstories_card .cardstories_card_background', element).eq(1);
+        equal(background.attr('src'), undefined);
+        $('.cardstories_card', element).eq(selected).click();
+    };
+    var meta = $('.cardstories_card_template', element).metadata({type: "attr", name: "data"});
+    var select = function(card, index, nudge, element) {
+        var link = $('.cardstories_card', element).eq(index);
+        var background = $('.cardstories_card_background', link);
+        equal(background.attr('src'), meta.card_bg_selected);
+        nudge();
+        equal(background.attr('src'), undefined);
+        start();
+    };
+    var background = $('.cardstories_card_template .cardstories_card_background', element);
+    equal(background.attr('src'), 'templatebackground');
+    meta.card_bg = '';
+    $.cardstories.
+        display_or_select_cards(cards,
+                                select, 
+                                element).
+        done(onReady);
+  });
+
 test("select_cards ok", function() {
     setup();
     stop();
