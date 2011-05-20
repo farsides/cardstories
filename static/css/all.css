@@ -71,7 +71,7 @@ html, body {
     width: 118px;
     left: 650px;
     top: 10px;
-    z-index: 10;
+    z-index: 4;
     background: transparent url('images/lobby_off.png') no-repeat left top;
 }
 
@@ -511,6 +511,7 @@ html, body {
     z-index: 1;
     left: 380px;
     top: 310px;
+    width: 600px;
 }
 
 .cardstories .cardstories_invitation .cardstories_pick .cardstories_pick_mask_chose_a_card {
@@ -558,14 +559,34 @@ html, body {
     background: transparent url('images/player_progress3.png') no-repeat left top;
 }
 
-.cardstories .cardstories_vote .cardstories_bubble_player_vote_for_a_card { 
+.cardstories .cardstories_vote .cardstories_voter .cardstories_bubble_player_vote_for_a_card { 
+    position: absolute;
+    left: 10px;
+    top: 8px;
+    background: transparent url('images/player_vote_for_a_card.png') no-repeat left top;
+    height: 342px;
+    width: 980px;
+}
+
+.cardstories .cardstories_vote .cardstories_voter .cardstories_sentence {
     position: absolute;
     z-index: 1;
-    left: 5%;
-    top: 95px;
-    background: transparent url('images/player_vote_for_a_card.png') no-repeat left top;
-    height: 122px;
-    width: 461px;
+    left: 330px;
+    top: 305px;
+    width: 600px;
+}
+
+.cardstories .cardstories_vote .cardstories_voter .cardstories_vote_mask_chose_a_card {
+    position: absolute;
+    bottom: 50px;
+    left: 10px;
+    background: transparent url('images/vote_mask_chose_a_card.png') no-repeat left top;
+    height: 339px;
+    width: 278px;
+}
+
+.cardstories .cardstories_vote .cardstories_voter.cardstories_card_confirm_right .cardstories_vote_mask_chose_a_card {
+    display: none;
 }
 
 /* state invitation and vote, player point of view : chose a card */
