@@ -221,6 +221,7 @@ html, body {
     right: 20px;
     height: 148px;
     width: 236px;
+    z-index: 5;
     display: none;
     background: transparent url('images/select_continue.png') no-repeat left top;
 }
@@ -259,19 +260,19 @@ html, body {
 
 .cardstories .cardstories_create .cardstories_pick_card .cardstories_cards {
     position: absolute;
-    left: 0px;
-    bottom: 15px;
+    left: 30px;
+    bottom: 25px;
     display: none;
 }
 
 .cardstories .cardstories_create .cardstories_bubble_pick_a_card { 
     position: absolute;
     z-index: 1;
-    left: 5%;
-    top: 108px;
+    left: 0px;
+    top: 159px;
     background: transparent url('images/pick_a_card.png') no-repeat left top;
-    height: 92px;
-    width: 287px;
+    height: 99px;
+    width: 388px;
 }
 
 .cardstories .cardstories_create .cardstories_pick_card .cardstories_progress_owner { 
@@ -500,7 +501,7 @@ html, body {
 .cardstories .cardstories_invitation .cardstories_pick .cardstories_bubble_player_pick_a_card { 
     position: absolute;
     left: 10px;
-    top: 8px;
+    top: 10px;
     background: transparent url('images/player_pick_a_card.png') no-repeat left top;
     height: 347px;
     width: 1001px;
@@ -562,7 +563,7 @@ html, body {
 .cardstories .cardstories_vote .cardstories_voter .cardstories_bubble_player_vote_for_a_card { 
     position: absolute;
     left: 10px;
-    top: 8px;
+    top: 10px;
     background: transparent url('images/player_vote_for_a_card.png') no-repeat left top;
     height: 342px;
     width: 980px;
