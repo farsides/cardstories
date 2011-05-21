@@ -503,41 +503,62 @@ html, body {
     background: transparent url('images/progress_4.png') no-repeat left top;
 }
 
-.cardstories .cardstories_invitation .cardstories_owner .cardstories_pending_invitations {
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_bubble_owner_pick_a_card { 
     position: absolute;
-    background: transparent url('images/pending_invitations.png') no-repeat left top;
-    top: 25%;
-    left: 1%;
-    height: 530px;
-    width: 1000px;
-    z-index: 1;
+    left: 10px;
+    top: 10px;
+    background: transparent url('images/owner_pick_a_card.png') no-repeat left top;
+    height: 566px;
+    width: 248px;
+    z-index: 10;
+}
+
+
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_sentence {
+    position: absolute;
+    background: transparent url('images/invitations_owner_sentence.png') no-repeat left top;
+    top: 204px;
+    right: 10px;
+    height: 85px;
+    width: 723px;
+    text-align: center;
+    line-height: 80px;
+    color: white;
 }
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_invite_friends {
     position: absolute;
     background: transparent url('images/invite_friends_button.png') no-repeat left top;
-    top: 58%;
-    left: 83%;
-    height: 121px;
-    width: 129px;
-    z-index: 2;
+    top: 275px;
+    left: 23px;
+    height: 137px;
+    width: 146px;
+    z-index: 20;
+}
+
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_invite_friends:hover {
+    left: 30px;
+    background: transparent url('images/invite_friends_button_over.png') no-repeat left top;
 }
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_voting {
     position: absolute;
     background: transparent url('images/to_vote.png') no-repeat left top;
-    bottom: 10%;
-    right: 5%;
-    height: 76px;
-    width: 109px;
-    z-index: 3;
+    bottom: 190px;
+    left: 20px;
+    height: 90px;
+    width: 135px;
+    z-index: 20;
+}
+
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_voting:hover {
+    background: transparent url('images/to_vote_over.png') no-repeat left top;
 }
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_cards {
     position: absolute;
-    bottom: 20%;
-    left: 21%;
-    z-index: 1;
+    bottom: 20px;
+    left: 150px;
     display: none;
 }
 
@@ -601,6 +622,19 @@ html, body {
     background: transparent url('images/pick_thanks.png') no-repeat left top;
     height: 267px;
     width: 648px;
+}
+
+/* state invitation, owner point of view */
+
+.cardstories .cardstories_owner .cardstories_cards_hand .cardstories_card_label {
+    position: absolute;
+    bottom: 5px;
+    font-weight: bold; 
+    font-size: 12px; 
+    color: #000;
+    text-align: center;
+    text-decoration: none;
+    width: 
 }
 
 /* state vote, player point of view : vote for a card */
