@@ -316,6 +316,7 @@
             var $this = this;
             var element = $('.cardstories_invitation .cardstories_owner', root);
             this.set_active(root, element);
+            $('.cardstories_sentence', element).text(game.sentence);
             //
             // Proceed to vote, if possible
             //

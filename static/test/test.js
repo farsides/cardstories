@@ -212,18 +212,20 @@ test("invitation_owner_invite_more", function() {
 test("invitation_owner", function() {
     setup();
     stop();
-    expect(12);
+    expect(13);
 
     var player1 = 'player1';
     var card1 = 5;
     var player2 = 'player2';
     var player_id = player1;
     var game_id = 101;
+    var sentence = 'SENTENCE';
 
     var game = {
 	'id': game_id,
 	'owner': true,
 	'ready': true,
+	'sentence': sentence,
         'players': [ [ player1, null, 'n', card1, [] ],
                      [ player2, null, 'n', null, [] ] ]
     };
@@ -243,6 +245,7 @@ test("invitation_owner", function() {
     $.cardstories.
         invitation(player_id, game, $('#qunit-fixture .cardstories')).
         done(function(is_ready) {
+            equal($('#qunit-fixture .cardstories_invitation .cardstories_owner .cardstories_sentence').text(), sentence);
             var cards = $('#qunit-fixture .cardstories_invitation .cardstories_owner .cardstories_cards');
             equal($('.cardstories_card:nth(0) .cardstories_card_foreground', cards).attr('alt'), player1);
             equal($('.cardstories_card:nth(0) .cardstories_card_foreground', cards).attr('src'), 'PATH/card0' + card1 + '.png');

@@ -70,6 +70,7 @@
 	'id': 100,
 	'owner': true,
 	'ready': true,
+	  'sentence': 'long sentence is in the flux',
         'players': [ [ 'player1', null, 'n', 5, [] ],
                      [ 'player2', null, 'n', null, [] ] ]
       };
