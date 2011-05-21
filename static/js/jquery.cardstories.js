@@ -592,6 +592,7 @@
               board2voters[game.board[i]] = [];
             }
             var board2player = {};
+            var winners = [];
             for(i = 0; i < game.players.length; i++) {
               var vote = game.players[i][1];
               var picked = game.players[i][3];
@@ -599,8 +600,14 @@
               if(voters !== undefined) {
                 voters.push(game.players[i][0]);
               }
+              if(game.players[i][2] == 'y') {
+                winners.push(game.players[i][0]);
+              }
               board2player[picked] = game.players[i];
             }
+            
+            $('.cardstories_winners', element).text(winners.join(', '));
+
             var cards = game.board;
             $('.cardstories_column', element).each(function(index) {
                 if(index < cards.length) {

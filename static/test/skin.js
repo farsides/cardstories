@@ -90,7 +90,7 @@
 	'sentence': 'long sentence is in the flux'
       };
       $.cardstories.invitation_pick_wait('PLAYER1', game, root);
-    } else if(skin == 'vote_voter' || skin == 'vote_voter_wait' || skin == 'vote_owner' || skin == 'vote_viewer') {
+    } else if(skin == 'vote_voter' || skin == 'vote_voter_wait' || skin == 'vote_viewer') {
       var game = {
 	'id': 100,
 	'board': [21,22,23,24,25,26],
@@ -98,6 +98,23 @@
 	'sentence': 'The sentence is the sentence'
       };
       $.cardstories[skin]('PLAYER1', game, root);
+    } else if(skin == 'vote_owner') {
+      var game = {
+	'id': 100,
+	'owner': false,
+        'sentence': 'the game sentence',
+        'board': [30,31,32,33,34,35,36],
+        'players': [ [ 'voter11', 30, null, 32, [ ] ],
+                     [ 'voter12', null, null, 30, [ ] ],
+                     [ 'voter21', 30, null, 31, [ ] ],
+                     [ 'voter22', 32, null, 33, [ ] ],
+                     [ 'voter23', 35, null, 34, [ ] ],
+                     [ 'voter24', 35, null, 35, [ ] ],
+                     [ 'voter25', 35, null, 36, [ ] ]
+                   ],
+	'ready': true
+      };
+      $.cardstories.vote_owner('voter11', game, root);
     } else if(skin == 'complete') {
       var game = {
 	'id': 100,

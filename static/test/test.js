@@ -597,7 +597,7 @@ test("vote_owner", function() {
 
 test("complete", function() {
     setup();
-    expect(7);
+    expect(6);
 
     var player_id = 15;
     var game_id = 101;
@@ -631,7 +631,6 @@ test("complete", function() {
     equal($('#qunit-fixture .cardstories_complete.cardstories_active').length, 1);
     equal($('#qunit-fixture .cardstories_complete.cardstories_owner').length, 1, 'is owner');
     equal($('#qunit-fixture .cardstories_complete.cardstories_player').length, 0, 'is not player');
-    equal($('#qunit-fixture .cardstories_complete .cardstories_sentence').text(), sentence);
     game.owner = false;
     $.cardstories.complete(player_id, game, $('#qunit-fixture .cardstories'));
     equal($('#qunit-fixture .cardstories_complete.cardstories_owner').length, 0, 'is not owner');
@@ -640,7 +639,7 @@ test("complete", function() {
 
 test("results_board", function() {
     setup();
-    expect(19);
+    expect(20);
 
     var player_id = 15;
     var game_id = 101;
@@ -668,10 +667,12 @@ test("results_board", function() {
                    ],
 	'ready': true
     };
+    var winners = [voter11, voter12].join(', ');
 
     var element = $('#qunit-fixture .cardstories_complete');
     $.cardstories.results_board(voter12, game, element);
 
+    equal($('.cardstories_winners', element).text(), winners);
     equal($('.cardstories_sentence', element).text(), sentence);
     
     var i;
