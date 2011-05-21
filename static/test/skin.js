@@ -48,10 +48,17 @@
                           ],
                  'win': {100: 'n', 101: 'y' }
                 };
+    var lobby_one = {'games': [[100, 'sentence100', 'invitation', 0],
+                               [101, 'sentence101', 'vote', 1]
+                              ],
+                     'win': {100: 'n', 101: 'y' }
+                    };
     if(skin == 'advertise') {
       $.cardstories.advertise('PLAYER1', 100, root);
     } else if(skin == 'in_progress') {
       $.cardstories.lobby_in_progress('PLAYER1', lobby, root);
+    } else if(skin == 'in_progress_one') {
+      $.cardstories.lobby_in_progress('PLAYER1', lobby_one, root);
     } else if(skin == 'finished') {
       $.cardstories.lobby_finished('PLAYER1', lobby, root);
     } else if(skin == 'create_pick_card') {

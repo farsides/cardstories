@@ -266,7 +266,7 @@
             var $this = this;
             var element = $('.cardstories_lobby .cardstories_in_progress', root);
             this.set_active(root, element);
-            $('.cardstories_tab_in_progress', element).click(function() {
+            $('.cardstories_tab_finished', element).click(function() {
                 $this.refresh_lobby(player_id, false, true, root);
               });
             $('.cardstories_start_story', element).click(function() {
@@ -279,7 +279,7 @@
             var $this = this;
             var element = $('.cardstories_lobby .cardstories_finished', root);
             this.set_active(root, element);
-            $('.cardstories_tab_finished', element).click(function() {
+            $('.cardstories_tab_in_progress', element).click(function() {
                 $this.refresh_lobby(player_id, true, true, root);
               });
             $('.cardstories_start_story', element).click(function() {

@@ -870,7 +870,7 @@ test("lobby_in_progress", function() {
         equal(options.type, 'GET');
         equal(options.url, $.cardstories.url + '?action=lobby&player_id=' + player_id + '&in_progress=false&my=true');
     };
-    $('.cardstories_tab', element).click();
+    $('.cardstories_tab_finished', element).click();
     // list of games
     ok($('.cardstories_games tbody tr', element).length > 0, 'rows were inserted');
     // create game
@@ -901,7 +901,7 @@ test("lobby_finished", function() {
         equal(options.type, 'GET');
         equal(options.url, $.cardstories.url + '?action=lobby&player_id=' + player_id + '&in_progress=true&my=true');
     };
-    $('.cardstories_tab', element).click();
+    $('.cardstories_tab_in_progress', element).click();
     // list of games
     ok($('.cardstories_games tbody tr', element).length > 0, 'rows were inserted');
     // create game
