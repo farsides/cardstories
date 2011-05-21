@@ -5,7 +5,7 @@
         <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
 	<script type="text/javascript" src="js/jquery/jquery-1.5.1.js"></script>
         <script type="text/javascript" src="js/supplant.js"></script>
-	<link rel="stylesheet" href="tablesorter/blue/style.css" type="text/css" media="screen">
+	<link rel="stylesheet" href="css/tablesorter.css" type="text/css" media="screen">
 	<script type="text/javascript" src="tablesorter/jquery.tablesorter.js"></script>
 	<script type="text/javascript" src="tablesorter/jquery.tablesorter.pager.js"></script>
 	<script type="text/javascript" src="js/jquery.metadata.js"></script>
@@ -25,6 +25,7 @@
   <div class="cardstories_skin" style="display: none; position: absolute; top: 0; z-index: 1000">
     <a href="?skin=name">name</a>
     <a href="?skin=in_progress">in_progress</a>
+    <a href="?skin=in_progress_one">in_progress one game</a>
     <a href="?skin=finished">finished</a>
     <a href="?skin=create_pick_card">create_pick_card</a>
     <a href="?skin=create_write_sentence">create_write_sentence</a>
@@ -85,9 +86,13 @@
 
           <div class="cardstories_lobby">
             <div class="cardstories_in_progress">
-              <div class="cardstories_tab cardstories_tab_in_progress"></div>
+              <div class="cardstories_tab">
+                <div class="cardstories_tab_in_progress"></div>
+                <div class="cardstories_tab_finished"></div>
+              </div>
+              <div class="cardstories_stories_you_are_playing"></div>
               <div class="cardstories_start_story"></div>
-              <div class="cadrstories_games_display">
+              <div class="cardstories_games_display">
                 <table class="cardstories_template">
                   <tbody>
                     <tr>
@@ -97,30 +102,30 @@
                     </tr>
                   </tbody>
                 </table>
-                <table class="cardstories_games tablesorter {widthFixed: true, sortlist: []}" cellspacing="1">
-                  <thead><tr><th>ROLE</th><th>SATUS</th><th>STORY</th></tr></thead>
+                <table class="cardstories_games tablesorter {sortlist: []}" cellspacing="1">
+                  <thead><tr><th class="role">Role</th><th>Status</th><th>Story</th></tr></thead>
                   <tbody></tbody>
                 </table>
                 <div class="cardstories_pager pager"> 
-                  <form> 
-                    <span class="first">first</span>  
-                    <span class="prev">prev</span>  
-                    <span class="next">next</span>  
-                    <span class="last">last</span>  
+                    <div class="first"></div>  
+                    <div class="prev"></div>  
+                    <div class="next"></div>  
+                    <div class="last"></div>  
                     <select class="pagesize">  
-                      <option selected="selected" value="5">5</option>  
+                      <option selected="selected" value="4">4</option>  
                       <option value="20">20</option>  
                       <option value="100">100</option>  
                     </select>  
-                  </form> 
                 </div> 
               </div>
             </div>
             <div class="cardstories_finished">
-              <div class="cardstories_tab cardstories_tab_finished"></div>
+              <div class="cardstories_tab">
+                <div class="cardstories_tab_in_progress"></div>
+                <div class="cardstories_tab_finished"></div>
+              </div>
               <div class="cardstories_start_story"></div>
-              <div class="cardstories_invite"></div>
-              <div class="cadrstories_games_display">
+              <div class="cardstories_games_display">
                 <table class="cardstories_template">
                   <tbody>
                     <tr>
@@ -131,21 +136,19 @@
                   </tbody>
                 </table>
                 <table class="cardstories_games tablesorter {widthFixed: true, sortlist: []}" cellspacing="1">
-                  <thead><tr><th>ROLE</th><th>WIN</th><th>STORY</th></tr></thead>
+                  <thead><tr><th class="role">Role</th><th>Winner</th><th>Story</th></tr></thead>
                   <tbody></tbody>
                 </table>
                 <div class="cardstories_pager pager"> 
-                  <form> 
-                    <span class="first">first</span>  
-                    <span class="prev">prev</span>  
-                    <span class="next">next</span>  
-                    <span class="last">last</span>  
+                    <div class="first"></div>  
+                    <div class="prev"></div>  
+                    <div class="next"></div>  
+                    <div class="last"></div>  
                     <select class="pagesize">  
-                      <option selected="selected" value="5">5</option>  
+                      <option selected="selected" value="4">4</option>  
                       <option value="20">20</option>  
                       <option value="100">100</option>  
                     </select>  
-                  </form> 
                 </div> 
               </div>
             </div>
