@@ -94,7 +94,7 @@
       var game = {
 	'id': 100,
 	'board': [21,22,23,24,25,26],
-	'self': [21, 26, [21,12,13,14,15,16,17]],
+	'self': [23, 26, [21,12,13,14,15,16,17]],
 	'sentence': 'The sentence is the sentence'
       };
       $.cardstories[skin]('PLAYER1', game, root);

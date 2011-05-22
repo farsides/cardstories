@@ -439,6 +439,9 @@
                     background.css({zIndex: links.length - index})
                     var foreground = $('.cardstories_card_foreground', link);
                     foreground.attr('src', card_file).css({zIndex: 2 * (links.length - index)});
+                    if(card) {
+                        link.toggleClass('cardstories_card_inactive', card.inactive !== undefined);
+                    }
                     if(select_callback !== undefined && card && card.inactive === undefined) {
                         link.metadata({type: "attr", name: "data"}).card = card.value;
                         link.unbind('click').click(function() {

@@ -341,7 +341,7 @@ html, body {
 
 .cardstories .cardstories_lobby .cardstories_pager {
     position: absolute;
-    bottom: 5px;
+    bottom: 10px;
     width: 100%;
     height: 30px;
     text-align: center;
@@ -392,6 +392,23 @@ html, body {
     background: transparent url('images/lobby_background.png') no-repeat 35px 350px;
 }
 
+.cardstories .cardstories_lobby .cardstories_games_display {
+    position: relative;
+    width: 925px;
+    height: 380px;
+    left: 50px;
+    top: 350px;
+}
+
+.cardstories .cardstories_lobby .cardstories_games {
+    border-collapse: collapse;
+    background: transparent url('images/transparent42.png') repeat-x left top;
+}
+
+.cardstories .cardstories_lobby .cardstories_games .cardstories_lobby_vote {
+    color: #F2A71B;
+}
+
 /* lobby for in progress games */
 
 .cardstories .cardstories_lobby .cardstories_in_progress .cardstories_tab_in_progress {
@@ -409,14 +426,6 @@ html, body {
     left: 350px;
     height: 85px;
     width: 368px;
-}
-
-.cardstories .cardstories_lobby .cardstories_games_display {
-    position: relative;
-    width: 925px;
-    height: 380px;
-    left: 50px;
-    top: 350px;
 }
 
 /* lobby for finished games */
@@ -634,6 +643,17 @@ html, body {
 
 .cardstories .cardstories_vote .cardstories_voter.cardstories_card_confirm_right .cardstories_vote_mask_chose_a_card {
     display: none;
+}
+
+.cardstories .cardstories_vote .cardstories_card_inactive .cardstories_card_my {
+    position: absolute;
+    bottom: 20px;
+    right: 0px;
+    margin-right: -40px;
+    height: 16px;
+    width: 60px;
+    z-index: 100;
+    background: transparent url('images/yourcard.png') no-repeat left top;
 }
 
 /* state invitation and vote, player point of view : chose a card */

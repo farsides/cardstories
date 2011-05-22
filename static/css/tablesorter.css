@@ -2,7 +2,6 @@
 table.tablesorter {
 	font-family:helvetica;
 	margin:10px 0pt 15px;
-	font-size: 16pt;
 	width: 100%;
 	text-align: left;
 }
@@ -10,13 +9,13 @@ table.tablesorter thead tr th,
 table.tablesorter tfoot tr th {
 	color: #373735;
         background-color: #d3d3d3;
-	border: 1px solid #FFF;
+	border: 1px solid #DBDBDB;
 	font-size: 16pt;
 	padding: 4px;
 }
 
 table.tablesorter tbody tr td {
-	border: 1px solid #FFF;
+	border: 1px solid #DBDBDB;
 }
 
 table.tablesorter thead tr th.role {
@@ -26,15 +25,26 @@ table.tablesorter thead tr th.role {
 table.tablesorter thead tr .header {
 	background-image: url(images/lobby_arrow.png);
 	background-repeat: no-repeat;
+        margin: 5px;
 	background-position: center right;
 	cursor: pointer;
 }
 table.tablesorter tbody td {
-	color: #B3B0A1;
 	padding: 4px 10px;
 	background-color: transparent;
 	vertical-align: center;
 }
+
+table.tablesorter tbody tr td.status {
+    color: #B3B0A1;
+	font-size: 15pt;
+}
+
+table.tablesorter tbody tr td.sentence {
+	color: #E1E1E5;
+	font-size: 13pt;
+}
+
 table.tablesorter tbody tr.odd td {
 	background-color:#F0F0F6;
 }
