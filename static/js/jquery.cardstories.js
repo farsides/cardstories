@@ -374,7 +374,7 @@
             this.set_active(root, element);
             $('.cardstories_sentence', element).text(game.sentence);
             var card = game.self[0];
-            $('.cardstories_card', element).attr('class', 'cardstories_card cardstories_card' + card + ' {card:' + card + '}');
+            $('.cardstories_card', element).attr('class', 'cardstories_card cardstories_wait_card' + card + ' {card:' + card + '}');
             $('.cardstories_card_change', element).unbind('click').click(function() {
                 $this.invitation_pick(player_id, game, root);
             });
@@ -550,7 +550,7 @@
             this.set_active(root, element);
             $('.cardstories_sentence', element).text(game.sentence);
             var card = game.self[1];
-            $('.cardstories_card', element).attr('class', 'cardstories_card cardstories_card' + card + ' {card:' + card + '}');
+            $('.cardstories_card', element).attr('class', 'cardstories_card cardstories_wait_card' + card + ' {card:' + card + '}');
             $('.cardstories_card_change', element).unbind('click').click(function() {
                 $this.vote_voter(player_id, game, root);
             });
