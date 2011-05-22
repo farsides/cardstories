@@ -10,6 +10,7 @@
     <script type="text/javascript" src="../tablesorter/jquery.tablesorter.pager.js"></script>
 
     <script type="text/javascript" src="../js/jquery.metadata.js"></script>
+    <script type="text/javascript" src="../js/jquery.validate.min.js"></script>
     <script type="text/javascript" src="../js/jquery.cookie.js"></script>
     <script type="text/javascript" src="../js/jquery.jqDock.js"></script>
     <script type="text/javascript" src="../js/jquery.cardstories.js"></script>
@@ -31,8 +32,10 @@
     <div id="qunit-fixture">
       <div class="cardstories">
         <div class="cardstories_subscribe">
-          <input class="cardstories_email" type="text" name="email" />
-          <input class="cardstories_submit" type="submit" name="submit" value="play" />
+          <form class="cardstories_emailform" method="get" action="javascript://">
+            <input class="cardstories_email required email" type="text" name="email" value="" />
+            <input class="cardstories_submit" type="submit" name="submit" value="" />
+          </form>
         </div>
         <div class="cardstories_create">
           <div class="cardstories_pick_card">

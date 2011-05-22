@@ -34,7 +34,7 @@ test("subscribe", function() {
     setup();
     expect(5);
 
-    var player_id = 'PLAYER';
+    var player_id = 'player@test.com';
     var game_id = undefined;
     $.cookie('CARDSTORIES_ID', null);
     equal($('#qunit-fixture .cardstories_subscribe.cardstories_active').length, 0);
@@ -45,13 +45,13 @@ test("subscribe", function() {
     // any ajax issued as indirect side effect of subscribing is ignored because it is
     // not a direct side effect
     $.cardstories.ajax = function(options) {};
-    $('#qunit-fixture .cardstories_subscribe .cardstories_submit').click();
-    equal($.cookie('CARDSTORIES_ID'), player_id);
+    $('#qunit-fixture .cardstories_subscribe .cardstories_submit').submit();
+    equal($.cookie('CARDSTORIES_ID').replace(/%40/g, "@"), player_id);
     $.cookie('CARDSTORIES_ID', null);
     equal($.cookie('CARDSTORIES_ID'), null);
 });
 
-test("subscribe_press_enter", function() {
+test("subscribe_validation_error", function() {
     setup();
     expect(3);
 
@@ -64,9 +64,8 @@ test("subscribe_press_enter", function() {
     // any ajax issued as indirect side effect of subscribing is ignored because it is
     // not a direct side effect
     $.cardstories.ajax = function(options) {};
-    $('#qunit-fixture .cardstories_subscribe .cardstories_email').trigger_keypress("13");
-    equal($.cookie('CARDSTORIES_ID'), player_id);
-    $.cookie('CARDSTORIES_ID', null);
+    $('#qunit-fixture .cardstories_subscribe .cardstories_submit').submit();
+    equal($('#qunit-fixture .cardstories_subscribe label.error').attr('for'), 'email');
     equal($.cookie('CARDSTORIES_ID'), null);
 });
 

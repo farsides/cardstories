@@ -698,22 +698,15 @@
             var $this = this;
             var element = $('.cardstories_subscribe', root);
             $this.set_active(root, element);
-
-            var submit = function() {
-                var player_id = encodeURIComponent($('.cardstories_email', element).val());
-                $.cookie('CARDSTORIES_ID', player_id);
-                $this.game_or_lobby(player_id, game_id, root);
-            };
-
-            $('.cardstories_email', element).focus();
-
-            // Trigger submit upon click on button or enter pressed in input field
-            $('.cardstories_submit', element).click(submit);
-            $('.cardstories_email', element).keypress(function(e) {
-                if(e.which == 13) {
-                    submit();
+            validator = $(".cardstories_emailform", element).validate({
+                submitHandler: function(form) {
+                    var player_id = encodeURIComponent($('.cardstories_email', element).val());
+                    $.cookie('CARDSTORIES_ID', player_id);
+                    $this.game_or_lobby(player_id, game_id, root);        
                 }
             });
+
+            $('.cardstories_email', element).focus();
         },
 
         bootstrap: function(player_id, game_id, root) {

@@ -118,6 +118,16 @@ html, body {
     background: transparent url('images/subscribe_bubble.png') no-repeat left top;
 }
 
+.cardstories .cardstories_extras .cardstories_subscribe label.error {
+    position: absolute;
+    top: 690px;
+    width: 100%;
+    text-align: center;
+    color: red;
+    font-size: 14px;
+    font-family: helvetica;
+}
+
 .cardstories .cardstories_extras .cardstories_subscribe .cardstories_email {
     position: absolute;
     width: 370px;
