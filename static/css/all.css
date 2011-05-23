@@ -270,7 +270,7 @@ html, body {
 
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_write_title {
     position: absolute;
-    background: transparent url('images/boy.png') no-repeat left top;
+    background: transparent url('images/write_title.png') no-repeat left top;
     top: 21px;
     left: 7%;
     height: 72px;
@@ -281,7 +281,7 @@ html, body {
 
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_write_hint {
     position: absolute;
-    background: transparent url('images/hint.png') no-repeat left top;
+    background: transparent url('images/write_hint.png') no-repeat left top;
     top: 222px;
     left: 7%;
     height: 135px;
@@ -290,41 +290,39 @@ html, body {
 }
 
 
+
+.cardstories .cardstories_create .cardstories_write_sentence .cardstories_write_box {
+    position: absolute;
+    left: 3%;
+    top: 92px;
+    height: 130px;
+    width: 524px;
+} 
+
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_sentence {
-   position: absolute;
-   top: 106px;
-   left: 5%;
    border: 0px; 
    height: 90px;
    width: 410px;
 } 
 
-.cardstories .cardstories_create .cardstories_write_sentence .cardstories_top_box {
-   position: absolute;
-   background: transparent url('images/top_box.png') no-repeat left top;
-   top: 90px;
-   left: 5%;
-   border: 0px; 
-   height: 15px;
-   width: 420px;
+
+.cardstories .cardstories_create .cardstories_write_sentence .cardstories_write_top_box {
+    background: transparent url('images/write_top_box.png') no-repeat left top;  
+    height: 15px;
+    width: 420px;
+    border: 0px; 
 } 
 
-.cardstories .cardstories_create .cardstories_write_sentence .cardstories_middle_box {
-   position: absolute;
-   background: transparent url('images/middle_box.png') left top;
-   top: 104px;
-   left: 5%;
+.cardstories .cardstories_create .cardstories_write_sentence .cardstories_write_middle_box {
+   background: transparent url('images/write_middle_box.png') left top;
    border: 0px; 
-   height: 100px;
+   height: 95px;
    width: 420px;
 } 
 
 
-.cardstories .cardstories_create .cardstories_write_sentence .cardstories_bottom_box {
-   position: absolute;
-   background: transparent url('images/bottom_box.png') no-repeat left top;
-   top: 203px;
-   left: 5%;
+.cardstories .cardstories_create .cardstories_write_sentence .cardstories_write_bottom_box {
+   background: transparent url('images/write_bottom_box.png') no-repeat left top;
    border: 0px; 
    height: 22px;
    width: 420px;
@@ -336,8 +334,8 @@ html, body {
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_submit {
     position: absolute;
     background: transparent url('images/next.png') no-repeat left top;
-    top: 158px;
-    right: 54px;
+    top: 64px;
+    right: 58px;
     height: 73px;
     width: 106px;
     z-index: 1;
