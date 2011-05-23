@@ -24,9 +24,10 @@ from twisted.web import resource, server
 from twisted.cred import portal, checkers
 from twisted.conch import manhole, manhole_ssh
 
-from OpenSSL import SSL
+#from OpenSSL import SSL
 
-from cardstories.service import SSLContextFactory, CardstoriesService
+from cardstories.service import CardstoriesService
+#from cardstories.service import SSLContextFactory
 from cardstories.site import CardstoriesTree, CardstoriesResource
 
 class Options(usage.Options):
@@ -84,8 +85,8 @@ def makeService(settings):
                        interface=settings.get('interface', '127.0.0.1')
                        ).setServiceParent(service_collection)
 
-    if settings.has_key('ssl-port') and settings['ssl-port']:
-        internet.SSLServer(settings['ssl-port'], site, SSLContextFactory(settings)
-                           ).setServiceParent(service_collection)
+    # if settings.has_key('ssl-port') and settings['ssl-port']:
+    #     internet.SSLServer(settings['ssl-port'], site, SSLContextFactory(settings)
+    #                        ).setServiceParent(service_collection)
 
     return service_collection

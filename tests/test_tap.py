@@ -144,7 +144,7 @@ def Run():
 #    loader.methodPrefix = "test_trynow"
     suite = loader.suiteFactory()
     suite.addTest(loader.loadClass(CardstoriesServerTest))
-    suite.addTest(loader.loadClass(CardstoriesServerTestSSL))
+#    suite.addTest(loader.loadClass(CardstoriesServerTestSSL))
 
     return runner.TrialRunner(
         reporter.VerboseTextReporter,

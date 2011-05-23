@@ -27,7 +27,7 @@ from twisted.enterprise import adbapi
 
 from cardstories.game import CardstoriesGame
 
-from OpenSSL import SSL
+#from OpenSSL import SSL
 
 import sqlite3
 
@@ -348,13 +348,13 @@ class CardstoriesService(service.Service):
             raise UserWarning, 'game_id=%s must be an integer > 0' % args['game_id']
         return game_id
 
-class SSLContextFactory:
-
-    def __init__(self, settings):
-        self.pem_file = settings['ssl-pem']
-
-    def getContext(self):
-        ctx = SSL.Context(SSL.SSLv23_METHOD)
-        ctx.use_certificate_file(self.pem_file)
-        ctx.use_privatekey_file(self.pem_file)
-        return ctx
+#class SSLContextFactory:
+#
+#    def __init__(self, settings):
+#        self.pem_file = settings['ssl-pem']
+#
+#    def getContext(self):
+#        ctx = SSL.Context(SSL.SSLv23_METHOD)
+#        ctx.use_certificate_file(self.pem_file)
+#        ctx.use_privatekey_file(self.pem_file)
+#        return ctx
