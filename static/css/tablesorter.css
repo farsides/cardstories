@@ -4,7 +4,9 @@ table.tablesorter {
 	margin:10px 0pt 15px;
 	width: 100%;
 	text-align: left;
+        border-style: hidden; 
 }
+
 table.tablesorter thead tr th,
 table.tablesorter tfoot tr th {
 	color: #373735;
