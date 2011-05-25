@@ -4,3 +4,7 @@ MANIFEST
 build
 *.swo
 twistd.pid
+*.pyc
+*.swp
+etc/cardstories/twisted/plugins/dropin.cache
+static/cardstories.zip
