@@ -85,7 +85,7 @@
                         $this.error(data.error);
                     } else {
                         var root = $(element).parents('.cardstories_root');
-                        $this.setTimeout(function() { $this.advertise(player_id, data.game_id, root); }, 30);
+                        $this.setTimeout(function() { $this.reload(player_id, data.game_id, root); }, 30);
                     }
                 };
                 var sentence = encodeURIComponent($('.cardstories_sentence', element).val());
@@ -292,7 +292,11 @@
             var poll = true;
             var deferred;
             if(game.owner) {
-                deferred = this.invitation_owner(player_id, game, root);
+                if(game.invited.length == 0) {
+                    deferred = this.advertise(player_id, game.id, root);
+                } else {
+                    deferred = this.invitation_owner(player_id, game, root);
+                }
             } else {
                 if(game.self !== null && game.self !== undefined) {
                     if(game.self[0] === null) {

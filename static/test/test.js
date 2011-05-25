@@ -108,9 +108,10 @@ test("send_game", function() {
 test("create", function() {
     setup();
     stop();
-    expect(7);
+    expect(9);
 
     var player_id = 15;
+    var game_id = 7;
     var card;
     var sentence = 'SENTENCE';
 
@@ -118,6 +119,17 @@ test("create", function() {
         equal(options.type, 'POST');
         equal(options.url, $.cardstories.url + '?action=create&owner_id=' + player_id + '&card=' + card);
 	equal(options.data, 'sentence=' + sentence);
+
+	var game = {
+	    'game_id': game_id,
+	};
+	options.success(game);
+    };
+
+    $.cardstories.reload = function(player_id2, game_id2, root2) {
+        equal(player_id2, player_id);
+        equal(game_id2, game_id);
+        start();
     };
 
     equal($('#qunit-fixture .cardstories_create .cardstories_pick_card.cardstories_active').length, 0, 'pick_card not active');
@@ -133,7 +145,6 @@ test("create", function() {
             equal($('#qunit-fixture .cardstories_create .cardstories_write_sentence.cardstories_active').length, 1, 'sentence active');
             $('#qunit-fixture .cardstories_create .cardstories_write_sentence .cardstories_sentence').val(sentence);
             $('#qunit-fixture .cardstories_create .cardstories_write_sentence .cardstories_submit').click();
-            start();
         });
 });
 
@@ -194,7 +205,8 @@ test("invitation_owner_invite_more", function() {
         'owner': true,
         'ready': true,
         'players': [ [ player1, null, 'n', card1, [] ],
-                     [ player2, null, 'n', null, [] ] ]
+                     [ player2, null, 'n', null, [] ] ],
+        'invited': [ player2, ]
     };
 
     $.cardstories.poll_ignore = function(ignored_request, ignored_answer, new_poll, old_poll) { };
@@ -205,6 +217,31 @@ test("invitation_owner_invite_more", function() {
     equal($('#qunit-fixture .cardstories_invitation .cardstories_owner.cardstories_active').length, 1);
     $('#qunit-fixture .cardstories_invitation .cardstories_owner .cardstories_invite_friends').click();
     equal($('#qunit-fixture .cardstories_invitation .cardstories_owner.cardstories_active').length, 0);
+    equal($('#qunit-fixture .cardstories_advertise.cardstories_active').length, 1);
+});
+
+test("invitation_owner_nobody_invited_yet", function() {
+    setup();
+    expect(2);
+
+    var player1 = 'player1';
+    var card1 = 5;
+    var player_id = player1;
+    var game_id = 101;
+
+    var game = {
+        'id': game_id,
+        'owner': true,
+        'ready': false,
+        'players': [ [ player1, null, 'n', card1, [] ], ],
+        'invited': [ ]
+    };
+
+    $.cardstories.poll_ignore = function(ignored_request, ignored_answer, new_poll, old_poll) { };
+    $.cardstories.ajax = function(options) { };
+
+    equal($('#qunit-fixture .cardstories_advertise.cardstories_active').length, 0);
+    $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
     equal($('#qunit-fixture .cardstories_advertise.cardstories_active').length, 1);
 });
 
@@ -226,7 +263,8 @@ test("invitation_owner", function() {
 	'ready': true,
 	'sentence': sentence,
         'players': [ [ player1, null, 'n', card1, [] ],
-                     [ player2, null, 'n', null, [] ] ]
+                     [ player2, null, 'n', null, [] ] ],
+        'invited': [ player2, ]
     };
 
     $.cardstories.ajax = function(options) {

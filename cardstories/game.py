@@ -158,8 +158,10 @@ class CardstoriesGame(pollable):
         ( owner_id, sentence, cards, board, state ) = rows[0]
         if owner_id == player_id:
             cards = [ ord(c) for c in cards ]
+            invited = list(self.invited)
         else:
             cards = None
+            invited = None
         if owner_id != player_id and state == 'invitation':
             board = None
         else:
@@ -207,7 +209,8 @@ class CardstoriesGame(pollable):
                             'ready': ready,
                             'self': myself,
                             'owner': owner_id == player_id,
-                            'players': players })
+                            'players': players,
+                            'invited': invited })
 
     def participateInteraction(self, transaction, game_id, player_id):
         transaction.execute("SELECT players, cards FROM games WHERE id = %d" % game_id)

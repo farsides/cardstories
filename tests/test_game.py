@@ -248,9 +248,13 @@ class CardstoriesGameTest(unittest.TestCase):
         card1 = 20
         player2 = 17
         card2 = 25
+        player3 = 18
+        player4 = 19
+        invited = [player3, player4]
         for player_id in ( player1, player2 ):
             result = yield self.game.participate(player_id)
             self.assertEquals([game_id], result['game_id'])
+        self.game.invite(invited)
 
         # invitation state, visitor point of view
         self.game.modified = 444
@@ -265,6 +269,7 @@ class CardstoriesGameTest(unittest.TestCase):
                            'sentence': u'SENTENCE',
                            'winner_card': None,
                            'state': u'invitation',
+                           'invited': None,
                            'modified': self.game.modified}, game_info)
         
         # invitation state, owner point of view
@@ -276,6 +281,7 @@ class CardstoriesGameTest(unittest.TestCase):
         self.assertFalse(game_info['ready'])
         self.assertEquals(winner_card, game_info['winner_card'])
         self.assertEquals(game_id, game_info['id'])
+        self.assertEquals(invited, game_info['invited'])
         self.assertEquals(owner_id, game_info['players'][0][0])
         self.assertEquals(1, len(game_info['players'][0][4]))
         self.assertEquals(winner_card, game_info['players'][0][3])
@@ -344,6 +350,7 @@ class CardstoriesGameTest(unittest.TestCase):
                            'sentence': u'SENTENCE',
                            'winner_card': None,
                            'state': u'vote',
+                           'invited': None,
                            'modified': self.game.modified}, game_info)
         # move to complete state
 

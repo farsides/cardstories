@@ -88,9 +88,15 @@ class Auth:
 
     @defer.inlineCallbacks
     def postprocess(self, result):
+        # Convert internal game logic ids to public ones
         if result.has_key('players'):
             for player in result['players']:
                 row = yield self.db.runQuery("SELECT name FROM players WHERE id = ?", [ player[0] ])
                 player[0] = row[0][0]
+        if result.has_key('invited') and result['invited']:
+            invited = result['invited'];
+            for index in range(len(invited)):
+                row = yield self.db.runQuery("SELECT name FROM players WHERE id = ?", [ invited[index] ])
+                invited[index] = row[0][0]
         defer.returnValue(result)
 
