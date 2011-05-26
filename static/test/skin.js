@@ -53,6 +53,7 @@
                               ],
                      'win': {100: 'n', 101: 'y' }
                     };
+    var game;
     if(skin == 'advertise') {
       $.cardstories.advertise('PLAYER1', 100, root);
     } else if(skin == 'in_progress') {
@@ -66,7 +67,7 @@
     } else if(skin == 'create_write_sentence') {
       $.cardstories.create_write_sentence('PLAYER1', 5, root);
     } else if(skin == 'invitation_owner') {
-      var game = {
+      game = {
 	'id': 100,
 	'owner': true,
 	 'ready': false,
@@ -77,7 +78,7 @@
 
       $.cardstories.invitation_owner('PLAYER1', game, root);
     } else if(skin == 'invitation_owner_ready') {
-      var game = {
+      game = {
 	'id': 100,
 	'owner': true,
 	'ready': true,
@@ -88,21 +89,21 @@
 
       $.cardstories.invitation_owner('PLAYER1', game, root);
     } else if(skin == 'invitation_pick') {
-      var game = {
+      game = {
 	'id': 100,
 	'self': [5, null, [11,12,13,14,15,16,17]],
 	'sentence': 'long sentence is in the flux'
       };
       $.cardstories.invitation_pick('PLAYER1', game, root);
     } else if(skin == 'invitation_pick_wait') {
-      var game = {
+      game = {
 	'id': 100,
 	'self': [5, null, [11,12,13,14,15,16,17]],
 	'sentence': 'long sentence is in the flux'
       };
       $.cardstories.invitation_pick_wait('PLAYER1', game, root);
     } else if(skin == 'vote_voter' || skin == 'vote_voter_wait' || skin == 'vote_viewer') {
-      var game = {
+      game = {
 	'id': 100,
 	'board': [21,22,23,24,25,26],
 	'self': [23, 26, [21,12,13,14,15,16,17]],
@@ -110,7 +111,7 @@
       };
       $.cardstories[skin]('PLAYER1', game, root);
     } else if(skin == 'vote_owner') {
-      var game = {
+      game = {
 	'id': 100,
 	'owner': false,
         'sentence': 'the game sentence',
@@ -127,7 +128,7 @@
       };
       $.cardstories.vote_owner('voter11', game, root);
     } else if(skin == 'vote_owner_ready') {
-      var game = {
+      game = {
 	'id': 100,
 	'owner': false,
         'sentence': 'the game sentence',
@@ -144,7 +145,7 @@
       };
       $.cardstories.vote_owner('voter11', game, root);
     } else if(skin == 'complete') {
-      var game = {
+      game = {
 	'id': 100,
 	'owner': false,
         'sentence': 'the game sentence',
@@ -158,7 +159,7 @@
       };
       $.cardstories.complete('voter11', game, root);
     } else if(skin == 'complete_owner') {
-      var game = {
+      game = {
 	'id': 100,
 	'owner': true,
         'sentence': 'the game sentence',
@@ -177,6 +178,6 @@
       $.cardstories.credits(root);
       $('.cardstories_credits_short', root).click();
     }
-  }
+  };
 
 })(jQuery);

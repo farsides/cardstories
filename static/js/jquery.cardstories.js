@@ -309,7 +309,7 @@
             var poll = true;
             var deferred;
             if(game.owner) {
-                if(game.invited.length == 0) {
+                if(game.invited.length === 0) {
                     deferred = this.advertise(player_id, game.id, root);
                 } else {
                     deferred = this.invitation_owner(player_id, game, root);
@@ -458,7 +458,7 @@
                     } else if(background.attr('src') !== undefined) {
                         background.removeAttr('src');
                     }
-                    background.css({zIndex: links.length - index})
+                    background.css({zIndex: links.length - index});
                     var foreground = $('.cardstories_card_foreground', link);
                     foreground.attr('src', card_file).css({zIndex: 2 * (links.length - index)});
                     if(card) {

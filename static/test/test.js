@@ -150,7 +150,7 @@ test("create", function() {
 	equal(options.data, 'sentence=' + sentence);
 
 	var game = {
-	    'game_id': game_id,
+	    'game_id': game_id
 	};
 	options.success(game);
     };
@@ -247,7 +247,7 @@ test("invitation_owner_invite_more", function() {
         'ready': true,
         'players': [ [ player1, null, 'n', card1, [] ],
                      [ player2, null, 'n', null, [] ] ],
-        'invited': [ player2, ]
+        'invited': [ player2 ]
     };
 
     $.cardstories.poll_ignore = function(ignored_request, ignored_answer, new_poll, old_poll) { };
@@ -276,7 +276,7 @@ test("invitation_owner_nobody_invited_yet", function() {
         'id': game_id,
         'owner': true,
         'ready': false,
-        'players': [ [ player1, null, 'n', card1, [] ], ],
+        'players': [ [ player1, null, 'n', card1, [] ] ],
         'invited': [ ]
     };
 
@@ -307,7 +307,7 @@ test("invitation_owner", function() {
 	'sentence': sentence,
         'players': [ [ player1, null, 'n', card1, [] ],
                      [ player2, null, 'n', null, [] ] ],
-        'invited': [ player2, ]
+        'invited': [ player2 ]
     };
 
     $.cardstories.ajax = function(options) {
