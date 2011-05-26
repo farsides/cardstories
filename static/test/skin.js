@@ -69,8 +69,19 @@
       var game = {
 	'id': 100,
 	'owner': true,
+	 'ready': false,
+	'sentence': 'long sentence is in the flux',
+        'players': [ [ 'player1', null, 'n', 5, [] ],
+                     [ 'player2', null, 'n', null, [] ] ]
+      };
+
+      $.cardstories.invitation_owner('PLAYER1', game, root);
+    } else if(skin == 'invitation_owner_ready') {
+      var game = {
+	'id': 100,
+	'owner': true,
 	'ready': true,
-	  'sentence': 'long sentence is in the flux',
+	'sentence': 'long sentence is in the flux',
         'players': [ [ 'player1', null, 'n', 5, [] ],
                      [ 'player2', null, 'n', null, [] ] ]
       };
@@ -99,6 +110,23 @@
       };
       $.cardstories[skin]('PLAYER1', game, root);
     } else if(skin == 'vote_owner') {
+      var game = {
+	'id': 100,
+	'owner': false,
+        'sentence': 'the game sentence',
+        'board': [30,31,32,33,34,35,36],
+        'players': [ [ 'voter11', 30, null, 32, [ ] ],
+                     [ 'voter12', null, null, 30, [ ] ],
+                     [ 'voter21', 30, null, 31, [ ] ],
+                     [ 'voter22', 32, null, 33, [ ] ],
+                     [ 'voter23', 35, null, 34, [ ] ],
+                     [ 'voter24', 35, null, 35, [ ] ],
+                     [ 'voter25', 35, null, 36, [ ] ]
+                   ],
+	'ready': false
+      };
+      $.cardstories.vote_owner('voter11', game, root);
+    } else if(skin == 'vote_owner_ready') {
       var game = {
 	'id': 100,
 	'owner': false,

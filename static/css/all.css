@@ -80,13 +80,12 @@ html, body {
 }
 
 /* Change cursor to treat buttons as links */
-.cardstories_card, .cardstories_submit, .cardstories_start_story, .cardstories_invite_friends, .cardstories_ready {
+.cardstories_card,
+.cardstories_submit,
+.cardstories_start_story,
+.cardstories_invite_friends,
+.cardstories_ready {
     cursor: pointer;
-}
-
-.cardstories_lobby_sentence {
-    cursor: pointer;
-    text-decoration: underline;
 }
 
 /* subscribe (home) */
@@ -477,6 +476,11 @@ html, body {
     color: #F2A71B;
 }
 
+.cardstories .cardstories_lobby .cardstories_lobby_sentence {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
 /* lobby for in progress games */
 
 .cardstories .cardstories_lobby .cardstories_in_progress .cardstories_tab_in_progress {
@@ -586,8 +590,11 @@ html, body {
 }
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_voting {
+    display: none;
     position: absolute;
-    background: transparent url('images/to_vote.png') no-repeat left top;
+    background-repeat: no-repeat;
+    background-color: transparent;
+    background-position: top left;
     bottom: 190px;
     left: 20px;
     height: 90px;
@@ -595,8 +602,13 @@ html, body {
     z-index: 20;
 }
 
-.cardstories .cardstories_invitation .cardstories_owner .cardstories_voting:hover {
-    background: transparent url('images/to_vote_over.png') no-repeat left top;
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_voting.cardstories_ready {
+    display: block;
+    background: url('images/to_vote.png');
+}
+
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_voting.cardstories_ready:hover {
+    background: url('images/to_vote_over.png');
 }
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_cards {
@@ -840,6 +852,23 @@ html, body {
     z-index: 2;
     left: 320px;
     top: 300px;
+}
+
+.cardstories .cardstories_vote .cardstories_owner .cardstories_finish {
+    position: absolute;
+    bottom: 30px;
+    right: 30px;
+    background: transparent url('images/next_off.png') no-repeat left top;
+    height: 73px;
+    width: 106px;
+}
+
+.cardstories .cardstories_vote .cardstories_owner .cardstories_finish.cardstories_ready {
+    background-image: url('images/next.png');
+}
+
+.cardstories .cardstories_vote .cardstories_owner .cardstories_finish.cardstories_ready:hover {
+    background-image: url('images/next_over.png');
 }
 
 /* state complete */
