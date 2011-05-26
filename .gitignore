@@ -8,3 +8,4 @@ twistd.pid
 *.swp
 etc/cardstories/twisted/plugins/dropin.cache
 static/cardstories.zip
+loic

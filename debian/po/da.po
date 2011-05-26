@@ -1,0 +1,37 @@
+# Danish translation cardstories.
+# Copyright (C) cardstories & nedenstående oversættere.
+# This file is distributed under the same license as the cardstories package.
+# Joe Hansen (joedalton2@yahoo.dk), 2011.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: cardstories\n"
+"Report-Msgid-Bugs-To: cardstories@packages.debian.org\n"
+"POT-Creation-Date: 2011-05-23 07:43+0200\n"
+"PO-Revision-Date: 2011-05-14 18:30+01:00\n"
+"Last-Translator: Joe Hansen <joedalton2@yahoo.dk>\n"
+"Language-Team: Danish <debian-l10n-danish@lists.debian.org>\n"
+"Language: da\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: multiselect
+#. Description
+#: ../cardstories.templates:2001
+msgid "Web server to reconfigure automatically:"
+msgstr "Internetserver at rekonfigurere automatisk:"
+
+#. Type: multiselect
+#. Description
+#: ../cardstories.templates:2001
+msgid ""
+"Please choose the web server that should be automatically configured to run "
+"cardstories. If the web server provides http://www.example.org/, cardstories "
+"can then be played at http://www.example.org/cardstories/."
+msgstr ""
+"Vælg venligst internetserveren som skal konfigureres automatisk til at køre "
+"cardstories. Hvis internetserveren tilbyder http://www.eksempel.org/, så kan "
+"cardstories blive spillet på http://www.eksempel.org/cardstories/."
+
+

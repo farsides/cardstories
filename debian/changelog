@@ -6,6 +6,16 @@ cardstories (1.0.3-1) unstable; urgency=low
   
   * Japanese po-debconf template translation (ja.po) (Closes: #626376).
 
+  * Russian po-debconf template translation (ru.po) (Closes: #627682).
+
+  * Danish po-debconf template translation (da.po) (Closes: #627707).
+  
+  * Portuguese po-debconf template translation (pt.po) (Closes: #627725).
+
+  * Czech  po-debconf template translation (cs.po) (Closes: #627802).
+
+  * Swedish po-debconf template translation (sv.po) (Closes: #627852).
+
   * section changed to games (Closes: #627180).
 
   * depends on httpd or nginx (Closes: #627181).
