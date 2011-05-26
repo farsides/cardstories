@@ -4,7 +4,6 @@ Priority: optional
 Maintainer: Loic Dachary (OuoU) <loic@debian.org>
 Build-Depends: debhelper (>= 7.0.50~),
                po-debconf,
-               httpd | nginx,
                python-all (>= 2.6.6-2~),
                python-coverage,
                python-twisted-web (>= 10.1),
@@ -17,13 +16,14 @@ Vcs-Browser: http://cardstori.es/trac/browser
 Homepage: http://cardstori.es/
 X-Python-Version: all
 
-Package: python-cardstories
+Package: cardstories
 Section: games
 Architecture: all
 Replaces: python-cardstories
 Conflicts: python-cardstories
 Depends: ${misc:Depends},
          adduser,
+         nginx | httpd,
          python-twisted-web (>= 10.1),
          python-twisted-mail,
          python-openssl,
