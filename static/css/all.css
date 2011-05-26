@@ -121,6 +121,7 @@ html, body {
 .cardstories .cardstories_extras .cardstories_subscribe label.error {
     position: absolute;
     top: 690px;
+    left: 0px;
     width: 100%;
     text-align: center;
     color: red;
