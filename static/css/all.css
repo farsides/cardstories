@@ -251,13 +251,13 @@ html, body {
 
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_card {
     position: absolute;
-    right: 4%;
-    top: 250px;
+    right: 5%;
+    top: 255px;
     background-repeat: no-repeat;
     background-color: transparent;
     background-position: top left;
-    width: 333px;
-    height: 451px;
+    width: 355px;
+    height: 475px;
 }
 
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_write {
