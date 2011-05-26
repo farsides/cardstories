@@ -192,7 +192,7 @@ test("game", function() {
 
 test("invitation_owner_invite_more", function() {
     setup();
-    expect(4);
+    expect(5);
 
     var player1 = 'player1';
     var card1 = 5;
@@ -215,8 +215,10 @@ test("invitation_owner_invite_more", function() {
     equal($('#qunit-fixture .cardstories_invitation .cardstories_owner.cardstories_active').length, 0);
     $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
     equal($('#qunit-fixture .cardstories_invitation .cardstories_owner.cardstories_active').length, 1);
+    $.cookie('CARDSTORIES_INVITATIONS', 'UNEXPECTED');
     $('#qunit-fixture .cardstories_invitation .cardstories_owner .cardstories_invite_friends').click();
     equal($('#qunit-fixture .cardstories_invitation .cardstories_owner.cardstories_active').length, 0);
+    equal($('#qunit-fixture .cardstories_advertise .cardstories_text').val(), '');
     equal($('#qunit-fixture .cardstories_advertise.cardstories_active').length, 1);
 });
 
@@ -741,7 +743,7 @@ test("results_board", function() {
 
 test("advertise", function() {
     setup();
-    expect(2);
+    expect(5);
     
     var owner_id = 15;
     var game_id = 100;
@@ -752,9 +754,24 @@ test("advertise", function() {
     };
 
     var element = $('#qunit-fixture .cardstories_advertise');
-    $('.cardstories_text', element).text(" \n \t player1 \n\n   \nplayer2");
+    // the list of invitations is filled by the user
+    $.cookie('CARDSTORIES_INVITATIONS', null);
+    var text = " \n \t player1 \n\n   \nplayer2";
+    $('.cardstories_text', element).text(text);
     $.cardstories.advertise(owner_id, game_id, $('#qunit-fixture .cardstories'));
     $('.cardstories_submit', element).click();
+    equal($.cookie('CARDSTORIES_INVITATIONS'), text);
+
+    // the list of invitations is retrieved from the cookie
+    $('.cardstories_text', element).text('UNEXPECTED');
+    $.cardstories.advertise(owner_id, game_id, $('#qunit-fixture .cardstories'));
+    equal($('.cardstories_text', element).val(), text);
+
+    // the placeholder shows
+    $.cookie('CARDSTORIES_INVITATIONS', null);
+    $('.cardstories_text', element).text('');
+    $.cardstories.advertise(owner_id, game_id, $('#qunit-fixture .cardstories'));    
+    equal($('.cardstories_text', element).attr('placeholder'), $('.cardstories_text', element).val());
   });
 
 test("refresh_lobby", function() {

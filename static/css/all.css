@@ -530,6 +530,10 @@ html, body {
     border: 0px;
 }
 
+.cardstories .cardstories_advertise .cardstories_text.placeholder {
+    color: #999;
+}
+
 .cardstories .cardstories_advertise .cardstories_progress_owner { 
     background: transparent url('images/progress_3.png') no-repeat left top;
 }

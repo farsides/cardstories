@@ -107,6 +107,11 @@
             var $this = this;
             var element = $('.cardstories_advertise', root);
             this.set_active(root, element);
+            var text = $.cookie('CARDSTORIES_INVITATIONS');
+            if(text !== undefined && text !== null) {
+                $('.cardstories_text', element).text(text);
+            }
+            $('.cardstories_text', element).placeholder();
             $('.cardstories_submit', element).unbind('click').click(function() {
                 var text = $('.cardstories_text', element).val();
                 var invites = text.split(/\s+/).
@@ -114,7 +119,7 @@
                               map(function(s) {
                                   return 'player_id=' + encodeURIComponent(s);
                                 });
-                
+                $.cookie('CARDSTORIES_INVITATIONS', text);
                 $this.send_game(owner_id, game_id, element, 'action=invite&owner_id=' + owner_id + '&game_id=' + game_id + '&' + invites.join('&'));
               });
         },
@@ -336,6 +341,7 @@
             //
             var invite_friends = $('.cardstories_invite_friends', element);
             invite_friends.click(function() {
+                $.cookie('CARDSTORIES_INVITATIONS', null);
                 $this.advertise(player_id, game.id, root);
             });
             //
