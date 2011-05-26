@@ -120,7 +120,7 @@ class CardstoriesService(service.Service):
         for (id,) in c.fetchall():
             game = CardstoriesGame(self, id)
             game.load(c)
-            self.games[id] = game
+            self.game_init(game)
             
     def poll(self, args):
         self.required(args, 'poll', 'modified')
@@ -182,6 +182,14 @@ class CardstoriesService(service.Service):
         d.addCallback(self.game_notify, game_id)
         return True
 
+    def game_init(self, game):
+        self.games[game.get_id()] = game
+        args = {
+            'modified': [game.modified],
+            'game_id': [game.get_id()]
+            }
+        self.game_notify(args, game.get_id())
+
     def create(self, args):
         self.required(args, 'create', 'card', 'sentence', 'owner_id')
         card = int(args['card'][0])
@@ -191,10 +199,7 @@ class CardstoriesService(service.Service):
         game = CardstoriesGame(self)
         d = game.create(card, sentence, owner_id)
         def success(game_id):
-            self.games[game.get_id()] = game
-            args['modified'] = [ game.modified ]
-            args['game_id'] = [ game.get_id() ]
-            self.game_notify(args, game.get_id())
+            self.game_init(game)
             return {'game_id': game_id}
         d.addCallback(success)
         return d

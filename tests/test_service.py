@@ -66,6 +66,7 @@ class CardstoriesServiceTestInit(unittest.TestCase):
         service.startService()
         self.assertEquals(game_id, service.games[game_id].id)
         self.assertEquals([player_id], service.games[game_id].get_players())
+        self.assertEquals(len(service.games[game_id].pollers), 1)
         yield service.stopService()
 
 class CardstoriesServiceTest(unittest.TestCase):
