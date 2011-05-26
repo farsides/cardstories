@@ -27,7 +27,7 @@ nginx_remove() {
 }
 
 apache2_remove() {
-    conf=/etc/apache2/config.d/python-cardstories.conf
+    conf=/etc/apache2/config.d/cardstories.conf
     rm -rf $conf
 }
 
@@ -47,7 +47,7 @@ if [ "$1" = "remove" ] || [ "$1" = "purge" ]; then
     if [ -f /usr/share/debconf/confmodule ]; then
         db_version 2.0
 
-        db_get python-cardstories/reconfigure-webserver
+        db_get cardstories/reconfigure-webserver
 
         webservers="$RET"
 

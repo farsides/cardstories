@@ -1,9 +1,10 @@
 Source: cardstories
-Section: python
+Section: games
 Priority: optional
 Maintainer: Loic Dachary (OuoU) <loic@debian.org>
 Build-Depends: debhelper (>= 7.0.50~),
                po-debconf,
+               httpd | nginx,
                python-all (>= 2.6.6-2~),
                python-coverage,
                python-twisted-web (>= 10.1),
@@ -17,7 +18,7 @@ Homepage: http://cardstori.es/
 X-Python-Version: all
 
 Package: python-cardstories
-Section: python
+Section: games
 Architecture: all
 Depends: ${misc:Depends},
          adduser,

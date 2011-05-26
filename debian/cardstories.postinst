@@ -28,7 +28,7 @@ nginx_install() {
 
 apache2_install() {
     included=/usr/share/cardstories/conf/apache2.conf
-    conf=/etc/apache2/conf.d/python-cardstories.conf
+    conf=/etc/apache2/conf.d/cardstories.conf
     if [ ! -e $conf ] ; then
         ln -s $included $conf
     fi
@@ -50,7 +50,7 @@ if [ "$1" = "configure" ]; then
 
     db_version 2.0
 
-    db_get python-cardstories/reconfigure-webserver
+    db_get cardstories/reconfigure-webserver
 
     webservers="$RET"
 

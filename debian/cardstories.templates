@@ -15,7 +15,7 @@
 # along with this program in a file in the toplevel directory called
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
-Template: python-cardstories/reconfigure-webserver
+Template: cardstories/reconfigure-webserver
 Type: multiselect
 Choices: nginx, apache2
 _Description: Web server to reconfigure automatically:
