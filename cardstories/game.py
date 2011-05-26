@@ -304,8 +304,9 @@ class CardstoriesGame(pollable):
     @defer.inlineCallbacks
     def invite(self, player_ids):
         for player_id in player_ids:
-            yield self.service.db.runQuery("INSERT INTO invitations (player_id, game_id) VALUES (?, ?)", [ player_id, self.get_id() ])
-        self.invited += player_ids
+            if player_id not in self.invited:
+                yield self.service.db.runQuery("INSERT INTO invitations (player_id, game_id) VALUES (?, ?)", [ player_id, self.get_id() ])
+        self.invited = list(set(self.invited + player_ids)) # Only keep one value when imported several times
         defer.returnValue(self.touch())
 
     @staticmethod

@@ -50,9 +50,9 @@
       <div class="cardstories">
         <div class="cardstories_game">
           <div class="cardstories_logo"></div>
+          <a href="javascript://" class="cardstories_go_lobby"></a>
           <div class="cardstories_create">
             <div class="cardstories_pick_card">
-              <a href="index.html" class="cardstories_go_lobby"></a>
               <div class="cardstories_bubble cardstories_bubble_pick_a_card"></div>
               <div class="cardstories_progress_owner"></div>
               <div class="cardstories_card_confirm" data="{middle:3}">
@@ -76,7 +76,6 @@
               </div>
             </div>
             <div class="cardstories_write_sentence">
-              <a href="index.html" class="cardstories_go_lobby"></a>
               <div class="cardstories_progress_owner"></div>
               <div class="cardstories_card"></div>
               <div class="cardstories_write">
@@ -96,78 +95,7 @@
             </div>
           </div>
 
-          <div class="cardstories_lobby">
-            <div class="cardstories_in_progress">
-              <div class="cardstories_tab">
-                <div class="cardstories_tab_in_progress"></div>
-                <div class="cardstories_tab_finished"></div>
-              </div>
-              <div class="cardstories_stories_you_are_playing"></div>
-              <div class="cardstories_start_story"></div>
-              <div class="cardstories_games_display">
-                <table class="cardstories_template">
-                  <tbody>
-                    <tr>
-                      <td><div class="cardstories_lobby_role {role}"></div></td>
-                      <td class="status"><div class="cardstories_lobby_state cardstories_lobby_{state}">{state}</div></td>
-                      <td class="sentence"><div class="cardstories_lobby_sentence" data="{game_id:{game_id}}">{sentence}</div></td>
-                    </tr>
-                  </tbody>
-                </table>
-                <table class="cardstories_games tablesorter {sortlist: []}" cellspacing="1">
-                  <thead><tr><th class="role">Role</th><th>Status</th><th>Story</th></tr></thead>
-                  <tbody></tbody>
-                </table>
-                <div class="cardstories_pager pager"> 
-                    <div class="first"></div>  
-                    <div class="prev"></div>  
-                    <div class="next"></div>  
-                    <div class="last"></div>  
-                    <select class="pagesize">  
-                      <option selected="selected" value="4">4</option>  
-                      <option value="20">20</option>  
-                      <option value="100">100</option>  
-                    </select>  
-                </div> 
-              </div>
-            </div>
-            <div class="cardstories_finished">
-              <div class="cardstories_tab">
-                <div class="cardstories_tab_in_progress"></div>
-                <div class="cardstories_tab_finished"></div>
-              </div>
-              <div class="cardstories_start_story"></div>
-              <div class="cardstories_games_display">
-                <table class="cardstories_template">
-                  <tbody>
-                    <tr>
-                      <td><div class="cardstories_lobby_role {role}"></div></td>
-                      <td><div class="cardstories_lobby_win">{win}</div></td>
-                      <td><div class="cardstories_lobby_sentence" data="{game_id:{game_id}}">{sentence}</div></td>
-                    </tr>
-                  </tbody>
-                </table>
-                <table class="cardstories_games tablesorter {widthFixed: true, sortlist: []}" cellspacing="1">
-                  <thead><tr><th class="role">Role</th><th>Winner</th><th>Story</th></tr></thead>
-                  <tbody></tbody>
-                </table>
-                <div class="cardstories_pager pager"> 
-                    <div class="first"></div>  
-                    <div class="prev"></div>  
-                    <div class="next"></div>  
-                    <div class="last"></div>  
-                    <select class="pagesize">  
-                      <option selected="selected" value="4">4</option>  
-                      <option value="20">20</option>  
-                      <option value="100">100</option>  
-                    </select>  
-                </div> 
-              </div>
-            </div>
-          </div>
-
           <div class="cardstories_advertise">
-            <a href="index.html" class="cardstories_go_lobby"></a>
             <div class="cardstories_progress_owner"></div>
             <div class="cardstories_frame"></div>
             <div class="cardstories_submit"></div>
@@ -176,12 +104,10 @@
 
           <div class="cardstories_invitation">
             <div class="cardstories_participate">
-              <a href="index.html" class="cardstories_go_lobby"></a>
               <div class="cardstories_sentence"></div>
               <input class="cardstories_submit" type="submit" name="submit" value="participate" />
             </div>
             <div class="cardstories_pick">
-              <a href="index.html" class="cardstories_go_lobby"></a>
               <div class="cardstories_progress_player"></div>
               <div class="cardstories_bubble_player_pick_a_card"></div>
               <div class="cardstories_pick_mask_chose_a_card"></div>
@@ -206,7 +132,6 @@
               </div>
             </div>
             <div class="cardstories_pick_wait">
-              <a href="index.html" class="cardstories_go_lobby"></a>
               <div class="cardstories_progress_player"></div>
               <div class="cardstories_bubble_player_pick_a_card_wait"></div>
               <div class="cardstories_pick_thanks"></div>
@@ -217,7 +142,6 @@
               </div>
             </div>
             <div class="cardstories_owner">
-              <a href="index.html" class="cardstories_go_lobby"></a>
               <div class="cardstories_progress_owner"></div>
               <div class="cardstories_invite_friends"></div>
               <div class="cardstories_voting"></div>
@@ -242,7 +166,6 @@
           </div>
           <div class="cardstories_vote">
             <div class="cardstories_voter">
-              <a href="index.html" class="cardstories_go_lobby"></a>
               <div class="cardstories_progress_player"></div>
               <div class="cardstories_bubble_player_vote_for_a_card"></div>
               <div class="cardstories_vote_mask_chose_a_card"></div>
@@ -268,7 +191,6 @@
               </div>
             </div>
             <div class="cardstories_voter_wait">
-              <a href="index.html" class="cardstories_go_lobby"></a>
               <div class="cardstories_progress_player"></div>
               <div class="cardstories_bubble_player_vote_wait"></div>
               <div class="cardstories_vote_thanks"></div>
@@ -279,7 +201,6 @@
               </div>
             </div>
             <div class="cardstories_owner">
-              <a href="index.html" class="cardstories_go_lobby"></a>
               <div class="cardstories_progress_owner"></div>
               <div class="cardstories_sentence"></div>
               <div class="cardstories_votes">
@@ -366,7 +287,6 @@
           </div>
 
           <div class="cardstories_complete">
-            <a href="index.html" class="cardstories_go_lobby"></a>
             <div class="cardstories_progress_owner"></div>
             <div class="cardstories_progress_player"></div>
             <div class="cardstories_complete_explain">
@@ -455,6 +375,78 @@
             </div>
           </div>
         </div>
+
+        <div class="cardstories_lobby">
+          <div class="cardstories_logo"></div>
+          <div class="cardstories_in_progress">
+            <div class="cardstories_tab">
+              <div class="cardstories_tab_in_progress"></div>
+              <div class="cardstories_tab_finished"></div>
+            </div>
+            <div class="cardstories_stories_you_are_playing"></div>
+            <div class="cardstories_start_story"></div>
+            <div class="cardstories_games_display">
+              <table class="cardstories_template">
+                <tbody>
+                  <tr>
+                    <td><div class="cardstories_lobby_role {role}"></div></td>
+                    <td class="status"><div class="cardstories_lobby_state cardstories_lobby_{state}">{state}</div></td>
+                    <td class="sentence"><div class="cardstories_lobby_sentence" data="{game_id:{game_id}}">{sentence}</div></td>
+                  </tr>
+                </tbody>
+              </table>
+              <table class="cardstories_games tablesorter {sortlist: []}" cellspacing="1">
+                <thead><tr><th class="role">Role</th><th>Status</th><th>Story</th></tr></thead>
+                <tbody></tbody>
+              </table>
+              <div class="cardstories_pager pager"> 
+                  <div class="first"></div>  
+                  <div class="prev"></div>  
+                  <div class="next"></div>  
+                  <div class="last"></div>  
+                  <select class="pagesize">  
+                    <option selected="selected" value="4">4</option>  
+                    <option value="20">20</option>  
+                    <option value="100">100</option>  
+                  </select>  
+              </div> 
+            </div>
+          </div>
+          <div class="cardstories_finished">
+            <div class="cardstories_tab">
+              <div class="cardstories_tab_in_progress"></div>
+              <div class="cardstories_tab_finished"></div>
+            </div>
+            <div class="cardstories_start_story"></div>
+            <div class="cardstories_games_display">
+              <table class="cardstories_template">
+                <tbody>
+                  <tr>
+                    <td><div class="cardstories_lobby_role {role}"></div></td>
+                    <td><div class="cardstories_lobby_win">{win}</div></td>
+                    <td><div class="cardstories_lobby_sentence" data="{game_id:{game_id}}">{sentence}</div></td>
+                  </tr>
+                </tbody>
+              </table>
+              <table class="cardstories_games tablesorter {widthFixed: true, sortlist: []}" cellspacing="1">
+                <thead><tr><th class="role">Role</th><th>Winner</th><th>Story</th></tr></thead>
+                <tbody></tbody>
+              </table>
+              <div class="cardstories_pager pager"> 
+                  <div class="first"></div>  
+                  <div class="prev"></div>  
+                  <div class="next"></div>  
+                  <div class="last"></div>  
+                  <select class="pagesize">  
+                    <option selected="selected" value="4">4</option>  
+                    <option value="20">20</option>  
+                    <option value="100">100</option>  
+                  </select>  
+              </div> 
+            </div>
+          </div>
+        </div>
+
         <div class="cardstories_extras">
           <div class="cardstories_subscribe">
             <div class="cardstories_logo_welcome"></div>

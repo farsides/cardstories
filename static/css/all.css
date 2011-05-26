@@ -39,7 +39,7 @@ html, body {
     height: 171px;
 }
 
-.cardstories_game {
+.cardstories_game, .cardstories_lobby {
     background: transparent url('images/background.png') repeat-x left top;
 }
 
@@ -1004,8 +1004,8 @@ html, body {
 /* Dimensions and initial state of all pages */
 
 .cardstories .cardstories_subscribe, 
-.cardstories .cardstories_lobby,
-.cardstories .cardstories_lobby > div,
+.cardstories .cardstories_in_progress,
+.cardstories .cardstories_finished,
 .cardstories .cardstories_create,
 .cardstories .cardstories_create > div, 
 .cardstories .cardstories_advertise,
@@ -1015,6 +1015,7 @@ html, body {
 .cardstories .cardstories_vote > div,
 .cardstories .cardstories_complete,
 .cardstories .cardstories_game,
+.cardstories .cardstories_lobby,
 .cardstories .cardstories_extras { 
      width: 100%;
      height: 100%; 

@@ -32,14 +32,25 @@
         },
 
         reload: function(player_id, game_id, root) {
-            var search = this.permalink(player_id, game_id, root);
+            var search = this.reload_link(player_id, game_id, root);
             location.search = search;
         },
 
         permalink: function(player_id, game_id, root) {
-            var search = '?player_id=' + player_id;
+            var search = '?';
+
             if(game_id !== undefined && game_id !== '') {
-              search += '&game_id=' + game_id;
+                search += 'game_id=' + game_id + '&';
+            }
+            return search;
+        },
+
+        reload_link: function(player_id, game_id, root) {
+            var search = this.permalink(player_id, game_id, root);
+
+            // Only keep the player_id in the URL if it already there (ie when it has been filled manually by the player)
+            if($.query.get('player_id')) {
+                search += 'player_id=' + player_id + '&';
             }
             return search;
         },
@@ -676,6 +687,12 @@
 
         game: function(player_id, game_id, root) {
             var $this = this;
+
+            // Activate the link to the lobby on each game
+            $('.cardstories_go_lobby', root).unbind('click').click(function() {
+                $this.reload(player_id);
+            });
+
             var success = function(data, status) {
                 if('error' in data) {
                     $this.error(data.error);

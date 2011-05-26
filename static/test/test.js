@@ -26,8 +26,37 @@ function setup() {
 
 test("permalink", function() {
     expect(2);
-    equal($.cardstories.permalink(5), '?player_id=5');
-    equal($.cardstories.permalink(6, 7), '?player_id=6&game_id=7');
+    equal($.cardstories.permalink(5), '?');
+    equal($.cardstories.permalink(6, 7), '?game_id=7&');
+});
+
+test("reload_link", function() {
+    expect(4);
+
+    var player_id = 5;
+    var game_id = 7;
+    var _query = $.query;
+
+    // Without player_id in the URL
+    $.query = {
+        'get': function(attr) { 
+        }
+    };
+    equal($.cardstories.reload_link(player_id), '?');
+    equal($.cardstories.reload_link(player_id, game_id), '?game_id=' + game_id + '&');
+
+    // With player_id in the URL
+    $.query = {
+        'get': function(attr) { 
+            if(attr == 'player_id') {
+              return player_id;
+            }
+        }
+    };
+    equal($.cardstories.reload_link(player_id), '?player_id=' + player_id + '&');
+    equal($.cardstories.reload_link(player_id, game_id), '?game_id=' + game_id + '&player_id=' + player_id + '&');
+
+    $.query = _query;
   });
 
 test("subscribe", function() {
@@ -174,6 +203,7 @@ test("game", function() {
     var game_id = 101;
     var card = 1;
     var sentence = 'SENTENCE';
+    var root = $('#qunit-fixture .cardstories');
 
     $.cardstories.fake_state = function(inner_player_id, game, element) {
 	equal(inner_player_id, player_id);
@@ -190,7 +220,15 @@ test("game", function() {
 	options.success(game);
     };
 
-    $.cardstories.game(player_id, game_id, $('#qunit-fixture .cardstories'));
+    $.cardstories.game(player_id, game_id, root);
+
+    // Test link to lobby
+    $.cardstories.reload = function(player_id2, game_id2, root2) {
+        equal(player_id2, player_id);
+        equal(game_id2, game_id);
+        equal(root2, root);
+    };
+    $('.cardstories_game .cardstories_go_lobby', root).click();
 });
 
 test("invitation_owner_invite_more", function() {

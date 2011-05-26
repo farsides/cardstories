@@ -365,13 +365,15 @@ class CardstoriesGameTest(unittest.TestCase):
         invited = [20,21]
         game_id = yield self.game.create(winner_card, sentence, owner_id)
         self.assertEquals([owner_id], self.game.get_players())
-        result = yield self.game.invite(invited)
-        self.assertEquals([game_id], result['game_id'])
-        self.assertEquals(invited, self.game.invited)
-        self.assertEquals([owner_id] + invited, self.game.get_players())
-        c = self.db.cursor()
-        c.execute("SELECT * FROM invitations WHERE game_id = %d" % game_id)
-        self.assertEquals(c.fetchall(), [(invited[0], game_id),
+        
+        for i in range(2): # execute twice to make sure we can invite the same players twice without error
+            result = yield self.game.invite(invited)
+            self.assertEquals([game_id], result['game_id'])
+            self.assertEquals(invited, self.game.invited)
+            self.assertEquals([owner_id] + invited, self.game.get_players())
+            c = self.db.cursor()
+            c.execute("SELECT * FROM invitations WHERE game_id = %d" % game_id)
+            self.assertEquals(c.fetchall(), [(invited[0], game_id),
                                          (invited[1], game_id)])
         #
         # load an existing game, invitations included
