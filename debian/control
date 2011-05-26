@@ -20,6 +20,8 @@ X-Python-Version: all
 Package: python-cardstories
 Section: games
 Architecture: all
+Replaces: python-cardstories
+Conflicts: python-cardstories
 Depends: ${misc:Depends},
          adduser,
          python-twisted-web (>= 10.1),
