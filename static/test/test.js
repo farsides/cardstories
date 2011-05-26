@@ -784,7 +784,7 @@ test("results_board", function() {
 
 test("advertise", function() {
     setup();
-    expect(5);
+    expect(6);
     
     var owner_id = 15;
     var game_id = 100;
@@ -812,7 +812,7 @@ test("advertise", function() {
     $.cookie('CARDSTORIES_INVITATIONS', null);
     $('.cardstories_text', element).text('');
     $.cardstories.advertise(owner_id, game_id, $('#qunit-fixture .cardstories'));    
-    ok($('.cardstories_sentence', element).attr('placeholder') !== undefined, 'placeholder is set');
+    ok($('.cardstories_text', element).attr('placeholder') !== undefined, 'placeholder is set');
     equal($('.cardstories_text', element).attr('placeholder'), $('.cardstories_text', element).val());
   });
 
