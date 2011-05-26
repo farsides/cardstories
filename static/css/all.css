@@ -1062,12 +1062,14 @@ html, body {
 
 .cardstories_credits_short_middle {
     background: transparent url('images/credits_short_middle.png') repeat-x left top;
-    color: #9D9070;
+/*    color: #9D9070; */
+    color: #000;
     font-size: 12px;
 }
 
 .cardstories_credits_short_middle a {
-    color: #9D9070;
+/*    color: #9D9070; */
+    color: #000;
 }
 
 .cardstories_credits_short_left {
