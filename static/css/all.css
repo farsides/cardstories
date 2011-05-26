@@ -3,6 +3,7 @@ html, body {
     height: 100%;
     margin: 0px;
     min-height: 768px; /* for ie7*/
+    font-family: helvetica, arial;
 }
 
 .cardstories_bg_outer {
@@ -125,7 +126,6 @@ html, body {
     text-align: center;
     color: red;
     font-size: 14px;
-    font-family: helvetica;
 }
 
 .cardstories .cardstories_extras .cardstories_subscribe .cardstories_email {
@@ -138,7 +138,6 @@ html, body {
     background-color: transparent;
     color: #FFFFFF;
     font-size: 14px;
-    font-family: helvetica;
 }
 
 .cardstories .cardstories_extras .cardstories_subscribe .cardstories_privacy_notice {
@@ -147,7 +146,6 @@ html, body {
     left: 338px;
     color: #90856D;
     font-size: 10px;
-    font-family: helvetica;
 }
 
 .cardstories .cardstories_extras .cardstories_subscribe .cardstories_submit {
@@ -190,7 +188,7 @@ html, body {
 
 .cardstories_card_confirm { 
     position: absolute;
-    top: 350px;
+    top: 290px;
     right: 20px;
     height: 148px;
     width: 236px;
@@ -572,6 +570,8 @@ html, body {
     text-align: center;
     line-height: 80px;
     color: white;
+    font-size: 13px;
+    color: #F8E8D8;
 }
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_invite_friends {
@@ -613,8 +613,8 @@ html, body {
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_cards {
     position: absolute;
-    bottom: 20px;
-    left: 150px;
+    bottom: 90px;
+    left: 220px;
     display: none;
 }
 
@@ -637,13 +637,15 @@ html, body {
     position: absolute;
     z-index: 1;
     left: 380px;
-    top: 310px;
+    top: 314px;
     width: 600px;
+    font-size: 13px;
+    color: #7A6A59;
 }
 
 .cardstories .cardstories_invitation .cardstories_pick .cardstories_pick_mask_chose_a_card {
     position: absolute;
-    bottom: 50px;
+    bottom: 85px;
     left: 10px;
     background: transparent url('images/pick_mask_chose_a_card.png') no-repeat left top;
     height: 331px;
@@ -652,6 +654,10 @@ html, body {
 
 .cardstories .cardstories_invitation .cardstories_pick.cardstories_card_confirm_right .cardstories_pick_mask_chose_a_card {
     display: none;
+}
+
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_card_confirm {
+    top: 350px;
 }
 
 /* state invitation, player point of view : wait for other players to pick a card */
@@ -714,11 +720,13 @@ html, body {
     left: 330px;
     top: 305px;
     width: 600px;
+    font-size: 13px;
+    color: #7A6A59;
 }
 
 .cardstories .cardstories_vote .cardstories_voter .cardstories_vote_mask_chose_a_card {
     position: absolute;
-    bottom: 50px;
+    bottom: 80px;
     left: 10px;
     background: transparent url('images/vote_mask_chose_a_card.png') no-repeat left top;
     height: 339px;
@@ -738,6 +746,10 @@ html, body {
     width: 60px;
     z-index: 100;
     background: transparent url('images/yourcard.png') no-repeat left top;
+}
+
+.cardstories .cardstories_vote .cardstories_voter .cardstories_card_confirm {
+    top: 350px;
 }
 
 /* state invitation and vote, player point of view : chose a card */
@@ -793,6 +805,8 @@ html, body {
     top: 310px;
     z-index: 1;
     width: 600px;
+    font-size: 13px;
+    color: #7A6A59;
 }
 
 .cardstories .cardstories_invitation .cardstories_pick_wait .cardstories_card_change,
@@ -852,6 +866,8 @@ html, body {
     z-index: 2;
     left: 320px;
     top: 300px;
+    font-size: 13px;
+    color: #7A6A59;
 }
 
 .cardstories .cardstories_vote .cardstories_owner .cardstories_finish {
@@ -897,9 +913,8 @@ html, body {
     width: 450px;
     text-align: center;
     line-height: 50px;
-    color: #F8E8D8;
+    color: #000000;
     font-size: 13px;
-    font-family: helvetica;
 }
 
 .cardstories .cardstories_complete .cardstories_sentence {
@@ -910,7 +925,6 @@ html, body {
     text-align: center;
     color: #F8E8D8;
     font-size: 13px;
-    font-family: helvetica;
 }
 
 /* owner view during the vote, complete state : the wall of the results */
@@ -954,7 +968,6 @@ html, body {
     text-align: center;
     color: #5C463B;
     font-size: 8px;
-    font-family: helvetica;
 }
 
 .cardstories .cardstories_votes .cardstories_column .cardstories_voter_name {
@@ -965,7 +978,6 @@ html, body {
     margin-top: 5px;
     color: #000;
     font-size: 8px;
-    font-family: helvetica;
     text-align: center;
 }
 
@@ -1052,7 +1064,6 @@ html, body {
     background: transparent url('images/credits_short_middle.png') repeat-x left top;
     color: #9D9070;
     font-size: 12px;
-    font-family: helvetica;
 }
 
 .cardstories_credits_short_middle a {
@@ -1111,7 +1122,6 @@ html, body {
 .cardstories_credits_text {
     color: #9D9070;
     font-size: 11px;
-    font-family: helvetica;
     height: 500px;
     width: 580px;
     overflow: auto;
