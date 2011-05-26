@@ -108,7 +108,7 @@ test("send_game", function() {
 test("create", function() {
     setup();
     stop();
-    expect(9);
+    expect(11);
 
     var player_id = 15;
     var game_id = 7;
@@ -132,19 +132,22 @@ test("create", function() {
         start();
     };
 
-    equal($('#qunit-fixture .cardstories_create .cardstories_pick_card.cardstories_active').length, 0, 'pick_card not active');
+    var element = $('#qunit-fixture .cardstories_create');
+    equal($('.cardstories_pick_card.cardstories_active', element).length, 0, 'pick_card not active');
     $.cardstories.
         create(player_id, $('#qunit-fixture .cardstories')).
         done(function(is_ready) {
-            equal($('#qunit-fixture .cardstories_create .cardstories_pick_card.cardstories_active').length, 1, 'pick_card active');
-            equal($('#qunit-fixture .cardstories_create .cardstories_write_sentence.cardstories_active').length, 0, 'sentence not active');
-            var first_card = $('#qunit-fixture .cardstories_create .cardstories_card:nth(0)');
+            equal($('.cardstories_pick_card.cardstories_active', element).length, 1, 'pick_card active');
+            equal($('.cardstories_write_sentence.cardstories_active', element).length, 0, 'sentence not active');
+            var first_card = $('.cardstories_card:nth(0)', element);
             card = first_card.metadata({type: "attr", name: "data"}).card;
             first_card.click();
-            $('#qunit-fixture .cardstories_create .cardstories_card_confirm_ok').click();
-            equal($('#qunit-fixture .cardstories_create .cardstories_write_sentence.cardstories_active').length, 1, 'sentence active');
-            $('#qunit-fixture .cardstories_create .cardstories_write_sentence .cardstories_sentence').val(sentence);
-            $('#qunit-fixture .cardstories_create .cardstories_write_sentence .cardstories_submit').click();
+            $('.cardstories_card_confirm_ok', element).click();
+            equal($('.cardstories_write_sentence.cardstories_active', element).length, 1, 'sentence active');
+            ok($('.cardstories_sentence', element).attr('placeholder') !== undefined, 'placeholder is set');
+            equal($('.cardstories_sentence', element).attr('placeholder'), $('.cardstories_sentence', element).val());
+            $('.cardstories_write_sentence .cardstories_sentence', element).val(sentence);
+            $('.cardstories_write_sentence .cardstories_submit', element).click();
         });
 });
 
@@ -771,6 +774,7 @@ test("advertise", function() {
     $.cookie('CARDSTORIES_INVITATIONS', null);
     $('.cardstories_text', element).text('');
     $.cardstories.advertise(owner_id, game_id, $('#qunit-fixture .cardstories'));    
+    ok($('.cardstories_sentence', element).attr('placeholder') !== undefined, 'placeholder is set');
     equal($('.cardstories_text', element).attr('placeholder'), $('.cardstories_text', element).val());
   });
 

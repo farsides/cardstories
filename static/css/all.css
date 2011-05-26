@@ -316,6 +316,9 @@ html, body {
    width: 410px;
 } 
 
+.cardstories .cardstories_create .cardstories_write_sentence .cardstories_sentence.placeholder {
+   color: #999;
+}
 
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_write_top_box {
     background: transparent url('images/write_top_box.png') no-repeat left top;  

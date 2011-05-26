@@ -78,6 +78,7 @@
             var $this = this;
             var element = $('.cardstories_create .cardstories_write_sentence', root);
             this.set_active(root, element);
+            $('.cardstories_sentence', element).placeholder();
             $('.cardstories_card', element).attr('class', 'cardstories_card cardstories_card' + card + ' {card:' + card + '}');
             $('.cardstories_submit', element).unbind('click').click(function() {
                 var success = function(data, status) {
