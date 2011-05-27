@@ -1266,6 +1266,29 @@ test("select_cards cancel", function() {
         done(onReady);
   });
 
+test("select_cards single", function() {
+    setup();
+    stop();
+
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_create .cardstories_cards_hand', root);
+    var onReady = function(is_ready) {
+        var links = $('a.cardstories_card', element);
+        links.each(function(index) {
+            $(this).click();
+            var condition = $(this).hasClass('cardstories_card_selected') == index == 0;
+            var not = $(this).hasClass('cardstories_card_selected') ? '' : 'not'
+            ok(condition, 'Card ' + index + ' ' + not +  ' picked.');
+        });
+        start();
+    };
+    $.cardstories.
+        display_or_select_cards([{'value':1},{'value':2},{'value':3},{'value':4},{'value':5},{'value':6}],
+                                function() {},
+                                element).
+        done(onReady);
+  });
+
 test("create_deck", function() {
     setup();
     expect(15);

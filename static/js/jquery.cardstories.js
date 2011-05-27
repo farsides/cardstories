@@ -467,22 +467,24 @@
                     if(select_callback !== undefined && card && card.inactive === undefined) {
                         link.metadata({type: "attr", name: "data"}).card = card.value;
                         link.unbind('click').click(function() {
-                            link.addClass('cardstories_card_selected');
-                            link.css({zIndex: 200});
-                            var nudge = function() {
-                                link.removeClass('cardstories_card_selected');
-                                link.css({zIndex: zindex});
-                                if(has_bg) {
-                                    background.attr('src', meta.card_bg);
-                                } else {
-                                    background.removeAttr('src');
-                                }
-                                dock.jqDock('nudge');
-                            };
-                            background.attr('src', meta.card_bg_selected);
-                            dock.jqDock('freeze');
-                            $(this).blur();
-                            select_callback.call(this, card.value, index, nudge, element);
+                            if(!$('a.cardstories_card', element).hasClass('cardstories_card_selected')) {
+                                link.addClass('cardstories_card_selected');
+                                link.css({zIndex: 200});
+                                var nudge = function() {
+                                    link.removeClass('cardstories_card_selected');
+                                    link.css({zIndex: zindex});
+                                    if(has_bg) {
+                                        background.attr('src', meta.card_bg);
+                                    } else {
+                                        background.removeAttr('src');
+                                    }
+                                    dock.jqDock('nudge');
+                                };
+                                background.attr('src', meta.card_bg_selected);
+                                dock.jqDock('freeze');
+                                $(this).blur();
+                                select_callback.call(this, card.value, index, nudge, element);
+                            }
                         });
                     }
                 });
