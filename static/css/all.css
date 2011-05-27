@@ -398,10 +398,14 @@ html, body {
 .cardstories .cardstories_lobby .cardstories_start_story {
     position: absolute;
     background: transparent url('images/start_story.png') no-repeat left top;
-    top: 262px;
-    right: 130px;
-    height: 89px;
-    width: 140px;
+    top: 235px;
+    right: 80px;
+    height: 115px;
+    width: 181px;
+}
+
+.cardstories .cardstories_lobby .cardstories_start_story:hover {
+    background-image: url('images/start_story_over.png');
 }
 
 .cardstories .cardstories_lobby .cardstories_pager {
