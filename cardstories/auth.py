@@ -77,6 +77,7 @@ class Auth:
             if key == 'player_id' or key == 'owner_id':
                 new_values = []
                 for value in values:
+                    value = value.decode('utf-8')
                     row = yield self.db.runQuery("SELECT id FROM players WHERE name = ?", [ value ])
                     if len(row) == 0:
                         id = yield self.db.runInteraction(self.create, value)
