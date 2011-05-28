@@ -100,6 +100,8 @@ class CardstoriesGameTest(unittest.TestCase):
         self.assertEquals([owner_id], self.game.get_players())
         participation = yield self.game.participate(player_id)
         self.assertEquals([game_id], participation['game_id'])
+        self.assertEquals('participate', participation['type'])
+        self.assertEquals(player_id, participation['player_id'])
         self.assertEquals([owner_id, player_id], self.game.get_players())
         c.execute("SELECT LENGTH(cards) FROM games WHERE id = %d" % game_id)
         self.assertEquals(cards_length - self.game.CARDS_PER_PLAYER, c.fetchone()[0])
@@ -143,7 +145,10 @@ class CardstoriesGameTest(unittest.TestCase):
             yield self.game.participate(player_id)
             player = yield self.game.player2game(player_id)
             player2card[player_id] = player['cards'][0]
-            yield self.game.pick(player_id, player2card[player_id] )
+            result = yield self.game.pick(player_id, player2card[player_id] )
+            self.assertEquals(result['type'], 'pick')
+            self.assertEquals(result['player_id'], player_id)
+            self.assertEquals(result['card'], player2card[player_id])
         
         c = self.db.cursor()
         for player_id in ( 16, 17 ):
@@ -170,7 +175,8 @@ class CardstoriesGameTest(unittest.TestCase):
         invited = 20
         yield self.game.invite([invited])
         self.assertEquals([owner_id] + players + [invited], self.game.get_players())
-        yield self.game.voting(owner_id)
+        result = yield self.game.voting(owner_id)
+        self.assertEquals(result['type'], 'voting')
         self.assertEquals([], self.game.invited)
         self.assertEquals([owner_id] + pick_players, self.game.get_players())
         c = self.db.cursor()
@@ -194,13 +200,16 @@ class CardstoriesGameTest(unittest.TestCase):
             player = yield self.game.player2game(player_id)
             card = player['cards'][0]
             yield self.game.pick(player_id,card)
-        
+
         yield self.game.voting(owner_id)
         
         c = self.db.cursor()
         for player_id in ( owner_id, 16, 17 ):
             vote = 1
-            yield self.game.vote(player_id, vote)
+            result = yield self.game.vote(player_id, vote)
+            self.assertEquals(result['type'], 'vote')
+            self.assertEquals(result['player_id'], player_id)
+            self.assertEquals(result['vote'], vote)
             c.execute("SELECT vote FROM player2game WHERE game_id = %d AND player_id = %d" % ( game_id, player_id ))
             self.assertEqual(chr(vote), c.fetchone()[0])
         c.close()
@@ -229,7 +238,8 @@ class CardstoriesGameTest(unittest.TestCase):
         loser_id = 17
         yield self.game.vote(loser_id, 120)
         self.assertEquals(self.game.get_players(), [owner_id] + players)
-        yield self.game.complete(owner_id)
+        result = yield self.game.complete(owner_id)
+        self.assertEquals(result['type'], 'complete')
         self.assertEquals(self.game.get_players(), [owner_id] + voting_players)
         c.execute("SELECT win FROM player2game WHERE game_id = %d AND player_id != %d" % ( game_id, owner_id ))
         self.assertEqual(u'y', c.fetchone()[0])
@@ -366,15 +376,20 @@ class CardstoriesGameTest(unittest.TestCase):
         game_id = yield self.game.create(winner_card, sentence, owner_id)
         self.assertEquals([owner_id], self.game.get_players())
         
-        for i in range(2): # execute twice to make sure we can invite the same players twice without error
-            result = yield self.game.invite(invited)
-            self.assertEquals([game_id], result['game_id'])
-            self.assertEquals(invited, self.game.invited)
-            self.assertEquals([owner_id] + invited, self.game.get_players())
-            c = self.db.cursor()
-            c.execute("SELECT * FROM invitations WHERE game_id = %d" % game_id)
-            self.assertEquals(c.fetchall(), [(invited[0], game_id),
-                                         (invited[1], game_id)])
+        result = yield self.game.invite(invited)
+        self.assertEquals(result['type'], 'invite')
+        self.assertEquals(result['invited'], invited)
+        self.assertEquals([game_id], result['game_id'])
+        self.assertEquals(invited, self.game.invited)
+        self.assertEquals([owner_id] + invited, self.game.get_players())
+        c = self.db.cursor()
+        c.execute("SELECT * FROM invitations WHERE game_id = %d" % game_id)
+        self.assertEquals(c.fetchall(), [(invited[0], game_id),
+                                     (invited[1], game_id)])
+        # inviting the same players twice is a noop
+        result = yield self.game.invite(invited)
+        self.assertEquals(result['type'], 'invite')
+        self.assertEquals(result['invited'], [])
         #
         # load an existing game, invitations included
         #

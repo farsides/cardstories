@@ -40,9 +40,10 @@ class CardstoriesGame(pollable):
         self.invited = []
         pollable.__init__(self, self.settings.get('poll-timeout', 300))
 
-    def touch(self):
+    def touch(self, *args, **kwargs):
         self.update_timer()
-        return pollable.touch(self, {'game_id': [self.id]})
+        kwargs['game_id'] = [self.id]
+        return pollable.touch(self, kwargs)
 
     def destroy(self):
         if hasattr(self, 'timer') and self.timer.active():
@@ -230,7 +231,7 @@ class CardstoriesGame(pollable):
         if player_id in self.invited:
             self.invited.remove(player_id)
         self.players.append(player_id)
-        defer.returnValue(self.touch())
+        defer.returnValue(self.touch(type = 'participate', player_id = player_id))
 
     @defer.inlineCallbacks
     def voting(self, owner_id):
@@ -248,7 +249,7 @@ class CardstoriesGame(pollable):
         yield self.service.db.runOperation("UPDATE games SET board = ?, state = 'vote' WHERE id = ?", [ board, self.get_id() ])
         yield self.cancelInvitations()
         self.invited = []
-        defer.returnValue(self.touch())
+        defer.returnValue(self.touch(type = 'voting'))
 
     @defer.inlineCallbacks
     def player2game(self, player_id):
@@ -261,12 +262,12 @@ class CardstoriesGame(pollable):
     @defer.inlineCallbacks
     def pick(self, player_id, card):
         yield self.service.db.runOperation("UPDATE player2game SET picked = ? WHERE game_id = ? AND player_id = ?", [ chr(card), self.get_id(), player_id ])
-        defer.returnValue(self.touch())
+        defer.returnValue(self.touch(type = 'pick', player_id = player_id, card = card))
 
     @defer.inlineCallbacks
     def vote(self, player_id, vote):
         yield self.service.db.runOperation("UPDATE player2game SET vote = ? WHERE game_id = ? AND player_id = ?", [ chr(vote), self.get_id(), player_id ])
-        defer.returnValue(self.touch())
+        defer.returnValue(self.touch(type = 'vote', player_id = player_id, vote = vote))
 
     def completeInteraction(self, transaction, game_id, owner_id):
         transaction.execute("SELECT cards FROM player2game WHERE game_id = %d AND player_id = %d" % ( game_id, owner_id ))
@@ -296,18 +297,20 @@ class CardstoriesGame(pollable):
         no_vote = filter(lambda player: player[1] == None and player[0] != self.get_owner_id(), game['players'])
         yield self.leave([ player[0] for player in no_vote ])
         yield self.service.db.runInteraction(self.completeInteraction, self.get_id(), owner_id)
-        defer.returnValue(self.touch())
+        defer.returnValue(self.touch(type = 'complete'))
 
     def cancelInvitations(self):
         return self.service.db.runQuery("DELETE FROM invitations WHERE game_id = ?", [ self.get_id() ])
 
     @defer.inlineCallbacks
     def invite(self, player_ids):
+        invited = []
         for player_id in player_ids:
             if player_id not in self.invited:
+                invited.append(player_id)
                 yield self.service.db.runQuery("INSERT INTO invitations (player_id, game_id) VALUES (?, ?)", [ player_id, self.get_id() ])
-        self.invited = list(set(self.invited + player_ids)) # Only keep one value when imported several times
-        defer.returnValue(self.touch())
+        self.invited += invited
+        defer.returnValue(self.touch(type = 'invite', invited = invited))
 
     @staticmethod
     def ord(c):
