@@ -54,6 +54,26 @@ class CardstoriesService(service.Service):
         self.settings = settings
         self.games = {}
         self.players = {}
+        self.listeners = []
+
+    def listen(self):
+        d = defer.Deferred()
+        self.listeners.append(d)
+        return d
+
+    def notify(self, result):
+        if hasattr(self, 'notify_running'):
+            raise UserWarning, 'recursive call to notify'
+        self.notify_running = True
+        listeners = self.listeners
+        self.listeners = []
+        def error(reason):
+            reason.printDetailedTraceback()
+            return True
+        for listener in listeners:
+            listener.addErrback(error)
+            listener.callback(result)
+        del self.notify_running
 
     def startService(self):
         database = self.settings['db']
@@ -68,8 +88,10 @@ class CardstoriesService(service.Service):
         c.close()
         db.close()
         self.db = adbapi.ConnectionPool("sqlite3", database=database, cp_noisy=True)
+        self.notify({'type': 'start'})
         
     def stopService(self):
+        self.notify({'type': 'stop'})
         for game in self.games.values():
             game.destroy()
         for player in self.players.values():
@@ -170,11 +192,13 @@ class CardstoriesService(service.Service):
 
     def game_notify(self, args, game_id):
         if args == None:
+            self.notify({'type': 'delete', 'game': self.games[game_id], 'details': args})
             del self.games[game_id]
             return False
         if not self.games.has_key(game_id):
             return False
         game = self.games[game_id]
+        self.notify({'type': 'change', 'game': game, 'details': args})
         for player_id in game.get_players():
             if self.players.has_key(player_id):
                 self.players[player_id].touch(args)

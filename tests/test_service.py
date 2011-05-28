@@ -31,15 +31,65 @@ from cardstories.service import CardstoriesService
 from twisted.internet import base
 base.DelayedCall.debug = True
 
+class CardstoriesServiceTestNotify(unittest.TestCase):
+    
+    def test00_notify(self):
+        service = CardstoriesService({})
+        d = service.listen()
+        def check(result):
+            self.assertTrue(result)
+            service.checked = True
+            return result
+        d.addCallback(check)
+        service.notify(True)
+        self.assertTrue(service.checked)
+
+    def test01_notify_recursive(self):
+        service = CardstoriesService({})
+        d = service.listen()
+        def recurse(result):
+            try:
+                service.notify(False)
+            except UserWarning, e:
+                self.failUnlessSubstring('recurs', e.args[0])
+                service.recursed = True
+            return result
+        d.addCallback(recurse)
+        service.notify(True)
+        self.assertTrue(service.recursed)
+
+    def test02_notify_ignore_exception(self):
+        service = CardstoriesService({})
+        d = service.listen()
+        def fail(result):
+            service.raised = True
+            raise UserWarning, 'raise exception'
+        d.addCallback(fail)
+        service.notify(True)
+        self.assertTrue(service.raised)
+
 class CardstoriesServiceTestInit(unittest.TestCase):
 
     def test00_startService(self):
         database = 'test.sqlite'
         service = CardstoriesService({'db': database})
         self.assertFalse(os.path.exists(database))
+        def start(event):
+            self.assertEqual(event['type'], 'start')
+            service.notified_start = True
+            return event
+        service.listen().addCallback(start)
         service.startService()
+        self.assertTrue(service.notified_start)
         self.assertTrue(os.path.exists(database))
-        return service.stopService()
+        def stop(event):
+            self.assertEqual(event['type'], 'stop')
+            service.notified_stop = True
+            return event
+        service.listen().addCallback(stop)
+        d = service.stopService()
+        self.assertTrue(service.notified_stop)
+        return d
 
     @defer.inlineCallbacks
     def test01_load(self):
@@ -394,9 +444,27 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
             self.assertEquals(result['modified'], [player.modified])
             self.assertEquals(result['player_id'], [owner_id])
             self.assertEquals(result['game_id'], [game.id])
+            game.checked = True
             return result
         d.addCallback(check)
+        def change(event):
+            self.assertTrue(event['type'], 'change')
+            self.assertTrue(event['game'].get_id(), game.get_id())
+            game.changed = True
+        self.service.listen().addCallback(change)
         game.touch() # calls game_notify indirectly
+        self.assertTrue(game.checked)
+        self.assertTrue(game.changed)
+        #
+        # Event notification when a game is destroyed
+        #
+        def destroy(event):
+            self.assertTrue(event['type'], 'delete')
+            self.assertTrue(event['game'].get_id(), game.get_id())
+            game.destroyed = True
+        self.service.listen().addCallback(destroy)            
+        game.destroy()
+        self.assertTrue(game.destroyed)
         #
         # calling game_notify on a non existent game is a noop
         #
@@ -563,6 +631,7 @@ def Run():
     loader = runner.TestLoader()
 #    loader.methodPrefix = "test11_"
     suite = loader.suiteFactory()
+    suite.addTest(loader.loadClass(CardstoriesServiceTestNotify))
     suite.addTest(loader.loadClass(CardstoriesServiceTestInit))
     suite.addTest(loader.loadClass(CardstoriesServiceTest))
     suite.addTest(loader.loadClass(CardstoriesServiceTestHandle))
