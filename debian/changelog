@@ -15,6 +15,8 @@ cardstories (1.0.3-1) unstable; urgency=low
   * Czech  po-debconf template translation (cs.po) (Closes: #627802).
 
   * Swedish po-debconf template translation (sv.po) (Closes: #627852).
+  
+  * Remove SSL support until python openssl is fixed (Closes: #628249).
 
   * section changed to games (Closes: #627180).
 
