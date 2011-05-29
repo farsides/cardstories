@@ -144,6 +144,20 @@
 	'ready': true
       };
       $.cardstories.vote_owner('voter11', game, root);
+    } else if(skin == 'confirm_results_publication') {
+        game = {
+            'id': 100,
+            'owner': false,
+            'sentence': 'the game sentence',
+            'board': [30,31,32],
+            'winner_card': 30,
+            'players': [ [ 'voter11', 30, 'y', 32, [ ] ],
+                         [ 'voter12', null, 'y', 30, [ ] ],
+                         [ 'voter21', 30, 'n', 31, [ ] ]
+                       ],
+            'ready': true
+        };
+        $.cardstories.confirm_results_publication('PLAYER1', game, root);
     } else if(skin == 'complete') {
       game = {
 	'id': 100,

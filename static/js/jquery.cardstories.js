@@ -593,12 +593,25 @@
             finish.toggleClass('cardstories_ready', game.ready);
             if(game.ready) {
                 finish.click(function() {
-                    $this.send_game(player_id, game.id, element, 'action=complete&owner_id=' + player_id + '&game_id=' + game.id);
+                    $this.confirm_results_publication(player_id, game, root);
                 });
             }
             
             // Display the current board state
             this.results_board(player_id, game, element);
+        },
+
+        confirm_results_publication: function(player_id, game, root) {
+            var $this = this;
+            var element = $('.cardstories_confirm_results_publication', root);
+            var vote_element = $('.cardstories_vote .cardstories_owner', root);
+            this.set_active(root, element);
+            $('.cardstories_notyet_announce_results').click(function () {
+                $this.vote_owner(player_id, game, root);
+            });
+            $('.cardstories_announce_results').click(function () {
+                $this.send_game(player_id, game.id, vote_element, 'action=complete&owner_id=' + player_id + '&game_id=' + game.id);
+            });
         },
 
         complete: function(player_id, game, root) {
