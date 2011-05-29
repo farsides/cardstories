@@ -602,6 +602,18 @@
         },
 
         complete: function(player_id, game, root) {
+            var $this = this;
+            if (game.owner) {
+                $('.play_again', root).show();
+                $('.play_again', root).unbind('click').click(function () {
+                    // "Play again" in this case is just to create a new game and
+                    // the players of this game will be kept as well because
+                    // the CARDSTORIES_INVITATIONS cookie stores those playes emails.
+                    $this.create(player_id, root);
+                });
+            } else {
+                $('.play_again').hide();
+            }
             var element = $('.cardstories_complete', root);
             this.set_active(root, element);
             element.toggleClass('cardstories_owner', game.owner);

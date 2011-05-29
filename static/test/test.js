@@ -24,6 +24,43 @@ function setup() {
     $.cardstories.poll_ignore = function() { throw 'poll_ignore'; };
 }
 
+test("play_again_finish_state", function() {
+    setup();
+    expect(5);
+    var player_id = 5;
+	var game = {
+	    'id': 7,
+	    'state': 'fake_state',
+	    'board': [],
+	    'players': [],
+	};
+	var root = $('#qunit-fixture .cardstories');
+	game.owner = false;
+    $.cardstories.complete(player_id, game, root);
+    ok($('.play_again', root).is(':hidden'), 'Play again button is hidden when the player is owner');
+	game.owner = true;
+    $.cardstories.complete(player_id, game, root);
+    ok(!$('.play_again', root).is(':hidden'), 'Play again button is visible when the player is owner');
+    var create = $.cardstories.create;
+    var send_game = $.cardstories.send_game;
+    var $textarea = $('.cardstories_text', $('.cardstories_advertise', root));
+    $.cookie('CARDSTORIES_INVITATIONS', null);
+    $textarea.val('aaa@aaa.aaa\nbbb@bbb.bbb\nccc@ccc.ccc')
+    var text = $textarea.val();
+    $.cardstories.send_game = function () {}; //do nothing
+    $.cardstories.advertise(player_id, game.id, root);
+    $('.cardstories_submit', $('.cardstories_advertise', root)).click();
+    $.cardstories.send_game = send_game;
+    var inv_cookie = $.cookie('CARDSTORIES_INVITATIONS');
+    $.cardstories.create = function (arg_player_id, arg_root) {
+        equal(arg_player_id, player_id);
+        equal(arg_root, root);
+        $.cardstories.create = create;
+    }
+    $('.play_again', root).click();
+    equal(text, inv_cookie);
+});
+
 test("permalink", function() {
     expect(2);
     equal($.cardstories.permalink(5), '?');
