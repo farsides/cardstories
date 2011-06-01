@@ -20,20 +20,12 @@ class Plugin:
     
     def __init__(self, service):
         self.service = service
-        self.accept(None)
 
     def name(self):
-        return 'plugin'
-
-    def accept(self, event):
-        self.service.plugin_event = event
-        self.service.listen().addCallback(self.accept)
+        return 'plugin_fail'
 
     def preprocess(self, result, request):
-        request.preprocess = 'preprocess'
-        return result
+        raise UserWarning, 'PREPROCESS'
 
     def postprocess(self, result):
-        result['postprocess'] = self.preprocess
-        return result
-
+        raise UserWarning, 'POSTPROCESS'

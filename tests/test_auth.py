@@ -24,27 +24,28 @@ import sqlite3
 from twisted.trial import unittest, runner, reporter
 from twisted.internet import defer
 
-from cardstories.auth import Auth
+from plugins.auth.auth import Plugin
+
+class FakeService:
+
+    def __init__(self, settings):
+        self.settings = settings
 
 class AuthTestInit(unittest.TestCase):
 
     def test00_create(self):
-        database = 'test.sqlite'
-        auth = Auth({'auth-db': database})
-        self.assertTrue(os.path.exists(database))
+        auth = Plugin(FakeService({'plugins-libdir': '.'}))
+        self.assertTrue(os.path.exists(auth.database))
 
 class AuthTest(unittest.TestCase):
 
     def setUp(self):
-        self.database = 'test.sqlite'
-        if os.path.exists(self.database):
-            os.unlink(self.database)
-        self.auth = Auth({'auth-db': self.database})
-        self.db = sqlite3.connect(self.database)
+        self.auth = Plugin(FakeService({'plugins-libdir': '.'}))
+        self.db = sqlite3.connect(self.auth.database)
 
     def tearDown(self):
         self.db.close()
-        os.unlink(self.database)
+        os.unlink(self.auth.database)
 
     @defer.inlineCallbacks
     def test00_translate(self):
@@ -79,37 +80,6 @@ class AuthTest(unittest.TestCase):
         self.assertEquals(result_out, { 'players': [ [ player ],
                                                      [ owner ] ] })
         
-
-    @defer.inlineCallbacks
-    def test01_invite(self):
-        mails = [ u'mail1@foo.com', u'mail2@foo.com' ]
-        game_id = 20
-        class request:
-            def __init__(self):
-                self.args = { 'player_id': mails,
-                              'game_id': [ game_id ],
-                              'action': [ 'invite' ] }
-        host = 'HOST'
-        self.auth.settings['mail-host'] = host
-        sender = 'FROM'
-        self.auth.settings['mail-from'] = sender
-        subject = 'SUBJECT'
-        self.auth.settings['mail-subject'] = subject
-        body = '%(player_id)s %(game_id)s'
-        self.auth.settings['mail-body'] = body
-        request1 = request()
-        result_in = 'RESULT'
-        self.auth.count = 0
-        def sendmail(_host, _sender, _mail, payload):
-            self.assertEqual(_host, host)
-            self.assertEqual(_sender, sender)
-            self.assertEqual(_mail, mails[self.auth.count])
-            self.failUnlessSubstring(body % { 'player_id': mails[self.auth.count],
-                                              'game_id': game_id }, payload)
-            self.auth.count += 1
-            return defer.succeed(True)
-        self.auth.sendmail = sendmail
-        result_out = yield self.auth.preprocess(result_in, request1)
 
     @defer.inlineCallbacks
     def test02_accent(self):
@@ -165,5 +135,5 @@ if __name__ == '__main__':
 
 # Interpreted by emacs
 # Local Variables:
-# compile-command: "python-coverage -e ; PYTHONPATH=.. python-coverage -x test_auth.py ; python-coverage -m -a -r ../cardstories/auth.py"
+# compile-command: "python-coverage -e ; PYTHONPATH=.. python-coverage -x test_auth.py ; python-coverage -m -a -r ../plugins/auth.py"
 # End:

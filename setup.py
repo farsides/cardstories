@@ -36,6 +36,8 @@ data_files.append(['/etc/cardstories/twisted/plugins', ['etc/cardstories/twisted
 data_files.append(['/usr/share/cardstories/conf', [ 'conf/nginx.conf' ]])
 data_files.append(['/usr/share/cardstories/conf', [ 'conf/apache2.conf' ]])
 
+data_files.append(['/usr/share/cardstories/plugins', [ 'plugins/auth/auth.py' ]])
+
 setup(name='cardstories',
       version='1.0.3',
       requires=['twisted (>=10.1.0)'],

@@ -21,8 +21,21 @@ from twisted.web import server, resource, static, http
 from twisted.internet import defer
 from twisted.python import urlpath, log
 
-from cardstories.auth import Auth
-
+class CardstoriesSite(server.Site):
+    
+    def __init__(self, resource, settings, plugins, **kwargs):
+        self.plugins = plugins
+        name2plugin = {}
+        for plugin in plugins:
+            name2plugin[plugin.name()] = plugin
+        self.preprocess = []
+        for plugin in settings.get('plugins-pre-process', '').split():
+            self.preprocess.append(name2plugin[plugin])
+        self.postprocess = []
+        for plugin in settings.get('plugins-post-process', '').split():
+            self.postprocess.append(name2plugin[plugin])
+        server.Site.__init__(self, resource, **kwargs)
+    
 class CardstoriesResource(resource.Resource):
 
     def __init__(self, service):
@@ -31,37 +44,37 @@ class CardstoriesResource(resource.Resource):
         self.isLeaf = True
 
     def render(self, request):
-        if not hasattr(self, 'auth'):
-            if self.service.settings.get('auth'):
-                self.auth = Auth(self.service.settings)
-            else:
-                self.auth = None
         self.wrap_http(request)
         return server.NOT_DONE_YET
 
     def wrap_http(self, request):
         d = defer.succeed(True)
-        
+
+        # pre-process the request ...
+        for plugin in request.site.preprocess:
+            d.addCallback(plugin.preprocess, request)
+        # ... process the request ...
+        d.addCallback(self.handle, request)
+        # ... post-process the request.
+        for plugin in request.site.postprocess:
+            d.addCallback(plugin.postprocess)
+
+        # catch errors and dump a trace ...
         def failed(reason):
+            reason.printDetailedTraceback()
             body = reason.getTraceback()
             request.setResponseCode(http.INTERNAL_SERVER_ERROR)
             request.setHeader('content-type',"text/html")
             request.setHeader('content-length', str(len(body)))
             request.write(body)
             request.finish()
-
+        # ... or return the JSON result to the caller
         def succeed(result):
             content = json.dumps(result)
             request.setHeader("content-length", str(len(content)))
             request.setHeader("content-type", 'application/json; charset="UTF-8"')
             request.write(content)
             request.finish()
-
-        if hasattr(self, 'auth') and self.auth:
-            d.addCallback(self.auth.preprocess, request)
-        d.addCallback(self.handle, request)
-        if hasattr(self, 'auth') and self.auth:
-            d.addCallback(self.auth.postprocess)
         d.addCallbacks(succeed, failed)
 
         return d

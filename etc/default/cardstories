@@ -1,19 +1,26 @@
+#
 # User to run the daemons as.
+#
 CARDSTORIES_USER=cardstories
 
+#
 # Group to run the daemons as.
+#
 CARDSTORIES_GROUP=nogroup
 
-# sending mail invitations
-CARDSTORIES_HOST=localhost
-CARDSTORIES_BODY=$(cat <<EOF
-Hi friend,
+#
+# White space separated list of plugins to load
+#
+PLUGINS="auth"
 
-Come play with me at 
-http://localhost:4923/static/?player_id=%(player_id)s&game_id=%(game_id)s
+#
+# White space separated list of plugins that will transform
+# the incoming HTTP request, in the order they show.
+#
+PLUGINS_PRE_PROCESS="auth"
 
-Cheers
-EOF
-)
-CARDSTORIES_FROM=noreply@localhost
-CARDSTORIES_SUBJECT="Cardstories invitation"
+#
+# White space separated list of plugins that will transform
+# the JSON result, in the order they show.
+#
+PLUGINS_POST_PROCESS="auth"

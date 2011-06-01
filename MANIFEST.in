@@ -3,6 +3,8 @@ recursive-include etc/cardstories *.py
 recursive-include tests *.py Makefile
 include etc/default/cardstories
 include conf/*.conf
+include plugins/*/*.py
+include plugins/__init__.py
 include maintain.mk
 include LICENSE.txt
 include MANIFEST

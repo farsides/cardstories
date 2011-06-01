@@ -19,7 +19,7 @@ Copyright (C) 2011 Loic Dachary <loic@dachary.org> (software)
 # display usage
 PYTHONPATH=.:etc/cardstories twistd cardstories --help
 # run locally with all features activated
-PYTHONPATH=.:etc/cardstories twistd --nodaemon cardstories --static $(pwd)/static --port 5000 --interface 0.0.0.0 --db /tmp/cardstories.sqlite --auth basic --auth-db /tmp/authcardstories.sqlite
+PYTHONPATH=.:etc/cardstories twistd --nodaemon cardstories --static $(pwd)/static --port 5000 --interface 0.0.0.0 --db /tmp/cardstories.sqlite --plugins-dir plugins/auth --plugins auth --plugins-pre-process auth --plugins-post-process auth --plugins-libdir /tmp
 # check if the webservice replies. The following must return the {} string
 curl --silent http://localhost:4923/resource
 

@@ -66,21 +66,34 @@ class CardstoriesServerTest(unittest.TestCase):
         settings = tap.Options()
         pem = 'cert.pem'
         db = 'base.sqlite'
-        auth = 'basic'
         ssl_port = '8080'
+        plugins = 'P1 P2 P3'
+        plugins_dir = 'PLUGINDIR'
+        plugins_libdir = 'PLUGINDIR/LIB'
+        plugins_confdir = 'PLUGINDIR/CONF'
+        plugins_pre_process = 'P1 P2'
+        plugins_post_process = 'P2 P1'
         settings.parseOptions(['--port', self.port,
                                '--ssl-port', ssl_port,
                                '--ssl-pem', pem,
                                '--verbose',
                                '--db', db,
-                               '--auth', auth,
-                               '--auth-db', 'auth' + db,
+                               '--plugins', plugins,
+                               '--plugins-dir', plugins_dir,
+                               '--plugins-libdir', plugins_libdir,
+                               '--plugins-confdir', plugins_confdir,
+                               '--plugins-pre-process', plugins_pre_process,
+                               '--plugins-post-process', plugins_post_process
                                ])
         self.assertEquals(pem, settings['ssl-pem'])
         self.assertEquals(1, settings['verbose'])
         self.assertEquals(db, settings['db'])
-        self.assertEquals(auth, settings['auth'])
-        self.assertEquals('auth' + db, settings['auth-db'])
+        self.assertEquals(plugins, settings['plugins'])
+        self.assertEquals(plugins_dir, settings['plugins-dir'])
+        self.assertEquals(plugins_libdir, settings['plugins-libdir'])
+        self.assertEquals(plugins_confdir, settings['plugins-confdir'])
+        self.assertEquals(plugins_pre_process, settings['plugins-pre-process'])
+        self.assertEquals(plugins_post_process, settings['plugins-post-process'])
         self.assertEquals(int(self.port), settings['port'])
         self.assertEquals(int(ssl_port), settings['ssl-port'])
 
@@ -88,12 +101,10 @@ class CardstoriesServerTest(unittest.TestCase):
                                '-s', ssl_port,
                                '-P', pem,
                                '-v',
-                               '-a', auth,
                                ])
         self.assertEquals(pem, settings['ssl-pem'])
         self.assertEquals(1, settings['verbose'])
         self.assertEquals(db, settings['db'])
-        self.assertEquals(auth, settings['auth'])
         self.assertEquals(int(self.port), settings['port'])
         self.assertEquals(int(ssl_port), settings['ssl-port'])
         

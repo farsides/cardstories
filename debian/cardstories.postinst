@@ -42,7 +42,7 @@ fi
 
 for d in /var/run/cardstories /var/log/cardstories /var/lib/cardstories; do
     mkdir -p $d
-    chown cardstories:nogroup $d
+    chown -R cardstories:nogroup $d
     chmod 755 $d
 done
 

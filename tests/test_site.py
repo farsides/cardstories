@@ -28,15 +28,28 @@ from twisted.python import filepath
 from twisted.web.test.test_web import DummyRequest
 from twisted.web.test._util import _render
 
-from cardstories.site import CardstoriesResource, CardstoriesTree, AGPLResource
+from cardstories.site import CardstoriesResource, CardstoriesTree, AGPLResource, CardstoriesSite
+from cardstories.plugins import CardstoriesPlugins
 
 class CardstoriesServiceMockup:
     def __init__(self):
         self.settings = {'static': os.getcwd()}
 
-    def handle(self, args): return 'handle'
+    def handle(self, args):
+        return 'handle'
 
 class CardstoriesSiteTest(unittest.TestCase):
+
+    def test00_init(self):
+        plugins = CardstoriesPlugins({ 'plugins-dir': '..',
+                                       'plugins': 'plugin_one plugin_two'})
+        plugins.load(True)
+        site = CardstoriesSite(resource.Resource(), { 'plugins-pre-process': 'plugin_one plugin_two',
+                                                      'plugins-post-process': 'plugin_two plugin_one' }, plugins.plugins)
+        self.assertEqual(site.preprocess[0], site.postprocess[1])
+        self.assertEqual(site.preprocess[1], site.postprocess[0])
+
+class CardstoriesResourceTest(unittest.TestCase):
 
     class Transport:
         host = None
@@ -48,7 +61,7 @@ class CardstoriesSiteTest(unittest.TestCase):
 
     class Channel:
         def __init__(self, site):
-            self.transport = CardstoriesSiteTest.Transport()
+            self.transport = CardstoriesResourceTest.Transport()
             self.site = site
 
         def requestDone(self, request):
@@ -62,7 +75,7 @@ class CardstoriesSiteTest(unittest.TestCase):
             self.site.stopFactory()
 
     def test00_render(self):
-        self.site = server.Site(CardstoriesTree(self.service))
+        self.site = CardstoriesSite(CardstoriesTree(self.service), {}, [])
         r = server.Request(self.Channel(self.site), True)
         r.site = r.channel.site
         input = ''
@@ -95,8 +108,9 @@ class CardstoriesSiteTest(unittest.TestCase):
 
     def test01_wrap_http(self):
         resource = CardstoriesResource(self.service)
-        self.site = server.Site(resource)
+        self.site = CardstoriesSite(resource, {}, [])
         request = server.Request(self.Channel(self.site), True)
+        request.site = self.site
         request.method = 'GET'
         d = resource.wrap_http(request)
         def finish(result):
@@ -104,23 +118,78 @@ class CardstoriesSiteTest(unittest.TestCase):
         d.addCallback(finish)
         return d
 
-    def test02_wrap_http_fail(self):
+    def test02_wrap_http_plugin(self):
+        class MyService:
+            def handle(self, args):
+                return args
+
+        plugins = CardstoriesPlugins({ 'plugins-dir': '..',
+                                       'plugins': 'plugin_site'})
+        plugins.load(True)
+        resource = CardstoriesResource(MyService())
+        self.site = CardstoriesSite(resource, { 'plugins-pre-process': 'plugin_site',
+                                                'plugins-post-process': 'plugin_site' }, plugins.plugins)
+        request = server.Request(self.Channel(self.site), True)
+        request.site = self.site
+        request.args = {}
+        request.method = 'GET'
+        d = resource.wrap_http(request)
+        def finish(result):
+            self.assertSubstring('"preprocess": ["PREPROCESS"]', request.transport.getvalue())
+            self.assertSubstring('"postprocess": "POSTPROCESS"', request.transport.getvalue())
+        d.addCallback(finish)
+        return d
+
+    def test02_wrap_http_plugin_preprocess_fail(self):
+        plugins = CardstoriesPlugins({ 'plugins-dir': '..',
+                                       'plugins': 'plugin_fail'})
+        plugins.load(True)
+        resource = CardstoriesResource(self.service)
+        self.site = CardstoriesSite(resource, { 'plugins-pre-process': 'plugin_fail' }, plugins.plugins)
+        request = server.Request(self.Channel(self.site), True)
+        request.site = self.site
+        request.method = 'GET'
+        d = resource.wrap_http(request)
+        def finish(result):
+            self.assertSubstring('Internal Server Error', request.transport.getvalue())
+            self.assertSubstring('PREPROCESS', request.transport.getvalue())
+        d.addCallback(finish)
+        return d
+
+    def test02_wrap_http_plugin_postprocess_fail(self):
+        plugins = CardstoriesPlugins({ 'plugins-dir': '..',
+                                       'plugins': 'plugin_fail'})
+        plugins.load(True)
+        resource = CardstoriesResource(self.service)
+        self.site = CardstoriesSite(resource, { 'plugins-post-process': 'plugin_fail' }, plugins.plugins)
+        request = server.Request(self.Channel(self.site), True)
+        request.site = self.site
+        request.method = 'GET'
+        d = resource.wrap_http(request)
+        def finish(result):
+            self.assertSubstring('Internal Server Error', request.transport.getvalue())
+            self.assertSubstring('POSTPROCESS', request.transport.getvalue())
+        d.addCallback(finish)
+        return d
+
+    def test03_wrap_http_fail(self):
         resource = CardstoriesResource(self.service)
         fail_string = 'FAIL STRING'
         def fail(result, request):
             raise Exception(fail_string)
         resource.handle = fail
-        self.site = server.Site(resource)
+        self.site = CardstoriesSite(resource, {}, [])
         request = server.Request(self.Channel(self.site), True)
+        request.site = self.site
         d = resource.wrap_http(request)
         def finish(result):
             self.assertSubstring(fail_string, request.transport.getvalue())
         d.addCallback(finish)
         return d
 
-    def test03_handle(self):
+    def test04_handle(self):
         resource = CardstoriesResource(self.service)
-        self.site = server.Site(resource)
+        self.site = CardstoriesSite(resource, {}, [])
         request = server.Request(self.Channel(self.site), True)
 
         request.method = 'GET'
@@ -166,6 +235,7 @@ def Run():
 #    loader.methodPrefix = "test_trynow"
     suite = loader.suiteFactory()
     suite.addTest(loader.loadClass(CardstoriesSiteTest))
+    suite.addTest(loader.loadClass(CardstoriesResourceTest))
     suite.addTest(loader.loadClass(AGPLResourceTest))
 
     return runner.TrialRunner(

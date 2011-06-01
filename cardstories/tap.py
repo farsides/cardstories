@@ -29,7 +29,7 @@ from twisted.conch import manhole, manhole_ssh
 from cardstories.service import CardstoriesService
 from cardstories.plugins import CardstoriesPlugins
 #from cardstories.service import SSLContextFactory
-from cardstories.site import CardstoriesTree, CardstoriesResource
+from cardstories.site import CardstoriesTree, CardstoriesResource, CardstoriesResource, CardstoriesSite
 
 class Options(usage.Options):
     synopsis = "[-h|--help] [-p|--port=<number>] [-s|--ssl-port=<number>] [-P|--ssl-pem=</etc/cardstories/cert.pem>] [-d|--db=</var/lib/cardstories/cardstories.sqlite>] [-v|--verbose]"
@@ -41,18 +41,16 @@ class Options(usage.Options):
          ["port", "p", 4923, "Port on which to listen", int],
          ["ssl-port", "s", None, "Port on which to listen for SSL", int],
          ["ssl-pem", "P", "/etc/cardstories/cert.pem", "certificate path name", str],
-         ["plugins-dir", "", "/usr/share/cardstories/plugins", "plugins directory", str],
-         ["plugins", "", "", "white space separated list of plugins to load, either a path name of a name in plugins-dir without the trailing .py", str],
          ["db", "d", "/var/lib/cardstories/cardstories.sqlite", "sqlite3 game database path", str],
-         ["auth", "a", None, "Authentication plugin values : basic", str],
-         ["auth-db", "", "/var/lib/cardstories/auth.sqlite", "sqlite3 auth database path", str],
-         ["mail-host", "", "localhost", "SMTP host", str],
-         ["mail-from", "", "cardstories", "From: line in invitations", str],
-         ["mail-subject", "", "Cardstories invitation", "Subject: line in invitations", str],
-         ["mail-body", "", "http://localhost:4923/static/?player_id=%(player_id)s&game_id=%(game_id)s", "Body of invitations", str],
          ["poll-timeout", "", 300, "Number of seconds before a long poll timesout", int],
          ["game-timeout", "", (24 * 60 * 60), "Number of seconds before a game in progress timesout", int],
-         ["static", "", "/usr/share/cardstories", "directory where /static files will be fetched", str]
+         ["static", "", "/usr/share/cardstories", "directory where /static files will be fetched", str],
+         ["plugins-libdir", "", "/var/lib/cardstories/plugins", "plugins storage directory", str],
+         ["plugins-confdir", "", "/etc/cardstories/plugins", "plugins configuration directory", str],
+         ["plugins-dir", "", "/usr/share/cardstories/plugins", "plugins directory", str],
+         ["plugins", "", "", "white space separated list of plugins to load, either a path name of a name in plugins-dir without the trailing .py", str],
+         ["plugins-pre-process", "", "", "white space separated list of plugins to rework the incoming HTTP request", str],
+         ["plugins-post-process", "", "", "white space separated list of plugins to reworkd the JSON result of a request", str]
     ]
 
     optFlags = [
@@ -78,7 +76,7 @@ def makeService(settings):
     plugins.load(cardstories_service)
     cardstories_service.setServiceParent(service_collection)
 
-    site = server.Site(CardstoriesTree(cardstories_service))
+    site = CardstoriesSite(CardstoriesTree(cardstories_service), settings, plugins.plugins)
 
     if settings.get('manhole', None):
         internet.TCPServer(2222,

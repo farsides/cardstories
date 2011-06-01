@@ -21,3 +21,5 @@ class Plugin:
     def __init__(self, service):
         self.service = service
 
+    def name(self):
+        return 'plugin_one'
