@@ -27,6 +27,7 @@ from twisted.conch import manhole, manhole_ssh
 #from OpenSSL import SSL
 
 from cardstories.service import CardstoriesService
+from cardstories.plugins import CardstoriesPlugins
 #from cardstories.service import SSLContextFactory
 from cardstories.site import CardstoriesTree, CardstoriesResource
 
@@ -40,6 +41,8 @@ class Options(usage.Options):
          ["port", "p", 4923, "Port on which to listen", int],
          ["ssl-port", "s", None, "Port on which to listen for SSL", int],
          ["ssl-pem", "P", "/etc/cardstories/cert.pem", "certificate path name", str],
+         ["plugins-dir", "", "/usr/share/cardstories/plugins", "plugins directory", str],
+         ["plugins", "", "", "white space separated list of plugins to load, either a path name of a name in plugins-dir without the trailing .py", str],
          ["db", "d", "/var/lib/cardstories/cardstories.sqlite", "sqlite3 game database path", str],
          ["auth", "a", None, "Authentication plugin values : basic", str],
          ["auth-db", "", "/var/lib/cardstories/auth.sqlite", "sqlite3 auth database path", str],
@@ -71,6 +74,8 @@ def getManholeFactory(namespace, **passwords):
 def makeService(settings):
     service_collection = service.MultiService()
     cardstories_service = CardstoriesService(settings)
+    plugins = CardstoriesPlugins(settings)
+    plugins.load(cardstories_service)
     cardstories_service.setServiceParent(service_collection)
 
     site = server.Site(CardstoriesTree(cardstories_service))

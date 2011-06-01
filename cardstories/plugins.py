@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2011 Dachary <loic@dachary.org>
+# Copyright (C) 2011 Loic Dachary <loic@dachary.org>
 #
 # This software's license gives you freedom; you can copy, convey,
 # propagate, redistribute and/or modify this program under the terms of
@@ -16,18 +16,24 @@
 # along with this program in a file in the toplevel directory called
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
-all:
+import os
+import imp
 
-check:
-	python-coverage -e
-	PYTHONPATH=.. python-coverage -x test_auth.py
-	PYTHONPATH=.. python-coverage -x test_service.py
-	PYTHONPATH=.. python-coverage -x test_site.py
-	PYTHONPATH=.. python-coverage -x test_tap.py
-	PYTHONPATH=.. python-coverage -x test_game.py
-	PYTHONPATH=.. python-coverage -x test_poll.py
-	PYTHONPATH=.. python-coverage -x test_plugins.py
-	python-coverage -m -a -r ../cardstories/*.py
+class CardstoriesPlugins:
 
-clean:
-	rm -fr .coverage _trial_temp*
+    def __init__(self, settings):
+        self.settings = settings
+        self.plugins = []
+
+    def load(self, service):
+        for plugin in self.settings.get('plugins', '').split():
+            module = imp.load_source("cardstories_plugin", self.path(plugin))
+            self.plugins.append(getattr(module, 'Plugin')(service))
+
+    def path(self, plugin):
+        if os.path.exists(plugin):
+            return plugin
+        path = os.path.join(self.settings['plugins-dir'], plugin + '.py')
+        if os.path.exists(path):
+            return path
+        raise UserWarning, plugin + ' and ' + path + ' are not file paths'

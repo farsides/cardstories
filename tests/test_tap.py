@@ -23,8 +23,28 @@ from twisted.trial import unittest, runner, reporter
 from twisted.web import client
 
 from cardstories import tap
+from cardstories.service import CardstoriesService
+
+class CardstoriesPluginsTest(unittest.TestCase):
+
+    def test00_start_stop(self):
+        self.port = '14834'
+        options = tap.Options()
+        options.parseOptions(['--port', self.port, '--db', 'test.sqlite',
+                              '--plugins-dir', '..',
+                              '--plugins', 'plugin'])
+        self.service = tap.makeService(options)
+        for service in self.service:
+            if isinstance(service, CardstoriesService):
+                break
+        self.service.startService()
+        self.assertEqual(service.plugin_event['type'], 'start')
+        d = self.service.stopService()
+        self.assertEqual(service.plugin_event['type'], 'stop')
+        return d
 
 class CardstoriesServerTest(unittest.TestCase):
+
     def setUp(self):
         self.port = '14834'
         options = tap.Options()
@@ -144,6 +164,7 @@ def Run():
 #    loader.methodPrefix = "test_trynow"
     suite = loader.suiteFactory()
     suite.addTest(loader.loadClass(CardstoriesServerTest))
+    suite.addTest(loader.loadClass(CardstoriesPluginsTest))
 #    suite.addTest(loader.loadClass(CardstoriesServerTestSSL))
 
     return runner.TrialRunner(

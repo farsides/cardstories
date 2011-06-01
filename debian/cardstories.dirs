@@ -1,3 +1,4 @@
 /etc/default
 /var/lib/cardstories
 /var/log/cardstories
+/usr/share/cardstories/plugins
