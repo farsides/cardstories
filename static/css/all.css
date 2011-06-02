@@ -73,11 +73,13 @@ html, body {
     left: 650px;
     top: 10px;
     z-index: 4;
-    background: transparent url('images/lobby_off.png') no-repeat left top;
+    background: transparent url('images/lobby.png') no-repeat left top;
+    background-position: 0px 0px;
 }
 
 .cardstories .cardstories_go_lobby:hover { 
-    background: transparent url('images/lobby_over.png') no-repeat left top;
+    background: transparent url('images/lobby.png') no-repeat left top;
+    background-position: -118px 0px;
 }
 
 /* Change cursor to treat buttons as links */
@@ -151,6 +153,7 @@ html, body {
 .cardstories .cardstories_extras .cardstories_subscribe .cardstories_submit {
     position: absolute;
     background: transparent url('images/next.png') no-repeat left top;
+    background-position: -212px 0px;
     top: 593px;
     left: 673px;
     border: 0px;
@@ -159,7 +162,8 @@ html, body {
     z-index: 1;
 }
 .cardstories .cardstories_extras .cardstories_subscribe .cardstories_submit:hover {
-    background: transparent url('images/next_over.png') no-repeat left top;
+    background-image: url('images/next.png');
+    background-position: -106px 0px;
 }
 
 /* displaying a deck of cards */
@@ -207,24 +211,28 @@ html, body {
     right: 15px;
     height: 50px;
     width: 109px;
-    background: transparent url('images/select_ok_off.png') no-repeat left top;
+    background: transparent url('images/select_ok.png') no-repeat left top;
+    background-position: 0px 0px;
 }
 
-.cardstories_card_confirm_ok:hover { 
-    background: transparent url('images/select_ok_on.png') no-repeat left top;
+.cardstories_card_confirm_ok:hover {
+    background: transparent url('images/select_ok.png') no-repeat left top;
+    background-position: -109px 0px;
 }
 
 .cardstories_card_confirm_cancel { 
     position: absolute;
     top: 60px;
     left: 20px;
-    height: 50px;
-    width: 109px;
-    background: transparent url('images/select_cancel_off.png') no-repeat left top;
+    width: 91px;
+    height: 38px;
+    background: transparent url('images/select_cancel.png') no-repeat left top;
+    background-position: 0px 0px;
 }
 
 .cardstories_card_confirm_cancel:hover { 
-    background: transparent url('images/select_cancel_on.png') no-repeat left top;
+    background: transparent url('images/select_cancel.png') no-repeat left top;
+    background-position: -91px 0px;
 }
 
 /* state create : pick a card */
@@ -345,6 +353,7 @@ html, body {
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_submit {
     position: absolute;
     background: transparent url('images/next.png') no-repeat left top;
+    background-position: -212px 0px;
     top: 64px;
     right: 58px;
     height: 73px;
@@ -353,7 +362,8 @@ html, body {
 }
 
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_submit:hover {
-    background: transparent url('images/next_over.png') no-repeat left top;
+    background-image: url('images/next.png');
+    background-position: -106px 0px;
 }
 
 /* lobby */
@@ -398,6 +408,7 @@ html, body {
 .cardstories .cardstories_lobby .cardstories_start_story {
     position: absolute;
     background: transparent url('images/start_story.png') no-repeat left top;
+    background-position: 0px 0px;
     top: 235px;
     right: 80px;
     height: 115px;
@@ -405,7 +416,8 @@ html, body {
 }
 
 .cardstories .cardstories_lobby .cardstories_start_story:hover {
-    background-image: url('images/start_story_over.png');
+    background-image: url('images/start_story.png');
+    background-position: -181px 0px;
 }
 
 .cardstories .cardstories_lobby .cardstories_pager {
@@ -423,37 +435,45 @@ html, body {
 }
 
 .cardstories .cardstories_lobby .cardstories_pager .first  {
-    background: transparent url('images/lobby_first_on.png') no-repeat left top;
+    background: transparent url('images/lobby_first.png') no-repeat left top;
+    background-position: 0px 0px;
 }
 
 .cardstories .cardstories_lobby .cardstories_pager .first:hover  {
-    background: transparent url('images/lobby_first_over.png') no-repeat left top;
+    background: transparent url('images/lobby_first.png') no-repeat left top;
+    background-position: -83px 0px;
 }
 
 .cardstories .cardstories_lobby .cardstories_pager .prev  {
     margin-left: 30px;
-    background: transparent url('images/lobby_previous_on.png') no-repeat left top;
+    background: transparent url('images/lobby_previous.png') no-repeat left top;
+    background-position: 0px 0px;
 }
 
 .cardstories .cardstories_lobby .cardstories_pager .prev:hover  {
-    background: transparent url('images/lobby_previous_over.png') no-repeat left top;
+    background: transparent url('images/lobby_previous.png') no-repeat left top;
+    background-position: -83px 0px;
 }
 
 .cardstories .cardstories_lobby .cardstories_pager .next  {
     margin-right: 30px;
-    background: transparent url('images/lobby_next_on.png') no-repeat left top;
+    background: transparent url('images/lobby_next.png') no-repeat left top;
+    background-position: 0px 0px;
 }
 
 .cardstories .cardstories_lobby .cardstories_pager .next:hover  {
-    background: transparent url('images/lobby_next_over.png') no-repeat left top;
+    background: transparent url('images/lobby_next.png') no-repeat left top;
+    background-position: -83px 0px;
 }
 
 .cardstories .cardstories_lobby .cardstories_pager .last  {
-    background: transparent url('images/lobby_last_on.png') no-repeat left top;
+    background: transparent url('images/lobby_last.png') no-repeat left top;
+    background-position: 0px 0px;
 }
 
 .cardstories .cardstories_lobby .cardstories_pager .last:hover  {
-    background: transparent url('images/lobby_last_over.png') no-repeat left top;
+    background: transparent url('images/lobby_last.png') no-repeat left top;
+    background-position: -83px 0px;
 }
 
 .cardstories .cardstories_lobby .cardstories_finished,
@@ -486,11 +506,13 @@ html, body {
 /* lobby for in progress games */
 
 .cardstories .cardstories_lobby .cardstories_in_progress .cardstories_tab_in_progress {
-    background: transparent url('images/tab_in_progress_on.png') no-repeat left top;
+    background: transparent url('images/tab_in_progress.png') no-repeat left top;
+    background-position: -123px 0px;
 }
 
 .cardstories .cardstories_lobby .cardstories_in_progress .cardstories_tab_finished {
-    background: transparent url('images/tab_finished_off.png') no-repeat left top;
+    background: transparent url('images/tab_finished.png') no-repeat left top;
+    background-position: 0px 0px;
 }
 
 .cardstories .cardstories_lobby .cardstories_in_progress .cardstories_stories_you_are_playing {
@@ -505,11 +527,13 @@ html, body {
 /* lobby for finished games */
 
 .cardstories .cardstories_lobby .cardstories_finished .cardstories_tab_in_progress {
-    background: transparent url('images/tab_in_progress_off.png') no-repeat left top;
+    background: transparent url('images/tab_in_progress.png') no-repeat left top;
+    background-position: 0px 0px;
 }
 
 .cardstories .cardstories_lobby .cardstories_finished .cardstories_tab_finished {
-    background: transparent url('images/tab_finished_on.png') no-repeat left top;
+    background: transparent url('images/tab_finished.png') no-repeat left top;
+    background-position: -123px 0px;
 }
 
 /* advertise the game and invite players */
@@ -581,6 +605,7 @@ html, body {
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_invite_friends {
     position: absolute;
     background: transparent url('images/invite_friends_button.png') no-repeat left top;
+    background-position: 0px 0px;
     top: 275px;
     left: 23px;
     height: 137px;
@@ -590,7 +615,8 @@ html, body {
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_invite_friends:hover {
     left: 30px;
-    background: transparent url('images/invite_friends_button_over.png') no-repeat left top;
+    background: transparent url('images/invite_friends_button.png') no-repeat left top;
+    background-position: -146px 0px;
 }
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_voting {
@@ -609,10 +635,13 @@ html, body {
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_voting.cardstories_ready {
     display: block;
     background: url('images/to_vote.png');
+    background-position: 0px 0px;
 }
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_voting.cardstories_ready:hover {
     background: url('images/to_vote_over.png');
+    background: url('images/to_vote.png');
+    background-position: -135px 0px;
 }
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_cards {
@@ -819,14 +848,16 @@ html, body {
     z-index: 1;
     right: 380px;
     bottom: 118px;
-    background: transparent url('images/change_off.png') no-repeat left top;
-    height: 86px;
+    background: transparent url('images/change.png') no-repeat left top;
     width: 206px;
+    height: 86px;
+    background-position: 0px 0px;
 }
 
 .cardstories .cardstories_invitation .cardstories_pick_wait .cardstories_card_change:hover,
 .cardstories .cardstories_vote .cardstories_voter_wait .cardstories_card_change:hover { 
-    background: transparent url('images/change_over.png') no-repeat left top;
+    background: transparent url('images/change.png') no-repeat left top;
+    background-position: -206px 0px;
 }
 
 .cardstories .cardstories_invitation .cardstories_pick_wait .cardstories_card_bg,
@@ -878,17 +909,20 @@ html, body {
     position: absolute;
     bottom: 30px;
     right: 30px;
-    background: transparent url('images/next_off.png') no-repeat left top;
+    background: transparent url('images/next.png') no-repeat left top;
+    background-position: 0px 0px;
     height: 73px;
     width: 106px;
 }
 
 .cardstories .cardstories_vote .cardstories_owner .cardstories_finish.cardstories_ready {
     background-image: url('images/next.png');
+    background-position: -212px 0px;
 }
 
 .cardstories .cardstories_vote .cardstories_owner .cardstories_finish.cardstories_ready:hover {
-    background-image: url('images/next_over.png');
+    background-image: url('images/next.png');
+    background-position: -106px 0px;
 }
 
 /* state complete */
@@ -1103,11 +1137,13 @@ html, body {
     top: 30px;
     position: absolute;
     z-index: 10;
-    background: transparent url('images/credits_close_off.png') no-repeat left top;
+    background: transparent url('images/credits_close.png') no-repeat left top;
+    background-position: 0px 0px;
 }
 
 .cardstories_credits_close:hover {
-    background: transparent url('images/credits_close_over.png') no-repeat left top;
+    background: transparent url('images/credits_close.png') no-repeat left top;
+    background-position: -26px 0px;
 }
 
 .cardstories_credits_long_bg_inner {
