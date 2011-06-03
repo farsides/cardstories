@@ -384,6 +384,7 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
                 'modified': self.service.games[game2].modified
                 })
 
+    @defer.inlineCallbacks
     def test06_get_or_create_player(self):
         # create a player that did not exist
         self.assertEquals({}, self.service.players)
@@ -412,11 +413,13 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         player.access_time = 0 # pretend the player has not been accessed for a long time
         func = player.timer.func
         player.timer.cancel()
-        self.assertTrue(func())
+        result = yield func()
+        self.assertTrue(result)
         self.assertTrue(player.deleted)
         self.assertFalse(self.service.players.has_key(player_id))
         # timeout on a deleted player does nothing
-        self.assertFalse(func())
+        result = yield func()
+        self.assertFalse(result)
 
     @defer.inlineCallbacks
     def test07_game_notify(self):
@@ -452,7 +455,7 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
             self.assertTrue(event['game'].get_id(), game.get_id())
             game.changed = True
         self.service.listen().addCallback(change)
-        game.touch() # calls game_notify indirectly
+        yield game.touch() # calls game_notify indirectly
         self.assertTrue(game.checked)
         self.assertTrue(game.changed)
         #
@@ -468,7 +471,8 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         #
         # calling game_notify on a non existent game is a noop
         #
-        self.assertFalse(self.service.game_notify({}, 200))
+        result = yield self.service.game_notify({}, 200)
+        self.assertFalse(result)
 
     @defer.inlineCallbacks
     def test08_poll(self):
@@ -493,7 +497,7 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
             player.ok = True
             return result
         d.addCallback(check)
-        player.touch({'ok': True})
+        yield player.touch({'ok': True})
         self.assertTrue(player.ok)
         #
         # poll game
@@ -513,7 +517,7 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
             game.ok = True
             return result
         d.addCallback(check)
-        game.touch()
+        yield game.touch()
         self.assertTrue(game.ok)
         
 

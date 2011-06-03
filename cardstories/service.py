@@ -70,10 +70,12 @@ class CardstoriesService(service.Service):
         def error(reason):
             reason.printDetailedTraceback()
             return True
+        d = defer.DeferredList(listeners, consumeErrors = True)
         for listener in listeners:
             listener.addErrback(error)
             listener.callback(result)
         del self.notify_running
+        return d
 
     def startService(self):
         database = self.settings['db']
@@ -90,15 +92,16 @@ class CardstoriesService(service.Service):
         self.db = adbapi.ConnectionPool("sqlite3", database=database, cp_noisy=True)
         self.notify({'type': 'start'})
         
+    @defer.inlineCallbacks
     def stopService(self):
-        self.notify({'type': 'stop'})
+        yield self.notify({'type': 'stop'})
         for game in self.games.values():
             game.destroy()
         for player in self.players.values():
             if player.timer.active():
                 player.timer.cancel()
             player.destroy()
-        return defer.succeed(None)
+        defer.returnValue(None)
 
     def create_base(self, c):
         c.execute(
@@ -155,7 +158,8 @@ class CardstoriesService(service.Service):
 
     def poll_player(self, args):
         player_id = int(args['player_id'][0])
-        return self.get_or_create_player(player_id).poll(args)
+        player = self.get_or_create_player(player_id)
+        return player.poll(args)
 
     def get_or_create_player(self, player_id):
         if not self.players.has_key(player_id):
@@ -173,38 +177,43 @@ class CardstoriesService(service.Service):
                         player.set_modified(game.get_modified())
             self.players[player_id] = player
             poll_timeout = self.settings.get('poll-timeout', 300)
+            @defer.inlineCallbacks
             def timeout():
                 now = int(runtime.seconds() * 1000)
                 if not self.players.has_key(player_id):
-                    return False
+                    defer.returnValue(False)
+                    return
                 player = self.players[player_id]
                 if now - player.access_time > (poll_timeout * 2 * 1000):
-                    player.touch({'delete': [now]})
+                    yield player.touch({'delete': [now]})
                     del self.players[player_id]
                 else:
                     player.timer = reactor.callLater(poll_timeout, timeout)
-                return True
+                defer.returnValue(True)
             timeout()
         else:
             player = self.players[player_id]
             player.access_time = int(runtime.seconds() * 1000)
         return player
 
+    @defer.inlineCallbacks
     def game_notify(self, args, game_id):
         if args == None:
-            self.notify({'type': 'delete', 'game': self.games[game_id], 'details': args})
+            yield self.notify({'type': 'delete', 'game': self.games[game_id], 'details': args})
             del self.games[game_id]
-            return False
+            defer.returnValue(False)
+            return
         if not self.games.has_key(game_id):
-            return False
+            defer.returnValue(False)
+            return
         game = self.games[game_id]
-        self.notify({'type': 'change', 'game': game, 'details': args})
+        yield self.notify({'type': 'change', 'game': game, 'details': args})
         for player_id in game.get_players():
             if self.players.has_key(player_id):
-                self.players[player_id].touch(args)
+                yield self.players[player_id].touch(args)
         d = game.poll(args)
         d.addCallback(self.game_notify, game_id)
-        return True
+        defer.returnValue(True)
 
     def game_init(self, game):
         self.games[game.get_id()] = game
@@ -212,7 +221,8 @@ class CardstoriesService(service.Service):
             'modified': [game.modified],
             'game_id': [game.get_id()]
             }
-        self.game_notify(args, game.get_id())
+        d = game.poll(args)
+        d.addCallback(self.game_notify, game.get_id())
 
     def create(self, args):
         self.required(args, 'create', 'card', 'sentence', 'owner_id')

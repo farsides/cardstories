@@ -46,9 +46,11 @@ class pollable:
         pollers = self.pollers
         self.pollers = []
         args['modified'] = [self.modified]
+        d = defer.DeferredList(pollers, consumeErrors = True)
         for poller in pollers:
             poller.callback(args)
-        return args
+        d.addCallback(lambda result: args)
+        return d
 
     def poll(self, args):
         modified = int(args['modified'][0])

@@ -95,7 +95,7 @@ class PollableTest(unittest.TestCase):
         d.addCallback(check)
         args = { 'ok': [True] }
         self.assertEquals(1, len(p.pollers))
-        r = p.touch(args)
+        r = yield p.touch(args)
         self.assertEquals(r['modified'][0], p.modified)
         self.assertEquals(0, len(p.pollers))
         result = yield d
