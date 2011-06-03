@@ -19,25 +19,12 @@
 all:
 
 check:
-	make -C tests check
-	jscoverage --no-instrument=js/jquery.placeholder-1.0.1.js --no-instrument=js/jquery.query-2.1.7.js static static-coverage
-	for dir in plugins/*/Makefile ; do \
-		make -C `dirname $$dir` check ; \
-	done
+	python-coverage -e
+	PYTHONPATH=../.. python-coverage -x test_solo.py
+	python-coverage -m -a -r solo.py
 
 clean:
-	for dir in plugins/*/Makefile ; do \
-		make -C `dirname $$dir` clean ; \
-	done
-	rm -f plugins/{solo,auth}.py 
-	make -C tests clean
-	find . -name '*,cover' | xargs rm -f
-	rm -fr static-coverage
-	rm -f etc/cardstories/twisted/plugins/dropin.cache
-	find . -name '*~' | xargs rm -f
-	find . -name '*.pyc' | xargs rm -f
-	rm -fr dist
-	rm -fr static/cardstories.zip
-	rm -f MANIFEST
-	rm -fr build
+	rm -fr .coverage _trial_temp*
+	rm -f *,cover
+	rm -f *.pyc
 

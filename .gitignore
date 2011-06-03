@@ -9,3 +9,8 @@ twistd.pid
 etc/cardstories/twisted/plugins/dropin.cache
 static/cardstories.zip
 loic
+*.orig
+*.rej
+_trial_temp*
+*,cover
+.coverage

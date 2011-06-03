@@ -37,6 +37,7 @@ data_files.append(['/usr/share/cardstories/conf', [ 'conf/nginx.conf' ]])
 data_files.append(['/usr/share/cardstories/conf', [ 'conf/apache2.conf' ]])
 
 data_files.append(['/usr/share/cardstories/plugins', [ 'plugins/auth/auth.py' ]])
+data_files.append(['/usr/share/cardstories/plugins', [ 'plugins/solo/solo.py' ]])
 
 setup(name='cardstories',
       version='1.0.3',

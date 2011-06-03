@@ -1037,7 +1037,7 @@ test("start_story", function() {
 
 test("lobby_in_progress", function() {
     setup();
-    expect(8);
+    expect(10);
 
     var player_id = 10;
     var game1 = 100;
@@ -1063,11 +1063,17 @@ test("lobby_in_progress", function() {
     $('.cardstories_start_story', element).click();
     equal($('#qunit-fixture .cardstories_lobby .cardstories_in_progress.cardstories_active').length, 0, 'in_progress not active');
     equal($('#qunit-fixture .cardstories_create .cardstories_pick_card.cardstories_active').length, 1, 'pick_card active');
+    // solo mode
+    $.cardstories.ajax = function(options) {
+        equal(options.type, 'GET');
+        equal(options.url, $.cardstories.url + '?action=solo&player_id=' + player_id);
+    };
+    $('.cardstories_solo', element).click();
   });
 
 test("lobby_finished", function() {
     setup();
-    expect(8);
+    expect(10);
 
     var player_id = 10;
     var game1 = 100;
@@ -1094,6 +1100,12 @@ test("lobby_finished", function() {
     $('.cardstories_start_story', element).click();
     equal($('#qunit-fixture .cardstories_lobby .cardstories_finished.cardstories_active').length, 0, 'finished not active');
     equal($('#qunit-fixture .cardstories_create .cardstories_pick_card.cardstories_active').length, 1, 'pick_card active');
+    // solo mode
+    $.cardstories.ajax = function(options) {
+        equal(options.type, 'GET');
+        equal(options.url, $.cardstories.url + '?action=solo&player_id=' + player_id);
+    };
+    $('.cardstories_solo', element).click();
   });
 
 test("poll", function() {
@@ -1397,4 +1409,31 @@ test("credits", function() {
     $('.cardstories_credits_short', root).click();
     equal(long.is(':visible'), true, 'credits visible');
     equal($('.jspArrowUp', long).css('background-image').indexOf('url('), 0, 'up arrow for scrolling');
+  });
+
+test("solo", function() {
+    setup();
+    expect(2);
+
+    var root = $('#qunit-fixture .cardstories');
+    var player_id = 15;
+    var game_id = 7;
+
+    $.cardstories.ajax = function(options) {
+        equal(options.type, 'GET');
+        equal(options.url, $.cardstories.url + '?action=solo&player_id=' + player_id);
+
+	var game = {
+	    'game_id': game_id
+	};
+	options.success(game);
+    };
+
+    $.cardstories.reload = function(player_id2, game_id2, root2) {
+        equal(player_id2, player_id);
+        equal(game_id2, game_id);
+        start();
+    };
+
+    $.cardstories.solo(player_id, root);
   });

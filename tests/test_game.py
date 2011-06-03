@@ -412,7 +412,7 @@ class CardstoriesGameTest(unittest.TestCase):
         sentence = 'SENTENCE'
         owner_id = 15
         game_id = yield self.game.create(winner_card, sentence, owner_id)
-        result = self.game.touch()
+        result = yield self.game.touch()
         self.assertEquals([game_id], result['game_id'])
         self.assertEquals(self.game.modified, result['modified'][0])
         

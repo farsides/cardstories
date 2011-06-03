@@ -11,13 +11,13 @@ CARDSTORIES_GROUP=nogroup
 #
 # White space separated list of plugins to load
 #
-PLUGINS="auth"
+PLUGINS="auth solo"
 
 #
 # White space separated list of plugins that will transform
 # the incoming HTTP request, in the order they show.
 #
-PLUGINS_PRE_PROCESS="auth"
+PLUGINS_PRE_PROCESS="auth solo"
 
 #
 # White space separated list of plugins that will transform

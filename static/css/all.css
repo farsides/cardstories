@@ -424,6 +424,21 @@ html, body {
     background-position: -181px 0px;
 }
 
+.cardstories .cardstories_lobby .cardstories_solo {
+    position: absolute;
+    background: transparent url('images/start_story.png') no-repeat left top;
+    background-position: 0px 0px;
+    top: 235px;
+    right: 250px;
+    height: 115px;
+    width: 181px;
+}
+
+.cardstories .cardstories_lobby .cardstories_solo:hover {
+    background-image: url('images/start_story.png');
+    background-position: -181px 0px;
+}
+
 .cardstories .cardstories_lobby .cardstories_pager {
     position: absolute;
     bottom: 10px;

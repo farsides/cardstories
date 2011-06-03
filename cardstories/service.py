@@ -207,10 +207,16 @@ class CardstoriesService(service.Service):
             defer.returnValue(False)
             return
         game = self.games[game_id]
+        modified = game.get_modified()
         yield self.notify({'type': 'change', 'game': game, 'details': args})
         for player_id in game.get_players():
             if self.players.has_key(player_id):
                 yield self.players[player_id].touch(args)
+        # 
+        # the functions being notified must not change the game state
+        # because the behavior in this case is undefined
+        #
+        assert game.get_modified() == modified
         d = game.poll(args)
         d.addCallback(self.game_notify, game_id)
         defer.returnValue(True)
@@ -218,6 +224,7 @@ class CardstoriesService(service.Service):
     def game_init(self, game):
         self.games[game.get_id()] = game
         args = {
+            'type': 'init',
             'modified': [game.modified],
             'game_id': [game.get_id()]
             }
@@ -353,7 +360,7 @@ class CardstoriesService(service.Service):
 
     def handle(self, args):
         if not args.has_key('action'):
-            return defer.succeed({})
+            return defer.succeed(args)
         try:
             action = args['action'][0]
             if action in self.ACTIONS:

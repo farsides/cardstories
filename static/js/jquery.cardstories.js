@@ -115,6 +115,27 @@
             });
         },
 
+        solo: function(player_id, root) {
+            var $this = this;
+            var success = function(data, status) {
+                if('error' in data) {
+                    $this.error(data.error);
+                } else {
+                    $this.setTimeout(function() { $this.reload(player_id, data.game_id, root); }, 30);
+                }
+            };
+            $this.ajax({
+                async: false,
+                timeout: 30000,
+                url: $this.url + '?action=solo&player_id=' + player_id,
+                type: 'GET',
+                dataType: 'json',
+                global: false,
+                success: success,
+                error: $this.xhr_error
+            });
+        },
+
         advertise: function(owner_id, game_id, root) {
             var $this = this;
             var element = $('.cardstories_advertise', root);
@@ -302,6 +323,9 @@
             $('.cardstories_start_story', element).click(function() {
                 $this.start_story(player_id, root);
               });
+            $('.cardstories_solo', element).click(function() {
+                $this.solo(player_id, root);
+              });
             this.lobby_games(player_id, lobby, element, root);
         },
 
@@ -314,6 +338,9 @@
               });
             $('.cardstories_start_story', element).click(function() {
                 $this.start_story(player_id, root);
+              });
+            $('.cardstories_solo', element).click(function() {
+                $this.solo(player_id, root);
               });
             this.lobby_games(player_id, lobby, element, root);
         },
