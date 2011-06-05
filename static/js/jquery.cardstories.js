@@ -89,9 +89,12 @@
             var $this = this;
             var element = $('.cardstories_create .cardstories_write_sentence', root);
             this.set_active(root, element);
-            $('.cardstories_sentence', element).placeholder();
             $('.cardstories_card', element).attr('class', 'cardstories_card cardstories_card' + card + ' {card:' + card + '}');
-            $('.cardstories_submit', element).unbind('click').click(function() {
+            var text = $('.cardstories_sentence', element);
+            var submit = function() {
+                if($.trim($(text).val()) == $.data(text[0], 'placeholderValue')) {
+                    return false;
+                }
                 var success = function(data, status) {
                     if('error' in data) {
                         $this.error(data.error);
@@ -112,7 +115,10 @@
                     success: success,
                     error: $this.xhr_error
                 });
-            });
+
+                return true;
+            };
+            text.val('').placeholder({ onSubmit: submit });
         },
 
         solo: function(player_id, root) {

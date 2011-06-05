@@ -248,8 +248,9 @@ test("create", function() {
             equal($('.cardstories_write_sentence.cardstories_active', element).length, 1, 'sentence active');
             ok($('.cardstories_sentence', element).attr('placeholder') !== undefined, 'placeholder is set');
             equal($('.cardstories_sentence', element).attr('placeholder'), $('.cardstories_sentence', element).val());
+            $('.cardstories_write_sentence .cardstories_submit', element).submit();
             $('.cardstories_write_sentence .cardstories_sentence', element).val(sentence);
-            $('.cardstories_write_sentence .cardstories_submit', element).click();
+            $('.cardstories_write_sentence .cardstories_submit', element).submit();
         });
 });
 
