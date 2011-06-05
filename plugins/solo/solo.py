@@ -55,12 +55,20 @@ class Plugin:
         self.service.listen().addCallback(self.handle)
         return defer.succeed(None)
 
-    def copy(self, transaction, player_to):
+    def copy(self, transaction, player_to, max_count):
         # 
         # get the id of a completed game at random
         #
-        transaction.execute("SELECT id, owner_id, board FROM games WHERE state = 'complete' ORDER BY RANDOM() LIMIT 1")
-        ( game_from, owner_id, board ) = transaction.fetchall()[0]
+        count = max_count
+        while True:
+            count -= 1
+            transaction.execute("SELECT id, owner_id, board FROM games WHERE state = 'complete' ORDER BY RANDOM() LIMIT 1")
+            ( game_from, owner_id, board ) = transaction.fetchall()[0]
+            transaction.execute("SELECT count(*) FROM player2game WHERE game_id = ? AND player_id = ?", [ game_from, player_to ])
+            if transaction.fetchone()[0] == 0:
+                break
+            elif count <= 0:
+                return False
         #
         # copy the game
         #
@@ -73,8 +81,8 @@ class Plugin:
         #
         # select a player at random
         #
-        transaction.execute("SELECT player_id, picked FROM player2game WHERE game_id = ? AND player_id != ? ORDER BY RANDOM() LIMIT 1", [ game_to, owner_id ])
-        ( player_from, picked ) = transaction.fetchall()[0]
+        transaction.execute("SELECT player_id FROM player2game WHERE game_id = ? AND player_id != ? ORDER BY RANDOM() LIMIT 1", [ game_to, owner_id ])
+        ( player_from, ) = transaction.fetchall()[0]
         #
         # replace the selected player with the player willing to play solo
         #
@@ -88,7 +96,10 @@ class Plugin:
         if request.args.has_key('action') and request.args['action'][0] == 'solo':
             del request.args['action']
             player_id = request.args['player_id'][0]
-            info = yield self.service.db.runInteraction(self.copy, player_id)
+            max_count = 5
+            info = yield self.service.db.runInteraction(self.copy, player_id, max_count)
+            if info == False:
+                raise UserWarning, 'tried %d times to get a game without player %d' % ( max_count, player_id )
             self.id2info[info['game_id']] = info
             game = CardstoriesGame(self.service, info['game_id'])
             yield self.service.db.runInteraction(game.load)

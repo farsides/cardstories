@@ -52,7 +52,8 @@ class SoloTest(unittest.TestCase):
         game = yield self.service.create({ 'card': [winner_card],
                                            'sentence': [sentence],
                                            'owner_id': [owner_id]})
-        for player_id in ( 16, 17 ):
+        self.player1 = 16
+        for player_id in ( self.player1, 17 ):
             yield self.service.participate({ 'action': ['participate'],
                                              'player_id': [player_id],
                                              'game_id': [game['game_id']] })
@@ -68,7 +69,7 @@ class SoloTest(unittest.TestCase):
         yield self.service.voting({ 'action': ['voting'],
                                     'game_id': [game['game_id']],
                                     'owner_id': [owner_id] })
-        winner_id = 16
+        winner_id = self.player1
         yield self.service.vote({ 'action': ['vote'],
                                   'game_id': [game['game_id']],
                                   'player_id': [winner_id],
@@ -143,6 +144,19 @@ class SoloTest(unittest.TestCase):
         yield self.voting(result, player_id)
         yield self.complete(result, player_id, self.winner_card)
 
+    @defer.inlineCallbacks
+    def test01_solo_duplicate(self):
+        solo = Plugin(self.service)
+        yield self.complete_game()
+        request = Request(action = ['solo'], player_id = [self.player1])
+        caught = False
+        try:
+            yield solo.preprocess(True, request)
+        except UserWarning, e:
+            caught = True
+            self.assertSubstring('tried', e.args[0])
+        self.assertTrue(caught)
+            
 def Run():
     loader = runner.TestLoader()
 #    loader.methodPrefix = "test_trynow"
