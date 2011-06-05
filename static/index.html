@@ -95,11 +95,28 @@
             </div>
           </div>
 
-          <div class="cardstories_advertise">
+          <div class="cardstories_advertise cardstories_game">
             <div class="cardstories_progress_owner"></div>
-            <div class="cardstories_frame"></div>
+            <div class="cardstories_frame">
+              <div class="cardstories_frame_bordertop"></div>
+              <div class="cardstories_frame_content"></div>
+              <div class="cardstories_frame_borderbottom"></div>
+            </div>
             <div class="cardstories_submit"></div>
-            <textarea class="cardstories_text" cols="100" rows="10" name="sentence" placeholder="Type the emails of the friends you want to invite, one per line"></textarea>
+            <div class="cardstories_back"></div>
+            <div class="cardstories_hint"></div>
+            <div class="cardstories_invitegirl"></div>
+            <div class="cardstories_invitegirlshadow"></div>
+            <!-- Facebook invite & send -->
+            <div class="cardstories_fb_label">To invite your Facebook friends to play, click on "Recommend". <br />The game you've created will be published on your Facebook wall:</div>
+            <div class="hidden" id="facebook_url">http://www.facebook.com/plugins/like.php?href={GAME_URL}&layout=standard&width=450&show_faces=false&action=recommend&colorscheme=light&font&height=80</div>
+            <iframe class="cardstories_fb_invite" src="" scrolling="no" frameborder="0" allowTransparency="true"></iframe>
+            <!-- TODO: "Send" FB button doesn't yet work with iframe. Add &send=true to the above URL when it does -->
+            <div class="cardstories_text_label">Or type in your friends emails here, separated by spaces:</div>
+            <div class="cardstories_text_label_tiny">(We promise to never give or sell the emails to anyone. We hate spams just like you.)</div>
+            <div class="cardstories_text_bordertop"></div>
+            <textarea class="cardstories_text" cols="88" rows="5" name="sentence"></textarea>
+            <div class="cardstories_text_borderbottom"></div>
           </div>
 
           <div class="cardstories_invitation">

@@ -123,17 +123,30 @@
             if(text !== undefined && text !== null) {
                 $('.cardstories_text', element).text(text);
             }
-            $('.cardstories_text', element).placeholder();
-            $('.cardstories_submit', element).unbind('click').click(function() {
-                var text = $('.cardstories_text', element).val();
-                var invites = text.split(/\s+/).
-                              filter(function(s) { return s !== ''; }).
-                              map(function(s) {
-                                  return 'player_id=' + encodeURIComponent(s);
-                                });
-                $.cookie('CARDSTORIES_INVITATIONS', text);
-                $this.send_game(owner_id, game_id, element, 'action=invite&owner_id=' + owner_id + '&game_id=' + game_id + '&' + invites.join('&'));
-              });
+            var load_text = function ($o) {
+                if ($o.val().trim().length != 0) {
+                    $('.cardstories_submit').addClass('cardstories_submit_ready');
+                    $('.cardstories_submit', element).unbind('click').click(function() {
+                        var text = $('.cardstories_text', element).val();
+                        var invites = text.split(/\s+/).
+                                      filter(function(s) { return s !== ''; }).
+                                      map(function(s) {
+                                          return 'player_id=' + encodeURIComponent(s);
+                                        });
+                        $.cookie('CARDSTORIES_INVITATIONS', text);
+                        $this.send_game(owner_id, game_id, element, 'action=invite&owner_id=' + owner_id + '&game_id=' + game_id + '&' + invites.join('&'));
+                      });
+                } else {
+                    $('.cardstories_submit', element).unbind('click');
+                    $('.cardstories_submit').removeClass('cardstories_submit_ready');
+                }
+            }
+            load_text($('.cardstories_text', element));
+            $('.cardstories_text', element).unbind('keyup').keyup(function () {
+                load_text($(this));
+            });
+            var facebookUrl = $('#facebook_url').html().supplant({'GAME_URL': escape(this.permalink(owner_id, game_id, root))});
+            $('.cardstories_fb_invite', element).attr('src', facebookUrl);
         },
 
         poll_timeout: 300 * 1000, // must be identical to the --poll-timeout value 
