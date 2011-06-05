@@ -80,7 +80,7 @@ class CardstoriesResource(resource.Resource):
         return d
 
     def handle(self, result, request):
-        return self.service.handle(request.args)
+        return self.service.handle(result, request.args)
 
 import os
 import glob

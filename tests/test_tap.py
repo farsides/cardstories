@@ -58,7 +58,7 @@ class CardstoriesServerTest(unittest.TestCase):
     def test01_connect(self):
         d = client.getPage('http://127.0.0.1:%s/resource' % self.port)
         def check(result):
-            self.assertEquals('{}', result)
+            self.assertEquals('true', result)
         d.addCallback(check)
         return d
 

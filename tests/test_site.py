@@ -35,7 +35,7 @@ class CardstoriesServiceMockup:
     def __init__(self):
         self.settings = {'static': os.getcwd()}
 
-    def handle(self, args):
+    def handle(self, result, args):
         return 'handle'
 
 class CardstoriesSiteTest(unittest.TestCase):
@@ -120,8 +120,8 @@ class CardstoriesResourceTest(unittest.TestCase):
 
     def test02_wrap_http_plugin(self):
         class MyService:
-            def handle(self, args):
-                return args
+            def handle(self, result, args):
+                return result
 
         plugins = CardstoriesPlugins({ 'plugins-dir': '..',
                                        'plugins': 'plugin_site'})

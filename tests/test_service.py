@@ -145,7 +145,7 @@ class CardstoriesServiceTestHandle(CardstoriesServiceTest):
     @defer.inlineCallbacks
     def test02_handle(self):
         for action in self.service.ACTIONS:
-            result = yield self.service.handle({ 'action': [action] })
+            result = yield self.service.handle(None, { 'action': [action] })
             self.failUnlessSubstring(action, result['error'])
             self.failUnlessSubstring('must be given', result['error'])
 
