@@ -6,6 +6,10 @@ html, body {
     font-family: helvetica, arial;
 }
 
+.hidden {
+    display: none;
+}
+
 .cardstories_bg_outer {
     height: 100%;
     width: 100%;
@@ -540,31 +544,178 @@ html, body {
 
 .cardstories .cardstories_advertise .cardstories_frame {
     position: absolute;
-    background: transparent url('images/invite_frame.png') no-repeat left top;
-    top: 30%;
+    background: transparent url('images/purple_bkg.png');
+    top: 45%;
     left: 10%;
-    height: 379px;
-    width: 833px;
+    height: 352px;
+    width: 635px;
+    z-index: 1;
+}
+
+.cardstories_frame_bordertop {
+    position: absolute;
+    background: transparent url('images/bkg_white_border1.png');
+    top: 10px;
+    left: 15px;
+    height: 33px;
+    width: 604px;
+}
+
+.cardstories_frame_content {
+    position: absolute;
+    background-color: white;
+    top: 40px;
+    left: 16px;
+    height: 286px;
+    width: 602px;
+}
+
+.cardstories_frame_borderbottom {
+    position: absolute;
+    background: transparent url('images/bkg_white_border2.png');
+    bottom: 10px;
+    left: 15px;
+    height: 33px;
+    width: 604px;
 }
 
 .cardstories .cardstories_advertise .cardstories_submit {
     position: absolute;
-    background: transparent url('images/send_invitations.png') no-repeat left top;
-    bottom: 15%;
-    left: 5%;
-    height: 69px;
-    width: 89px;
+    background: transparent url('images/binvite.png') no-repeat;
+    background-position: -106px 0px;
+    bottom: 8%;
+    right: 300px;
+    height: 84px;    
+    width: 106px;
+    z-index: 10;
 }
 
-.cardstories .cardstories_advertise .cardstories_text {
+.cardstories .cardstories_advertise .cardstories_submit_ready {
+    background-position: 0px 0px;
+}
+
+.cardstories .cardstories_advertise .cardstories_submit:hover {
+    background: transparent url('images/binvite.png') no-repeat left top;
+    background-position: -212px 0px;
+}
+
+.cardstories .cardstories_advertise .cardstories_back {
     position: absolute;
-    top: 40%;
-    left: 15%;
+    background: transparent url('images/bback.png') no-repeat;
+    background-position: -113px 0px;
+    bottom: 8%;
+    right: 174px;
+    height: 80px;
+    width: 113px;
+    z-index: 2;
+}
+
+.cardstories .cardstories_advertise .cardstories_back:hover {
+    background: transparent url('images/bback.png') no-repeat;
+    background-position: 0px 0px;
+}
+
+.cardstories .cardstories_advertise .cardstories_hint {
+    position: absolute;
+    background: transparent url('images/hint.png') no-repeat left top;
+    top: 45%;
+    right: 30px;
+    height: 211px;
+    width: 267px;
+}
+
+.cardstories .cardstories_advertise .cardstories_invitegirl {
+    position: absolute;
+    background: transparent url('images/inviteyourfriendsgirl.png') no-repeat left top;
+    top: 274px;
+    left: 10%;
+    height: 72px;
+    width: 437px;
+}
+
+.cardstories .cardstories_advertise .cardstories_invitegirlshadow {
+    position: absolute;
+    background: transparent url('images/shadow_girl.png') no-repeat left top;
+    top: 344px;
+    left: 155px;
+    height: 11px;
+    width: 47px;
+    z-index: 2;
+}
+
+.cardstories .cardstories_advertise .cardstories_fb_label,
+.cardstories .cardstories_advertise .cardstories_text_label,
+.cardstories .cardstories_advertise .cardstories_text_label_tiny {
+    position: absolute;
+    font-family: "helvetica";
+    font-size: 12pt;
+    color: #1D1D1B;
+    top: 49%;
+    left: 14%;
+    width: 615px;
     border: 0px;
+    text-align: left;
+    z-index: 2;
+}
+
+.cardstories .cardstories_advertise .cardstories_fb_invite {
+    position: absolute;
+    top: 58%;
+    left: 14%;
+    border:none;
+    overflow:hidden;
+    width:450px;
+    height:80px;
+    z-index: 2;
+}
+
+.cardstories .cardstories_advertise .cardstories_text_label {
+    top: 66%;
+}
+
+.cardstories .cardstories_advertise .cardstories_text_label_tiny {
+    top: 69%;
+    font-size: 10pt;
+    color: #4F4F4F;
 }
 
 .cardstories .cardstories_advertise .cardstories_text.placeholder {
     color: #999;
+}
+
+.cardstories .cardstories_advertise .cardstories_text {
+    position: absolute;
+    top: 74%;
+    left: 144px;
+    font-family: "helvetica";
+    font-size: 12pt;
+    color: #E3D4CB;
+    height: 90px;
+    width: 530px;
+    border: none;
+    background-color: #725760;
+    padding: 0px 10px 0px 10px;
+    z-index: 2;
+}
+
+.cardstories .cardstories_advertise .cardstories_text_bordertop,
+.cardstories .cardstories_advertise .cardstories_text_borderbottom {
+    position:  absolute;
+    width: 551px;
+    height: 20px;
+    z-index: 2;
+}
+
+.cardstories .cardstories_advertise .cardstories_text_bordertop {
+    background: transparent url('images/bkg_purple2_border1.png') no-repeat left top;
+    top: 72%;
+    left: 14%;
+}
+
+.cardstories .cardstories_advertise .cardstories_text_borderbottom {
+    background: transparent url('images/bkg_purple2_border2.png') no-repeat left top;
+    top: 85%;
+    left: 14%;
 }
 
 .cardstories .cardstories_advertise .cardstories_progress_owner { 

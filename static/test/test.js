@@ -888,12 +888,17 @@ test("advertise", function() {
     $.cardstories.advertise(owner_id, game_id, $('#qunit-fixture .cardstories'));
     equal($('.cardstories_text', element).val(), text);
 
-    // the placeholder shows
     $.cookie('CARDSTORIES_INVITATIONS', null);
     $('.cardstories_text', element).text('');
-    $.cardstories.advertise(owner_id, game_id, $('#qunit-fixture .cardstories'));    
-    ok($('.cardstories_text', element).attr('placeholder') !== undefined, 'placeholder is set');
-    equal($('.cardstories_text', element).attr('placeholder'), $('.cardstories_text', element).val());
+    $.cardstories.advertise(owner_id, game_id, $('#qunit-fixture .cardstories'));
+
+    // GAME_URL supplant
+    var root = $('#qunit-fixture .cardstories');    
+    var facebookUrl = $('#facebook_url').html().supplant({'GAME_URL': escape($.cardstories.permalink(owner_id, game_id, root))});
+    var src = $('.cardstories_fb_invite', element).attr('src');
+    ok(src.indexOf('GAME_URL') == -1, '{GAME_URL} supplant');
+    equal(src, facebookUrl);
+    
   });
 
 test("refresh_lobby", function() {
