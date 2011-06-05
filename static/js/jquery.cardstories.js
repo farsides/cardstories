@@ -309,7 +309,7 @@
             var poll = true;
             var deferred;
             if(game.owner) {
-                if(game.invited.length === 0 && game.players.length === 0) {
+                if(game.invited.length === 0 && game.players.length <= 1) {
                     deferred = this.advertise(player_id, game.id, root);
                 } else {
                     deferred = this.invitation_owner(player_id, game, root);

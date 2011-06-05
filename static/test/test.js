@@ -313,7 +313,7 @@ test("invitation_owner_nobody_invited_yet", function() {
         'id': game_id,
         'owner': true,
         'ready': false,
-        'players': [ [ player1, null, 'n', card1, [] ] ],
+        'players': [ [ player1, null, 'n', card1, [] ], [ 'player2', null, 'n', 10, [] ] ],
         'invited': [ ]
     };
 
@@ -321,11 +321,11 @@ test("invitation_owner_nobody_invited_yet", function() {
     $.cardstories.ajax = function(options) { };
 
     equal($('#qunit-fixture .cardstories_advertise.cardstories_active').length, 0);
-    // there is a player, therefore it is not mandatory to send invitations
+    // there is more than one player, therefore it is not mandatory to send invitations
     $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
     equal($('#qunit-fixture .cardstories_advertise.cardstories_active').length, 0);
-    // no players and no pending invitations : show the advertise page
-    game.players = [];
+    // only the author is here and no pending invitations : show the advertise page
+    game.players = [ game.players[0] ];
     $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
     equal($('#qunit-fixture .cardstories_advertise.cardstories_active').length, 1);
 });
