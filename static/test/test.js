@@ -302,7 +302,7 @@ test("invitation_owner_invite_more", function() {
 
 test("invitation_owner_nobody_invited_yet", function() {
     setup();
-    expect(2);
+    expect(3);
 
     var player1 = 'player1';
     var card1 = 5;
@@ -321,6 +321,11 @@ test("invitation_owner_nobody_invited_yet", function() {
     $.cardstories.ajax = function(options) { };
 
     equal($('#qunit-fixture .cardstories_advertise.cardstories_active').length, 0);
+    // there is a player, therefore it is not mandatory to send invitations
+    $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
+    equal($('#qunit-fixture .cardstories_advertise.cardstories_active').length, 0);
+    // no players and no pending invitations : show the advertise page
+    game.players = [];
     $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
     equal($('#qunit-fixture .cardstories_advertise.cardstories_active').length, 1);
 });
