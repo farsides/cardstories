@@ -145,6 +145,42 @@ test("widget subscribe", function() {
     equal($('#qunit-fixture .cardstories_subscribe.cardstories_active').length, 1);
 });
 
+test("test confirm_results_publication", function () {
+    setup();
+    expect(5);
+    var player_id = 15;
+    var game_id = 101;
+
+    var root = $('#qunit-fixture .cardstories');
+    root.addClass('cardstories_root');
+    var vote_element = $('.cardstories_vote .cardstories_owner', root);
+    var element = $('.cardstories_vote .cardstories_owner', '.cardstories_invitation');
+    var query = 'action=complete&owner_id=' + player_id + '&game_id=' + game_id;
+	var game = {
+	    'id': game_id,
+	    'state': 'fake_state'
+	};
+	var vote_owner = $.cardstories.vote_owner;
+
+    $.cardstories.vote_owner = function (arg_player_id, arg_game, root) {
+        equal(arg_player_id, player_id);
+        equal(arg_game.id, game_id);
+        ok($(root).hasClass('cardstories_root'), 'cardstories_root');
+        $.cardstories.vote_owner = vote_owner;
+    }
+
+	var send_game = $.cardstories.send_game;
+    $.cardstories.send_game = function (arg_player_id, arg_game_id) {
+        equal(arg_player_id, player_id);
+        equal(arg_game_id, game_id);
+        $.cardstories.send_game = send_game;
+    }
+
+    $.cardstories.confirm_results_publication(player_id, game, root);
+    $('.cardstories_notyet_announce_results').click();
+    $('.cardstories_announce_results').click();
+});
+
 test("send_game", function() {
     setup();
     expect(5);
@@ -683,6 +719,8 @@ test("vote_owner", function() {
 
     var sentence = 'SENTENCE';
 
+    var root = $('#qunit-fixture .cardstories');
+
     var game = {
 	'id': game_id,
 	'owner': true,
@@ -693,11 +731,6 @@ test("vote_owner", function() {
                      [ voter21, board1, 'n', board2, [ ] ]
                    ],
 	'ready': true
-    };
-
-    $.cardstories.ajax = function(options) {
-        equal(options.type, 'GET');
-        equal(options.url, $.cardstories.url + '?action=complete&owner_id=' + player_id + '&game_id=' + game_id);
     };
 
     $.cardstories.poll_ignore = function(ignored_request, ignored_answer, new_poll, old_poll) {
@@ -713,8 +746,13 @@ test("vote_owner", function() {
     equal($('.cardstories_sentence', vote).text(), sentence);
 
     ok($('.cardstories_finish', vote).hasClass('cardstories_ready'), 'cardstories_ready');
-
+    var confirm_results_publication = $.cardstories.confirm_results_publication;
+    $.cardstories.confirm_results_publication = function (arg_player_id, arg_game, arg_root, arg_vote_element) {
+        equal(arg_player_id, player_id);
+        equal(arg_game.id, game.id);
+    };
     $('.cardstories_finish', vote).click();
+    $.cardstories.confirm_results_publication = confirm_results_publication;
 });
 
 test("complete", function() {

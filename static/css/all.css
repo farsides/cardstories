@@ -925,6 +925,55 @@ html, body {
     background-position: -106px 0px;
 }
 
+/* state confirm results publication */
+
+.cardstories .cardstories_confirm_results_publication {
+    display: none;
+    background: transparent url('images/vote_wall.png') no-repeat 13px bottom;
+}
+
+.cardstories .cardstories_confirm_results_publication .cardstories_owner .cardstories_progress_owner {
+    background: transparent url('images/progress_5.png') no-repeat left top;
+}
+
+
+.cardstories .cardstories_confirm_results_publication .cardstories_announce_confirm {
+    position: absolute;
+    top: 320px;
+    left: 200px;
+    height: 53px;
+    width: 619px;
+    background: transparent url('images/announce_results_question.png') no-repeat 13px bottom;
+}
+
+.cardstories .cardstories_confirm_results_publication .cardstories_notyet_announce_results {
+    position: absolute;
+    top: 430px;
+    left: 160px;
+    height: 258px;
+    width: 328px;
+    cursor: pointer;
+    background: transparent url('images/confirmation_no_off.png') no-repeat 13px bottom;
+}
+
+.cardstories .cardstories_confirm_results_publication .cardstories_notyet_announce_results:hover {
+    background: transparent url('images/confirmation_no_over.png') no-repeat 13px bottom;
+}
+
+.cardstories .cardstories_confirm_results_publication .cardstories_announce_results {
+    position: absolute;
+    top: 430px;
+    left: 540px;
+    height: 258px;
+    width: 328px;
+    cursor: pointer;
+    background: transparent url('images/confirmation_yes_off.png') no-repeat 13px bottom;
+}
+
+.cardstories .cardstories_confirm_results_publication .cardstories_announce_results:hover {
+    background: transparent url('images/confirmation_yes_over.png') no-repeat 13px bottom;
+}
+
 /* state complete */
 
 .cardstories .cardstories_complete .cardstories_progress_player,
