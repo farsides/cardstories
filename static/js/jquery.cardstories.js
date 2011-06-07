@@ -122,6 +122,7 @@
         },
 
         solo: function(player_id, root) {
+            this.poll_discard(root); 
             var $this = this;
             var success = function(data, status) {
                 if('error' in data) {
