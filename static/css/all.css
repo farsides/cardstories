@@ -1158,8 +1158,14 @@ html, body {
     width: 245px;
 }
 
+.cardstories .cardstories_complete.cardstories_why .cardstories_monster {
+    display: none;
+}
+
 .cardstories .cardstories_complete .cardstories_winners {
-    padding: 30px 20px 30px 200px;
+    position: absolute;
+    left: 210px;
+    top: 35px;
     height: 20px;
     width: 450px;
     text-align: center;
@@ -1168,14 +1174,103 @@ html, body {
     font-size: 13px;
 }
 
+.cardstories .cardstories_complete.cardstories_why .cardstories_winners {
+    display: none;
+}
+
 .cardstories .cardstories_complete .cardstories_sentence {
-    padding: 5px 20px 10px 180px;
+    position: absolute;
+    left: 180px;
+    bottom: 20px;
     height: 50px;
     line-height: 50px;
     width: 500px;
     text-align: center;
     color: #F8E8D8;
     font-size: 13px;
+}
+
+.cardstories .cardstories_complete.cardstories_why .cardstories_sentence {
+    left: 450px;
+}
+
+.cardstories .cardstories_complete .cardstories_set_why {
+    font-family: "helvetica";
+    font-size: 11px;
+    text-decoration: underline;
+    color: #7A6A59;
+    position: absolute;
+    top: 55px;
+    left: 35px;
+}
+
+.cardstories .cardstories_complete.cardstories_why .cardstories_set_why {
+    display: none;
+}
+
+.cardstories .cardstories_complete .cardstories_unset_why {
+    display: none;
+}
+
+.cardstories .cardstories_complete.cardstories_why .cardstories_unset_why {
+    font-family: "helvetica";
+    font-size: 11px;
+    text-decoration: underline;
+    color: #7A6A59;
+    position: absolute;
+    top: 55px;
+    left: 290px;
+    display: block;
+}
+
+/* state complete, owner point of view */
+
+.cardstories .cardstories_complete.cardstories_owner .cardstories_progress_owner { 
+    background: transparent url('images/progress_6.png') no-repeat left top;
+    display: block;
+}
+
+.cardstories .cardstories_complete.cardstories_owner .cardstories_complete_explain {
+    position: absolute;
+    background: transparent url('images/complete_owner_explain.png') no-repeat left top;
+    top: 195px;
+    right: 30px;
+    height: 152px;
+    width: 731px;
+}
+
+.cardstories .cardstories_complete.cardstories_owner.cardstories_why .cardstories_complete_explain {
+    position: absolute;
+    background: transparent url('images/complete_owner_why.png') no-repeat left top;
+    top: 195px;
+    left: 12px;
+    height: 150px;
+    width: 988px;
+}
+
+/* state complete, player point of view */
+
+.cardstories .cardstories_complete.cardstories_player .cardstories_progress_player { 
+    background: transparent url('images/player_progress5.png') no-repeat left top;
+    display: block;
+}
+
+.cardstories .cardstories_complete.cardstories_player .cardstories_complete_explain {
+    position: absolute;
+    background: transparent url('images/complete_player_explain.png') no-repeat left top;
+    top: 195px;
+    right: 30px;
+    height: 152px;
+    width: 731px;
+}
+
+.cardstories .cardstories_complete.cardstories_player.cardstories_why .cardstories_complete_explain {
+    position: absolute;
+    background: transparent url('images/complete_player_why.png') no-repeat left top;
+    top: 195px;
+    left: 12px;
+    height: 150px;
+    width: 988px;
 }
 
 /* owner view during the vote, complete state (both for owner and player) : the wall of the results */
@@ -1234,38 +1329,6 @@ html, body {
     color: #000;
     font-size: 8px;
     text-align: center;
-}
-
-/* state complete, owner point of view */
-
-.cardstories .cardstories_complete.cardstories_owner .cardstories_progress_owner { 
-    background: transparent url('images/progress_6.png') no-repeat left top;
-    display: block;
-}
-
-.cardstories .cardstories_complete.cardstories_owner .cardstories_complete_explain {
-    position: absolute;
-    background: transparent url('images/complete_owner_explain.png') no-repeat left top;
-    top: 195px;
-    right: 30px;
-    height: 152px;
-    width: 731px;
-}
-
-/* state complete, player point of view */
-
-.cardstories .cardstories_complete.cardstories_player .cardstories_progress_player { 
-    background: transparent url('images/player_progress5.png') no-repeat left top;
-    display: block;
-}
-
-.cardstories .cardstories_complete.cardstories_player .cardstories_complete_explain {
-    position: absolute;
-    background: transparent url('images/complete_player_explain.png') no-repeat left top;
-    top: 195px;
-    right: 30px;
-    height: 152px;
-    width: 731px;
 }
 
 /* Dimensions and initial state of all pages */

@@ -678,6 +678,12 @@
             this.set_active(root, element);
             element.toggleClass('cardstories_owner', game.owner);
             element.toggleClass('cardstories_player', !game.owner);
+            $('.cardstories_set_why', element).unbind('click').click(function() {
+                element.toggleClass('cardstories_why', true);
+            });
+            $('.cardstories_unset_why', element).unbind('click').click(function() {
+                element.toggleClass('cardstories_why', false);
+            });
             // Display the current board state
             this.results_board(player_id, game, element);
         },

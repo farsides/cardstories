@@ -758,7 +758,7 @@ test("vote_owner", function() {
 
 test("complete", function() {
     setup();
-    expect(6);
+    expect(9);
 
     var player_id = 15;
     var game_id = 101;
@@ -796,6 +796,12 @@ test("complete", function() {
     $.cardstories.complete(player_id, game, $('#qunit-fixture .cardstories'));
     equal($('#qunit-fixture .cardstories_complete.cardstories_owner').length, 0, 'is not owner');
     equal($('#qunit-fixture .cardstories_complete.cardstories_player').length, 1, 'is player');
+
+    equal($('#qunit-fixture .cardstories_complete.cardstories_why').length, 0, 'why is not set');
+    $('#qunit-fixture .cardstories_complete .cardstories_set_why').click();
+    equal($('#qunit-fixture .cardstories_complete.cardstories_why').length, 1, 'why is set');
+    $('#qunit-fixture .cardstories_complete .cardstories_unset_why').click();
+    equal($('#qunit-fixture .cardstories_complete.cardstories_why').length, 0, 'why is not set');
 });
 
 test("results_board", function() {
