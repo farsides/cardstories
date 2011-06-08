@@ -20,13 +20,11 @@ all:
 
 check:
 	python-coverage -e
-	PYTHONPATH=.. python-coverage -x test_service.py
-	PYTHONPATH=.. python-coverage -x test_site.py
-	PYTHONPATH=.. python-coverage -x test_tap.py
-	PYTHONPATH=.. python-coverage -x test_game.py
-	PYTHONPATH=.. python-coverage -x test_poll.py
-	PYTHONPATH=.. python-coverage -x test_plugins.py
-	python-coverage -m -a -r ../cardstories/*.py
+	PYTHONPATH=../.. python-coverage -x test_auth.py
+	python-coverage -m -a -r auth.py
 
 clean:
 	rm -fr .coverage _trial_temp*
+	rm -f *,cover
+	rm -f *.pyc
+

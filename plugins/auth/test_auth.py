@@ -18,7 +18,7 @@
 #
 import sys
 import os
-sys.path.insert(0, os.path.abspath("..")) # so that for M-x pdb works
+sys.path.insert(0, os.path.abspath("../..")) # so that for M-x pdb works
 import sqlite3
 
 from twisted.trial import unittest, runner, reporter
@@ -75,10 +75,12 @@ class AuthTest(unittest.TestCase):
 
         result_in = { 'players': [ [ request1.args['player_id'][0] ],
                                    [ request1.args['owner_id'][0] ]
-                                   ] }
+                                   ],
+                      'invited': [ request1.args['player_id'][0] ] }
         result_out = yield self.auth.postprocess(result_in)
         self.assertEquals(result_out, { 'players': [ [ player ],
-                                                     [ owner ] ] })
+                                                     [ owner ] ],
+                                        'invited': [ player ]})
         
 
     @defer.inlineCallbacks
@@ -135,5 +137,5 @@ if __name__ == '__main__':
 
 # Interpreted by emacs
 # Local Variables:
-# compile-command: "python-coverage -e ; PYTHONPATH=.. python-coverage -x test_auth.py ; python-coverage -m -a -r ../plugins/auth.py"
+# compile-command: "python-coverage -e ; PYTHONPATH=../.. python-coverage -x test_auth.py ; python-coverage -m -a -r auth.py"
 # End:
