@@ -1178,7 +1178,7 @@ html, body {
     font-size: 13px;
 }
 
-/* owner view during the vote, complete state : the wall of the results */
+/* owner view during the vote, complete state (both for owner and player) : the wall of the results */
 
 .cardstories .cardstories_votes {
     position: absolute;
@@ -1197,6 +1197,10 @@ html, body {
     background: transparent url('small/card_bg.png') no-repeat left top;
     width: 135px;
     height: 175px;
+}
+
+.cardstories .cardstories_votes .cardstories_column.cardstories_winner_card .cardstories_card_bg {
+    background: transparent url('small/card_bg_winner.png') no-repeat left top;
 }
 
 .cardstories .cardstories_votes .cardstories_column .cardstories_card {

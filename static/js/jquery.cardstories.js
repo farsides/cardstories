@@ -711,6 +711,7 @@
             $('.cardstories_column', element).each(function(index) {
                 if(index < cards.length) {
                   var card = cards[index];
+                  $(this).toggleClass('cardstories_winner_card', game.winner_card == card);
                   var c = 'cardstories_card cardstories_complete_card' + card + ' {card:' + card + '}';
                   $('.cardstories_card', this).attr('class', c);
                   var player = board2player[card];

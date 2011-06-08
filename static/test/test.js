@@ -800,7 +800,7 @@ test("complete", function() {
 
 test("results_board", function() {
     setup();
-    expect(20);
+    expect(22);
 
     var player_id = 15;
     var game_id = 101;
@@ -847,6 +847,7 @@ test("results_board", function() {
     var column;
     column = $('.cardstories_column:nth(0)', element);
     equal($('.cardstories_card', column).metadata().card, board1);
+    ok(column.hasClass('cardstories_winner_card'), 'winner card class');
     equal($('.cardstories_player_name', column).text(), voter12.toString());
     ok($('.cardstories_player_name', column).hasClass('cardstories_win'), 'cardstories_win');
     equal($('.cardstories_voter_name:nth(0)', column).text(), voter11.toString());
@@ -857,6 +858,7 @@ test("results_board", function() {
 
     column = $('.cardstories_column:nth(1)', element);
     equal($('.cardstories_card', column).metadata().card, board2);
+    ok(!column.hasClass('cardstories_winner_card'), 'not winner card class');
     equal($('.cardstories_player_name', column).text(), voter21.toString());
     ok(!$('.cardstories_player_name', column).hasClass('cardstories_win'), 'cardstories_win not set');
     ok(!$('.cardstories_voter_name:nth(0)', column).is(':visible'), 'col 2, first vote hidden');
