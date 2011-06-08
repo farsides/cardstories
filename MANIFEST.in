@@ -9,3 +9,4 @@ include maintain.mk
 include LICENSE.txt
 include MANIFEST
 include MANIFEST.in
+include artwork/*.ai
