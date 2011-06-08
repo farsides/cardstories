@@ -519,13 +519,15 @@ html, body {
 /* lobby for in progress games */
 
 .cardstories .cardstories_lobby .cardstories_in_progress .cardstories_tab_in_progress {
-    background: transparent url('images/tab_in_progress.png') no-repeat left top;
-    background-position: -123px 0px;
+    background: transparent url('images/tab_in_progress_current.png') no-repeat left top;
 }
 
 .cardstories .cardstories_lobby .cardstories_in_progress .cardstories_tab_finished {
     background: transparent url('images/tab_finished.png') no-repeat left top;
-    background-position: 0px 0px;
+}
+
+.cardstories .cardstories_lobby .cardstories_in_progress .cardstories_tab_finished:hover {
+    background: transparent url('images/tab_finished_over.png') no-repeat left top;
 }
 
 .cardstories .cardstories_lobby .cardstories_in_progress .cardstories_stories_you_are_playing {
@@ -541,12 +543,14 @@ html, body {
 
 .cardstories .cardstories_lobby .cardstories_finished .cardstories_tab_in_progress {
     background: transparent url('images/tab_in_progress.png') no-repeat left top;
-    background-position: 0px 0px;
+}
+
+.cardstories .cardstories_lobby .cardstories_finished .cardstories_tab_in_progress:hover {
+    background: transparent url('images/tab_in_progress_over.png') no-repeat left top;
 }
 
 .cardstories .cardstories_lobby .cardstories_finished .cardstories_tab_finished {
-    background: transparent url('images/tab_finished.png') no-repeat left top;
-    background-position: -123px 0px;
+    background: transparent url('images/tab_finished_current.png') no-repeat left top;
 }
 
 /* advertise the game and invite players */
