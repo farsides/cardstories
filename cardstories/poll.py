@@ -18,6 +18,7 @@
 #
 from twisted.python import runtime
 from twisted.internet import reactor, defer
+from copy import deepcopy
 
 class pollable:
 
@@ -48,7 +49,7 @@ class pollable:
         args['modified'] = [self.modified]
         d = defer.DeferredList(pollers, consumeErrors = True)
         for poller in pollers:
-            poller.callback(args)
+            poller.callback(deepcopy(args))
         d.addCallback(lambda result: args)
         return d
 

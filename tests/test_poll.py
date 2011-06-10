@@ -87,18 +87,30 @@ class PollableTest(unittest.TestCase):
         p = poll.pollable(timeout)
         p.modified -= 1000
         d = p.poll({ 'modified': [p.modified] })
+        d1 = p.poll({ 'modified': [p.modified] })
         def check(result):
             # pollers must be reset before the callbacks are triggered
             # so that they can register new pollers without interfering
             self.assertEquals(0, len(p.pollers))
+            self.assertEquals(result['sideeffect'][0], 0)
+            result['sideeffect'][0] = 1
             return result
+        def error(reason):
+            print reason.getTraceback()
+            return reason
         d.addCallback(check)
-        args = { 'ok': [True] }
-        self.assertEquals(1, len(p.pollers))
+        d.addErrback(error)
+        d1.addCallback(check)
+        d1.addErrback(error)
+        args = { 'ok': [True], 'sideeffect': [0] }
+        self.assertEquals(2, len(p.pollers))
         r = yield p.touch(args)
         self.assertEquals(r['modified'][0], p.modified)
         self.assertEquals(0, len(p.pollers))
         result = yield d
+        self.assertTrue(result['ok'])
+        self.assertEquals(result['modified'][0], p.modified)
+        result = yield d1
         self.assertTrue(result['ok'])
         self.assertEquals(result['modified'][0], p.modified)
 
