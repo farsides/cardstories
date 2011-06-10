@@ -88,7 +88,7 @@ class SoloTest(unittest.TestCase):
             
     @defer.inlineCallbacks
     def test00_preprocess_noop(self):
-        solo = Plugin(self.service)
+        solo = Plugin(self.service, [])
         self.assertEquals(solo.name(), 'solo')
         yield self.complete_game()
         result_in = 'RESULT'
@@ -129,7 +129,7 @@ class SoloTest(unittest.TestCase):
 
     @defer.inlineCallbacks
     def test01_solo(self):
-        solo = Plugin(self.service)
+        solo = Plugin(self.service, [])
         yield self.complete_game()
         player_id = 200
         request = Request(action = ['solo'], player_id = [player_id])
@@ -146,7 +146,7 @@ class SoloTest(unittest.TestCase):
 
     @defer.inlineCallbacks
     def test01_solo_duplicate(self):
-        solo = Plugin(self.service)
+        solo = Plugin(self.service, [])
         yield self.complete_game()
         request = Request(action = ['solo'], player_id = [self.player1])
         caught = False

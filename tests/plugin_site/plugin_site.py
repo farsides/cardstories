@@ -18,7 +18,7 @@
 #
 class Plugin:
     
-    def __init__(self, service):
+    def __init__(self, service, plugins):
         self.service = service
 
     def name(self):

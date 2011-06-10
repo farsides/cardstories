@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Cardstories Pick</title>
+</head>
+
+<body>
+<table width="600" border="0" background='%(url)s/plugins/mail/templates/pick/background.png'>
+  <tr>
+    <td align="center">
+      <div style='font-size:38px; font-family:Arial, Helvetica; color:#E7E0CE; line-height:38px'>
+      New Card Picked!
+      </div>
+      <div style='font-size:20px; font-family:Arial, Helvetica; color:#E7E0CE; line-height:20px'>
+      One of your friends picked a card.
+      </div>
+    </td>
+    <td align="center">
+      <br>
+      <a href='%(url)s/?game_id=%(game_id)d'>
+      <img src="%(url)s/plugins/mail/templates/pick/button.png" width="125" height="117" />
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td rowspan="2">
+      <img src="%(url)s/plugins/mail/templates/pick/card.png" width="342" height="363" />
+    </td>
+    <td align="center">
+      <br>
+      <img src="%(url)s/plugins/mail/templates/pick/logo.png" width="223" height="171" />
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <br>
+      <div style='font-size:21px; font-family:Arial, Helvetica; color:#E2DFCF'>
+      Check the card that
+      </div>
+      <div style='font-size:14px; font-family:Arial, Helvetica; color:#E2DFCF'>
+      %(player_email)s
+      </div>
+      <div style='font-size:21px; font-family:Arial, Helvetica; color:#E2DFCF'>
+      picked just now!
+      </div>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

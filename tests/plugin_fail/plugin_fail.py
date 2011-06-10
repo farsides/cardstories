@@ -16,24 +16,16 @@
 # along with this program in a file in the toplevel directory called
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
-import os
-import imp
+class Plugin:
+    
+    def __init__(self, service, plugins):
+        self.service = service
 
-class CardstoriesPlugins:
+    def name(self):
+        return 'plugin_fail'
 
-    def __init__(self, settings):
-        self.settings = settings
-        self.plugins = []
+    def preprocess(self, result, request):
+        raise UserWarning, 'PREPROCESS'
 
-    def load(self, service):
-        for plugin in self.settings.get('plugins', '').split():
-            module = imp.load_source("cardstories_plugin", self.path(plugin))
-            self.plugins.append(getattr(module, 'Plugin')(service, self.plugins))
-
-    def path(self, plugin):
-        if os.path.exists(plugin):
-            return plugin
-        path = os.path.join(self.settings['plugins-dir'], plugin, plugin + '.py')
-        if os.path.exists(path):
-            return path
-        raise UserWarning, plugin + ' and ' + path + ' are not file paths'
+    def postprocess(self, result):
+        raise UserWarning, 'POSTPROCESS'

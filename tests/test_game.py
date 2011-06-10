@@ -264,7 +264,7 @@ class CardstoriesGameTest(unittest.TestCase):
         for player_id in ( player1, player2 ):
             result = yield self.game.participate(player_id)
             self.assertEquals([game_id], result['game_id'])
-        self.game.invite(invited)
+        yield self.game.invite(invited)
 
         # invitation state, visitor point of view
         self.game.modified = 444
@@ -292,6 +292,7 @@ class CardstoriesGameTest(unittest.TestCase):
         self.assertEquals(winner_card, game_info['winner_card'])
         self.assertEquals(game_id, game_info['id'])
         self.assertEquals(invited, game_info['invited'])
+        self.assertNotEquals(id(invited), id(game_info['invited']))
         self.assertEquals(owner_id, game_info['players'][0][0])
         self.assertEquals(1, len(game_info['players'][0][4]))
         self.assertEquals(winner_card, game_info['players'][0][3])
@@ -376,7 +377,15 @@ class CardstoriesGameTest(unittest.TestCase):
         game_id = yield self.game.create(winner_card, sentence, owner_id)
         self.assertEquals([owner_id], self.game.get_players())
         
-        result = yield self.game.invite(invited)
+        self.checked = False
+        d = self.game.invite(invited)
+        def check(result):
+            self.checked = True
+            self.assertNotEquals(id(invited), id(result['invited']))
+            return result
+        d.addCallback(check)
+        result = yield d
+        self.assertTrue(self.checked)
         self.assertEquals(result['type'], 'invite')
         self.assertEquals(result['invited'], invited)
         self.assertEquals([game_id], result['game_id'])

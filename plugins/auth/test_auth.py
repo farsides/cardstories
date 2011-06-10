@@ -34,13 +34,13 @@ class FakeService:
 class AuthTestInit(unittest.TestCase):
 
     def test00_create(self):
-        auth = Plugin(FakeService({'plugins-libdir': '.'}))
+        auth = Plugin(FakeService({'plugins-libdir': '.'}), [])
         self.assertTrue(os.path.exists(auth.database))
 
 class AuthTest(unittest.TestCase):
 
     def setUp(self):
-        self.auth = Plugin(FakeService({'plugins-libdir': '.'}))
+        self.auth = Plugin(FakeService({'plugins-libdir': '.'}), [])
         self.db = sqlite3.connect(self.auth.database)
 
     def tearDown(self):

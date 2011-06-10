@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2011 Loic Dachary <loic@dachary.org>
+# Copyright (C) 2011 Dachary <loic@dachary.org>
 #
 # This software's license gives you freedom; you can copy, convey,
 # propagate, redistribute and/or modify this program under the terms of
@@ -16,16 +16,16 @@
 # along with this program in a file in the toplevel directory called
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
-class Plugin:
-    
-    def __init__(self, service):
-        self.service = service
+all:
 
-    def name(self):
-        return 'plugin_fail'
+check:
+	python-coverage -e
+	PYTHONPATH=../.. python-coverage -x test_mail.py
+	python-coverage -m -a -r mail.py
 
-    def preprocess(self, result, request):
-        raise UserWarning, 'PREPROCESS'
+clean:
+	rm -fr fixture/auth
+	rm -fr .coverage _trial_temp*
+	rm -f *,cover
+	rm -f *.pyc
 
-    def postprocess(self, result):
-        raise UserWarning, 'POSTPROCESS'

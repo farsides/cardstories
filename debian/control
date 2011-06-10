@@ -5,6 +5,7 @@ Maintainer: Loic Dachary (OuoU) <loic@debian.org>
 Build-Depends: debhelper (>= 7.0.50~),
                po-debconf,
                python-all (>= 2.6.6-2~),
+               python-lxml,
                python-coverage,
                python-twisted-web (>= 10.1),
                python-twisted-mail,
@@ -26,6 +27,7 @@ Depends: ${misc:Depends},
          nginx | httpd,
          python-twisted-web (>= 10.1),
          python-twisted-mail,
+         python-lxml,
          python-openssl,
          ${python:Depends}
 Provides: ${python:Provides}

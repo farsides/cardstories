@@ -24,7 +24,7 @@ from twisted.enterprise import adbapi
 
 class Plugin:
 
-    def __init__(self, service):
+    def __init__(self, service, plugins):
         dirname = os.path.join(service.settings['plugins-libdir'], self.name())
         self.database = os.path.join(dirname, 'auth.sqlite')
         exists = os.path.exists(self.database)
@@ -72,7 +72,6 @@ class Plugin:
 
     @defer.inlineCallbacks
     def postprocess(self, result):
-        # Convert internal game logic ids to public ones
         if result.has_key('players'):
             for player in result['players']:
                 row = yield self.db.runQuery("SELECT name FROM players WHERE id = ?", [ player[0] ])

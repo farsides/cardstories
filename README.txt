@@ -18,8 +18,10 @@ Copyright (C) 2011 Loic Dachary <loic@dachary.org> (software)
 
 # display usage
 PYTHONPATH=.:etc/cardstories twistd cardstories --help
-# run locally with all features activated
-for plugin in solo auth ; do ( cd plugins ; ln -s $plugin/$plugin.py $plugin.py ) ; done ; PYTHONPATH=.:etc/cardstories twistd --nodaemon cardstories --static $(pwd)/static --port 5000 --interface 0.0.0.0 --db /tmp/cardstories.sqlite --plugins-dir plugins --plugins 'auth solo' --plugins-pre-process 'auth solo' --plugins-post-process auth --plugins-libdir /tmp
+# run locally 
+PYTHONPATH=.:etc/cardstories twistd --nodaemon cardstories --static $(pwd)/static --port 5000 --interface 0.0.0.0 --db /tmp/cardstories.sqlite --plugins-dir plugins --plugins 'auth solo' --plugins-pre-process 'auth solo' --plugins-post-process auth --plugins-libdir /tmp
+# run locally with mails
+PYTHONPATH=.:etc/cardstories twistd --nodaemon cardstories --static $(pwd)/static --port 5000 --interface 0.0.0.0 --db /tmp/cardstories.sqlite --plugins-dir plugins --plugins 'auth solo mail' --plugins-pre-process 'auth solo' --plugins-post-process auth --plugins-libdir /tmp --plugins-confdir tests
 # check if the webservice replies. The following must return the {} string
 curl --silent http://localhost:4923/resource
 

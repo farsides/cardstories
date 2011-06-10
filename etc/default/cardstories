@@ -9,8 +9,10 @@ CARDSTORIES_USER=cardstories
 CARDSTORIES_GROUP=nogroup
 
 #
-# White space separated list of plugins to load
+# White space separated list of plugins to load.
+# The order matters.
 #
+#PLUGINS="auth solo mail"
 PLUGINS="auth solo"
 
 #

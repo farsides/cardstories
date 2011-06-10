@@ -36,8 +36,19 @@ data_files.append(['/etc/cardstories/twisted/plugins', ['etc/cardstories/twisted
 data_files.append(['/usr/share/cardstories/conf', [ 'conf/nginx.conf' ]])
 data_files.append(['/usr/share/cardstories/conf', [ 'conf/apache2.conf' ]])
 
-data_files.append(['/usr/share/cardstories/plugins', [ 'plugins/auth/auth.py' ]])
-data_files.append(['/usr/share/cardstories/plugins', [ 'plugins/solo/solo.py' ]])
+data_files.append(['/usr/share/cardstories/plugins/auth', [ 'plugins/auth/auth.py' ]])
+
+data_files.append(['/usr/share/cardstories/plugins/solo', [ 'plugins/solo/solo.py' ]])
+
+data_files.append(['/usr/share/cardstories/plugins/mail', [ 'plugins/mail/mail.py' ]])
+for dirpath, dirnames, filenames in os.walk('plugins/mail/templates'):
+	    # Ignore dirnames that start with '.'
+	    for i, dirname in enumerate(dirnames):
+	        if dirname.startswith('.'): del dirnames[i]
+	    if filenames:
+                filenames = filter(lambda f: re.match('.*.(html|png|jpg|gif)$', f), filenames)
+	        data_files.append(['/usr/share/cardstories/' + dirpath, [os.path.join(dirpath, f) for f in filenames]])
+data_files.append(['/etc/cardstories/plugins/mail', [ 'plugins/mail/mail.xml' ]])
 
 setup(name='cardstories',
       version='1.0.3',

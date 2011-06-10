@@ -1,0 +1,48 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Cardstories Complete</title>
+</head>
+
+<body>
+<table width="600" border="0" background='%(url)s/plugins/mail/templates/complete/background.png'>
+  <tr>
+    <td align="center">
+    <div style='font-size:57px; font-family:Arial,Helvetica; color:#EDE8D3; line-height:57px'>
+      Results!
+    </div>
+    <div style='font-size:22px; font-family:Arial,Helvetica; color:#E2DFCF; line-height:22px'>
+      Who won the game?
+    </div>
+    </td>
+    <td align="center">
+      <br>
+      <a href='%(url)s/?game_id=%(game_id)d'>
+        <img src="%(url)s/plugins/mail/templates/complete/button.png" width="125" height="117" />
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td rowspan="2">
+      <img src="%(url)s/plugins/mail/templates/complete/star.png" width="346" height="350" />
+    </td>
+    <td align="center">
+      <br>
+      <img src="%(url)s/plugins/mail/templates/complete/logo.png" width="223" height="171" />
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <div style='font-size:21px; font-family:Arial,Helvetica; color:#E2DFCF'>
+        The magic moment!
+      </div>
+      <div style='font-size:14px; font-family:Arial,Helvetica; color:#E2DFCF'>
+        %(owner_email)s
+      </div>
+      <div style='font-size:21px; font-family:Arial,Helvetica; color:#E2DFCF'>
+        reveals the truth.
+      </div>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

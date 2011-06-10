@@ -25,7 +25,7 @@ from cardstories.game import CardstoriesGame
 
 class Plugin:
 
-    def __init__(self, service):
+    def __init__(self, service, plugins):
         self.service = service
         self.id2info = {}
         self.handle(None)

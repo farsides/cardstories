@@ -27,8 +27,8 @@ class CardstoriesPluginsTest(unittest.TestCase):
     
     def test00_path(self):
         plugins = CardstoriesPlugins({ 'plugins-dir': '..' })
-        self.assertEquals(plugins.path('../plugin_one.py'), '../plugin_one.py')
-        self.assertEquals(plugins.path('plugin_one'), '../plugin_one.py')
+        self.assertEquals(plugins.path('../plugin_one/plugin_one.py'), '../plugin_one/plugin_one.py')
+        self.assertEquals(plugins.path('plugin_one'), '../plugin_one/plugin_one.py')
         caught = False
         try:
             plugins.path('WTF')
