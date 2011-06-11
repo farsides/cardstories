@@ -1,0 +1,36 @@
+# German debconf translation of cardstories.
+# Copyright (C) 2011 Holger Wansing
+# This file is distributed under the same license as the cardstories package.
+# Translation: Holger Wansing <linux@wansing-online.de>, 2011.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: cardstories 1.0.2-2\n"
+"Report-Msgid-Bugs-To: cardstories@packages.debian.org\n"
+"POT-Creation-Date: 2011-05-23 07:43+0200\n"
+"PO-Revision-Date: 2011-05-30 21:35+0100\n"
+"Last-Translator: Holger Wansing <linux@wansing-online.de>\n"
+"Language-Team: German <debian-l10n-german@lists.debian.org>\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: multiselect
+#. Description
+#: ../cardstories.templates:2001
+msgid "Web server to reconfigure automatically:"
+msgstr "Webserver, der automatisch neu konfiguriert werden soll:"
+
+#. Type: multiselect
+#. Description
+#: ../cardstories.templates:2001
+msgid ""
+"Please choose the web server that should be automatically configured to run "
+"cardstories. If the web server provides http://www.example.org/, cardstories "
+"can then be played at http://www.example.org/cardstories/."
+msgstr ""
+"Bitte wählen Sie den Webserver, der automatisch konfiguriert werden soll, um "
+"cardstories laufen zu lassen. Wenn der Webserver http://www.example.org/ "
+"bereitstellt, kann cardstories unter http://www.example.org/cardstories/ "
+"gespielt werden."

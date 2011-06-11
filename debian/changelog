@@ -1,25 +1,23 @@
 cardstories (1.0.3-1) unstable; urgency=low
 
   * upstream release
-
   * add apache configuration
-  
-  * Japanese po-debconf template translation (ja.po) (Closes: #626376).
-
-  * Russian po-debconf template translation (ru.po) (Closes: #627682).
-
-  * Danish po-debconf template translation (da.po) (Closes: #627707).
-  
-  * Portuguese po-debconf template translation (pt.po) (Closes: #627725).
-
-  * Czech  po-debconf template translation (cs.po) (Closes: #627802).
-
-  * Swedish po-debconf template translation (sv.po) (Closes: #627852).
-  
+  * Debconf templates and debian/control reviewed by the debian-l10n-
+    english team as part of the Smith review project. Closes: #627277
+  * [Debconf translation updates]
+  * Japanese (Hideki Yamane).  Closes: #626376
+  * Russian (Yuri Kozlov).  Closes: #627682
+  * Danish (Joe Hansen).  Closes: #627707
+  * Portuguese (Rui Branco).  Closes: #627725
+  * Czech (Michal Simunek).  Closes: #627802
+  * Swedish (Martin Bagge / brother).  Closes: #627852
+  * Dutch; (Jeroen Schot).  Closes: #628098
+  * French (Julien Patriarca).  Closes: #628366
+  * German (Holger Wansing).  Closes: #628625
+  * Spanish; (Francisco Javier Cuadrado).  Closes: #629063
+  * Brazilian Portuguese (Adriano Rafael Gomes).  Closes: #629241
   * Remove SSL support until python openssl is fixed (Closes: #628249).
-
   * section changed to games (Closes: #627180).
-
   * depends on httpd or nginx (Closes: #627181).
 
  -- Loic Dachary (OuoU) <loic@debian.org>  Thu, 26 May 2011 14:25:17 +0200

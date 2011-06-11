@@ -1,0 +1,36 @@
+# Debconf translations for cardstories.
+# Copyright (C) 2011 THE cardstories'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the cardstories package.
+# Adriano Rafael Gomes <adrianorg@gmail.com>, 2011.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: cardstories 1.0.2-1\n"
+"Report-Msgid-Bugs-To: cardstories@packages.debian.org\n"
+"POT-Creation-Date: 2011-05-23 07:43+0200\n"
+"PO-Revision-Date: 2011-05-27 11:12-0300\n"
+"Last-Translator: Adriano Rafael Gomes <adrianorg@gmail.com>\n"
+"Language-Team: Brazilian Portuguese <debian-l10n-portuguese@lists.debian."
+"org>\n"
+"Language: pt_BR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Type: multiselect
+#. Description
+#: ../cardstories.templates:2001
+msgid "Web server to reconfigure automatically:"
+msgstr "Servidor web para reconfigurar automaticamente:"
+
+#. Type: multiselect
+#. Description
+#: ../cardstories.templates:2001
+msgid ""
+"Please choose the web server that should be automatically configured to run "
+"cardstories. If the web server provides http://www.example.org/, cardstories "
+"can then be played at http://www.example.org/cardstories/."
+msgstr ""
+"Por favor, escolha o servidor web que deverá ser automaticamente configurado "
+"para executar o cardstories. Se o servidor web provê http://www.exemplo."
+"org/, então pode-se jogar cardstories em http://www.exemplo.org/cardstories/."
