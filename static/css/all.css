@@ -1056,7 +1056,7 @@ html, body {
     height: 100%;
 }
 
-/* owner view during vote */
+/* state vote, owner view */
 
 .cardstories .cardstories_vote .cardstories_owner .cardstories_progress_owner { 
     background: transparent url('images/progress_5.png') no-repeat left top;
@@ -1085,10 +1085,16 @@ html, body {
 .cardstories .cardstories_vote .cardstories_owner .cardstories_sentence {
     position: absolute;
     z-index: 2;
-    left: 320px;
-    top: 300px;
-    font-size: 13px;
-    color: #7A6A59;
+    background: transparent url('images/vote_owner_sentence.png') no-repeat left top;
+    top: 230px;
+    right: 20px;
+    height: 85px;
+    width: 723px;
+    text-align: center;
+    line-height: 80px;
+    color: white;
+    font-size: 13pt;
+    color: #F8E8D8;
 }
 
 .cardstories .cardstories_vote .cardstories_owner .cardstories_finish {
