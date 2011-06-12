@@ -332,6 +332,7 @@ html, body {
    font-family: helvetica;
    font-size: 12pt;
    color: #000;
+   outline: none;
 } 
 
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_sentence.placeholder {
