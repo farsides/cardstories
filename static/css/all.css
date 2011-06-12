@@ -420,27 +420,29 @@ html, body {
 
 .cardstories .cardstories_lobby .cardstories_start_story {
     position: absolute;
-    background: transparent url('images/start_story.png') no-repeat left top;
-    background-position: 0px 0px;
-    top: 235px;
-    right: 80px;
-    height: 115px;
-    width: 181px;
+    background: transparent url('images/start_story_off.png') no-repeat left top;
+    top: 266px;
+    right: 180px;
+    height: 184px;
+    width: 131px;
 }
 
 .cardstories .cardstories_lobby .cardstories_start_story:hover {
-    background-image: url('images/start_story.png');
-    background-position: -181px 0px;
+    background-image: url('images/start_story_on.png');
 }
 
 .cardstories .cardstories_lobby .cardstories_solo {
     position: absolute;
-    background: transparent url('images/solo_story.png') no-repeat left top;
+    background: transparent url('images/solo_story_off.png') no-repeat left top;
     background-position: 0px 0px;
-    top: 35px;
-    right: 100px;
-    height: 135px;
-    width: 195px;
+    top: 266px;
+    right: 40px;
+    height: 85px;
+    width: 131px;
+}
+
+.cardstories .cardstories_lobby .cardstories_solo:hover {
+    background-image: url('images/solo_story_on.png');
 }
 
 .cardstories .cardstories_lobby .cardstories_pager {
@@ -544,9 +546,9 @@ html, body {
     position: absolute;
     background: transparent url('images/stories_you_are_playing.png') no-repeat left top;
     top: 260px;
-    left: 350px;
-    height: 85px;
-    width: 368px;
+    left: 336px;
+    height: 83px;
+    width: 340px;
 }
 
 /* lobby for finished games */
