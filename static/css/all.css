@@ -1064,6 +1064,15 @@ html, body {
     background: transparent url('images/vote_wall.png') no-repeat 13px bottom;
 }
 
+.cardstories .cardstories_vote .cardstories_owner .cardstories_monster {
+    position: absolute;
+    background: transparent url('images/vote_monster.png') no-repeat left top;
+    top: 130px;
+    left: 12px;
+    height: 293px;
+    width: 245px;
+}
+
 .cardstories .cardstories_vote .cardstories_owner .cardstories_finish {
     position: absolute;
     z-index: 20;
@@ -1164,7 +1173,7 @@ html, body {
     position: absolute;
     background: transparent url('images/complete_monster.png') no-repeat left top;
     top: 130px;
-    left: 10px;
+    left: 12px;
     height: 293px;
     width: 245px;
 }
