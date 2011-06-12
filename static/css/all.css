@@ -719,6 +719,7 @@ html, body {
     background-color: #725760;
     padding: 0px 10px 0px 10px;
     z-index: 2;
+    outline: none;
 }
 
 .cardstories .cardstories_advertise .cardstories_text_bordertop,
