@@ -806,7 +806,7 @@ test("complete", function() {
 
 test("results_board", function() {
     setup();
-    expect(22);
+    expect(24);
 
     var player_id = 15;
     var game_id = 101;
@@ -818,7 +818,8 @@ test("results_board", function() {
     var board1 = 30;
     var board2 = 31;
     var board3 = 32;
-    var board = [ board1, board2, board3 ];
+    var board4 = 66; // a player that has been discarded when moving to voting phase
+    var board = [ board1, board2, board3, board4 ];
 
     var sentence = 'SENTENCE';
 
@@ -869,6 +870,10 @@ test("results_board", function() {
     ok(!$('.cardstories_player_name', column).hasClass('cardstories_win'), 'cardstories_win not set');
     ok(!$('.cardstories_voter_name:nth(0)', column).is(':visible'), 'col 2, first vote hidden');
     
+    // the player was discarded because he did not vote in time, the card has no name
+    column = $('.cardstories_column:nth(3)', element);
+    equal($('.cardstories_card', column).metadata().card, board4);
+    equal($('.cardstories_player_name', column).text(), '');
   });
 
 test("advertise", function() {

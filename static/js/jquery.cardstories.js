@@ -721,8 +721,10 @@
                   var c = 'cardstories_card cardstories_complete_card' + card + ' {card:' + card + '}';
                   $('.cardstories_card', this).attr('class', c);
                   var player = board2player[card];
-                  $('.cardstories_player_name', this).toggleClass('cardstories_win', player[2] == 'y');
-                  $('.cardstories_player_name', this).text(player[0]);
+                  if(player !== undefined) {
+                    $('.cardstories_player_name', this).toggleClass('cardstories_win', player[2] == 'y');
+                    $('.cardstories_player_name', this).text(player[0]);
+                  }
                   var voters = board2voters[card];
                   if(voters !== undefined) {
                     $('.cardstories_voter_name', this).each(function(voter_index) {
