@@ -123,25 +123,25 @@ class MailTest(unittest.TestCase):
             if self.count == 1:
                 self.assertSubstring('_INVITE_', email)
                 self.assertSubstring('owner_email=%s' % self.owner_name, email)
-            elif self.count in (2, 3) :
-                self.assertSubstring('_PICK_', email)
-                if self.count == 2:
-                    self.assertSubstring('player_email=%s' % self.player1_name, email)
-                elif self.count == 3:
-                    self.assertSubstring('player_email=%s' % self.player2_name, email)
-            elif self.count in (4, 5) :
-                self.assertSubstring('_VOTE_', email)
-                if self.count == 4:
-                    self.assertSubstring('player_email=%s' % self.player1_name, email)
-                elif self.count == 5:
-                    self.assertSubstring('player_email=%s' % self.player2_name, email)
-            elif self.count == 6:
+            # elif self.count in (2, 3) :
+            #     self.assertSubstring('_PICK_', email)
+            #     if self.count == 2:
+            #         self.assertSubstring('player_email=%s' % self.player1_name, email)
+            #     elif self.count == 3:
+            #         self.assertSubstring('player_email=%s' % self.player2_name, email)
+            # elif self.count in (4, 5) :
+            #     self.assertSubstring('_VOTE_', email)
+            #     if self.count == 4:
+            #         self.assertSubstring('player_email=%s' % self.player1_name, email)
+            #     elif self.count == 5:
+            #         self.assertSubstring('player_email=%s' % self.player2_name, email)
+            elif self.count == 2:
                 self.assertSubstring('_COMPLETE_', email)
                 self.assertSubstring('owner_email=%s' % self.owner_name, email)
             return defer.succeed(True)
         plugin.sendmail = sendmail
         yield self.complete_game()
-        self.assertEqual(self.count, 6)
+        self.assertEqual(self.count, 2)
 
     @defer.inlineCallbacks
     def test02_send_nothing(self):

@@ -31,6 +31,7 @@ from twisted.mail.smtp import sendmail
 class Plugin:
 
     ALLOWED = ( 'pick', 'vote', 'complete', 'invite' )
+    SEND = ( 'complete', 'invite' )
 
     def __init__(self, service, plugins):
         for plugin in plugins:
@@ -59,7 +60,7 @@ class Plugin:
         d = defer.succeed(True)
         if changes != None and changes['type'] == 'change':
             details = changes['details']
-            if details['type'] in self.ALLOWED:
+            if details['type'] in self.SEND:
                 d = getattr(self, details['type'])(changes['game'], details)
         self.service.listen().addCallback(self.self_notify)
         return d
