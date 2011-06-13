@@ -40,7 +40,7 @@ if ! id -u cardstories >/dev/null 2>&1; then
     adduser --quiet --system --no-create-home --home /var/run/cardstories cardstories
 fi
 
-for d in /var/run/cardstories /var/log/cardstories /var/lib/cardstories; do
+for d in /var/run/cardstories /var/log/cardstories /var/lib/cardstories /etc/cardstories; do
     mkdir -p $d
     chown -R cardstories:nogroup $d
     chmod 755 $d
