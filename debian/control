@@ -27,6 +27,7 @@ Depends: ${misc:Depends},
          nginx | httpd,
          python-twisted-web (>= 10.1),
          python-twisted-mail,
+         python-twisted-conch,
          python-lxml,
          python-openssl,
          ${python:Depends}
