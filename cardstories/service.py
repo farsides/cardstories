@@ -218,7 +218,7 @@ class CardstoriesService(service.Service):
         # because the behavior in this case is undefined
         #
         assert game.get_modified() == modified
-        d = game.poll(args)
+        d = game.wait(args)
         d.addCallback(self.game_notify, game_id)
         defer.returnValue(True)
 

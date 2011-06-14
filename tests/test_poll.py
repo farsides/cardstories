@@ -126,6 +126,12 @@ class PollableTest(unittest.TestCase):
         p.destroy()
         return d
 
+    def test03_accessors(self):
+        modified = 100
+        p = poll.pollable(2000)
+        p.set_modified(modified)
+        self.assertEquals(modified, p.get_modified())
+
 def Run():
     loader = runner.TestLoader()
 #    loader.methodPrefix = "test_trynow"

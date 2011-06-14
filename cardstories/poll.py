@@ -53,7 +53,7 @@ class pollable:
         d.addCallback(lambda result: args)
         return d
 
-    def poll(self, args):
+    def wait(self, args):
         modified = int(args['modified'][0])
         if modified < self.modified:
             #
@@ -63,6 +63,21 @@ class pollable:
             return defer.succeed(args)
         d = defer.Deferred()
         self.pollers.append(d)
+        def success(result):
+            if d in self.pollers:
+                self.pollers.remove(d)
+            if result != None:
+                result['modified'] = [self.modified]
+            return result
+        def error(reason):
+            if d in self.pollers:
+                self.pollers.remove(d)
+            return reason
+        d.addCallbacks(success, error)
+        return d
+        
+    def poll(self, args):
+        d = self.wait(args)
         def timeout():
             args['timeout'] = [int(runtime.seconds() * 1000)]
             if d in self.pollers:
@@ -70,18 +85,12 @@ class pollable:
             d.callback(args)
         timer = reactor.callLater(self.timeout, timeout)
         def success(result):
-            if d in self.pollers:
-                self.pollers.remove(d)
-            if result != None:
-                result['modified'] = [self.modified]
             if timer.active():
                 if result != None:
                     result['active_timer'] = [True]
                 timer.cancel()
             return result
         def error(reason):
-            if d in self.pollers:
-                self.pollers.remove(d)
             if timer.active():
                 reason.active_timer = True
                 timer.cancel()
