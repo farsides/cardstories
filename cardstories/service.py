@@ -24,6 +24,7 @@ from twisted.application import service
 from twisted.internet import reactor, defer
 from twisted.web import resource, client
 from twisted.enterprise import adbapi
+import logging
 
 from cardstories.game import CardstoriesGame
 
@@ -70,7 +71,7 @@ class CardstoriesService(service.Service):
         def error(reason):
             reason.printDetailedTraceback()
             return True
-        d = defer.DeferredList(listeners, consumeErrors = True)
+        d = defer.DeferredList(listeners)
         for listener in listeners:
             listener.addErrback(error)
             listener.callback(result)
