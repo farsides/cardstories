@@ -790,7 +790,6 @@ html, body {
 }
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_voting.cardstories_ready:hover {
-    background: url('images/to_vote_over.png');
     background: url('images/to_vote.png');
     background-position: -135px 0px;
 }
@@ -880,7 +879,6 @@ html, body {
     color: #000;
     text-align: center;
     text-decoration: none;
-    width: 
 }
 
 /* state vote, player point of view : vote for a card */
