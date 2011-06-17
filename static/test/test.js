@@ -17,7 +17,7 @@
 module("cardstories");
 
 function setup() {
-    $.cardstories.setTimeout = function(cb, delay) { console.log("timeout"); return window.setTimeout(cb, delay); };
+    $.cardstories.setTimeout = function(cb, delay) { return window.setTimeout(cb, delay); };
     $.cardstories.ajax = function(o) { throw o; };
     $.cardstories.reload = $.cardstories.game_or_lobby;
     $.cardstories.confirm_participate = true;
