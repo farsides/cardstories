@@ -22,8 +22,8 @@ PYTHONPATH=.:etc/cardstories twistd cardstories --help
 PYTHONPATH=.:etc/cardstories twistd --nodaemon cardstories --static $(pwd)/static --port 5000 --interface 0.0.0.0 --db /tmp/cardstories.sqlite --plugins-dir plugins --plugins 'auth solo' --plugins-pre-process 'auth solo' --plugins-post-process auth --plugins-libdir /tmp
 # run locally with mails
 PYTHONPATH=.:etc/cardstories twistd --nodaemon cardstories --static $(pwd)/static --port 5000 --interface 0.0.0.0 --db /tmp/cardstories.sqlite --plugins-dir plugins --plugins 'auth solo mail' --plugins-pre-process 'auth solo' --plugins-post-process auth --plugins-libdir /tmp --plugins-confdir tests
-# check if the webservice replies. The following must return the {} string
-curl --silent http://localhost:4923/resource
+# check if the webservice replies. The following must return the {"win": {}, "games": [], "modified": 0} string
+curl --silent 'http://localhost:5000/resource?action=lobby&my=true&player_id=TEST&in_progress=yes'
 
 To create a source distribution use:
 v=1.0.4 ; python setup.py sdist --dist-dir .. ; mv ../cardstories-$v.tar.gz ../cardstories_$v.orig.tar.gz
