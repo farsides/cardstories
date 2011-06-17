@@ -16,12 +16,14 @@
 # along with this program in a file in the toplevel directory called
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
+export COVERAGE=$(shell which coverage || which python-coverage)
+
 all:
 
 check:
-	python-coverage -e
-	PYTHONPATH=../.. python-coverage -x test_solo.py
-	python-coverage -m -a -r solo.py
+	${COVERAGE} -e
+	PYTHONPATH=../.. ${COVERAGE} -x test_solo.py
+	${COVERAGE} -m -a -r solo.py
 
 clean:
 	rm -fr .coverage _trial_temp*

@@ -16,14 +16,15 @@
 # along with this program in a file in the toplevel directory called
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
+
 all:
 
 check:
 	make -C tests check
-	jscoverage --no-instrument=js/jquery.placeholder-1.0.1.js --no-instrument=js/jquery.query-2.1.7.js static static-coverage
 	for dir in plugins/*/Makefile ; do \
 		make -C `dirname $$dir` check ; \
 	done
+	jscoverage --no-instrument=js/jquery.placeholder-1.0.1.js --no-instrument=js/jquery.query-2.1.7.js static static-coverage
 
 clean:
 	for dir in plugins/*/Makefile ; do \

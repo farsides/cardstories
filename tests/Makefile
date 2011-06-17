@@ -16,17 +16,20 @@
 # along with this program in a file in the toplevel directory called
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
+
+export COVERAGE=$(shell which coverage || which python-coverage)
+
 all:
 
 check:
-	python-coverage -e
-	PYTHONPATH=.. python-coverage -x test_service.py
-	PYTHONPATH=.. python-coverage -x test_site.py
-	PYTHONPATH=.. python-coverage -x test_tap.py
-	PYTHONPATH=.. python-coverage -x test_game.py
-	PYTHONPATH=.. python-coverage -x test_poll.py
-	PYTHONPATH=.. python-coverage -x test_plugins.py
-	python-coverage -m -a -r ../cardstories/*.py
+	${COVERAGE} -e
+	PYTHONPATH=.. ${COVERAGE} -x test_service.py
+	PYTHONPATH=.. ${COVERAGE} -x test_site.py
+	PYTHONPATH=.. ${COVERAGE} -x test_tap.py
+	PYTHONPATH=.. ${COVERAGE} -x test_game.py
+	PYTHONPATH=.. ${COVERAGE} -x test_poll.py
+	PYTHONPATH=.. ${COVERAGE} -x test_plugins.py
+	${COVERAGE} -m -a -r ../cardstories/*.py
 
 clean:
 	rm -fr .coverage _trial_temp*
