@@ -1,0 +1,1207 @@
+2011-06-19 00:16:12 +0200 Loic Dachary <loic@dachary.org>
+        e62ef2431fc3974a1def252c3ac5924a15534147: avoid displaying a blue
+        border on firefox3
+
+2011-06-18 01:17:19 +0200 Loic Dachary <loic@dachary.org>
+        9a23c20a9b01b57a9375d27862704810c2886731: remove call to console to
+        prevent failure if no console is activated
+
+2011-06-18 00:49:42 +0200 Loic Dachary <loic@dachary.org>
+        dcceac2655bc2474a3be1dcab9fb24d01c3d1375: set COVERAGE with coverage or
+        python-coverage depending on its availability
+
+2011-06-18 00:00:17 +0200 Loic Dachary <loic@dachary.org>
+        7e0d734ad5cad84b7c186b8e70f727546ae27952: update the curl example
+
+2011-06-15 10:15:44 +0200 Loic Dachary <loic@dachary.org>
+
+	Release 1.0.4
+
+        c23bc632e1f88958fc08b7189223457e60b4290d: remove redundant and broken
+        image and empty width:
+
+2011-06-14 11:22:12 +0200 Loic Dachary <loic@dachary.org>
+        ca1a20b976ce63df5aa8cfb7532369f7d069ecbe: Split the poll function of
+        pollable in two : wait and poll. The wait function provides a blocking
+        API where poll adds a timeout feature. Change the service.py notify
+        system to use wait instead of poll since it does not mean anything to
+        timeout internaly. Fixes #148.
+
+2011-06-14 10:11:53 +0200 Loic Dachary <loic@dachary.org>
+        80368094403480a84241ce354386998555804bb5: do nothing if the result is
+        None. Otherwise it would fail because has_key is not a method of None
+
+2011-06-14 10:10:48 +0200 Loic Dachary <loic@dachary.org>
+        bfa31124cc39ceca4279507311a27cb9ec4d2b3e: do not consume errors,
+        otherwise a plugin that tracebacks goes unoticed
+
+2011-06-13 23:43:44 +0200 Loic Dachary <loic@dachary.org>
+        29a294783dab8db941b0db11595703cbbc06b69a: do not send email
+        notifications on pick and vote
+
+2011-06-13 19:02:40 +0200 Loic Dachary <loic@dachary.org>
+        747d7ff95d65c1b6ce4791c78721a59b271b7166: /etc/cardstories must belong
+        to cardstories so that plugins are allowed to create files in it at
+        startup time
+
+2011-06-13 18:31:31 +0200 Loic Dachary <loic@dachary.org>
+        f0d8d32df5e9b072a34fc4c6512f26f84645b71f: add missing
+        python-twisted-conch dependency (needed for manhole)
+
+2011-06-13 02:38:11 +0200 Loic Dachary <loic@dachary.org>
+        4e18861d2d987e41eb661a197b5cd9003692ffbf: Comment out fb display
+        because it does not work yet. Use padding and div to position elements
+        instead of absolute positioning for all, which get confusing when there
+        are so many elements that could be positionned using the normal flow.
+
+2011-06-13 00:23:21 +0200 Loic Dachary <loic@dachary.org>
+        479bafde245be1821a26966eda6d59e4097041cc: lobby and welcome
+
+2011-06-13 00:22:47 +0200 Loic Dachary <loic@dachary.org>
+        f0fe9e42d38ee14ba89265fe5dbd1be3a20d8403: Add temporary placeholder for
+        voter view of the sentence.
+
+2011-06-12 23:57:04 +0200 Loic Dachary <loic@dachary.org>
+        ab784cda84b257f93509bd407d8f735be372ff57: Fixes #78. Button for the
+        solo player mode.
+
+2011-06-12 20:23:02 +0200 Loic Dachary <loic@dachary.org>
+        fca7c5632bca9e8e7b4abbb4ba10d7dee81cf91a: IssueID #30. Add monster.
+
+2011-06-12 19:40:21 +0200 Loic Dachary <loic@dachary.org>
+        9f97baf99a29166f0d0e0f5771e4fc00ba6ef6cb: Fixes #136. it should be
+        players instead of player
+
+2011-06-12 19:37:40 +0200 Loic Dachary <loic@dachary.org>
+        58cd6171337c578a06d9a3c0305e32e0bec8f262: Fixes #134. outline: none;
+        prevents a blue border around textarea.
+
+2011-06-12 19:34:16 +0200 Loic Dachary <loic@dachary.org>
+        8b784c9e1c0108ed2c065387e5ce181f76744f47: Fixes #129. outline: none;
+        prevents a blue border around textarea.
+
+2011-06-12 19:21:56 +0200 Loic Dachary <loic@dachary.org>
+        4f55d51eff97f6d497263985715365aab0105563: Fixes #131. The card is
+        missing the border
+
+2011-06-12 19:11:40 +0200 Loic Dachary <loic@dachary.org>
+        8e7725d57cc3ac232f1cbc1b0671bfe57427cdf4: Fixes #128. The text that is
+        displayed on the white box (a sentence related to the card) should be
+        Helvetica 12pt #000000
+
+2011-06-12 19:03:42 +0200 Loic Dachary <loic@dachary.org>
+        d94b5c46239c9e4b46df80eabe8275aff91d91dd: IssueID #102. Show a card
+        that has no player when reviewing the complete page.
+
+2011-06-12 18:49:42 +0200 Loic Dachary <loic@dachary.org>
+        f8d8f731aeb0a88e99559cb201f153a2cc40e300: bump version 1.0.4
+
+2011-06-12 18:48:01 +0200 Loic Dachary <loic@dachary.org>
+
+	Release 1.0.3
+
+        89ccac8d10bf789b59280529c81ca9a5970346f9: IssueID #102. When a user is
+        discarded because he did not vote, the card must be shown but the
+        player name is not available. Handle this case instead of raising an
+        exception
+
+2011-06-12 00:46:14 +0200 Loic Dachary <loic@dachary.org>
+        ed3ed890e91aaf58ef8d04d39f956ec66a19a31c: final round of installation
+        instructions translations
+
+2011-06-11 01:17:44 +0200 Loic Dachary <loic@dachary.org>
+        04483e06aab16b4a263e657076329ba25478ba03: Change the rule to load the
+        plugin from plugin.py to plugin/plugin.py and rename all relevant
+        files, tests and fixtures. It makes it easier to create self contained
+        plugin directotires. The plugin constructor takes a list of plugins
+        which contains each already loaded plugin. Implement mail notifications
+        plugins for invite + complete + pick + vote.
+
+2011-06-10 21:17:45 +0200 Loic Dachary <loic@dachary.org>
+        8179fdcc6ae6065cd69591a884834c044c08cd80: copy the args before sending
+        them to the poller so that it can alter it without impacting other
+        deferred callback chains
+
+2011-06-08 17:10:55 +0200 Loic Dachary <loic@dachary.org>
+        9f9d9e278c76a1ad53f5fea87ac35bb605d240f1: 100% coverage on the auth.py
+        plugin
+
+2011-06-08 16:25:21 +0200 Loic Dachary <loic@dachary.org>
+        81643c4e00fa30eb517a2317efa4e46dc3db940d: IssueID #90. Write a sentence
+        view - text input box images update
+
+2011-06-08 16:16:09 +0200 Loic Dachary <loic@dachary.org>
+        a6a1268f6d7a4370b99129934c7a6a0e86406bb2: IssueID #74. The
+        cardstories_why class is toggled when clicking on the
+        cardstories_set_why / cardstories_unset_why elements. The CSS is
+        arranged to display the explanation that helps interpret the board
+        restult.
+
+2011-06-08 13:45:17 +0200 Loic Dachary <loic@dachary.org>
+        840463e6fede8d76e3d15e20d4cd9713021c4c67: IssueId #88. Set the
+        background of the author card to green in the board
+
+2011-06-08 11:03:13 +0200 Loic Dachary <loic@dachary.org>
+        835bf3ab5909e0bd39a40fe5fc7df3e1e8282e05: IssueID #89. Update in
+        progress and finished lobby buttons.
+
+2011-06-08 11:02:33 +0200 Loic Dachary <loic@dachary.org>
+        17a763cbcabbe55822082c100d5296648eda77af: add artwork in source
+        distribution
+
+2011-06-08 00:45:25 +0200 Loic Dachary <loic@dachary.org>
+        e8be1fceb7b62441354ab27ad22b50c8fbb82185: sources for the graphics
+
+2011-06-08 00:43:55 +0200 Loic Dachary <loic@dachary.org>
+        c81fe17e4b965a73be89df96d0b32efc4f050c19: Add a place holder for solo
+        mode until nice graphics are done
+
+2011-06-07 11:35:03 +0200 Loic Dachary <loic@dachary.org>
+        b142231d7c26f79f2079063c69520d95af9a65fe: Add poll_discard when
+        creating a solo game to avoid looping on poll
+
+2011-06-05 23:02:33 +0200 Loic Dachary <loic@dachary.org>
+        b46525dbe575fa4c72fc3b30950f9b8eac1ab4bd: Fixes #82. An exception is
+        thrown if no game can be found (5 tries) to build a solo mode where the
+        asking player was not already involved
+
+2011-06-05 22:18:41 +0200 Loic Dachary <loic@dachary.org>
+        4f0330ba5303067bf026610ae2e2ca2c062cbb91: The service handle function
+        must return the result when there is no action in order for a plugin to
+        be able to transparently pass thru it.
+
+2011-06-05 17:48:10 +0200 Loic Dachary <loic@dachary.org>
+        de613264804e1f7335a6bc83e277fafedea29c28: Do not submit a sentence that
+        is the placeholder
+
+2011-06-05 16:08:49 +0200 Loic Dachary <loic@dachary.org>
+        1fa7cef93df9925469ea6135546157d17d6b329f: Fix typos the "run locally"
+        example
+
+2011-06-03 15:38:47 +0200 Loic Dachary <loic@dachary.org>
+        ca9e144df7cf2ed48a0d4ceaceaf28142df8865e: Fixes #72. The game_notify
+        function will raise an exception of the game for which there is a
+        notification is modified. This helps prevent unexpected recursion. The
+        event broadcasted when the game is created is assigned the type 'init'.
+        The /etc/default/cardstories file is set to load the solo plugin by
+        default. The makefile is modified to run tests on each plugin directory
+        where they are available. The solo mode is implemented as a plugin that
+        catches action=solo in the query string. It goes to voting state and
+        complete state automatically when the user acts. Client side the
+        action=solo is sent and when the game_id of the solo game is received,
+        the player is redirected to it, as if it just registered to a regular
+        game.
+
+2011-06-01 16:58:11 +0200 Loic Dachary <loic@dachary.org>
+        895c92864e74ae4dfc97f4e79a50c5b88aacede2: self document the accept
+        method as an example in tests/plugin.py
+
+2011-06-01 22:30:50 +0200 Loic Dachary <loic@dachary.org>
+        16900104eed533ca0b6ed6ff2b33ae3c6b72e1df: Implement plugins that are
+        loaded at runtime. They can register on the service using the listen()
+        function. They can also rework the incoming HTTP request or the
+        outgoing JSON result. The auth.py module is transformed into a plugin.
+        The ability to send mail when the invitation is an email address has
+        been removed because it is work in progress. Fixes #63
+
+2011-06-01 15:30:50 +0200 Loic Dachary <loic@dachary.org>
+        74552e0032c1aa9242b6f5ea1927d24adf750064: The --plugins are loaded from
+        --plugins-dir. They expose the Plugin class which is instantiated with
+        a single argument : the CardstoriesService instance. IssueID #63
+
+2011-06-06 01:37:27 +0200 Loic Dachary <loic@dachary.org>
+        0e90888eb93b93488c016ae2e38d96153c3eab88: Merge remote-tracking branch
+        'rogerio/feature6-23'
+
+2011-06-06 01:36:44 +0200 Loic Dachary <loic@dachary.org>
+        fba16b552871468501d574bcec08c792e0780dbc: Merge remote-tracking branch
+        'rogerio/feature12'
+
+2011-06-05 15:14:32 -0300 Rogério Hilbert Lima <rogerhil@gmail.com>
+        a2e98793d57d6bdd985d36c8de27e3b2be63c259: Merge of Feature #6
+        (Integrate design mockup: Author - Invitation page) and the Feature #23
+        (Display Facebook inviter & {GAME_URL} substitution). Also fix the
+        advertise test and adds the GAME_URL supplant test.
+
+2011-05-29 17:25:56 -0300 Rogério Hilbert Lima <rogerhil@gmail.com>
+        a550c3b7953deec5df3fc099881c545e4cc5436c: Feature #12 - Integrate
+        design mockup: Author - Confirmation of results publication. Test added
+        and also skin case.
+
+2011-06-05 18:00:12 +0200 Loic Dachary <loic@dachary.org>
+        2f5ce823ae2353d6e229ffdbea677fe61349d1fe: IssueID #81. Algorithm was
+        wrong : missing the author who is always in the game
+
+2011-06-05 15:56:53 +0200 Loic Dachary <loic@dachary.org>
+        291afa082cec2952a2755425ad0866864bdd76ba: Fixes #81. The advertise page
+        is only shown when no players have joined the game yet.
+
+2011-06-03 11:34:52 +0200 Loic Dachary <loic@dachary.org>
+        5cbcbc331001e9b62eff79148ff67649eeccd7e0: Fixes #79. The list of
+        pollers on which to callback() is in a DeferredList and returned to the
+        caller of touch. The same is done for the notifications in
+        CardstoriesService. All callers of touch() are changed to take into
+        account that it became an asynchronous function.
+
+2011-06-02 12:13:01 +0200 Loic Dachary <loic@dachary.org>
+        a0df280c72725fa71a6b148511aeedd79aaf5dc2: Merge remote-tracking branch
+        'rogerio/feature46'
+
+2011-06-02 12:10:11 +0200 Loic Dachary <loic@dachary.org>
+        808e805661feaea1aba682ad87a52fd46a0bd01a: Merge remote-tracking branch
+        'rogerio/bug16'
+
+2011-06-01 12:44:24 +0200 David Blanchard <david@farsides.com>
+        3f3f861d24af0247153418c0d62ea6bf8fe07f29: fixes #58 Results page:
+        Winner appears in the wrong block
+
+2011-06-02 00:36:31 -0300 Rogério Hilbert Lima <rogerhil@gmail.com>
+        6a7351a0eec40bfbe25ed8d74ec32295250bfabb: Fix Bug #16 - Preload "hover"
+        images to prevent them from disappearing on first display
+
+2011-05-29 19:30:15 -0300 Rogério Hilbert <rogerhil@gmail.com>
+        a1adf120303e5d93b9266a29a0f5e983612c3514: Feature #46 - Creates a "Play
+        again" button at the end of a game
+
+2011-05-28 16:18:23 +0200 Loic Dachary <loic@dachary.org>
+        ab43ba53f02de6c8f6e5109e5bfdbc8211a9f443: Remove SSL support until
+        python openssl is fixed
+
+2011-05-28 16:15:55 +0200 Loic Dachary <loic@dachary.org>
+        cbaf5abc0bd22defc08e9cee4c5e9ba77daf7791: The touch() function of game
+        is given arguments describing the reason why it was called. This is
+        most useful to objects receiving an indirect notification thru
+        CardstoriesService fix#62
+
+2011-05-28 14:56:31 +0200 Loic Dachary <loic@dachary.org>
+        c9c68cb4856333078390a4fedecaed57636682bc: Add the listen and notify
+        functions to CardstoriesServices. listen() returns a deferred that will
+        be called when a) the service is started (type start), b) the service
+        is stopped (type stop), c) a game is deleted (type delete), d) a game
+        has changed (type change). The result argument of the callback is a map
+        with a "type" member set as explained above. When the type is either
+        "delete" or "change", it the "game" member is the CardstoriesGame
+        object to which the even relates. The "detail" member further describes
+        the event when the "type" is "change" or it is set to None when the
+        "type" is "delete".  refs#62
+
+2011-05-27 22:03:48 +0200 Loic Dachary <loic@dachary.org>
+        aff7187e7c0c6e5a15b2ac000e44a46a8f578b10: Fixes #70 . Prevent multiple
+        selection of cards
+
+2011-05-27 21:32:38 +0200 Loic Dachary <loic@dachary.org>
+        6cca671ae35a8f6097984295c8de8853aeb3ee6d: Fixes #26. Allows for non
+        ascii characters in player names.
+
+2011-05-27 21:08:54 +0200 Loic Dachary <loic@dachary.org>
+        68e40ea2191caa8e2adc7fdcc969e895ba0bc3ff: add missing images in the
+        lobby
+
+2011-05-27 21:08:41 +0200 Loic Dachary <loic@dachary.org>
+        c4d415cbd9bb91b0922dd8940d972527489e90e4: add missing images in the
+        lobby
+
+2011-05-27 00:04:14 +0200 Loic Dachary <loic@dachary.org>
+        88b0fb9afb5de7625b970732a0f49f550f893cb6: update translations
+
+2011-05-26 23:01:14 +0200 Loic Dachary <loic@dachary.org>
+        7f0cf3b746ad98a8335fdee29bfe7caef5ae88d7: Merge commit
+        '30ecf3820303cd9e170bc79539428aef8ba8343d'
+
+2011-05-26 23:00:58 +0200 Loic Dachary <loic@dachary.org>
+        8da4987035c1b303a30aab59d5168256adededa7: Merge commit
+        '848f9813c9b23b1b8c34f4e05047232670d77365'
+
+2011-05-26 20:13:36 +0200 Loic Dachary <loic@dachary.org>
+        2c789e995164b4414567bfe4f49b04b9d75ae3f8: When the game is loaded from
+        the database because the daemon is relaunched, it must be registered as
+        if it was just created : the players must be notified when it changes.
+        This bug did not occur during the play tests but it was bound to be
+        noticed in production. A game may be in the invitation state during
+        days and the daemon will most probably need to be relaunched at some
+        point for maintainance purposes.
+
+2011-05-26 19:24:03 +0200 Loic Dachary <loic@dachary.org>
+        800e0a39f10685673bee0f9bca64db6aa2a87c1f: remove obsolete images
+
+2011-05-26 18:58:42 +0200 Loic Dachary <loic@dachary.org>
+        1215eafd6f77ae68f829c9222bea81e6dab4d06f: remove the win column because
+        it is unsure if it is going to be useful
+
+2011-05-26 18:58:14 +0200 Loic Dachary <loic@dachary.org>
+        003a0a983e6db1fdba0055850c7d55b4f8bfada2: use color black for credits
+        to improve readability
+
+2011-05-26 18:19:00 +0200 Loic Dachary <loic@dachary.org>
+        8218e3974ea71df0292364a62fd2bfe7a32d06d0: Merge remote-tracking branch
+        'blanchard/master'
+
+2011-05-26 18:18:10 +0200 Loic Dachary <loic@dachary.org>
+        647d5c379d05ab071422fa1cc8357e7e3be42636: Merge remote-tracking branch
+        'antoviaque/master'
+
+2011-05-26 17:51:20 +0200 Xavier Antoviaque <xavier@antoviaque.org>
+        30ecf3820303cd9e170bc79539428aef8ba8343d: Adding card_bg attributes
+        (backgrounds didn't appear). Resubmitted for polishing of mockups
+        implementation.
+
+2011-05-26 17:48:50 +0200 Xavier Antoviaque <xavier@antoviaque.org>
+        848f9813c9b23b1b8c34f4e05047232670d77365: fixes #50 - Adjust card/hand
+        size on pages with jqDock to not cover other elements. Moved elements:
+        card_confirm, "small" size of cards for player_pick/player_vote docks,
+        pick_mask_chose_a_card, cardstories_vote_mask_chose_a_card. Also fixed
+        display of cardstories_sentence (font, size & color) and
+        cardstories_winners (color).
+
+2011-05-26 18:11:19 +0200 Loic Dachary <loic@dachary.org>
+        605864f766ade8804046c4491377f274c1de6303: placeholder selector is
+        cardstories_text for advertise text
+
+2011-05-26 18:08:35 +0200 Loic Dachary <loic@dachary.org>
+        7b32192a39df7e8a17721856e1f0f11587c660ee: fix jslint warnings
+
+2011-05-26 18:05:06 +0200 Loic Dachary <loic@dachary.org>
+        010e0f3a1ed9bd1912b8d0436002bc0ffc9273ff: fix lintian warnings
+
+2011-05-26 17:51:20 +0200 Xavier Antoviaque <xavier@antoviaque.org>
+        2157e24d14bf36762db1f0d6034a6b45e52011cb: Adding card_bg attributes
+        (backgrounds didn't appear). Resubmitted for polishing of mockups
+        implementation.
+
+2011-05-26 17:48:50 +0200 Xavier Antoviaque <xavier@antoviaque.org>
+        7a217a9602411d87c58449404cc0b0a7a13b01e1: fixes #50 - Adjust card/hand
+        size on pages with jqDock to not cover other elements. Moved elements:
+        card_confirm, "small" size of cards for player_pick/player_vote docks,
+        pick_mask_chose_a_card, cardstories_vote_mask_chose_a_card. Also fixed
+        display of cardstories_sentence (font, size & color) and
+        cardstories_winners (color).
+
+2011-05-26 17:48:46 +0200 Loic Dachary <loic@dachary.org>
+        62084d07aec1e82e954c5c3abc6790a099923fe9: Merge remote-tracking branch
+        'antoviaque/master'
+
+2011-05-26 17:32:32 +0200 Loic Dachary <loic@dachary.org>
+        d94ba58256013837faa8950437efa7ebb422213b: The "go to vote" button is
+        hidden unless there has been enough cards picked by players. The "game
+        complete" button is displayed as inactive unless there has been enough
+        votes to finish the game
+
+2011-05-26 16:58:56 +0200 Loic Dachary <loic@dachary.org>
+        61c33d0e0fb381b7a5af168bd5033a44027af291: The placeholder displayed to
+        write a sentence describing the card is removed when starting to type
+        the sentence.
+
+2011-05-26 16:44:13 +0200 David Blanchard <david@farsides.com>
+        6660679aa383cb8448e3c5eda1a875b60396dd5a: resized the card, #19
+
+2011-05-26 15:53:42 +0200 Loic Dachary <loic@dachary.org>
+        f402e7e6d92609c94ff768881c65df5339c81a5a: The list of invitations is
+        stored in a cookie. When the invitation text area is displayed, it is
+        initialized with the content of the cookie. The cookie is reset when
+        clicking on the "invite more friends" link of the owner view of the
+        invitation state
+
+2011-05-26 15:46:18 +0200 Xavier Antoviaque <xavier@antoviaque.org>
+        bb8d086247722afb7b992b3235eb887e9e58cf0c: fixes #48 - Internal server
+        error when trying to invite the same player twice. Now allows it, only
+        the first invitation is taken into account for each player in each
+        game.
+
+2011-05-26 14:35:53 +0200 Loic Dachary <loic@dachary.org>
+        bf595d3351aac2ccd0641c9fdcf42561927a92a4: renaming implies a conflict
+        and a replacement
+
+2011-05-26 14:34:42 +0200 Loic Dachary <loic@dachary.org>
+        21603a3a976e0a77e76e941d7084705b1be8f350: section changed to games
+        (Closes: #627180); depends on httpd or nginx (Closes: #627181)
+
+2011-05-26 14:33:42 +0200 Loic Dachary <loic@dachary.org>
+        66799579d963ac076ea15cbd23de8ab846c54635: jquery plugin to display a
+        placeholder
+
+2011-05-26 12:30:32 +0200 Xavier Antoviaque <xavier@antoviaque.org>
+        f09b6d2758901ff36b87174e68f645eff8931ce2: fixes #49 - Don't include the
+        player_id in the URL when playing with the cookie value. Changed the
+        permalink formatting, to never include the player_id there. Extracted
+        the player_id addition to a new reload_link() function which only
+        include the player_id attribute if it is already in the URL. Fixed the
+        a.cardstories_go_lobby button behavior - instead of linking through a
+        <a href> directly to the index.html, used the reload() function so that
+        it takes advantage of the same reload_link() construction logic (and
+        thus avoid dropping the player_id attribute when it is there). Factored
+        the a.cardstories_go_lobby to the root of cardstories_game and moved
+        cardstories_lobby up in the hierarchy, on the same level as
+        cardstories_game & cardstories_extra, to allow for easier templating.
+
+2011-05-26 11:14:57 +0200 Loic Dachary <loic@dachary.org>
+        e3892d594dee404010a7c44491fbd018c49b635e: email validation error must
+        be positioned horizontaly
+
+2011-05-25 16:10:45 +0200 Xavier Antoviaque <xavier@antoviaque.org>
+        45f8c55a3e942f13cdfd262f5441aaae764c297f: fixes #7 - Display the
+        game_id in the URL during the invitation phase. The page is now
+        reload()'ed to display the permalink in the URL from
+        create_write_sentence. The list of pending invitations is returned (if
+        any) by the webservice when the owner of the game requests the game
+        state. invitation() now calls the advertise function if there are no
+        pending invitations. Otherwise the invitation_owner function is called.
+
+2011-05-25 12:19:17 +0200 Xavier Antoviaque <xavier@antoviaque.org>
+        56436a57dc3e2e6c1eed05b89cedbf06f801cb45: Added temporary files to
+        .gitignore
+
+2011-05-22 20:08:50 +0200 Xavier Antoviaque <xavier@antoviaque.org>
+        3b6ac538a10da88a27e2009e53d2f1033e3b0718: Adds validation of user email
+        on 'email' view. Removed the test on the "enter" key and binded on
+        submit() instead, as jquery doesn't seem to trigger the submit event
+        based on a fake click() or "enter" keypress.
+
+2011-05-24 08:01:10 +0200 Loic Dachary <loic@dachary.org>
+        5d1764d801313347f3098f598be5e76051e3d5bd: Move border-style: hidden
+        away from the index.html where it was insert for debug purposes only
+
+2011-05-24 00:51:42 +0200 Loic Dachary <loic@dachary.org>
+        f2e1e074b2af9743d8e676de52279c7549320cd5: Merge remote-tracking branch
+        'blanchard/master'
+
+2011-05-24 00:05:53 +0200 Loic Dachary <loic@dachary.org>
+        3a3ada3d943935245b0a283d46f548f94e043c99: disable openssl until
+        http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=622154 is fixed
+
+2011-05-23 16:38:46 +0200 David Blanchard <david@farsides.com>
+        a09dd9c8e76f8d25558a0e704dad83432b4436cf: fixes #19 integration of
+        design mockup: author - write a sentence
+
+2011-05-22 18:15:04 +0200 David Blanchard <david@farsides.com>
+        5ef2000440b6cc79dc67c031722a3c050ebc0523: fixes #19 integration of
+        design mockup: author - write a sentence
+
+2011-05-22 18:06:58 +0200 Loic Dachary <loic@dachary.org>
+        ea2a56ba55746b0338b420c0bd91048e6aa65099: Integrate the lobby in
+        progress. Integrate the "my card" marker on the vote page
+
+2011-05-22 14:51:15 +0200 Loic Dachary <loic@dachary.org>
+        b96eb34b5610f04c89a9378d2020d0a98f193352: Integrate the player wait
+        phase (pick and vote) using medium sized cards
+
+2011-05-22 09:46:08 +0200 Loic Dachary <loic@dachary.org>
+        7776343074ddd967416f20ade7f544f3caa69e53: rename the skin function from
+        name to email to follow the function name change in
+        jquery.cardstories.js
+
+2011-05-21 21:33:34 +0200 Loic Dachary <loic@dachary.org>
+        5d6c5a5ba2f8808bfd62f65637e6512f52387e6b: Integrate the owner view of
+        the voting phase and the complete view, both for the owner and the
+        player. They have been worked on all at once because they share the
+        result board.
+
+2011-05-21 21:32:18 +0200 Loic Dachary <loic@dachary.org>
+        3e6028170534eddc9f6a3333553025f24b0b700d: In complete state, allow for
+        the display of the comma separated list of winners. The tests for the
+        sentence is moved in the test for board result because it is where the
+        substitution is done. The skin for the owner view of the voting phase
+        is given a game state that shows all the slots.
+
+2011-05-21 16:48:55 +0200 Loic Dachary <loic@dachary.org>
+        76cc9f47efe674f7b65cc878133f03986c63bf95: Integrate the owner view of
+        the invitation state
+
+2011-05-21 16:48:23 +0200 Loic Dachary <loic@dachary.org>
+        957db071370333b52ef20028582388d5926d0891: The owner invitation function
+        also displays the sentence
+
+2011-05-21 12:48:11 +0200 Loic Dachary <loic@dachary.org>
+        ad8c116f05f75860c05918887fb428af8c346576: The "in progress" and
+        "finished" lobby pages are integrated
+
+2011-05-21 12:46:47 +0200 Loic Dachary <loic@dachary.org>
+        36e7f1928e01bfe6751e1ea1d82a588c440d51d6: The lobby tab that switches
+        between "finished" games and "in progress" games is now implemented as
+        two separate images instead of a single one
+
+2011-05-21 07:51:54 +0200 Loic Dachary <loic@dachary.org>
+        8d4e2b17148152692e8544906096f916c560a884: Integrate the page where the
+        author picks a card
+
+2011-05-20 22:08:54 +0200 Loic Dachary <loic@dachary.org>
+        633c5b83a227f695a4c4123e4abcd8bb73990b60: Fixes #13. Integrate the
+        player vote page and remove the background of the non selected cards
+        for the picking page too
+
+2011-05-20 22:05:09 +0200 Loic Dachary <loic@dachary.org>
+        e58286a98f67bcf87cc6a19fbb9c6a4e316267cd: fixes #17 - Update cards
+        borders and back of cards
+
+2011-05-20 22:03:51 +0200 Loic Dachary <loic@dachary.org>
+        1707dd06a6e438c10fd7a9a10faed9499f8f7a75: If the cards template
+        background meta information does not set card_bg (or it is the empty
+        string), remove the src attribute so that it is not displayed at all.
+        The card selection for players do not show a white background around
+        cards.
+
+2011-05-20 16:41:12 +0200 Xavier Antoviaque <xavier@antoviaque.org>
+        b57a10cef9acaa459a5602bade9ff2f8e418cbae: fixes #38 - Missing text on
+        subscribe page. Also changed the font of the email input field to match
+        mockup.
+
+2011-05-20 15:02:36 +0200 Xavier Antoviaque <xavier@antoviaque.org>
+        d4beffa14858fc7673c2153b43da904069ab9bf7: fixes #37 - Subscribe view:
+        Hitting enter in the email doesn't submit. Also renamed from "name" to
+        "email" to take advantage of the browser autocompletion. Set cookies to
+        'null' value to unset them instead of '' in tests. Added functions to
+        simulate keypress/keydown to allow to simulate the behaviour in tests
+
+2011-05-20 14:34:39 +0200 Loic Dachary <loic@dachary.org>
+        a75d886e992e9fd354d932b15742f364e74d7fbf: Replace the logo. Integrate
+        the invitation_pick page. Modify the behavior of the select_cards
+        function so that it sets the cardstories_card_confirm_right class on
+        the first cardstories_active parent above the confirmation element.
+        This is done so that CSS selectors can chose to hide or show elements
+        depending on wether a confirmation shows to the right or to the left of
+        the cards. The middle meta tag is interpreted as equal or greater
+        instead of equal. Otherwise it is confusing, mostly because the index
+        starts at zero. The confirmation element and behavior is shared with
+        the game author card selection as well as the vote and both have been
+        fixed to work with the newer behavior. IssueID #13.
+
+2011-05-20 11:53:48 +0200 Loic Dachary <loic@dachary.org>
+        9c19764d5ed80275c9b37002fb9b406114024209: Test that going to complete
+        state while a poll is running works fine : since the poll depends on
+        the game and that the complete destroys the game, there is a potential
+        for race condition. Increase the verbosity of the adbapi connection
+        pool. Display a very verbose stack trace in the logs in case of a
+        traceback, which is convenient for debugging and can be matched with
+        the less verbose stack trace sent back to the client. The game not
+        found error is triggered by the following scenario : open 6 tabs in
+        firefox and it will create 6 long polls, therefore reaching the maximum
+        number of simultaneous connections to the same server. This triggers a
+        race condition where a poll is scheduled to be sent by the client but
+        held back by firefox. If the game completes before firefox allows for
+        the poll to be sent, it will trigger an error because it references a
+        game that no longer exists. fix#65
+
+2011-05-19 21:02:34 +0200 Loic Dachary <loic@dachary.org>
+        aa34362c8bc6ed499cdfe1118103a65878306e11: move the OK / CANCEL buttons
+        to a place where they can be clicked, otherwise it is just impossible
+        to play a game
+
+2011-05-19 01:29:41 +0200 Loic Dachary <loic@dachary.org>
+        7b3b4a336e83e6e599f31a4bdc688cbf1122f29c: Include the all.css file when
+        running the tests. Although it is not match for a real CSS check, it
+        helps ensure the code will actually behave as expected when run with
+        the all.css loaded. The changes mostly involve a) cookies, b) using
+        css('display') instead of is(':visible') which makes for more precise
+        tests that will require more maintainance and c) ensuring that the
+        elements on which the tests are run are not display: none such as was
+        the case for the display_or_select_cards tests
+
+2011-05-19 00:44:27 +0200 Loic Dachary <loic@dachary.org>
+        eec14eb1c1b7e801cd1079438a024b38eaff0d5e: Implement a credits overlay
+        displayed on top of the current page with copyright information. A
+        close button dismisses the overlay. A on line credit line is added to
+        the bottom of each game page. Add loic email to copyright. Remove
+        cardstories_copyright class because credits replaces it. fix#18
+
+2011-05-18 19:31:19 +0200 Loic Dachary <loic@dachary.org>
+        c07dd9f17c57bd819cdb4bcb7ec04335b18c16a4: Merge branch 'master' of
+        ssh://cardstories.politis.vm.gnt/var/www/cardstories
+
+2011-05-18 18:46:21 +0200 Xavier Antoviaque <xavier@antoviaque.org>
+        fe6310040954d57998b39bca9e1eaeafcf5d95c9: Added DOM elements & CSS for
+        the body of subscribe screen, autofocus of input field ref#41
+
+2011-05-18 18:46:21 +0200 Xavier Antoviaque <xavier@antoviaque.org>
+        d797cd9e40c48ebc2e18642dfd048b01658cbfac: ref#41 Added DOM elements &
+        CSS for the body of subscribe screen, autofocus of input field
+
+2011-05-18 16:48:14 +0200 Xavier Antoviaque <xavier@antoviaque.org>
+        96af682bd63769d6c8b88911d0b30937ab95c469: Ticket #41 - Split
+        .cardstories <div> container in two (.cardstories_game and
+        .cardstories_extra) to allow to differentiate disposition (change the
+        logo, use a different background...)
+
+2011-05-18 15:40:38 +0200 Xavier Antoviaque <xavier@antoviaque.org>
+        7ac5230bf5053c817ba09259a5ff8d3b774d572a: Ticket #42 - Replaced the
+        central background with the new one (adds transparent borders and
+        includes the blue line)
+
+2011-05-18 15:13:39 +0200 Xavier Antoviaque <xavier@antoviaque.org>
+        76630787786469e84c0c47ccf8ff7ebdd9d26377: Added background image for
+        the game surroundings
+
+2011-05-18 14:33:40 +0200 Xavier Antoviaque <xavier@antoviaque.org>
+        54d08523bb96266ef716d3814a9bc6aa01429d70: Fixed centering - Used
+        display:table CSS to avoid top being cut on small browser windows
+
+2011-05-17 13:22:50 +0200 Loic Dachary <loic@dachary.org>
+        93b813ff6826c7b88f51c1f0d642a2512ecd5b95: Instead of modifying the CSS,
+        change the JavaScript behavior. This is slightly more complicated but
+        it allows for testing and it keeps the z-index logic into one place
+        fix#69
+
+2011-05-17 12:39:18 +0200 Loic Dachary <loic@dachary.org>
+        ac4658e76660baee81423ecf1355a1b8459d9541: Merge remote-tracking branch
+        'blanchard/master'
+
+2011-05-17 09:53:02 +0200 Loic Dachary <loic@dachary.org>
+        da06b3319e1f9b6e48812672736bb8525ec882c3: When a player voted for a
+        card, it is shown a page to confirm his choice and let her/him know
+        that other players are also expected to vote a card before the game can
+        proceed further. The button to change the vote has been merged with the
+        button to pick another card in the CSS, as well as the display of the
+        card. The tests for the pick state were wrong in expecting the wait
+        page to show: the test was removed.
+
+2011-05-17 01:15:26 +0200 Loic Dachary <loic@dachary.org>
+        366f6efd6c32d99828b8550eb28ce44c369ff34d: replace the counter with the
+        newer progress images. The complete phase needs an additional CSS class
+        to differentiate the owner from the player. Slightly reorganize the CSS
+        stanzas defining the application pages.
+
+2011-05-16 23:45:21 +0200 Loic Dachary <loic@dachary.org>
+        1866767dddeccbe2b08d03ed02c03a153a2fe3e6: make sure the link to the
+        menu has a z-index higher than the decorations of the page that may
+        overlap its position (in the wait state for instance)
+
+2011-05-16 23:42:50 +0200 Loic Dachary <loic@dachary.org>
+        5f07efc64e5b24838028e4fa4eb9fe2b48bdddf6: display a link to the lobby,
+        that is to the page without a query
+
+2011-05-16 22:30:55 +0200 Loic Dachary <loic@dachary.org>
+        c54daacea76bfd7bafe49177c81b623aa709d055: same mockups but all 1024x768
+        and meaningfull names
+
+2011-05-16 01:53:15 +0200 Loic Dachary <loic@dachary.org>
+        bafd072f7ac1b43a5141e5445b1f2bd01fe81794: when a player has chosen a
+        card, it is shown a page to confirm his choice and let her/him know
+        that other players are also expected to chose a card before the game
+        can proceed further. fix#73
+
+2011-05-16 01:02:00 +0200 Loic Dachary <loic@dachary.org>
+        4353edb8c1da161a8cb66e7ab63654e542058c60: only center horizontaly to
+        prevent hiding the top should the browser window be too small
+
+2011-05-15 22:54:53 +0200 Loic Dachary <loic@dachary.org>
+        14543529a789f52f3e698cb33baccd2cd8f18f05: artwork source files are
+        obsolete
+
+2011-05-15 22:53:26 +0200 Loic Dachary <loic@dachary.org>
+        d9f7bd8e5f7265c3b39b8880f4113de1fc6870c2: updated mockups
+
+2011-05-15 20:03:23 +0200 Loic Dachary <loic@dachary.org>
+        490025e5488ccb15b3866d92144e08bd2c036371: Comment : activate the button
+        to publish the results if the game is ready
+
+2011-05-15 20:01:16 +0200 Loic Dachary <loic@dachary.org>
+        0de0c1a872d684405788d377faa005803130ad98: <div
+        class="cardstories_submit"></div> has been replaced by
+        cardstories_card_confirm
+
+2011-05-15 19:56:59 +0200 Loic Dachary <loic@dachary.org>
+        dce4cd4f711845223c4364e1f7a24609097cfee5: prevent flicker when loading
+        the cards to be displayed : jqDock will remove display none when they
+        are ready
+
+2011-05-15 18:00:26 +0200 da <da@da-portable-ubuntu.(none)>
+        822f1e7d2eab32fdadb2cb3a8840acb82a208d07: ticket 69 : when author
+        selects the card (step 1 - pick a card), the card should become
+        entirely visible
+
+2011-05-05 14:36:55 +0200 Xavier Antoviaque <xavier@antoviaque.org>
+        3b4cb56492e6168556cae466f36b4e58b75f5abc: Centered game on page and
+        added background color
+
+2011-05-15 15:57:58 +0200 Loic Dachary <loic@dachary.org>
+        f69a02b52a183a9de892f159b08ad1d64454c64e: display the complete view in
+        vote_owner fix#67
+
+2011-05-15 15:09:56 +0200 Loic Dachary <loic@dachary.org>
+        4edad02f32eb1801fbf18b99c8b5a2c9e261249e: add missing images for thumb
+        size of card selection
+
+2011-05-15 15:05:15 +0200 Loic Dachary <loic@dachary.org>
+        14588ff89ada1ffd1acdd8be52f2b23429d06e85: remove conflict resolution
+        leftovers
+
+2011-05-05 14:52:25 +0200 Xavier Antoviaque <xavier@antoviaque.org>
+        8a7428201e927a55c70222056e11ce8446a556d5:
+        http://cardstori.es/trac/ticket/29 Show entries in the lobby table as
+        links (underline)
+
+2011-05-05 15:00:34 +0200 Xavier Antoviaque <xavier@antoviaque.org>
+        97e329ad73c467edf6f0b499e9837fc68b7c3e7d:
+        http://cardstori.es/trac/ticket/46 Wrong positioning of "pick a card"
+        illustration
+
+2011-05-05 14:24:28 +0200 Xavier Antoviaque <xavier@antoviaque.org>
+        f6533473fd784c0666c72449b61a7254a8c9130f:
+        http://cardstori.es/trac/ticket/28 - When an item is clickable, the
+        mouse cursor should change from "arrow" to "hand" (missing
+        differentiation between clickable & non-clickable cards)
+
+2011-05-15 13:54:25 +0200 da <da@da-portable-ubuntu.(none)>
+        39cbe890a6b7ac9887060e4ef72a128daffbbc42: updated new version of cards
+        (ticket #63)
+
+2011-05-15 12:42:36 +0200 Loic Dachary <loic@dachary.org>
+        806b7c0b8d0a2c3ad6340c2b6c3315af9b9258e0: fix jslint errors
+
+2011-05-15 12:05:15 +0200 Loic Dachary <loic@dachary.org>
+        fba3426e6af5d8effa757d51877703b9cc85b4ec: remove double content
+
+2011-05-15 11:00:13 +0200 Loic Dachary <loic@dachary.org>
+        7bcaf63bc57f247244aa7ef826711d28caeae573: copy copyright information
+        from debian/copyright
+
+2011-05-15 10:56:30 +0200 Loic Dachary <loic@dachary.org>
+        6e8c9518ad0cffb85c671df72a4f4e2dde47463d: ignore swo and pid files
+
+2011-05-13 12:12:38 +0200 Loic Dachary <loic@dachary.org>
+        51d419ddfcafa6db887ffc67c09c57b3dcb83fe5: add loic to dachary in
+        copyright
+
+2011-05-13 11:14:56 +0200 Loic Dachary <loic@dachary.org>
+        650e1ef68b88949429e647b902d4c47eb2fb1b50: only use player_id for invite
+        if present and work with an empty list otherwise fix#62
+
+2011-05-12 19:43:51 +0200 Loic Dachary <loic@dachary.org>
+        de0b886c9a9b88fc3b4107ca97743b74ec75d17e: rollback to jquery-1.5.1
+        because jquery-1.6 has issues with iframes. Implement invitation_owner
+        with display_or_select_cards
+
+2011-05-12 19:40:52 +0200 Loic Dachary <loic@dachary.org>
+        6efb99ddccd2b6e0063ee893febf0cda7b71ba8b: label voting must be over the
+        larger invitation background
+
+2011-05-12 19:40:03 +0200 Loic Dachary <loic@dachary.org>
+        7fa8aad4a0a6f119f54562f6ec6d07fee6166a2e: distribute jpg gif
+
+2011-05-12 14:32:59 +0200 Loic Dachary <loic@dachary.org>
+        541b868acd1097ebc44d6e1c23ee47d8a5a12959: remove obsolete images of
+        various sizes refs#39
+
+2011-05-12 14:29:13 +0200 Loic Dachary <loic@dachary.org>
+        32df65baa0387b0941396c4c6f6e0e04c03dfa59: bump to version 1.0.3
+
+2011-05-12 14:22:21 +0200 Loic Dachary <loic@dachary.org>
+        da0d0814f90edb8e3a42e6943cf804206ae956a0: add japanese translation of
+        installation menu fix#66
+
+2011-05-12 14:01:18 +0200 Loic Dachary <loic@dachary.org>
+        898729397895a22bee7406969a8777f8087b30dc: Remove the player_select_card
+        function. Modify vote function to use select_cards. Change the
+        prototype of the vote function to use objects instead of cards so that
+        setting the title or deactivating a card is easier. Set the OK / CANCEL
+        buttons for the selection confirmation to a default label to be used
+        while waiting for the graphics. Do not use the setLabel function of
+        jqDock and replace it with a div managed outside of jqDock. fix#39
+
+2011-05-12 10:19:55 +0200 Loic Dachary <loic@dachary.org>
+        b3ab48e4f2ae15f40c881e12d1eb71d6a8e6aed8: use select_cards instead of
+        player_select_card for invitation_pick. Calling invitation twice in the
+        test will not work because a) onReady will not be called twice on the
+        same dock, b) if jqDock("destroy") is called it will not restore the
+        original content of the image list and jqDock will refuse to initialize
+        because the a element contain two img instead of just one. refs#39
+
+2011-05-11 22:50:35 +0200 Loic Dachary <loic@dachary.org>
+        e97f46bc4e9cd3c82cdecae42cd3082610d45f4e: implement and test the
+        display_or_select_cards and select_cards functions. Use them for the
+        game creation. They are designed to be common to invite and vote but
+        the switch is not complete yet. Only pick 7 cards from the deck when
+        creating it. The create function returns a deferred that is used for
+        testing purposes because it simplifies waiting for the jqDock onReady
+        asynchronous callback. More verbose explanations at
+        http://dachary.org/?p=447 refs#39
+
+2011-05-10 18:15:50 +0200 Loic Dachary <loic@dachary.org>
+        e276f5d399839446773da0581a50767383e97946: Merge branch 'debian' of
+        http://git.comum.org/lincoln/cardstories
+
+2011-05-10 15:37:55 +0200 Loic Dachary <loic@dachary.org>
+        e2f2e948780b3ae0d54e4a45cd32acd27f8cb92f: backport inclusion of the
+        html part in the index.html used for tests as well as the removal of
+        the extra class qualifier .cardstories_create that made the test fail
+        fix#31
+
+2011-05-04 18:43:41 +0200 Xavier Antoviaque <xavier@antoviaque.org>
+        1d09fe99daaf49391ea96df3cd0caef46eb7891d: Cleaned-up previous fix and
+        added test (does not run properly)
+
+2011-05-04 16:23:48 +0200 Xavier Antoviaque <xavier@antoviaque.org>
+        1a13d283cf0bb262d316165e8f1d5fd9f3fc64ab: Fixed
+        http://cardstori.es/trac/ticket/31 - Make the "Invite cool friends"
+        button work
+
+2011-05-01 19:45:43 -0300 Lincoln de Sousa <lincoln@comum.org>
+        fee1870d87e8aacff36d39518e4ab39d57d4d216: Adding a default
+        configuration for apache2 to Debian the pkg (Closes: #9)
+
+2011-05-01 21:08:28 +0200 Loic Dachary <loic@dachary.org>
+        994c19034b08839587d258af87b3a3f314199be5: stats LOC
+
+2011-04-27 00:38:15 +0200 Loic Dachary <loic@dachary.org>
+        22d89baf219b6b0625aa8f78e5ac7a8e976890b9: remove circular reference
+        from game to service in destroy
+
+2011-04-26 18:25:59 +0200 Loic Dachary <loic@dachary.org>
+        0c33828913c22cbb7ab0475a11139da21282242a: poll-timeout and game-timeout
+        must be integers, not strings
+
+2011-04-26 18:16:01 +0200 Loic Dachary <loic@dachary.org>
+        9942623a90c894d936805daf66fa36bcbfcdc4f3: get rid of --loop option and
+        associated code and tests because they are left over from the original
+        code borrowed from wspool
+
+2011-04-26 17:50:45 +0200 Loic Dachary <loic@dachary.org>
+        4a0369898821ae7c48c791e56e58edd5105d4a60: bump to 1.0.3
+
+2011-04-26 17:45:51 +0200 Loic Dachary <loic@dachary.org>
+        7f6fd991a7cf8dafafe217325e42cb878e38d789: add --manhole to create a
+        debug shell that can be ssh -p 2222
+
+2011-04-25 20:02:21 +0200 Loic Dachary <loic@dachary.org>
+        57e3c3fad50b1810e41f4cbbce57442b6ee0e463: 1.0.2
+
+2011-04-25 19:58:30 +0200 Loic Dachary <loic@dachary.org>
+        9e93391e67e76d55f9c972d82fb92bb20c133198: release 1.0.2
+
+2011-04-25 19:57:49 +0200 Loic Dachary <loic@dachary.org>
+        869a7160d53f20c565241b153c0d8f82528875b4: add missing medium images
+
+2011-04-25 15:38:02 +0200 Loic Dachary <loic@dachary.org>
+        230981bf848dd1abc118d8dc8fdc68d78cd42f6e: relax version constraints on
+        twisted + python-all to build on squeeze + maverick
+
+2011-04-25 13:49:31 +0200 Loic Dachary <loic@dachary.org>
+        d5ad032fcdb60c4d8f5725add42875aa4c42fd9c: fix lintian warnings
+
+2011-04-25 12:59:09 +0200 Loic Dachary <loic@dachary.org>
+        4615bd8eb979e101b2e333af78826f304113dbe1: release 1.0.1. Switch to
+        dh_python2 according to
+        http://wiki.debian.org/Python/PythonSupportToDHPython2 to close#3
+
+2011-04-25 12:11:41 +0200 Loic Dachary <loic@dachary.org>
+        85a36a9372a2d534497e6570369a71205939f602: bump to 1.0.1 and lower the
+        twisted dependency to 10.1 instead of 10.2
+
+2011-04-25 11:06:08 +0200 Loic Dachary <loic@dachary.org>
+        b9fbd735bc5e02db1660109d7f252b48a4334f3d: remove jscoverage directory
+        during clean
+
+2011-04-24 22:56:39 +0200 Loic Dachary <loic@dachary.org>
+        4c3568c5add5a6d073119789eceacef18a20a4e5: Fix typo
+
+2011-04-24 22:09:25 +0200 Loic Dachary <loic@dachary.org>
+        60a5d1c69b551e855283f6a2a63bdc466bd7c8fa: random.shuffle the board
+        before storing it in the database (close#2)
+
+2011-04-24 18:08:29 +0200 Loic Dachary <loic@dachary.org>
+        f7ff05fadd62ba961954919e8f120fbbfcc6d05f: close#4
+
+2011-04-24 00:04:34 +0200 Loic Dachary <loic@dachary.org>
+        1a819910fdbdcc3e75c9a40bfae1473cf5e5998b: run tests after building
+
+2011-04-23 23:24:05 +0200 Loic Dachary <loic@dachary.org>
+        df0236f4d25066be898e3e23c8433c5c11461918: fix debian package
+
+2011-04-23 17:01:20 +0200 Loic Dachary <loic@dachary.org>
+        412be4a813acf7f5defa77cf97b8f1f330f7bd0c: lintian clean package, not
+        sure if it actually works yet
+
+2011-04-23 12:33:41 +0200 Loic Dachary <loic@dachary.org>
+        47f4de7e91b7e2670cb680a24b150bab7b71331d: databases must be in var/lib
+        not var/cache
+
+2011-04-23 12:02:35 +0200 Loic Dachary <loic@dachary.org>
+        84310e191096c3256d6d4d87bc375dc94d1204b1: update licensing information
+
+2011-04-23 10:46:46 +0200 Loic Dachary <loic@dachary.org>
+        2819552dd2a37ace73493414dd6d8e59d7fecc03: create a clean distribution
+        tarbal
+
+2011-04-22 15:26:51 +0200 Loic Dachary <loic@dachary.org>
+        4356900c2af324a901c4791912a350a40611c892: if an invitation is of the
+        form foo@bar, send a mail
+
+2011-04-22 10:22:06 +0200 Loic Dachary <loic@dachary.org>
+        7b93adf993371ff387436ea68a79a9471ea47d85: split game in two, delegate
+        argument parsing to service and keep the game logic in game
+
+2011-04-22 09:24:37 +0200 Loic Dachary <loic@dachary.org>
+        0f55f8a451642dae23c51bac4d530fe2b8b90c4b: split invite in two, delegate
+        argument parsing to service and keep the game logic in game
+
+2011-04-22 09:18:37 +0200 Loic Dachary <loic@dachary.org>
+        1d4a840d2426eebb0a181cb89215aba7f7598307: split voting in two, delegate
+        argument parsing to service and keep the game logic in game
+
+2011-04-22 09:14:09 +0200 Loic Dachary <loic@dachary.org>
+        a057209e13a2d4598e7faef1fe9048ca32dc115a: split complete in two,
+        delegate argument parsing to service and keep the game logic in game
+
+2011-04-22 09:02:08 +0200 Loic Dachary <loic@dachary.org>
+        202b28b92649f0448d258f74cdb6e3fbb7920fba: split vote in two, delegate
+        argument parsing to service and keep the game logic in game
+
+2011-04-22 08:53:44 +0200 Loic Dachary <loic@dachary.org>
+        69983f62606f774901eaa63cfaa1e5c8622dc9b5: split pick in two, delegate
+        argument parsing to service and keep the game logic in game
+
+2011-04-22 08:46:54 +0200 Loic Dachary <loic@dachary.org>
+        7643c21f15f86e54c0d29972fa1398009e4f041c: split player2game in two,
+        delegate argument parsing to service and keep the game logic in game
+
+2011-04-22 08:41:28 +0200 Loic Dachary <loic@dachary.org>
+        99536ddd87d9e86c78c8a2cb88fd80c4c4250cce: split participate in two,
+        delegate argument parsing to service and keep the game logic in game
+
+2011-04-22 01:25:35 +0200 Loic Dachary <loic@dachary.org>
+        f99a4eda238f1379da5ec77a86769297cf64cc2e: move create argument parsing
+        from game to service
+
+2011-04-17 21:26:28 +0200 Loic Dachary <loic@dachary.org>
+        c315cad4be08d8ca36f75565bc06ae8bd2f5e2cf: poll tests
+
+2011-04-17 17:25:53 +0200 Loic Dachary <loic@dachary.org>
+        2ce3291446ccd976ed22f879a01868219aead3e8: the game moves on
+        automatically after --game-timeout seconds
+
+2011-04-17 09:21:26 +0200 Loic Dachary <loic@dachary.org>
+        6dc6dbe1826a5eeebf3bed4366362301744029b7: test for proper utf8 decoding
+
+2011-04-17 00:43:35 +0200 Loic Dachary <loic@dachary.org>
+        caca0e819107c273761651a98f8a1935a71d19c9: added missing * 1000 for
+        calculation of the player timeout value
+
+2011-04-17 00:40:48 +0200 Loic Dachary <loic@dachary.org>
+        f6a23d6f81103df44a86ad1ca7257f196486b612: added missing * 1000 for
+        calculation of the player timeout value
+
+2011-04-16 23:13:52 +0200 Loic Dachary <loic@dachary.org>
+        5edd1023d205101c84dcf4d1bc38aa74ebff2dd2: page is utf-8 encoded
+
+2011-04-16 23:13:33 +0200 Loic Dachary <loic@dachary.org>
+        8cf81b2502285b28a11e3a94babf9fc6e166e294: sentence is utf-8 encoded
+
+2011-04-16 10:48:42 +0200 Loic Dachary <loic@dachary.org>
+        8b8ac279e52c602bf9c2ed4f120f8a9ce879e2a6: ignore errors while exiting
+        the page : the ajax call will be interrupted but that is not a concern
+
+2011-04-16 10:25:15 +0200 Loic Dachary <loic@dachary.org>
+        984cec13aeb43681f2de08f594bc6507943fb138: do not display the pager if
+        the table is empty
+
+2011-04-15 21:38:22 +0200 Loic Dachary <loic@dachary.org>
+        47ee16feff6fc86d52d8730f6e9756916b9825ea: width typo
+
+2011-04-15 17:15:56 +0200 Loic Dachary <loic@dachary.org>
+        44609e70417aae64e91734459ff09b358a9ede2d: implement long poll client
+        side + add method to figure out the modified date for a player based on
+        the modified dates of all the games it is involved in
+
+2011-04-14 12:49:29 +0200 Loic Dachary <loic@dachary.org>
+        e25752d93a277000d1ed407afed70ad3bfa62344: implement long poll
+
+2011-04-12 18:25:35 +0200 Loic Dachary <loic@dachary.org>
+        0ef7ac677cc33b58a60389198287b5ac53bade89: re-architecture the server
+        code to create the game object that exists in the service when the game
+        is in progress
+
+2011-04-10 21:48:36 +0200 Loic Dachary <loic@dachary.org>
+        10aa1e53799de63340a32bf840f67bdb8b04a462: do not rely on redirection
+
+2011-04-10 19:21:05 +0200 Loic Dachary <loic@dachary.org>
+        5f7a334d81d12178a16da168e4548042103cfe72: python and debian packaging,
+        /agpl implementation
+
+2011-04-09 21:13:41 +0200 Loic Dachary <loic@dachary.org>
+        8888c1bccbeed587fb2d95381e285ceb9b6172a1: complete the skin gallery and
+        get rid of camel case function names
+
+2011-04-09 17:05:54 +0200 Loic Dachary <loic@dachary.org>
+        fa0b4609c9011834270ce9958b6cdd1a7c1f9df5: implement lobbyFinished
+
+2011-04-08 23:24:16 +0200 Loic Dachary <loic@dachary.org>
+        7118575ce96a0f993fc1c1f6b03b452f81c8c119: implement the lobbyInProgress
+
+2011-04-06 19:51:03 +0200 Loic Dachary <loic@dachary.org>
+        947b0e88ab97aef6352517f23e37279ae4901d83: implement invitations
+
+2011-04-06 13:17:10 +0200 Loic Dachary <loic@dachary.org>
+        7cf885bd5014d8f6d4763435e53780c8974815e9: add a deck of cards, 100px
+        wide
+
+2011-04-06 13:16:28 +0200 Loic Dachary <loic@dachary.org>
+        bdcfaf2a06c9ae981bb86836f26bda0402c453d4: integrate the complete state
+
+2011-04-05 17:40:40 +0200 Loic Dachary <loic@dachary.org>
+        136f94a2c324373e79254f250186b7d057d33c01: integrate the vote state from
+        the player point of view
+
+2011-04-05 15:24:59 +0200 Loic Dachary <loic@dachary.org>
+        3aa708a836d573525cb177d20c7d5e33f6d12358: integrate the invitation
+        state, when a player picks a card
+
+2011-04-03 18:40:53 +0200 Loic Dachary <loic@dachary.org>
+        eeacb86f6cb35751ede3439bc87a1e0d042f98c2: integrate the player pick a
+        card state
+
+2011-04-02 13:43:33 +0200 Loic Dachary <loic@dachary.org>
+        ca0337820f8134f9e62ef28d4cbd4904d232498d: move interface_cs.svg to
+        static/mockups so that it can be referenced
+
+2011-04-02 12:40:57 +0200 Loic Dachary <loic@dachary.org>
+        e9cad6a7300dfcf76d83282cffdfcb122a881d17: integration of the owner view
+        of the invitation state
+
+2011-04-02 00:00:28 +0200 Loic Dachary <loic@dachary.org>
+        887c926993fa2dee9769865bfab11a85a2004763: integration of the second
+        creation state : writing the sentence
+
+2011-04-01 22:41:10 +0200 Loic Dachary <loic@dachary.org>
+        b35e64d7c229d2e575ea4d47656d4b42e2c1c6dc: integration of the first
+        state
+
+2011-04-01 17:14:18 +0200 Loic Dachary <loic@dachary.org>
+        53e715ee411bfd3e1e243099d5332a94965447c5: skin the create game state
+
+2011-04-01 11:59:33 +0200 Loic Dachary <loic@dachary.org>
+        edeaa9bf5d949e5c11a914137641950a42c98139: split the create phase in two
+
+2011-03-31 00:03:41 +0200 Loic Dachary <loic@dachary.org>
+        b0f01361247dfd643659118a07ec0cac6ad5c98d: implement basic
+        authentication without password
+
+2011-03-30 11:31:39 +0200 Loic Dachary <loic@dachary.org>
+        f4d51e95fa0d719a6f66e3ffdb7e232d8fd8427f: basic authentication mapping
+        names to id
+
+2011-03-26 00:21:28 +0100 Loic Dachary <loic@dachary.org>
+        ce8c0fdd58eda6c30653b6f61861ea5e125bd8b6: implement the last state of
+        the game : complete
+
+2011-03-25 21:56:36 +0100 Loic Dachary <loic@dachary.org>
+        963b3fe536c09fe9c7d182b9689602a2abd8480c: implement the winner_card
+        field in the game method
+
+2011-03-25 21:41:56 +0100 Loic Dachary <loic@dachary.org>
+        8f5e65033ae89bdef1ddafb7aa8b0007a4d9f732: keep jslint happy
+
+2011-03-25 21:40:36 +0100 Loic Dachary <loic@dachary.org>
+        a84600431f242674c8fe751a6c6fef4364ce8977: implement the voting phase as
+        seen by an anonymous viewer
+
+2011-03-25 20:52:56 +0100 Loic Dachary <loic@dachary.org>
+        2dc21a838dbb2ebade5b3cc39cc84e95f58eab7c: implement the voting phase
+        from the owner point of view
+
+2011-03-25 15:45:38 +0100 Loic Dachary <loic@bet.dachary.org>
+        6552730fce65a6c54349e85f938ff1892baee962: use toggleClass instead of a
+        test
+
+2011-03-25 08:27:17 -0400 Loic Dachary <loic@dachary.org>
+        6e78ce87a4c49722cb24e4ecfa1e9eae89ef1f42: unbind click functions before
+        binding them to avoid accumulation of handlers
+
+2011-03-25 08:17:16 -0400 Loic Dachary <loic@dachary.org>
+        61359de0f3582478706fc54336df19c215b3391b: implement the voter function
+        and user interface. Introduce the send function in the js client to be
+        used when an ajax request to the server must be followed by a refresh
+        of the game status
+
+2011-03-25 06:05:20 -0400 Loic Dachary <loic@dachary.org>
+        d0fc737723fb8eccbebc6440ce064a4ddc10edc7: vote is no longer the index
+        on the board but the actual value of the card
+
+2011-03-25 05:26:16 -0400 Loic Dachary <loic@dachary.org>
+        acecb519adc2a4397d9086f958a4aa1c08286164: complete the implementation
+        of the invitation state, with a transition to the vote state
+
+2011-03-24 20:04:56 -0400 Loic Dachary <loic@dachary.org>
+        599d06a6801e8167d9e146a632774f365e98836a: add images to the tests
+
+2011-03-24 18:25:23 -0400 Loic Dachary <loic@dachary.org>
+        faef3e0a25d549fbbcbada405382e5ae43be45aa: implement invitation_pick
+        code and tests
+
+2011-03-24 16:11:25 -0400 Loic Dachary <loic@dachary.org>
+        8d875c5c40f88def315be3bd35eedfbe4abac336: implement owner view of the
+        invitation state
+
+2011-03-24 12:11:06 -0400 Loic Dachary <loic@dachary.org>
+        315a8ef0c41d81f86bec8db347d974556fa80879: implement participate
+        interaction and associated tests
+
+2011-03-24 07:42:42 -0400 Loic Dachary <loic@dachary.org>
+        6e4955d0032aa0f72e94f89c39107c95a5a97675: implement and test the game
+        method from the point of view of the game owner
+
+2011-03-24 06:22:55 -0400 Loic Dachary <loic@dachary.org>
+        0404c2090fd9690d2df57b5525c8fc317ecf6517: xhr_error must be from $this
+
+2011-03-24 06:14:52 -0400 Loic Dachary <loic@dachary.org>
+        96952b4058cf884f14f734230d933fee70cccc27: fix HTML structure bug
+
+2011-03-24 06:12:02 -0400 Loic Dachary <loic@dachary.org>
+        b1f3ab033fe7667787816862a3a2e96dfc570dad: test the game creation widget
+
+2011-03-24 05:55:51 -0400 Loic Dachary <loic@dachary.org>
+        544c23896fb35fe80cedcac86d729baa76af9656: implement the game creation
+        interface with tests
+
+2011-03-23 14:20:11 -0400 Loic Dachary <loic@dachary.org>
+        b4c74f95972c607656883dcaa9c848ed2e16290d: implement the game method :
+        returns the state of the game
+
+2011-03-23 12:40:05 -0400 Loic Dachary <loic@dachary.org>
+        e049f8d3d676d3abdc8b584b55defae62e15d7fb: handle error back in handle
+        when it contains a UserWarning
+
+2011-03-23 08:44:31 -0400 Loic Dachary <loic@dachary.org>
+        d52351d99c004b679664dafc8017bb8b254fdd6e: first working version of the
+        webservice
+
+2011-03-23 08:22:24 -0400 Loic Dachary <loic@dachary.org>
+        1f54e2ac9913ce8bd6ceea56fc680fa909dcfb32: implement and test the handle
+        method. stylistic changes
+
+2011-03-23 03:44:18 -0400 Loic Dachary <loic@dachary.org>
+        2e4d068eefe591ad655f575efa9a41db232413d2: document the algorithm
+
+2011-03-22 16:49:05 -0400 Loic Dachary <loic@dachary.org>
+        81bf8025f62856ecd4d9fe06ecd5e5433d52510a: implement game completion
+
+2011-03-22 12:41:52 -0400 Loic Dachary <loic@dachary.org>
+        69caa716fab43f7d5bcaa146d60a6ea2689fee4f: implement vote
+
+2011-03-22 12:06:01 -0400 Loic Dachary <loic@dachary.org>
+        6c34ad756082ffc7f2d91c9cae96dfa68870a5ee: implement participate,
+        player2game, pick
+
+2011-03-22 11:44:50 -0400 Loic Dachary <loic@dachary.org>
+        10eb46a2c5314e3e23c1cb3415cdfeb24e15bd3d: implement participate,
+        player2game, pick
+
+2011-03-20 20:09:45 -0400 Loic Dachary <loic@dachary.org>
+        5f4c4388187161718178b871738c936fabec0754: table creation
+
+2011-03-20 18:39:06 -0400 Loic Dachary <loic@dachary.org>
+        2874b7148f5b8157520b81618eb1ba7c521dc55e: *** empty log message ***
+
+2011-03-20 15:36:55 -0400 Loic Dachary <loic@dachary.org>
+        54dabccfa9f888bda624ef1abeb912d5e5500fc5: set of cards
+
+2011-03-20 15:27:36 -0400 Loic Dachary <loic@dachary.org>
+        406219a9fd84bc0492db56b6ec9285d9136aabac: interface mockups
+
+2011-03-20 15:19:30 -0400 Loic Dachary <loic@dachary.org>
+        0195f2d741e83145f5b80a7a386b342d2c3af9b3: add copyrights
+
+2011-03-20 13:43:32 -0400 Loic Dachary <loic@dachary.org>
+        dfcf4e12d83c89dd5d838d2e61dd4fec23ae9b63: initial
+
+# Interpreted by emacs
+# Local Variables:
+# compile-command: "git log --tags --'pretty=format:%w(80,0,8)%ai %an <%ae>%n%H: %s%n' | sed -e 's/ *$//'"
+# End:
