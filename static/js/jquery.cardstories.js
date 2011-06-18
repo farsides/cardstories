@@ -152,7 +152,7 @@
                 $('.cardstories_text', element).text(text);
             }
             var load_text = function ($o) {
-                if ($o.val().trim().length != 0) {
+                if ($o.val().trim().length !== 0) {
                     $('.cardstories_submit').addClass('cardstories_submit_ready');
                     $('.cardstories_submit', element).unbind('click').click(function() {
                         var text = $('.cardstories_text', element).val();
@@ -168,7 +168,7 @@
                     $('.cardstories_submit', element).unbind('click');
                     $('.cardstories_submit').removeClass('cardstories_submit_ready');
                 }
-            }
+            };
             load_text($('.cardstories_text', element));
             $('.cardstories_text', element).unbind('keyup').keyup(function () {
                 load_text($(this));
