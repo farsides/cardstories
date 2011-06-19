@@ -30,8 +30,8 @@ from twisted.mail.smtp import sendmail
 
 class Plugin:
 
-    ALLOWED = ( 'pick', 'vote', 'complete', 'invite' )
-    SEND = ( 'complete', 'invite' )
+    ALLOWED = ( 'invite', 'pick', 'voting', 'vote', 'complete' )
+    SEND = ( 'invite', 'voting', 'complete' )
 
     def __init__(self, service, plugins):
         for plugin in plugins:
@@ -92,7 +92,7 @@ class Plugin:
         recipients = game.get_players()
         recipients.remove(player_id)
         ( player_email, ) = yield self.resolve([ player_id ])
-        yield self.send("Cardstories - New card picked!", recipients, template,
+        yield self.send("Cardstories - New card picked.", recipients, template,
                         { 'game_id': game.get_id(),
                           'player_email': player_email
                           })
@@ -107,15 +107,22 @@ class Plugin:
     def invite(self, game, details):
         recipients = details['invited']
         ( owner_email, ) = yield self.resolve([ game.get_owner_id() ])
-        yield self.send("You have been invited to a CardStories Game!", recipients, self.templates['invite'],
+        yield self.send("Cardstories - You have been invited to a Game.", recipients, self.templates['invite'],
                         { 'game_id': game.get_id(),
                           'owner_email': owner_email
                           })
     
     @defer.inlineCallbacks
+    def voting(self, game, details):
+        recipients = game.get_players()
+        recipients.remove(game.get_owner_id())
+        yield self.send("Cardstories - you can vote.", recipients, self.templates['voting'],
+                        { 'game_id': game.get_id() })
+    
+    @defer.inlineCallbacks
     def complete(self, game, details):
         ( owner_email, ) = yield self.resolve([ game.get_owner_id() ])
-        yield self.send("Cardstories - Results!", game.get_players(), self.templates['complete'],
+        yield self.send("Cardstories - Results.", game.get_players(), self.templates['complete'],
                         { 'game_id': game.get_id(),
                           'owner_email': owner_email
                           })

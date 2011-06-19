@@ -136,12 +136,14 @@ class MailTest(unittest.TestCase):
             #     elif self.count == 5:
             #         self.assertSubstring('player_email=%s' % self.player2_name, email)
             elif self.count == 2:
+                self.assertSubstring('_VOTING_', email)
+            elif self.count == 3:
                 self.assertSubstring('_COMPLETE_', email)
                 self.assertSubstring('owner_email=%s' % self.owner_name, email)
             return defer.succeed(True)
         plugin.sendmail = sendmail
         yield self.complete_game()
-        self.assertEqual(self.count, 2)
+        self.assertEqual(self.count, 3)
 
     @defer.inlineCallbacks
     def test02_send_nothing(self):
