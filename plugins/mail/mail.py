@@ -31,7 +31,6 @@ from twisted.mail.smtp import sendmail
 class Plugin:
 
     ALLOWED = ( 'invite', 'pick', 'voting', 'vote', 'complete' )
-    SEND = ( 'invite', 'voting', 'complete' )
 
     def __init__(self, service, plugins):
         for plugin in plugins:
@@ -60,7 +59,7 @@ class Plugin:
         d = defer.succeed(True)
         if changes != None and changes['type'] == 'change':
             details = changes['details']
-            if details['type'] in self.SEND:
+            if details['type'] in self.ALLOWED:
                 d = getattr(self, details['type'])(changes['game'], details)
         self.service.listen().addCallback(self.self_notify)
         return d
@@ -89,10 +88,8 @@ class Plugin:
 
     @defer.inlineCallbacks
     def pick_or_vote(self, game, player_id, subject, template):
-        recipients = game.get_players()
-        recipients.remove(player_id)
         ( player_email, ) = yield self.resolve([ player_id ])
-        yield self.send("Cardstories - New card picked.", recipients, template,
+        yield self.send("Cardstories - New card picked.", [ game.get_owner_id() ], template,
                         { 'game_id': game.get_id(),
                           'player_email': player_email
                           })
