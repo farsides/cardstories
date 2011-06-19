@@ -51,7 +51,7 @@ for dirpath, dirnames, filenames in os.walk('plugins/mail/templates'):
 data_files.append(['/etc/cardstories/plugins/mail', [ 'plugins/mail/mail.xml' ]])
 
 setup(name='cardstories',
-      version='1.0.4',
+      version='1.0.5',
       requires=['twisted (>=10.1.0)'],
       description='Find out a card using a sentence made up by another player',
       author='Loic Dachary',

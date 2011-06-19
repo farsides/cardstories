@@ -26,8 +26,9 @@ PYTHONPATH=.:etc/cardstories twistd --nodaemon cardstories --static $(pwd)/stati
 curl --silent 'http://localhost:5000/resource?action=lobby&my=true&player_id=TEST&in_progress=yes'
 
 To create a source distribution use:
-v=1.0.4 ; python setup.py sdist --dist-dir .. ; mv ../cardstories-$v.tar.gz ../cardstories_$v.orig.tar.gz
+v=1.0.5 ; python setup.py sdist --dist-dir .. ; mv ../cardstories-$v.tar.gz ../cardstories_$v.orig.tar.gz
 To create the Debian GNU/Linux package use:
 dpkg-buildpackage -S -uc -us
 
 As of Apr, 26th 2011 there are 321 LOC of JavaScript, 687 LOC of Python = 1008 LOC
+As of Jun, 19th 2011 there are 473 LOC of JavaScript, 896 LOC of Python = 1369 LOC
