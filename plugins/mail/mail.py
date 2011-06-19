@@ -89,7 +89,7 @@ class Plugin:
     @defer.inlineCallbacks
     def pick_or_vote(self, game, player_id, subject, template):
         ( player_email, ) = yield self.resolve([ player_id ])
-        yield self.send("Cardstories - New card picked.", [ game.get_owner_id() ], template,
+        yield self.send(subject, [ game.get_owner_id() ], template,
                         { 'game_id': game.get_id(),
                           'player_email': player_email
                           })
