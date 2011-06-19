@@ -9,6 +9,17 @@ CARDSTORIES_USER=cardstories
 CARDSTORIES_GROUP=nogroup
 
 #
+# Number of seconds after which an inactive game will
+# be canceled.
+# A day
+# GAME_TIMEOUT=86400
+# A week
+# GAME_TIMEOUT=604800
+# A month
+# GAME_TIMEOUT=2592000
+#
+GAME_TIMEOUT=86400
+#
 # White space separated list of plugins to load.
 # The order matters.
 #
