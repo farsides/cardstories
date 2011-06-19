@@ -158,9 +158,15 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
                                            # twisted web decodes %c3%a9
         utf8_sentence = u'SENTENCE \xe9'
         owner_id = 15
+        self.inited = False
+        def accept(event):
+            self.assertEquals(event['details']['type'], 'init')
+            self.inited = True
+        self.service.listen().addCallback(accept)
         result = yield self.service.create({ 'card': [card],
                                              'sentence': [str_sentence],
                                              'owner_id': [owner_id]})
+        self.assertTrue(self.inited, 'init event called')
         c = self.db.cursor()
         c.execute("SELECT * FROM games")
         rows = c.fetchall()

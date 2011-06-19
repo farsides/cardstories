@@ -226,10 +226,10 @@ class CardstoriesService(service.Service):
         self.games[game.get_id()] = game
         args = {
             'type': 'init',
-            'modified': [game.modified],
+            'modified': [0],
             'game_id': [game.get_id()]
             }
-        d = game.poll(args)
+        d = game.wait(args)
         d.addCallback(self.game_notify, game.get_id())
 
     def create(self, args):
