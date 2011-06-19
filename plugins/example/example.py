@@ -96,11 +96,9 @@ class Plugin:
         return 'example'
 
     #
-    # This function is registered by __init__ to listen on every
+    # The accept function is registered by __init__ to listen on every
     # CardstoriesService events, as described in the body of the
-    # function. The function registered to listen to
-    # CardstoriesService must register itself again to catch the next
-    # event.
+    # function. It must register itself again to catch the next event.
     #
     # If accept raises an exception, it will show in the cardstories
     # log with a backtrace. Such an exception is otherwise ignored
@@ -136,8 +134,6 @@ class Plugin:
     # will be kept consistent for backward compatibility.
     #
     def accept(self, event):
-        if event == None:
-            self.event = 'NONE'
         # 
         # Received when startService() is called on CardstoriesService.
         # The ongoing games are loaded from the database (after a daemon
@@ -145,7 +141,7 @@ class Plugin:
         # and the event occurs before any connection is accepted from
         # clients.
         #
-        elif event['type'] == 'start':
+        if event['type'] == 'start':
             self.event = 'START'
         #
         # Received when stopService() is about to be called on
@@ -240,31 +236,107 @@ class Plugin:
         self.service.listen().addCallback(self.accept)
         return defer.succeed(True)
 
-    @defer.inlineCallbacks
-    def preprocess(self, result, request):
-        for (key, values) in request.args.iteritems():
-            if key == 'player_id' or key == 'owner_id':
-                new_values = []
-                for value in values:
-                    value = value.decode('utf-8')
-                    row = yield self.db.runQuery("SELECT id FROM players WHERE name = ?", [ value ])
-                    if len(row) == 0:
-                        id = yield self.db.runInteraction(self.create, value)
-                    else:
-                        id = row[0][0]
-                    new_values.append(id)
-                request.args[key] = new_values
-        defer.returnValue(result)
+    #
+    # The preprocess method will be called if the plugin name ( as
+    # returned by the name() method) is listed in the --plugins-pre-process
+    # argument. For instance if
+    #
+    # --plugins-pre-process="auth example"
+    #
+    # is given, the 
+    #   auth.Plugin().preprocess
+    # method will be called and immediately after the
+    #   example.Plugin().preprocess
+    # method will be campled. The order in which the methods are called matches
+    # the order in which the plugin name show in the option. 
+    # The return value of the first plugin preprocess method is given as an
+    # argument to the second plugin process method, and so on. Each preprocess
+    # method is expected to have side effects on the incoming structures. For
+    # instance, the auth module is expected to replace the human readable 
+    # strings with numerical identifiers.
+    #
+    # The same applies to the postprocess method (
+    # --plugins-post-process ) and the differences between the two are
+    # document before each function.
+    #
 
-    @defer.inlineCallbacks
+    #
+    # The preprocess method is registered as a deferred callback which
+    # is triggered when a client request is received by the
+    # cardstories server and before it is handled by the
+    # CardstoriesService handle function.
+    #
+    # The result argument is the return value of the previous callback.
+    # The request argument is a Request instance, as defined by twisted.web
+    #
+    # The request argument contains a args member that is a dictionary
+    # where keys are arguments extracted from the QUERY_STRING. For instance
+    #
+    # QUERY_STRING=foo=1&foo=2&bar=3
+    #
+    # will translate into
+    #
+    # request.args == { 'foo': ['1', '2'], 'bar': ['3'] }
+    #
+    # After the last plugin preprocess method returns, the request
+    # argument is given to the CardstoriesService handle method for
+    # processing, together with the returned result.
+    #
+    # If the function throws, it will show a full traceback in the logs,
+    # abort the request and a Server Error (500) will be returned, with the
+    # traceback. 
+    #
+    def preprocess(self, result, request):
+        #
+        # This is an example of action that is intercepted by a plugin, 
+        # is has no meaning outside this plugin.
+        #
+        if request.args['action'][0] == 'echo':
+            # 
+            # Deleting the request.args dictionary entry "action" 
+            # is the recommended way to intercept a request and 
+            # tell CardstoriesService to not do anything with it. 
+            # When this is done, the result argument will be transparently 
+            # returned to the user.
+            # 
+            del request.args['action'] 
+            #
+            # The same request object will be given to the next plugin in
+            # the callback queue. It will therefore see each value with a
+            # trailing X appended to it.  This is the technique used to
+            # translated the human readable user name into a numerical
+            # id.
+            #
+            for (key, values) in request.args.iteritems():
+                request.args[key] = map(lambda value: value + 'X', values)
+            #
+            # Because the 'action' dictionary entry has been removed above,
+            # the value returned by the preprocess function will be transparently
+            # used as the body of the request answer. In this case the incoming
+            # arguments are echoed back to the client.
+            #
+            return defer.succeed(request.args)
+        else:
+            self.preprocessed = request.args
+            return defer.succeed(result)
+
+    #
+    # The preprocess method is registered as a deferred callback which
+    # is triggered after a request has been processed by the
+    # CardstoriesService handle function.
+    #
+    # If the function throws, it will show a full traceback in the logs,
+    # abort the request and a Server Error (500) will be returned, with the
+    # traceback. 
+    #
     def postprocess(self, result):
-        if result and result.has_key('players'):
-            for player in result['players']:
-                row = yield self.db.runQuery("SELECT name FROM players WHERE id = ?", [ player[0] ])
-                player[0] = row[0][0]
-        if result and result.has_key('invited') and result['invited']:
-            invited = result['invited'];
-            for index in range(len(invited)):
-                row = yield self.db.runQuery("SELECT name FROM players WHERE id = ?", [ invited[index] ])
-                invited[index] = row[0][0]
-        defer.returnValue(result)
+        if result.has_key('echo') and result['echo'][0] == 'yesX':
+            #
+            # If the result is an intercepted echo from the preprocess
+            # method that was passed to postprocess transparently, augment it.
+            #
+            result['MORE'] = 'YES'
+            return defer.succeed(result)
+        else:
+            self.postprocessed = result
+            return defer.succeed(result)

@@ -22,7 +22,9 @@ sys.path.insert(0, os.path.abspath("../..")) # so that for M-x pdb works
 
 from twisted.trial import unittest, runner, reporter
 from twisted.internet import reactor, defer
+from twisted.web import server
 
+from cardstories.site import CardstoriesTree, CardstoriesSite, CardstoriesResource
 from cardstories.service import CardstoriesService
 from plugins.example import example
 
@@ -43,7 +45,22 @@ class ExampleTestInit(unittest.TestCase):
             def listen(self):
                 return defer.succeed(True)
 
-        
+class Transport:
+    host = None
+
+    def getPeer(self):
+        return None
+    def getHost(self):
+        return self.host
+
+class Channel:
+    def __init__(self, site):
+        self.transport = Transport()
+        self.site = site
+
+    def requestDone(self, request):
+        pass
+
 class ExampleTest(unittest.TestCase):
 
     def setUp(self):
@@ -52,52 +69,53 @@ class ExampleTest(unittest.TestCase):
             os.unlink(self.database)
         self.service = CardstoriesService({'db': self.database,
                                            'plugins-confdir': 'CONFDIR',
-                                           'plugins-libdir': 'LIBDIR'
+                                           'plugins-libdir': 'LIBDIR',
+                                           'static': 'STATIC'
                                            })
 
     @defer.inlineCallbacks
-    def complete_game(self):
+    def complete_game(self, send):
         self.winner_card = winner_card = 5
         self.player1 = 1001
         self.player2 = 1002
         self.owner_id = 1003
         sentence = 'SENTENCE'
-        game = yield self.service.create({ 'card': [winner_card],
+        game = yield send('create', { 'card': [winner_card],
                                            'sentence': [sentence],
                                            'owner_id': [self.owner_id]})
         self.game_id = game['game_id']
-        yield self.service.invite({ 'action': ['invite'],
+        yield send('invite', { 'action': ['invite'],
                                     'game_id': [self.game_id],
                                     'player_id': [self.player1],
                                     'owner_id': [self.owner_id] })
         for player_id in ( self.player1, self.player2 ):
-            yield self.service.participate({ 'action': ['participate'],
+            yield send('participate', { 'action': ['participate'],
                                              'player_id': [player_id],
                                              'game_id': [self.game_id] })
             player = yield self.service.player2game({ 'action': ['player2game'],
                                                       'player_id': [player_id],
                                                       'game_id': [self.game_id] })
             card = player['cards'][0]
-            yield self.service.pick({ 'action': ['pick'],
+            yield send('pick', { 'action': ['pick'],
                                       'player_id': [player_id],
                                       'game_id': [self.game_id],
                                       'card': [card] })
         
-        yield self.service.voting({ 'action': ['voting'],
+        yield send('voting', { 'action': ['voting'],
                                     'game_id': [self.game_id],
                                     'owner_id': [self.owner_id] })
         winner_id = self.player1
-        yield self.service.vote({ 'action': ['vote'],
+        yield send('vote', { 'action': ['vote'],
                                   'game_id': [self.game_id],
                                   'player_id': [winner_id],
                                   'card': [winner_card] })
         loser_id = self.player2
-        yield self.service.vote({ 'action': ['vote'],
+        yield send('vote', { 'action': ['vote'],
                                   'game_id': [self.game_id],
                                   'player_id': [loser_id],
                                   'card': [120] })
         self.assertTrue(self.service.games.has_key(self.game_id))
-        yield self.service.complete({ 'action': ['complete'],
+        yield send('complete', { 'action': ['complete'],
                                       'game_id': [self.game_id],
                                       'owner_id': [self.owner_id] })
         self.assertFalse(self.service.games.has_key(self.game_id))
@@ -119,7 +137,7 @@ class ExampleTest(unittest.TestCase):
             return defer.succeed(True)
         self.service.listen().addCallback(accept)
         self.service.startService()
-        yield self.complete_game()
+        yield self.complete_game(lambda action, args: getattr(self.service, action)(args))
         yield self.service.stopService()
         self.assertEqual(self.events, ['START',
                                        'CHANGE init',
@@ -135,9 +153,54 @@ class ExampleTest(unittest.TestCase):
                                        'DELETE',
                                        'STOP'])
 
+    def test02_transparent_transform(self):
+        self.site = CardstoriesSite(CardstoriesTree(self.service),
+                                    { 'plugins-pre-process': 'example',
+                                      'plugins-post-process': 'example' },
+                                    [ example.Plugin(self.service, [ AnotherPlugin() ]) ])
+        r = server.Request(Channel(self.site), True)
+        r.site = r.channel.site
+        input = ''
+        r.gotLength(len(input))
+        r.handleContentChunk(input)
+        r.queued = 0
+        d = r.notifyFinish()
+        def finish(result):
+            self.assertSubstring('\r\n\r\n{"arg1": ["val10X", "val11X"], "arg2": ["val20X"], "MORE": "YES", "echo": ["yesX"]}', r.transport.getvalue())
+        d.addCallback(finish)
+        r.requestReceived('GET', '/resource?action=echo&echo=yes&arg1=val10&arg1=val11&arg2=val20', '')
+        return d
+
+    @defer.inlineCallbacks
+    def test03_pipeline(self):
+        plugin = example.Plugin(self.service, [ AnotherPlugin() ])
+        resource = CardstoriesResource(self.service)
+        self.site = CardstoriesSite(CardstoriesTree(self.service),
+                                    { 'plugins-pre-process': 'example',
+                                      'plugins-post-process': 'example' },
+                                    [ plugin ])
+        self.collected = []
+        def collect(result):
+            print [ plugin.preprocessed, plugin.postprocessed ]
+            self.collected.append([ plugin.preprocessed, plugin.postprocessed ])
+            return result
+        def send(action, args):
+            args['action'] = [action];
+            request = server.Request(Channel(self.site), True)
+            request.site = self.site
+            request.args = args
+            request.method = 'GET'
+            d = resource.wrap_http(request)
+            d.addCallback(collect)
+            return d
+        self.service.startService()
+        yield self.complete_game(send)
+        yield self.service.stopService()
+        self.assertEqual(self.events, [])
+
 def Run():
     loader = runner.TestLoader()
-#    loader.methodPrefix = "test_trynow"
+    loader.methodPrefix = "test03_"
     suite = loader.suiteFactory()
     suite.addTest(loader.loadClass(ExampleTest))
 

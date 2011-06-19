@@ -75,6 +75,7 @@ class CardstoriesResource(resource.Resource):
             request.setHeader("content-type", 'application/json; charset="UTF-8"')
             request.write(content)
             request.finish()
+            return result
         d.addCallbacks(succeed, failed)
 
         return d
