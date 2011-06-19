@@ -61,7 +61,7 @@ class CardstoriesResource(resource.Resource):
 
         # catch errors and dump a trace ...
         def failed(reason):
-            reason.printDetailedTraceback()
+            reason.printTraceback()
             body = reason.getTraceback()
             request.setResponseCode(http.INTERNAL_SERVER_ERROR)
             request.setHeader('content-type',"text/html")

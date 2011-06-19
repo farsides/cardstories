@@ -79,7 +79,7 @@ class ExampleTest(unittest.TestCase):
         self.player1 = 1001
         self.player2 = 1002
         self.owner_id = 1003
-        sentence = 'SENTENCE'
+        self.sentence = sentence = 'SENTENCE'
         game = yield send('create', { 'card': [winner_card],
                                            'sentence': [sentence],
                                            'owner_id': [self.owner_id]})
@@ -181,7 +181,6 @@ class ExampleTest(unittest.TestCase):
                                     [ plugin ])
         self.collected = []
         def collect(result):
-            print [ plugin.preprocessed, plugin.postprocessed ]
             self.collected.append([ plugin.preprocessed, plugin.postprocessed ])
             return result
         def send(action, args):
@@ -196,11 +195,109 @@ class ExampleTest(unittest.TestCase):
         self.service.startService()
         yield self.complete_game(send)
         yield self.service.stopService()
-        self.assertEqual(self.events, [])
+        count = 0
+        self.assertEquals(self.collected[count],
+                          [{'action': ['create'],
+                            'card': [self.winner_card],
+                            'owner_id': [self.owner_id],
+                            'sentence': [self.sentence]},
+                           {'game_id': self.game_id}]);
+        count += 1
+        del self.collected[count][1]['modified']
+        self.assertEquals(self.collected[count],
+                          [{'action': ['invite'],
+                            'game_id': [self.game_id],
+                            'owner_id': [self.owner_id],
+                            'player_id': [self.player1]},
+                           {'game_id': [self.game_id],
+                            'invited': [self.player1],
+                            'type': 'invite'}]);
+        count += 1
+        del self.collected[count][1]['modified']
+        self.assertEquals(self.collected[count],
+                          [{'action': ['participate'],
+                            'game_id': [self.game_id],
+                            'player_id': [self.player1]},
+                           {'game_id': [self.game_id],
+                            'player_id': self.player1,
+                            'type': 'participate'}]);
+        count += 1
+        del self.collected[count][1]['modified']
+        player1_card = self.collected[count][0]['card'][0]
+        self.assertEquals(self.collected[count],
+                          [{'action': ['pick'],
+                            'card': [player1_card],
+                            'game_id': [self.game_id],
+                            'player_id': [self.player1]},
+                           {'card': player1_card,
+                            'game_id': [self.game_id],
+                            'player_id': self.player1,
+                            'type': 'pick'}]);
+        count += 1
+        del self.collected[count][1]['modified']
+        self.assertEquals(self.collected[count],
+                          [{'action': ['participate'],
+                            'game_id': [self.game_id],
+                            'player_id': [self.player2]},
+                           {'game_id': [self.game_id],
+                            'player_id': self.player2,
+                            'type': 'participate'}]);
+        count += 1
+        del self.collected[count][1]['modified']
+        player2_card = self.collected[count][0]['card'][0]
+        self.assertEquals(self.collected[count],
+                          [{'action': ['pick'],
+                            'card': [player2_card],
+                            'game_id': [self.game_id],
+                            'player_id': [self.player2]},
+                           {'card': player2_card,
+                            'game_id': [self.game_id],
+                            'player_id': self.player2,
+                            'type': 'pick'}]);
+        count += 1
+        del self.collected[count][1]['modified']
+        self.assertEquals(self.collected[count],
+                          [{'action': ['voting'],
+                            'game_id': [self.game_id],
+                            'owner_id': [self.owner_id]},
+                           {'game_id': [self.game_id], 'type': 'voting'}]);
+        count += 1
+        del self.collected[count][1]['modified']
+        self.assertEquals(self.collected[count],
+                          [{'action': ['vote'],
+                            'card': [self.winner_card],
+                            'game_id': [self.game_id],
+                            'player_id': [self.player1]},
+                           {'game_id': [self.game_id],
+                            'player_id': self.player1,
+                            'type': 'vote',
+                            'vote': self.winner_card}]);
+        count += 1
+        del self.collected[count][1]['modified']
+        looser_card = self.collected[count][0]['card'][0]
+        self.assertEquals(self.collected[count],
+                          [{'action': ['vote'],
+                            'card': [looser_card],
+                            'game_id': [self.game_id],
+                            'player_id': [self.player2]},
+                           {'game_id': [self.game_id],
+                            'player_id': self.player2,
+                            'type': 'vote',
+                            'vote': looser_card}]);
+        count += 1
+        del self.collected[count][1]['modified']
+        self.assertEquals(self.collected[count],
+                          [{'action': ['complete'],
+                            'game_id': [self.game_id],
+                            'owner_id': [self.owner_id]},
+                           {'game_id': [self.game_id],
+                            'type': 'complete'}]);
+        count += 1
+        self.assertEqual(len(self.collected), count)
 
 def Run():
     loader = runner.TestLoader()
-    loader.methodPrefix = "test03_"
+#    loader.methodPrefix = "test03_"
     suite = loader.suiteFactory()
     suite.addTest(loader.loadClass(ExampleTest))
 

@@ -69,7 +69,7 @@ class CardstoriesService(service.Service):
         listeners = self.listeners
         self.listeners = []
         def error(reason):
-            reason.printDetailedTraceback()
+            reason.printTraceback()
             return True
         d = defer.DeferredList(listeners)
         for listener in listeners:
@@ -376,7 +376,7 @@ class CardstoriesService(service.Service):
             else:
                 raise UserWarning('action ' + action + ' is not among the allowed actions ' + ','.join(self.ACTIONS))
         except UserWarning, e:
-            failure.Failure().printDetailedTraceback()
+            failure.Failure().printTraceback()
             return defer.succeed({'error': e.args[0]})
 
     @staticmethod

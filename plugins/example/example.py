@@ -286,6 +286,14 @@ class Plugin:
     # abort the request and a Server Error (500) will be returned, with the
     # traceback. 
     #
+    # All the values are strings. For instance, even the numerical
+    # identifier for a card is a string and is not converted into an integer.
+    #
+    # The type of the parameters are documented assuming the plugin is the only
+    # loaded plugin. For instance, if an authentication plugin processes
+    # the request afterwards, the type of the player_id may be a string instead
+    # of a numerical id.
+    #
     def preprocess(self, result, request):
         #
         # This is an example of action that is intercepted by a plugin, 
@@ -317,7 +325,64 @@ class Plugin:
             #
             return defer.succeed(request.args)
         else:
-            self.preprocessed = request.args
+            args = request.args
+            self.preprocessed = args
+            #
+            # create a new game. The sentence is an utf-8 encode string
+            # that needs to be decoded as follows: 
+            #
+            # sentence = args['sentence'][0].decode('utf-8')
+            #
+            if args['action'][0] == 'create':
+                args['card'][0] # the numerical identifier of the chosen card
+                args['sentence'][0] # the sentence describing the card
+                args['owner_id'][0] # the player who creates the game
+            #
+            # invite players to participate in the game
+            #
+            elif args['action'][0] == 'invite':
+                args['game_id'][0] # the identifier of the game
+                args['owner_id'][0] # the player who owns the game
+                args['player_id'][0] # the list of invited players
+            #
+            # participate in the game
+            #
+            elif args['action'][0] == 'participate':
+                args['game_id'][0] # the identifier of the game
+                args['player_id'][0] # the player who wants to enter the game
+            #
+            # pick a card among the cards distributed to the player
+            #
+            elif args['action'][0] == 'pick':
+                args['game_id'][0] # the identifier of the game
+                args['player_id'][0] # the player who is picking  card
+                args['card'][0] # the numerical identifier of the chosen card
+            # 
+            # the author of the game goes to the vote
+            #
+            elif args['action'][0] == 'voting':
+                args['game_id'][0] # the identifier of the game
+                args['owner_id'][0] # the player who owns the game
+            #
+            # vote for a card
+            #
+            elif args['action'][0] == 'vote':
+                args['game_id'][0] # the identifier of the game
+                args['player_id'][0] # the player who is voting for a card
+                args['card'][0] # the numerical identifier of the chosen card
+            # 
+            # the author of the game publishes the game results
+            #
+            elif args['action'][0] == 'complete':
+                args['game_id'][0] # the identifier of the game
+                args['owner_id'][0] # the player who owns the game
+            # 
+            # request the state of the game
+            #
+            elif args['action'][0] == 'game':
+                args['game_id'][0] # the identifier of the game
+                args['player_id'][0] # the player requesting the game
+
             return defer.succeed(result)
 
     #
@@ -339,4 +404,54 @@ class Plugin:
             return defer.succeed(result)
         else:
             self.postprocessed = result
+            if result.has_key('type'):
+                #
+                # In the following, each result['type'] matches
+                # the answer to the incoming action as described
+                # in the preprocess function. 
+                #
+
+                #
+                # The list of invited players is the subset of the
+                # list provided by the caller where the duplicates
+                # have been removed.
+                #
+                if result['type'] == 'invite':
+                    result['game_id'][0] # the identifier of the game
+                    result['invited'][0] # the list of invited players
+                #
+                # participate in the game
+                #
+                elif result['type'] == 'participate':
+                    result['game_id'][0] # the identifier of the game
+                    result['player_id'] # the player who wants to enter the game
+                #
+                # pick a card among the cards distributed to the player
+                #
+                elif result['type'] == 'pick':
+                    result['game_id'][0] # the identifier of the game
+                    result['player_id'] # the player who is picking  card
+                    result['card'] # the numerical identifier of the chosen card
+                # 
+                # the game goes to vote
+                #
+                elif result['type'] == 'voting':
+                    result['game_id'][0] # the identifier of the game
+                #
+                # vote for a card
+                #
+                elif result['type'] == 'vote':
+                    result['game_id'][0] # the identifier of the game
+                    result['player_id'] # the player who is voting for a card
+                    result['vote'] # the numerical identifier of the chosen card
+                # 
+                # the author of the game publishes the game results
+                #
+                elif result['type'] == 'complete':
+                    result['game_id'][0] # the identifier of the game
+            else:
+                #
+                # A game was created, the new identifier is returned
+                #
+                result['game_id'] # the id of the game
             return defer.succeed(result)
