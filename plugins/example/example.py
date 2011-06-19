@@ -42,11 +42,16 @@ from twisted.internet import defer, reactor
 # If --plugins-libdir=/var/lib/cardstories the example plugin directory
 # is /var/lib/cardstories/example.
 #
+# The API of the CardstoriesGame and CardstoriesServices are not documented.
+# The code from other plugins should be used for inspiration.
+#
 class Plugin:
     #
     # Instantiated when the plugin is loaded.
     # service is an instance of CardstoriesService as found
-    # in service.py.
+    # in service.py. The service is not started when the plugin
+    # is instantiated. 
+    #
     # plugins is a list of plugin instances, in the order in
     # which they are mentionned in the --plugins option. 
     # If --plugins="a b" then it will be called:
@@ -91,48 +96,147 @@ class Plugin:
         return 'example'
 
     #
+    # This function is registered by __init__ to listen on every
+    # CardstoriesService events, as described in the body of the
+    # function. The function registered to listen to
+    # CardstoriesService must register itself again to catch the next
+    # event.
+    #
+    # If accept raises an exception, it will show in the cardstories
+    # log with a backtrace. Such an exception is otherwise ignored
+    # and has no side effect on the other listeners.
+    #
+    # The event argument is an object which can be interpreted as
+    # documented in the code below. All cases and data members
+    # are demonstrated and the code should be used as a reference.
+    #
+    # The return value must be a Deferred
+    #
+    # It is forbidden to trigger an action on a game in the listener.
+    # If a side effect is desired, it must be done using a timed function
+    # instead. This limitation is imposed to prevent recursive notification
+    # which would be both complex and confusing. The solo mode plugin
+    # has examples of timed events that modify the course of the game.
+    #
+    # In the function below, the data member self.event is set according
+    # to the event. This is used in the test_example.py file to ensure
+    # that the sequence of events happens as documented.
+    #
+    # In each documented case in the function below, the data
+    # that have a meaning are displayed and documented. For instance,
+    # when a game is deleted:
+    #
+    #    elif event['type'] == 'delete':
+    #        self.event = 'DELETE'
+    #        event['game'] # CardstoriesGame instance
     # 
+    # this means that only the event['game'] data is set and it holds
+    # a CardstoriesGame instance. If a data is not documented, it must
+    # be assumed to be undefined. The presence of the documented data
+    # will be kept consistent for backward compatibility.
     #
     def accept(self, event):
         if event == None:
             self.event = 'NONE'
-        # startService() was called on CardstoriesService
+        # 
+        # Received when startService() is called on CardstoriesService.
+        # The ongoing games are loaded from the database (after a daemon
+        # restart) before this event. The service is fully operational
+        # and the event occurs before any connection is accepted from
+        # clients.
+        #
         elif event['type'] == 'start':
             self.event = 'START'
-        # stopService() is about to be called on CardstoriesService
+        #
+        # Received when stopService() is about to be called on
+        # CardstoriesService. Nothing has been terminated yet and all
+        # client connections are active. The service will stop only
+        # when the returned deferred is complete.
+        #
         elif event['type'] == 'stop':
             self.event = 'STOP'
-        # a game is about to be deleted from memory
+        #
+        # Received when a game is about to be deleted from
+        # memory. This happens shortly after a game is completed. A
+        # completed game is loaded from the database only when
+        # required and will be deleted after a while, if unused. As a
+        # consequence, multiple delete events can be received for the
+        # same game.
+        #
         elif event['type'] == 'delete':
             self.event = 'DELETE'
             event['game'] # CardstoriesGame instance
-        # a game was modified
+        # 
+        # Received when an event related to a given game occurs.
+        #
         elif event['type'] == 'change':
+            #
+            # The event is further described in the event['details']
+            # data. The event is received after the game was modified.
+            # For instance, if the event received says the game
+            # when to the voting state, checking the game state would
+            # confirm that it is in voting state. 
+            #
+            # Because the listeners are forbident to have any side 
+            # effect on the games, the action undertaken cannot rely
+            # and does not have to worry about the order in which the
+            # listeners are called. If a timed action is run to alter
+            # the game state, it must take into account that other
+            # plugins can do the same. A lack of coordination between
+            # plugins that plan to alter the game in this way will lead
+            # to an undefined results.
+            #
             self.event = 'CHANGE ' + event['details']['type']
             event['game'] # CardstoriesGame instance
+            details = event['details'] # description of the event
             # 
-            if event['details']['type'] == 'init':
+            # Received once, when the game is created and before
+            # any player is connected to it.
+            #
+            if details['type'] == 'init':
                 pass
-            # a player is given cards to pick
-            elif event['details']['type'] == 'participate':
-                event['details']['player_id'] # numerical player id
-            # the author went to voting state
-            elif event['details']['type'] == 'voting':
+            #
+            # Received each time the author invites players.
+            # It can happen multiple times for a given game. The
+            # list of invited players is guaranteed to not 
+            # contain duplicates. The aggregated invitations for
+            # a given game does not contain duplicates.
+            #
+            elif details['type'] == 'invite':
+                details['invited'] # list of numerical player ids
+            #
+            # Received each time a player is distributed cards 
+            # to pick and is therefore registered as a participant
+            # to the game. 
+            #
+            elif details['type'] == 'participate':
+                details['player_id'] # numerical player id
+            #
+            # Received each time a player picks a card. A player
+            # may pick a card multiple times and only the latest
+            # is taken into account.
+            #
+            elif details['type'] == 'pick':
+                details['player_id'] # numerical player id
+                details['card'] # numerical card id
+            #
+            # Received once, when the author goes to voting state.
+            #
+            elif details['type'] == 'voting':
                 pass
-            # the player picks a card
-            elif event['details']['type'] == 'pick':
-                event['details']['player_id'] # numerical player id
-                event['details']['card'] # numerical card id
-            # the player votes for a card
-            elif event['details']['type'] == 'vote':
-                event['details']['player_id'] # numerical player id
-                event['details']['vote'] # numerical card id
-            # the author went to game complete state
-            elif event['details']['type'] == 'complete':
+            #
+            # Received each time a player votes for a card. A player
+            # may vote for a card multiple times and only the latest
+            # is taken into account.
+            #
+            elif details['type'] == 'vote':
+                details['player_id'] # numerical player id
+                details['vote'] # numerical card id
+            #
+            # Received once, when the author goes to complete state.
+            #
+            elif details['type'] == 'complete':
                 pass
-            # the author invited players to play
-            elif event['details']['type'] == 'invite':
-                event['details']['invited'] # list of numerical player ids
         self.service.listen().addCallback(self.accept)
         return defer.succeed(True)
 
