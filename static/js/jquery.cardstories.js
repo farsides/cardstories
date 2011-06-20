@@ -362,16 +362,20 @@
                     deferred = this.invitation_owner(player_id, game, root);
                 }
             } else {
-                if(game.self !== null && game.self !== undefined) {
-                    if(game.self[0] === null) {
-                        deferred = this.invitation_pick(player_id, game, root);
-                        // do not disturb a player while (s)he is picking a card
-                        poll = false;
-                    } else {
-                        deferred = this.invitation_pick_wait(player_id, game, root);
-                    }
+                if ($.query.get('anonymous')) {
+                    deferred = this.invitation_anonymous(player_id, game, root);
                 } else {
-                    deferred = this.invitation_participate(player_id, game, root);
+                    if(game.self !== null && game.self !== undefined) {
+                         if(game.self[0] === null) {
+                            deferred = this.invitation_pick(player_id, game, root);
+                            // do not disturb a player while (s)he is picking a card
+                            poll = false;
+                        } else {
+                            deferred = this.invitation_pick_wait(player_id, game, root);
+                        }
+                    } else {
+                        deferred = this.invitation_participate(player_id, game, root);
+                    }
                 }
             }
             if(poll) {
@@ -559,6 +563,13 @@
             }
         },
 
+        invitation_anonymous: function(player_id, game, root) {
+            var $this = this;
+            var element = $('.cardstories_invitation .cardstories_invitation_anonymous', root);
+            this.set_active(root, element);
+            $('.cardstories_sentence', element).text(game.sentence);
+        },
+
         vote: function(player_id, game, root) {
             var poll = true;
             var deferred;
@@ -574,7 +585,11 @@
                         deferred = this.vote_voter_wait(player_id, game, root);
                     }
                 } else {
-                    deferred = this.vote_viewer(player_id, game, root);
+                    if ($.query.get('anonymous')) {
+                        deferred = this.vote_anonymous(player_id, game, root);
+                    } else {
+                        deferred = this.vote_viewer(player_id, game, root);
+                    }
                 }
             }
             if(poll) {
@@ -628,6 +643,13 @@
             $('.cardstories_card_change', element).unbind('click').click(function() {
                 $this.vote_voter(player_id, game, root);
             });
+        },
+
+        vote_anonymous: function(player_id, game, root) {
+            var $this = this;
+            var element = $('.cardstories_vote .cardstories_vote_anonymous', root);
+            this.set_active(root, element);
+            $('.cardstories_sentence', element).text(game.sentence);
         },
 
         vote_owner: function(player_id, game, root) {

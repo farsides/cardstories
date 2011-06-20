@@ -844,6 +844,32 @@ html, body {
     top: 350px;
 }
 
+/* state invitation, anonymous view : wait for others */
+
+.cardstories .cardstories_invitation .cardstories_invitation_anonymous .cardstories_text_label {
+    font-family: "helvetica";
+    font-size: 12pt;
+    color: #1D1D1B;
+    background-color: #fff;
+    text-align: left;
+    margin: 0 2px 0 1px;
+    padding: 0px 0px 4px 30px;
+}
+
+.cardstories .cardstories_invitation .cardstories_invitation_anonymous .cardstories_bubble_player_pick_a_card_wait { 
+    position: absolute;
+    z-index: 1;
+    left: 10px;
+    top: 10px;
+    background: transparent url('images/player_pick_a_card_wait.png') no-repeat left top;
+    height: 340px;
+    width: 962px;
+}
+
+.cardstories .cardstories_invitation .cardstories_invitation_anonymous .cardstories_progress_player { 
+    /*background: transparent url('images/player_progress2.png') no-repeat left top;*/
+}
+
 /* state invitation, player point of view : wait for other players to pick a card */
 
 .cardstories .cardstories_invitation .cardstories_pick_wait .cardstories_progress_player { 
@@ -946,6 +972,18 @@ html, body {
     display: none;
 }
 
+/* state vote, anonymous point of view : wait for other players to vote for a card */
+
+.cardstories .cardstories_vote .cardstories_vote_anonymous .cardstories_bubble_player_vote_wait { 
+    position: absolute;
+    z-index: 1;
+    left: 10px;
+    top: 10px;
+    background: transparent url('images/player_vote_wait.png') no-repeat left top;
+    height: 340px;
+    width: 962px;
+}
+
 /* state vote, player point of view : wait for other players to vote for a card */
 
 .cardstories .cardstories_vote .cardstories_voter_wait .cardstories_progress_player { 
@@ -982,6 +1020,8 @@ html, body {
 /* state invitation and vote, player point of view : wait for others to pick or vote */
 
 .cardstories .cardstories_invitation .cardstories_pick_wait .cardstories_sentence,
+.cardstories .cardstories_invitation .cardstories_invitation_anonymous .cardstories_sentence,
+.cardstories .cardstories_vote .cardstories_vote_anonymous .cardstories_sentence,
 .cardstories .cardstories_vote .cardstories_voter_wait .cardstories_sentence {
     position: absolute;
     left: 330px;

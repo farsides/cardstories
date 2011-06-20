@@ -506,6 +506,46 @@ test("invitation_pick_wait", function() {
     equal($(element_pick).hasClass('cardstories_active'), true, 'pick active');
 });
 
+test("invitation_anonymous", function() {
+    setup();
+    expect(3);
+
+    var player_id = null;
+    var game_id = 101;
+    var picked = null;
+    var cards = [1,2,3,4,picked,5];
+    var sentence = 'SENTENCE';
+
+    var _query = $.query;
+
+    // Without player_id in the URL
+    $.query = {
+        'get': function(attr) {
+            if (attr == "anonymous") {
+                return "yes";
+            }
+        }
+    };
+
+    var game = {
+	'id': game_id,
+	'self': [picked, null, cards],
+	'sentence': sentence
+    };
+
+    $.cardstories.poll_ignore = function(ignored_request, ignored_answer, new_poll, old_poll) {
+        equal(ignored_request.game_id, game_id, 'poll_ignore request game_id');
+        equal(new_poll, undefined, 'poll_ignore metadata not set');
+    };
+
+    var element = $('#qunit-fixture .cardstories_invitation .cardstories_invitation_anonymous');
+    $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
+    equal($('.cardstories_sentence', element).text(), sentence);
+
+    // Restore the original query
+    $.query = _query;
+});
+
 test("invitation_participate", function() {
     setup();
     expect(11);
@@ -671,6 +711,48 @@ test("invitation_voter_wait", function() {
     equal($(element_pick).hasClass('cardstories_active'), false, 'voter not active');
     $('.cardstories_card_change', element).click();
     equal($(element_pick).hasClass('cardstories_active'), true, 'voter active');
+});
+
+test("vote_anonymous", function() {
+    setup();
+    expect(3);
+
+    var player_id = null;
+    var game_id = 101;
+    var picked = null;
+    var voted = null;
+    var board = [1,2,voted,4,picked,6];
+    var sentence = 'SENTENCE';
+
+    var _query = $.query;
+
+    // Without player_id in the URL
+    $.query = {
+        'get': function(attr) {
+            if (attr == "anonymous") {
+                return "yes";
+            }
+        }
+    };
+
+    var game = {
+	'id': game_id,
+	'board': board,
+	'self': null,
+	'sentence': sentence
+    };
+
+    $.cardstories.poll_ignore = function(ignored_request, ignored_answer, new_poll, old_poll) {
+        equal(ignored_request.game_id, game_id, 'poll_ignore request game_id');
+        equal(new_poll, undefined, 'poll_ignore metadata not set');
+    };
+
+    var element = $('#qunit-fixture .cardstories_vote .cardstories_vote_anonymous');
+    $.cardstories.vote(player_id, game, $('#qunit-fixture .cardstories'));
+    equal($('.cardstories_sentence', element).text(), sentence);
+
+    // Restore the original query
+    $.query = _query;
 });
 
 test("vote_viewer", function() {
