@@ -1,3 +1,57 @@
+2011-06-20 01:18:44 +0200 Loic Dachary <loic@dachary.org>
+        aadbd30e3be775c07f57257a55d5a26ab4e32721: update the copyright notice
+
+2011-06-19 20:15:41 +0200 Loic Dachary <loic@dachary.org>
+        85f6c6899561be103608c8b996123155c4a7263b: IssueID #166. complete the
+        postprocess and preprocess documentation.
+
+2011-06-19 18:11:11 +0200 Loic Dachary <loic@dachary.org>
+        299979cf6eebefe1111113dcb70bbd4536761084: IssueID #166. Setup the
+        preprocess / postprocess tests and the transparent catch of an action
+
+2011-06-19 15:42:08 +0200 Loic Dachary <loic@dachary.org>
+        82416895113d487d52cc1df410848277fa216a9d: IssueID #166. complete
+        documentation of the plugin function that is notified of game events.
+
+2011-06-19 14:06:52 +0200 Loic Dachary <loic@dachary.org>
+        3eb3cc08ac7ddec040cb47d661626cd5fbb12b05: Fixes #114. Use the subject
+        argument instead of redundant subject.
+
+2011-06-19 13:49:00 +0200 Loic Dachary <loic@dachary.org>
+        bbc2850ea2e008fd37a45c10d01832e45999c50e: IssueID #47. Only send an
+        email about a card being picked or voted to the game author, the
+        players do not care.
+
+2011-06-19 13:37:30 +0200 Loic Dachary <loic@dachary.org>
+        9a1b8856d33fd6c65f5085a8d0f10d7b243acc52: IssueID #168. Send a mail to
+        all players when switching to the voting state
+
+2011-06-19 12:44:06 +0200 Loic Dachary <loic@dachary.org>
+        acad8d254be2d283e93ee504e0ab880c12141acc: Fixes #9. The GAME_TIMEOUT
+        variable value from the /etc/default/cardstories file is used to set
+        the --game-timeout option in /etc/init.d/cardstories
+
+2011-06-19 12:32:12 +0200 Loic Dachary <loic@dachary.org>
+        3c78164869b8feeb06cdcc8b654070f6ab3d7048: IssueID #166. Draft
+        implementation covering the notification function
+
+2011-06-19 12:31:04 +0200 Loic Dachary <loic@dachary.org>
+        e5bcc7b77d8898a877b15942a1355b7bff6c8f03: bump to 1.0.5
+
+2011-06-19 12:30:02 +0200 Loic Dachary <loic@dachary.org>
+        73a4f4e428fcef2393851278b0022c9377e82c35: When the init event is sent,
+        it must set the modified date to zero otherwise it is trashed. It must
+        use the wait method instead of the poll method because there is no need
+        for timeout
+
+2011-06-19 01:24:10 +0200 Loic Dachary <loic@dachary.org>
+        6cd589a9cc5705ed2a0794446fa96b5f4ee25387: jslint fixes in the advertise
+        function
+
+2011-06-19 01:07:58 +0200 Loic Dachary <loic@dachary.org>
+        69ee383c936ec4ab604858f08704cedd1ad8e0ac: compile changelog from git
+        history
+
 2011-06-19 00:16:12 +0200 Loic Dachary <loic@dachary.org>
         e62ef2431fc3974a1def252c3ac5924a15534147: avoid displaying a blue
         border on firefox3
@@ -1203,5 +1257,5 @@
 
 # Interpreted by emacs
 # Local Variables:
-# compile-command: "git log --tags --'pretty=format:%w(80,0,8)%ai %an <%ae>%n%H: %s%n' | sed -e 's/ *$//'"
+# compile-command: "git log --'pretty=format:%w(80,0,8)%ai %an <%ae>%n%H: %s%n' | sed -e 's/ *$//'"
 # End:
