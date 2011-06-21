@@ -95,6 +95,13 @@
 	'sentence': 'long sentence is in the flux'
       };
       $.cardstories.invitation_pick('PLAYER1', game, root);
+    } else if(skin == 'invitation_anonymous') {
+      game = {
+	'id': null,
+	'self': [null, null, [11,12,13,14,15,16,17]],
+	'sentence': 'long sentence is in the flux'
+      };
+      $.cardstories.invitation_anonymous('', game, root);
     } else if(skin == 'invitation_pick_wait') {
       game = {
 	'id': 100,
@@ -110,6 +117,14 @@
 	'sentence': 'The sentence is the sentence'
       };
       $.cardstories[skin]('PLAYER1', game, root);
+    } else if(skin == 'vote_anonymous') {
+      game = {
+	'id': null,
+	'board': [21,22,23,24,25,26],
+	'self': null,
+	'sentence': 'The sentence is the sentence'
+      };
+      $.cardstories.vote_anonymous(null, game, root);
     } else if(skin == 'vote_owner') {
       game = {
 	'id': 100,
