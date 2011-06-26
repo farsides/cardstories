@@ -20,6 +20,8 @@ import os
 from twisted.python import runtime
 from twisted.internet import defer, reactor
 
+from cardstories.poll import pollable
+
 #
 # The plugin must be a single file (such as this example) that can be
 # loaded in two ways:
@@ -45,7 +47,7 @@ from twisted.internet import defer, reactor
 # The API of the CardstoriesGame and CardstoriesServices are not documented.
 # The code from other plugins should be used for inspiration.
 #
-class Plugin:
+class Plugin(pollable):
     #
     # Instantiated when the plugin is loaded.
     # service is an instance of CardstoriesService as found
@@ -63,6 +65,17 @@ class Plugin:
     # plugins.append(a)
     #
     # and so on
+    # 
+    # When the plugin is derived from pollable, the cardstories client can 
+    # poll it and be notified when the plugin state changes. The plugin
+    # notifies the client that its state changed by calling the touch()
+    # method. The client will then ask for the current state of the plugin
+    # using the state() method.
+    #
+    # The pollable derivation is optional. If Plugin is not derived from
+    # pollable, the state method bellow will never be called and the code
+    # associated with the comments where the "pollable" keyword show can
+    # be commented out.
     #
     def __init__(self, service, plugins):
         # 
@@ -85,6 +98,11 @@ class Plugin:
         #
         self.confdir = os.path.join(self.service.settings['plugins-confdir'], self.name())
         self.libdir = os.path.join(self.service.settings['plugins-libdir'], self.name())
+        #
+        # initialize the pollable using the service parameters. There is
+        # no reason to improve or change these parameters.
+        #
+        pollable.__init__(self, self.service.settings.get('poll-timeout', 300))
 
     #
     # Must return a string that is the name of the plugin. It 
@@ -455,3 +473,46 @@ class Plugin:
                 #
                 result['game_id'] # the id of the game
             return defer.succeed(result)
+
+    #
+    # pollable:
+    #
+    # Demonstrate how the plugin can notify the clients when 
+    # its state changes.
+    #
+    def count(self):
+        self.counter = 0
+        def incr():
+            self.counter += 1
+            #
+            # The argument of the touch method must be a map.
+            # It is implemented by the pollable class and
+            # the 'modified' key will be set to the unix timestamp
+            # of the current time. Each client will receive a
+            # copy of the map, in a JSON object.
+            #
+            self.touch({'info': True}) # notify the clients
+        reactor.callLater(0.01, incr)
+
+    #
+    # pollable:
+    #
+    # The state method is called when a client requires the action=state
+    # of the server and adds type=<plugin name> (type=example in this
+    # example) to the query string. The args argument is a map with 
+    # the following keys:
+    #
+    # args['modified'] = unix timestamp 
+    #  return only the data that has changed after timestamp
+    #  argument. It is not required to return only
+    #  the delta and the method can return the full state of the plugin.
+    #
+    # In the context of a chat plug, the state method would be expected to
+    # return the lines written since the last call to the state method.
+    #
+    def state(self, args):
+        args['modified'][0] # unix timestamp 
+        state = {}
+        state['counter'] = self.counter
+        return defer.succeed(state)
+

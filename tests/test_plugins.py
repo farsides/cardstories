@@ -40,9 +40,15 @@ class CardstoriesPluginsTest(unittest.TestCase):
     def test01_load(self):
         plugins = CardstoriesPlugins({ 'plugins-dir': '..',
                                        'plugins': 'plugin_one plugin_two'})
-        plugins.load(True)
-        self.assertTrue(plugins.plugins[0].service)
-        self.assertTrue(plugins.plugins[1].service)
+        class Service:
+            def __init__(self):
+                self.pollable_plugins = []
+        service = Service()
+        plugins.load(service)
+        self.assertEquals(plugins.plugins[0].service, service)
+        self.assertEquals(plugins.plugins[1].service, service)
+        self.assertEquals(service.pollable_plugins[0], plugins.plugins[1])
+        self.assertEquals(len(service.pollable_plugins), 1)
 
 def Run():
     loader = runner.TestLoader()

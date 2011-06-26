@@ -295,9 +295,25 @@ class ExampleTest(unittest.TestCase):
         count += 1
         self.assertEqual(len(self.collected), count)
 
+    def test04_poll(self):
+        plugin = example.Plugin(self.service, [ AnotherPlugin() ])
+        d = plugin.poll({'modified': [plugin.get_modified()]})
+        @defer.inlineCallbacks
+        def check(result):
+            plugin.ok = True
+            self.assertEquals(plugin.counter, 1)
+            self.assertTrue(result['info'])
+            state = yield plugin.state({'modified': [0]})
+            self.assertEquals(plugin.counter, state['counter'])
+            defer.returnValue(result)
+        d.addCallback(check)
+        plugin.count()
+        self.assertEquals(plugin.counter, 0)
+        return d
+
 def Run():
     loader = runner.TestLoader()
-#    loader.methodPrefix = "test03_"
+#    loader.methodPrefix = "test04_"
     suite = loader.suiteFactory()
     suite.addTest(loader.loadClass(ExampleTest))
 

@@ -16,7 +16,9 @@
 # along with this program in a file in the toplevel directory called
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
-class Plugin:
+from cardstories import poll
+
+class Plugin(poll.pollable):
     
     def __init__(self, service, plugins):
         self.service = service

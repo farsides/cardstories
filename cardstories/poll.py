@@ -42,12 +42,15 @@ class pollable:
         for poller in pollers:
             poller.callback(None)
 
+    def state(self, *args, **kwargs):
+        raise UserWarning, 'the state method must be re-defined by the derived class'
+
     def touch(self, args):
         self.modified = int(runtime.seconds() * 1000)
         pollers = self.pollers
         self.pollers = []
         args['modified'] = [self.modified]
-        d = defer.DeferredList(pollers, consumeErrors = True)
+        d = defer.DeferredList(pollers)
         for poller in pollers:
             poller.callback(deepcopy(args))
         d.addCallback(lambda result: args)

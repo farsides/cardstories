@@ -49,13 +49,14 @@ class CardstoriesPlayer(pollable):
 class CardstoriesService(service.Service):
 
     ACTIONS_GAME = ( 'game', 'participate', 'voting', 'pick', 'vote', 'complete', 'invite' )
-    ACTIONS = ACTIONS_GAME + ( 'create', 'lobby', 'poll' )
+    ACTIONS = ACTIONS_GAME + ( 'create', 'lobby', 'poll', 'state' )
 
     def __init__(self, settings):
         self.settings = settings
         self.games = {}
         self.players = {}
         self.listeners = []
+        self.pollable_plugins = []
 
     def listen(self):
         d = defer.Deferred()
@@ -149,13 +150,44 @@ class CardstoriesService(service.Service):
             self.game_init(game)
             
     def poll(self, args):
-        self.required(args, 'poll', 'modified')
-        if args.has_key('game_id'):
-            return self.game_proxy(args)
-        elif args.has_key('player_id'):
-            return self.poll_player(args)
-        else:
-            raise UserWarning, 'poll requires either player_id or game_id but neither were set'
+        self.required(args, 'poll', 'type', 'modified')
+        deferreds = []
+        if 'game' in args['type']:
+            deferreds.append(self.game_proxy(args))
+        if 'lobby' in args['type']:
+            deferreds.append(self.poll_player(args))
+        for plugin in self.pollable_plugins:
+            if plugin.name() in args['type']:
+                deferreds.append(plugin.poll(args))
+        d = defer.DeferredList(deferreds, fireOnOneCallback = True)
+        d.addCallback(lambda x: x[0])
+        return d
+
+    @defer.inlineCallbacks
+    def state(self, args):
+        self.required(args, 'state', 'type', 'modified')
+        states = []
+        if 'game' in args['type']:
+            game_args = {'action': 'game',
+                         'game_id': args['game_id'] }
+            if args.has_key('player_id'):
+                game_args['player_id'] = args['player_id']
+            game = yield self.game(game_args)
+            game['type'] = 'game'
+            states.append(game)
+        if 'lobby' in args['type']:
+            lobby = yield self.lobby({'action': 'lobby',
+                                      'in_progress': args['in_progress'],
+                                      'player_id': args['player_id']})
+            lobby['type'] = 'lobby'
+            states.append(lobby)
+        for plugin in self.pollable_plugins:
+            if plugin.name() in args['type']:
+                state = yield plugin.state(args)
+                state['type'] = plugin.name()
+                state['modified'] = plugin.get_modified()
+                states.append(state)
+        defer.returnValue(states)
 
     def poll_player(self, args):
         player_id = int(args['player_id'][0])
@@ -183,7 +215,6 @@ class CardstoriesService(service.Service):
                 now = int(runtime.seconds() * 1000)
                 if not self.players.has_key(player_id):
                     defer.returnValue(False)
-                    return
                 player = self.players[player_id]
                 if now - player.access_time > (poll_timeout * 2 * 1000):
                     yield player.touch({'delete': [now]})
@@ -203,10 +234,8 @@ class CardstoriesService(service.Service):
             yield self.notify({'type': 'delete', 'game': self.games[game_id], 'details': args})
             del self.games[game_id]
             defer.returnValue(False)
-            return
         if not self.games.has_key(game_id):
             defer.returnValue(False)
-            return
         game = self.games[game_id]
         modified = game.get_modified()
         yield self.notify({'type': 'change', 'game': game, 'details': args})

@@ -27,6 +27,7 @@ from twisted.internet import defer, reactor
 from twisted.web import server, resource, http
 
 from cardstories.service import CardstoriesService
+from cardstories.poll import pollable
 
 from twisted.internet import base
 base.DelayedCall.debug = True
@@ -490,14 +491,17 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
             self.service.poll({'modified':[0]})
         except UserWarning, e:
             caught = True
-            self.failUnlessSubstring('poll requires', e.args[0])
+            self.failUnlessSubstring('poll must be given', e.args[0])
         self.assertTrue(caught)
         #
         # poll player
         #
         player_id = 10
         player = self.service.get_or_create_player(player_id)
-        d = self.service.poll({'modified': [player.modified], 'player_id': [player_id]})
+        d = self.service.poll({'action': ['poll'],
+                               'type': ['lobby'],
+                               'modified': [player.modified],
+                               'player_id': [player_id]})
         def check(result):
             self.assertTrue(result['ok'])
             player.ok = True
@@ -516,6 +520,7 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
                                              'owner_id': [owner_id]})
         game = self.service.games[result['game_id']]
         d = self.service.poll({'action': ['poll'],
+                               'type': ['game'],
                                'modified': [game.modified],
                                'game_id': [game.id]})
         def check(result):
@@ -525,7 +530,26 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         d.addCallback(check)
         yield game.touch()
         self.assertTrue(game.ok)
-        
+        #
+        # poll plugins
+        #
+        class Plugin(pollable):
+            def __init__(self):
+                pollable.__init__(self, 200000000000)
+            def name(self):
+                return 'plugin'
+        plugin = Plugin()
+        self.service.pollable_plugins.append(plugin)
+        d = self.service.poll({'action': ['poll'],
+                               'type': ['plugin'],
+                               'modified': [game.modified]})
+        def check(result):
+            self.assertEquals(['plugin'], result['type'])
+            plugin.ok = True
+            return result
+        d.addCallback(check)
+        yield plugin.touch({})
+        self.assertTrue(plugin.ok)
 
     @defer.inlineCallbacks
     def test09_cancel(self):
@@ -625,6 +649,7 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         self.assertTrue(self.service.games.has_key(result['game_id']))
         game = self.service.games[result['game_id']]
         d = self.service.poll({'action': ['poll'],
+                               'type': ['game'],
                                'modified': [game.modified],
                                'game_id': [game.id]})
         def check(result):
@@ -637,9 +662,69 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         self.assertFalse(self.service.games.has_key(result['game_id']))
         yield d
 
+    @defer.inlineCallbacks
+    def test12_state(self):
+        winner_card = 5
+        sentence = 'SENTENCE'
+        owner_id = 15
+        game = yield self.service.create({ 'card': [winner_card],
+                                           'sentence': [sentence],
+                                           'owner_id': [owner_id]})
+        #
+        # type = ['game']
+        # 
+        state = yield self.service.state({ 'type': ['game'],
+                                           'modified': [0],
+                                           'game_id': [game['game_id']] })
+        self.assertEquals(game['game_id'], state[0]['id'])
+        self.assertEquals(state[0]['winner_card'], None)
+        state = yield self.service.state({ 'type': ['game'],
+                                           'modified': [0],
+                                           'game_id': [game['game_id']],
+                                           'player_id': [owner_id] })
+        self.assertEquals(game['game_id'], state[0]['id'])
+        self.assertEquals(state[0]['winner_card'], winner_card)
+        self.assertEquals(state[0]['type'], 'game')
+        #
+        # type = ['plugin']
+        #
+        class Plugin(pollable):
+            def __init__(self):
+                pollable.__init__(self, 200000000000)
+            def state(self, args):
+                return {'info': True}
+            def name(self):
+                return 'plugin'
+        plugin = Plugin()
+        self.service.pollable_plugins.append(plugin)
+        state = yield self.service.state({ 'type': ['plugin'],
+                                           'modified': [0]})
+        self.assertEquals(state[0]['type'], 'plugin')
+        self.assertTrue(state[0]['info'])
+        #
+        # type = ['lobby']
+        #
+        state = yield self.service.state({ 'type': ['lobby'],
+                                           'modified': [0],
+                                           'in_progress': ['true'],
+                                           'player_id': [owner_id] })
+        self.assertEquals(state[0]['type'], 'lobby')
+        self.assertEquals(state[0]['games'][0][0], game['game_id'])
+        #
+        # type = ['game','lobby','plugin']
+        #
+        state = yield self.service.state({ 'type': ['game','lobby','plugin'],
+                                           'modified': [0],
+                                           'game_id': [game['game_id']],
+                                           'in_progress': ['true'],
+                                           'player_id': [owner_id] })
+        self.assertEquals(state[0]['type'], 'game')
+        self.assertEquals(state[1]['type'], 'lobby')
+        self.assertEquals(state[2]['type'], 'plugin')
+
 def Run():
     loader = runner.TestLoader()
-#    loader.methodPrefix = "test11_"
+#    loader.methodPrefix = "test12_"
     suite = loader.suiteFactory()
     suite.addTest(loader.loadClass(CardstoriesServiceTestNotify))
     suite.addTest(loader.loadClass(CardstoriesServiceTestInit))

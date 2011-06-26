@@ -19,6 +19,8 @@
 import os
 import imp
 
+from cardstories import poll
+
 class CardstoriesPlugins:
 
     def __init__(self, settings):
@@ -28,7 +30,10 @@ class CardstoriesPlugins:
     def load(self, service):
         for plugin in self.settings.get('plugins', '').split():
             module = imp.load_source("cardstories_plugin", self.path(plugin))
-            self.plugins.append(getattr(module, 'Plugin')(service, self.plugins))
+            o = getattr(module, 'Plugin')(service, self.plugins)
+            self.plugins.append(o)
+            if isinstance(o, poll.pollable):
+                service.pollable_plugins.append(o)
 
     def path(self, plugin):
         if os.path.exists(plugin):

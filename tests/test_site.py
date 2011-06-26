@@ -43,7 +43,11 @@ class CardstoriesSiteTest(unittest.TestCase):
     def test00_init(self):
         plugins = CardstoriesPlugins({ 'plugins-dir': '..',
                                        'plugins': 'plugin_one plugin_two'})
-        plugins.load(True)
+        class Service:
+            def __init__(self):
+                self.pollable_plugins = []
+        service = Service()
+        plugins.load(service)
         site = CardstoriesSite(resource.Resource(), { 'plugins-pre-process': 'plugin_one plugin_two',
                                                       'plugins-post-process': 'plugin_two plugin_one' }, plugins.plugins)
         self.assertEqual(site.preprocess[0], site.postprocess[1])
