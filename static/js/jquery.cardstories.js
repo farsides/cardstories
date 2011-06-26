@@ -757,8 +757,6 @@
                           $(this).hide();
                         }
                       });
-                  } else {
-                    $('.cardstories_voter_name', this).hide();
                   }
                   $(this).show();
                 } else {
