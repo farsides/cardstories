@@ -308,12 +308,12 @@ class CardstoriesService(service.Service):
     def game_proxy(self, args):
         game_id = self.required_game_id(args)
         if not self.games.has_key(game_id):
-            raise UserWarning, 'game_id=%s does not exist' % args['game_id']
+            raise UserWarning, 'game_id=%s does not exist' % str(game_id)
         return getattr(self.games[game_id], args['action'][0])(args)
 
     def game_method(self, game_id, action, *args, **kwargs):
         if not self.games.has_key(game_id):
-            raise UserWarning, 'game_id=%s does not exist' % args['game_id']
+            raise UserWarning, 'game_id=%s does not exist' % str(game_id)
         return getattr(self.games[game_id], action)(*args, **kwargs)
 
     def participate(self, args):
