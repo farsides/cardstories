@@ -542,13 +542,13 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         self.service.pollable_plugins.append(plugin)
         d = self.service.poll({'action': ['poll'],
                                'type': ['plugin'],
-                               'modified': [game.modified]})
+                               'modified': [plugin.get_modified()]})
         def check(result):
             self.assertEquals(['plugin'], result['type'])
             plugin.ok = True
             return result
         d.addCallback(check)
-        yield plugin.touch({})
+        yield plugin.touch({'type': ['plugin']})
         self.assertTrue(plugin.ok)
 
     @defer.inlineCallbacks

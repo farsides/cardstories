@@ -48,8 +48,8 @@ class CardstoriesPlayer(pollable):
 
 class CardstoriesService(service.Service):
 
-    ACTIONS_GAME = ( 'game', 'participate', 'voting', 'pick', 'vote', 'complete', 'invite' )
-    ACTIONS = ACTIONS_GAME + ( 'create', 'lobby', 'poll', 'state' )
+    ACTIONS_GAME = ( 'participate', 'voting', 'pick', 'vote', 'complete', 'invite' )
+    ACTIONS = ACTIONS_GAME + ( 'create', 'poll', 'state' )
 
     def __init__(self, settings):
         self.settings = settings
@@ -178,6 +178,7 @@ class CardstoriesService(service.Service):
         if 'lobby' in args['type']:
             lobby = yield self.lobby({'action': 'lobby',
                                       'in_progress': args['in_progress'],
+                                      'my': args.get('my', ['true']),
                                       'player_id': args['player_id']})
             lobby['type'] = 'lobby'
             states.append(lobby)

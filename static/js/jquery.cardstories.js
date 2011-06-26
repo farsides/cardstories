@@ -210,16 +210,19 @@
               }
             };
             var query = 'modified=' + request.modified;
+            var type;
             if('player_id' in request) {
               query += '&player_id=' + request.player_id;
+              type = 'lobby';
             }
             if('game_id' in request) {
               query += '&game_id=' + request.game_id;
+              type = 'game';
             }
             $this.ajax({
               async: true,
                   timeout: $this.poll_timeout * 2,
-                  url: $this.url + '?action=poll&' + query,
+                  url: $this.url + '?action=poll&type=' + type + '&' + query,
                   type: 'GET',
                   dataType: 'json',
                   global: false,
@@ -254,12 +257,12 @@
                 $this.error(data.error);
               } else {
                 if(in_progress) {
-                  $this.lobby_in_progress(player_id, data, root);
+                  $this.lobby_in_progress(player_id, data[0], root);
                 } else {
-                  $this.lobby_finished(player_id, data, root);
+                  $this.lobby_finished(player_id, data[0], root);
                 }
                 // FIXME not activated if the list of tables is empty ???
-                $this.poll({ 'modified': data.modified, 'player_id': player_id }, root);
+                $this.poll({ 'modified': data[0].modified, 'player_id': player_id }, root);
               }
             };
             var query_in_progress;
@@ -276,7 +279,7 @@
             $this.ajax({
               async: false,
                   timeout: 30000,
-                  url: $this.url + '?action=lobby&player_id=' + player_id + '&in_progress=' + query_in_progress + '&my=' + my,
+                  url: $this.url + '?action=state&type=lobby&modified=0&player_id=' + player_id + '&in_progress=' + query_in_progress + '&my=' + my,
                   type: 'GET',
                   dataType: 'json',
                   global: false,
@@ -804,13 +807,13 @@
                 if('error' in data) {
                     $this.error(data.error);
                 } else {
-                    $this[data.state](player_id, data, root);
+                    $this[data[0].state](player_id, data[0], root);
                 }
             };
             $this.ajax({
                 async: false,
                 timeout: 30000,
-                url: $this.url + '?action=game&game_id=' + game_id + '&player_id=' + player_id,
+                url: $this.url + '?action=state&type=game&modified=0&game_id=' + game_id + '&player_id=' + player_id,
                 type: 'GET',
                 dataType: 'json',
                 global: false,

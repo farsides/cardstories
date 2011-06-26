@@ -73,14 +73,14 @@ class AuthTest(unittest.TestCase):
         c.execute("SELECT id FROM players")
         self.assertEquals([(1,),(2,),(3,)], c.fetchall())
 
-        result_in = { 'players': [ [ request1.args['player_id'][0] ],
+        result_in = [{ 'players': [ [ request1.args['player_id'][0] ],
                                    [ request1.args['owner_id'][0] ]
                                    ],
-                      'invited': [ request1.args['player_id'][0] ] }
+                       'invited': [ request1.args['player_id'][0] ] }]
         result_out = yield self.auth.postprocess(result_in)
-        self.assertEquals(result_out, { 'players': [ [ player ],
-                                                     [ owner ] ],
-                                        'invited': [ player ]})
+        self.assertEquals(result_out, [{ 'players': [ [ player ],
+                                                      [ owner ] ],
+                                         'invited': [ player ]}])
         
 
     @defer.inlineCallbacks
@@ -109,12 +109,12 @@ class AuthTest(unittest.TestCase):
         c.execute("SELECT id FROM players")
         self.assertEquals([(1,),(2,),(3,)], c.fetchall())
 
-        result_in = { 'players': [ [ request1.args['player_id'][0] ],
+        result_in = [{ 'players': [ [ request1.args['player_id'][0] ],
                                    [ request1.args['owner_id'][0] ]
-                                   ] }
+                                   ] }]
         result_out = yield self.auth.postprocess(result_in)
-        self.assertEquals(result_out, { 'players': [ [ unicode(player, 'utf-8') ],
-                                                     [ unicode(owner, 'utf-8') ] ] })
+        self.assertEquals(result_out, [{ 'players': [ [ unicode(player, 'utf-8') ],
+                                                      [ unicode(owner, 'utf-8') ] ] }])
 
 
 def Run():
