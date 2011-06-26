@@ -19,13 +19,17 @@
     $.cardstories = {
         url: "../resource",
 
+        window: window,
+
+        location: location,
+
         error: function(error) { alert(error); },
 
         xhr_error: function(xhr, status, error) {
             $.cardstories.error(error);
         },
 
-        setTimeout: function(cb, delay) { return window.setTimeout(cb, delay); },
+        setTimeout: function(cb, delay) { return $.cardstories.window.setTimeout(cb, delay); },
 
         ajax: function(o) {
             return jQuery.ajax(o);
@@ -33,7 +37,7 @@
 
         reload: function(player_id, game_id, root) {
             var search = this.reload_link(player_id, game_id, root);
-            location.search = search;
+            $.cardstories.location.search = search;
         },
 
         permalink: function(player_id, game_id, root) {
