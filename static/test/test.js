@@ -263,7 +263,7 @@ test("widget lobby", function() {
     ok(!$('#qunit-fixture .cardstories').hasClass('cardstories_root'), 'no cardstories_root');
     $.cardstories.ajax = function(options) {
         equal(options.type, 'GET');
-        equal(options.url, $.cardstories.url + '?action=state&type=lobby&player_id=' + player_id + '&in_progress=true&my=true');
+        equal(options.url, $.cardstories.url + '?action=state&type=lobby&modified=0&player_id=' + player_id + '&in_progress=true&my=true');
     };
     $('#qunit-fixture .cardstories').cardstories(player_id);
     ok($('#qunit-fixture .cardstories').hasClass('cardstories_root'), 'cardstories_root');
@@ -286,7 +286,7 @@ test("game", function() {
 
     $.cardstories.ajax = function(options) {
         equal(options.type, 'GET');
-        equal(options.url, $.cardstories.url + '?action=state&type=game&game_id=' + game_id + '&player_id=' + player_id);
+        equal(options.url, $.cardstories.url + '?action=state&type=game&modified=0&game_id=' + game_id + '&player_id=' + player_id);
 	var game = {
 	    'id': game_id,
 	    'state': 'fake_state'
@@ -597,7 +597,7 @@ test("widget invitation", function() {
 
     $.cardstories.ajax = function(options) {
         equal(options.type, 'GET');
-        equal(options.url, $.cardstories.url + '?action=state&type=game&game_id=' + game_id + '&player_id=' + player_id);
+        equal(options.url, $.cardstories.url + '?action=state&type=game&modified=0&game_id=' + game_id + '&player_id=' + player_id);
 	var game = {
 	    'id': game_id,
 	    'state': 'invitation',
@@ -1011,7 +1011,7 @@ test("refresh_lobby", function() {
 
     $.cardstories.ajax = function(options) {
         equal(options.type, 'GET');
-        equal(options.url, $.cardstories.url + '?action=state&type=lobby&player_id=' + player_id + '&in_progress=' + in_progress.toString() + '&my=true');
+        equal(options.url, $.cardstories.url + '?action=state&type=lobby&modified=0&player_id=' + player_id + '&in_progress=' + in_progress.toString() + '&my=true');
 	options.success([games]);
     };
 
@@ -1067,7 +1067,7 @@ test("lobby_games", function() {
     equal($('.cardstories_lobby_sentence', first).metadata({type: "attr", name: "data"}).game_id, game1);
     $.cardstories.ajax = function(options) {
         equal(options.type, 'GET');
-        equal(options.url, $.cardstories.url + '?action=state&type=game&game_id=' + game1 + '&player_id=' + player_id);
+        equal(options.url, $.cardstories.url + '?action=state&type=game&modified=0&game_id=' + game1 + '&player_id=' + player_id);
     };
     $('.cardstories_lobby_sentence', first).click();
     var second = $('.cardstories_games tbody tr:nth(1)', element);
@@ -1078,7 +1078,7 @@ test("lobby_games", function() {
     equal($('.cardstories_lobby_sentence', second).metadata({type: "attr", name: "data"}).game_id, game2);
     $.cardstories.ajax = function(options) {
         equal(options.type, 'GET');
-        equal(options.url, $.cardstories.url + '?action=state&type=game&game_id=' + game2 + '&player_id=' + player_id);
+        equal(options.url, $.cardstories.url + '?action=state&type=game&modified=0&game_id=' + game2 + '&player_id=' + player_id);
     };
     $('.cardstories_lobby_sentence', second).click();
     // modify the number row per page
@@ -1149,7 +1149,7 @@ test("lobby_in_progress", function() {
     // lobby tab
     $.cardstories.ajax = function(options) {
         equal(options.type, 'GET');
-        equal(options.url, $.cardstories.url + '?action=state&type=lobby&player_id=' + player_id + '&in_progress=false&my=true');
+        equal(options.url, $.cardstories.url + '?action=state&type=lobby&modified=0&player_id=' + player_id + '&in_progress=false&my=true');
     };
     $('.cardstories_tab_finished', element).click();
     // list of games
@@ -1186,7 +1186,7 @@ test("lobby_finished", function() {
     // lobby tab
     $.cardstories.ajax = function(options) {
         equal(options.type, 'GET');
-        equal(options.url, $.cardstories.url + '?action=state&type=lobby&player_id=' + player_id + '&in_progress=true&my=true');
+        equal(options.url, $.cardstories.url + '?action=state&type=lobby&modified=0&player_id=' + player_id + '&in_progress=true&my=true');
     };
     $('.cardstories_tab_in_progress', element).click();
     // list of games
@@ -1228,7 +1228,7 @@ test("poll", function() {
     //
     var game_ajax1 = function(options) {
         equal(options.type, 'GET');
-        equal(options.url, $.cardstories.url + '?action=state&type=game&game_id=' + game_id + '&player_id=' + player_id);
+        equal(options.url, $.cardstories.url + '?action=state&type=game&modified=0&game_id=' + game_id + '&player_id=' + player_id);
     };
 
     var poll_ajax1 = function(options) {
