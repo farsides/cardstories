@@ -16,6 +16,7 @@
 //
 module("cardstories");
 
+var cardstories_default_setTimeout = $.cardstories.setTimeout;
 var cardstories_default_ajax = $.cardstories.ajax;
 var cardstories_original_error = $.cardstories.error;
 var cardstories_original_poll_ignore = $.cardstories.poll_ignore;
@@ -42,14 +43,16 @@ test("error", function() {
 test("setTimeout", function() {
   expect(2);
 
-  var setTimeout = window.setTimeout;
-  window.setTimeout = function(cb, delay) {
+  $.cardstories.setTimeout = cardstories_default_setTimeout;
+
+  var setTimeout = $.cardstories.window.setTimeout;
+  $.cardstories.window.setTimeout = function(cb, delay) {
     equal(cb, 'a function');
     equal(delay, 42);
   };
 
   $.cardstories.setTimeout('a function', 42);
-  window.setTimeout = setTimeout;
+  $.cardstories.window.setTimeout = setTimeout;
 });
 
 test("ajax", function() {
