@@ -16,6 +16,7 @@
 //
 module("cardstories");
 
+var cardstories_default_reload = $.cardstories.reload;
 var cardstories_default_setTimeout = $.cardstories.setTimeout;
 var cardstories_default_ajax = $.cardstories.ajax;
 var cardstories_original_error = $.cardstories.error;
@@ -69,6 +70,27 @@ test("ajax", function() {
   equal(result, 'some ajax result', 'returns the result of jQuery.ajax call');
 
   jQuery.ajax = ajax;
+});
+
+test("reload", function() {
+    expect(4);
+
+    var location = $.cardstories.location;
+    var reload_link = $.cardstories.reload_link;
+    $.cardstories.reload = cardstories_default_reload;
+    $.cardstories.location = {search: ''};
+    $.cardstories.reload_link = function(player_id, game_id, root) {
+        equal(player_id, 11);
+        equal(game_id, 101);
+        equal(root, 'the root');
+        return '?reload=link&';
+    };
+
+    $.cardstories.reload(11, 101, 'the root');
+    equal($.cardstories.location.search, '?reload=link&');
+
+    $.cardstories.location = location;
+    $.cardstories.reload_link = reload_link;
 });
 
 test("xhr_error", function() {
