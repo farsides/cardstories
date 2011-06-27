@@ -23,6 +23,8 @@
 
         location: location,
 
+        noop: function() {},
+
         error: function(error) { alert(error); },
 
         xhr_error: function(xhr, status, error) {
@@ -900,7 +902,7 @@
     };
 
     $(window).bind("beforeunload", function() {
-        $.cardstories.error = function(error) { };
-      });
+        $.cardstories.error = $.cardstories.noop;
+    });
 
 })(jQuery);

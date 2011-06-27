@@ -1770,3 +1770,11 @@ test("trigger_keypress, trigger_keydown helpers", function() {
 
     $.event.trigger = trigger;
 });
+
+test("onbeforeunload", function() {
+    setup();
+    expect(1);
+
+    $(window).trigger('beforeunload');
+    equal($.cardstories.error, $.cardstories.noop, 'error handler gets set to a noop function on beforeunload');
+});
