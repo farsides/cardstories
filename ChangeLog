@@ -1,3 +1,83 @@
+2011-06-28 12:31:36 +0200 Loic Dachary <loic@dachary.org>
+
+	Release 1.0.5
+
+        902f3aac7d96f2ba1855959a01605f6e5150cf90: authors file to recap
+        copyright holders and authors
+
+2011-06-28 11:33:56 +0200 Matjaz Gregoric <mtyaka@gmail.com>
+        8eafe8d4d34d3d555862548daaf85010309c572e: Add a test for
+        $.cardstories.game on ajax error.
+
+2011-06-27 13:20:55 +0200 Matjaz Gregoric <mtyaka@gmail.com>
+        3234a993c4811b76def7cccebbb89bbb3139ead4: Add a test for the
+        beforeunload handler.
+
+2011-06-27 13:20:34 +0200 Matjaz Gregoric <mtyaka@gmail.com>
+        b7ae8cbde2af71a502df28127d2f8d01f07694c2: Add a test for the reload
+        function.
+
+2011-06-27 13:20:01 +0200 Matjaz Gregoric <mtyaka@gmail.com>
+        f152d33cd339ac16017cd3f69908e64f6715aab3: Modify setTimeout test to
+        take the new $.cardstories.window object into account.
+
+2011-06-22 23:48:53 +0200 Matjaz Gregoric <mtyaka@gmail.com>
+        2048d1833fe9676106829db84d5e065cf5eae456: Improve JS test coverage.
+
+2011-06-27 13:54:35 +0200 Loic Dachary <loic@dachary.org>
+        aacdaa1d50cd0c909ff0b0dfc4c7f7c24104d53e: add missing modified=0
+        because it is always added to the url
+
+2011-06-26 19:50:59 +0200 Loic Dachary <loic@dachary.org>
+        8a6008a88a74c733dd6661006768e6a70946192d: fix UserWarnings that were
+        referencing non existent entries
+
+2011-06-26 18:28:53 +0200 Loic Dachary <loic@dachary.org>
+        b9523045ce1ff6d4445acde690f5b8a5c0de7a81: IssueID #180. The client was
+        modified to implement the new poll/state protocol. The auth plugin was
+        modified parse the new state output format that is a list.
+
+2011-06-26 16:41:48 +0200 Loic Dachary <loic@dachary.org>
+        f54204f4a3dd656dcc62a537be2a027c85183141: Fixes #180. Implement a
+        backward incompatible poll function that enables the client to chose
+        multiple objects to poll. It was previously limited to either the lobby
+        or a specific game. It can now be a list as specified in the type
+        argument of the query string. type=game and/or type=lobby. The type can
+        also be a plugin name such as type=example and it will expect the
+        corresponding plugin to notify the client when something happens to it.
+        The poll will return when the first object of interest changes state.
+        The state method (action=state) is implemented and returns the state of
+        the game as a list of object states. Each object is required to set the
+        type key to match the type key used in the incoming state method so
+        that the client can figure out where it comes from. The type=game
+        describes a specific game, the type=lobby describes a lobby and the
+        type=example describes the state of the example plugin. The example
+        plugin was updated to demonstrate how poll / state can be used from the
+        perspective of a plugin author
+
+2011-06-26 12:36:40 +0200 Loic Dachary <loic@dachary.org>
+        fa40854e13afa509027abed57e47396c81e74ff4: IssueID #120. Set window and
+        location data members to allow mockups.
+
+2011-06-26 12:32:16 +0200 Loic Dachary <loic@dachary.org>
+        73aa2a40668fbf39859474c0a58ed041a4259ce0: IssueID #120. Matjaz Gregoric
+        : the code never gets to the else branch because the board2voters gets
+        pre-filled with empty arrays for every card from the board and
+        therefore boards2voters[card] is never undefined.
+
+2011-06-21 09:24:40 +0200 Loic Dachary <loic@dachary.org>
+        f324ae9ea09a28366c2b3133affff5550700e358: Merge remote-tracking branch
+        'mccormix/master'
+
+2011-06-21 09:24:12 +0200 Loic Dachary <loic@dachary.org>
+        bb0708a7b1a4d7d6a0f6ec38b0d1db178f32a7a7: Update changelog to use git
+
+2011-06-20 22:58:55 +0800 Chris McCormick <chris@mccormick.cx>
+        ea8e4128fad917fcd4b490927ef352fa61fb9892: IssueID #159. Introduced two
+        new switch/methods for anonymous users (when querystring anonymous=yes)
+        during vote and invitation phases + unit tests and skin test pages for
+        those, and basic HTML skeletons.
+
 2011-06-20 01:18:44 +0200 Loic Dachary <loic@dachary.org>
         aadbd30e3be775c07f57257a55d5a26ab4e32721: update the copyright notice
 
