@@ -1,0 +1,16 @@
+Copyright holder Farsides SARL France contact@farsides.com xavier@antoviaque.org david@blanchard.name
+   The works of the following authors were implemented as work for hire and under a contract
+   that assigns copyright to the company Farsides. They published their work under 
+   a Free Software license in accordance with the Farsides management.
+
+   Xavier Antoviaque <xavier@antoviaque.org>
+   tartarugafeliz <contact@tartarugafeliz.com>
+   David Blanchard <david@farsides.com> da <da@da-portable-ubuntu.(none)>
+
+   Chris McCormick <chris@mccormick.cx>
+   Lincoln de Sousa <lincoln@comum.org>
+   Matjaz Gregoric <mtyaka@gmail.com>
+   Rogério Hilbert <rogerhil@gmail.com> Rogério Hilbert Lima <rogerhil@gmail.com>
+
+Copyright holder Loic Dachary <loic@dachary.org>
+   Loic Dachary <loic@dachary.org> Loic Dachary <loic@bet.dachary.org>
