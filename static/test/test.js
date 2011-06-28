@@ -427,6 +427,22 @@ test("game", function() {
     $('.cardstories_go_lobby', root).click();
 });
 
+test("game on error", function() {
+    setup();
+    expect(1);
+
+    $.cardstories.ajax = function(options) {
+        var data = {error: 'error on game'};
+        options.success(data);
+    };
+
+    $.cardstories.error = function(err) {
+        equal(err, 'error on game', 'calls $.cardstories.error');
+    };
+
+    $.cardstories.game(11, 111, 'the root');
+});
+
 test("invitation_owner_invite_more", function() {
     setup();
     expect(5);
