@@ -1,51 +1,8 @@
-html, body {
-    background-image: url('images/background_surroundings.jpg');
-    height: 100%;
-    margin: 0px;
-    min-height: 768px; /* for ie7*/
-    font-family: helvetica, arial;
-}
-
-.hidden {
-    display: none;
-}
-
-.cardstories_bg_outer {
-    height: 100%;
-    width: 100%;
-    display: table;
-    vertical-align: middle;
-}
-
-.cardstories_bg_inner {
-    text-align: center;
-    position: relative;
-    vertical-align: middle;
-    display: table-cell;
-    height: 768px;
-}
-
 .cardstories { 
     width: 1024px; 
     height: 768px; 
-    text-align: center;
-    margin-left: auto;
-    margin-right: auto;
     position: relative;
-}
-
-.cardstories .cardstories_logo { 
-    background-repeat: no-repeat;
-    background-image: url('images/logo.png');
-    position: absolute;
-    left: 419px;
-    top: 15px;
-    width: 223px;
-    height: 171px;
-}
-
-.cardstories_game, .cardstories_lobby {
-    background: transparent url('images/background.png') repeat-x left top;
+    margin-top: 80px;
 }
 
 .cardstories_extras {
@@ -61,29 +18,98 @@ html, body {
     top: 15px;
 }
 
-.cardstories .cardstories_progress_player { 
-    position: absolute;
-    height: 180px;
-    width: 198px;
-    z-index: 1;
-    right: 25px;
-    top: 15px;
+.cardstories .cardstories_top { 
+    height: 30px;
+    width: 1024px;
+    border: 3px solid black;
+    margin: 5px;
+    padding: 7px;
 }
 
-.cardstories .cardstories_go_lobby { 
-    position: absolute;
-    height: 90px;
-    width: 118px;
-    left: 650px;
-    top: 10px;
-    z-index: 4;
-    background: transparent url('images/lobby.png') no-repeat left top;
-    background-position: 0px 0px;
+.cardstories .cardstories_top > div { 
+    display: inline-block;
 }
 
-.cardstories .cardstories_go_lobby:hover { 
-    background: transparent url('images/lobby.png') no-repeat left top;
-    background-position: -118px 0px;
+.cardstories .cardstories_top .cardstories_progress_player > div {
+    display: inline-block;
+    border: 1px solid black;
+    padding: 3px;
+    font-size: 12pt;
+}
+
+.cardstories .cardstories_bottom { 
+    height: 600px;
+    width: 1024px;
+}
+
+.cardstories .cardstories_bottom .cardstories_left { 
+    position: relative;
+    display: inline-block;
+    height: 600px;
+    width: 800px;
+    border: 3px solid black;
+    margin: 5px;
+    padding: 7px;
+}
+
+.cardstories .cardstories_bottom .cardstories_right { 
+    display: inline-block;
+    vertical-align: top;
+    height: 700px;
+    width: 180px;
+}
+
+.cardstories .cardstories_bottom .cardstories_right > div { 
+    height: 150px;
+    width: 150px;
+    border: 3px solid black;
+    margin: 5px;
+    padding: 7px;
+}
+
+.cardstories_player_seat {
+    position: absolute;
+    height: 150px;
+    width: 250px;
+    border: 1px solid black;
+}
+
+.cardstories_player_seat.cardstories_player_top_left {
+    top: 150px;
+    left: 0;
+}
+
+.cardstories_player_seat.cardstories_player_bottom_left {
+    bottom: 150px;
+    left: 0;
+}
+
+.cardstories_player_seat.cardstories_player_top_right {
+    top: 150px;
+    right: 0;
+}
+
+.cardstories_player_seat.cardstories_player_bottom_right {
+    bottom: 150px;
+    right: 0;
+}
+
+.cardstories_owner_seat {
+    position: absolute;
+    top: 0;
+    left: 300px;
+    height: 200px;
+    width: 250px;
+    border: 1px solid black;
+}
+
+.cardstories_self_seat {
+    position: absolute;
+    bottom: 0;
+    left: 300px;
+    height: 200px;
+    width: 250px;
+    border: 1px solid black;
 }
 
 /* Change cursor to treat buttons as links */

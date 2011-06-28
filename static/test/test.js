@@ -646,12 +646,10 @@ test("invitation_pick_wait", function() {
 
 test("invitation_anonymous", function() {
     setup();
-    expect(3);
+    expect(9);
 
     var player_id = null;
     var game_id = 101;
-    var picked = null;
-    var cards = [1,2,3,4,picked,5];
     var sentence = 'SENTENCE';
 
     var _query = $.query;
@@ -665,9 +663,18 @@ test("invitation_anonymous", function() {
         }
     };
 
+    var owner = 'owner';
     var game = {
 	'id': game_id,
-	'self': [picked, null, cards],
+        'players': [
+            [ owner, null, 'n', null, [] ],
+            [ 'player1', null, 'n', null, [] ],
+            [ 'player2', null, 'n', null, [] ],
+            [ 'player3', null, 'n', null, [] ],
+            [ 'player4', null, 'n', null, [] ],
+            [ 'player5', null, 'n', null, [] ]
+        ],
+        'owner_id': owner,
 	'sentence': sentence
     };
 
@@ -679,6 +686,10 @@ test("invitation_anonymous", function() {
     var element = $('#qunit-fixture .cardstories_invitation .cardstories_invitation_anonymous');
     $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
     equal($('.cardstories_sentence', element).text(), sentence);
+    equal($('.cardstories_owner_seat', element).text(), owner);
+    for(var i = 1; i <= 5; i++) {
+        equal($('.cardstories_player_seat_' + i, element).text(), 'player' + i);
+    }
 
     // Restore the original query
     $.query = _query;

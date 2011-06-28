@@ -577,6 +577,16 @@
             var element = $('.cardstories_invitation .cardstories_invitation_anonymous', root);
             this.set_active(root, element);
             $('.cardstories_sentence', element).text(game.sentence);
+            var players = game.players;
+            var seat = 1;
+            for(var i = 0; i < players.length; i++) {
+                if(players[i][0] == game.owner_id) {
+                    $('.cardstories_owner_seat').text(players[i][0]);
+                } else {
+                    $('.cardstories_player_seat_' + seat).text(players[i][0]);
+                    seat += 1;
+                }
+            }
         },
 
         vote: function(player_id, game, root) {
