@@ -210,6 +210,7 @@ class CardstoriesGame(pollable):
                             'ready': ready,
                             'self': myself,
                             'owner': owner_id == player_id,
+                            'owner_id': owner_id,
                             'players': players,
                             'invited': invited })
 

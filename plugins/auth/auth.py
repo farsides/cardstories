@@ -80,6 +80,9 @@ class Plugin:
                     for player in result['players']:
                         row = yield self.db.runQuery("SELECT name FROM players WHERE id = ?", [ player[0] ])
                         player[0] = row[0][0]
+                if result.has_key('owner_id'):
+                        row = yield self.db.runQuery("SELECT name FROM players WHERE id = ?", [ result['owner_id'] ])
+                        result['owner_id'] = row[0][0]
                 if result.has_key('invited') and result['invited']:
                     invited = result['invited'];
                     for index in range(len(invited)):

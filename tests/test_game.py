@@ -274,6 +274,7 @@ class CardstoriesGameTest(unittest.TestCase):
                            'id': game_id,
                            'ready': False,
                            'owner': False,
+                           'owner_id': 15,
                            'players': [[owner_id, None, u'n', None, None], [player1, None, u'n', None, None], [player2, None, u'n', None, None]],
                            'self': None,
                            'sentence': u'SENTENCE',
@@ -356,6 +357,7 @@ class CardstoriesGameTest(unittest.TestCase):
                            'id': game_id,
                            'ready': True,
                            'owner': False,
+                           'owner_id': 15,
                            'players': [[owner_id, None, u'n', None, None], [player1, None, u'n', card1, player1_cards], [player2, None, u'n', None, None]],
                            'self': [card1, card2, player1_cards],
                            'sentence': u'SENTENCE',
@@ -569,7 +571,7 @@ class CardstoriesGameTest(unittest.TestCase):
 
 def Run():
     loader = runner.TestLoader()
-#    loader.methodPrefix = "test16_"
+#    loader.methodPrefix = "test08_"
     suite = loader.suiteFactory()
     suite.addTest(loader.loadClass(CardstoriesGameTest))
 
