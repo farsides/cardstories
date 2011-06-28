@@ -108,7 +108,7 @@ test("play_again_finish_state", function() {
 	    'id': 7,
 	    'state': 'fake_state',
 	    'board': [],
-	    'players': [],
+	    'players': []
 	};
 	var root = $('#qunit-fixture .cardstories');
 	game.owner = false;
@@ -121,7 +121,7 @@ test("play_again_finish_state", function() {
     var send_game = $.cardstories.send_game;
     var $textarea = $('.cardstories_text', $('.cardstories_advertise', root));
     $.cookie('CARDSTORIES_INVITATIONS', null);
-    $textarea.val('aaa@aaa.aaa\nbbb@bbb.bbb\nccc@ccc.ccc')
+    $textarea.val('aaa@aaa.aaa\nbbb@bbb.bbb\nccc@ccc.ccc');
     var text = $textarea.val();
     $.cardstories.send_game = function () {}; //do nothing
     $.cardstories.advertise(player_id, game.id, root);
@@ -132,7 +132,7 @@ test("play_again_finish_state", function() {
         equal(arg_player_id, player_id);
         equal(arg_root, root);
         $.cardstories.create = create;
-    }
+    };
     $('.play_again', root).click();
     equal(text, inv_cookie);
 });
@@ -243,14 +243,14 @@ test("test confirm_results_publication", function () {
         equal(arg_game.id, game_id);
         ok($(root).hasClass('cardstories_root'), 'cardstories_root');
         $.cardstories.vote_owner = vote_owner;
-    }
+    };
 
-	var send_game = $.cardstories.send_game;
+    var send_game = $.cardstories.send_game;
     $.cardstories.send_game = function (arg_player_id, arg_game_id) {
         equal(arg_player_id, player_id);
         equal(arg_game_id, game_id);
         $.cardstories.send_game = send_game;
-    }
+    };
 
     $.cardstories.confirm_results_publication(player_id, game, root);
     $('.cardstories_notyet_announce_results').click();
@@ -1665,8 +1665,8 @@ test("select_cards single", function() {
         var links = $('a.cardstories_card', element);
         links.each(function(index) {
             $(this).click();
-            var condition = $(this).hasClass('cardstories_card_selected') == index == 0;
-            var not = $(this).hasClass('cardstories_card_selected') ? '' : 'not'
+            var condition = $(this).hasClass('cardstories_card_selected') == index === 0;
+            var not = $(this).hasClass('cardstories_card_selected') ? '' : 'not';
             ok(condition, 'Card ' + index + ' ' + not +  ' picked.');
         });
         start();
