@@ -32,6 +32,7 @@ apache2_install() {
     if [ ! -e $conf ] ; then
         ln -s $included $conf
     fi
+    a2enmod proxy proxy_http
 }
 
 . /usr/share/debconf/confmodule
