@@ -7,6 +7,8 @@ include conf/*.conf
 include maintain.mk
 include LICENSE.txt
 include AUTHORS.txt
+include NEWS.txt
+include ChangeLog
 include MANIFEST
 include MANIFEST.in
 include artwork/*.ai
