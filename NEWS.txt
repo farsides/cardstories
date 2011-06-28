@@ -1,0 +1,11 @@
+Release 1.0.5
+
+Copyright holders updates.
+100% test coverage on the client code.
+New polling architecture enabling pollable plugins.
+Partial client support for anonymous viewing.
+Example plugin with documentation for plugin authors.
+Improve email notification to help asynchronous players.
+Add system administrator control for the game timeout delay.
+Remove the blue border around cards in ff3.
+Fedora compatibility changes.
