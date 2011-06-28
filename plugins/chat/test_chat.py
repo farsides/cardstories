@@ -1,0 +1,225 @@
+#
+# Copyright (C) 2011 Chris McCormick <chris@mccormick.cx>
+#
+# This software's license gives you freedom; you can copy, convey,
+# propagate, redistribute and/or modify this program under the terms of
+# the GNU Affero General Public License (AGPL) as published by the Free
+# Software Foundation (FSF), either version 3 of the License, or (at your
+# option) any later version of the AGPL published by the FSF.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero
+# General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program in a file in the toplevel directory called
+# "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
+#
+import sys
+import os
+sys.path.insert(0, os.path.abspath("../..")) # so that for M-x pdb works
+import sqlite3
+
+from twisted.python import runtime
+from twisted.trial import unittest, runner, reporter
+from twisted.internet import reactor, defer
+
+from cardstories.service import CardstoriesService
+from plugins.chat.chat import Plugin
+
+# TODO:
+#(10:17:37 PM) dachary: chr15m: I suggest you add a listener in the test that will react to the touch() by firing a callback that you use as a return value of the test
+#(10:17:44 PM) dachary: chr15m: code translation:
+#(10:17:51 PM) dachary: d = deferred()
+#(10:18:00 PM) dachary: def check(event):
+#(10:18:15 PM) dachary:     d.callback(True)
+#(10:18:39 PM) dachary: service.listen().addCallback(check)
+#(10:18:50 PM) dachary: (do your test)
+#(10:18:53 PM) dachary: return d
+#(10:19:42 PM) dachary: in other words you return something that tells the tests framework to wait for an event that you expect
+#(10:20:13 PM) dachary: if you return nothing the test framework will assume it's all done ... but when doing forensic analysis on the environement it will notice that there are leftovers
+#(10:21:27 PM) dachary: hum
+#(10:21:51 PM) dachary: if your *sure* your test will only fire one event only you can do even simpler : at the end of the test you call
+#(10:21:57 PM) dachary: return service.listen()
+#(10:21:59 PM) dachary: and voila
+
+class Request:
+    
+    def __init__(self, **kwargs):
+        self.args = kwargs
+
+class ChatTest(unittest.TestCase):
+
+    def setUp(self):
+        self.database = 'test.sqlite'
+        if os.path.exists(self.database):
+            os.unlink(self.database)
+        self.service = CardstoriesService({'db': self.database,
+                                           'plugins-confdir': 'CONFDIR',
+                                           'plugins-libdir': 'LIBDIR',
+                                           'static': 'STATIC'
+                                           })
+        self.service.startService()
+
+    def tearDown(self):
+        return self.service.stopService()
+
+    @defer.inlineCallbacks
+    def complete_game(self):
+        self.winner_card = winner_card = 5
+        sentence = 'SENTENCE'
+        owner_id = 15
+        game = yield self.service.create({ 'card': [winner_card],
+                                           'sentence': [sentence],
+                                           'owner_id': [owner_id]})
+        self.player1 = 16
+        for player_id in ( self.player1, 17 ):
+            yield self.service.participate({ 'action': ['participate'],
+                                             'player_id': [player_id],
+                                             'game_id': [game['game_id']] })
+            player = yield self.service.player2game({ 'action': ['player2game'],
+                                                      'player_id': [player_id],
+                                                      'game_id': [game['game_id']] })
+            card = player['cards'][0]
+            yield self.service.pick({ 'action': ['pick'],
+                                      'player_id': [player_id],
+                                      'game_id': [game['game_id']],
+                                      'card': [card] })
+        
+        yield self.service.voting({ 'action': ['voting'],
+                                    'game_id': [game['game_id']],
+                                    'owner_id': [owner_id] })
+        winner_id = self.player1
+        yield self.service.vote({ 'action': ['vote'],
+                                  'game_id': [game['game_id']],
+                                  'player_id': [winner_id],
+                                  'card': [winner_card] })
+        loser_id = 17
+        yield self.service.vote({ 'action': ['vote'],
+                                  'game_id': [game['game_id']],
+                                  'player_id': [loser_id],
+                                  'card': [120] })
+        self.assertTrue(self.service.games.has_key(game['game_id']))
+        yield self.service.complete({ 'action': ['complete'],
+                                      'game_id': [game['game_id']],
+                                      'owner_id': [owner_id] })
+        self.assertFalse(self.service.games.has_key(game['game_id']))
+        defer.returnValue(True)
+    
+    @defer.inlineCallbacks
+    def test00_preprocess_noop(self):
+        # create a new instance of the plugin and make sure it's the right type
+        chat_instance = Plugin(self.service, [])
+        self.assertEquals(chat_instance.name(), 'chat')
+        # run a game to get into a realistic situation
+        yield self.complete_game()
+        # run the preprocess method and make sure it does not affect anything during a normal 'game' event
+        result_in = 'RESULT'
+        result_out = yield chat_instance.preprocess(result_in, Request(action = ['game']))
+        self.assertEquals(result_in, result_out)
+
+    @defer.inlineCallbacks
+    def test01_add_message(self):
+        # new instance of the chat plugin to test
+        chat_instance = Plugin(self.service, [])
+        # get into a normal gameplay state
+        yield self.complete_game()
+        # create a message event request
+        player_id = 200
+        sentence = "This is my sentence!"
+        now = int(runtime.seconds() * 1000)
+        request = Request(action = ['message'], player_id = [player_id], sentence=[sentence])
+        # verify we have no messages yet
+        self.assertEquals(len(chat_instance.messages), 0)
+        # run the request
+        result = yield chat_instance.preprocess(True, request)
+        # verify we now have one message
+        self.assertEquals(len(chat_instance.messages), 1)
+        # verify the event has been removed from the pipeline
+        self.assertFalse(request.args.has_key('action'))
+        # verify the message we added is in the list
+        self.assertEquals(chat_instance.messages[0]["player_id"], player_id)
+        self.assertEquals(chat_instance.messages[0]["sentence"], sentence)
+    
+    
+    @defer.inlineCallbacks
+    def test02_check_added_message_after_now(self):
+        # new instance of the chat plugin to test
+        chat_instance = Plugin(self.service, [])
+        # get into a normal gameplay state
+        yield self.complete_game()
+        # create a message event request
+        player_id = 200
+        sentence = "This is my sentence!"
+        now = int(runtime.seconds() * 1000)
+        request = Request(action = ['message'], player_id = [player_id], sentence=[sentence])
+        # run the request
+        result = yield chat_instance.preprocess(True, request)
+        # check to make sure no message is returned if we ask for now or later
+        state = yield chat_instance.state({"modified": [now]})
+        self.assertTrue(state.has_key('messages'))
+        self.assertEquals(len(state['messages']), 0)
+    
+    @defer.inlineCallbacks
+    def test03_check_added_message_before_now(self):
+        # new instance of the chat plugin to test
+        chat_instance = Plugin(self.service, [])
+        # get into a normal gameplay state
+        yield self.complete_game()
+        # create a message event request
+        player_id = 200
+        sentence = "This is my sentence!"
+        now = int(runtime.seconds() * 1000)
+        request = Request(action = ['message'], player_id = [player_id], sentence=[sentence])
+        # run the request
+        result = yield chat_instance.preprocess(True, request)
+        # check to make sure no message is returned if we ask for now or later
+        state = yield chat_instance.state({"modified": [now - 1]})
+        self.assertEquals(len(state['messages']), 1)
+        self.assertEquals(state['messages'][0]['player_id'], player_id)
+        self.assertEquals(state['messages'][0]['sentence'], sentence)
+
+    @defer.inlineCallbacks
+    def test04_check_multiple_messages(self):
+        # new instance of the chat plugin to test
+        chat_instance = Plugin(self.service, [])
+        # get into a normal gameplay state
+        yield self.complete_game()
+        # create a message event request
+        player_ids = [200, 220, 999]
+        sentences = ["This is my sentence!", "Yeah another test hello.", "Ping ping poing pong."]
+        when = []
+        for i in range(3):
+            when.append(int(runtime.seconds() * 1000))
+            request = Request(action = ['message'], player_id = [player_ids[i]], sentence=[sentences[i]])
+            # run the request
+            result = yield chat_instance.preprocess(True, request)
+            # check to make sure no message is returned if we ask for now or later
+        state = yield chat_instance.state({"modified": [when[-1] - 1]})
+        self.assertEquals(len(state['messages']), 3)
+        for i in range(3):
+            self.assertEquals(state['messages'][i]['player_id'], player_ids[i])
+            self.assertEquals(state['messages'][i]['sentence'], sentences[i])
+
+def Run():
+    loader = runner.TestLoader()
+    suite = loader.suiteFactory()
+    suite.addTest(loader.loadClass(ChatTest))
+
+    return runner.TrialRunner(
+        reporter.VerboseTextReporter,
+        tracebackFormat='default',
+        ).run(suite)
+
+if __name__ == '__main__':
+    if Run().wasSuccessful():
+        sys.exit(0)
+    else:
+        sys.exit(1)
+
+# Interpreted by emacs
+# Local Variables:
+# compile-command: "python-coverage -e ; PYTHONPATH=../.. python-coverage -x test_chat.py ; python-coverage -m -a -r chat.py"
+# End:
+
