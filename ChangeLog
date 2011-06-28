@@ -1,6 +1,18 @@
-2011-06-28 12:31:36 +0200 Loic Dachary <loic@dachary.org>
+2011-06-28 14:46:40 +0200 Loic Dachary <loic@dachary.org>
 
 	Release 1.0.5
+
+        89a7e0ef4e28641f7e7bf5c4087b8a6e86e8f670: a2enmod proxy to apache so
+        that ProxyPass works
+
+2011-06-28 14:43:52 +0200 Loic Dachary <loic@dachary.org>
+        ff527091723627c70762e4cf5a10adeaa0731c1a: add NEWS.txt and ChangeLog to
+        the distribution
+
+2011-06-28 12:45:07 +0200 Loic Dachary <loic@dachary.org>
+        15dab1d82dec1048405157a36dd1d80de6d85537: NEWS file
+
+2011-06-28 12:31:36 +0200 Loic Dachary <loic@dachary.org>
 
         902f3aac7d96f2ba1855959a01605f6e5150cf90: authors file to recap
         copyright holders and authors
