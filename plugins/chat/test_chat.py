@@ -20,6 +20,7 @@ import sys
 import os
 sys.path.insert(0, os.path.abspath("../..")) # so that for M-x pdb works
 import sqlite3
+from time import sleep
 
 from twisted.python import runtime
 from twisted.trial import unittest, runner, reporter
@@ -28,29 +29,21 @@ from twisted.internet import reactor, defer
 from cardstories.service import CardstoriesService
 from plugins.chat.chat import Plugin
 
-# TODO:
-#(10:17:37 PM) dachary: chr15m: I suggest you add a listener in the test that will react to the touch() by firing a callback that you use as a return value of the test
-#(10:17:44 PM) dachary: chr15m: code translation:
-#(10:17:51 PM) dachary: d = deferred()
-#(10:18:00 PM) dachary: def check(event):
-#(10:18:15 PM) dachary:     d.callback(True)
-#(10:18:39 PM) dachary: service.listen().addCallback(check)
-#(10:18:50 PM) dachary: (do your test)
-#(10:18:53 PM) dachary: return d
-#(10:19:42 PM) dachary: in other words you return something that tells the tests framework to wait for an event that you expect
-#(10:20:13 PM) dachary: if you return nothing the test framework will assume it's all done ... but when doing forensic analysis on the environement it will notice that there are leftovers
-#(10:21:27 PM) dachary: hum
-#(10:21:51 PM) dachary: if your *sure* your test will only fire one event only you can do even simpler : at the end of the test you call
-#(10:21:57 PM) dachary: return service.listen()
-#(10:21:59 PM) dachary: and voila
-
+# fake a request object holding the arguments we specify
 class Request:
     
     def __init__(self, **kwargs):
         self.args = kwargs
 
+# fake plugin to test
+class AnotherPlugin:
+
+    def name(self):
+        return "another"
+
 class ChatTest(unittest.TestCase):
 
+    # initialise our test with a service that we can use during testing and a testing database
     def setUp(self):
         self.database = 'test.sqlite'
         if os.path.exists(self.database):
@@ -63,8 +56,9 @@ class ChatTest(unittest.TestCase):
         self.service.startService()
 
     def tearDown(self):
+        # kill the service we started before the test
         return self.service.stopService()
-
+    
     @defer.inlineCallbacks
     def complete_game(self):
         self.winner_card = winner_card = 5
@@ -123,8 +117,6 @@ class ChatTest(unittest.TestCase):
     def test01_add_message(self):
         # new instance of the chat plugin to test
         chat_instance = Plugin(self.service, [])
-        # get into a normal gameplay state
-        yield self.complete_game()
         # create a message event request
         player_id = 200
         sentence = "This is my sentence!"
@@ -147,8 +139,6 @@ class ChatTest(unittest.TestCase):
     def test02_check_added_message_after_now(self):
         # new instance of the chat plugin to test
         chat_instance = Plugin(self.service, [])
-        # get into a normal gameplay state
-        yield self.complete_game()
         # create a message event request
         player_id = 200
         sentence = "This is my sentence!"
@@ -165,8 +155,6 @@ class ChatTest(unittest.TestCase):
     def test03_check_added_message_before_now(self):
         # new instance of the chat plugin to test
         chat_instance = Plugin(self.service, [])
-        # get into a normal gameplay state
-        yield self.complete_game()
         # create a message event request
         player_id = 200
         sentence = "This is my sentence!"
@@ -184,8 +172,6 @@ class ChatTest(unittest.TestCase):
     def test04_check_multiple_messages(self):
         # new instance of the chat plugin to test
         chat_instance = Plugin(self.service, [])
-        # get into a normal gameplay state
-        yield self.complete_game()
         # create a message event request
         player_ids = [200, 220, 999]
         sentences = ["This is my sentence!", "Yeah another test hello.", "Ping ping poing pong."]
@@ -195,12 +181,61 @@ class ChatTest(unittest.TestCase):
             request = Request(action = ['message'], player_id = [player_ids[i]], sentence=[sentences[i]])
             # run the request
             result = yield chat_instance.preprocess(True, request)
-            # check to make sure no message is returned if we ask for now or later
-        state = yield chat_instance.state({"modified": [when[-1] - 1]})
+        # check to make sure no message is returned if we ask for now or later
+        # we check right back to one second ago to make sure all recently added messages are caught
+        state = yield chat_instance.state({"modified": [when[-1] - 1000]})
         self.assertEquals(len(state['messages']), 3)
         for i in range(3):
             self.assertEquals(state['messages'][i]['player_id'], player_ids[i])
             self.assertEquals(state['messages'][i]['sentence'], sentences[i])
+
+    @defer.inlineCallbacks
+    def test05_check_half_of_multiple_messages(self):
+        # new instance of the chat plugin to test
+        chat_instance = Plugin(self.service, [])
+        # create a message event request
+        player_ids = [200, 220, 999]
+        sentences = ["This is my sentence!", "Yeah another test hello.", "Ping ping poing pong."]
+        when = []
+        for i in range(3):
+            sleep(0.1)
+            when.append(int(runtime.seconds() * 1000))
+            request = Request(action = ['message'], player_id = [player_ids[i]], sentence=[sentences[i]])
+            # run the request
+            result = yield chat_instance.preprocess(True, request)
+        # check to make sure no message is returned if we ask for now or later
+        # we check right back to one second ago to make sure all recently added messages are caught
+        state = yield chat_instance.state({"modified": [when[-1] - 150]})
+        # this time because of the 100ms delay between messages, and only checking to 150ms ago
+        # we should only get the last two messages
+        self.assertEquals(len(state['messages']), 2)
+        for i in range(2):
+            self.assertEquals(state['messages'][i]['player_id'], player_ids[i + 1])
+            self.assertEquals(state['messages'][i]['sentence'], sentences[i + 1])
+    
+    @defer.inlineCallbacks
+    def test06_touch_state(self):
+        # here we test that a listener actually gets the state correctly
+        player_id = 200
+        sentence = "This is my sentence!"
+        chat_instance = Plugin(self.service, [AnotherPlugin()])
+        d = chat_instance.poll({'modified': [chat_instance.get_modified()]})
+        # our test callback
+        @defer.inlineCallbacks
+        def check(result):
+            self.assertEquals(len(chat_instance.messages), 1)
+            state = yield chat_instance.state({'modified': [0]})
+            self.assertEquals(state['messages'][0]['player_id'], player_id)
+            self.assertEquals(state['messages'][0]['sentence'], sentence)
+            defer.returnValue(result)
+        d.addCallback(check)
+        # check there are no messages before we run the tes
+        self.assertEquals(len(chat_instance.messages), 0)
+        # create a message event request
+        request = Request(action = ['message'], player_id = [player_id], sentence=[sentence])
+        # run the request
+        result = yield chat_instance.preprocess(True, request)
+        yield d
 
 def Run():
     loader = runner.TestLoader()

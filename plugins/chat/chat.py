@@ -22,6 +22,9 @@ from twisted.internet import defer, reactor
 
 from cardstories.poll import pollable
 
+# how long we retain old messages for in milliseconds
+MESSAGE_EXPIRE_TIME = 3600000
+
 class Plugin(pollable):
     """ The chat plugin implements the backend for the in-game chat system. """
     def __init__(self, service, plugins):
@@ -58,7 +61,7 @@ class Plugin(pollable):
             # log the chat message for later
             log.msg('chat: ' + str(player_id) + " - " + str(sentence))
             # cull out very old messages to stop memory leaks
-            delmessages = [m for m in self.messages if int(runtime.seconds() * 1000) > m["when"] + 3600000]
+            delmessages = [m for m in self.messages if int(runtime.seconds() * 1000) > m["when"] + MESSAGE_EXPIRE_TIME]
             for m in delmessages:
                 self.messages.remove(m)
             # tell everybody connected about the new sentence
