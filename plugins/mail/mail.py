@@ -27,6 +27,7 @@ from email.mime.text import MIMEText
 from twisted.python import failure, runtime, log
 from twisted.internet import defer, reactor
 from twisted.mail.smtp import sendmail
+from twisted.web import client
 
 class Plugin:
 
@@ -36,6 +37,10 @@ class Plugin:
         for plugin in plugins:
             if plugin.name() == 'auth':
                 self.auth = plugin
+                break
+            elif plugin.name() == 'djangoauth':
+                self.auth = plugin
+                break
         assert self.auth
         self.service = service
         self.service.listen().addCallback(self.self_notify)
@@ -50,6 +55,7 @@ class Plugin:
         self.sender = self.settings.get('sender')
         self.host = self.settings.get('host')
         self.url = self.settings.get('url')
+        self.static_url = self.settings.get('static_url')
         self.sendmail = sendmail
 
     def name(self):
@@ -66,8 +72,15 @@ class Plugin:
 
     @defer.inlineCallbacks
     def resolve(self, player_ids):
-        rows = yield self.auth.db.runQuery("SELECT name FROM players WHERE " + ' OR '.join([ 'id = ?' ] * len(player_ids)), player_ids)
-        defer.returnValue(map(lambda row: row[0], rows))
+        if self.auth.name() == 'auth':
+            rows = yield self.auth.db.runQuery("SELECT name FROM players WHERE " + ' OR '.join([ 'id = ?' ] * len(player_ids)), player_ids)
+            usernames = map(lambda row: row[0], rows)
+        elif self.auth.name() == 'djangoauth':
+            usernames = []
+            for player_id in player_ids:
+                username = yield client.getPage("http://%s/getusername/%s/" % (self.auth.host, str(player_id)))
+                usernames.append(username)
+        defer.returnValue(usernames)
 
     @defer.inlineCallbacks
     def send(self, subject, recipients, template, variables):
@@ -81,6 +94,7 @@ class Plugin:
             email['Subject'] = subject
             email['To'] = ', '.join(recipients)
             variables['url'] = self.url
+            variables['static_url'] = self.static_url
             html = MIMEText(template % variables, 'html')
             email.attach(html)
             yield self.sendmail(self.host, self.sender, recipients, email.as_string())

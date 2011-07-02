@@ -1,4 +1,32 @@
+#
+# Copyright (C) 2011 Farsides <contact@farsides.com>
+#
+# Author: Adolfo R. Brandes <arbrandes@gmail.com>
+#
+# This software's license gives you freedom; you can copy, convey,
+# propagate, redistribute and/or modify this program under the terms of
+# the GNU Affero General Public License (AGPL) as published by the Free
+# Software Foundation (FSF), either version 3 of the License, or (at your
+# option) any later version of the AGPL published by the FSF.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero
+# General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program in a file in the toplevel directory called
+# "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
+#
 # Django settings for website project.
+#
+import os
+import sys
+
+# Shortcuts to the real site directory and its parent.
+spath = lambda x: os.path.join(os.path.dirname(__file__), x)
+ppath = lambda x: os.path.join(os.path.dirname(
+                                     os.path.dirname(__file__)), x)
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
@@ -11,23 +39,18 @@ MANAGERS = ADMINS
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.', # Add 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': '',                      # Or path to database file if using sqlite3.
-        'USER': '',                      # Not used with sqlite3.
-        'PASSWORD': '',                  # Not used with sqlite3.
-        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': '/tmp/cardstories.website',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
     }
 }
 
-# Local time zone for this installation. Choices can be found here:
-# http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
-# although not all choices may be available on all operating systems.
-# On Unix systems, a value of None will cause Django to use the same
-# timezone as the operating system.
-# If running in a Windows environment this must be set to the same as your
-# system time zone.
-TIME_ZONE = 'America/Chicago'
+# A value of None will cause Django to use the same timezone as the operating
+# system.
+TIME_ZONE = None
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -45,26 +68,26 @@ USE_L10N = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/"
-MEDIA_ROOT = ''
+MEDIA_ROOT = ppath('static')
 
 # URL that handles the media served from MEDIA_ROOT. Make sure to use a
 # trailing slash if there is a path component (optional in other cases).
 # Examples: "http://media.lawrence.com", "http://example.com/media/"
-MEDIA_URL = ''
+MEDIA_URL = '/static/'
 
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.
 # Examples: "http://foo.com/media/", "/media/".
-ADMIN_MEDIA_PREFIX = '/media/'
+ADMIN_MEDIA_PREFIX = '/admin/media/'
 
 # Make this unique, and don't share it with anybody.
-SECRET_KEY = 'm4m_856$xc-*s6nr+$b+2b%_qn^b0u73b6hb5bfnfcu!mp&-d='
+SECRET_KEY = '^!gqxoef0k9oo%bdri4#aagv@3txu$@voz52zzv_7)ae@8j$%$'
 
 # List of callables that know how to import templates from various sources.
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
+#    'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -75,12 +98,10 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
 )
 
-ROOT_URLCONF = 'website.urls'
+ROOT_URLCONF = 'urls'
 
 TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
+        spath('templates'),
 )
 
 INSTALLED_APPS = (
@@ -89,8 +110,16 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.sites',
     'django.contrib.messages',
-    # Uncomment the next line to enable the admin:
-    # 'django.contrib.admin',
-    # Uncomment the next line to enable admin documentation:
-    # 'django.contrib.admindocs',
+    'django.contrib.admin',
+    'cardstories',
+    'util',
 )
+
+# Enables code coverage
+TEST_RUNNER = 'tests.run_tests_with_coverage'
+COVERAGE_MODULES = ['urls',
+                    'cardstories.views',
+                    'cardstories.forms']
+
+# Cardstories web service host:port
+CARDSTORIES_HOST = 'localhost:5000'

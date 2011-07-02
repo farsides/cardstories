@@ -1,5 +1,9 @@
 #
-# Copyright (C) 2011 Dachary <loic@dachary.org>
+# Copyright (C) 2011 Farsides <contact@farsides.com>
+#
+# Authors:
+#          Loic Dachary <loic@dachary.org>
+#          Adolfo R. Brandes <arbrandes@gmail.com>
 #
 # This software's license gives you freedom; you can copy, convey,
 # propagate, redistribute and/or modify this program under the terms of
@@ -16,30 +20,17 @@
 # along with this program in a file in the toplevel directory called
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
+export COVERAGE=$(shell which coverage || which python-coverage)
 
 all:
 
 check:
-	make -C tests check
-	for dir in plugins/*/Makefile ; do \
-		make -C `dirname $$dir` check ; \
-	done
-	jscoverage --no-instrument=js/jquery.placeholder-1.0.1.js --no-instrument=js/jquery.query-2.1.7.js static static-coverage
-	website/manage.py test
+	${COVERAGE} -e
+	PYTHONPATH=../.. ${COVERAGE} -x test_djangoauth.py
+	${COVERAGE} -m -a -r djangoauth.py
 
 clean:
-	for dir in plugins/*/Makefile ; do \
-		make -C `dirname $$dir` clean ; \
-	done
-	rm -f plugins/{solo,auth}.py 
-	make -C tests clean
-	find . -name '*,cover' | xargs rm -f
-	rm -fr static-coverage
-	rm -f etc/cardstories/twisted/plugins/dropin.cache
-	find . -name '*~' | xargs rm -f
-	find . -name '*.pyc' | xargs rm -f
-	rm -fr dist
-	rm -fr static/cardstories.zip
-	rm -f MANIFEST
-	rm -fr build
+	rm -fr .coverage _trial_temp*
+	rm -f *,cover
+	rm -f *.pyc
 

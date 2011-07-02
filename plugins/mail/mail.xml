@@ -1,1 +1,1 @@
-<mail host="localhost" sender="contact@cardstori.es" url="http://localhost:4923/static" />
+<mail host="localhost" sender="contact@cardstori.es" url="http://localhost/cardstories" static_url="http://localhost/static" />

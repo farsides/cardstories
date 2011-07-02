@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{% block title %}Cardstories{% endblock %}</title>
+  <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+  <link rel="stylesheet" href="/static/css/all.css" type="text/css" media="screen">
+  <script type="text/javascript" src="/static/js/jquery/jquery-1.5.1.js"></script>
+  {% block head %}{% endblock %}
+</head>
+<body>
+  {%block precontent %}{% endblock %}
+  <div class="cardstories_bg_outer">
+    <div class="cardstories_bg_inner">
+      <div class="cardstories">
+        {%block content %}{% endblock %}
+      </div>
+    </div>
+  </div>
+  {%block postcontent %}{% endblock %}
+</body>
+</html>

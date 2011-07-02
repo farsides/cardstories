@@ -1,1 +1,1 @@
-<mail host="dmail.dachary.vm.gnt" sender="loic@dachary.org" url="http://localhost:5000/static" />
+<mail host="localhost" sender="fake@cardstories.org" url="http://localhost:8000/cardstories" static_url="http://localhost:8000/static" />

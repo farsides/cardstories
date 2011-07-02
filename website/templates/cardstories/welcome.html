@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome to Cardstories!{% endblock %}
+
+{%block content %}
+  <div class="cardstories_extras cardstories_active">
+    <div class="cardstories_subscribe cardstories_active">
+      <div class="cardstories_logo_welcome"></div>
+      <a href="http://farsides.com/" target="_blank"><div class="cardstories_logo_farsides"></div></a>
+      <div class="cardstories_bubble"></div>
+      <div class="cardstories_reg_title">New players</div>
+      <div class="cardstories_reg_errors">
+        {{ registration_form.name.errors }}
+        {{ registration_form.username.errors }}
+        {{ registration_form.password1.errors }}
+      </div>
+      <form class="cardstories_registerform" method="post" action="/register/">{% csrf_token %}
+        {{ registration_form.name }}
+        {{ registration_form.username }}
+        {{ registration_form.password1 }}
+        {{ registration_form.password1_clear }}
+        {{ registration_form.password2 }}
+        {{ registration_form.password2_clear }}
+        <input class="cardstories_reg_submit" type="submit" value="Register" />
+      </form>
+      <div class="cardstories_login_title">Returning players</div>
+      <div class="cardstories_login_errors">
+        {{ login_form.username.errors }}
+        {{ login_form.password.errors }}
+      </div>
+      <form class="cardstories_loginform" method="post" action="/login/">{% csrf_token %}
+        {{ login_form.username }}
+        {{ login_form.password }}
+        {{ login_form.password_clear }}
+        <input class="cardstories_login_submit" type="submit" value="Login" />
+      </form>
+      <div class="cardstories_password_reset"><a href="{% url auth_password_reset %}">Forgot your password?</a></div>
+      <div class="cardstories_privacy_notice">We promise to never give or sell any emails to anyone. We hate spams just like you.</div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block postcontent %}
+<script>
+$(document).ready(function() {
+    rp1c = $('.cardstories_reg_password1_clear');
+    rp1 = $('.cardstories_reg_password1');
+    rp2c = $('.cardstories_reg_password2_clear');
+    rp2 = $('.cardstories_reg_password2');
+    lpc = $('.cardstories_login_password_clear');
+    lp = $('.cardstories_login_password');
+
+    if (rp1.val() == '' && !rp1.hasClass('cardstories_field_error')) {
+        rp1c.show();
+        rp1.hide();
+        rp1c.focus(function() {
+            rp1c.hide();
+            rp1.show();
+            rp1.focus();
+        });
+        rp1.blur(function() {
+            if(rp1.val() == '') {
+                rp1c.show();
+                rp1.hide();
+            }
+        });
+    }
+
+    if (rp2.val() == '' && !rp2.hasClass('cardstories_field_error')) {
+        rp2c.show();
+        rp2.hide();
+        rp2c.focus(function() {
+            rp2c.hide();
+            rp2.show();
+            rp2.focus();
+        });
+        rp2.blur(function() {
+            if(rp2.val() == '') {
+                rp2c.show();
+                rp2.hide();
+            }
+        });
+    }
+
+    if (lp.val() == '' && !lp.hasClass('cardstories_field_error')) {
+        lpc.show();
+        lp.hide();
+        lpc.focus(function() {
+            lpc.hide();
+            lp.show();
+            lp.focus();
+        });
+        lp.blur(function() {
+            if(lp.val() == '') {
+                lpc.show();
+                lp.hide();
+            }
+        });
+    }
+  
+    $('.cardstories_default_value').each(function() {
+        if (!$(this).hasClass('cardstories_field_error')) {
+            var default_value = this.value;
+            $(this).focus(function() {
+                if(this.value == default_value) {
+                    this.value = '';
+                }
+            });
+            $(this).blur(function() {
+                if(this.value == '') {
+                    this.value = default_value;
+                }
+            });
+        }
+    });
+
+    $('.cardstories_field_error').first().focus();
+});
+</script>
+{% endblock %}
