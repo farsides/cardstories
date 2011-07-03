@@ -25,6 +25,8 @@ export COVERAGE=$(shell which coverage || which python-coverage)
 all:
 
 check:
+
+_check:
 	${COVERAGE} -e
 	PYTHONPATH=../.. ${COVERAGE} -x test_djangoauth.py
 	${COVERAGE} -m -a -r djangoauth.py
