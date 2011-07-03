@@ -561,6 +561,7 @@ test("invitation_pick", function() {
     expect(11);
 
     var player_id = 15;
+    var owner = 150;
     var game_id = 101;
     var picked = 5;
     var cards = [1,2,3,4,picked,5];
@@ -574,6 +575,10 @@ test("invitation_pick", function() {
     var game = {
 	'id': game_id,
 	'self': [null, null, cards],
+        'players': [
+            [ owner, null, 'n', null, [] ],
+            [ player_id, null, 'n', null, [] ]
+        ],
 	'sentence': sentence
     };
 
@@ -600,7 +605,7 @@ test("invitation_pick", function() {
         invitation(player_id, game, $('#qunit-fixture .cardstories')).
         done(function(is_ready) {
             equal($('#qunit-fixture .cardstories_invitation .cardstories_pick.cardstories_active').length, 1);    
-            equal($('#qunit-fixture .cardstories_invitation .cardstories_pick .cardstories_sentence').text(), sentence);
+            equal($('#qunit-fixture .cardstories_invitation .cardstories_pick .cardstories_sentence').text(), sentence); // invitation_board function side effect 
             equal($('.cardstories_card:nth(0) .cardstories_card_foreground', element).attr('src'), 'PATH/card0' + cards[0] + '.png');
             equal($('.cardstories_card:nth(5) .cardstories_card_foreground', element).attr('src'), 'PATH/card0' + cards[5] + '.png');
             $('.cardstories_card:nth(4)', element).click();
@@ -616,6 +621,7 @@ test("invitation_pick_wait", function() {
     expect(8);
 
     var player_id = 15;
+    var owner = 150;
     var game_id = 101;
     var picked = 5;
     var cards = [1,2,3,4,picked,5];
@@ -623,6 +629,10 @@ test("invitation_pick_wait", function() {
 
     var game = {
 	'id': game_id,
+        'players': [
+            [ owner, null, 'n', null, [] ],
+            [ player_id, null, 'n', null, [] ]
+        ],
 	'self': [picked, null, cards],
 	'sentence': sentence
     };
@@ -646,7 +656,7 @@ test("invitation_pick_wait", function() {
 
 test("invitation_anonymous", function() {
     setup();
-    expect(9);
+    expect(2);
 
     var player_id = null;
     var game_id = 101;
@@ -685,14 +695,87 @@ test("invitation_anonymous", function() {
 
     var element = $('#qunit-fixture .cardstories_invitation .cardstories_invitation_anonymous');
     $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
-    equal($('.cardstories_sentence', element).text(), sentence);
-    equal($('.cardstories_owner_seat', element).text(), owner);
-    for(var i = 1; i <= 5; i++) {
-        equal($('.cardstories_player_seat_' + i, element).text(), 'player' + i);
-    }
 
     // Restore the original query
     $.query = _query;
+});
+
+test("invitation_board", function() {
+    setup();
+    expect(27);
+
+    var player_id = null;
+    var player1 = 'player1';
+    var game_id = 101;
+    var sentence = 'SENTENCE';
+
+    var owner = 'owner';
+    var game = {
+	'id': game_id,
+        'players': [
+            [ owner, null, 'n', null, [] ],
+            [ player1, null, 'n', null, [] ],
+            [ 'player2', null, 'n', null, [] ],
+            [ 'player3', null, 'n', null, [] ],
+            [ 'player4', null, 'n', null, [] ],
+            [ 'player5', null, 'n', null, [] ]
+        ],
+        'owner_id': owner,
+	'sentence': sentence
+    };
+
+    var element = $('#qunit-fixture .cardstories_invitation .cardstories_board');
+    $.cardstories.invitation_board(player_id, game, $('#qunit-fixture .cardstories'), element);
+    equal($('.cardstories_sentence', element).text(), sentence);
+    // anonymous view, all players present
+    equal($('.cardstories_owner_seat .cardstories_player_name', element).text(), owner);
+    for(var i = 1; i <= 5; i++) {
+        equal($('.cardstories_player_seat_' + i + ' .cardstories_player_name', element).text(), 'player' + i);
+    }
+    // player view, all players present
+    player_id = player1
+    $.cardstories.invitation_board(player_id, game, $('#qunit-fixture .cardstories'), element);
+    equal($('.cardstories_owner_seat .cardstories_player_name', element).text(), owner);
+    equal($('.cardstories_player_seat_1 .cardstories_player_name', element).text(), 'player2');
+    equal($('.cardstories_player_seat_2 .cardstories_player_name', element).text(), 'player3');
+    equal($('.cardstories_player_seat_3 .cardstories_player_name', element).text(), 'player4');
+    equal($('.cardstories_player_seat_4 .cardstories_player_name', element).text(), 'player5');
+    equal($('.cardstories_player_seat_5 .cardstories_player_name', element).text(), 'player1');
+    equal($('.cardstories_self_seat .cardstories_player_name', element).text(), 'player1');
+    ok(!$('.cardstories_player_seat_4', element).hasClass('cardstories_empty_seat'), 'seat4 is not empty');
+    // player view, one player missing
+    game.players.pop();
+    $.cardstories.invitation_board(player_id, game, $('#qunit-fixture .cardstories'), element);
+    equal($('.cardstories_owner_seat .cardstories_player_name', element).text(), owner);
+    ok(!$('.cardstories_owner_seat', element).hasClass('cardstories_empty_seat'), 'owner not empty seat');
+    equal($('.cardstories_player_seat_1 .cardstories_player_name', element).text(), 'player2');
+    ok(!$('.cardstories_player_seat_1', element).hasClass('cardstories_empty_seat'), 'seat1 not empty');
+    equal($('.cardstories_player_seat_2 .cardstories_player_name', element).text(), 'player3');
+    ok(!$('.cardstories_player_seat_2', element).hasClass('cardstories_empty_seat'), 'seat2 not empty');
+    equal($('.cardstories_player_seat_3 .cardstories_player_name', element).text(), 'player4');
+    ok(!$('.cardstories_player_seat_3', element).hasClass('cardstories_empty_seat'), 'seat3 not empty');
+    equal($('.cardstories_player_seat_4 .cardstories_player_name', element).text(), 'player5');
+    ok($('.cardstories_player_seat_4', element).hasClass('cardstories_empty_seat'), 'seat4 is empty');
+    equal($('.cardstories_self_seat .cardstories_player_name', element).text(), 'player1');
+    ok($('.cardstories_self_seat', element).hasClass('cardstories_self_seat'), 'self seat is not empty');
+});
+
+test("invitation_board_seat", function() {
+    setup();
+    expect(3);
+
+    var player_id = 100;
+    var card1 = 10;
+    var card2 = 20;
+    var card3 = 30;
+    var game = {};
+
+    var element = $('#qunit-fixture .cardstories_invitation .cardstories_board .cardstories_owner_seat');
+    player = [ 'player1', card1, 'y', card3, [card1, card2] ]
+    $.cardstories.invitation_board_seat(player_id, game, $('#qunit-fixture .cardstories'), element, player, 'owner');
+    ok(element.hasClass('cardstories_player_picked'), 'picked');
+    ok(element.hasClass('cardstories_player_voted'), 'voted');
+    ok(element.hasClass('cardstories_player_won'), 'won');
 });
 
 test("invitation_participate", function() {

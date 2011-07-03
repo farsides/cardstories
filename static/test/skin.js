@@ -92,9 +92,18 @@
       game = {
 	'id': 100,
 	'self': [5, null, [11,12,13,14,15,16,17]],
+        'players': [
+            [ 'player1', null, 'n', 5, [] ],
+            [ 'player2', null, 'n', null, [] ],
+            [ 'player3', null, 'n', null, [] ],
+            [ 'player4', null, 'n', null, [] ],
+            [ 'player5', null, 'n', null, [] ],
+            [ 'player6', null, 'n', null, [] ]
+        ],
+        'owner_id': 'player1',
 	'sentence': 'long sentence is in the flux'
       };
-      $.cardstories.invitation_pick('PLAYER1', game, root);
+      $.cardstories.invitation_pick('player2', game, root);
     } else if(skin == 'invitation_anonymous') {
       game = {
 	  'id': null,

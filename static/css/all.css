@@ -18,6 +18,15 @@
     top: 15px;
 }
 
+.cardstories .cardstories_chat {
+    position: absolute;
+    height: 500px;
+    width: 180px;
+    right: 0px;
+    bottom: 0px;
+    border: 3px solid black;
+}
+
 .cardstories .cardstories_top { 
     height: 30px;
     width: 1024px;
