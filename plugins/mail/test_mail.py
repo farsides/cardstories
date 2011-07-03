@@ -27,7 +27,6 @@ from twisted.web import client
 
 from cardstories.service import CardstoriesService
 from plugins.auth import auth
-from plugins.djangoauth import djangoauth
 from plugins.mail import mail
 
 class Request:
@@ -164,30 +163,11 @@ class MailTestAuth(MailTest):
         d.addCallback(check)
         yield d
 
-
-class MailTestDjangoAuth(MailTest):
-
-    def setUp(self):
-        self._setUp()
-        self.auth = djangoauth.Plugin(self.service, [])
-        self.service.startService()
-
-    @defer.inlineCallbacks
-    def create_players(self):
-        self.owner_name = 'owner@foo.com'
-        self.player1_name = 'player1@foo.com'
-        self.player2_name = 'player2@foo.com'
-        self.owner_id = yield client.getPage("http://%s/getuserid/%s/?create=yes" % (self.auth.host, self.owner_name))
-        self.player1 = yield client.getPage("http://%s/getuserid/%s/?create=yes" % (self.auth.host, self.player1_name))
-        self.player2 = yield client.getPage("http://%s/getuserid/%s/?create=yes" % (self.auth.host, self.player2_name))
-    
-
 def Run():
     loader = runner.TestLoader()
 #    loader.methodPrefix = "test_trynow"
     suite = loader.suiteFactory()
     suite.addTest(loader.loadClass(MailTestAuth))
-    suite.addTest(loader.loadClass(MailTestDjangoAuth))
 
     return runner.TrialRunner(
         reporter.VerboseTextReporter,
