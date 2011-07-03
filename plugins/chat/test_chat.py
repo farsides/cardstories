@@ -211,16 +211,26 @@ class ChatTest(unittest.TestCase):
     def test06_touch_state(self):
         player_id = 200
         sentence = "This is my sentence!"
+        # new instance of chat plugin to run the test against
         chat_instance = Plugin(self.service, [])
-        d = self.service.poll({'action': ['poll'], 'type': ['chat'], 'modified': [0]})
+        # put the chat instance into the service's pollable_plugins
+        self.service.pollable_plugins.append(chat_instance)
+        # flag to signify whether the callback has run
+        self.called = False
+        # service to poll instance waiting for chat
+        d = self.service.poll({'action': ['poll'], 'type': ['chat'], 'modified': [chat_instance.get_modified()]})
+        # callback which runs once the chat plugin calls touch()
         def check(event):
-            print 'I DO NOT GET CALLED'
-            self.assertTrue(True)
-            d.callback([True])
+            self.called = True
         d.addCallback(check)
+        # make sure our flag is false before we run
+        self.assertFalse(self.called)
+        # run the test request
         request = Request(action = ['message'], player_id = [player_id], sentence=[sentence])
-        # run the request
         result = yield chat_instance.preprocess(True, request)
+        yield d
+        # make sure the flag is now set after we've run the test
+        self.assertTrue(self.called)
 
 def Run():
     loader = runner.TestLoader()
