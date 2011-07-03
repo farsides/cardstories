@@ -220,8 +220,6 @@
 	'ready': true
       };
       $.cardstories.complete('voter11', game, root);
-    } else if(skin == 'email') {
-      $.cardstories.email(undefined, root);
     } else if(skin == 'credits') {
       $.cardstories.credits(root);
       $('.cardstories_credits_short', root).click();

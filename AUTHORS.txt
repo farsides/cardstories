@@ -11,6 +11,7 @@ Copyright holder Farsides SARL France contact@farsides.com xavier@antoviaque.org
    Lincoln de Sousa <lincoln@comum.org>
    Matjaz Gregoric <mtyaka@gmail.com>
    Rogério Hilbert <rogerhil@gmail.com> Rogério Hilbert Lima <rogerhil@gmail.com>
+   Adolfo R. Brandes <arbrandes@gmail.com>
 
 Copyright holder Loic Dachary <loic@dachary.org>
    Loic Dachary <loic@dachary.org> Loic Dachary <loic@bet.dachary.org>

@@ -147,7 +147,8 @@
     height: 131px;
     top: 530px;
     left: 240px;
-    background: transparent url('images/subscribe_bubble.png') no-repeat left top;
+    /* Awaiting proper art. */
+    /*background: transparent url('images/subscribe_bubble.png') no-repeat left top;*/
 }
 
 .cardstories .cardstories_extras .cardstories_subscribe label.error {
@@ -160,26 +161,184 @@
     font-size: 14px;
 }
 
-.cardstories .cardstories_extras .cardstories_subscribe .cardstories_email {
+.cardstories .cardstories_extras .cardstories_subscribe .cardstories_reg_title {
     position: absolute;
-    width: 370px;
-    height: 20px;
-    top: 632px;
-    left: 340px;
+    top: 490px;
+    left: 240px;
     border: 0;
-    background-color: transparent;
-    color: #FFFFFF;
+    /*background-color: transparent;*/
+    /*color: #FFFFFF;*/
+    font-size: 16px;
+}
+
+.cardstories .cardstories_extras .cardstories_subscribe .cardstories_reg_errors {
+    position: absolute;
+    padding: 0;
+    margin: 0;
+    width: 240px;
+    height: 16px;
+    top: 510px;
+    left: 170px;
+    /*background-color: transparent;*/
+    font-size: 12px;
+    text-align: left;
+    overflow: hidden;
+}
+
+.cardstories .cardstories_extras .cardstories_subscribe .cardstories_reg_name {
+    position: absolute;
+    width: 240px;
+    height: 20px;
+    top: 530px;
+    left: 170px;
+    border: 0;
+    /*background-color: transparent;*/
+    /*color: #FFFFFF;*/
     font-size: 14px;
 }
 
-.cardstories .cardstories_extras .cardstories_subscribe .cardstories_privacy_notice {
+.cardstories .cardstories_extras .cardstories_subscribe .cardstories_reg_email {
     position: absolute;
-    top: 661px;
-    left: 338px;
-    color: #90856D;
-    font-size: 10px;
+    width: 240px;
+    height: 20px;
+    top: 561px;
+    left: 170px;
+    border: 0;
+    /*background-color: transparent;*/
+    /*color: #FFFFFF;*/
+    font-size: 14px;
 }
 
+.cardstories .cardstories_extras .cardstories_subscribe .cardstories_reg_password1,
+.cardstories .cardstories_extras .cardstories_subscribe .cardstories_reg_password1_clear {
+    position: absolute;
+    width: 115px;
+    height: 20px;
+    top: 593px;
+    left: 170px;
+    border: 0;
+    /*background-color: transparent;*/
+    /*color: #FFFFFF;*/
+    font-size: 14px;
+}
+
+.cardstories .cardstories_extras .cardstories_subscribe .cardstories_reg_password2,
+.cardstories .cardstories_extras .cardstories_subscribe .cardstories_reg_password2_clear {
+    position: absolute;
+    width: 115px;
+    height: 20px;
+    top: 593px;
+    left: 295px;
+    border: 0;
+    /*background-color: transparent;*/
+    /*color: #FFFFFF;*/
+    font-size: 14px;
+}
+
+.cardstories .cardstories_extras .cardstories_subscribe .cardstories_reg_submit {
+    position: absolute;
+    width: 115px;
+    top: 622px;
+    left: 295px;
+    /*border: 0;*/
+    /*background-color: transparent;*/
+    /*color: #FFFFFF;*/
+    font-size: 14px;
+}
+
+.cardstories .cardstories_extras .cardstories_subscribe .cardstories_login_title {
+    position: absolute;
+    top: 490px;
+    left: 670px;
+    /*background-color: transparent;*/
+    /*color: #FFFFFF;*/
+    font-size: 16px;
+}
+
+.cardstories .cardstories_extras .cardstories_subscribe .cardstories_login_errors {
+    position: absolute;
+    padding: 0;
+    margin: 0;
+    width: 240px;
+    height: 16px;
+    top: 510px;
+    left: 620px;
+    /*background-color: transparent;*/
+    color: red;
+    font-size: 12px;
+    text-align: left;
+    overflow: hidden;
+}
+
+.cardstories .cardstories_extras .cardstories_subscribe .cardstories_login_email {
+    position: absolute;
+    width: 240px;
+    height: 20px;
+    top: 530px;
+    left: 620px;
+    border: 0;
+    /*background-color: transparent;*/
+    /*color: #FFFFFF;*/
+    font-size: 14px;
+}
+
+.cardstories .cardstories_extras .cardstories_subscribe .cardstories_login_password,
+.cardstories .cardstories_extras .cardstories_subscribe .cardstories_login_password_clear {
+    position: absolute;
+    width: 240px;
+    height: 20px;
+    top: 561px;
+    left: 620px;
+    border: 0;
+    /*background-color: transparent;*/
+    /*color: #FFFFFF;*/
+    font-size: 14px;
+}
+
+.cardstories .cardstories_extras .cardstories_subscribe .cardstories_login_submit {
+    position: absolute;
+    width: 115px;
+    top: 593px;
+    left: 745px;
+    /*border: 0;*/
+    /*background-color: transparent;*/
+    /*color: #FFFFFF;*/
+    font-size: 14px;
+}
+
+.cardstories .cardstories_extras .cardstories_subscribe .cardstories_password_reset {
+    position: absolute;
+    top: 597px;
+    left: 620px;
+    /*background-color: transparent;*/
+    color: red;
+    font-size: 11px;
+}
+
+.cardstories .cardstories_extras .cardstories_subscribe .cardstories_reg_password1_clear,
+.cardstories .cardstories_extras .cardstories_subscribe .cardstories_reg_password2_clear,
+.cardstories .cardstories_extras .cardstories_subscribe .cardstories_login_password_clear {
+    display: none;
+}
+
+.cardstories .cardstories_extras .cardstories_subscribe .errorlist {
+    list-style-type: none;
+    position: relative;
+    padding: 0;
+    margin: 0;
+    color: red;
+}
+
+.cardstories .cardstories_extras .cardstories_subscribe .errorlist li {
+    margin: 0;
+    padding: 0;
+}
+.cardstories .cardstories_extras .cardstories_subscribe .cardstories_field_error {
+    color: white;
+    background-color: red;
+}
+
+/*
 .cardstories .cardstories_extras .cardstories_subscribe .cardstories_submit {
     position: absolute;
     background: transparent url('images/next.png') no-repeat left top;
@@ -191,9 +350,33 @@
     width: 106px;
     z-index: 1;
 }
+
 .cardstories .cardstories_extras .cardstories_subscribe .cardstories_submit:hover {
     background-image: url('images/next.png');
     background-position: -106px 0px;
+}
+*/
+
+.cardstories .cardstories_extras .cardstories_subscribe .cardstories_privacy_notice {
+    position: absolute;
+    top: 661px;
+    left: 338px;
+    color: #90856D;
+    font-size: 10px;
+}
+
+/* password reset */
+
+.cardstories .cardstories_extras .cardstories_subscribe .cardstories_password_form {
+    position: absolute;
+    width: 240px;
+    height: 20px;
+    top: 520px;
+    left: 390px;
+    border: 0;
+    /*background-color: transparent;*/
+    /*color: #FFFFFF;*/
+    font-size: 14px;
 }
 
 /* displaying a deck of cards */

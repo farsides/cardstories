@@ -23,9 +23,11 @@ import sqlite3
 
 from twisted.trial import unittest, runner, reporter
 from twisted.internet import reactor, defer
+from twisted.web import client
 
 from cardstories.service import CardstoriesService
 from plugins.auth import auth
+from plugins.djangoauth import djangoauth
 from plugins.mail import mail
 
 class Request:
@@ -35,7 +37,7 @@ class Request:
 
 class MailTest(unittest.TestCase):
 
-    def setUp(self):
+    def _setUp(self):
         self.database = 'test.sqlite'
         if os.path.exists(self.database):
             os.unlink(self.database)
@@ -43,21 +45,10 @@ class MailTest(unittest.TestCase):
                                            'plugins-libdir': '../fixture',
                                            'plugins-confdir': '../fixture',
                                            'plugins-dir': '../fixture'})
-        self.auth = auth.Plugin(self.service, [])
-        self.service.startService()
 
     def tearDown(self):
         return self.service.stopService()
 
-    @defer.inlineCallbacks
-    def create_players(self):
-        self.owner_name = 'owner@foo.com'
-        self.player1_name = 'player1@foo.com'
-        self.player2_name = 'player2'
-        self.owner_id = yield self.auth.db.runInteraction(self.auth.create, self.owner_name)
-        self.player1 = yield self.auth.db.runInteraction(self.auth.create, self.player1_name)
-        self.player2 = yield self.auth.db.runInteraction(self.auth.create, self.player2_name)
-    
     @defer.inlineCallbacks
     def complete_game(self):
         yield self.create_players()
@@ -120,6 +111,7 @@ class MailTest(unittest.TestCase):
             self.count += 1
             self.assertSubstring('game_id=%d' % self.game_id, email)
             self.assertSubstring('url=URL', email)
+            self.assertSubstring('static_url=STATIC_URL', email)
             if self.count == 1:
                 self.assertSubstring('_INVITE_', email)
                 self.assertSubstring('owner_email=%s' % self.owner_name, email)
@@ -144,7 +136,24 @@ class MailTest(unittest.TestCase):
         plugin.sendmail = sendmail
         yield self.complete_game()
         self.assertEqual(self.count, 7)
+        
 
+class MailTestAuth(MailTest):
+
+    def setUp(self):
+        self._setUp()
+        self.auth = auth.Plugin(self.service, [])
+        self.service.startService()
+
+    @defer.inlineCallbacks
+    def create_players(self):
+        self.owner_name = 'owner@foo.com'
+        self.player1_name = 'player1@foo.com'
+        self.player2_name = 'player2'
+        self.owner_id = yield self.auth.db.runInteraction(self.auth.create, self.owner_name)
+        self.player1 = yield self.auth.db.runInteraction(self.auth.create, self.player1_name)
+        self.player2 = yield self.auth.db.runInteraction(self.auth.create, self.player2_name)
+    
     @defer.inlineCallbacks
     def test02_send_nothing(self):
         yield self.create_players()
@@ -154,13 +163,31 @@ class MailTest(unittest.TestCase):
             self.assertFalse(result)
         d.addCallback(check)
         yield d
-        
+
+
+class MailTestDjangoAuth(MailTest):
+
+    def setUp(self):
+        self._setUp()
+        self.auth = djangoauth.Plugin(self.service, [])
+        self.service.startService()
+
+    @defer.inlineCallbacks
+    def create_players(self):
+        self.owner_name = 'owner@foo.com'
+        self.player1_name = 'player1@foo.com'
+        self.player2_name = 'player2@foo.com'
+        self.owner_id = yield client.getPage("http://%s/getuserid/%s/?create=yes" % (self.auth.host, self.owner_name))
+        self.player1 = yield client.getPage("http://%s/getuserid/%s/?create=yes" % (self.auth.host, self.player1_name))
+        self.player2 = yield client.getPage("http://%s/getuserid/%s/?create=yes" % (self.auth.host, self.player2_name))
+    
 
 def Run():
     loader = runner.TestLoader()
 #    loader.methodPrefix = "test_trynow"
     suite = loader.suiteFactory()
-    suite.addTest(loader.loadClass(MailTest))
+    suite.addTest(loader.loadClass(MailTestAuth))
+    suite.addTest(loader.loadClass(MailTestDjangoAuth))
 
     return runner.TrialRunner(
         reporter.VerboseTextReporter,
