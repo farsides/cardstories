@@ -178,8 +178,11 @@ class CardstoriesGame(pollable):
                 player_cards = [ ord(c) for c in player[1] ]
             else:
                 player_cards = None
-            if player[2] != None and ( state == 'complete' or player[0] == player_id or owner_id == player_id ):
-                picked = ord(player[2])
+            if player[2] != None:
+                if ( state == 'complete' or player[0] == player_id or owner_id == player_id ):
+                    picked = ord(player[2])
+                else:
+                    picked = ''
             else:
                 picked = None
             if player[2] != None:
@@ -191,7 +194,10 @@ class CardstoriesGame(pollable):
                     winner_card = ord(player[1][0])
                 vote = self.ord(player[3])
             else:
-                vote = None
+                if player[3] != None:
+                    vote = ''
+                else:
+                    vote = None
             if player[3] != None:
                 voted_count += 1
             players.append([ player[0], vote, player[4], picked, player_cards ])
