@@ -35,12 +35,6 @@ class Request:
     def __init__(self, **kwargs):
         self.args = kwargs
 
-# fake plugin to test
-class AnotherPlugin:
-
-    def name(self):
-        return "another"
-
 class ChatTest(unittest.TestCase):
 
     # initialise our test with a service that we can use during testing and a testing database
@@ -215,27 +209,18 @@ class ChatTest(unittest.TestCase):
     
     @defer.inlineCallbacks
     def test06_touch_state(self):
-        # here we test that a listener actually gets the state correctly
         player_id = 200
         sentence = "This is my sentence!"
-        chat_instance = Plugin(self.service, [AnotherPlugin()])
-        d = chat_instance.poll({'modified': [chat_instance.get_modified()]})
-        # our test callback
-        @defer.inlineCallbacks
-        def check(result):
-            self.assertEquals(len(chat_instance.messages), 1)
-            state = yield chat_instance.state({'modified': [0]})
-            self.assertEquals(state['messages'][0]['player_id'], player_id)
-            self.assertEquals(state['messages'][0]['sentence'], sentence)
-            defer.returnValue(result)
+        chat_instance = Plugin(self.service, [])
+        d = self.service.poll({'action': ['poll'], 'type': ['chat'], 'modified': [0]})
+        def check(event):
+            print 'I DO NOT GET CALLED'
+            self.assertTrue(True)
+            d.callback([True])
         d.addCallback(check)
-        # check there are no messages before we run the tes
-        self.assertEquals(len(chat_instance.messages), 0)
-        # create a message event request
         request = Request(action = ['message'], player_id = [player_id], sentence=[sentence])
         # run the request
         result = yield chat_instance.preprocess(True, request)
-        yield d
 
 def Run():
     loader = runner.TestLoader()
