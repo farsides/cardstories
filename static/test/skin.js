@@ -16,7 +16,7 @@
 //
 (function($) {
 
-  $.cardstories.skin = function(what, root) {
+  $.cardstories.skin = function(skin, root) {
     $(root).addClass('cardstories_root');
     var lobby = {'games': [[100, 'sentence100', 'invitation', 0],
                            [101, 'sentence101', 'vote', 1],
@@ -203,6 +203,8 @@
 	'ready': true
       };
       $.cardstories.complete('voter11', game, root);
+    } else if(skin == 'email') {
+      $.cardstories.email(undefined, root);
     } else if(skin == 'credits') {
       $.cardstories.credits(root);
       $('.cardstories_credits_short', root).click();
