@@ -27,6 +27,8 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as auth_login
 from django.template import RequestContext
+from django.conf import settings
+from django.core.urlresolvers import reverse
 
 from forms import RegistrationForm, LoginForm
 
@@ -37,10 +39,16 @@ def welcome(request):
     login forms.
 
     """
-    return render_to_response('cardstories/welcome.html',
-                              {'registration_form': RegistrationForm(),
-                               'login_form': LoginForm()},
-                              context_instance=RequestContext(request))
+    response = render_to_response('cardstories/welcome.html',
+                                  {'registration_form': RegistrationForm(),
+                                   'login_form': LoginForm()},
+                                  context_instance=RequestContext(request))
+
+    # Set welcome page URL for redirection.
+    welcome_url = quote(reverse('cardstories.views.welcome'), '')
+    response.set_cookie('CARDSTORIES_WELCOME', welcome_url)
+
+    return response
 
 def register(request):
     """
@@ -65,11 +73,17 @@ def register(request):
             # Always call authenticate() before login().
             auth_user = authenticate(username=username, password=password)
             auth_login(request, auth_user)
-            response = HttpResponseRedirect('/cardstories/')
+            response = HttpResponseRedirect(settings.CARDSTORIES_URL)
 
             # Note that the username should be "quoted", which is the
             # equivalent of Javascript's, encodeURIcompontent().
-            response.set_cookie('CARDSTORIES_ID', quote(username));
+            response.set_cookie('CARDSTORIES_ID', quote(username))
+
+            # Set welcome page URL for redirection, which will be needed for
+            # logout, for example.
+            welcome_url = quote(reverse('cardstories.views.welcome'), '')
+            response.set_cookie('CARDSTORIES_WELCOME', welcome_url)
+
             return response
     else:
         form = RegistrationForm()
@@ -93,11 +107,17 @@ def login(request):
             # At this point, the user has already been authenticated by form
             # validation (which simplifies user feedback on login errors).
             auth_login(request, form.auth_user)
-            response = HttpResponseRedirect('/cardstories/')
+            response = HttpResponseRedirect(settings.CARDSTORIES_URL)
 
             # Note that the username should be "quoted", which is the
             # equivalent of Javascript's, encodeURIcompontent().
-            response.set_cookie('CARDSTORIES_ID', quote(username));
+            response.set_cookie('CARDSTORIES_ID', quote(username))
+
+            # Set welcome page URL for redirection, which will be needed for
+            # logout, for example.
+            welcome_url = quote(reverse('cardstories.views.welcome'), '')
+            response.set_cookie('CARDSTORIES_WELCOME', welcome_url)
+
             return response
     else:
         form = LoginForm()

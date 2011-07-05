@@ -121,5 +121,6 @@ COVERAGE_MODULES = ['urls',
                     'cardstories.views',
                     'cardstories.forms']
 
-# Cardstories web service host:port
+# Cardstories settings
 CARDSTORIES_HOST = 'localhost:5000'
+CARDSTORIES_URL = '/static/index.html'

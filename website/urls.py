@@ -42,7 +42,6 @@ urlpatterns += patterns('cardstories.views',
     (r'^login/', 'login'),
     (r'^getuserid/(.+)/', 'getuserid'),
     (r'^getusername/(\d+)/', 'getusername'),
-    (r'^cardstories/', direct_to_template, {'template': 'cardstories/cardstories.html'}),
 )
 
 # Development urls

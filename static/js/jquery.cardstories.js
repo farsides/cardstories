@@ -834,8 +834,27 @@
             $(element).parents('.cardstories_root div').addClass('cardstories_active');
         },
 
-        redirect_to_welcome: function() {
-            document.location.href = "../";
+        email: function(game_id, root) {
+            var $this = this;
+            var element = $('.cardstories_subscribe', root);
+            $this.set_active(root, element);
+            validator = $(".cardstories_emailform", element).validate({
+                submitHandler: function(form) {
+                    var player_id = encodeURIComponent($('.cardstories_email', element).val());
+                    $.cookie('CARDSTORIES_ID', player_id);
+                    $this.game_or_lobby(player_id, game_id, root);        
+                }
+            });
+
+            $('.cardstories_email', element).focus();
+        },
+
+        login: function(welcome_url, game_id, root) {
+            if(welcome_url !== undefined && welcome_url !== null && welcome_url !== '') {
+                document.location.href = welcome_url;
+            } else {
+                this.email(game_id, root);
+            }
         },
 
         bootstrap: function(player_id, game_id, root) {
@@ -844,7 +863,7 @@
                 player_id = $.cookie('CARDSTORIES_ID');
             }
             if(player_id === undefined || player_id === null || player_id === '') {
-                this.redirect_to_welcome();
+                this.login($.cookie('CARDSTORIES_WELCOME'), game_id, root);
             } else {
                 this.game_or_lobby(player_id, game_id, root);
             }

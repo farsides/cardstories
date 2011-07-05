@@ -121,8 +121,7 @@ html, body {
     height: 131px;
     top: 530px;
     left: 240px;
-    /* Awaiting proper art. */
-    /*background: transparent url('images/subscribe_bubble.png') no-repeat left top;*/
+    background: transparent url('images/subscribe_bubble.png') no-repeat left top;
 }
 
 .cardstories .cardstories_extras .cardstories_subscribe label.error {
@@ -135,13 +134,22 @@ html, body {
     font-size: 14px;
 }
 
+.cardstories .cardstories_extras .cardstories_subscribe .cardstories_email {
+    position: absolute;
+    width: 370px;
+    height: 20px;
+    top: 632px;
+    left: 340px;
+    border: 0;
+    background-color: transparent;
+    color: #FFFFFF;
+    font-size: 14px;
+}
+
 .cardstories .cardstories_extras .cardstories_subscribe .cardstories_reg_title {
     position: absolute;
     top: 490px;
     left: 240px;
-    border: 0;
-    /*background-color: transparent;*/
-    /*color: #FFFFFF;*/
     font-size: 16px;
 }
 
@@ -153,7 +161,6 @@ html, body {
     height: 16px;
     top: 510px;
     left: 170px;
-    /*background-color: transparent;*/
     font-size: 12px;
     text-align: left;
     overflow: hidden;
@@ -165,9 +172,6 @@ html, body {
     height: 20px;
     top: 530px;
     left: 170px;
-    border: 0;
-    /*background-color: transparent;*/
-    /*color: #FFFFFF;*/
     font-size: 14px;
 }
 
@@ -177,9 +181,6 @@ html, body {
     height: 20px;
     top: 561px;
     left: 170px;
-    border: 0;
-    /*background-color: transparent;*/
-    /*color: #FFFFFF;*/
     font-size: 14px;
 }
 
@@ -190,9 +191,6 @@ html, body {
     height: 20px;
     top: 593px;
     left: 170px;
-    border: 0;
-    /*background-color: transparent;*/
-    /*color: #FFFFFF;*/
     font-size: 14px;
 }
 
@@ -203,9 +201,6 @@ html, body {
     height: 20px;
     top: 593px;
     left: 295px;
-    border: 0;
-    /*background-color: transparent;*/
-    /*color: #FFFFFF;*/
     font-size: 14px;
 }
 
@@ -214,9 +209,6 @@ html, body {
     width: 115px;
     top: 622px;
     left: 295px;
-    /*border: 0;*/
-    /*background-color: transparent;*/
-    /*color: #FFFFFF;*/
     font-size: 14px;
 }
 
@@ -224,8 +216,6 @@ html, body {
     position: absolute;
     top: 490px;
     left: 670px;
-    /*background-color: transparent;*/
-    /*color: #FFFFFF;*/
     font-size: 16px;
 }
 
@@ -237,7 +227,6 @@ html, body {
     height: 16px;
     top: 510px;
     left: 620px;
-    /*background-color: transparent;*/
     color: red;
     font-size: 12px;
     text-align: left;
@@ -251,8 +240,6 @@ html, body {
     top: 530px;
     left: 620px;
     border: 0;
-    /*background-color: transparent;*/
-    /*color: #FFFFFF;*/
     font-size: 14px;
 }
 
@@ -264,8 +251,6 @@ html, body {
     top: 561px;
     left: 620px;
     border: 0;
-    /*background-color: transparent;*/
-    /*color: #FFFFFF;*/
     font-size: 14px;
 }
 
@@ -274,9 +259,6 @@ html, body {
     width: 115px;
     top: 593px;
     left: 745px;
-    /*border: 0;*/
-    /*background-color: transparent;*/
-    /*color: #FFFFFF;*/
     font-size: 14px;
 }
 
@@ -284,7 +266,6 @@ html, body {
     position: absolute;
     top: 597px;
     left: 620px;
-    /*background-color: transparent;*/
     color: red;
     font-size: 11px;
 }
@@ -312,7 +293,6 @@ html, body {
     background-color: red;
 }
 
-/*
 .cardstories .cardstories_extras .cardstories_subscribe .cardstories_submit {
     position: absolute;
     background: transparent url('images/next.png') no-repeat left top;
@@ -329,7 +309,6 @@ html, body {
     background-image: url('images/next.png');
     background-position: -106px 0px;
 }
-*/
 
 .cardstories .cardstories_extras .cardstories_subscribe .cardstories_privacy_notice {
     position: absolute;
