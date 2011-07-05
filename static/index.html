@@ -592,13 +592,15 @@
     </div>
   </div>
   <script>
+  $(window).load(function() {
     var skin = $.query.get('skin');
     if(skin !== '') {
       $('.cardstories_skin').show();
       $.cardstories.skin(skin, $('.cardstories'));
     } else {
-      $('.cardstories').cardstories($.query.get('player_id'), $.query.get('game_id'));
+      setTimeout(function () {$('.cardstories').cardstories($.query.get('player_id'), $.query.get('game_id'));}, 0);
     }
+  });
   </script>
 </body>
 </html>
