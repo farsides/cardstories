@@ -33,10 +33,13 @@ def proxy(request, cardstories_host='localhost:5000'):
     uri = r"http://%s%s%s" % (cardstories_host, request.path, get)
     connection = httplib2.Http()
 
+    headers = {'Content-type': request.META['CONTENT_TYPE'],
+               'Cookie': request.META['HTTP_COOKIE']}
+
     if request.method == 'GET':
-        response, content = connection.request(uri, request.method)
+        response, content = connection.request(uri, request.method,
+                                               headers=headers)
     elif request.method == 'POST':
-        headers = {'Content-type': request.META['CONTENT_TYPE']}
         body = request.raw_post_data
         response, content = connection.request(uri, request.method,
                                                headers=headers, body=body)

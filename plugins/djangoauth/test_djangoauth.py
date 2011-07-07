@@ -22,10 +22,15 @@
 #
 import sys
 import os
+import random
 sys.path.insert(0, os.path.abspath("../..")) # so that for M-x pdb works
 
 from twisted.trial import unittest, runner, reporter
 from twisted.internet import defer
+from twisted.web import client
+from twisted.web.error import PageRedirect
+
+from urllib import urlencode
 
 from plugins.djangoauth.djangoauth import Plugin
 
@@ -47,12 +52,42 @@ class DjangoAuthTest(unittest.TestCase):
 
     @defer.inlineCallbacks
     def test01_translate(self):
+        rand = ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for i in xrange(10))
+        owner = u'%s@email.com' % rand
         player = u'player@email.com'
         invited = u'invited@email.com'
-        owner = u'owner@email.com'
+
+        # First, create the owner and log him in so that we can get a sessionid
+        # from the cookie.
+        cookies = {}
+        data = {'name': 'Bogus User',
+                'username': owner,
+                'password1': rand,
+                'password2': rand}
+        headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+        try: 
+            # Do not actually try to get the redirected page, otherwise we'll
+            # get a 404 exception.
+            yield client.getPage("http://%s/register/" % self.djangoauth.host,
+                                 method = 'POST',
+                                 postdata = urlencode(data),
+                                 headers = headers,
+                                 followRedirect = False,
+                                 cookies = cookies)
+        except PageRedirect:
+            pass
+
+        sessionid = cookies['sessionid']
+
         class request:
             def __init__(self):
-                self.args = { 'player_id': [ player, invited ], 'owner_id': [ owner ] }
+                self.args = {'action': ['invite'], 
+                             'player_id': [ player, invited ],
+                             'owner_id': [ owner ]}
+
+            def getCookie(self, key):
+                return sessionid
+
         request1 = request()
         result_in = 'RESULT'
         result_out = yield self.djangoauth.preprocess(result_in, request1)

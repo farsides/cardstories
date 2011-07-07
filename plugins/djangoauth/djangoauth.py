@@ -48,10 +48,19 @@ class Plugin:
                 new_values = []
                 for value in values:
                     value = value.decode('utf-8')
-                    # Fetch id from django.  A user will be created if it
-                    # doesn't exist.
-                    id = yield client.getPage("http://%s/getuserid/%s/?create=yes" %
-                                              (self.host, str(value)))
+                    # Invitation player_id's cannot be retrieved using the
+                    # sessionid cookie, which only refers to the logged-in user.
+                    if request.args.has_key('action') and \
+                        request.args['action'][0] == 'invite' and \
+                        key == 'player_id':
+                        id = yield client.getPage("http://%s/getuserid/%s/?create=yes" %
+                                                  (self.host, str(value)))
+                    # Otherwise, try to get the id from the session cookie.
+                    else:
+                        sessionid = request.getCookie('sessionid')
+                        id = yield client.getPage("http://%s/getloggedinuserid/%s/" %
+                                                  (self.host, str(sessionid)))
+
                     id = int(id)
                     new_values.append(id)
                 request.args[key] = new_values

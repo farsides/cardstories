@@ -23,6 +23,7 @@ from urllib import quote
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseNotFound
 from django.http import HttpResponseBadRequest, HttpResponseRedirect
+from django.contrib.sessions.models import Session
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as auth_login
@@ -177,3 +178,19 @@ def getusername(request, userid):
         return HttpResponse(user.username, mimetype="text/plain")
     except User.DoesNotExist:
         return HttpResponseNotFound()
+
+def getloggedinuserid(request, session_key):
+    """
+    Returns a user's id based on a logged in session id. If user is not found,
+    a status of 404 will be returned.
+
+    """
+    try:
+        session = Session.objects.get(session_key=session_key)
+        user_id = session.get_decoded().get('_auth_user_id')
+        user = User.objects.get(id=user_id)
+    except (User.DoesNotExist, Session.DoesNotExist):
+        return HttpResponseNotFound()
+
+    response = HttpResponse(user.id, mimetype="text/plain")
+    return response

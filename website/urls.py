@@ -42,6 +42,7 @@ urlpatterns += patterns('cardstories.views',
     (r'^login/', 'login'),
     (r'^getuserid/(.+)/', 'getuserid'),
     (r'^getusername/(\d+)/', 'getusername'),
+    (r'^getloggedinuserid/(.+)/', 'getloggedinuserid'),
 )
 
 # Development urls

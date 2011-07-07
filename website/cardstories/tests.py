@@ -234,3 +234,43 @@ class CardstoriesTest(TestCase):
         response = c.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, "testuser1@email.com")
+
+    def test_05getloggedinuserid(self):
+        """
+        Test getloggedinuserid.  Requires 'users' fixture.
+
+        """
+        c = self.client
+        base_url = "/getloggedinuserid"
+        username = "testuser1@email.com"
+
+        # First, log an user in to get his sessionid
+        login_url = "/login/"
+        login_form = "login_form"
+        login_data = {"username": username,
+                      "password": "abc!@#"}
+
+        response = c.post(login_url, login_data)
+        self.assertEqual(response.status_code, 302)
+        self.assertIsNotNone(c.cookies["sessionid"])
+
+        # Store sessionid, but delete the cookie for subsequent requests.
+        sessionid = c.cookies["sessionid"].value
+        del c.cookies["sessionid"]
+
+        # Empty request must 404.
+        c = self.client
+        url = "%s/%s/" % (base_url, "")
+        response = c.get(url)
+        self.assertEqual(response.status_code, 404)
+
+        # Try to get a user that doesn't exist.
+        url = "%s/%s/" % (base_url, "bogus_session_id")
+        response = c.get(url)
+        self.assertEqual(response.status_code, 404)
+
+        # Return proper id for valid sessionid
+        url = "%s/%s/" % (base_url, sessionid)
+        response = c.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response._container[0], 1)

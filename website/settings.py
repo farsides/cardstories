@@ -96,6 +96,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'util.disablecsrf.DisableCSRF', #Comment this out in production!
 )
 
 ROOT_URLCONF = 'urls'
