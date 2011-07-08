@@ -96,10 +96,9 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'util.disablecsrf.DisableCSRF', #Comment this out in production!
 )
 
-ROOT_URLCONF = 'urls'
+ROOT_URLCONF = 'website.urls'
 
 TEMPLATE_DIRS = (
         spath('templates'),
@@ -112,15 +111,15 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.admin',
-    'cardstories',
-    'util',
+    'website.cardstories',
+    'website.util',
 )
 
 # Enables code coverage
 TEST_RUNNER = 'tests.run_tests_with_coverage'
-COVERAGE_MODULES = ['urls',
-                    'cardstories.views',
-                    'cardstories.forms']
+COVERAGE_MODULES = ['website.urls',
+                    'website.cardstories.views',
+                    'website.cardstories.forms']
 
 # Cardstories settings
 CARDSTORIES_HOST = 'localhost:5000'

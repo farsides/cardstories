@@ -36,7 +36,7 @@ urlpatterns = patterns('',
 )
 
 # Application urls.
-urlpatterns += patterns('cardstories.views',
+urlpatterns += patterns('website.cardstories.views',
     (r'^$', 'welcome'),
     (r'^register/', 'register'),
     (r'^login/', 'login'),

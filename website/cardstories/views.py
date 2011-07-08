@@ -46,7 +46,7 @@ def welcome(request):
                                   context_instance=RequestContext(request))
 
     # Set welcome page URL for redirection.
-    welcome_url = quote(reverse('cardstories.views.welcome'), '')
+    welcome_url = quote(reverse(welcome), '')
     response.set_cookie('CARDSTORIES_WELCOME', welcome_url)
 
     return response
@@ -82,7 +82,7 @@ def register(request):
 
             # Set welcome page URL for redirection, which will be needed for
             # logout, for example.
-            welcome_url = quote(reverse('cardstories.views.welcome'), '')
+            welcome_url = quote(reverse(welcome), '')
             response.set_cookie('CARDSTORIES_WELCOME', welcome_url)
 
             return response
@@ -116,7 +116,7 @@ def login(request):
 
             # Set welcome page URL for redirection, which will be needed for
             # logout, for example.
-            welcome_url = quote(reverse('cardstories.views.welcome'), '')
+            welcome_url = quote(reverse(welcome), '')
             response.set_cookie('CARDSTORIES_WELCOME', welcome_url)
 
             return response

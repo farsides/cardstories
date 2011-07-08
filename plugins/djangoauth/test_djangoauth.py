@@ -27,10 +27,9 @@ sys.path.insert(0, os.path.abspath("../..")) # so that for M-x pdb works
 
 from twisted.trial import unittest, runner, reporter
 from twisted.internet import defer
-from twisted.web import client
-from twisted.web.error import PageRedirect
 
 from urllib import urlencode
+from urlparse import urlparse
 
 from plugins.djangoauth.djangoauth import Plugin
 
@@ -44,8 +43,45 @@ class FakeService:
 class DjangoAuthTest(unittest.TestCase):
 
     def setUp(self):
+        # Set up the django test framework.
+        os.environ['DJANGO_SETTINGS_MODULE'] = 'website.settings'
+        from django.conf import settings
+        from django.test.utils import setup_test_environment
+        from django.db import connection
+
+        # If DEBUG = True, django will sometimes take different code paths.
+        settings.DEBUG = False
+
+        self.django_db = settings.DATABASE_NAME
+        setup_test_environment()
+        connection.creation.create_test_db(verbosity=0)
+
+        # Instantiate our test subject.
         self.djangoauth = Plugin(FakeService({'plugins-libdir': '.',
                                               'plugins-confdir': '../fixture'}), [])
+
+        # Create a fake web client so that we don't need to set up an actual
+        # web server to handle requests...
+        class FakeClient:
+            def getPage(self, url):
+                from django.test.client import Client
+                c = Client()
+                u = urlparse(url)
+                _url = u.path
+                if u.query:
+                    _url += "?" + u.query
+                response = c.get(_url)
+                return response._container[0]
+
+        # ... and use it in the plugin instead of twisted's getPage.
+        self.djangoauth.getPage = FakeClient().getPage
+
+
+    def tearDown(self):
+        from django.db import connection
+        from django.test.utils import teardown_test_environment
+        connection.creation.destroy_test_db(self.django_db, verbosity=0)
+        teardown_test_environment()
 
     def test00_init(self):
         self.assertEqual(self.djangoauth.name(), "djangoauth")
@@ -59,25 +95,15 @@ class DjangoAuthTest(unittest.TestCase):
 
         # First, create the owner and log him in so that we can get a sessionid
         # from the cookie.
-        cookies = {}
-        data = {'name': 'Bogus User',
+        from django.test.client import Client
+        c = Client()
+        url = "/register/"
+        data = {'name': rand,
                 'username': owner,
                 'password1': rand,
                 'password2': rand}
-        headers = {'Content-Type': 'application/x-www-form-urlencoded'}
-        try: 
-            # Do not actually try to get the redirected page, otherwise we'll
-            # get a 404 exception.
-            yield client.getPage("http://%s/register/" % self.djangoauth.host,
-                                 method = 'POST',
-                                 postdata = urlencode(data),
-                                 headers = headers,
-                                 followRedirect = False,
-                                 cookies = cookies)
-        except PageRedirect:
-            pass
-
-        sessionid = cookies['sessionid']
+        c.post(url, data)
+        sessionid = c.cookies["sessionid"].value
 
         class request:
             def __init__(self):

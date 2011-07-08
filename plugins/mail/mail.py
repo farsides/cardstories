@@ -78,7 +78,7 @@ class Plugin:
         elif self.auth.name() == 'djangoauth':
             usernames = []
             for player_id in player_ids:
-                username = yield client.getPage("http://%s/getusername/%s/" % (self.auth.host, str(player_id)))
+                username = yield self.auth.getPage("http://%s/getusername/%s/" % (self.auth.host, str(player_id)))
                 usernames.append(username)
         defer.returnValue(usernames)
 

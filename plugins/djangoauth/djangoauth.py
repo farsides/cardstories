@@ -36,6 +36,7 @@ class Plugin:
         self.confdir = os.path.join(self.service.settings['plugins-confdir'], 'djangoauth')
         self.settings = objectify.parse(open(os.path.join(self.confdir, 'djangoauth.xml'))).getroot()
         self.host = self.settings.get('host')
+        self.getPage = client.getPage
         log.msg('plugin djangoauth initialized')
 
     def name(self):
@@ -53,13 +54,13 @@ class Plugin:
                     if request.args.has_key('action') and \
                         request.args['action'][0] == 'invite' and \
                         key == 'player_id':
-                        id = yield client.getPage("http://%s/getuserid/%s/?create=yes" %
-                                                  (self.host, str(value)))
+                        id = yield self.getPage("http://%s/getuserid/%s/?create=yes" %
+                                                (self.host, str(value)))
                     # Otherwise, try to get the id from the session cookie.
                     else:
                         sessionid = request.getCookie('sessionid')
-                        id = yield client.getPage("http://%s/getloggedinuserid/%s/" %
-                                                  (self.host, str(sessionid)))
+                        id = yield self.getPage("http://%s/getloggedinuserid/%s/" %
+                                                (self.host, str(sessionid)))
 
                     id = int(id)
                     new_values.append(id)
@@ -72,11 +73,11 @@ class Plugin:
             for result in results:
                 if result.has_key('players'):
                     for player in result['players']:
-                        player[0] = yield client.getPage("http://%s/getusername/%s/" %
-                                                         (self.host, str(player[0])))
+                        player[0] = yield self.getPage("http://%s/getusername/%s/" %
+                                                       (self.host, str(player[0])))
                 if result.has_key('invited') and result['invited']:
                     invited = result['invited'];
                     for index in range(len(invited)):
-                        invited[index] = yield client.getPage("http://%s/getusername/%s/" %
-                                                              (self.host, str(invited[index])))
+                        invited[index] = yield self.getPage("http://%s/getusername/%s/" %
+                                                            (self.host, str(invited[index])))
         defer.returnValue(results)
