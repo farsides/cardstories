@@ -120,7 +120,7 @@ To display the cardstories web service usage information:
 
 $ PYTHONPATH=.:etc/cardstories twistd cardstories --help
 
-To run the webservice without the mail plugin:
+To run the webservice without mail or djangoauth:
 
 $ PYTHONPATH=.:etc/cardstories twistd --nodaemon cardstories \
 	--static $(pwd)/static --port 5000 --interface 0.0.0.0 \
@@ -128,7 +128,7 @@ $ PYTHONPATH=.:etc/cardstories twistd --nodaemon cardstories \
 	--plugins-dir plugins \
 	--plugins-libdir /tmp \
 	--plugins-confdir tests \
-	--plugins 'chat djangoauth solo' \
+	--plugins 'chat auth solo' \
 	--plugins-pre-process 'chat auth solo' \
 	--plugins-post-process auth
 

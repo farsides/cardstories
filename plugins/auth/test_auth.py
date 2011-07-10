@@ -81,10 +81,9 @@ class AuthTest(unittest.TestCase):
         self.assertEquals(result_out, [{ 'players': [ [ player ],
                                                       [ owner ] ],
                                          'invited': [ player ]}])
-        
 
     @defer.inlineCallbacks
-    def test02_accent(self):
+    def test01_accent(self):
         player = 'pl\xc3\xa1y\xe1\xba\xbdr'
         invited = 'invited'
         owner = '\xc3\xad\xc3\xb1vit\xc3\xa9d'
@@ -115,6 +114,14 @@ class AuthTest(unittest.TestCase):
         result_out = yield self.auth.postprocess(result_in)
         self.assertEquals(result_out, [{ 'players': [ [ unicode(player, 'utf-8') ],
                                                       [ unicode(owner, 'utf-8') ] ] }])
+        
+    @defer.inlineCallbacks
+    def test02_resolution(self):
+        players = ('owner@foo.com', 'player1@foo.com', 'player')
+        ids = yield self.auth.create_players(players)
+        self.assertEquals([1, 2, 3], ids)
+        names = yield self.auth.resolve_players(ids)
+        self.assertEquals(players, names)
 
 
 def Run():

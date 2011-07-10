@@ -24,11 +24,8 @@ import sqlite3
 from twisted.trial import unittest, runner, reporter
 from twisted.internet import reactor, defer
 
-from urlparse import urlparse
-
 from cardstories.service import CardstoriesService
 from plugins.auth import auth
-from plugins.djangoauth import djangoauth
 from plugins.mail import mail
 
 class Request:
@@ -151,12 +148,9 @@ class MailTestAuth(MailTest):
 
     @defer.inlineCallbacks
     def create_players(self):
-        self.owner_name = 'owner@foo.com'
-        self.player1_name = 'player1@foo.com'
-        self.player2_name = 'player2'
-        self.owner_id = yield self.auth.db.runInteraction(self.auth.create, self.owner_name)
-        self.player1 = yield self.auth.db.runInteraction(self.auth.create, self.player1_name)
-        self.player2 = yield self.auth.db.runInteraction(self.auth.create, self.player2_name)
+        players = ('owner@foo.com', 'player1@foo.com', 'player')
+        (self.owner_name, self.player1_name, self.player2_name) = players
+        (self.owner_id, self.player1, self.player2) = yield self.auth.create_players(players)
     
     @defer.inlineCallbacks
     def test02_send_nothing(self):
@@ -169,71 +163,11 @@ class MailTestAuth(MailTest):
         yield d
 
 
-class MailTestDjangoAuth(MailTest):
-
-    def setUp(self):
-        # Call the base setup method (just a trick so as not to duplicate too
-        # much code).
-        self._setUp()
-
-        # Set up the django test framework.
-        os.environ['DJANGO_SETTINGS_MODULE'] = 'website.settings'
-        from django.conf import settings
-        from django.test.utils import setup_test_environment
-        from django.db import connection
-
-        # If DEBUG = True, django will sometimes take different code paths.
-        settings.DEBUG = False
-
-        self.django_db = settings.DATABASE_NAME
-        setup_test_environment()
-        connection.creation.create_test_db(verbosity=0)
-
-        # Instantiate our test subject.
-        self.auth = djangoauth.Plugin(self.service, [])
-
-        # Create a fake web client so that we don't need to set up an actual
-        # web server to handle requests...
-        class FakeClient:
-            def getPage(self, url):
-                from django.test.client import Client
-                c = Client()
-                u = urlparse(url)
-                _url = u.path
-                if u.query:
-                    _url += "?" + u.query
-                response = c.get(_url)
-                return response._container[0]
-
-        # ... and use it in the plugin instead of twisted's getPage.
-        self.auth.getPage = FakeClient().getPage
-
-        # Finally, start the cardstories service.
-        self.service.startService()
-
-    def tearDown(self):
-        from django.db import connection
-        from django.test.utils import teardown_test_environment
-        connection.creation.destroy_test_db(self.django_db, verbosity=0)
-        teardown_test_environment()
-        self._tearDown()
-
-    @defer.inlineCallbacks
-    def create_players(self):
-        self.owner_name = 'owner@foo.com'
-        self.player1_name = 'player1@foo.com'
-        self.player2_name = 'player2@foo.com'
-        self.owner_id = yield self.auth.getPage("/getuserid/%s/?create=yes" % self.owner_name)
-        self.player1 = yield self.auth.getPage("/getuserid/%s/?create=yes" % self.player1_name)
-        self.player2 = yield self.auth.getPage("/getuserid/%s/?create=yes" % self.player2_name)
-
-
 def Run():
     loader = runner.TestLoader()
 #    loader.methodPrefix = "test_trynow"
     suite = loader.suiteFactory()
     suite.addTest(loader.loadClass(MailTestAuth))
-    suite.addTest(loader.loadClass(MailTestDjangoAuth))
 
     return runner.TrialRunner(
         reporter.VerboseTextReporter,

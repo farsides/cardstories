@@ -43,6 +43,32 @@ class Plugin:
         return 'djangoauth'
 
     @defer.inlineCallbacks
+    def create(self, name):
+        id = yield self.getPage("http://%s/getuserid/%s/?create=yes" % (self.host, name))
+        defer.returnValue(id)
+
+    @defer.inlineCallbacks
+    def resolve(self, id):
+        name = yield self.getPage("http://%s/getusername/%s/" % (self.host, str(id)))
+        defer.returnValue(name)
+
+    @defer.inlineCallbacks
+    def create_players(self, names):
+        ids = []
+        for name in names:
+            id = yield self.create(name)
+            ids.append(id)
+        defer.returnValue(ids)
+
+    @defer.inlineCallbacks
+    def resolve_players(self, ids):
+        names = []
+        for id in ids:
+            name = yield self.resolve(id)
+            names.append(name)
+        defer.returnValue(names)
+
+    @defer.inlineCallbacks
     def preprocess(self, result, request):
         for (key, values) in request.args.iteritems():
             if key == 'player_id' or key == 'owner_id':
@@ -54,8 +80,7 @@ class Plugin:
                     if request.args.has_key('action') and \
                         request.args['action'][0] == 'invite' and \
                         key == 'player_id':
-                        id = yield self.getPage("http://%s/getuserid/%s/?create=yes" %
-                                                (self.host, str(value)))
+                        id = yield self.create(str(value))
                     # Otherwise, try to get the id from the session cookie.
                     else:
                         sessionid = request.getCookie('sessionid')
@@ -73,11 +98,9 @@ class Plugin:
             for result in results:
                 if result.has_key('players'):
                     for player in result['players']:
-                        player[0] = yield self.getPage("http://%s/getusername/%s/" %
-                                                       (self.host, str(player[0])))
+                        player[0] = yield self.resolve(player[0])
                 if result.has_key('invited') and result['invited']:
                     invited = result['invited'];
                     for index in range(len(invited)):
-                        invited[index] = yield self.getPage("http://%s/getusername/%s/" %
-                                                            (self.host, str(invited[index])))
+                        invited[index] = yield self.resolve(invited[index])
         defer.returnValue(results)

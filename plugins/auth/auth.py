@@ -57,6 +57,25 @@ class Plugin:
         return transaction.lastrowid
         
     @defer.inlineCallbacks
+    def resolve(self, id):
+        row = yield self.db.runQuery("SELECT name FROM players WHERE id = ?", [ id ])
+        defer.returnValue(row[0][0])
+
+    @defer.inlineCallbacks
+    def create_players(self, names):
+        ids = []
+        for name in names:
+            id = yield self.db.runInteraction(self.create, name)
+            ids.append(id)
+        defer.returnValue(ids)
+
+    @defer.inlineCallbacks
+    def resolve_players(self, ids):
+        rows = yield self.db.runQuery("SELECT name FROM players WHERE " + ' OR '.join([ 'id = ?' ] * len(ids)), ids)
+        names = map(lambda row: row[0], rows)
+        defer.returnValue(names)
+
+    @defer.inlineCallbacks
     def preprocess(self, result, request):
         for (key, values) in request.args.iteritems():
             if key == 'player_id' or key == 'owner_id':
@@ -78,12 +97,10 @@ class Plugin:
             for result in results:
                 if result.has_key('players'):
                     for player in result['players']:
-                        row = yield self.db.runQuery("SELECT name FROM players WHERE id = ?", [ player[0] ])
-                        player[0] = row[0][0]
+                        player[0] = yield self.resolve(player[0])
                 if result.has_key('invited') and result['invited']:
                     invited = result['invited'];
                     for index in range(len(invited)):
-                        row = yield self.db.runQuery("SELECT name FROM players WHERE id = ?", [ invited[index] ])
-                        invited[index] = row[0][0]
+                        invited[index] = yield self.resolve(invited[index])
         defer.returnValue(results)
 

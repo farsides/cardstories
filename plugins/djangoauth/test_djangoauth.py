@@ -31,17 +31,32 @@ from twisted.internet import defer
 from urllib import urlencode
 from urlparse import urlparse
 
-from plugins.djangoauth.djangoauth import Plugin
+from plugins.djangoauth import djangoauth
+from plugins.mail.test_mail import MailTest
 
 
-class FakeService:
-
-    def __init__(self, settings):
-        self.settings = settings
+class FakeTwistedWebClient:
+    """
+    A fake twisted.web.client that uses the django test framework, so that we
+    don't need to set up an actual web server to handle requests.
+    
+    """
+    def getPage(self, url):
+        from django.test.client import Client
+        c = Client()
+        u = urlparse(url)
+        _url = u.path
+        if u.query:
+            _url += "?" + u.query
+        response = c.get(_url)
+        return response._container[0]
 
 
 class DjangoAuthTest(unittest.TestCase):
-
+    """
+    The django authentication test proper.
+    
+    """
     def setUp(self):
         # Set up the django test framework.
         os.environ['DJANGO_SETTINGS_MODULE'] = 'website.settings'
@@ -56,26 +71,17 @@ class DjangoAuthTest(unittest.TestCase):
         setup_test_environment()
         connection.creation.create_test_db(verbosity=0)
 
+        # A fake cardstories service just to benefit from settings directories.
+        class FakeService:
+            def __init__(self, settings):
+                self.settings = settings
+
         # Instantiate our test subject.
-        self.djangoauth = Plugin(FakeService({'plugins-libdir': '.',
-                                              'plugins-confdir': '../fixture'}), [])
+        self.auth = djangoauth.Plugin(FakeService({'plugins-libdir': '.',
+                                                   'plugins-confdir': '../fixture'}), [])
 
-        # Create a fake web client so that we don't need to set up an actual
-        # web server to handle requests...
-        class FakeClient:
-            def getPage(self, url):
-                from django.test.client import Client
-                c = Client()
-                u = urlparse(url)
-                _url = u.path
-                if u.query:
-                    _url += "?" + u.query
-                response = c.get(_url)
-                return response._container[0]
-
-        # ... and use it in the plugin instead of twisted's getPage.
-        self.djangoauth.getPage = FakeClient().getPage
-
+        # Use the fake client in the plugin instead of twisted's getPage.
+        self.auth.getPage = FakeTwistedWebClient().getPage
 
     def tearDown(self):
         from django.db import connection
@@ -84,7 +90,7 @@ class DjangoAuthTest(unittest.TestCase):
         teardown_test_environment()
 
     def test00_init(self):
-        self.assertEqual(self.djangoauth.name(), "djangoauth")
+        self.assertEqual(self.auth.name(), "djangoauth")
 
     @defer.inlineCallbacks
     def test01_translate(self):
@@ -116,7 +122,7 @@ class DjangoAuthTest(unittest.TestCase):
 
         request1 = request()
         result_in = 'RESULT'
-        result_out = yield self.djangoauth.preprocess(result_in, request1)
+        result_out = yield self.auth.preprocess(result_in, request1)
         self.assertEquals(result_in, result_out)
         self.assertEquals(int, type(request1.args['player_id'][0]))
         self.assertEquals(int, type(request1.args['player_id'][1]))
@@ -124,7 +130,7 @@ class DjangoAuthTest(unittest.TestCase):
         self.assertNotEquals(request1.args['player_id'], request1.args['owner_id'])
         request2 = request()
         result_in = 'RESULT'
-        result_out = yield self.djangoauth.preprocess(result_in, request2)
+        result_out = yield self.auth.preprocess(result_in, request2)
         self.assertEquals(request1.args['player_id'][0], request2.args['player_id'][0])
         self.assertEquals(request1.args['player_id'][1], request2.args['player_id'][1])
         self.assertEquals(request1.args['owner_id'][0], request2.args['owner_id'][0])
@@ -133,16 +139,63 @@ class DjangoAuthTest(unittest.TestCase):
                                    [ request1.args['owner_id'][0] ]
                                    ],
                       'invited': [ request1.args['player_id'][0] ] }]
-        result_out = yield self.djangoauth.postprocess(result_in)
+        result_out = yield self.auth.postprocess(result_in)
         self.assertEquals(result_out, [{ 'players': [ [ player ],
                                                      [ owner ] ],
                                         'invited': [ player ]}])
+
+
+class DjangoAuthMailTest(MailTest):
+    """
+    Tests mail plugin interaction with django authentication.
+
+    """
+    def setUp(self):
+        # Call the base setup method (just a trick so as not to duplicate too
+        # much code).
+        self._setUp()
+
+        # Set up the django test framework.
+        os.environ['DJANGO_SETTINGS_MODULE'] = 'website.settings'
+        from django.conf import settings
+        from django.test.utils import setup_test_environment
+        from django.db import connection
+
+        # If DEBUG = True, django will sometimes take different code paths.
+        settings.DEBUG = False
+
+        self.django_db = settings.DATABASE_NAME
+        setup_test_environment()
+        connection.creation.create_test_db(verbosity=0)
+
+        # Instantiate our test subject.
+        self.auth = djangoauth.Plugin(self.service, [])
+
+        # Use the fake client it in the plugin instead of twisted's getPage.
+        self.auth.getPage = FakeTwistedWebClient().getPage
+
+        # Finally, start the cardstories service.
+        self.service.startService()
+
+    def tearDown(self):
+        from django.db import connection
+        from django.test.utils import teardown_test_environment
+        connection.creation.destroy_test_db(self.django_db, verbosity=0)
+        teardown_test_environment()
+        self._tearDown()
+
+    @defer.inlineCallbacks
+    def create_players(self):
+        players = ('owner@foo.com', 'player1@foo.com', 'player2@foo.com')
+        (self.owner_name, self.player1_name, self.player2_name) = players
+        (self.owner_id, self.player1, self.player2) = yield self.auth.create_players(players)
 
 
 def Run():
     loader = runner.TestLoader()
     suite = loader.suiteFactory()
     suite.addTest(loader.loadClass(DjangoAuthTest))
+    suite.addTest(loader.loadClass(DjangoAuthMailTest))
 
     return runner.TrialRunner(
         reporter.VerboseTextReporter,
