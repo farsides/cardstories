@@ -117,7 +117,7 @@ class AuthTest(unittest.TestCase):
         
     @defer.inlineCallbacks
     def test02_resolution(self):
-        players = ('owner@foo.com', 'player1@foo.com', 'player')
+        players = [u'owner@foo.com', u'player1@foo.com', u'player']
         ids = yield self.auth.create_players(players)
         self.assertEquals([1, 2, 3], ids)
         names = yield self.auth.resolve_players(ids)
