@@ -80,24 +80,35 @@
           </div>
         </div>
         <div class="cardstories_write_sentence">
-          <div class="cardstories_progress_owner"></div>
-          <div class="cardstories_card_background">
-            <div class="cardstories_card"></div>
-          </div>
-          <div class="cardstories_write">
-            <div class="cardstories_write_title"></div>
-            <div class="cardstories_write_box">
-              <div class="cardstories_write_top_box"></div>
-              <div class="cardstories_write_middle_box">
+          <div class="cardstories_pane">
+            <div class="cardstories_sidebar">
+              <div class="cardstories_deck">Deck of cards</div>
+            </div>
+            <div class="cardstories_board">
+              <div class="cardstories_progress">
+                <div class="cardstories_steps"></div>
+                <div class="cardstories_help"></div>
+                <div class="cardstories_logout"></div>
+              </div>
+              <div class="cardstories_write">
                 <form action="javascript://">
-                  <textarea class="cardstories_sentence" cols="60" rows="3" name="sentence" placeholder="A sentence related to the card"></textarea>
+                  <div class="cardstories_write_box">
+                    <textarea class="cardstories_sentence" cols="60" rows="3" name="sentence" placeholder="Write a story about the card. It can be a sentence, a word, anything!"></textarea>
+                  </div>
                   <input class="cardstories_submit" type="submit" name="submit" value="" />
                 </form>
               </div>
-              <div class="cardstories_write_bottom_box"></div>
+              <div class="cardstories_owner_seat">
+                  <div class="cardstories_nickname">Nick</div>
+              </div>
+              <div class="cardstories_card_shadow"></div>
+              <div class="cardstories_card_template" data="{card:'css/images/card0{card}.png'}">
+                <img src="css/images/card_bg.png" class="cardstories_card_background" />
+                <img src="css/images/card020.png" class="cardstories_card_foreground" />
+              </div>
             </div>
-            <div class="cardstories_write_hint"></div>
           </div>
+
         </div>
       </div>
 
@@ -139,8 +150,11 @@
             <div>Help</div>
             <div>Log out</div>
           </div>
-          <div class="cardstories_bottom">
-            <div class="cardstories_left">
+          <div class="cardstories_pane">
+            <div class="cardstories_sidebar">
+              <div class="cardstories_deck">Deck of cards</div>
+            </div>
+            <div class="cardstories_board">
               <div class="cardstories_sentence"></div>
               <div class="cardstories_owner_seat"></div>
               <div class="cardstories_player_seat cardstories_player_seat_1 cardstories_player_top_left"></div>
@@ -148,9 +162,6 @@
               <div class="cardstories_player_seat cardstories_player_seat_3 cardstories_player_top_right"></div>
               <div class="cardstories_player_seat cardstories_player_seat_4 cardstories_player_bottom_right"></div>
               <div class="cardstories_self_seat cardstories_player_seat_5"></div>
-            </div>
-            <div class="cardstories_right">
-              <div class="cardstories_deck">Deck of cards</div>
             </div>
           </div>
         </div>
@@ -160,8 +171,11 @@
             <div>Help</div>
             <div>Log out</div>
           </div>
-          <div class="cardstories_bottom">
-            <div class="cardstories_left">
+          <div class="cardstories_pane">
+            <div class="cardstories_sidebar">
+              <div class="cardstories_deck">Deck of cards</div>
+            </div>
+            <div class="cardstories_board">
               <div class="cardstories_sentence"></div>
               <div class="cardstories_owner_seat"><div class="cardstories_player_name"></div></div>
               <div class="cardstories_player_seat cardstories_player_seat_1 cardstories_player_top_left"><div class="cardstories_player_name"></div></div>
@@ -187,9 +201,6 @@
                   <img class="cardstories_card_background" src="" alt="" />
                 </div>
               </div>
-            </div>
-            <div class="cardstories_right">
-              <div class="cardstories_deck">Deck of cards</div>
             </div>
           </div>
         </div>
