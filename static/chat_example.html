@@ -51,6 +51,12 @@
   </div>
 
   <script type="text/javascript">
+    $.cardstories_chat.plugin_send = function(line) {
+        // Pick a random name for the demo.
+        var player_id = ['John', 'Bob', 'Amy'][Math.floor(Math.random() * 3)];
+        var messages = {messages: [{sentence: line, player_id: player_id}]};
+        $.cardstories_chat.plugin_chat.call(this, messages);
+    }
     $('#cardstories_chat_example').cardstories_chat();
   </script>
 </body>

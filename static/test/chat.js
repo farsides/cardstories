@@ -28,6 +28,13 @@ test("plugin_chat", function() {
     ok(display.html().match('Goodbye all!'), 'Display shows sentence');
 });
 
+test("plugin_send", function() {
+    setup();
+    expect(1);
+
+    raises($.cardstories_chat.plugin_send, /No implementation/, 'default implementation throws an error');
+});
+
 test("pressing enter inside input field", function() {
     setup();
     expect(2);

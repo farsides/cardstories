@@ -31,10 +31,7 @@
         },
 
         plugin_send: function(line) {
-            // Pick a random name for the demo.
-            var player_id = ['John', 'Bob', 'Amy'][Math.floor(Math.random() * 3)];
-            var messages = {messages: [{sentence: line, player_id: player_id}]};
-            $.cardstories_chat.plugin_chat.call(this, messages);
+            throw('No implementation of the $.cardstories_chat.plugin_send function has been provided.')
         }
     };
 
