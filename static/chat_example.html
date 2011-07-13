@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cardstories Chat Plugin</title>
+  <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+  <script type="text/javascript" src="js/jquery/jquery-1.5.1.js"></script>
+  <script type="text/javascript" src="js/jquery.placeholder-1.0.1.js"></script>
+  <script type="text/javascript" src="js/jquery.cardstories-chat.js"></script>
+  <script type="text/javascript" src="js/supplant.js"></script>
+  <style type="text/css">
+    html {
+      background-color: #333;
+    }
+    #cardstories_chat_example {
+      margin: 30px auto;
+      width: 400px;
+    }
+    .cardstories_chat_display {
+      background-color: #fff;
+      height: 450px;
+      overflow: auto;
+      width: 100%;
+      -moz-border-radius: 10px 10px 0 0;
+      -webkit-border-radius: 10px 10px 0 0;
+      border-radius: 10px 10px 0 0;
+    }
+    .cardstories_chat_message {
+      border-bottom: 1px solid #eee;
+      padding: 5px 10px 4px;
+    }
+    .cardstories_chat_message span {
+      color: #9c9;
+    }
+    .cardstories_chat_input {
+      border: none;
+      margin-top: 3px;
+      outline: none;
+      padding: 5px 10px;
+      width: 380px;
+      -moz-border-radius: 0 0 10px 10px;
+      -webkit-border-radius: 0 0 10px 10px;
+      border-radius: 0 0 10px 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="cardstories_chat_example">
+    <div class="cardstories_chat_display">
+    </div>
+    <input class="cardstories_chat_input" type="text" placeholder="Chat with online friends here" />
+  </div>
+
+  <script type="text/javascript">
+    $('#cardstories_chat_example').cardstories_chat();
+  </script>
+</body>
+</html>
