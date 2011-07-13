@@ -90,7 +90,7 @@
             var cards = $this.create_deck().map(function(card) {
                 return { 'value':card };
             });
-            return $this.select_cards(cards, ok, element);
+            return $this.select_cards('create_pick_card', cards, ok, element);
         },
 
         create_write_sentence: function(player_id, card, root) {
@@ -208,7 +208,7 @@
                   if('timeout' in answer) {
                     $this.poll(request, root);
                   } else {
-                    $this.reload(request.player_id, request.game_id, root);
+                    $this.game_or_lobby(request.player_id, request.game_id, root);
                   }
                 }
               }
@@ -406,7 +406,7 @@
             var voting = $('.cardstories_voting', element);
             voting.toggleClass('cardstories_ready', game.ready);
             if(game.ready) {
-                voting.click(function() {
+                voting.unbind('click').click(function() {
                     $this.send_game(player_id, game.id, element, 'action=voting&owner_id=' + player_id + '&game_id=' + game.id);
                 });
             }
@@ -414,7 +414,7 @@
             // Navigate to invite more friends, if desired
             //
             var invite_friends = $('.cardstories_invite_friends', element);
-            invite_friends.click(function() {
+            invite_friends.unbind('click').click(function() {
                 $.cookie('CARDSTORIES_INVITATIONS', null);
                 $this.advertise(player_id, game.id, root);
             });
@@ -437,7 +437,7 @@
                 cards.push(card);
             }
             var hand = $('.cardstories_cards_hand', element);
-            return this.display_or_select_cards(cards, undefined, hand);
+            return this.display_or_select_cards('invitation_owner', cards, undefined, hand);
         },
 
         invitation_pick: function(player_id, game, root) {
@@ -449,7 +449,7 @@
                 $this.send_game(player_id, game.id, element, 'action=pick&player_id=' + player_id + '&game_id=' + game.id + '&card=' + card);
             };
             var cards = game.self[2].map(function(card) { return {'value':card}; });
-            return $this.select_cards(cards, ok, element);
+            return $this.select_cards('invitation_pick', cards, ok, element);
         },
 
         invitation_pick_wait: function(player_id, game, root) {
@@ -464,7 +464,7 @@
             });
         },
 
-        select_cards: function(cards, ok, element) {
+        select_cards: function(id, cards, ok, element) {
             var confirm = $('.cardstories_card_confirm', element);
             var middle = confirm.metadata({type: "attr", name: "data"}).middle;
             var confirm_callback = function(card, index, nudge, cards_element) {
@@ -484,10 +484,16 @@
                 });
             };
             var hand = $('.cardstories_cards_hand', element);
-            return this.display_or_select_cards(cards, confirm_callback, hand);
+            return this.display_or_select_cards(id, cards, confirm_callback, hand);
         },
 
-        display_or_select_cards: function(cards, select_callback, element) {
+        display_or_select_cards: function(id, cards, select_callback, element) {
+            id += '_saved_element';
+            if(this[id] === undefined) {
+                this[id] = element.html();
+            } else {
+                element.html(this[id]);
+            }
             var meta = element.metadata({type: "attr", name: "data"});
             var options = {
                 'active': meta.active,
@@ -672,7 +678,7 @@
                 }
                 cards.push(card);
             }
-            return $this.select_cards(cards, ok, element);
+            return $this.select_cards('vote_voter', cards, ok, element);
         },
 
         vote_voter_wait: function(player_id, game, root) {

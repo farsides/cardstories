@@ -1602,7 +1602,8 @@ test("display_or_select_cards move", function() {
       start();
     };
     $.cardstories.
-        display_or_select_cards([{'value':1},{'value':2},{'value':3},{'value':4},{'value':5},{'value':6}],
+        display_or_select_cards('move',
+                                [{'value':1},{'value':2},{'value':3},{'value':4},{'value':5},{'value':6}],
                                 function() {}, 
                                 element).
         done(onReady);
@@ -1649,7 +1650,8 @@ test("display_or_select_cards select", function() {
         start();
     };
     $.cardstories.
-        display_or_select_cards(cards,
+        display_or_select_cards('select',
+                                cards,
                                 select, 
                                 element).
         done(onReady);
@@ -1688,10 +1690,55 @@ test("display_or_select_cards select no bg", function() {
     equal(background.attr('src'), 'templatebackground');
     meta.card_bg = '';
     $.cardstories.
-        display_or_select_cards(cards,
+        display_or_select_cards('select no bg',
+                                cards,
                                 select, 
                                 element).
         done(onReady);
+  });
+
+test("display_or_select_cards twice", function() {
+    setup();
+    stop();
+    expect(2);
+
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_create .cardstories_cards_hand', root);
+    var label = 'LABEL';
+    var card1 = 11;
+    var create_cards = function(card) {
+        return [
+            {'value':card},
+            {'value':2,'label':label},
+            {'value':3},
+            {'value':4},
+            {'value':5},
+            {'value':6}];
+    };
+
+    var meta = $('.cardstories_card_template', element).metadata({type: "attr", name: "data"});
+    var check = function(is_ready) {
+        var foreground = $('.cardstories_card .cardstories_card_foreground', element).eq(0);
+        equal(foreground.attr('src'), meta.card.supplant({'card': card1}));
+    };
+    $.cardstories.
+        display_or_select_cards('twice',
+                                create_cards(card1),
+                                undefined, 
+                                element).
+        done(function(is_ready) {
+            check(is_ready);
+            card1 = 22;
+            $.cardstories.
+                display_or_select_cards('twice',
+                                        create_cards(card1),
+                                        undefined, 
+                                        element).
+                done(function(is_ready) {
+                    check(is_ready);
+                    start();
+                });
+        });
   });
 
 test("select_cards ok", function() {
@@ -1716,7 +1763,8 @@ test("select_cards ok", function() {
         start();
     };
     $.cardstories.
-        select_cards(cards,
+        select_cards('ok',
+                     cards,
                      ok_callback, 
                      element).
         done(onReady);
@@ -1743,7 +1791,8 @@ test("select_cards cancel", function() {
         ok(false, 'ok_callback unexpectedly called');
     };
     $.cardstories.
-        select_cards(cards,
+        select_cards('cancel',
+                     cards,
                      ok_callback, 
                      element).
         done(onReady);
@@ -1751,6 +1800,7 @@ test("select_cards cancel", function() {
 
 test("select_cards single", function() {
     setup();
+    expect(6);
     stop();
 
     var root = $('#qunit-fixture .cardstories');
@@ -1759,14 +1809,16 @@ test("select_cards single", function() {
         var links = $('a.cardstories_card', element);
         links.each(function(index) {
             $(this).click();
-            var condition = $(this).hasClass('cardstories_card_selected') == index === 0;
+            var tmp = index === 0;
+            var condition = $(this).hasClass('cardstories_card_selected') == tmp;
             var not = $(this).hasClass('cardstories_card_selected') ? '' : 'not';
             ok(condition, 'Card ' + index + ' ' + not +  ' picked.');
         });
         start();
     };
     $.cardstories.
-        display_or_select_cards([{'value':1},{'value':2},{'value':3},{'value':4},{'value':5},{'value':6}],
+        display_or_select_cards('single',
+                                [{'value':1},{'value':2},{'value':3},{'value':4},{'value':5},{'value':6}],
                                 function() {},
                                 element).
         done(onReady);
