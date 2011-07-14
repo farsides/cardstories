@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load facebook %}
 
 {% block title %}Welcome to Cardstories!{% endblock %}
 
@@ -34,6 +35,10 @@
         <input class="cardstories_login_submit" type="submit" value="Login" />
       </form>
       <div class="cardstories_password_reset"><a href="{% url auth_password_reset %}">Forgot your password?</a></div>
+      <div class="cardstories_facebook_title">Facebook users</div>
+      <div class="cardstories_facebook_button">
+          <a href="https://www.facebook.com/dialog/oauth?client_id={{ fb_app_id }}&redirect_uri={{ fb_redirect_uri }}&scope={% fb_perms %}"><img src="http://developers.facebook.com/images/devsite/login-button.png"/></a>
+      </div>
       <div class="cardstories_privacy_notice">We promise to never give or sell any emails to anyone. We hate spams just like you.</div>
     </div>
   </div>

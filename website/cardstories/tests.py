@@ -154,7 +154,144 @@ class CardstoriesTest(TestCase):
         # Was the user logged in as the cardstories client expects it?
         self.assertIsNotNone(c.cookies["CARDSTORIES_ID"])
 
-    def test_03getuserid(self):
+    def test_03facebook(self):
+        """
+        Test facebook login and registration.
+
+        """
+        from website.cardstories import views
+        from website.cardstories import facebook
+
+        fb_id = 123456789
+        fb_email = 'bogusdude@cardstories.org'
+        fb_name = 'Bogus Dude'
+
+        c = self.client
+        url = "/facebook/"
+
+        # Empty get
+        response = c.get(url)
+        self.assertEqual(response.status_code, 200)
+
+        # User denied access
+        data = {'error_reason': 'user_denied',
+                'error': 'access_denied',
+                'error_description': 'The user denied your request.'}
+        response = c.get(url, data)
+        self.assertEqual(response.status_code, 200)
+
+        # Token error
+        class MockTokenError(object):
+            """https://graph.facebook.com/oauth/access_token?..."""
+            def read(self):
+                return "{" \
+                       "\n   \"error\": {" \
+                       "\n      \"type\": \"OAuthException\"," \
+                       "\n      \"message\": \"Error validating verification code.\"" \
+                       "\n   }" \
+                       "\n}"
+        def mock_token_error(url):
+            return MockTokenError()
+        views.urlopen = mock_token_error
+        data = {'code': 'abcdefghijklmnopqrstuvwxyz'}
+        response = c.get(url, data)
+        self.assertEqual(response.status_code, 200)
+
+        # GraphAPI parse error
+        class MockToken(object):
+            """Mocks https://graph.facebook.com/oauth/access_token?..."""
+            def read(self):
+                # A completely fake access_token
+                return "access_token=0123456789|abcdefg|hijklm&expires=1234"
+        def mock_token(url):
+            return MockToken()
+        views.urlopen = mock_token
+        class MockMeInvalid(object):
+            """Mocks https://graph.facebook.com/me?access_token=..."""
+            def read(self):
+                return ""
+        def mock_me_invalid(url):
+            return MockMeInvalid()
+        facebook.urlopen = mock_me_invalid
+        from simplejson import JSONDecodeError
+        with self.assertRaises(JSONDecodeError):
+            response = c.get(url, data)
+
+        # GraphAPI exception
+        class MockMeAPIException(object):
+            """Mocks https://graph.facebook.com/me?access_token=..."""
+            def read(self):
+                    return "{" \
+                           "\n   \"error\": {" \
+                           "\n      \"type\": \"OAuthException\"," \
+                           "\n      \"message\": \"Invalid access token signature.\"" \
+                           "\n   }" \
+                           "\n}"
+        def mock_me_exception(url):
+            return MockMeAPIException()
+        facebook.urlopen = mock_me_exception
+        with self.assertRaises(facebook.GraphAPIError):
+            response = c.get(url, data)
+
+        # No email permission
+        class MockMeNoEmail(object):
+            """Mocks https://graph.facebook.com/me?access_token=..."""
+            def read(self):
+                    # A valid return with just basic permissions.
+                    return "{" \
+                           "\n   \"id\": \"%d\"," \
+                           "\n   \"name\": \"%s\"," \
+                           "\n   \"first_name\": \"Bogus\"," \
+                           "\n   \"last_name\": \"Dude\"," \
+                           "\n   \"link\": \"https://www.facebook.com/bogusdude\"," \
+                           "\n   \"username\": \"bogusdude\"," \
+                           "\n   \"gender\": \"male\"," \
+                           "\n   \"timezone\": -3," \
+                           "\n   \"locale\": \"en_US\"," \
+                           "\n   \"verified\": true," \
+                           "\n   \"updated_time\": \"2011-07-15T02:22:58+0000\"" \
+                           "\n}" % (fb_id, fb_name)
+        def mock_me_noemail(url):
+            return MockMeNoEmail()
+        facebook.urlopen = mock_me_noemail
+        response = c.get(url, data)
+        self.assertEqual(response.status_code, 200)
+
+        # Valid user
+        class MockMe(object):
+            """Mocks https://graph.facebook.com/me?access_token=..."""
+            def read(self):
+                    # A valid return with basic and email permissions.
+                    return "{" \
+                           "\n   \"id\": \"%d\"," \
+                           "\n   \"name\": \"%s\"," \
+                           "\n   \"first_name\": \"Bogus\"," \
+                           "\n   \"last_name\": \"Dude\"," \
+                           "\n   \"link\": \"https://www.facebook.com/bogusdude\"," \
+                           "\n   \"username\": \"bogusdude\"," \
+                           "\n   \"gender\": \"male\"," \
+                           "\n   \"email\": \"%s\"," \
+                           "\n   \"timezone\": -3," \
+                           "\n   \"locale\": \"en_US\"," \
+                           "\n   \"verified\": true," \
+                           "\n   \"updated_time\": \"2011-07-15T02:22:58+0000\"" \
+                           "\n}" % (fb_id, fb_name, fb_email)
+        def mock_me(url):
+            return MockMe()
+        facebook.urlopen = mock_me
+        response = c.get(url, data)
+        self.assertEqual(response.status_code, 302)
+
+        # Checks user was created properly
+        from django.contrib.auth.models import User
+        user = User.objects.get(username=fb_email)
+        self.assertEqual(user.first_name, fb_name)
+        self.assertEqual(user.get_profile().facebook_id, fb_id)
+
+        # Was the user logged in as the cardstories client expects it?
+        self.assertIsNotNone(c.cookies["CARDSTORIES_ID"])
+
+    def test_04getuserid(self):
         """
         Test getuserid. Requires 'users' fixture.
 
@@ -206,7 +343,7 @@ class CardstoriesTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response._container[0], 2)
 
-    def test_04getusername(self):
+    def test_05getusername(self):
         """
         Test getuserid.  Requires 'users' fixture.
 
@@ -235,7 +372,7 @@ class CardstoriesTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, "testuser1@email.com")
 
-    def test_05getloggedinuserid(self):
+    def test_06getloggedinuserid(self):
         """
         Test getloggedinuserid.  Requires 'users' fixture.
 
