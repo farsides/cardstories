@@ -19,6 +19,8 @@
             });
         },
 
+        // The assumption here is that the sentences have already been
+        // HTML escaped to prevent from XSS attacks.
         plugin_chat: function(data) {
             var messages = data.messages;
             for (var i = 0, len = messages.length; i < len; i++) {
