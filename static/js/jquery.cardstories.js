@@ -93,6 +93,41 @@
             return $this.select_cards('create_pick_card', cards, ok, element);
         },
 
+        create_write_sentence_animate: function(player_id, card, element, root) {
+            var write_box = $('.cardstories_write', element);
+            var card_shadow = $('.cardstories_card_shadow', element);
+            var card_template = $('.cardstories_card_template', element);
+            var card_imgs = $('img', card_template);
+            var final_top = parseInt(card_template.css('top'), 10); // assuming the top value is given in pixels
+            var final_margin_left = parseInt(card_template.css('margin-left'), 10); // assuming value in pixels
+            var final_width = card_imgs.width();
+            var final_height = card_imgs.height();
+            var starting_width = 220;
+            var ratio = final_width / starting_width;
+            var starting_height = Math.ceil(final_height / ratio);
+            var animation_duration = 500;
+
+            // Set the card into its initial state. The css values will need to
+            // be adjusted properly once the layouts are finished.
+            write_box.hide();
+            card_shadow.hide();
+            card_template.css({
+                top: final_top + final_height - starting_height,
+                marginLeft: final_margin_left / ratio
+            });
+            card_imgs.css({
+                width: starting_width,
+                height: starting_height
+            });
+
+            // Animate towards the final state.
+            card_template.animate({top: final_top, marginLeft: final_margin_left}, animation_duration);
+            card_imgs.animate({width: final_width, height: final_height}, animation_duration, function() {
+                card_shadow.fadeIn('fast');
+                write_box.fadeIn('fast');
+            });
+        },
+
         create_write_sentence: function(player_id, card, root) {
             var $this = this;
             var element = $('.cardstories_create .cardstories_write_sentence', root);
