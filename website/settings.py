@@ -127,8 +127,8 @@ AUTH_PROFILE_MODULE = 'cardstories.UserProfile'
 # Cardstories settings
 CARDSTORIES_HOST = 'localhost:5000'
 CARDSTORIES_URL = '/static/index.html'
-FACEBOOK_APP_ID = '200674796649069'
-FACEBOOK_API_SECRET = '7d9939a4c1f960d20b86aed03571f21b'
+FACEBOOK_APP_ID = ''
+FACEBOOK_API_SECRET = ''
 
 # Facebook permissions, e.g: ['email', 'user_about_me']
 FACEBOOK_PERMS = ['email']
