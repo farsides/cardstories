@@ -98,6 +98,12 @@
             var card_shadow = $('.cardstories_card_shadow', element);
             var card_template = $('.cardstories_card_template', element);
             var card_imgs = $('img', card_template);
+            var card_foreground = card_imgs.filter('.cardstories_card_foreground');
+
+            // Set the card's src attribute first.
+            var src = card_template.metadata({type: 'attr', name: 'data'}).card.supplant({card: card});
+            card_foreground.attr('src', src);
+
             var final_top = parseInt(card_template.css('top'), 10); // assuming the top value is given in pixels
             var final_margin_left = parseInt(card_template.css('margin-left'), 10); // assuming value in pixels
             var final_width = card_imgs.width();
