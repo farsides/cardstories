@@ -138,6 +138,7 @@
             var $this = this;
             var element = $('.cardstories_create .cardstories_write_sentence', root);
             this.set_active(root, element);
+            this.create_write_sentence_animate(player_id, card, element, root);
             $('.cardstories_card', element).attr('class', 'cardstories_card cardstories_card' + card + ' {card:' + card + '}');
             var text = $('.cardstories_sentence', element);
             var submit = function() {
