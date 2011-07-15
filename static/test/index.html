@@ -62,11 +62,34 @@
             </div>
           </div>
           <div class="cardstories_write_sentence">
-            <div class="cardstories_card"></div>
-            <form action="javascript://">
-              <textarea class="cardstories_sentence" name="sentence" placeholder="A sentence related to the card"></textarea>
-              <input class="cardstories_submit" type="submit" name="submit" value="" />
-            </form>
+            <div class="cardstories_pane">
+              <div class="cardstories_sidebar">
+                <div class="cardstories_deck">Deck of cards</div>
+              </div>
+              <div class="cardstories_board">
+                <div class="cardstories_progress">
+                  <div class="cardstories_steps"></div>
+                  <div class="cardstories_help"></div>
+                  <div class="cardstories_logout"></div>
+                </div>
+                <div class="cardstories_write">
+                  <form action="javascript://">
+                    <div class="cardstories_write_box">
+                      <textarea class="cardstories_sentence" cols="60" rows="3" name="sentence" placeholder="Write a story about the card. It can be a sentence, a word, anything!"></textarea>
+                    </div>
+                    <input class="cardstories_submit" type="submit" name="submit" value="" />
+                  </form>
+                </div>
+                <div class="cardstories_owner_seat">
+                    <div class="cardstories_nickname">Nick</div>
+                </div>
+                <div class="cardstories_card_shadow"></div>
+                <div class="cardstories_card_template" data="{card:'css/images/card0{card}.png'}">
+                  <img src="css/images/card_bg.png" class="cardstories_card_background" />
+                  <img src="css/images/card020.png" class="cardstories_card_foreground" />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 

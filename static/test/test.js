@@ -1369,6 +1369,41 @@ test("lobby_games without games", function() {
     equal($('.cardstories_pager', element).css('display'), 'none', 'pager is hidden');
 });
 
+test("create_write_sentence_animate", function() {
+    setup();
+    stop();
+    expect(7);
+
+    var player_id = 101;
+    var card = 42;
+    var root = $('#qunit-fixture .cardstories');
+    var element = root.find('.cardstories_create .cardstories_write_sentence');
+
+    var write_box = $('.cardstories_write', element);
+    var card_shadow = $('.cardstories_card_shadow', element);
+    var card_template = $('.cardstories_card_template', element);
+    var card_imgs = $('img', card_template);
+    var card_foreground = card_imgs.filter('.cardstories_card_foreground');
+
+    var final_width = card_imgs.width();
+    var starting_width = 220;
+
+    $.cardstories.create_write_sentence_animate(player_id, card, element, root);
+
+    equal(write_box.css('display'), 'none', 'write box is not visible initially');
+    equal(card_shadow.css('display'), 'none', 'card shadow is not visible initially');
+    ok(card_foreground.attr('src').match(/42/), 'src attribute is set properly to show the chosen card');
+    equal(card_imgs.width(), 220, 'card starts out at 220px wide');
+
+    // Setting a timeout of 800 ms, which should be enough for the animation to finish.
+    setTimeout(function() {
+        equal(card_imgs.width(), final_width, 'after animation card grows to its original width');
+        equal(write_box.css('display'), 'block', 'write box is visible after animation');
+        equal(card_shadow.css('display'), 'block', 'card shadow is visible after animation');
+        start();
+    }, 800);
+});
+
 test("poll_discard", function() {
     setup();
     expect(3);
