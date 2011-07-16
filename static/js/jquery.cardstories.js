@@ -82,6 +82,7 @@
             var $this = this;
             var element = $('.cardstories_create .cardstories_pick_card', root);
             this.set_active(root, element);
+            this.notify_active(root, 'create_pick_card');
             var ok = function(card) {
                 $this.create_write_sentence(player_id, card, root);
             };
@@ -95,6 +96,7 @@
             var $this = this;
             var element = $('.cardstories_create .cardstories_write_sentence', root);
             this.set_active(root, element);
+            this.notify_active(root, 'create_write_sentence');
             $('.cardstories_card', element).attr('class', 'cardstories_card cardstories_card' + card + ' {card:' + card + '}');
             var text = $('.cardstories_sentence', element);
             var submit = function() {
@@ -153,6 +155,7 @@
             var $this = this;
             var element = $('.cardstories_advertise', root);
             this.set_active(root, element);
+            this.notify_active(root, 'advertise');
             var text = $.cookie('CARDSTORIES_INVITATIONS');
             if(text !== undefined && text !== null) {
                 $('.cardstories_text', element).text(text);
@@ -333,6 +336,7 @@
             var $this = this;
             var element = $('.cardstories_lobby .cardstories_in_progress', root);
             this.set_active(root, element);
+            this.notify_active(root, 'in_progress');
             $('.cardstories_tab_finished', element).click(function() {
                 $this.refresh_lobby(player_id, false, true, root);
               });
@@ -349,6 +353,7 @@
             var $this = this;
             var element = $('.cardstories_lobby .cardstories_finished', root);
             this.set_active(root, element);
+            this.notify_active(root, 'finished');
             $('.cardstories_tab_in_progress', element).click(function() {
                 $this.refresh_lobby(player_id, true, true, root);
               });
@@ -397,6 +402,7 @@
             var $this = this;
             var element = $('.cardstories_invitation .cardstories_owner', root);
             this.set_active(root, element);
+            this.notify_active(root, 'invitation_owner');
             $('.cardstories_sentence', element).text(game.sentence);
             //
             // Proceed to vote, if possible
@@ -442,6 +448,7 @@
             var $this = this;
             var element = $('.cardstories_invitation .cardstories_pick', root);
             this.set_active(root, element);
+            this.notify_active(root, 'invitation_pick');
             $('.cardstories_sentence', element).text(game.sentence);
             var ok = function(card) {
                 $this.send_game(player_id, game.id, element, 'action=pick&player_id=' + player_id + '&game_id=' + game.id + '&card=' + card);
@@ -454,6 +461,7 @@
             var $this = this;
             var element = $('.cardstories_invitation .cardstories_pick_wait', root);
             this.set_active(root, element);
+            this.notify_active(root, 'invitation_pick_wait');
             $('.cardstories_sentence', element).text(game.sentence);
             var card = game.self[0];
             $('.cardstories_card', element).attr('class', 'cardstories_card cardstories_wait_card' + card + ' {card:' + card + '}');
@@ -563,6 +571,7 @@
             if(this.confirm_participate) {
               var $this = this;
               this.set_active(root, element);
+              this.notify_active(root, 'invitation_participate');
               $('.cardstories_sentence', element).text(game.sentence);
               $('input[type=submit]', element).click(function() {
                   $this.send_game(player_id, game.id, element, 'action=participate&player_id=' + player_id + '&game_id=' + game.id);
@@ -576,6 +585,7 @@
             var $this = this;
             var element = $('.cardstories_invitation .cardstories_invitation_anonymous', root);
             this.set_active(root, element);
+            this.notify_active(root, 'invitation_anonymous');
             $('.cardstories_sentence', element).text(game.sentence);
         },
 
@@ -611,6 +621,7 @@
             var $this = this;
             var element = $('.cardstories_vote .cardstories_viewer', root);
             this.set_active(root, element);
+            this.notify_active(root, 'vote_viewer');
             $('.cardstories_sentence', element).text(game.sentence);
             var cards = game.board;
             $('.cardstories_card', element).each(function(index) {
@@ -622,6 +633,7 @@
         vote_voter: function(player_id, game, root) {
             var element = $('.cardstories_vote .cardstories_voter', root);
             this.set_active(root, element);
+            this.notify_active(root, 'vote_voter');
             var $this = this;
             $('.cardstories_sentence', element).text(game.sentence);
             var ok = function(card) {
@@ -646,6 +658,7 @@
             var $this = this;
             var element = $('.cardstories_vote .cardstories_voter_wait', root);
             this.set_active(root, element);
+            this.notify_active(root, 'vote_voter_wait');
             $('.cardstories_sentence', element).text(game.sentence);
             var card = game.self[1];
             $('.cardstories_card', element).attr('class', 'cardstories_card cardstories_wait_card' + card + ' {card:' + card + '}');
@@ -658,6 +671,7 @@
             var $this = this;
             var element = $('.cardstories_vote .cardstories_vote_anonymous', root);
             this.set_active(root, element);
+            this.notify_active(root, 'vote_anonymous');
             $('.cardstories_sentence', element).text(game.sentence);
         },
 
@@ -665,6 +679,7 @@
             var $this = this;
             var element = $('.cardstories_vote .cardstories_owner', root);
             this.set_active(root, element);
+            this.notify_active(root, 'vote_owner');
             $('.cardstories_sentence', element).text(game.sentence);
             // Activate the button to publish the results if the game is ready
             var finish = $('.cardstories_finish', element);
@@ -684,6 +699,7 @@
             var element = $('.cardstories_confirm_results_publication', root);
             var vote_element = $('.cardstories_vote .cardstories_owner', root);
             this.set_active(root, element);
+            this.notify_active(root, 'confirm_results_publication');
             $('.cardstories_notyet_announce_results').click(function () {
                 $this.vote_owner(player_id, game, root);
             });
@@ -707,6 +723,7 @@
             }
             var element = $('.cardstories_complete', root);
             this.set_active(root, element);
+            this.notify_active(root, 'complete');
             element.toggleClass('cardstories_owner', game.owner);
             element.toggleClass('cardstories_player', !game.owner);
             $('.cardstories_set_why', element).unbind('click').click(function() {
@@ -834,10 +851,15 @@
             $(element).parents('.cardstories_root div').addClass('cardstories_active');
         },
 
+        notify_active: function(root, skin) {
+            $(root).trigger('active.cardstories', [skin]);
+        },
+
         email: function(game_id, root) {
             var $this = this;
             var element = $('.cardstories_subscribe', root);
-            $this.set_active(root, element);
+            this.set_active(root, element);
+            this.notify_active(root, 'email');
             validator = $(".cardstories_emailform", element).validate({
                 submitHandler: function(form) {
                     var player_id = encodeURIComponent($('.cardstories_email', element).val());

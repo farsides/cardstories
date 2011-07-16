@@ -12,6 +12,7 @@
 	<script type="text/javascript" src="js/jquery.validate.min.js"></script>
 	<script type="text/javascript" src="js/jquery.cookie.js"></script>
 	<script type="text/javascript" src="js/jquery.jqDock.min.js"></script>
+	<script type="text/javascript" src="js/jquery.jqDock.min.js"></script>
 	<link rel="stylesheet" href="css/all.css" type="text/css" media="screen">
 	<link rel="stylesheet" href="css/images.css" type="text/css" media="screen">
 
@@ -22,6 +23,7 @@
 	<script type="text/javascript" src="test/skin.js"></script>
 	<script type="text/javascript" src="js/jquery.query-2.1.7.js"></script>
 	<script type="text/javascript" src="js/jquery.placeholder-1.0.1.js"></script>
+	<script type="text/javascript" src="js/jquery.owa.js"></script>
 </head>
 <body>
   <div class="cardstories_skin" style="display: none; position: absolute; top: 0; z-index: 1000">
@@ -598,7 +600,12 @@
       $('.cardstories_skin').show();
       $.cardstories.skin(skin, $('.cardstories'));
     } else {
-      setTimeout(function () {$('.cardstories').cardstories($.query.get('player_id'), $.query.get('game_id'));}, 0);
+      setTimeout(function () {
+        // To enable OWA, uncomment the next two lines and change parameters appropriately.
+        //$('.cardstories').owa('<OWA_URL>', '<OWA_SITE_ID>')
+        //                 .owa_subscribe('active.cardstories', 'static/?skin=');
+        $('.cardstories').cardstories($.query.get('player_id'), $.query.get('game_id'));
+      }, 0);
     }
   });
   </script>

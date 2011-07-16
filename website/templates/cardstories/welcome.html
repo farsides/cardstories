@@ -3,7 +3,7 @@
 
 {% block title %}Welcome to Cardstories!{% endblock %}
 
-{%block content %}
+{% block content %}
   <div class="cardstories_extras cardstories_active">
     <div class="cardstories_subscribe cardstories_active">
       <div class="cardstories_logo_welcome"></div>
@@ -46,7 +46,13 @@
 
 {% block postcontent %}
 <script>
+// Initialize Open Web Analytics
+{% if owa_enable %}
+$('.cardstories').owa('{{ owa_url }}', '{{ owa_site_id }}', true);
+{% endif %}
+
 $(document).ready(function() {
+    // Javascript trickery to allow default field values as labels (including password fields)
     rp1c = $('.cardstories_reg_password1_clear');
     rp1 = $('.cardstories_reg_password1');
     rp2c = $('.cardstories_reg_password2_clear');

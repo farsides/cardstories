@@ -86,6 +86,44 @@ to change the CARDSTORIES_HOST parameter here, and restart the website server:
    * website/settings.py
 
 
+###########################
+Enabling Open Web Analytics
+###########################
+
+To use OWA, first you must get it up and running somewhere.  To do so, follow
+the installation steps here:
+
+http://wiki.openwebanalytics.com/index.php?title=Installation
+
+Once it's configured and running, for example at http://localhost:8080/, log in
+and obtain your Site ID.  With this information in hand, start by setting the
+correct values in website/settings.py:
+
+$ vim website/settings.py
+----------
+OWA_ENABLE = True
+OWA_URL = 'http://localhost:8080/'
+OWA_SITE_ID = '<your_site_id>'
+----------
+
+Then, proceed to static/index.html and uncomment these lines at the bottom,
+using the same values for OWA_URL and OWA_SITE_ID as above:
+
+$ vim static/index.html
+----------
+$('.cardstories').owa('<OWA_URL>', '<OWA_SITE_ID>')
+                 .owa_subscribe('active.cardstories', 'static/?skin=');
+----------
+
+Once this is done, all relevant page views should be logged.  Game state
+changes will be artificially logged as page views with URLs in the following
+format, where <skin_name> refers to an existing skin in the game.
+
+http://local.cardstories.org/static/index.html?skin=<skin_name>
+
+You can then proceed to set up goals in OWA accordingly.
+
+
 #################################
 Deploying cardstories with Apache
 #################################

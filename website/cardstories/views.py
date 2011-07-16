@@ -48,6 +48,17 @@ def get_facebook_redirect_uri(encode=True):
 
     return uri
 
+def common_variables(request):
+    """
+    Common template variables.
+
+    """
+    return {'fb_redirect_uri': get_facebook_redirect_uri(),
+            'fb_app_id': settings.FACEBOOK_APP_ID,
+            'owa_enable': settings.OWA_ENABLE,
+            'owa_url': settings.OWA_URL,
+            'owa_site_id': settings.OWA_SITE_ID}
+
 def welcome(request):
     """
     Simply renders the welcome page, which includes both a registration and
@@ -55,11 +66,10 @@ def welcome(request):
 
     """
     context = {'registration_form': RegistrationForm(),
-               'login_form': LoginForm(),
-               'fb_redirect_uri': get_facebook_redirect_uri(),
-               'fb_app_id': settings.FACEBOOK_APP_ID}
+               'login_form': LoginForm()}
     response = render_to_response('cardstories/welcome.html', context,
-                              context_instance=RequestContext(request))
+                              context_instance=RequestContext(request,
+                              processors=[common_variables]))
 
     # Set welcome page URL for redirection.
     welcome_url = quote(reverse(welcome), '')
@@ -106,11 +116,10 @@ def register(request):
         form = RegistrationForm()
 
     context = {'registration_form': form,
-               'login_form': LoginForm(),
-               'fb_redirect_uri': get_facebook_redirect_uri(),
-               'fb_app_id': settings.FACEBOOK_APP_ID}
+               'login_form': LoginForm()}
     return render_to_response('cardstories/welcome.html', context,
-                              context_instance=RequestContext(request))
+                              context_instance=RequestContext(request,
+                              processors=[common_variables]))
 
 def login(request):
     """
@@ -142,11 +151,10 @@ def login(request):
         form = LoginForm()
 
     context = {'registration_form': RegistrationForm(),
-               'login_form': form,
-               'fb_redirect_uri': get_facebook_redirect_uri(),
-               'fb_app_id': settings.FACEBOOK_APP_ID}
+               'login_form': form}
     return render_to_response('cardstories/welcome.html', context,
-                              context_instance=RequestContext(request))
+                              context_instance=RequestContext(request,
+                              processors=[common_variables]))
 
 def facebook(request):
     """
@@ -187,11 +195,10 @@ def facebook(request):
                     return response
 
     context = {'registration_form': RegistrationForm(),
-               'login_form': LoginForm(),
-               'fb_redirect_uri': get_facebook_redirect_uri(),
-               'fb_app_id': settings.FACEBOOK_APP_ID}
+               'login_form': LoginForm()}
     return render_to_response('cardstories/welcome.html', context,
-                              context_instance=RequestContext(request))
+                              context_instance=RequestContext(request,
+                              processors=[common_variables]))
 
 def getuserid(request, username):
     """

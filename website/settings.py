@@ -127,11 +127,16 @@ AUTH_PROFILE_MODULE = 'cardstories.UserProfile'
 # Cardstories settings
 CARDSTORIES_HOST = 'localhost:5000'
 CARDSTORIES_URL = '/static/index.html'
+
+# Facebook settings.
 FACEBOOK_APP_ID = ''
 FACEBOOK_API_SECRET = ''
-
-# Facebook permissions, e.g: ['email', 'user_about_me']
 FACEBOOK_PERMS = ['email']
+
+# Open Web Analytics settings
+OWA_ENABLE = False
+OWA_URL = ''
+OWA_SITE_ID = ''
 
 # Enables code coverage
 TEST_RUNNER = 'tests.run_tests_with_coverage'
