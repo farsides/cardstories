@@ -41,6 +41,14 @@ be automatically created at /tmp/cardstories.website):
 
 $ website/manage.py syncdb
 
+Note that for local Facebook development, you must also add an entry to
+/etc/hosts that matches the domain name in your Django site configuration.  It
+is recommended when running the above syncdb command to chose
+"local.cardstories.org" as the domain name, and then to add a line in
+/etc/hosts like the following:
+
+127.0.0.1 local.cardstories.org
+
 On one terminal window, run the cardstories web service.  Under default
 configuration, the following command assumes you have postfix configured
 properly for relaying emails sent to 'localhost' (otherwise invitations won't
@@ -57,14 +65,13 @@ $ PYTHONPATH=.:etc/cardstories twistd --nodaemon cardstories \
 	--plugins-post-process 'djangoauth'
 
 On a second terminal window, still from the root of the checkout, run the
-website development server, which by default binds to localhost and port 8000:
-(Note: Django's default "manage.py runserver" does not work with the djangoauth
-plugin because it can only handle one request at a time, so our manage.py has
-been hacked to provide multithreaded goodness.)
+website development server, which by default binds to localhost and port 8000.
+However, for local Facebook redirection to work (which you set up above in
+/etc/hosts), you must run the server on port 80 as root:
 
-$ website/manage.py runserver 0.0.0.0:8000
+$ sudo website/manage.py runserver 0.0.0.0:80
 
-Now simply access http://localhost:8000/, and code away!
+Now simply access http://local.cardstories.org/, and code away!
 
 If for any reason you need to run the website dev server on a different host or
 port, these files that must be modified accordingly, and the cardstories web
@@ -135,7 +142,7 @@ $ PYTHONPATH=.:etc/cardstories twistd --nodaemon cardstories \
 To check if the webservice replies, run the following (requires curl). The
 following must return the {"win": {}, "games": [], "modified": 0} string:
 
-$ curl --silent 'http://localhost:8000/resource?action=lobby&my=true&player_id=TEST&in_progress=yes'
+$ curl --silent 'http://localhost:5000/resource?action=lobby&my=true&player_id=TEST&in_progress=yes'
 
 
 ######################

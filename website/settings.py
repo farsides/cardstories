@@ -115,12 +115,29 @@ INSTALLED_APPS = (
     'website.util',
 )
 
-# Enables code coverage
-TEST_RUNNER = 'tests.run_tests_with_coverage'
-COVERAGE_MODULES = ['website.urls',
-                    'website.cardstories.views',
-                    'website.cardstories.forms']
+# Enables the custom Facebook authentication backend
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'website.cardstories.backends.FacebookBackend'
+)
+
+# Enables the custom user profile
+AUTH_PROFILE_MODULE = 'cardstories.UserProfile'
 
 # Cardstories settings
 CARDSTORIES_HOST = 'localhost:5000'
 CARDSTORIES_URL = '/static/index.html'
+FACEBOOK_APP_ID = ''
+FACEBOOK_API_SECRET = ''
+
+# Facebook permissions, e.g: ['email', 'user_about_me']
+FACEBOOK_PERMS = ['email']
+
+# Enables code coverage
+TEST_RUNNER = 'tests.run_tests_with_coverage'
+COVERAGE_MODULES = ['website.cardstories.views',
+                    'website.cardstories.forms',
+                    'website.cardstories.facebook',
+                    'website.cardstories.backends',
+                    'website.cardstories.models']
+

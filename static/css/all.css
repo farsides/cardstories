@@ -149,7 +149,7 @@ html, body {
 .cardstories .cardstories_extras .cardstories_subscribe .cardstories_reg_title {
     position: absolute;
     top: 490px;
-    left: 240px;
+    left: 170px;
     font-size: 16px;
 }
 
@@ -160,7 +160,7 @@ html, body {
     width: 240px;
     height: 16px;
     top: 510px;
-    left: 170px;
+    left: 100px;
     font-size: 12px;
     text-align: left;
     overflow: hidden;
@@ -171,7 +171,7 @@ html, body {
     width: 240px;
     height: 20px;
     top: 530px;
-    left: 170px;
+    left: 100px;
     font-size: 14px;
 }
 
@@ -180,7 +180,7 @@ html, body {
     width: 240px;
     height: 20px;
     top: 561px;
-    left: 170px;
+    left: 100px;
     font-size: 14px;
 }
 
@@ -190,7 +190,7 @@ html, body {
     width: 115px;
     height: 20px;
     top: 593px;
-    left: 170px;
+    left: 100px;
     font-size: 14px;
 }
 
@@ -200,7 +200,7 @@ html, body {
     width: 115px;
     height: 20px;
     top: 593px;
-    left: 295px;
+    left: 225px;
     font-size: 14px;
 }
 
@@ -208,14 +208,14 @@ html, body {
     position: absolute;
     width: 115px;
     top: 622px;
-    left: 295px;
+    left: 225px;
     font-size: 14px;
 }
 
 .cardstories .cardstories_extras .cardstories_subscribe .cardstories_login_title {
     position: absolute;
     top: 490px;
-    left: 670px;
+    left: 450px;
     font-size: 16px;
 }
 
@@ -226,7 +226,7 @@ html, body {
     width: 240px;
     height: 16px;
     top: 510px;
-    left: 620px;
+    left: 400px;
     color: red;
     font-size: 12px;
     text-align: left;
@@ -238,7 +238,7 @@ html, body {
     width: 240px;
     height: 20px;
     top: 530px;
-    left: 620px;
+    left: 400px;
     border: 0;
     font-size: 14px;
 }
@@ -249,7 +249,7 @@ html, body {
     width: 240px;
     height: 20px;
     top: 561px;
-    left: 620px;
+    left: 400px;
     border: 0;
     font-size: 14px;
 }
@@ -258,14 +258,14 @@ html, body {
     position: absolute;
     width: 115px;
     top: 593px;
-    left: 745px;
+    left: 525px;
     font-size: 14px;
 }
 
 .cardstories .cardstories_extras .cardstories_subscribe .cardstories_password_reset {
     position: absolute;
     top: 597px;
-    left: 620px;
+    left: 400px;
     color: red;
     font-size: 11px;
 }
@@ -274,6 +274,19 @@ html, body {
 .cardstories .cardstories_extras .cardstories_subscribe .cardstories_reg_password2_clear,
 .cardstories .cardstories_extras .cardstories_subscribe .cardstories_login_password_clear {
     display: none;
+}
+
+.cardstories .cardstories_extras .cardstories_subscribe .cardstories_facebook_title {
+    position: absolute;
+    top: 490px;
+    left: 750px;
+    font-size: 16px;
+}
+
+.cardstories .cardstories_extras .cardstories_subscribe .cardstories_facebook_button {
+    position: absolute;
+    top: 545px;
+    left: 732px;
 }
 
 .cardstories .cardstories_extras .cardstories_subscribe .errorlist {

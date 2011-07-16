@@ -18,30 +18,20 @@
 # along with this program in a file in the toplevel directory called
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
-from django.db import models
+from django.contrib import admin
 from django.contrib.auth.models import User
-from django.db.models.signals import post_save
+from django.contrib.auth.admin import UserAdmin
 
+from models import UserProfile
 
-class UserProfile(models.Model):
-    """
-    Extends the default User model with additional fields.
+class UserProfileInline(admin.StackedInline):
+    model = UserProfile
+    max_num = 1
+    can_delete = False
 
-    """
-    user = models.OneToOneField(User)
+class MyUserAdmin(UserAdmin):
+    inlines = [UserProfileInline]
 
-    # Facebook user id.
-    facebook_id = models.BigIntegerField(unique=True, null=True)
-
-
-def create_user_profile(sender, instance, created, **kwargs):
-    """
-    Creates Cardstories user profile after creation of default User.
-
-    """
-    if created:
-        UserProfile.objects.create(user=instance)
-
-
-# Registers creation of user profile on post_save signal.
-post_save.connect(create_user_profile, sender=User)
+# Unregister the old user admin, and register the new one.
+admin.site.unregister(User)
+admin.site.register(User, MyUserAdmin)

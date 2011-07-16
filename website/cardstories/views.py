@@ -18,7 +18,8 @@
 # along with this program in a file in the toplevel directory called
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
-from urllib import quote
+from urllib import quote, urlencode, urlopen
+from urlparse import parse_qs
 
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseNotFound
@@ -27,6 +28,7 @@ from django.contrib.sessions.models import Session
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as auth_login
+from django.contrib.sites.models import Site
 from django.template import RequestContext
 from django.conf import settings
 from django.core.urlresolvers import reverse
@@ -34,16 +36,30 @@ from django.core.urlresolvers import reverse
 from forms import RegistrationForm, LoginForm
 
 
+def get_facebook_redirect_uri(encode=True):
+    """
+    Returns the urllib.quoted facebook redirection URI.
+
+    """
+    domain = Site.objects.get_current().domain
+    uri = 'http://%s%s' % (domain, reverse(facebook))
+    if encode:
+        uri = quote(uri, '')
+
+    return uri
+
 def welcome(request):
     """
     Simply renders the welcome page, which includes both a registration and
     login forms.
 
     """
-    response = render_to_response('cardstories/welcome.html',
-                                  {'registration_form': RegistrationForm(),
-                                   'login_form': LoginForm()},
-                                  context_instance=RequestContext(request))
+    context = {'registration_form': RegistrationForm(),
+               'login_form': LoginForm(),
+               'fb_redirect_uri': get_facebook_redirect_uri(),
+               'fb_app_id': settings.FACEBOOK_APP_ID}
+    response = render_to_response('cardstories/welcome.html', context,
+                              context_instance=RequestContext(request))
 
     # Set welcome page URL for redirection.
     welcome_url = quote(reverse(welcome), '')
@@ -89,9 +105,11 @@ def register(request):
     else:
         form = RegistrationForm()
 
-    return render_to_response('cardstories/welcome.html',
-                              {'registration_form': form,
-                               'login_form': LoginForm()},
+    context = {'registration_form': form,
+               'login_form': LoginForm(),
+               'fb_redirect_uri': get_facebook_redirect_uri(),
+               'fb_app_id': settings.FACEBOOK_APP_ID}
+    return render_to_response('cardstories/welcome.html', context,
                               context_instance=RequestContext(request))
 
 def login(request):
@@ -123,9 +141,56 @@ def login(request):
     else:
         form = LoginForm()
 
-    return render_to_response('cardstories/welcome.html',
-                              {'registration_form': RegistrationForm(),
-                               'login_form': form},
+    context = {'registration_form': RegistrationForm(),
+               'login_form': form,
+               'fb_redirect_uri': get_facebook_redirect_uri(),
+               'fb_app_id': settings.FACEBOOK_APP_ID}
+    return render_to_response('cardstories/welcome.html', context,
+                              context_instance=RequestContext(request))
+
+def facebook(request):
+    """
+    Logs a user in using Facebook.  Registers the user using his/her email, so
+    appropriate permissions are necessary.
+
+    """
+    if request.method == 'GET':
+        if request.GET.get('error', '') == '' \
+           and request.GET.get('code', '') != '':
+            params = {
+                'client_id': settings.FACEBOOK_APP_ID,
+                'client_secret': settings.FACEBOOK_API_SECRET,
+                'redirect_uri': get_facebook_redirect_uri(encode=False),
+                'code': request.GET['code'],
+            }
+
+            url = 'https://graph.facebook.com/oauth/access_token?%s' % urlencode(params)
+            data = urlopen(url).read()
+            if 'error' not in data:
+                response = parse_qs(data)
+                token = response['access_token'][0]
+
+                user = authenticate(token=token)
+                if user and user.is_active:
+                    auth_login(request, user)
+                    response = HttpResponseRedirect(settings.CARDSTORIES_URL)
+
+                    # Note that the username should be "quoted", which is the
+                    # equivalent of Javascript's, encodeURIcompontent().
+                    response.set_cookie('CARDSTORIES_ID', quote(user.username))
+
+                    # Set welcome page URL for redirection, which will be needed for
+                    # logout, for example.
+                    welcome_url = quote(reverse(welcome), '')
+                    response.set_cookie('CARDSTORIES_WELCOME', welcome_url)
+
+                    return response
+
+    context = {'registration_form': RegistrationForm(),
+               'login_form': LoginForm(),
+               'fb_redirect_uri': get_facebook_redirect_uri(),
+               'fb_app_id': settings.FACEBOOK_APP_ID}
+    return render_to_response('cardstories/welcome.html', context,
                               context_instance=RequestContext(request))
 
 def getuserid(request, username):
@@ -146,7 +211,7 @@ def getuserid(request, username):
         if request.GET.get('create', '') == 'yes':
             # Validates the username according to the registration form.
             name = "Cardstories Player"
-            password = User.objects.make_random_password(length=8)
+            password = "mockpassword"
             data = {"name": name,
                     "username": username,
                     "password1": password,
@@ -155,10 +220,9 @@ def getuserid(request, username):
             if not form.is_valid():
                 return HttpResponseBadRequest()
 
-            # Create the user with a random password and generic name.  For
-            # now, the user will need to click on "forgot password" to obtain a
-            # new one.
-            user = User.objects.create_user(username, username, password)
+            # Create the user with an unusable password and generic name.  The
+            # user will need to click on "forgot password" to obtain a new one.
+            user = User.objects.create_user(username, username)
             user.first_name = name
             user.save()
         else:
