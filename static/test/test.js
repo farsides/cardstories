@@ -1395,13 +1395,15 @@ test("create_write_sentence_animate", function() {
     ok(card_foreground.attr('src').match(/42/), 'src attribute is set properly to show the chosen card');
     equal(card_imgs.width(), 220, 'card starts out at 220px wide');
 
-    // Setting a timeout of 800 ms, which should be enough for the animation to finish.
-    setTimeout(function() {
-        equal(card_imgs.width(), final_width, 'after animation card grows to its original width');
-        equal(write_box.css('display'), 'block', 'write box is visible after animation');
-        equal(card_shadow.css('display'), 'block', 'card shadow is visible after animation');
-        start();
-    }, 800);
+    var interval = setInterval(function() {
+        if (write_box.css('display') === 'block') {
+            equal(write_box.css('display'), 'block', 'write box is visible after animation');
+            equal(card_shadow.css('display'), 'block', 'card shadow is visible after animation');
+            equal(card_imgs.width(), final_width, 'after animation card grows to its original width');
+            clearInterval(interval);
+            start();
+        }
+    }, 750);
 });
 
 test("poll_discard", function() {
