@@ -172,6 +172,22 @@ test("reload_link", function() {
     $.query = _query;
   });
 
+test("notify_active", function() {
+    setup();
+    expect(1);
+    stop();
+
+    var skin = 'email';
+    var root = $('#qunit-fixture .cardstories');
+
+    root.bind('active.cardstories', function(e, state) {
+        equal(state, skin);
+        start();
+    });
+
+    $.cardstories.notify_active(root, skin);
+});
+
 test("subscribe", function() {
     setup();
     expect(5);
@@ -219,6 +235,20 @@ test("widget subscribe", function() {
     equal($('#qunit-fixture .cardstories_subscribe.cardstories_active').length, 0);
     $('#qunit-fixture .cardstories').cardstories(undefined, undefined);
     equal($('#qunit-fixture .cardstories_subscribe.cardstories_active').length, 1);
+});
+
+test("welcome_url", function() {
+    setup();
+    expect(1);
+
+    var location = $.cardstories.location;
+    var welcome_url = '/';
+    $.cookie('CARDSTORIES_WELCOME', welcome_url);
+    $.cardstories.location = {href: 'http://fake.href'};
+    $('#qunit-fixture .cardstories').cardstories(undefined, undefined);
+    equal($.cardstories.location.href, welcome_url);
+    $.cardstories.location = location;
+    $.cookie('CARDSTORIES_WELCOME', null);
 });
 
 test("test confirm_results_publication", function () {

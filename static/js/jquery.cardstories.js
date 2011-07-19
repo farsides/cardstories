@@ -873,7 +873,7 @@
 
         login: function(welcome_url, game_id, root) {
             if(welcome_url !== undefined && welcome_url !== null && welcome_url !== '') {
-                document.location.href = welcome_url;
+                $.cardstories.location.href = welcome_url;
             } else {
                 this.email(game_id, root);
             }
