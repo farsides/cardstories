@@ -20,6 +20,8 @@
 
     $.owa = {
 
+        location: location,
+
         // Where OWA is hosted
         url: '',
 
@@ -66,7 +68,7 @@
             var $this = this;
 
             // Override everything from the URI except the protocol and host.
-            base_url = window.location.protocol + '//' + window.location.host;
+            base_url = this.location.protocol + '//' + this.location.host;
             base_url += '/' + path;
 
             $(root).bind(stream, function (e, state) {
