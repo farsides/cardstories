@@ -162,7 +162,6 @@ class MailTestAuth(MailTest):
         d.addCallback(check)
         yield d
 
-
 def Run():
     loader = runner.TestLoader()
 #    loader.methodPrefix = "test_trynow"

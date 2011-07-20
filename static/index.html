@@ -52,7 +52,10 @@
   </div>
   <div class="cardstories">
     <div class="cardstories_game">
-      <div class="cardstories_logo"></div>
+      <div class="cardstories_chat">
+        <div class="cardstories_online">List of online players</div>
+        <div class="cardstories_room">Chat room</div>
+      </div>
       <a href="javascript://" class="cardstories_go_lobby"></a>
       <div class="cardstories_create">
         <div class="cardstories_pick_card">
@@ -79,24 +82,35 @@
           </div>
         </div>
         <div class="cardstories_write_sentence">
-          <div class="cardstories_progress_owner"></div>
-          <div class="cardstories_card_background">
-            <div class="cardstories_card"></div>
-          </div>
-          <div class="cardstories_write">
-            <div class="cardstories_write_title"></div>
-            <div class="cardstories_write_box">
-              <div class="cardstories_write_top_box"></div>
-              <div class="cardstories_write_middle_box">
+          <div class="cardstories_pane">
+            <div class="cardstories_sidebar">
+              <div class="cardstories_deck">Deck of cards</div>
+            </div>
+            <div class="cardstories_board">
+              <div class="cardstories_progress">
+                <div class="cardstories_steps"></div>
+                <div class="cardstories_help"></div>
+                <div class="cardstories_logout"></div>
+              </div>
+              <div class="cardstories_write">
                 <form action="javascript://">
-                  <textarea class="cardstories_sentence" cols="60" rows="3" name="sentence" placeholder="A sentence related to the card"></textarea>
+                  <div class="cardstories_write_box">
+                    <textarea class="cardstories_sentence" cols="60" rows="3" name="sentence" placeholder="Write a story about the card. It can be a sentence, a word, anything!"></textarea>
+                  </div>
                   <input class="cardstories_submit" type="submit" name="submit" value="" />
                 </form>
               </div>
-              <div class="cardstories_write_bottom_box"></div>
+              <div class="cardstories_owner_seat">
+                  <div class="cardstories_nickname">Nick</div>
+              </div>
+              <div class="cardstories_card_shadow"></div>
+              <div class="cardstories_card_template" data="{card:'css/images/card0{card}.png'}">
+                <img src="css/images/card_bg.png" class="cardstories_card_background" />
+                <img src="css/images/card020.png" class="cardstories_card_foreground" />
+              </div>
             </div>
-            <div class="cardstories_write_hint"></div>
           </div>
+
         </div>
       </div>
 
@@ -134,18 +148,15 @@
         </div>
         <div class="cardstories_invitation_anonymous">
           <div class="cardstories_top">
-            <div class="cardstories_progress_player">
-              <div>Fake a card</div>
-              <div>Wait for players to Fake</div>
-              <div>Guess the Card Story from the Author</div>
-              <div>Wait for Players to guess</div>
-              <div>Results</div>
-            </div>
+            <div class="cardstories_progress_player"></div>
             <div>Help</div>
             <div>Log out</div>
           </div>
-          <div class="cardstories_bottom">
-            <div class="cardstories_left">
+          <div class="cardstories_pane">
+            <div class="cardstories_sidebar">
+              <div class="cardstories_deck">Deck of cards</div>
+            </div>
+            <div class="cardstories_board">
               <div class="cardstories_sentence"></div>
               <div class="cardstories_owner_seat"></div>
               <div class="cardstories_player_seat cardstories_player_seat_1 cardstories_player_top_left"></div>
@@ -154,34 +165,44 @@
               <div class="cardstories_player_seat cardstories_player_seat_4 cardstories_player_bottom_right"></div>
               <div class="cardstories_self_seat cardstories_player_seat_5"></div>
             </div>
-            <div class="cardstories_right">
-              <div class="cardstories_deck">Deck of cards</div>
-              <div class="cardstories_online">List of online players</div>
-              <div class="cardstories_chat">Chat room</div>
-            </div>
           </div>
         </div>
         <div class="cardstories_pick">
-          <div class="cardstories_progress_player"></div>
-          <div class="cardstories_bubble_player_pick_a_card"></div>
-          <div class="cardstories_pick_mask_chose_a_card"></div>
-          <div class="cardstories_sentence"></div>
-          <div class="cardstories_card_confirm" data="{middle:2}">
-            <div class="cardstories_card_confirm_ok"></div>
-            <div class="cardstories_card_confirm_cancel"></div>
+          <div class="cardstories_top">
+            <div class="cardstories_progress_player"></div>
+            <div>Help</div>
+            <div>Log out</div>
           </div>
-          <div class="cardstories_cards_hand" data="{active:3,size:200,distance:200}">
-            <div class="cardstories_cards">
-              <a class="cardstories_card" href="javascript://"><img src="css/images/card_small_visiblepart.png" /></a>
-              <a class="cardstories_card" href="javascript://"><img src="css/images/card_small_visiblepart.png" /></a>
-              <a class="cardstories_card" href="javascript://"><img src="css/images/card_small_visiblepart.png" /></a>
-              <a class="cardstories_card" href="javascript://"><img src="css/images/card_small_visiblepart.png" /></a>
-              <a class="cardstories_card" href="javascript://"><img src="css/images/card_small_visiblepart.png" /></a>
-              <a class="cardstories_card" href="javascript://"><img src="css/images/card_small_visiblepart_full.png" /></a>
+          <div class="cardstories_pane">
+            <div class="cardstories_sidebar">
+              <div class="cardstories_deck">Deck of cards</div>
             </div>
-            <div class="cardstories_card_template" data="{card:'css/images/card0{card}.png',card_bg:'css/images/card_bg.png',card_bg_selected:'css/images/card_bg_selected.png',nocard:'css/images/card-back.png'}">
-              <img class="cardstories_card_foreground" src="" alt="" />
-              <img class="cardstories_card_background" src="" alt="" />
+            <div class="cardstories_board">
+              <div class="cardstories_sentence"></div>
+              <div class="cardstories_owner_seat"><div class="cardstories_player_name"></div></div>
+              <div class="cardstories_player_seat cardstories_player_seat_1 cardstories_player_top_left"><div class="cardstories_player_name"></div></div>
+              <div class="cardstories_player_seat cardstories_player_seat_2 cardstories_player_bottom_left"><div class="cardstories_player_name"></div></div>
+              <div class="cardstories_player_seat cardstories_player_seat_3 cardstories_player_top_right"><div class="cardstories_player_name"></div></div>
+              <div class="cardstories_player_seat cardstories_player_seat_4 cardstories_player_bottom_right"><div class="cardstories_player_name"></div></div>
+              <div class="cardstories_self_seat cardstories_player_seat_5"></div>
+              <div class="cardstories_card_confirm" data="{middle:2}">
+                <div class="cardstories_card_confirm_ok"></div>
+                <div class="cardstories_card_confirm_cancel"></div>
+              </div>
+              <div class="cardstories_cards_hand" data="{active:3,size:200,distance:200}">
+                <div class="cardstories_cards">
+                  <a class="cardstories_card" href="javascript://"><img src="css/images/card_small_visiblepart.png" /></a>
+                  <a class="cardstories_card" href="javascript://"><img src="css/images/card_small_visiblepart.png" /></a>
+                  <a class="cardstories_card" href="javascript://"><img src="css/images/card_small_visiblepart.png" /></a>
+                  <a class="cardstories_card" href="javascript://"><img src="css/images/card_small_visiblepart.png" /></a>
+                  <a class="cardstories_card" href="javascript://"><img src="css/images/card_small_visiblepart.png" /></a>
+                  <a class="cardstories_card" href="javascript://"><img src="css/images/card_small_visiblepart_full.png" /></a>
+                </div>
+                <div class="cardstories_card_template" data="{card:'css/images/card0{card}.png',card_bg:'css/images/card_bg.png',card_bg_selected:'css/images/card_bg_selected.png',nocard:'css/images/card-back.png'}">
+                  <img class="cardstories_card_foreground" src="" alt="" />
+                  <img class="cardstories_card_background" src="" alt="" />
+                </div>
+              </div>
             </div>
           </div>
         </div>

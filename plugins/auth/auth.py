@@ -98,6 +98,8 @@ class Plugin:
                 if result.has_key('players'):
                     for player in result['players']:
                         player[0] = yield self.resolve(player[0])
+                if result.has_key('owner_id'):
+                        result['owner_id'] = yield self.resolve(result['owner_id'])
                 if result.has_key('invited') and result['invited']:
                     invited = result['invited'];
                     for index in range(len(invited)):

@@ -335,7 +335,7 @@ test("send_game on error", function() {
 test("create", function() {
     setup();
     stop();
-    expect(11);
+    expect(14);
 
     var player_id = 15;
     var game_id = 7;
@@ -373,8 +373,12 @@ test("create", function() {
             equal($('.cardstories_write_sentence.cardstories_active', element).length, 1, 'sentence active');
             ok($('.cardstories_sentence', element).attr('placeholder') !== undefined, 'placeholder is set');
             equal($('.cardstories_sentence', element).attr('placeholder'), $('.cardstories_sentence', element).val());
+            equal($('.cardstories_write_sentence .cardstories_submit', element).css('display'), 'none', 'OK button is initially hidden');
             $('.cardstories_write_sentence .cardstories_submit', element).submit();
-            $('.cardstories_write_sentence .cardstories_sentence', element).val(sentence);
+            $('.cardstories_write_sentence .cardstories_sentence', element).val('o').change();
+            equal($('.cardstories_write_sentence .cardstories_submit', element).css('display'), 'none', 'OK button is hidden if text is too short');
+            $('.cardstories_write_sentence .cardstories_sentence', element).val(sentence).change();
+            equal($('.cardstories_write_sentence .cardstories_submit', element).css('display'), 'block', 'OK button is visible if valid text has been set');
             $('.cardstories_write_sentence .cardstories_submit', element).submit();
         });
 });
@@ -591,6 +595,7 @@ test("invitation_pick", function() {
     expect(11);
 
     var player_id = 15;
+    var owner = 150;
     var game_id = 101;
     var picked = 5;
     var cards = [1,2,3,4,picked,5];
@@ -604,6 +609,10 @@ test("invitation_pick", function() {
     var game = {
 	'id': game_id,
 	'self': [null, null, cards],
+        'players': [
+            [ owner, null, 'n', null, [] ],
+            [ player_id, null, 'n', null, [] ]
+        ],
 	'sentence': sentence
     };
 
@@ -630,7 +639,7 @@ test("invitation_pick", function() {
         invitation(player_id, game, $('#qunit-fixture .cardstories')).
         done(function(is_ready) {
             equal($('#qunit-fixture .cardstories_invitation .cardstories_pick.cardstories_active').length, 1);    
-            equal($('#qunit-fixture .cardstories_invitation .cardstories_pick .cardstories_sentence').text(), sentence);
+            equal($('#qunit-fixture .cardstories_invitation .cardstories_pick .cardstories_sentence').text(), sentence); // invitation_board function side effect 
             equal($('.cardstories_card:nth(0) .cardstories_card_foreground', element).attr('src'), 'PATH/card0' + cards[0] + '.png');
             equal($('.cardstories_card:nth(5) .cardstories_card_foreground', element).attr('src'), 'PATH/card0' + cards[5] + '.png');
             $('.cardstories_card:nth(4)', element).click();
@@ -646,6 +655,7 @@ test("invitation_pick_wait", function() {
     expect(8);
 
     var player_id = 15;
+    var owner = 150;
     var game_id = 101;
     var picked = 5;
     var cards = [1,2,3,4,picked,5];
@@ -653,6 +663,10 @@ test("invitation_pick_wait", function() {
 
     var game = {
 	'id': game_id,
+        'players': [
+            [ owner, null, 'n', null, [] ],
+            [ player_id, null, 'n', null, [] ]
+        ],
 	'self': [picked, null, cards],
 	'sentence': sentence
     };
@@ -676,12 +690,10 @@ test("invitation_pick_wait", function() {
 
 test("invitation_anonymous", function() {
     setup();
-    expect(3);
+    expect(2);
 
     var player_id = null;
     var game_id = 101;
-    var picked = null;
-    var cards = [1,2,3,4,picked,5];
     var sentence = 'SENTENCE';
 
     var _query = $.query;
@@ -695,9 +707,18 @@ test("invitation_anonymous", function() {
         }
     };
 
+    var owner = 'owner';
     var game = {
 	'id': game_id,
-	'self': [picked, null, cards],
+        'players': [
+            [ owner, null, 'n', null, [] ],
+            [ 'player1', null, 'n', null, [] ],
+            [ 'player2', null, 'n', null, [] ],
+            [ 'player3', null, 'n', null, [] ],
+            [ 'player4', null, 'n', null, [] ],
+            [ 'player5', null, 'n', null, [] ]
+        ],
+        'owner_id': owner,
 	'sentence': sentence
     };
 
@@ -708,10 +729,87 @@ test("invitation_anonymous", function() {
 
     var element = $('#qunit-fixture .cardstories_invitation .cardstories_invitation_anonymous');
     $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
-    equal($('.cardstories_sentence', element).text(), sentence);
 
     // Restore the original query
     $.query = _query;
+});
+
+test("invitation_board", function() {
+    setup();
+    expect(27);
+
+    var player_id = null;
+    var player1 = 'player1';
+    var game_id = 101;
+    var sentence = 'SENTENCE';
+
+    var owner = 'owner';
+    var game = {
+	'id': game_id,
+        'players': [
+            [ owner, null, 'n', null, [] ],
+            [ player1, null, 'n', null, [] ],
+            [ 'player2', null, 'n', null, [] ],
+            [ 'player3', null, 'n', null, [] ],
+            [ 'player4', null, 'n', null, [] ],
+            [ 'player5', null, 'n', null, [] ]
+        ],
+        'owner_id': owner,
+	'sentence': sentence
+    };
+
+    var element = $('#qunit-fixture .cardstories_invitation .cardstories_board');
+    $.cardstories.invitation_board(player_id, game, $('#qunit-fixture .cardstories'), element);
+    equal($('.cardstories_sentence', element).text(), sentence);
+    // anonymous view, all players present
+    equal($('.cardstories_owner_seat .cardstories_player_name', element).text(), owner);
+    for(var i = 1; i <= 5; i++) {
+        equal($('.cardstories_player_seat_' + i + ' .cardstories_player_name', element).text(), 'player' + i);
+    }
+    // player view, all players present
+    player_id = player1
+    $.cardstories.invitation_board(player_id, game, $('#qunit-fixture .cardstories'), element);
+    equal($('.cardstories_owner_seat .cardstories_player_name', element).text(), owner);
+    equal($('.cardstories_player_seat_1 .cardstories_player_name', element).text(), 'player2');
+    equal($('.cardstories_player_seat_2 .cardstories_player_name', element).text(), 'player3');
+    equal($('.cardstories_player_seat_3 .cardstories_player_name', element).text(), 'player4');
+    equal($('.cardstories_player_seat_4 .cardstories_player_name', element).text(), 'player5');
+    equal($('.cardstories_player_seat_5 .cardstories_player_name', element).text(), 'player1');
+    equal($('.cardstories_self_seat .cardstories_player_name', element).text(), 'player1');
+    ok(!$('.cardstories_player_seat_4', element).hasClass('cardstories_empty_seat'), 'seat4 is not empty');
+    // player view, one player missing
+    game.players.pop();
+    $.cardstories.invitation_board(player_id, game, $('#qunit-fixture .cardstories'), element);
+    equal($('.cardstories_owner_seat .cardstories_player_name', element).text(), owner);
+    ok(!$('.cardstories_owner_seat', element).hasClass('cardstories_empty_seat'), 'owner not empty seat');
+    equal($('.cardstories_player_seat_1 .cardstories_player_name', element).text(), 'player2');
+    ok(!$('.cardstories_player_seat_1', element).hasClass('cardstories_empty_seat'), 'seat1 not empty');
+    equal($('.cardstories_player_seat_2 .cardstories_player_name', element).text(), 'player3');
+    ok(!$('.cardstories_player_seat_2', element).hasClass('cardstories_empty_seat'), 'seat2 not empty');
+    equal($('.cardstories_player_seat_3 .cardstories_player_name', element).text(), 'player4');
+    ok(!$('.cardstories_player_seat_3', element).hasClass('cardstories_empty_seat'), 'seat3 not empty');
+    equal($('.cardstories_player_seat_4 .cardstories_player_name', element).text(), 'player5');
+    ok($('.cardstories_player_seat_4', element).hasClass('cardstories_empty_seat'), 'seat4 is empty');
+    equal($('.cardstories_self_seat .cardstories_player_name', element).text(), 'player1');
+    ok($('.cardstories_self_seat', element).hasClass('cardstories_self_seat'), 'self seat is not empty');
+});
+
+test("invitation_board_seat", function() {
+    setup();
+    expect(3);
+
+    var player_id = 100;
+    var card1 = 10;
+    var card2 = 20;
+    var card3 = 30;
+    var game = {};
+
+    var element = $('#qunit-fixture .cardstories_invitation .cardstories_board .cardstories_owner_seat');
+    player = [ 'player1', card1, 'y', card3, [card1, card2] ]
+    $.cardstories.invitation_board_seat(player_id, game, $('#qunit-fixture .cardstories'), element, player, 'owner');
+    ok(element.hasClass('cardstories_player_picked'), 'picked');
+    ok(element.hasClass('cardstories_player_voted'), 'voted');
+    ok(element.hasClass('cardstories_player_won'), 'won');
 });
 
 test("invitation_participate", function() {
@@ -1305,6 +1403,43 @@ test("lobby_games without games", function() {
     equal($('.cardstories_pager', element).css('display'), 'none', 'pager is hidden');
 });
 
+test("create_write_sentence_animate", function() {
+    setup();
+    stop();
+    expect(7);
+
+    var player_id = 101;
+    var card = 42;
+    var root = $('#qunit-fixture .cardstories');
+    var element = root.find('.cardstories_create .cardstories_write_sentence');
+
+    var write_box = $('.cardstories_write', element);
+    var card_shadow = $('.cardstories_card_shadow', element);
+    var card_template = $('.cardstories_card_template', element);
+    var card_imgs = $('img', card_template);
+    var card_foreground = card_imgs.filter('.cardstories_card_foreground');
+
+    var final_width = card_imgs.width();
+    var starting_width = 220;
+
+    $.cardstories.create_write_sentence_animate(player_id, card, element, root);
+
+    equal(write_box.css('display'), 'none', 'write box is not visible initially');
+    equal(card_shadow.css('display'), 'none', 'card shadow is not visible initially');
+    ok(card_foreground.attr('src').match(/42/), 'src attribute is set properly to show the chosen card');
+    equal(card_imgs.width(), 220, 'card starts out at 220px wide');
+
+    var interval = setInterval(function() {
+        if (write_box.css('display') === 'block') {
+            equal(write_box.css('display'), 'block', 'write box is visible after animation');
+            equal(card_shadow.css('display'), 'block', 'card shadow is visible after animation');
+            equal(card_imgs.width(), final_width, 'after animation card grows to its original width');
+            clearInterval(interval);
+            start();
+        }
+    }, 750);
+});
+
 test("poll_discard", function() {
     setup();
     expect(3);
@@ -1538,7 +1673,8 @@ test("display_or_select_cards move", function() {
       start();
     };
     $.cardstories.
-        display_or_select_cards([{'value':1},{'value':2},{'value':3},{'value':4},{'value':5},{'value':6}],
+        display_or_select_cards('move',
+                                [{'value':1},{'value':2},{'value':3},{'value':4},{'value':5},{'value':6}],
                                 function() {}, 
                                 element).
         done(onReady);
@@ -1585,7 +1721,8 @@ test("display_or_select_cards select", function() {
         start();
     };
     $.cardstories.
-        display_or_select_cards(cards,
+        display_or_select_cards('select',
+                                cards,
                                 select, 
                                 element).
         done(onReady);
@@ -1624,10 +1761,55 @@ test("display_or_select_cards select no bg", function() {
     equal(background.attr('src'), 'templatebackground');
     meta.card_bg = '';
     $.cardstories.
-        display_or_select_cards(cards,
+        display_or_select_cards('select no bg',
+                                cards,
                                 select, 
                                 element).
         done(onReady);
+  });
+
+test("display_or_select_cards twice", function() {
+    setup();
+    stop();
+    expect(2);
+
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_create .cardstories_cards_hand', root);
+    var label = 'LABEL';
+    var card1 = 11;
+    var create_cards = function(card) {
+        return [
+            {'value':card},
+            {'value':2,'label':label},
+            {'value':3},
+            {'value':4},
+            {'value':5},
+            {'value':6}];
+    };
+
+    var meta = $('.cardstories_card_template', element).metadata({type: "attr", name: "data"});
+    var check = function(is_ready) {
+        var foreground = $('.cardstories_card .cardstories_card_foreground', element).eq(0);
+        equal(foreground.attr('src'), meta.card.supplant({'card': card1}));
+    };
+    $.cardstories.
+        display_or_select_cards('twice',
+                                create_cards(card1),
+                                undefined, 
+                                element).
+        done(function(is_ready) {
+            check(is_ready);
+            card1 = 22;
+            $.cardstories.
+                display_or_select_cards('twice',
+                                        create_cards(card1),
+                                        undefined, 
+                                        element).
+                done(function(is_ready) {
+                    check(is_ready);
+                    start();
+                });
+        });
   });
 
 test("select_cards ok", function() {
@@ -1652,7 +1834,8 @@ test("select_cards ok", function() {
         start();
     };
     $.cardstories.
-        select_cards(cards,
+        select_cards('ok',
+                     cards,
                      ok_callback, 
                      element).
         done(onReady);
@@ -1679,7 +1862,8 @@ test("select_cards cancel", function() {
         ok(false, 'ok_callback unexpectedly called');
     };
     $.cardstories.
-        select_cards(cards,
+        select_cards('cancel',
+                     cards,
                      ok_callback, 
                      element).
         done(onReady);
@@ -1687,6 +1871,7 @@ test("select_cards cancel", function() {
 
 test("select_cards single", function() {
     setup();
+    expect(6);
     stop();
 
     var root = $('#qunit-fixture .cardstories');
@@ -1695,14 +1880,16 @@ test("select_cards single", function() {
         var links = $('a.cardstories_card', element);
         links.each(function(index) {
             $(this).click();
-            var condition = $(this).hasClass('cardstories_card_selected') == index === 0;
+            var tmp = index === 0;
+            var condition = $(this).hasClass('cardstories_card_selected') == tmp;
             var not = $(this).hasClass('cardstories_card_selected') ? '' : 'not';
             ok(condition, 'Card ' + index + ' ' + not +  ' picked.');
         });
         start();
     };
     $.cardstories.
-        display_or_select_cards([{'value':1},{'value':2},{'value':3},{'value':4},{'value':5},{'value':6}],
+        display_or_select_cards('single',
+                                [{'value':1},{'value':2},{'value':3},{'value':4},{'value':5},{'value':6}],
                                 function() {},
                                 element).
         done(onReady);

@@ -92,14 +92,31 @@
       game = {
 	'id': 100,
 	'self': [5, null, [11,12,13,14,15,16,17]],
+        'players': [
+            [ 'player1', null, 'n', 5, [] ],
+            [ 'player2', null, 'n', null, [] ],
+            [ 'player3', null, 'n', null, [] ],
+            [ 'player4', null, 'n', null, [] ],
+            [ 'player5', null, 'n', null, [] ],
+            [ 'player6', null, 'n', null, [] ]
+        ],
+        'owner_id': 'player1',
 	'sentence': 'long sentence is in the flux'
       };
-      $.cardstories.invitation_pick('PLAYER1', game, root);
+      $.cardstories.invitation_pick('player2', game, root);
     } else if(skin == 'invitation_anonymous') {
       game = {
-	'id': null,
-	'self': [null, null, [11,12,13,14,15,16,17]],
-	'sentence': 'long sentence is in the flux'
+	  'id': null,
+          'players': [
+              [ 'player1', null, 'n', 5, [] ],
+              [ 'player2', null, 'n', null, [] ],
+              [ 'player3', null, 'n', null, [] ],
+              [ 'player4', null, 'n', null, [] ],
+              [ 'player5', null, 'n', null, [] ],
+              [ 'player6', null, 'n', null, [] ]
+          ],
+          'owner_id': 'player1',
+	  'sentence': 'long sentence is in the flux'
       };
       $.cardstories.invitation_anonymous('', game, root);
     } else if(skin == 'invitation_pick_wait') {
@@ -119,10 +136,19 @@
       $.cardstories[skin]('PLAYER1', game, root);
     } else if(skin == 'vote_anonymous') {
       game = {
-	'id': null,
-	'board': [21,22,23,24,25,26],
-	'self': null,
-	'sentence': 'The sentence is the sentence'
+	  'id': null,
+	  'board': [21,22,23,24,25,26],
+	  'self': null,
+          'players': [
+              [ 'player1', null, 'n', 5, [] ],
+              [ 'player2', null, 'n', null, [] ],
+              [ 'player3', null, 'n', null, [] ],
+              [ 'player4', null, 'n', null, [] ],
+              [ 'player5', null, 'n', null, [] ],
+              [ 'player6', null, 'n', null, [] ]
+          ],
+          'owner_id': 'player1',
+	  'sentence': 'The sentence is the sentence'
       };
       $.cardstories.vote_anonymous(null, game, root);
     } else if(skin == 'vote_owner') {

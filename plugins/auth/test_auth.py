@@ -76,10 +76,12 @@ class AuthTest(unittest.TestCase):
         result_in = [{ 'players': [ [ request1.args['player_id'][0] ],
                                    [ request1.args['owner_id'][0] ]
                                    ],
+                       'owner_id': request1.args['owner_id'][0],
                        'invited': [ request1.args['player_id'][0] ] }]
         result_out = yield self.auth.postprocess(result_in)
         self.assertEquals(result_out, [{ 'players': [ [ player ],
                                                       [ owner ] ],
+                                         'owner_id': owner,
                                          'invited': [ player ]}])
 
     @defer.inlineCallbacks

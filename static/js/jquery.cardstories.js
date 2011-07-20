@@ -17,7 +17,9 @@
 (function($) {
 
     $.cardstories = {
-        url: "../resource/",
+        url: "../resource",
+
+        SEATS: 6,
 
         window: window,
 
@@ -89,7 +91,48 @@
             var cards = $this.create_deck().map(function(card) {
                 return { 'value':card };
             });
-            return $this.select_cards(cards, ok, element);
+            return $this.select_cards('create_pick_card', cards, ok, element);
+        },
+
+        create_write_sentence_animate: function(player_id, card, element, root) {
+            var write_box = $('.cardstories_write', element);
+            var card_shadow = $('.cardstories_card_shadow', element);
+            var card_template = $('.cardstories_card_template', element);
+            var card_imgs = $('img', card_template);
+            var card_foreground = card_imgs.filter('.cardstories_card_foreground');
+
+            // Set the card's src attribute first.
+            var src = card_template.metadata({type: 'attr', name: 'data'}).card.supplant({card: card});
+            card_foreground.attr('src', src);
+
+            var final_top = parseInt(card_template.css('top'), 10); // assuming the top value is given in pixels
+            var final_margin_left = parseInt(card_template.css('margin-left'), 10); // assuming value in pixels
+            var final_width = card_imgs.width();
+            var final_height = card_imgs.height();
+            var starting_width = 220;
+            var ratio = final_width / starting_width;
+            var starting_height = Math.ceil(final_height / ratio);
+            var animation_duration = 500;
+
+            // Set the card into its initial state. The css values will need to
+            // be adjusted properly once the layouts are finished.
+            write_box.hide();
+            card_shadow.hide();
+            card_template.css({
+                top: final_top + final_height - starting_height,
+                marginLeft: final_margin_left / ratio
+            });
+            card_imgs.css({
+                width: starting_width,
+                height: starting_height
+            });
+
+            // Animate towards the final state.
+            card_template.animate({top: final_top, marginLeft: final_margin_left}, animation_duration);
+            card_imgs.animate({width: final_width, height: final_height}, animation_duration, function() {
+                card_shadow.fadeIn('fast');
+                write_box.fadeIn('fast');
+            });
         },
 
         create_write_sentence: function(player_id, card, root) {
@@ -97,10 +140,27 @@
             var element = $('.cardstories_create .cardstories_write_sentence', root);
             this.set_active(root, element);
             this.notify_active(root, 'create_write_sentence');
+            this.create_write_sentence_animate(player_id, card, element, root);
             $('.cardstories_card', element).attr('class', 'cardstories_card cardstories_card' + card + ' {card:' + card + '}');
             var text = $('.cardstories_sentence', element);
+            var input = $('.cardstories_submit', element).hide();
+
+            var is_sentence_valid = function() {
+                var trimmedText = $.trim(text.val());
+                var placeholderValue = $.data(text[0], 'placeholderValue');
+                return trimmedText.length > 1 && trimmedText !== placeholderValue;
+            };
+
+            text.bind('keyup click change', function() {
+                if (is_sentence_valid()) {
+                    input.show();
+                } else {
+                    input.hide();
+                }
+            });
+
             var submit = function() {
-                if($.trim($(text).val()) == $.data(text[0], 'placeholderValue')) {
+                if (!is_sentence_valid()) {
                     return false;
                 }
                 var success = function(data, status) {
@@ -209,7 +269,7 @@
                   if('timeout' in answer) {
                     $this.poll(request, root);
                   } else {
-                    $this.reload(request.player_id, request.game_id, root);
+                    $this.game_or_lobby(request.player_id, request.game_id, root);
                   }
                 }
               }
@@ -410,7 +470,7 @@
             var voting = $('.cardstories_voting', element);
             voting.toggleClass('cardstories_ready', game.ready);
             if(game.ready) {
-                voting.click(function() {
+                voting.unbind('click').click(function() {
                     $this.send_game(player_id, game.id, element, 'action=voting&owner_id=' + player_id + '&game_id=' + game.id);
                 });
             }
@@ -418,7 +478,7 @@
             // Navigate to invite more friends, if desired
             //
             var invite_friends = $('.cardstories_invite_friends', element);
-            invite_friends.click(function() {
+            invite_friends.unbind('click').click(function() {
                 $.cookie('CARDSTORIES_INVITATIONS', null);
                 $this.advertise(player_id, game.id, root);
             });
@@ -441,7 +501,7 @@
                 cards.push(card);
             }
             var hand = $('.cardstories_cards_hand', element);
-            return this.display_or_select_cards(cards, undefined, hand);
+            return this.display_or_select_cards('invitation_owner', cards, undefined, hand);
         },
 
         invitation_pick: function(player_id, game, root) {
@@ -449,12 +509,12 @@
             var element = $('.cardstories_invitation .cardstories_pick', root);
             this.set_active(root, element);
             this.notify_active(root, 'invitation_pick');
-            $('.cardstories_sentence', element).text(game.sentence);
+            this.invitation_board(player_id, game, root, element);
             var ok = function(card) {
                 $this.send_game(player_id, game.id, element, 'action=pick&player_id=' + player_id + '&game_id=' + game.id + '&card=' + card);
             };
             var cards = game.self[2].map(function(card) { return {'value':card}; });
-            return $this.select_cards(cards, ok, element);
+            return $this.select_cards('invitation_pick', cards, ok, element);
         },
 
         invitation_pick_wait: function(player_id, game, root) {
@@ -470,7 +530,7 @@
             });
         },
 
-        select_cards: function(cards, ok, element) {
+        select_cards: function(id, cards, ok, element) {
             var confirm = $('.cardstories_card_confirm', element);
             var middle = confirm.metadata({type: "attr", name: "data"}).middle;
             var confirm_callback = function(card, index, nudge, cards_element) {
@@ -490,10 +550,16 @@
                 });
             };
             var hand = $('.cardstories_cards_hand', element);
-            return this.display_or_select_cards(cards, confirm_callback, hand);
+            return this.display_or_select_cards(id, cards, confirm_callback, hand);
         },
 
-        display_or_select_cards: function(cards, select_callback, element) {
+        display_or_select_cards: function(id, cards, select_callback, element) {
+            id += '_saved_element';
+            if(this[id] === undefined) {
+                this[id] = element.html();
+            } else {
+                element.html(this[id]);
+            }
             var meta = element.metadata({type: "attr", name: "data"});
             var options = {
                 'active': meta.active,
@@ -586,7 +652,38 @@
             var element = $('.cardstories_invitation .cardstories_invitation_anonymous', root);
             this.set_active(root, element);
             this.notify_active(root, 'invitation_anonymous');
+            this.invitation_board(player_id, game, root, element);
+        },
+
+        invitation_board: function(player_id, game, root, element) {
             $('.cardstories_sentence', element).text(game.sentence);
+            var players = game.players;
+            var seat = 1;
+            var i;
+            for(i = 0; i < players.length; i++) {
+                if(players[i][0] == game.owner_id) {
+                    this.invitation_board_seat(player_id, game, root, $('.cardstories_owner_seat', element), players[i], 'owner');
+                } else if(players[i][0] == player_id) {
+                    this.invitation_board_seat(player_id, game, root, $('.cardstories_self_seat', element), players[i], 'self');
+                } else {
+                    this.invitation_board_seat(player_id, game, root, $('.cardstories_player_seat_' + seat, element), players[i], 'player');
+                    seat += 1;
+                }
+            }
+            var empty = $.cardstories.SEATS - seat;
+            if(player_id !== undefined)
+                empty--;
+            for(i = 0; i < empty; i++, seat++) {
+                $('.cardstories_player_seat_' + seat, element).addClass('cardstories_empty_seat');
+            }
+        },
+
+        invitation_board_seat: function(player_id, game, root, element, player, who) {
+            element.removeClass('cardstories_empty_seat');
+            element.toggleClass('cardstories_player_voted', player[1] !== null);
+            element.toggleClass('cardstories_player_won', player[2] != 'n');
+            element.toggleClass('cardstories_player_picked', player[3] !== null);
+            $('.cardstories_player_name', element).text(player[0]);
         },
 
         vote: function(player_id, game, root) {
@@ -651,7 +748,7 @@
                 }
                 cards.push(card);
             }
-            return $this.select_cards(cards, ok, element);
+            return $this.select_cards('vote_voter', cards, ok, element);
         },
 
         vote_voter_wait: function(player_id, game, root) {
@@ -916,6 +1013,9 @@
     };
 
     $.fn.cardstories = function(player_id, game_id) {
+        if(player_id === undefined || player_id === '') {
+          player_id = $.cookie('CARDSTORIES_ID');
+        }
         return this.each(function() {
             $(this).toggleClass('cardstories_root', true);
             $(this).metadata().poll = 1;
