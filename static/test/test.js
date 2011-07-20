@@ -305,7 +305,7 @@ test("send_game on error", function() {
 test("create", function() {
     setup();
     stop();
-    expect(11);
+    expect(14);
 
     var player_id = 15;
     var game_id = 7;
@@ -343,8 +343,12 @@ test("create", function() {
             equal($('.cardstories_write_sentence.cardstories_active', element).length, 1, 'sentence active');
             ok($('.cardstories_sentence', element).attr('placeholder') !== undefined, 'placeholder is set');
             equal($('.cardstories_sentence', element).attr('placeholder'), $('.cardstories_sentence', element).val());
+            equal($('.cardstories_write_sentence .cardstories_submit', element).css('display'), 'none', 'OK button is initially hidden');
             $('.cardstories_write_sentence .cardstories_submit', element).submit();
-            $('.cardstories_write_sentence .cardstories_sentence', element).val(sentence);
+            $('.cardstories_write_sentence .cardstories_sentence', element).val('o').change();
+            equal($('.cardstories_write_sentence .cardstories_submit', element).css('display'), 'none', 'OK button is hidden if text is too short');
+            $('.cardstories_write_sentence .cardstories_sentence', element).val(sentence).change();
+            equal($('.cardstories_write_sentence .cardstories_submit', element).css('display'), 'block', 'OK button is visible if valid text has been set');
             $('.cardstories_write_sentence .cardstories_submit', element).submit();
         });
 });

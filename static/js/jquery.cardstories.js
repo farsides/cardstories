@@ -141,8 +141,24 @@
             this.create_write_sentence_animate(player_id, card, element, root);
             $('.cardstories_card', element).attr('class', 'cardstories_card cardstories_card' + card + ' {card:' + card + '}');
             var text = $('.cardstories_sentence', element);
+            var input = $('.cardstories_submit', element).hide();
+
+            var is_sentence_valid = function() {
+                var trimmedText = $.trim(text.val());
+                var placeholderValue = $.data(text[0], 'placeholderValue');
+                return trimmedText.length > 1 && trimmedText !== placeholderValue;
+            };
+
+            text.bind('keyup click change', function() {
+                if (is_sentence_valid()) {
+                    input.show();
+                } else {
+                    input.hide();
+                }
+            });
+
             var submit = function() {
-                if($.trim($(text).val()) == $.data(text[0], 'placeholderValue')) {
+                if (!is_sentence_valid()) {
                     return false;
                 }
                 var success = function(data, status) {
