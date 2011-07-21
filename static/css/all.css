@@ -955,26 +955,28 @@
     margin-bottom: 13px;
 }
 
-.cardstories .cardstories_invitation .cardstories_owner .cardstories_sentence_box .cardstories_sentence {
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_sentence_box .cardstories_sentence,
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_sentence_box .cardstories_sentence_bg_box {
     width: auto;
     height: auto;
-    padding: 10px;
-    font-family: "helvetica";
-    font-size: 10pt;
-    text-align: center;
     bottom: 12px;
     top: 0px;
     left: 0px;
     right: 0px;
     position: absolute;
+}
 
-    background: transparent url('images/sentence_bubble_bg.png') repeat left top;
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_sentence_box .cardstories_sentence {
+    padding: 10px;
     color: #4D4D4F;
+    font-size: 10pt;
+    text-align: center;
+    font-family: "helvetica";
+}
 
-	-moz-border-radius: 11px;
-	-webkit-border-radius: 11px;
-	border-radius: 11px;
-	behavior: url(border-radius.htc); /* IE compatibility */
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_sentence_box .cardstories_sentence_bg {
+    width: 100%;
+    height: 100%;
 }
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_sentence_box .cardstories_sentence_footer {
