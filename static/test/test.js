@@ -18,12 +18,15 @@ module("cardstories");
 
 var cardstories_default_reload = $.cardstories.reload;
 var cardstories_default_setTimeout = $.cardstories.setTimeout;
+var cardstories_default_setInterval = $.cardstories.setInterval;
 var cardstories_default_ajax = $.cardstories.ajax;
 var cardstories_original_error = $.cardstories.error;
 var cardstories_original_poll_ignore = $.cardstories.poll_ignore;
+var cardstories_original_create_write_sentence_animate_end = $.cardstories.create_write_sentence_animate_end;
 
 function setup() {
     $.cardstories.setTimeout = function(cb, delay) { return window.setTimeout(cb, delay); };
+    $.cardstories.setInterval = function(cb, delay) { return window.setInterval(cb, delay); };
     $.cardstories.ajax = function(o) { throw o; };
     $.cardstories.reload = $.cardstories.game_or_lobby;
     $.cardstories.confirm_participate = true;
@@ -54,6 +57,21 @@ test("setTimeout", function() {
 
   $.cardstories.setTimeout('a function', 42);
   $.cardstories.window.setTimeout = setTimeout;
+});
+
+test("setInterval", function() {
+  expect(2);
+
+  $.cardstories.setInterval = cardstories_default_setInterval;
+
+  var setInterval = $.cardstories.window.setInterval;
+  $.cardstories.window.setInterval = function(cb, delay) {
+    equal(cb, 'a function');
+    equal(delay, 42);
+  };
+
+  $.cardstories.setInterval('a function', 42);
+  $.cardstories.window.setInterval = setInterval;
 });
 
 test("ajax", function() {
@@ -358,6 +376,10 @@ test("create", function() {
         equal(game_id2, game_id);
         start();
     };
+
+    $.cardstories.create_write_sentence_animate_end = function(card, element, root, cb) {
+        cb();
+    }
 
     var element = $('#qunit-fixture .cardstories_create');
     equal($('.cardstories_pick_card.cardstories_active', element).length, 0, 'pick_card not active');
@@ -760,7 +782,7 @@ test("invitation_board", function() {
 
     var element = $('#qunit-fixture .cardstories_invitation .cardstories_board');
     $.cardstories.invitation_board(player_id, game, $('#qunit-fixture .cardstories'), element);
-    equal($('.cardstories_sentence', element).text(), sentence);
+    equal($('.cardstories_sentence', element).first().text(), sentence);
     // anonymous view, all players present
     equal($('.cardstories_owner_seat .cardstories_player_name', element).text(), owner);
     for(var i = 1; i <= 5; i++) {
@@ -1403,12 +1425,11 @@ test("lobby_games without games", function() {
     equal($('.cardstories_pager', element).css('display'), 'none', 'pager is hidden');
 });
 
-test("create_write_sentence_animate", function() {
+test("create_write_sentence_animate_start", function() {
     setup();
     stop();
     expect(7);
 
-    var player_id = 101;
     var card = 42;
     var root = $('#qunit-fixture .cardstories');
     var element = root.find('.cardstories_create .cardstories_write_sentence');
@@ -1422,22 +1443,66 @@ test("create_write_sentence_animate", function() {
     var final_width = card_imgs.width();
     var starting_width = 220;
 
-    $.cardstories.create_write_sentence_animate(player_id, card, element, root);
+    $.cardstories.create_write_sentence_animate_start(card, element, root, function() {
+        equal(write_box.css('display'), 'block', 'write box is visible after animation');
+        equal(card_shadow.css('display'), 'block', 'card shadow is visible after animation');
+        equal(card_imgs.width(), final_width, 'after animation card grows to its original width');
+        start();
+    });
 
     equal(write_box.css('display'), 'none', 'write box is not visible initially');
     equal(card_shadow.css('display'), 'none', 'card shadow is not visible initially');
     ok(card_foreground.attr('src').match(/42/), 'src attribute is set properly to show the chosen card');
-    equal(card_imgs.width(), 220, 'card starts out at 220px wide');
+    equal(card_imgs.width(), starting_width, 'card starts out at starting width');
+});
 
-    var interval = setInterval(function() {
-        if (write_box.css('display') === 'block') {
-            equal(write_box.css('display'), 'block', 'write box is visible after animation');
-            equal(card_shadow.css('display'), 'block', 'card shadow is visible after animation');
-            equal(card_imgs.width(), final_width, 'after animation card grows to its original width');
-            clearInterval(interval);
-            start();
-        }
-    }, 750);
+test("create_write_sentence_animate_end", function() {
+    setup();
+    stop();
+    expect(14);
+
+    $.cardstories.create_write_sentence_animate_end = cardstories_original_create_write_sentence_animate_end;
+
+    var card = 42;
+    var root = $('#qunit-fixture .cardstories');
+    var element = root.find('.cardstories_create .cardstories_write_sentence');
+
+    var card_template = $('.cardstories_card_template', element);
+    var card_img = $('img', card_template);
+    var card_shadow = $('.cardstories_card_shadow', element);
+    var final_element = $('.cardstories_invitation .cardstories_owner', root);
+    var final_card_template = $('.cardstories_card_template', final_element);
+    var write_box = $('.cardstories_write', element);
+    var sentence_box = $('.cardstories_sentence_box', element);
+    var final_sentence_box = $('.cardstories_sentence_box', final_element);
+
+    var final_card_top = parseInt(final_card_template.css('top'), 10);
+    var final_card_left = parseInt(final_card_template.css('left'), 10);
+    var final_card_width = parseInt(final_card_template.css('width'), 10);
+    var final_card_height = parseInt(final_card_template.css('height'), 10);
+    var final_sentence_top = parseInt(final_sentence_box.css('top'), 10);
+    var final_sentence_left = parseInt(final_sentence_box.css('left'), 10);
+    var final_sentence_width = parseInt(final_sentence_box.css('width'), 10);
+    var final_sentence_height = parseInt(final_sentence_box.css('height'), 10);
+
+    equal(write_box.css('display'), 'block', 'write box is visible initially');
+    equal(card_shadow.css('display'), 'block', 'card shadow is visible initially');
+    equal(sentence_box.css('display'), 'none', 'sentence box is invisible initially');
+
+    $.cardstories.create_write_sentence_animate_end(card, element, root, function() {
+        equal(write_box.css('display'), 'none', 'write box is invisible after animation');
+        equal(card_shadow.css('display'), 'none', 'card shadow is invisible after animation');
+        equal(sentence_box.css('display'), 'block', 'sentence box is visible after animation');
+        equal(card_img.width(), final_card_width);
+        equal(card_img.height(), final_card_height);
+        equal(parseInt(card_template.css('top'), 10), final_card_top);
+        equal(parseInt(card_template.css('left'), 10), final_card_left);
+        equal(sentence_box.width(), final_sentence_width);
+        equal(sentence_box.height(), final_sentence_height);
+        equal(parseInt(sentence_box.css('top'), 10), final_sentence_top);
+        equal(parseInt(sentence_box.css('left'), 10), final_sentence_left);
+        start();
+    });
 });
 
 test("poll_discard", function() {

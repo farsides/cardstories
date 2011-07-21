@@ -35,6 +35,8 @@
 
         setTimeout: function(cb, delay) { return $.cardstories.window.setTimeout(cb, delay); },
 
+        setInterval: function(cb, delay) { return $.cardstories.window.setInterval(cb, delay); },
+
         ajax: function(o) {
             return jQuery.ajax(o);
         },
@@ -94,7 +96,7 @@
             return $this.select_cards('create_pick_card', cards, ok, element);
         },
 
-        create_write_sentence_animate: function(player_id, card, element, root) {
+        create_write_sentence_animate_start: function(card, element, root, cb) {
             var write_box = $('.cardstories_write', element);
             var card_shadow = $('.cardstories_card_shadow', element);
             var card_template = $('.cardstories_card_template', element);
@@ -106,7 +108,7 @@
             card_foreground.attr('src', src);
 
             var final_top = parseInt(card_template.css('top'), 10); // assuming the top value is given in pixels
-            var final_margin_left = parseInt(card_template.css('margin-left'), 10); // assuming value in pixels
+            var final_left = parseInt(card_template.css('left'), 10); // assuming value in pixels
             var final_width = card_imgs.width();
             var final_height = card_imgs.height();
             var starting_width = 220;
@@ -120,7 +122,7 @@
             card_shadow.hide();
             card_template.css({
                 top: final_top + final_height - starting_height,
-                marginLeft: final_margin_left / ratio
+                left: final_left + ((final_width - starting_width) / 2)
             });
             card_imgs.css({
                 width: starting_width,
@@ -128,11 +130,86 @@
             });
 
             // Animate towards the final state.
-            card_template.animate({top: final_top, marginLeft: final_margin_left}, animation_duration);
-            card_imgs.animate({width: final_width, height: final_height}, animation_duration, function() {
-                card_shadow.fadeIn('fast');
-                write_box.fadeIn('fast');
+            var q = $({});
+            q.queue('chain', function(next) {
+                card_template.animate({
+                    top: final_top,
+                    left: final_left
+                }, animation_duration);
+                card_imgs.animate({
+                    width: final_width,
+                    height: final_height
+                }, animation_duration, function() {next();});
             });
+            q.queue('chain', function(next) {
+                card_shadow.fadeIn('fast');
+                write_box.fadeIn('fast', function() {next();});
+            });
+            // If set, run the callback at the end of the queue.
+            if (cb !== undefined) {
+                q.queue('chain', function(next) {cb();});
+            }
+            q.dequeue('chain');
+        },
+
+        create_write_sentence_animate_end: function(card, element, root, cb) {
+            var card_template = $('.cardstories_card_template', element);
+            var card_img = $('img', card_template);
+            var card_shadow = $('.cardstories_card_shadow', element);
+            var final_element = $('.cardstories_invitation .cardstories_owner', root);
+            var final_card_template = $('.cardstories_card_template', final_element);
+            var write_box = $('.cardstories_write', element);
+            var sentence_box = $('.cardstories_sentence_box', element);
+            var final_sentence_box = $('.cardstories_sentence_box', final_element);
+
+            // Calculate final position and dimensions.
+            var card_top = parseInt(final_card_template.css('top'), 10);
+            var card_left = parseInt(final_card_template.css('left'), 10);
+            var card_width = parseInt(final_card_template.css('width'), 10);
+            var card_height = parseInt(final_card_template.css('height'), 10);
+            var sentence_top = parseInt(final_sentence_box.css('top'), 10);
+            var sentence_left = parseInt(final_sentence_box.css('left'), 10);
+            var sentence_width = parseInt(final_sentence_box.css('width'), 10);
+            var sentence_height = parseInt(final_sentence_box.css('height'), 10);
+
+            // Animate!
+            var text = $('.cardstories_sentence', write_box).val();
+            $('.cardstories_sentence', sentence_box).text(text);
+            var q = $({});
+            q.queue('chain', function(next) {
+                write_box.fadeOut('fast');
+                sentence_box.fadeIn('fast', function() {next();});
+            });
+            q.queue('chain', function(next) {
+                write_box.hide();
+                sentence_box.animate({
+                    top: sentence_box.position().top + 20,
+                    left: sentence_box.position().left + 30,
+                    width: sentence_width,
+                    height: sentence_height
+                }, 200, function() {next();});
+            });
+            q.queue('chain', function(next) {
+                card_shadow.hide();
+                var duration = 500;
+                sentence_box.animate({
+                    top: sentence_top,
+                    left: sentence_left,
+                }, duration);
+                card_template.animate({
+                    top: card_top,
+                    left: card_left
+                }, duration);
+                card_img.animate({
+                    width: card_width,
+                    height: card_height
+                }, duration, function() {next();});
+            });
+            // If set, run the callback at the end of the queue.
+            if (cb !== undefined) {
+                q.queue('chain', function(next) {cb();});
+            }
+            q.dequeue('chain');
         },
 
         create_write_sentence: function(player_id, card, root) {
@@ -140,8 +217,8 @@
             var element = $('.cardstories_create .cardstories_write_sentence', root);
             this.set_active(root, element);
             this.notify_active(root, 'create_write_sentence');
-            this.create_write_sentence_animate(player_id, card, element, root);
             $('.cardstories_card', element).attr('class', 'cardstories_card cardstories_card' + card + ' {card:' + card + '}');
+            this.create_write_sentence_animate_start(card, element, root);
             var text = $('.cardstories_sentence', element);
             var input = $('.cardstories_submit', element).hide();
 
@@ -163,12 +240,21 @@
                 if (!is_sentence_valid()) {
                     return false;
                 }
+                var animation_done = false;
+                $this.create_write_sentence_animate_end(card, element, root, function() {
+                    animation_done = true;
+                });
                 var success = function(data, status) {
                     if('error' in data) {
                         $this.error(data.error);
                     } else {
                         var root = $(element).parents('.cardstories_root');
-                        $this.setTimeout(function() { $this.reload(player_id, data.game_id, root); }, 30);
+                        var interval = $this.setInterval(function() {
+                            if (animation_done) {
+                                $this.reload(player_id, data.game_id, root); 
+                                clearInterval(interval);
+                            }
+                        }, 250);
                     }
                 };
                 var sentence = encodeURIComponent($('.cardstories_sentence', element).val());

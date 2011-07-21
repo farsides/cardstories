@@ -504,9 +504,8 @@
 
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_card_template {
     position: absolute;
-    left: 50%;
-    margin-left: -123px;
     top: 200px;
+    left: 265px;
     width: 247px;
     height: 328px;
 }
@@ -518,9 +517,8 @@
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_card_shadow {
     background: transparent url('images/shadow.png') no-repeat left top;
     position: absolute;
-    left: 50%;
-    margin-left: -137px;
     top: 220px;
+    left: 251px;
     width: 14px;
     height: 300px;
 }
@@ -550,6 +548,15 @@
     width: 524px;
 } 
 
+.cardstories .cardstories_create .cardstories_write_sentence .cardstories_sentence_box {
+    display: none;
+    position: absolute;
+    top: 88px;
+    left: 200px;
+    height: 68px;
+    width: 380px;
+}
+
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_sentence {
     position: absolute;
     border: 0px;
@@ -559,6 +566,7 @@
     left: 15px;
     font-family: "helvetica";
     font-size: 11pt;
+    overflow: auto;
 }
 
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_submit {
@@ -919,8 +927,8 @@
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_card_template {
     position: absolute;
-    right: 170px;
-    bottom: 4px;
+    top: 475px;
+    left: 493px;
     width: 113px;
     height: 143px;
 }
@@ -947,16 +955,16 @@
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_sentence_box {
     position: absolute;
+    top: 420px;
+    left: 390px;
     width: 300px;
     height: 50px;
-    bottom: 140px;
-    right: 220px;
-    margin-right: -130px;
-    margin-bottom: 13px;
 }
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_sentence_box .cardstories_sentence,
-.cardstories .cardstories_invitation .cardstories_owner .cardstories_sentence_box .cardstories_sentence_bg_box {
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_sentence_box .cardstories_sentence_bg_box,
+.cardstories .cardstories_create .cardstories_write_sentence .cardstories_sentence_box .cardstories_sentence,
+.cardstories .cardstories_create .cardstories_write_sentence .cardstories_sentence_box .cardstories_sentence_bg_box {
     width: auto;
     height: auto;
     bottom: 12px;
@@ -966,7 +974,8 @@
     position: absolute;
 }
 
-.cardstories .cardstories_invitation .cardstories_owner .cardstories_sentence_box .cardstories_sentence {
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_sentence_box .cardstories_sentence,
+.cardstories .cardstories_create .cardstories_write_sentence .cardstories_sentence_box .cardstories_sentence {
     padding: 10px;
     color: #4D4D4F;
     font-size: 10pt;
@@ -974,12 +983,14 @@
     font-family: "helvetica";
 }
 
-.cardstories .cardstories_invitation .cardstories_owner .cardstories_sentence_box .cardstories_sentence_bg {
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_sentence_box .cardstories_sentence_bg,
+.cardstories .cardstories_create .cardstories_write_sentence .cardstories_sentence_box .cardstories_sentence_bg {
     width: 100%;
     height: 100%;
 }
 
-.cardstories .cardstories_invitation .cardstories_owner .cardstories_sentence_box .cardstories_sentence_footer {
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_sentence_box .cardstories_sentence_footer,
+.cardstories .cardstories_create .cardstories_write_sentence .cardstories_sentence_box .cardstories_sentence_footer {
     background: transparent url('images/sentence_bubble_footer.png') repeat left top;
     position: absolute;
     width: 18px;
