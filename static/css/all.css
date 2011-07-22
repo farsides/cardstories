@@ -69,28 +69,26 @@
 }
 
 .cardstories .cardstories_pane .cardstories_board { 
+    position: absolute;
     background: transparent url('images/bkg_board.png') no-repeat left 66px;
-    position: relative;
-    display: inline-block;
+    top: 0px;
+    left: 217px;
     height: 622px;
     width: 776px;
-    margin: 5px;
-    padding: 0px;
 }
 
 .cardstories .cardstories_pane .cardstories_sidebar { 
-    display: inline-block;
-    vertical-align: top;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 217px;
     height: 700px;
-    width: 180px;
 }
 
-.cardstories .cardstories_pane .cardstories_sidebar > div { 
-    height: 150px;
-    width: 150px;
-    border: 3px solid black;
-    margin: 5px;
-    padding: 7px;
+.cardstories .cardstories_pane .cardstories_sidebar .cardstories_deck { 
+    background: transparent url('images/card_deck.png') no-repeat left top;
+    width: 217px;
+    height: 226px;
 }
 
 .cardstories_player_seat {
@@ -483,21 +481,12 @@
 
 /* state create : pick a card */
 
-.cardstories .cardstories_create .cardstories_pick_card .cardstories_cards {
-    position: absolute;
-    left: 30px;
-    bottom: 25px;
-    display: none;
+.cardstories .cardstories_create .cardstories_pick_card .cardstories_steps {
+    background: transparent url('images/steps_author_1.png') no-repeat left top;
 }
 
-.cardstories .cardstories_create .cardstories_bubble_pick_a_card { 
-    position: absolute;
-    z-index: 1;
-    left: 0px;
-    top: 159px;
-    background: transparent url('images/pick_a_card.png') no-repeat left top;
-    height: 99px;
-    width: 388px;
+.cardstories .cardstories_create .cardstories_pick_card .cardstories_cards_hand {
+    display: none;
 }
 
 /* state create : write a sentence */
