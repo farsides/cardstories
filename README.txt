@@ -153,8 +153,14 @@ $ a2enmod wsgi
 $ a2enmod proxy_http
 $ sudo /etc/init.d/apache2 restart
 
-Finally, don't forget to create the default database for the website and run
-the cardstories web service as described in the previous section.
+Don't forget to create the default database for the website and run the
+cardstories web service as described in the previous section.
+
+Finally, to future deployments, you can create a separate local_settings.py
+containing just the stuff you want applied locally (such as Facebook app id,
+OWA url, etc) in:
+
+/usr/share/cardstories/website/local_settings.py
 
 
 ##############
