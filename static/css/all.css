@@ -11,28 +11,109 @@
 
 .cardstories .cardstories_chat {
     position: absolute;
-    height: 500px;
-    width: 180px;
+    height: 396px;
+    width: 216px;
+    top: 219px;
     left: 0px;
-    bottom: 0px;
-    border: 3px solid black;
+    background-color: #e0e4e8;
 }
 
 .cardstories .cardstories_progress { 
     background: transparent url('images/bkg_top.png') no-repeat left top;
-    height: 66px;
-    width: 778px;
+    width: 775px;
+    height: 59px;
     border: 0px;
     margin: 0px;
     padding: 0px;
 }
 
-.cardstories .cardstories_progress .cardstories_steps {
+.cardstories .cardstories_progress .cardstories_progress_mark {
+    background: transparent url('images/mark.png') no-repeat left top;
     position: absolute;
-    width: 655px;
+    width: 130px;
     height: 59px;
-    top: 7px;
+}
+
+.cardstories .cardstories_progress .cardstories_step1,
+.cardstories .cardstories_progress .cardstories_step2,
+.cardstories .cardstories_progress .cardstories_step3,
+.cardstories .cardstories_progress .cardstories_step4,
+.cardstories .cardstories_progress .cardstories_step5,
+.cardstories .cardstories_progress .cardstories_step6 {
+    position: absolute;
+    height: 27px;
+    top: 19px;
     left: 0px;
+    font-family: "helvetica";
+    font-size: 10px;
+    color: #CED0D2;
+}
+
+.cardstories .cardstories_progress .selected {
+    color: #FFFFFF;
+}
+
+.cardstories .cardstories_progress .old {
+    color: #616C72;
+}
+
+.cardstories .cardstories_progress .cardstories_step_no,
+.cardstories .cardstories_progress .cardstories_step_text {
+    display: inline-block;
+    vertical-align: top;
+}
+
+.cardstories .cardstories_progress .cardstories_step_no {
+    margin-top: -4px;
+    font-size: 27px;
+}
+
+.cardstories .cardstories_progress .cardstories_step1 {
+    left: 42px;
+}
+
+.cardstories .cardstories_progress .cardstories_step2 {
+    left: 134px;
+}
+
+.cardstories .cardstories_progress .cardstories_step3 {
+    left: 232px;
+}
+
+.cardstories .cardstories_progress .cardstories_step4 {
+    left: 324px;
+}
+
+.cardstories .cardstories_progress .cardstories_step5 {
+    left: 455px;
+}
+
+.cardstories .cardstories_progress .cardstories_step6 {
+    left: 568px;
+}
+
+.cardstories .cardstories_progress .cardstories_step1 .cardstories_step_text {
+    width: 40px;
+}
+
+.cardstories .cardstories_progress .cardstories_step2 .cardstories_step_text {
+    width: 45px;
+}
+
+.cardstories .cardstories_progress .cardstories_step3 .cardstories_step_text {
+    width: 40px;
+}
+
+.cardstories .cardstories_progress .cardstories_step4 .cardstories_step_text {
+    width: 78px;
+}
+
+.cardstories .cardstories_progress .cardstories_step5 .cardstories_step_text {
+    width: 65px;
+}
+
+.cardstories .cardstories_progress .cardstories_step6 .cardstories_step_text {
+    width: 60px;
 }
 
 .cardstories .cardstories_progress .cardstories_help {
@@ -40,16 +121,17 @@
     background: transparent url('images/b_help_on.png') no-repeat left top;
     width: 41px;
     height: 59px;
-    top: 11px;
-    right: 68px;
+    top: 0px;
+    left: 662px;
 }
+
 .cardstories .cardstories_progress .cardstories_logout {
     position: absolute;
     background: transparent url('images/b_logout_on.png') no-repeat left top;
     width: 46px;
     height: 59px;
-    top: 11px;
-    right: 20px;
+    top: 0px;
+    left: 715px;
 }
 
 .cardstories .cardstories_top > div { 
@@ -70,7 +152,7 @@
 
 .cardstories .cardstories_pane .cardstories_board { 
     position: absolute;
-    background: transparent url('images/bkg_board.png') no-repeat left 66px;
+    background: transparent url('images/bkg_board.png') no-repeat left 59px;
     top: 0px;
     left: 217px;
     height: 622px;
@@ -81,14 +163,14 @@
     position: absolute;
     top: 0px;
     left: 0px;
-    width: 217px;
+    width: 216px;
     height: 700px;
 }
 
 .cardstories .cardstories_pane .cardstories_sidebar .cardstories_deck { 
     background: transparent url('images/card_deck.png') no-repeat left top;
-    width: 217px;
-    height: 226px;
+    width: 216px;
+    height: 217px;
 }
 
 .cardstories_player_seat {
@@ -481,13 +563,9 @@
 
 /* state create : pick a card */
 
-.cardstories .cardstories_create .cardstories_pick_card .cardstories_steps {
-    background: transparent url('images/steps_author_1.png') no-repeat left top;
-}
-
 .cardstories .cardstories_create .cardstories_pick_card .cardstories_deck .cardstories_card { 
     position: absolute;
-    top: 22px;
+    top: 15px;
     left: 56px;
     width: 107px;
     height: 142px;
@@ -505,16 +583,16 @@
 
 /* state create : write a sentence */
 
+.cardstories .cardstories_create .cardstories_write_sentence .cardstories_progress_mark { 
+    left: 90px;
+}
+
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_card_template {
     position: absolute;
     top: 200px;
     left: 265px;
     width: 247px;
     height: 328px;
-}
-
-.cardstories .cardstories_create .cardstories_write_sentence .cardstories_steps {
-    background: transparent url('images/steps_author_2.png') no-repeat left top;
 }
 
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_card_shadow {
@@ -928,16 +1006,16 @@
 
 /* state invitation : owner */
 
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_progress_mark { 
+    left: 185px;
+}
+
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_card_template {
     position: absolute;
     top: 475px;
     left: 493px;
     width: 113px;
     height: 143px;
-}
-
-.cardstories .cardstories_invitation .cardstories_owner .cardstories_steps {
-    background: transparent url('images/steps_author_2.png') no-repeat left top;
 }
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_card_template img {
