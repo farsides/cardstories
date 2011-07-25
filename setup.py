@@ -49,7 +49,7 @@ data_files.append(['/usr/share/cardstories/website/apache', [ 'website/apache/dj
 
 # Plugins
 data_files.append(['/usr/share/cardstories/plugins/auth', [ 'plugins/auth/auth.py' ]])
-data_files.append(['/usr/share/cardstories/plugins/auth', [ 'plugins/djangoauth/djangoauth.py' ]])
+data_files.append(['/usr/share/cardstories/plugins/djangoauth', [ 'plugins/djangoauth/djangoauth.py' ]])
 data_files.append(['/usr/share/cardstories/plugins/solo', [ 'plugins/solo/solo.py' ]])
 data_files.append(['/usr/share/cardstories/plugins/mail', [ 'plugins/mail/mail.py' ]])
 

@@ -58,5 +58,5 @@ if settings.DEBUG:
 
     # Proxy requests to the cardstories service.
     urlpatterns += patterns('',
-        (r'^resource/', 'util.views.proxy', {'cardstories_host': settings.CARDSTORIES_HOST}),
+        (r'^resource/', 'website.util.views.proxy', {'cardstories_host': settings.CARDSTORIES_HOST}),
     )

@@ -146,3 +146,8 @@ COVERAGE_MODULES = ['website.cardstories.views',
                     'website.cardstories.backends',
                     'website.cardstories.models']
 
+# Use local settings, if any.
+try:
+    from local_settings import *
+except ImportError, e:
+    pass

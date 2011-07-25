@@ -31,7 +31,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User)
 
     # Facebook user id.
-    facebook_id = models.BigIntegerField(unique=True, null=True)
+    facebook_id = models.BigIntegerField(null=True, blank=True)
 
 
 def create_user_profile(sender, instance, created, **kwargs):
