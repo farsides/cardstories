@@ -388,7 +388,7 @@ test("create", function() {
         done(function(is_ready) {
             equal($('.cardstories_pick_card.cardstories_active', element).length, 1, 'pick_card active');
             equal($('.cardstories_write_sentence.cardstories_active', element).length, 0, 'sentence not active');
-            var first_card = $('.cardstories_card:nth(0)', element);
+            var first_card = $('.cardstories_cards_hand .cardstories_card:nth(0)', element);
             card = first_card.metadata({type: "attr", name: "data"}).card;
             first_card.click();
             $('.cardstories_card_confirm_ok', element).click();
@@ -400,7 +400,7 @@ test("create", function() {
             $('.cardstories_write_sentence .cardstories_sentence', element).val('o').change();
             equal($('.cardstories_write_sentence .cardstories_submit', element).css('display'), 'none', 'OK button is hidden if text is too short');
             $('.cardstories_write_sentence .cardstories_sentence', element).val(sentence).change();
-            equal($('.cardstories_write_sentence .cardstories_submit', element).css('display'), 'block', 'OK button is visible if valid text has been set');
+            ok($('.cardstories_write_sentence .cardstories_submit', element).css('display') !== 'none', 'OK button is visible if valid text has been set');
             $('.cardstories_write_sentence .cardstories_submit', element).submit();
         });
 });
@@ -425,7 +425,7 @@ test("create on error", function() {
     $.cardstories.
         create(player_id, $('#qunit-fixture .cardstories')).
         done(function(is_ready) {
-            var first_card = $('.cardstories_card:nth(0)', element);
+            var first_card = $('.cardstories_cards_hand .cardstories_card:nth(0)', element);
             first_card.click();
             $('.cardstories_card_confirm_ok', element).click();
             $('.cardstories_write_sentence .cardstories_sentence', element).val('SENTENCE');
@@ -1425,6 +1425,33 @@ test("lobby_games without games", function() {
     equal($('.cardstories_pager', element).css('display'), 'none', 'pager is hidden');
 });
 
+test("create_pick_card_animate", function() {
+    setup();
+    stop();
+    expect(24); // there are 6 cards, we set 4 assertions on each
+
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_create .cardstories_pick_card', root);
+    var cards = $('.cardstories_deck .cardstories_card', element);
+
+    cards.each(function() {
+        var card = $(this);
+        var meta = card.metadata({type: 'attr', name: 'data'});
+        ok(parseInt(card.css('left'), 10) < meta.final_left, 'card starts more left than its final position');
+        ok(parseInt(card.css('top'), 10) < meta.final_top, 'card starts higher than its final position');
+    });
+
+    $.cardstories.create_pick_card_animate(element, root, function() {
+        cards.each(function() {
+            var card = $(this);
+            var meta = card.metadata({type: 'attr', name: 'data'});
+            equal(parseInt(card.css('left'), 10), meta.final_left, 'card is animated to the left position defined by its metadata');
+            equal(parseInt(card.css('top'), 10), meta.final_top, 'card is animated to the top position defined by its metadata');
+        });
+        start();
+    });
+});
+
 test("create_write_sentence_animate_start", function() {
     setup();
     stop();
@@ -1890,7 +1917,7 @@ test("select_cards ok", function() {
     var cards = [{'value':1},{'value':2},{'value':3},{'value':4},{'value':5},{'value':6}];
     var selected = 5;
     var onReady = function(is_ready) {
-        $('.cardstories_card', element).eq(selected).click();
+        $('.cardstories_cards_hand .cardstories_card', element).eq(selected).click();
         $('.cardstories_card_confirm_ok', element).click();
     };
     var ok_callback = function(card) {
@@ -1918,7 +1945,7 @@ test("select_cards cancel", function() {
     var cards = [{'value':1},{'value':2},{'value':3},{'value':4},{'value':5},{'value':6}];
     var selected = 4;
     var onReady = function(is_ready) {
-        $('.cardstories_card', element).eq(selected).click();
+        $('.cardstories_cards_hand .cardstories_card', element).eq(selected).click();
         $('.cardstories_card_confirm_cancel', element).click();
         ok(true);
         start();

@@ -93,7 +93,55 @@
             var cards = $this.create_deck().map(function(card) {
                 return { 'value':card };
             });
-            return $this.select_cards('create_pick_card', cards, ok, element);
+
+            var deferred = $.Deferred();
+            $this.create_pick_card_animate(element, root, function() {
+                $this.select_cards('create_pick_card', cards, ok, element).done(function() {
+                    deferred.resolve();
+                });;
+            });
+            return deferred;
+        },
+
+        create_pick_card_animate: function(element, root, cb) {
+            var cards = $('.cardstories_deck .cardstories_card', element);
+            var card_fly_velocity = 1.2;   // in pixels per milisecond
+            var card_delay = 100;   // delay in ms after each subsequent card starts "flying" from the deck
+            var vertical_offset = 8;
+            var vertical_rise_duration = 600;
+            var q = $({});
+
+            cards.each(function(i) {
+                var card = $(this);
+                var meta = card.metadata({type: 'attr', name: 'data'});
+                var starting_top = parseInt(card.css('top'), 10);
+                var starting_left = parseInt(card.css('left'), 10);
+                var final_top = meta.final_top;
+                var final_left = meta.final_left;
+                var keyframe_top = final_top + vertical_offset;
+
+                var fly_length = Math.sqrt(Math.pow(keyframe_top - starting_top, 2) + Math.pow(final_left - starting_left, 2));
+                var fly_duration = fly_length / card_fly_velocity;
+
+                // The first card should start flying immediately,
+                // but each subsequent card should be delayed.
+                if (i !== 0) {
+                    q.delay(card_delay, 'chain');
+                }
+
+                // The callback passed to this function should be fired
+                // after the last card raises to its final position.
+                var callback = i === 5 ? cb : null;
+
+                q.queue('chain', function(next) {
+                    card.animate({top: keyframe_top, left: final_left}, fly_duration, function() {
+                        card.animate({top: final_top}, vertical_rise_duration, callback);
+                    });
+                    next();
+                });
+            });
+
+            q.dequeue('chain');
         },
 
         create_write_sentence_animate_start: function(card, element, root, cb) {
@@ -621,17 +669,17 @@
             var middle = confirm.metadata({type: "attr", name: "data"}).middle;
             var confirm_callback = function(card, index, nudge, cards_element) {
                 confirm.show();
-                var parent = confirm.parent('.cardstories_active');
-                parent.toggleClass('cardstories_card_confirm_right', index >= middle);
+                var wrapper = confirm.closest('.cardstories_active');
+                wrapper.toggleClass('cardstories_card_confirm_right', index >= middle);
                 $('.cardstories_card_confirm_ok', confirm).unbind('click').click(function() {
                     confirm.hide();
                     ok(card);
-                    parent.removeClass('cardstories_card_confirm_right');
+                    wrapper.removeClass('cardstories_card_confirm_right');
                     nudge();
                 });
                 $('.cardstories_card_confirm_cancel', confirm).unbind('click').click(function() {
                     confirm.hide();
-                    parent.removeClass('cardstories_card_confirm_right');
+                    wrapper.removeClass('cardstories_card_confirm_right');
                     nudge();
                 });
             };
