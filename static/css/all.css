@@ -203,7 +203,7 @@
 .cardstories_owner_seat {
     background: transparent url('images/gamemaster.png') no-repeat left top;
     position: absolute;
-    bottom: 3px;
+    bottom: 10px;
     left: 50%;
     margin-left: -73px;
     height: 69px;
@@ -581,7 +581,7 @@
 
 .cardstories .cardstories_create .cardstories_pick_card .cardstories_board .cardstories_cards {
     position: absolute;
-    top: 400px;
+    top: 393px;
     left: 50px;
 }
 

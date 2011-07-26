@@ -1433,12 +1433,13 @@ test("create_pick_card_animate", function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_create .cardstories_pick_card', root);
     var cards = $('.cardstories_deck .cardstories_card', element);
+    var final_top = parseInt($('.cardstories_cards', element).css('top'), 10);
 
     cards.each(function() {
         var card = $(this);
         var meta = card.metadata({type: 'attr', name: 'data'});
         ok(parseInt(card.css('left'), 10) < meta.final_left, 'card starts more left than its final position');
-        ok(parseInt(card.css('top'), 10) < meta.final_top, 'card starts higher than its final position');
+        ok(parseInt(card.css('top'), 10) < final_top, 'card starts higher than its final position');
     });
 
     $.cardstories.create_pick_card_animate(element, root, function() {
@@ -1446,7 +1447,7 @@ test("create_pick_card_animate", function() {
             var card = $(this);
             var meta = card.metadata({type: 'attr', name: 'data'});
             equal(parseInt(card.css('left'), 10), meta.final_left, 'card is animated to the left position defined by its metadata');
-            equal(parseInt(card.css('top'), 10), meta.final_top, 'card is animated to the top position defined by its metadata');
+            equal(parseInt(card.css('top'), 10), final_top, 'card is animated to the final top position');
         });
         start();
     });

@@ -110,13 +110,13 @@
             var vertical_offset = 8;
             var vertical_rise_duration = 600;
             var q = $({});
+            var final_top = parseInt($('.cardstories_cards', element).css('top'), 10);
 
             cards.each(function(i) {
                 var card = $(this);
                 var meta = card.metadata({type: 'attr', name: 'data'});
                 var starting_top = parseInt(card.css('top'), 10);
                 var starting_left = parseInt(card.css('left'), 10);
-                var final_top = meta.final_top;
                 var final_left = meta.final_left;
                 var keyframe_top = final_top + vertical_offset;
 
