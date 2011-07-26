@@ -400,7 +400,7 @@ test("create", function() {
             $('.cardstories_write_sentence .cardstories_sentence', element).val('o').change();
             equal($('.cardstories_write_sentence .cardstories_submit', element).css('display'), 'none', 'OK button is hidden if text is too short');
             $('.cardstories_write_sentence .cardstories_sentence', element).val(sentence).change();
-            equal($('.cardstories_write_sentence .cardstories_submit', element).css('display'), 'block', 'OK button is visible if valid text has been set');
+            ok($('.cardstories_write_sentence .cardstories_submit', element).css('display') !== 'none', 'OK button is visible if valid text has been set');
             $('.cardstories_write_sentence .cardstories_submit', element).submit();
         });
 });
