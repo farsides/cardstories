@@ -90,7 +90,8 @@
             var ok = function(card) {
                 $this.create_write_sentence(player_id, card, root);
             };
-            var cards = $this.create_deck().map(function(card) {
+            var deck = $this.create_deck();
+            var cards = $.map(deck, function(card, index) {
                 return { 'value':card };
             });
 
@@ -359,11 +360,10 @@
                     $('.cardstories_submit').addClass('cardstories_submit_ready');
                     $('.cardstories_submit', element).unbind('click').click(function() {
                         var text = $('.cardstories_text', element).val();
-                        var invites = text.split(/\s+/).
-                                      filter(function(s) { return s !== ''; }).
-                                      map(function(s) {
-                                          return 'player_id=' + encodeURIComponent(s);
-                                        });
+                        var invites = $.map($.grep(text.split(/\s+/), function(s,i) { return s !== ''; }),
+                                            function(s,i) {
+                                                return 'player_id=' + encodeURIComponent(s);
+                                            });
                         $.cookie('CARDSTORIES_INVITATIONS', text);
                         $this.send_game(owner_id, game_id, element, 'action=invite&owner_id=' + owner_id + '&game_id=' + game_id + '&' + invites.join('&'));
                       });
@@ -647,7 +647,7 @@
             var ok = function(card) {
                 $this.send_game(player_id, game.id, element, 'action=pick&player_id=' + player_id + '&game_id=' + game.id + '&card=' + card);
             };
-            var cards = game.self[2].map(function(card) { return {'value':card}; });
+            var cards = $.map(game.self[2], function(card,index) { return {'value':card}; });
             return $this.select_cards('invitation_pick', cards, ok, element);
         },
 
