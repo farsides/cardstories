@@ -592,8 +592,8 @@
 .cardstories .cardstories_create .cardstories_game_about_creativity { 
     position: absolute;
     z-index: 1;
-    left: 400px;
-    top: 200px;
+    left: 230px;
+    top: 90px;
     background: transparent url('images/gamemaster_pick_a_card_modal_box.png') no-repeat left top;
     height: 129px;
     width: 301px;
