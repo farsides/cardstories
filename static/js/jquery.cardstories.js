@@ -99,7 +99,7 @@
             $this.create_pick_card_animate(element, root, function() {
                 $this.select_cards('create_pick_card', cards, ok, element).done(function() {
                     deferred.resolve();
-                });;
+                });
             });
             return deferred;
         },
@@ -243,7 +243,7 @@
                 var duration = 500;
                 sentence_box.animate({
                     top: sentence_top,
-                    left: sentence_left,
+                    left: sentence_left
                 }, duration);
                 card_template.animate({
                     top: card_top,
@@ -805,8 +805,9 @@
                 }
             }
             var empty = $.cardstories.SEATS - seat;
-            if(player_id !== undefined)
+            if(player_id !== undefined) {
                 empty--;
+            }
             for(i = 0; i < empty; i++, seat++) {
                 $('.cardstories_player_seat_' + seat, element).addClass('cardstories_empty_seat');
             }
