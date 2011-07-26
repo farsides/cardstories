@@ -493,6 +493,30 @@
     height: 142px;
 }
 
+.cardstories_card_1 {
+    z-index: 1;
+}
+
+.cardstories_card_2 {
+    z-index: 2;
+}
+
+.cardstories_card_3 {
+    z-index: 3;
+}
+
+.cardstories_card_4 {
+    z-index: 4;
+}
+
+.cardstories_card_5 {
+    z-index: 5;
+}
+
+.cardstories_card_6 {
+    z-index: 6;
+}
+
 .cardstories .cardstories_create .cardstories_pick_card .cardstories_board .cardstories_cards_hand {
     /*display: none;*/
 }
