@@ -87,6 +87,7 @@
             var element = $('.cardstories_create .cardstories_pick_card', root);
             this.set_active(root, element);
             this.notify_active(root, 'create_pick_card');
+            this.display_progress_bar(1, element, root);
             var ok = function(card) {
                 $this.create_write_sentence(player_id, card, root);
             };
@@ -266,6 +267,7 @@
             var element = $('.cardstories_create .cardstories_write_sentence', root);
             this.set_active(root, element);
             this.notify_active(root, 'create_write_sentence');
+            this.display_progress_bar(2, element, root);
             $('.cardstories_card', element).attr('class', 'cardstories_card cardstories_card' + card + ' {card:' + card + '}');
             this.create_write_sentence_animate_start(card, element, root);
             var text = $('.cardstories_sentence', element);
@@ -597,6 +599,7 @@
             var element = $('.cardstories_invitation .cardstories_owner', root);
             this.set_active(root, element);
             this.notify_active(root, 'invitation_owner');
+            this.display_progress_bar(3, element, root);
             $('.cardstories_sentence', element).text(game.sentence);
             //
             // Proceed to vote, if possible
@@ -1085,6 +1088,24 @@
 
         notify_active: function(root, skin) {
             $(root).trigger('active.cardstories', [skin]);
+        },
+
+        display_progress_bar: function(step, element, root) {
+            var snippets = $('.cardstories_snippets', root);
+            var src_bar = $('.cardstories_progress', snippets);
+            var dst_bar = $('.cardstories_progress', element);
+
+            // Clone the source bar.
+            var tmp_bar = src_bar.clone();
+
+            // Set the proper classes.
+            tmp_bar.children('.cardstories_step' + step).addClass('selected');
+            for (var i=1; i<step; i++) {
+                tmp_bar.children('.cardstories_step' + i).addClass('old');
+            }
+            
+            // Finally, place the children into the destination.
+            tmp_bar.children().appendTo(dst_bar);
         },
 
         email: function(game_id, root) {

@@ -206,6 +206,25 @@ test("notify_active", function() {
     $.cardstories.notify_active(root, skin);
 });
 
+test("display_progress_bar", function() {
+    setup();
+    expect(6);
+
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_create .cardstories_write_sentence', root);
+    var pbar = $('.cardstories_progress', element);
+    var step = 2;
+
+    $.cardstories.display_progress_bar(step, element, root);
+
+    ok($('.cardstories_step1', pbar).hasClass('old'), 'step 1 has old class');
+    ok($('.cardstories_step2', pbar).hasClass('selected'), 'step 2 is selected');
+    equal($('.cardstories_step3', pbar).attr('class'), 'cardstories_step3', 'step 3 is bare');
+    equal($('.cardstories_step4', pbar).attr('class'), 'cardstories_step4', 'step 4 is bare');
+    equal($('.cardstories_step5', pbar).attr('class'), 'cardstories_step5', 'step 5 is bare');
+    equal($('.cardstories_step6', pbar).attr('class'), 'cardstories_step6', 'step 6 is bare');
+});
+
 test("subscribe", function() {
     setup();
     expect(5);
