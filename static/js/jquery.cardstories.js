@@ -621,17 +621,17 @@
             var middle = confirm.metadata({type: "attr", name: "data"}).middle;
             var confirm_callback = function(card, index, nudge, cards_element) {
                 confirm.show();
-                var parent = confirm.parent('.cardstories_active');
-                parent.toggleClass('cardstories_card_confirm_right', index >= middle);
+                var wrapper = confirm.closest('.cardstories_active');
+                wrapper.toggleClass('cardstories_card_confirm_right', index >= middle);
                 $('.cardstories_card_confirm_ok', confirm).unbind('click').click(function() {
                     confirm.hide();
                     ok(card);
-                    parent.removeClass('cardstories_card_confirm_right');
+                    wrapper.removeClass('cardstories_card_confirm_right');
                     nudge();
                 });
                 $('.cardstories_card_confirm_cancel', confirm).unbind('click').click(function() {
                     confirm.hide();
-                    parent.removeClass('cardstories_card_confirm_right');
+                    wrapper.removeClass('cardstories_card_confirm_right');
                     nudge();
                 });
             };

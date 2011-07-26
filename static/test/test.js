@@ -388,7 +388,7 @@ test("create", function() {
         done(function(is_ready) {
             equal($('.cardstories_pick_card.cardstories_active', element).length, 1, 'pick_card active');
             equal($('.cardstories_write_sentence.cardstories_active', element).length, 0, 'sentence not active');
-            var first_card = $('.cardstories_card:nth(0)', element);
+            var first_card = $('.cardstories_cards_hand .cardstories_card:nth(0)', element);
             card = first_card.metadata({type: "attr", name: "data"}).card;
             first_card.click();
             $('.cardstories_card_confirm_ok', element).click();
@@ -425,7 +425,7 @@ test("create on error", function() {
     $.cardstories.
         create(player_id, $('#qunit-fixture .cardstories')).
         done(function(is_ready) {
-            var first_card = $('.cardstories_card:nth(0)', element);
+            var first_card = $('.cardstories_cards_hand .cardstories_card:nth(0)', element);
             first_card.click();
             $('.cardstories_card_confirm_ok', element).click();
             $('.cardstories_write_sentence .cardstories_sentence', element).val('SENTENCE');
@@ -1890,7 +1890,7 @@ test("select_cards ok", function() {
     var cards = [{'value':1},{'value':2},{'value':3},{'value':4},{'value':5},{'value':6}];
     var selected = 5;
     var onReady = function(is_ready) {
-        $('.cardstories_card', element).eq(selected).click();
+        $('.cardstories_cards_hand .cardstories_card', element).eq(selected).click();
         $('.cardstories_card_confirm_ok', element).click();
     };
     var ok_callback = function(card) {
@@ -1918,7 +1918,7 @@ test("select_cards cancel", function() {
     var cards = [{'value':1},{'value':2},{'value':3},{'value':4},{'value':5},{'value':6}];
     var selected = 4;
     var onReady = function(is_ready) {
-        $('.cardstories_card', element).eq(selected).click();
+        $('.cardstories_cards_hand .cardstories_card', element).eq(selected).click();
         $('.cardstories_card_confirm_cancel', element).click();
         ok(true);
         start();
