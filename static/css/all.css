@@ -159,6 +159,10 @@
     cursor: pointer;
 }
 
+.cardstories_card img {
+    border: none;
+}
+
 /* subscribe (home) */
 
 .cardstories .cardstories_extras .cardstories_subscribe .cardstories_logo_welcome {
