@@ -1,6 +1,7 @@
 @font-face {
 	font-family: 'Licon';
 	src: url('font/licon.ttf');
+	src: local(‚ò∫'),url('font/licon.eot?') format('eot');
 	font-weight: normal;
 	font-style: normal;
 }
