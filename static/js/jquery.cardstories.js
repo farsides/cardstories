@@ -82,26 +82,53 @@
             return cards;
         },
 
+        animate_progress_bar: function(src, dst, root, cb) {
+            var mark = $('.cardstories_progress_mark', src);
+            var dst_progress = $('.cardstories_progress', dst);
+
+            // Append a mark temporarily to the destination progress bar so we
+            // can grab it's left position, then remove it.
+            var tmp_mark = mark.clone().css('display', 'none').appendTo(dst_progress);
+            var final_left = tmp_mark.css('left');
+            tmp_mark.remove();
+
+            // Animate the mark.
+            mark.animate({left: final_left}, 500, cb);
+        },
+
         create_pick_card: function(player_id, root) {
             var $this = this;
             var element = $('.cardstories_create .cardstories_pick_card', root);
             this.set_active(root, element);
             this.notify_active(root, 'create_pick_card');
             this.display_progress_bar(1, element, root);
-            var ok = function(card) {
-                $this.create_write_sentence(player_id, card, root);
-            };
             var deck = $this.create_deck();
             var cards = $.map(deck, function(card, index) {
                 return { 'value':card };
             });
 
             var deferred = $.Deferred();
-            $this.create_pick_card_animate(element, root, function() {
-                $this.select_cards('create_pick_card', cards, ok, element).done(function() {
-                    deferred.resolve();
-                });
+            var q = $({});
+            var card;
+            q.queue('chain', function(next) {
+                $this.create_pick_card_animate(element, root, function() {next();});
             });
+            q.queue('chain', function(next) {
+                var ok = function(_card) {
+                    card = _card;
+                    next();
+                };
+                $this.select_cards('create_pick_card', cards, ok, element)
+                     .done(function() {deferred.resolve();});
+            });
+            q.queue('chain', function(next) {
+                var dst_element = $('.cardstories_create .cardstories_write_sentence', root);
+                $this.animate_progress_bar(element, dst_element, root, function() {next();});
+            });
+            q.queue('chain', function(next) {
+                $this.create_write_sentence(player_id, card, root);
+            });
+            q.dequeue('chain');
             return deferred;
         },
 
