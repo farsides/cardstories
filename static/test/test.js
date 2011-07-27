@@ -208,7 +208,7 @@ test("notify_active", function() {
 
 test("subscribe", function() {
     setup();
-    expect(5);
+    expect(6);
 
     var player_id = 'player@test.com';
     var game_id = undefined;
@@ -218,10 +218,14 @@ test("subscribe", function() {
     equal($('#qunit-fixture .cardstories_subscribe.cardstories_active').length, 1);
     equal($.cookie('CARDSTORIES_ID'), null);
     $('#qunit-fixture .cardstories_subscribe .cardstories_email').val(player_id);
+    var called = false;
     // any ajax issued as indirect side effect of subscribing is ignored because it is
     // not a direct side effect
-    $.cardstories.ajax = function(options) {};
+    $.cardstories.ajax = function(options) {
+        called = true;
+    };
     $('#qunit-fixture .cardstories_subscribe .cardstories_submit').submit();
+    ok(called, 'ajax function called, hence input validated');
     equal($.cookie('CARDSTORIES_ID').replace(/%40/g, "@"), player_id);
     $.cookie('CARDSTORIES_ID', null);
     equal($.cookie('CARDSTORIES_ID'), null);
