@@ -96,6 +96,56 @@
             mark.animate({left: final_left}, 500, cb);
         },
 
+        // For best results with animate_scale, the element must be positioned
+        // absolutely, and its children must be sized and positioned relatively
+        // (i.e., "em" instead of "px", percentages for widths and heights).
+        animate_scale: function(reverse, factor, duration, el, cb) {
+            var big_top = parseInt(el.css('top'), 10);
+            var big_left = parseInt(el.css('left'), 10);
+            var big_width = el.width();
+            var big_height = el.height();
+            var big_fontsize = parseInt(el.css('font-size'), 10);
+
+            var small_width = Math.floor(big_width / factor);
+            var small_height = Math.floor(big_height / factor);
+            var small_top = big_top + Math.floor((big_height - small_height)/2);
+            var small_left = big_left + Math.floor((big_width - small_width)/2);
+            var small_fontsize = Math.floor(big_fontsize / factor);
+
+            if (!reverse) {
+                // Set the initial small size.
+                el.css({
+                    top: small_top,
+                    left: small_left,
+                    width: small_width,
+                    height: small_height,
+                    fontSize: small_fontsize
+                });
+                
+                // Show the element and animate.
+                el.show();
+                el.animate({
+                    top: big_top,
+                    left: big_left,
+                    width: big_width,
+                    height: big_height,
+                    fontSize: big_fontsize
+                }, duration, function() {cb();});
+            } else {
+                // Animate and the hide the element.
+                el.animate({
+                    top: small_top,
+                    left: small_left,
+                    width: small_width,
+                    height: small_height,
+                    fontSize: small_fontsize
+                }, duration, function() {
+                    el.hide();
+                    cb();
+                });
+            }
+        },
+
         create_pick_card: function(player_id, root) {
             var $this = this;
             var element = $('.cardstories_create .cardstories_pick_card', root);
@@ -112,6 +162,10 @@
             var card;
             q.queue('chain', function(next) {
                 $this.create_pick_card_animate(element, root, function() {next();});
+            });
+            q.queue('chain', function(next) {
+                var box = $('.cardstories_game_about_creativity', element);
+                $this.animate_scale(false, 5, 500, box, function() {next();});
             });
             q.queue('chain', function(next) {
                 var ok = function(_card) {

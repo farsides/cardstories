@@ -1,9 +1,12 @@
 @font-face {
-	font-family: 'Licon';
-	src: url('font/licon.ttf');
-	src: local(‚ò∫'),url('font/licon.eot?') format('eot');
-	font-weight: normal;
-	font-style: normal;
+    font-family: 'Licon';
+    src: url('font/licon.eot');
+    src: url('font/licon.eot?#iefix') format('embedded-opentype'),
+         url('font/licon.woff') format('woff'),
+         url('font/licon.ttf') format('truetype'),
+         url('font/licon.svg#Licon') format('svg');
+    font-weight: normal;
+    font-style: normal;
 }
 
 .cardstories { 
@@ -586,62 +589,67 @@
     height: 142px;
 }
 
-.cardstories .cardstories_create .cardstories_pick_card .cardstories_board .cardstories_cards_hand {
-    /*display: none;*/
-}
-
 .cardstories .cardstories_create .cardstories_game_about_creativity { 
+    display: none;
     position: absolute;
     z-index: 1;
+    font-size: 10px;
     left: 230px;
     top: 90px;
-    background: transparent url('images/gamemaster_pick_a_card_modal_box.png') no-repeat left top;
     height: 129px;
     width: 301px;
+    text-align:center;
+    font-family: "Licon";
+    color:#FFFFFF;
+}
+
+.cardstories .cardstories_create .cardstories_game_about_creativity_background { 
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
 }
 
 .cardstories .cardstories_create .cardstories_game_about_creativity_text_first_line {
-    text-align:center;
-    font-size: 24px; 
-    font-family:Licon;
-    color:#FFFFFF;
-    margin: 10px 0px 0px 12px; 
-    height: 30px;
-    width: 280px;
+    margin: 0.3em 0;
+    font-size: 2.4em; 
 }
 
-.cardstories .cardstories_create .cardstories_game_about_creativity_text_second_line {
-    text-align:center; 
-    font-size: 11px; 
-    font-family:"Helvetica";
-    color:#FFFFFF;
-    height: 14px;
-    width: 300px;
+.cardstories .cardstories_create .cardstories_game_about_creativity_text_second_line,
+.cardstories .cardstories_create .cardstories_game_about_creativity_text_third_line {
+    margin: 0;
+    font-family: "Helvetica";
+    font-size: 1.1em; 
 }
 
 .cardstories .cardstories_create .cardstories_game_about_creativity_text_third_line {
     font-weight: bold; 
-    text-align:center;
-    font-family:"Helvetica";
-    color:#FFFFFF;
-    font-size: 11px; 
-    height: 20px;
-    width: 300px;
 }
-
 
 .cardstories .cardstories_create .cardstories_game_about_creativity_ok {
-    background: transparent url('images/gamemaster_pick_a_card_modal_box_button_ok_on.png') no-repeat left top;
-    text-align:center;
-    color:#FFFFFF;
-    margin: 0px 0px 0px 75px;
-    padding: 15px 0px 0px 0px;
-    font-size: 24px; 
-    font-family:"Licon";
-    height: 48px;
-    width: 156px;
+    position: relative;
+    top: 0.35em;
+    margin: 0 auto;
+    font-size: 2.4em; 
+    width: 6.5em;
+    height: 2em;
 }
 
+.cardstories .cardstories_create .cardstories_game_about_creativity_ok_background {
+    position: absolute;
+    z-index: -1;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+}
+
+.cardstories .cardstories_create .cardstories_game_about_creativity_ok > span {
+    position: relative;
+    top: 11px;
+}
 
 .cardstories .cardstories_create .cardstories_pick_card .cardstories_board .cardstories_cards {
     position: absolute;

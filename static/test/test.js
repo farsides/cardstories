@@ -256,6 +256,88 @@ test("animate_progress_bar", function() {
     });
 });
 
+test("animate_scale", function() {
+    setup();
+    stop();
+    expect(7);
+
+    var root = $('#qunit-fixture .cardstories');
+    var el = $('.cardstories_game_about_creativity', root);
+    var orig_top = parseInt(el.css('top'), 10);
+    var orig_left = parseInt(el.css('left'), 10);
+    var orig_width = el.width();
+    var orig_height = el.height();
+    var orig_fontsize = parseInt(el.css('font-size'), 10);
+
+    var factor = 5;
+    var duration = 500;
+
+    equal(el.css('display'), 'none', 'Element starts hidden');
+    $.cardstories.animate_scale(false, factor, duration, el, function () {
+        equal(el.css('display'), 'block', 'Element is visible after animation.');
+        equal(parseInt(el.css('top'), 10), orig_top, 'Element achieves proper top.');
+        equal(parseInt(el.css('left'), 10), orig_left, 'Element achieves proper left.');
+        equal(el.width(), orig_width, 'Element achieves proper width.');
+        equal(el.height(), orig_height, 'Element achieves proper height.');
+        equal(parseInt(el.css('font-size'), 10), orig_fontsize, 'Element achieves proper font size.');
+
+        // Cleanup
+        el.css({
+            top: orig_top,
+            left: orig_left,
+            width: orig_width,
+            height: orig_height,
+            fontSize: orig_fontsize,
+            display: 'none'
+        });
+        start();
+    });
+});
+
+test("animate_scale reverse", function() {
+    setup();
+    stop();
+    expect(7);
+
+    var root = $('#qunit-fixture .cardstories');
+    var el = $('.cardstories_game_about_creativity', root);
+    var orig_top = parseInt(el.css('top'), 10);
+    var orig_left = parseInt(el.css('left'), 10);
+    var orig_width = el.width();
+    var orig_height = el.height();
+    var orig_fontsize = parseInt(el.css('font-size'), 10);
+
+    var factor = 5;
+    var duration = 500;
+
+    var dst_width = Math.floor(orig_width / factor);
+    var dst_height = Math.floor(orig_height / factor);
+    var dst_top = orig_top + Math.floor((orig_height - dst_height)/2);
+    var dst_left = orig_left + Math.floor((orig_width - dst_width)/2);
+    var dst_fontsize = Math.floor(orig_fontsize / factor);
+
+    el.show();
+    equal(el.css('display'), 'block', 'Element starts visible');
+    $.cardstories.animate_scale(true, factor, duration, el, function () {
+        equal(el.css('display'), 'none', 'Element is invisible after animation.');
+        equal(parseInt(el.css('top'), 10), dst_top, 'Element achieves proper top.');
+        equal(parseInt(el.css('left'), 10), dst_left, 'Element achieves proper left.');
+        equal(el.width(), dst_width, 'Element achieves proper width.');
+        equal(el.height(), dst_height, 'Element achieves proper height.');
+        equal(parseInt(el.css('font-size'), 10), dst_fontsize.toFixed(), 'Element achieves proper font size.');
+
+        // Cleanup
+        el.css({
+            top: orig_top,
+            left: orig_left,
+            width: orig_width,
+            height: orig_height,
+            fontSize: orig_fontsize 
+        });
+        start();
+    });
+});
+
 test("subscribe", function() {
     setup();
     expect(6);
