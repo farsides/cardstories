@@ -23,6 +23,7 @@ var cardstories_default_ajax = $.cardstories.ajax;
 var cardstories_original_error = $.cardstories.error;
 var cardstories_original_poll_ignore = $.cardstories.poll_ignore;
 var cardstories_original_create_write_sentence_animate_end = $.cardstories.create_write_sentence_animate_end;
+var cardstories_original_animate_progress_bar = $.cardstories.animate_progress_bar;
 
 function setup() {
     $.cardstories.setTimeout = function(cb, delay) { return window.setTimeout(cb, delay); };
@@ -223,6 +224,36 @@ test("display_progress_bar", function() {
     equal($('.cardstories_step4', pbar).attr('class'), 'cardstories_step4', 'step 4 is bare');
     equal($('.cardstories_step5', pbar).attr('class'), 'cardstories_step5', 'step 5 is bare');
     equal($('.cardstories_step6', pbar).attr('class'), 'cardstories_step6', 'step 6 is bare');
+
+    // Clean it up
+    pbar.children().remove();
+});
+
+test("animate_progress_bar", function() {
+    setup();
+    stop();
+    expect(1);
+
+    var root = $('#qunit-fixture .cardstories');
+    var snippets = $('.cardstories_snippets', root);
+    var tmp_mark = $('.cardstories_progress_mark', snippets);
+    var src = $('.cardstories_create .cardstories_pick_card', root);
+    var src_progress = $('.cardstories_progress', src);
+    var dst = $('.cardstories_create .cardstories_write_sentence', root);
+    var dst_progress = $('.cardstories_progress', dst);
+
+    var src_mark = tmp_mark.clone().appendTo(src_progress);
+    var dst_mark = tmp_mark.clone().appendTo(dst_progress);
+    var final_left = dst_mark.css('left');
+    dst_mark.remove();
+
+    $.cardstories.animate_progress_bar(src, dst, root, function() {
+        equal(src_mark.css('left'), final_left, 'mark is at final position');
+
+        // Clean it up
+        src_mark.remove();
+        start();
+    });
 });
 
 test("subscribe", function() {
@@ -393,12 +424,15 @@ test("create", function() {
     $.cardstories.reload = function(player_id2, game_id2, root2) {
         equal(player_id2, player_id);
         equal(game_id2, game_id);
+
+        // Clean up
+        $.cardstories.create_write_sentence_animate_end = cardstories_original_create_write_sentence_animate_end;
+        $.cardstories.animate_progress_bar = cardstories_original_animate_progress_bar;
         start();
     };
 
-    $.cardstories.create_write_sentence_animate_end = function(card, element, root, cb) {
-        cb();
-    };
+    $.cardstories.create_write_sentence_animate_end = function(card, element, root, cb) {cb();};
+    $.cardstories.animate_progress_bar = function(src, dst, root, cb) {cb();};
 
     var element = $('#qunit-fixture .cardstories_create');
     equal($('.cardstories_pick_card.cardstories_active', element).length, 0, 'pick_card not active');
@@ -440,6 +474,9 @@ test("create on error", function() {
         equal(err, 'error on create', 'calls $.cardstories.error');
     };
 
+    $.cardstories.create_write_sentence_animate_end = function(card, element, root, cb) {cb();};
+    $.cardstories.animate_progress_bar = function(src, dst, root, cb) {cb();};
+
     var element = $('#qunit-fixture .cardstories_create');
     $.cardstories.
         create(player_id, $('#qunit-fixture .cardstories')).
@@ -449,6 +486,10 @@ test("create on error", function() {
             $('.cardstories_card_confirm_ok', element).click();
             $('.cardstories_write_sentence .cardstories_sentence', element).val('SENTENCE');
             $('.cardstories_write_sentence .cardstories_submit', element).submit();
+
+            // Clean up
+            $.cardstories.create_write_sentence_animate_end = cardstories_original_create_write_sentence_animate_end;
+            $.cardstories.animate_progress_bar = cardstories_original_animate_progress_bar;
             start();
         });
 });
@@ -1507,8 +1548,6 @@ test("create_write_sentence_animate_end", function() {
     setup();
     stop();
     expect(14);
-
-    $.cardstories.create_write_sentence_animate_end = cardstories_original_create_write_sentence_animate_end;
 
     var card = 42;
     var root = $('#qunit-fixture .cardstories');
