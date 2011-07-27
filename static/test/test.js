@@ -224,7 +224,7 @@ test("subscribe", function() {
     $.cardstories.ajax = function(options) {
         called = true;
     };
-    $('#qunit-fixture .cardstories_subscribe .cardstories_submit').submit();
+    $('#qunit-fixture .cardstories_subscribe .cardstories_emailform').submit();
     ok(called, 'ajax function called, hence input validated');
     equal($.cookie('CARDSTORIES_ID').replace(/%40/g, "@"), player_id);
     $.cookie('CARDSTORIES_ID', null);
@@ -244,7 +244,7 @@ test("subscribe_validation_error", function() {
     // any ajax issued as indirect side effect of subscribing is ignored because it is
     // not a direct side effect
     $.cardstories.ajax = function(options) {};
-    $('#qunit-fixture .cardstories_subscribe .cardstories_submit').submit();
+    $('#qunit-fixture .cardstories_subscribe .cardstories_emailform').submit();
     equal($('#qunit-fixture .cardstories_subscribe label.error').attr('for'), 'email');
     equal($.cookie('CARDSTORIES_ID'), null);
 });
