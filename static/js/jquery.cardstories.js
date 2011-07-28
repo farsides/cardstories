@@ -98,12 +98,6 @@
             var deferred = $.Deferred();
             $this.create_pick_card_animate(cards, element, root, function() {
                 $this.select_cards('create_pick_card', cards, ok, element).done(function() {
-                    // The cards that are animated to the board need to be hidden when jqDock
-                    // is done initializing, otherwise they would show on top of jqDock in IE7,
-                    // due to IE7's z-index bug.
-                    // It would be better if this could be done inside create_pick_card_animate,
-                    // but I wasn't able to find a pretty way to do it.
-                    $('.cardstories_deck .cardstories_card', element).hide();
                     deferred.resolve();
                 });
             });
@@ -179,7 +173,7 @@
                         // background is visible as the border.
                         // Here we only have one (the foreground) image, so we need to emulate a border with CSS.
                         // While it would be more consistent to also use two images here, jqDock only expects
-                        // one image, and the pain of working around this jqDock limitation wouldn't worth it, IMHO.
+                        // one image, and the pain of working around this jqDock limitation wouldn't be worth it, IMHO.
                         card.attr('src', foreground_src).addClass('cardstories_card_border');
                         if (i === nr_of_cards - 1) {
                             next();
