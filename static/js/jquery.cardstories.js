@@ -131,7 +131,9 @@
                     height: big_height,
                     fontSize: big_fontsize
                 }, duration, function() {
-                    if (cb !== undefined) cb();
+                    if (cb !== undefined) {
+                        cb();
+                    }
                 });
             } else {
                 // Animate and the hide the element.
@@ -143,7 +145,9 @@
                     fontSize: small_fontsize
                 }, duration, function() {
                     el.hide();
-                    if (cb !== undefined) cb();
+                    if (cb !== undefined) {
+                        cb();
+                    }
                 });
             }
         },
