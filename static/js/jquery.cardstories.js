@@ -830,6 +830,7 @@
                         });
                     }
                 });
+                dock.show();
                 if (start_collapsed) {
                     active_card_img.jqDock('expand');
                 }
