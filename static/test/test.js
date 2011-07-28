@@ -363,24 +363,6 @@ test("subscribe", function() {
     equal($.cookie('CARDSTORIES_ID'), null);
 });
 
-test("subscribe_validation_error", function() {
-    setup();
-    expect(3);
-
-    var player_id = 'PLAYER';
-    var game_id = undefined;
-    $.cookie('CARDSTORIES_ID', null);
-    $.cardstories.email(game_id, $('#qunit-fixture .cardstories'));
-    equal($.cookie('CARDSTORIES_ID'), null);
-    $('#qunit-fixture .cardstories_subscribe .cardstories_email').val(player_id);
-    // any ajax issued as indirect side effect of subscribing is ignored because it is
-    // not a direct side effect
-    $.cardstories.ajax = function(options) {};
-    $('#qunit-fixture .cardstories_subscribe .cardstories_emailform').submit();
-    equal($('#qunit-fixture .cardstories_subscribe label.error').attr('for'), 'email');
-    equal($.cookie('CARDSTORIES_ID'), null);
-});
-
 test("widget subscribe", function() {
     setup();
     expect(3);

@@ -1273,12 +1273,11 @@
             var element = $('.cardstories_subscribe', root);
             this.set_active(root, element);
             this.notify_active(root, 'email');
-            validator = $(".cardstories_emailform", element).validate({
-                submitHandler: function(form) {
-                    var player_id = encodeURIComponent($('.cardstories_email', element).val());
-                    $.cookie('CARDSTORIES_ID', player_id);
-                    $this.game_or_lobby(player_id, game_id, root);        
-                }
+            validator = $(".cardstories_emailform", element).submit(function() {
+                var player_id = encodeURIComponent($('.cardstories_email', element).val());
+                $.cookie('CARDSTORIES_ID', player_id);
+                $this.game_or_lobby(player_id, game_id, root);
+                return true;
             });
 
             $('.cardstories_email', element).focus();
