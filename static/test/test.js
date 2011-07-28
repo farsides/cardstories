@@ -1574,12 +1574,14 @@ test("lobby_games without games", function() {
 test("create_pick_card_animate", function() {
     setup();
     stop();
-    expect(24); // there are 6 cards, we set 4 assertions on each
+    expect(30); // there are 6 cards, we set 5 assertions on each
 
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_create .cardstories_pick_card', root);
+    var card_specs = [{value: 1}, {value: 2}, {value: 3}, {value: 4}, {value: 5}, {value: 6}];
     var cards = $('.cardstories_deck .cardstories_card', element);
     var final_top = parseInt($('.cardstories_cards', element).css('top'), 10);
+    var src_template = $('.cardstories_card_template', element).metadata({type: 'attr', name: 'data'}).card;
 
     cards.each(function() {
         var card = $(this);
@@ -1588,12 +1590,13 @@ test("create_pick_card_animate", function() {
         ok(parseInt(card.css('top'), 10) < final_top, 'card starts higher than its final position');
     });
 
-    $.cardstories.create_pick_card_animate(element, root, function() {
-        cards.each(function() {
+    $.cardstories.create_pick_card_animate(card_specs, element, root, function() {
+        cards.each(function(i) {
             var card = $(this);
             var meta = card.metadata({type: 'attr', name: 'data'});
             equal(parseInt(card.css('left'), 10), meta.final_left, 'card is animated to the left position defined by its metadata');
             equal(parseInt(card.css('top'), 10), final_top, 'card is animated to the final top position');
+            equal(card.attr('src'), src_template.supplant({card: card_specs[cards.length - i - 1].value}), 'the foregournd image is shown');
         });
         start();
     });
