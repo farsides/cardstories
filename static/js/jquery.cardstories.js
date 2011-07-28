@@ -130,7 +130,9 @@
                     width: big_width,
                     height: big_height,
                     fontSize: big_fontsize
-                }, duration, function() {cb();});
+                }, duration, function() {
+                    if (cb !== undefined) cb();
+                });
             } else {
                 // Animate and the hide the element.
                 el.animate({
@@ -141,7 +143,7 @@
                     fontSize: small_fontsize
                 }, duration, function() {
                     el.hide();
-                    cb();
+                    if (cb !== undefined) cb();
                 });
             }
         },
@@ -161,20 +163,24 @@
             var q = $({});
             var card;
             q.queue('chain', function(next) {
-                $this.create_pick_card_animate(cards, root, function() {next();});
-            });
-            q.queue('chain', function(next) {
-                var box = $('.cardstories_game_about_creativity', element);
-                $this.animate_scale(false, 5, 500, box, function() {next();});
+                $this.create_pick_card_animate(cards, element, root, function() {next();});
             });
             q.queue('chain', function(next) {
                 var ok = function(_card) {
                     card = _card;
                     next();
                 };
+
                 $this.select_cards('create_pick_card', cards, ok, element).done(function() {
                     deferred.resolve();
                 });
+
+                // Delay the appearance of the info box artificially, since
+                // jqDock doesn't provide a hook for when expansion finishes.
+                $this.setTimeout(function() {
+                    var box = $('.cardstories_game_about_creativity', element);
+                    $this.animate_scale(false, 5, 500, box);
+                }, 300);
             });
             q.queue('chain', function(next) {
                 var dst_element = $('.cardstories_create .cardstories_write_sentence', root);
