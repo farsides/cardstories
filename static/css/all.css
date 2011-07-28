@@ -245,6 +245,13 @@
     border: none;
 }
 
+.cardstories_card_border {
+    background-color: #f4efda;
+    border-radius: 15px;
+    -moz-border-radius: 15px;
+    -webkit-border-radius: 15px;
+}
+
 /* subscribe (home) */
 
 .cardstories .cardstories_extras .cardstories_subscribe .cardstories_logo_welcome {
@@ -566,6 +573,10 @@
 }
 
 /* state create : pick a card */
+
+.cardstories .cardstories_create .cardstories_pick_card .cardstories_sidebar {
+    z-index: 1;
+}
 
 .cardstories .cardstories_create .cardstories_pick_card .cardstories_deck .cardstories_card { 
     position: absolute;

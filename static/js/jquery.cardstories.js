@@ -96,22 +96,37 @@
             });
 
             var deferred = $.Deferred();
-            $this.create_pick_card_animate(element, root, function() {
+            $this.create_pick_card_animate(cards, element, root, function() {
                 $this.select_cards('create_pick_card', cards, ok, element).done(function() {
+                    // The cards that are animated to the board need to be hidden when jqDock
+                    // is done initializing, otherwise they would show on top of jqDock in IE7,
+                    // due to IE7's z-index bug.
+                    // It would be better if this could be done inside create_pick_card_animate,
+                    // but I wasn't able to find a pretty way to do it.
+                    $('.cardstories_deck .cardstories_card', element).hide();
                     deferred.resolve();
                 });
             });
             return deferred;
         },
 
-        create_pick_card_animate: function(element, root, cb) {
+        create_pick_card_animate: function(card_specs, element, root, cb) {
+            var $this = this;
             var cards = $('.cardstories_deck .cardstories_card', element);
+
+            $this.create_pick_card_animate_fly_to_board(cards, element, root, function() {
+                $this.create_pick_card_animate_morph_into_jqdock(cards, card_specs, element, cb);
+            });
+        },
+
+        create_pick_card_animate_fly_to_board: function(cards, element, root, cb) {
+            var nr_of_cards = cards.length;
             var card_fly_velocity = 1.2;   // in pixels per milisecond
             var card_delay = 100;   // delay in ms after each subsequent card starts "flying" from the deck
             var vertical_offset = 8;
-            var vertical_rise_duration = 600;
-            var q = $({});
+            var vertical_rise_duration = 300;
             var final_top = parseInt($('.cardstories_cards', element).css('top'), 10);
+            var q = $({});
 
             cards.each(function(i) {
                 var card = $(this);
@@ -132,7 +147,7 @@
 
                 // The callback passed to this function should be fired
                 // after the last card raises to its final position.
-                var callback = i === 5 ? cb : null;
+                var callback = (i === nr_of_cards - 1) ? cb : null;
 
                 q.queue('chain', function(next) {
                     card.animate({top: keyframe_top, left: final_left}, fly_duration, function() {
@@ -140,6 +155,54 @@
                     });
                     next();
                 });
+            });
+
+            q.dequeue('chain');
+        },
+
+        create_pick_card_animate_morph_into_jqdock: function(cards, card_specs, element, cb) {
+            var nr_of_cards = cards.length;
+            var card_width = cards.width();
+            var src_template = $('.cardstories_card_template', element).metadata({type: 'attr', name: 'data'}).card;
+            var turnaround_duration = 600;
+            var q = $({});
+
+            q.queue('chain', function(next) {
+                cards.each(function(i) {
+                    var card = $(this);
+                    var spec = card_specs[nr_of_cards - i - 1];
+                    var meta = card.metadata({type: 'attr', name: 'data'});
+                    card.animate({width: 0, left: meta.final_left + card_width/2}, turnaround_duration/2, function() {
+                        var foreground_src = src_template.supplant({card: spec.value});
+                        // Elsewhere in the code, one card usually consists of two images stacked one
+                        // on top of another: the foregrond and the background image, where the
+                        // background is visible as the border.
+                        // Here we only have one (the foreground) image, so we need to emulate a border with CSS.
+                        // While it would be more consistent to also use two images here, jqDock only expects
+                        // one image, and the pain of working around this jqDock limitation wouldn't worth it, IMHO.
+                        card.attr('src', foreground_src).addClass('cardstories_card_border');
+                        if (i === nr_of_cards - 1) {
+                            next();
+                        }
+                    });
+                });
+            });
+
+            q.queue('chain', function(next) {
+                cards.each(function(i) {
+                    var card = $(this);
+                    var meta = card.metadata({type: 'attr', name: 'data'});
+                    card.animate({width: card_width, left: meta.final_left}, turnaround_duration/2, function() {
+                        if (i === nr_of_cards - 1) {
+                            next();
+                        }
+                    });
+                });
+            });
+
+            q.queue('chain', function(next) {
+                cb();
+                next();
             });
 
             q.dequeue('chain');
@@ -688,6 +751,9 @@
         },
 
         display_or_select_cards: function(id, cards, select_callback, element) {
+            // In create_pick_card, jqDock needs to start collapsed, to better
+            // integrate with the animation.
+            var start_collapsed = id === 'create_pick_card';
             id += '_saved_element';
             if(this[id] === undefined) {
                 this[id] = element.html();
@@ -695,17 +761,25 @@
                 element.html(this[id]);
             }
             var meta = element.metadata({type: "attr", name: "data"});
+            var active_card = meta.active;
             var options = {
-                'active': meta.active,
                 'size': meta.size,
                 'distance': meta.distance
             };
+            if (!start_collapsed) {
+                options.active = active_card;
+            }
             var template = $('.cardstories_card_template', element);
             var dock = $('.cardstories_cards', element);
-
             var deferred = $.Deferred();
             options.onReady = function(is_ready) {
                 var links = $('a.cardstories_card', element);
+                // There is some trickery involved here. We need to hold a reference to the
+                // active_card_img so that we can expand it later (if starting collapsed).
+                // In the loop below, the images will be replaced and because jqDock only keeps
+                // a reference to the original images present at initialization time,
+                // we wouldn't be able to expand it without this reference.
+                var active_card_img = start_collapsed ? $('img', links).eq(active_card) : null;
                 var html = template.html();
                 var meta = template.metadata({type: "attr", name: "data"});
                 links.each(function(index) {
@@ -756,6 +830,9 @@
                         });
                     }
                 });
+                if (start_collapsed) {
+                    active_card_img.jqDock('expand');
+                }
                 deferred.resolve(is_ready);
             };
 
