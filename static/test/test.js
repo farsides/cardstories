@@ -1083,8 +1083,8 @@ test("vote_voter", function() {
             for(var i = 0; i < board.length; i++) {
                 equal($('.cardstories_card:nth(' + i + ') .cardstories_card_foreground', element).attr('src'), 'PATH/card0' + board[i] + '.png');
             }
-            equal($('.cardstories_card:nth(0) .cardstories_card_foreground', element).attr('alt'), '', 'card0 alt was reset');
-            equal($('.cardstories_card:nth(1) .cardstories_card_foreground', element).attr('alt'), 'My Card', 'card1 alt was set');
+            equal($('.cardstories_card:nth(0) .cardstories_card_foreground', element).attr('alt'), ' ', 'card0 alt was reset');
+            equal($('.cardstories_card:nth(1) .cardstories_card_foreground', element).attr('alt'), ' My Card', 'card1 alt was set');
             equal($('.cardstories_card:nth(5) .cardstories_card_foreground', element).attr('src'), 'PATH/nocard.png');
             $('.cardstories_picked', element).click(); // must do nothing
             $('.cardstories_card:nth(4)', element).click();
@@ -1679,7 +1679,7 @@ test("poll_discard", function() {
 test("poll_ignore", function() {
     $.cardstories.poll_ignore = cardstories_original_poll_ignore;
 
-    if (console && console.log) {
+    if (typeof console !== "undefined" && typeof console.log !== "undefined") {
         expect(2);
 
         var log = console.log;
@@ -2119,13 +2119,16 @@ test("select_cards single", function() {
 
 test("create_deck", function() {
     setup();
-    expect(15);
+    expect(29);
     var deck = $.cardstories.create_deck();
+    var i;
     equal(deck.length, 7);
     while(deck.length > 0) {
         var card = deck.pop();
         equal(typeof card, "number");
-        equal(deck.indexOf(card), -1, 'duplicate of ' + card);
+	for(i = 0; i < deck.length; i++) {
+	    ok(deck[i] != card, 'duplicate of ' + card);
+	}
     }
   });
 
