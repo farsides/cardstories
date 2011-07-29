@@ -163,14 +163,39 @@
                 return { 'value':card };
             });
 
+            // Set up modal box behavior
+            var box = $('.cardstories_game_about_creativity', element);
+            var button = $('.cardstories_game_about_creativity_ok', box);
+            var button_meta = button.metadata({type: 'attr', name: 'data'});
+            var button_img = $('img', button);
+            var button_img_src = button_img.attr('src');
+            var button_img_src_over = button_meta.overimage;
+            var button_a = $('a', button);
+            button_a.mousedown(function() {
+                button_img.attr('src', button_img_src_over);
+            });
+            button_a.mouseup(function() {
+                button_img.attr('src', button_img_src);
+                // Hide the box and disable the modal overlay.
+                $this.animate_scale(true, 5, 500, box, function() {
+                    $('.cardstories_modal_overlay', element).hide();
+                });
+            });
+
             var deferred = $.Deferred();
             var q = $({});
             var card;
+
+            // Deal the cards
             q.queue('chain', function(next) {
                 $this.create_pick_card_animate(cards, element, root, function() {next();});
             });
+
+            // Set up the dock for card selection, and show the modal box.  The
+            // user won't be able to select a card until "OK" is clicked.
             q.queue('chain', function(next) {
                 var ok = function(_card) {
+                    // The selected card will be needed later in the 'chain' queue.
                     card = _card;
                     next();
                 };
@@ -179,20 +204,24 @@
                     deferred.resolve();
                 });
 
-                // Delay the appearance of the info box artificially, since
+                // Delay the appearance of the modal box artificially, since
                 // jqDock doesn't provide a hook for when expansion finishes.
                 $this.setTimeout(function() {
-                    var box = $('.cardstories_game_about_creativity', element);
                     $this.animate_scale(false, 5, 500, box);
                 }, 300);
             });
+
+            // Animate the progress bar into the next step.
             q.queue('chain', function(next) {
                 var dst_element = $('.cardstories_create .cardstories_write_sentence', root);
                 $this.animate_progress_bar(element, dst_element, root, function() {next();});
             });
+
+            // Initialize the next state.
             q.queue('chain', function(next) {
                 $this.create_write_sentence(player_id, card, root);
             });
+
             q.dequeue('chain');
             return deferred;
         },

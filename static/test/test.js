@@ -24,6 +24,7 @@ var cardstories_original_error = $.cardstories.error;
 var cardstories_original_poll_ignore = $.cardstories.poll_ignore;
 var cardstories_original_create_write_sentence_animate_end = $.cardstories.create_write_sentence_animate_end;
 var cardstories_original_animate_progress_bar = $.cardstories.animate_progress_bar;
+var cardstories_original_animate_scale = $.cardstories.animate_scale;
 
 function setup() {
     $.cardstories.setTimeout = function(cb, delay) { return window.setTimeout(cb, delay); };
@@ -471,7 +472,7 @@ test("send_game on error", function() {
 test("create", function() {
     setup();
     stop();
-    expect(14);
+    expect(16);
 
     var player_id = 15;
     var game_id = 7;
@@ -496,17 +497,32 @@ test("create", function() {
         // Clean up
         $.cardstories.create_write_sentence_animate_end = cardstories_original_create_write_sentence_animate_end;
         $.cardstories.animate_progress_bar = cardstories_original_animate_progress_bar;
+        $.cardstories.animate_scale = cardstories_original_animate_scale;
         start();
     };
 
     $.cardstories.create_write_sentence_animate_end = function(card, element, root, cb) {cb();};
     $.cardstories.animate_progress_bar = function(src, dst, root, cb) {cb();};
+    $.cardstories.animate_scale = function(reverse, factor, duration, el, cb) {
+        if (reverse) {
+            el.hide();
+        } else {
+            el.show();
+        }
+        if (cb !== undefined) cb();
+    };
 
     var element = $('#qunit-fixture .cardstories_create');
     equal($('.cardstories_pick_card.cardstories_active', element).length, 0, 'pick_card not active');
     $.cardstories.
         create(player_id, $('#qunit-fixture .cardstories')).
-        done(function(is_ready) {
+        done(function() {
+            equal($('.cardstories_modal_overlay', element).css('display'), 'block', 'modal overlay is on');
+            var button = $('.cardstories_game_about_creativity_ok', element);
+            var anchor = $('a', button);
+            anchor.mousedown();
+            anchor.mouseup();
+            equal($('.cardstories_modal_overlay', element).css('display'), 'none', 'modal overlay is off');
             equal($('.cardstories_pick_card.cardstories_active', element).length, 1, 'pick_card active');
             equal($('.cardstories_write_sentence.cardstories_active', element).length, 0, 'sentence not active');
             var first_card = $('.cardstories_cards_hand .cardstories_card:nth(0)', element);
@@ -548,7 +564,7 @@ test("create on error", function() {
     var element = $('#qunit-fixture .cardstories_create');
     $.cardstories.
         create(player_id, $('#qunit-fixture .cardstories')).
-        done(function(is_ready) {
+        done(function() {
             var first_card = $('.cardstories_cards_hand .cardstories_card:nth(0)', element);
             first_card.click();
             $('.cardstories_card_confirm_ok', element).click();
