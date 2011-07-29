@@ -194,9 +194,18 @@
 }
 
 .cardstories .cardstories_pane .cardstories_sidebar .cardstories_deck { 
-    background: transparent url('images/card_deck.png') no-repeat left top;
+    background: transparent url('images/card_deck_base.png') no-repeat left top;
     width: 216px;
     height: 217px;
+}
+
+.cardstories .cardstories_pane .cardstories_sidebar .cardstories_deck_cards { 
+    background: transparent url('images/card_deck.png') no-repeat left top;
+    position: absolute;
+    left:45px;
+    top:13px;
+    width: 135px;
+    height: 153px;
 }
 
 .cardstories_player_seat {
