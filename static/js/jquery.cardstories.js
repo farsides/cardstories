@@ -145,6 +145,15 @@
                     fontSize: small_fontsize
                 }, duration, function() {
                     el.hide();
+                    // Reset to original size.
+                    el.css({
+                        top: big_top,
+                        left: big_left,
+                        width: big_width,
+                        height: big_height,
+                        fontSize: big_fontsize
+                    });
+                
                     if (cb !== undefined) {
                         cb();
                     }
@@ -166,10 +175,9 @@
             // Set up modal box behavior
             var box = $('.cardstories_game_about_creativity', element);
             var button = $('.cardstories_game_about_creativity_ok', box);
-            var button_meta = button.metadata({type: 'attr', name: 'data'});
             var button_img = $('img', button);
             var button_img_src = button_img.attr('src');
-            var button_img_src_over = button_meta.overimage;
+            var button_img_src_over = button_img.metadata({type: 'attr', name: 'data'}).over;
             var button_a = $('a', button);
             button_a.mousedown(function() {
                 button_img.attr('src', button_img_src_over);
@@ -200,7 +208,7 @@
                     next();
                 };
 
-                $this.select_cards('create_pick_card', cards, ok, element).done(function() {
+                $this.select_cards('create_pick_card', cards, ok, element, root).done(function() {
                     deferred.resolve();
                 });
 
@@ -829,7 +837,7 @@
                 $this.send_game(player_id, game.id, element, 'action=pick&player_id=' + player_id + '&game_id=' + game.id + '&card=' + card);
             };
             var cards = $.map(game.self[2], function(card,index) { return {'value':card}; });
-            return $this.select_cards('invitation_pick', cards, ok, element);
+            return $this.select_cards('invitation_pick', cards, ok, element, root);
         },
 
         invitation_pick_wait: function(player_id, game, root) {
@@ -845,23 +853,26 @@
             });
         },
 
-        select_cards: function(id, cards, ok, element) {
+        select_cards: function(id, cards, ok, element, root) {
+            var $this = this;
             var confirm = $('.cardstories_card_confirm', element);
-            var middle = confirm.metadata({type: "attr", name: "data"}).middle;
+            if (confirm.children().length == 0) {
+                var snippets = $('.cardstories_snippets', root);
+                var confirm_snippet = $('.cardstories_card_confirm', snippets);
+                confirm_snippet.clone().children().appendTo(confirm);
+            }
             var confirm_callback = function(card, index, nudge, cards_element) {
-                confirm.show();
-                var wrapper = confirm.closest('.cardstories_active');
-                wrapper.toggleClass('cardstories_card_confirm_right', index >= middle);
+                $this.animate_scale(false, 5, 300, confirm);
                 $('.cardstories_card_confirm_ok', confirm).unbind('click').click(function() {
-                    confirm.hide();
-                    ok(card);
-                    wrapper.removeClass('cardstories_card_confirm_right');
-                    nudge();
+                    $this.animate_scale(true, 5, 300, confirm, function() {
+                        ok(card);
+                        nudge();
+                    });
                 });
                 $('.cardstories_card_confirm_cancel', confirm).unbind('click').click(function() {
-                    confirm.hide();
-                    wrapper.removeClass('cardstories_card_confirm_right');
-                    nudge();
+                    $this.animate_scale(true, 5, 300, confirm, function() {
+                        nudge();
+                    });
                 });
             };
             var hand = $('.cardstories_cards_hand', element);
@@ -1079,7 +1090,7 @@
                 }
                 cards.push(card);
             }
-            return $this.select_cards('vote_voter', cards, ok, element);
+            return $this.select_cards('vote_voter', cards, ok, element, root);
         },
 
         vote_voter_wait: function(player_id, game, root) {
