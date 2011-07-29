@@ -592,7 +592,11 @@
     z-index: 1;
 }
 
-.cardstories .cardstories_create .cardstories_pick_card .cardstories_deck .cardstories_card {
+.cardstories .cardstories_create .cardstories_pick_card .cardstories_deck .cardstories_deck_cover {
+    z-index: 7;
+}
+
+.cardstories .cardstories_create .cardstories_pick_card .cardstories_deck img {
     position: absolute;
     top: 15px;
     left: 56px;

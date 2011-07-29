@@ -165,13 +165,14 @@
 
             var deferred = $.Deferred();
             var q = $({});
-            var card;
+            var card_value, card_index;
             q.queue('chain', function(next) {
                 $this.create_pick_card_animate(cards, element, root, function() {next();});
             });
             q.queue('chain', function(next) {
-                var ok = function(_card) {
-                    card = _card;
+                var ok = function(_card_value, _card_index) {
+                    card_value = _card_value;
+                    card_index = _card_index;
                     next();
                 };
 
@@ -187,11 +188,14 @@
                 }, 300);
             });
             q.queue('chain', function(next) {
+                $this.create_pick_card_animate_fly_to_deck(card_index, element, function() {next();});
+            });
+            q.queue('chain', function(next) {
                 var dst_element = $('.cardstories_create .cardstories_write_sentence', root);
                 $this.animate_progress_bar(element, dst_element, root, function() {next();});
             });
             q.queue('chain', function(next) {
-                $this.create_write_sentence(player_id, card, root);
+                $this.create_write_sentence(player_id, card_value, root);
             });
             q.dequeue('chain');
             return deferred;
@@ -292,6 +296,72 @@
                 next();
             });
 
+            q.dequeue('chain');
+        },
+
+        create_pick_card_animate_fly_to_deck: function(card_index, element, cb) {
+            var deck = $('.cardstories_deck', element);
+            var cards = $('.cardstories_card', deck);
+            var docked_cards = $('.cardstories_cards_hand .cardstories_card', element);
+            var nr_of_cards = cards.length;
+            var card_fly_velocity = 1.2;   // in pixels per milisecond
+            var card_delay = 100;   // delay in ms after each subsequent card starts "flying" back to the deck
+            var deck_cover = $('.cardstories_deck_cover', deck);
+            var final_top = parseInt(deck_cover.css('top'), 10);
+            var final_left = parseInt(deck_cover.css('left'), 10);
+            var final_width = deck_cover.width();
+            var final_height = deck_cover.height();
+            var deck_offset = deck.offset();
+            var q = $({});
+
+            cards.each(function(i) {
+                var card = $(this);
+                var rindex = nr_of_cards - i - 1;
+                // Hide the chosen card (we will use the one handled by jqDock)
+                // and move on to the next one.
+                if (rindex === card_index) {
+                    card.hide();
+                    return;
+                }
+
+                var docked_card = docked_cards.find('.cardstories_card_foreground').eq(rindex);
+                var height = docked_card.height();
+                var width = docked_card.width();
+                var starting_left = docked_card.offset().left - deck_offset.left;
+                var starting_top = parseInt(card.css('top'), 10) - height + final_height;
+                var fly_length = Math.sqrt(Math.pow(starting_top - final_top, 2) + Math.pow(starting_left - final_left, 2));
+                var fly_duration = fly_length / card_fly_velocity;
+
+                card.css({top: starting_top, left: starting_left, height: height, width: width});
+
+                // The first card should start flying immediately,
+                // but each subsequent card should be delayed.
+                if (i !== 0) {
+                    q.delay(card_delay, 'chain');
+                }
+
+                q.queue('chain', function(next) {
+                    var final_props = {
+                        top: final_top,
+                        left: final_left,
+                        width: final_width,
+                        height: final_height
+                    };
+                    var count = 0;
+                    card.animate(final_props, fly_duration, function() {
+                        // hide the card so that non-rounded borders aren't too obvious in IE8.
+                        card.hide();
+                        // The callback function should be called after the last card
+                        // reaches its final position.
+                        if (rindex === (card_index === 0 ? 1 : 0)) {
+                            cb();
+                        }
+                    });
+                    next();
+                });
+            });
+
+            docked_cards.filter(':not(.cardstories_card_selected)').hide();
             q.dequeue('chain');
         },
 
@@ -825,7 +895,7 @@
                 wrapper.toggleClass('cardstories_card_confirm_right', index >= middle);
                 $('.cardstories_card_confirm_ok', confirm).unbind('click').click(function() {
                     confirm.hide();
-                    ok(card);
+                    ok(card, index);
                     wrapper.removeClass('cardstories_card_confirm_right');
                     nudge();
                 });
