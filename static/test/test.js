@@ -22,6 +22,7 @@ var cardstories_default_setInterval = $.cardstories.setInterval;
 var cardstories_default_ajax = $.cardstories.ajax;
 var cardstories_original_error = $.cardstories.error;
 var cardstories_original_poll_ignore = $.cardstories.poll_ignore;
+var cardstories_original_animate_center_picked_card = $.cardstories.animate_center_picked_card;
 var cardstories_original_create_write_sentence_animate_end = $.cardstories.create_write_sentence_animate_end;
 var cardstories_original_animate_progress_bar = $.cardstories.animate_progress_bar;
 var cardstories_original_animate_scale = $.cardstories.animate_scale;
@@ -35,6 +36,7 @@ function setup() {
     $.cardstories.poll_ignore = function() { throw 'poll_ignore'; };
     $.cardstories.error = cardstories_original_error;
     $.cardstories.create_write_sentence_animate_end = function(card, element, root, cb) { cb(); };
+    $.cardstories.animate_center_picked_card = function(element, card, cb) { cb(); };
     $.cardstories.animate_progress_bar = function(src, dst, root, cb) { cb(); };
     $.cardstories.animate_scale = function(reverse, factor, duration, el, cb) {
         if (reverse) {
@@ -1590,6 +1592,55 @@ test("create_pick_card_animate", function() {
     });
 });
 
+test("animate_center_picked_card", function() {
+    setup();
+    stop();
+    expect(3);
+
+    $.cardstories.animate_center_picked_card = cardstories_original_animate_center_picked_card;
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('#qunit-fixture .cardstories_create .cardstories_pick_card');
+    var card_flyover = $('#qunit-fixture .cardstories_create .cardstories_pick_card .cardstories_card_flyover');
+    var cards = [{'value':1},
+                 {'value':2},
+                 {'value':3},
+                 {'value':4},
+                 {'value':5},
+                 {'value':6}];
+    var selected = 1;
+    
+    root.addClass('cardstories_root');
+    $('.cardstories_create .cardstories_pick_card .cardstories_cards', root).show();
+    $.cardstories.set_active(root, $('.cardstories_create .cardstories_pick_card', root));
+
+    // First display the dock
+    var onReady = function(is_ready) {
+        // Then select one of the cards
+        $('.cardstories_cards_hand .cardstories_card', element).eq(selected).click();
+    };
+    var meta = $('.cardstories_cards_hand .cardstories_card_template', element).metadata({type: "attr", name: "data"});
+    var select = function(card, index, nudge, element) {
+        equal(card_flyover.css('display'), 'none', 'flyover card is not visible initially');
+
+        // And play the animation
+        $.cardstories.animate_center_picked_card(element, card, function() {
+            equal(card_flyover.css('display'), 'block', 'flyover card visible after animation');
+            equal(card_flyover.position().left, 278, 'flyover card should be moved');
+
+            // Remove selected attribute
+            nudge();
+
+            start();
+        });
+    };
+    $.cardstories.
+        display_or_select_cards('animate_center_picked_card',
+                                cards,
+                                select, 
+                                element).
+        done(onReady);
+});
+
 test("create_write_sentence_animate_start", function() {
     setup();
     stop();
@@ -1612,6 +1663,7 @@ test("create_write_sentence_animate_start", function() {
         equal(write_box.css('display'), 'block', 'write box is visible after animation');
         equal(card_shadow.css('display'), 'block', 'card shadow is visible after animation');
         equal(card_imgs.width(), final_width, 'after animation card grows to its original width');
+
         start();
     });
 
