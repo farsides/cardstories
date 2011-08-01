@@ -599,8 +599,11 @@
                         var root = $(element).parents('.cardstories_root');
                         var interval = $this.setInterval(function() {
                             if (animation_done) {
-                                $this.reload(player_id, data.game_id, root); 
                                 clearInterval(interval);
+                                var dst_element = $('.cardstories_invitation .cardstories_owner', root);
+                                $this.animate_progress_bar(element, dst_element, root, function() {
+                                    $this.reload(player_id, data.game_id, root); 
+                                });
                             }
                         }, 250);
                     }
