@@ -206,6 +206,7 @@
     top:13px;
     width: 135px;
     height: 153px;
+    z-index: 7;
 }
 
 .cardstories_player_seat {
@@ -650,7 +651,7 @@
 }
 
 .cardstories .cardstories_create .cardstories_pick_card .cardstories_deck .cardstories_deck_cover {
-    z-index: 7;
+    display: none;
 }
 
 .cardstories .cardstories_create .cardstories_pick_card .cardstories_deck img {
