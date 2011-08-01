@@ -300,7 +300,10 @@ test("animate_scale reverse", function() {
     expect(7);
 
     var root = $('#qunit-fixture .cardstories');
-    var el = $('.cardstories_game_about_creativity', root);
+    // Make sure the element and its ancestors are visible,
+    // to prevent some versions of FF report faulty values.
+    var el = $('.cardstories_game_about_creativity', root).show();
+    el.parents().show();
     var orig_top = parseInt(el.css('top'), 10);
     var orig_left = parseInt(el.css('left'), 10);
     var orig_width = el.width();
@@ -320,6 +323,8 @@ test("animate_scale reverse", function() {
     equal(el.css('display'), 'block', 'Element starts visible');
     $.cardstories.animate_scale(true, factor, duration, el, function () {
         equal(el.css('display'), 'none', 'Element is invisible after animation.');
+        // Show the element, otherwise some versions of FF report faulty values.
+        el.show();
         equal(parseInt(el.css('top'), 10), dst_top, 'Element achieves proper top.');
         equal(parseInt(el.css('left'), 10), dst_left, 'Element achieves proper left.');
         equal(el.width(), dst_width, 'Element achieves proper width.');
@@ -332,7 +337,7 @@ test("animate_scale reverse", function() {
             left: orig_left,
             width: orig_width,
             height: orig_height,
-            fontSize: orig_fontsize 
+            fontSize: orig_fontsize
         });
         start();
     });
@@ -1562,7 +1567,13 @@ test("create_pick_card_animate", function() {
     var element = $('.cardstories_create .cardstories_pick_card', root);
     var card_specs = [{value: 1}, {value: 2}, {value: 3}, {value: 4}, {value: 5}, {value: 6}];
     var cards = $('.cardstories_deck .cardstories_card', element);
-    var final_top = parseInt($('.cardstories_cards', element).css('top'), 10);
+
+    // Make sure the container (and its ancestors) are visible before measuring top and left,
+    // otherwise some versions of FF report bad values.
+    var container = $('.cardstories_cards', element).show();
+    container.parents().show();
+    var final_top = parseInt(container.css('top'), 10);
+
     var src_template = $('.cardstories_card_template', element).metadata({type: 'attr', name: 'data'}).card;
 
     cards.each(function() {

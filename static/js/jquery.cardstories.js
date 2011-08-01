@@ -100,6 +100,10 @@
         // absolutely, and its children must be sized and positioned relatively
         // (i.e., "em" instead of "px", percentages for widths and heights).
         animate_scale: function(reverse, factor, duration, el, cb) {
+            // In some versions of FF, hidden elements always return 0 for their top and left property.
+            // So make sure to show the element before doing any measurements.
+            el.show();
+
             var big_top = parseInt(el.css('top'), 10);
             var big_left = parseInt(el.css('left'), 10);
             var big_width = el.width();
@@ -121,9 +125,8 @@
                     height: small_height,
                     fontSize: small_fontsize
                 });
-                
-                // Show the element and animate.
-                el.show();
+
+                // Animate.
                 el.animate({
                     top: big_top,
                     left: big_left,
@@ -212,8 +215,13 @@
             var card_delay = 100;   // delay in ms after each subsequent card starts "flying" from the deck
             var vertical_offset = 8;
             var vertical_rise_duration = 300;
-            var final_top = parseInt($('.cardstories_cards', element).css('top'), 10);
             var q = $({});
+
+            // In some versions of FF, .css('top') always returns zero when used on hidden elements,
+            // that's why we show the container temporarily, get the top, then hide it again.
+            var container = $('.cardstories_cards', element).show();
+            var final_top = parseInt(container.css('top'), 10);
+            container.hide();
 
             cards.each(function(i) {
                 var card = $(this);
