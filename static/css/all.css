@@ -772,6 +772,24 @@
     z-index: 6;
 }
 
+.cardstories .cardstories_create .cardstories_pick_card .cardstories_board .cardstories_card_flyover {
+    position: absolute;
+    display: none;
+}
+
+.cardstories .cardstories_create .cardstories_pick_card .cardstories_board .cardstories_card_flyover .cardstories_card_foreground,
+.cardstories .cardstories_create .cardstories_pick_card .cardstories_board .cardstories_card_flyover .cardstories_card_background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.cardstories .cardstories_create .cardstories_pick_card .cardstories_board .cardstories_cards_hand {
+    /*display: none;*/
+}
+
 /* state create : write a sentence */
 
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_progress_mark { 

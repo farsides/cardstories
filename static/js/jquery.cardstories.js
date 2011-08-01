@@ -220,22 +220,63 @@
                 }, 300);
             });
 
-            // Animate the progress bar into the next step.
             q.queue('chain', function(next) {
                 $this.create_pick_card_animate_fly_to_deck(card_index, element, function() {next();});
+            });
+            q.queue('chain', function(next) {
+                $this.animate_center_picked_card(element, card_index, card_value, function() {next();});
             });
             q.queue('chain', function(next) {
                 var dst_element = $('.cardstories_create .cardstories_write_sentence', root);
                 $this.animate_progress_bar(element, dst_element, root, function() {next();});
             });
 
-            // Initialize the next state.
+            // Finally, initialize the next state.
             q.queue('chain', function(next) {
                 $this.create_write_sentence(player_id, card_value, root);
             });
 
             q.dequeue('chain');
             return deferred;
+        },
+
+        animate_center_picked_card: function(element, index, card, callback) {
+            var dock = $('.cardstories_cards_hand .cardstories_cards', element);
+            var card_element = $('.cardstories_card', dock).eq(index);
+            var card_selected = $('.cardstories_card_foreground', card_element);
+
+            // Image size & position varies according to the state of jqDock when it was frozen)
+            // The dock element is contained in multiple <div> - left position is the sum of all elements
+            var initial_left = card_element.parents('div[class^="jqDockMouse"]').position().left;
+            initial_left += card_element.parents('.jqDock').position().left;
+            initial_left += dock.position().left;
+            // Top position of the card: top position of the bottom of the dock minus card height
+            var dock_bottom_pos = dock.position().top + dock.height();
+            var initial_top = dock_bottom_pos - card_element.height();
+
+            // Replace the docked card by an absolutely positioned image, to be able to move it
+            var card_flyover = $('.cardstories_card_flyover', element);
+            var src = card_flyover.metadata({type: 'attr', name: 'data'}).card.supplant({card: card});
+
+            $('.cardstories_card_foreground', card_flyover).attr('src', src);
+            card_flyover.css({
+                top: initial_top,
+                left: initial_left,
+                width: card_selected.width(),
+                height: card_selected.height(),
+                display: 'block'
+            });
+            dock.css({'display': 'none'});
+
+            // Center the card
+            card_flyover.animate({
+                    top: dock_bottom_pos - 292,
+                    left: 278,
+                    height: 292,
+                    width: 220,
+                }, 500, function() {
+                    callback();
+            });
         },
 
         create_pick_card_animate: function(card_specs, element, root, cb) {
