@@ -54,9 +54,7 @@
                      'win': {100: 'n', 101: 'y' }
                     };
     var game;
-    if(skin == 'advertise') {
-      $.cardstories.advertise('PLAYER1', 100, root);
-    } else if(skin == 'in_progress') {
+    if(skin == 'in_progress') {
       $.cardstories.lobby_in_progress('PLAYER1', lobby, root);
     } else if(skin == 'in_progress_one') {
       $.cardstories.lobby_in_progress('PLAYER1', lobby_one, root);
@@ -68,10 +66,10 @@
       $.cardstories.create_write_sentence('PLAYER1', 5, root);
     } else if(skin == 'invitation_owner') {
       game = {
-	'id': 100,
-	'owner': true,
-	 'ready': false,
-	'sentence': 'long sentence is in the flux',
+        'id': 100,
+        'owner': true,
+        'ready': false,
+        'sentence': 'long sentence is in the flux',
         'players': [ [ 'player1', null, 'n', 5, [] ],
                      [ 'player2', null, 'n', null, [] ] ]
       };

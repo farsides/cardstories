@@ -145,6 +145,8 @@ test("play_again_finish_state", function() {
 	    'players': []
 	};
 	var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_invitation .cardstories_owner', root);
+    var advertise = $('.cardstories_invitation .cardstories_owner .cardstories_advertise', element);
 	game.owner = false;
     $.cardstories.complete(player_id, game, root);
     ok($('.play_again', root).is(':hidden'), 'Play again button is hidden when the player is owner');
@@ -153,13 +155,13 @@ test("play_again_finish_state", function() {
     ok(!$('.play_again', root).is(':hidden'), 'Play again button is visible when the player is owner');
     var create = $.cardstories.create;
     var send_game = $.cardstories.send_game;
-    var $textarea = $('.cardstories_text', $('.cardstories_advertise', root));
+    var $textarea = $('.cardstories_text', advertise);
     $.cookie('CARDSTORIES_INVITATIONS', null);
     $textarea.val('aaa@aaa.aaa\nbbb@bbb.bbb\nccc@ccc.ccc');
     var text = $textarea.val();
     $.cardstories.send_game = function () {}; //do nothing
-    $.cardstories.advertise(player_id, game.id, root);
-    $('.cardstories_submit', $('.cardstories_advertise', root)).click();
+    $.cardstories.advertise(player_id, game.id, element);
+    $('.cardstories_submit', advertise).click();
     $.cardstories.send_game = send_game;
     var inv_cookie = $.cookie('CARDSTORIES_INVITATIONS');
     $.cardstories.create = function (arg_player_id, arg_root) {
@@ -341,20 +343,13 @@ test("animate_scale reverse", function() {
     $.cardstories.animate_scale = cardstories_original_animate_scale;
     $.cardstories.animate_scale(true, factor, duration, el, function () {
         equal(el.css('display'), 'none', 'Element is invisible after animation.');
+        // Show the element, otherwise some versions of FF report faulty values.
+        el.show();
         equal(parseInt(el.css('top'), 10), orig_top, 'Element achieves proper top.');
         equal(parseInt(el.css('left'), 10), orig_left, 'Element achieves proper left.');
         equal(el.width(), orig_width, 'Element achieves proper width.');
         equal(el.height(), orig_height, 'Element achieves proper height.');
         equal(parseInt(el.css('font-size'), 10), orig_fontsize, 'Element achieves proper font size.');
-
-        // Cleanup
-        el.css({
-            top: orig_top,
-            left: orig_left,
-            width: orig_width,
-            height: orig_height,
-            fontSize: orig_fontsize
-        });
         start();
     });
 });
@@ -684,7 +679,7 @@ test("game on error", function() {
 
 test("invitation_owner_invite_more", function() {
     setup();
-    expect(5);
+    expect(4);
 
     var player1 = 'player1';
     var card1 = 5;
@@ -709,45 +704,14 @@ test("invitation_owner_invite_more", function() {
     equal($('#qunit-fixture .cardstories_invitation .cardstories_owner.cardstories_active').length, 1);
     $.cookie('CARDSTORIES_INVITATIONS', 'UNEXPECTED');
     $('#qunit-fixture .cardstories_invitation .cardstories_owner .cardstories_invite_friends').click();
-    equal($('#qunit-fixture .cardstories_invitation .cardstories_owner.cardstories_active').length, 0);
-    equal($('#qunit-fixture .cardstories_advertise .cardstories_text').val(), '');
-    equal($('#qunit-fixture .cardstories_advertise.cardstories_active').length, 1);
-});
-
-test("invitation_owner_nobody_invited_yet", function() {
-    setup();
-    expect(3);
-
-    var player1 = 'player1';
-    var card1 = 5;
-    var player_id = player1;
-    var game_id = 101;
-
-    var game = {
-        'id': game_id,
-        'owner': true,
-        'ready': false,
-        'players': [ [ player1, null, 'n', card1, [] ], [ 'player2', null, 'n', 10, [] ] ],
-        'invited': [ ]
-    };
-
-    $.cardstories.poll_ignore = function(ignored_request, ignored_answer, new_poll, old_poll) { };
-    $.cardstories.ajax = function(options) { };
-
-    equal($('#qunit-fixture .cardstories_advertise.cardstories_active').length, 0);
-    // there is more than one player, therefore it is not mandatory to send invitations
-    $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
-    equal($('#qunit-fixture .cardstories_advertise.cardstories_active').length, 0);
-    // only the author is here and no pending invitations : show the advertise page
-    game.players = [ game.players[0] ];
-    $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
-    equal($('#qunit-fixture .cardstories_advertise.cardstories_active').length, 1);
+    equal($('#qunit-fixture .cardstories_invitation .cardstories_owner .cardstories_advertise').css('display'), 'block');
+    equal($('#qunit-fixture .cardstories_invitation .cardstories_owner .cardstories_advertise .cardstories_text').val(), '');
 });
 
 test("invitation_owner", function() {
     setup();
     stop();
-    expect(13);
+    expect(6);
 
     var player1 = 'player1';
     var card1 = 5;
@@ -778,20 +742,20 @@ test("invitation_owner", function() {
     };
 
     equal($('#qunit-fixture .cardstories_invitation .cardstories_owner.cardstories_active').length, 0);
-    $.cardstories.
-        invitation(player_id, game, $('#qunit-fixture .cardstories')).
-        done(function(is_ready) {
-            equal($('#qunit-fixture .cardstories_invitation .cardstories_owner .cardstories_sentence').text(), sentence);
-            var cards = $('#qunit-fixture .cardstories_invitation .cardstories_owner .cardstories_cards');
-            equal($('.cardstories_card:nth(0) .cardstories_card_foreground', cards).attr('alt'), player1);
-            equal($('.cardstories_card:nth(0) .cardstories_card_foreground', cards).attr('src'), 'PATH/card0' + card1 + '.png');
-            equal($('.cardstories_card:nth(1) .cardstories_card_foreground', cards).attr('alt'), player2);
-            equal($('.cardstories_card:nth(1) .cardstories_card_foreground', cards).attr('src'), 'PATH/card-back.png');
-            equal($('.cardstories_card:nth(2) .cardstories_card_foreground', cards).attr('alt'), 'Waiting');
-            equal($('.cardstories_card:nth(2) .cardstories_card_foreground', cards).attr('src'), 'PATH/card-back.png');
-            equal($('#qunit-fixture .cardstories_invitation .cardstories_owner.cardstories_active').length, 1);
-            $('#qunit-fixture .cardstories_owner .cardstories_voting').click();
-        });
+    $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
+    equal($('#qunit-fixture .cardstories_invitation .cardstories_owner .cardstories_sentence').text(), sentence);
+    // TODO: Test card display when new display logic is implemented.
+    /*
+    var cards = $('#qunit-fixture .cardstories_invitation .cardstories_owner .cardstories_cards');
+    equal($('.cardstories_card:nth(0) .cardstories_card_foreground', cards).attr('alt'), player1);
+    equal($('.cardstories_card:nth(0) .cardstories_card_foreground', cards).attr('src'), 'PATH/card0' + card1 + '.png');
+    equal($('.cardstories_card:nth(1) .cardstories_card_foreground', cards).attr('alt'), player2);
+    equal($('.cardstories_card:nth(1) .cardstories_card_foreground', cards).attr('src'), 'PATH/card-back.png');
+    equal($('.cardstories_card:nth(2) .cardstories_card_foreground', cards).attr('alt'), 'Waiting');
+    equal($('.cardstories_card:nth(2) .cardstories_card_foreground', cards).attr('src'), 'PATH/card-back.png');
+    equal($('#qunit-fixture .cardstories_invitation .cardstories_owner.cardstories_active').length, 1);
+    */
+    $('#qunit-fixture .cardstories_owner .cardstories_voting').click();
 });
 
 test("invitation_pick", function() {
@@ -1431,46 +1395,40 @@ test("results_board", function() {
 
 test("advertise", function() {
     setup();
-    expect(8);
+    expect(6);
     
     var owner_id = 15;
     var game_id = 100;
+    var element = $('#qunit-fixture .cardstories_invitation .cardstories_owner');
+    var advertise = $('.cardstories_advertise', element);
 
     $.cardstories.ajax = function(options) {
         equal(options.type, 'GET');
         equal(options.url, $.cardstories.url + '?action=invite&owner_id=' + owner_id + '&game_id=' + game_id + '&player_id=player1&player_id=player2');
     };
 
-    var element = $('#qunit-fixture .cardstories_advertise');
     // the list of invitations is filled by the user
     $.cookie('CARDSTORIES_INVITATIONS', null);
     var text = " \n \t player1 \n\n   \nplayer2";
-    $('.cardstories_text', element).text(text);
-    $.cardstories.advertise(owner_id, game_id, $('#qunit-fixture .cardstories'));
-    $('.cardstories_submit', element).click();
+    $('.cardstories_text', advertise).text(text);
+    $.cardstories.advertise(owner_id, game_id, element);
+    $('.cardstories_submit', advertise).click();
     equal($.cookie('CARDSTORIES_INVITATIONS'), text);
 
     // the list of invitations is retrieved from the cookie
-    $('.cardstories_text', element).text('UNEXPECTED');
-    $.cardstories.advertise(owner_id, game_id, $('#qunit-fixture .cardstories'));
-    equal($('.cardstories_text', element).val(), text);
+    $('.cardstories_text', advertise).text('UNEXPECTED');
+    $.cardstories.advertise(owner_id, game_id, element);
+    equal($('.cardstories_text', advertise).val(), text);
 
     $.cookie('CARDSTORIES_INVITATIONS', null);
-    $('.cardstories_text', element).text('');
-    $.cardstories.advertise(owner_id, game_id, $('#qunit-fixture .cardstories'));
+    $('.cardstories_text', advertise).text('');
+    $.cardstories.advertise(owner_id, game_id, element);
 
     // button should be enabled only when text is not blank
-    ok(!$('.cardstories_submit', element).hasClass('cardstories_submit_ready'), 'button should be disabled');
-    $('.cardstories_text', element).text('player1').keyup();
-    ok($('.cardstories_submit', element).hasClass('cardstories_submit_ready'), 'button should be enabled');
-
-    // GAME_URL supplant
-    var root = $('#qunit-fixture .cardstories');    
-    var facebookUrl = $('#facebook_url').html().supplant({'GAME_URL': escape($.cardstories.permalink(owner_id, game_id, root))});
-    var src = $('.cardstories_fb_invite', element).attr('src');
-    ok(src.indexOf('GAME_URL') == -1, '{GAME_URL} supplant');
-    equal(src, facebookUrl);
-  });
+    ok(!$('.cardstories_submit', advertise).hasClass('cardstories_submit_ready'), 'button should be disabled');
+    $('.cardstories_text', advertise).text('player1').keyup();
+    ok($('.cardstories_submit', advertise).hasClass('cardstories_submit_ready'), 'button should be enabled');
+});
 
 test("refresh_lobby", function() {
     setup();
