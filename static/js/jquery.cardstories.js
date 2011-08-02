@@ -656,20 +656,19 @@
             });
         },
 
-        advertise: function(owner_id, game_id, root) {
+        advertise: function(owner_id, game_id, element) {
             var $this = this;
-            var element = $('.cardstories_advertise', root);
-            this.set_active(root, element);
-            this.notify_active(root, 'advertise');
+            var box = $('.cardstories_advertise', element);
             var text = $.cookie('CARDSTORIES_INVITATIONS');
             if(text !== undefined && text !== null) {
-                $('.cardstories_text', element).text(text);
+                $('.cardstories_text', box).text(text);
             }
+
             var load_text = function ($o) {
                 if ($.trim($o.val()).length !== 0) {
                     $('.cardstories_submit').addClass('cardstories_submit_ready');
-                    $('.cardstories_submit', element).unbind('click').click(function() {
-                        var text = $('.cardstories_text', element).val();
+                    $('.cardstories_submit', box).unbind('click').click(function() {
+                        var text = $('.cardstories_text', box).val();
                         var invites = $.map($.grep(text.split(/\s+/), function(s,i) { return s !== ''; }),
                                             function(s,i) {
                                                 return 'player_id=' + encodeURIComponent(s);
@@ -678,16 +677,17 @@
                         $this.send_game(owner_id, game_id, element, 'action=invite&owner_id=' + owner_id + '&game_id=' + game_id + '&' + invites.join('&'));
                       });
                 } else {
-                    $('.cardstories_submit', element).unbind('click');
+                    $('.cardstories_submit', box).unbind('click');
                     $('.cardstories_submit').removeClass('cardstories_submit_ready');
                 }
             };
-            load_text($('.cardstories_text', element));
-            $('.cardstories_text', element).unbind('keyup').keyup(function () {
+            load_text($('.cardstories_text', box));
+            $('.cardstories_text', box).unbind('keyup').keyup(function () {
                 load_text($(this));
             });
-            var facebookUrl = $('#facebook_url').html().supplant({'GAME_URL': escape(this.permalink(owner_id, game_id, root))});
-            $('.cardstories_fb_invite', element).attr('src', facebookUrl);
+
+            // TODO: animate this into existence
+            box.show();
         },
 
         poll_timeout: 300 * 1000, // must be identical to the --poll-timeout value 
@@ -874,11 +874,7 @@
             var poll = true;
             var deferred;
             if(game.owner) {
-                if(game.invited.length === 0 && game.players.length <= 1) {
-                    deferred = this.advertise(player_id, game.id, root);
-                } else {
-                    deferred = this.invitation_owner(player_id, game, root);
-                }
+                deferred = this.invitation_owner(player_id, game, root);
             } else {
                 if ($.query.get('anonymous')) {
                     deferred = this.invitation_anonymous(player_id, game, root);
@@ -909,6 +905,7 @@
             this.notify_active(root, 'invitation_owner');
             this.display_progress_bar(3, element, root);
             $('.cardstories_sentence', element).text(game.sentence);
+
             //
             // Proceed to vote, if possible
             //
@@ -945,8 +942,8 @@
                 }
                 cards.push(card);
             }
-            var hand = $('.cardstories_cards_hand', element);
-            return this.display_or_select_cards('invitation_owner', cards, undefined, hand);
+            
+            // TODO: display the cards without jqDock
         },
 
         invitation_pick: function(player_id, game, root) {

@@ -266,31 +266,6 @@
             </div>
           </div>
         </div>
-
-        <div class="cardstories_advertise cardstories_game">
-          <div class="cardstories_progress_owner"></div>
-          <div class="cardstories_frame">
-            <div class="cardstories_frame_bordertop"></div>
-            <div class="cardstories_frame_content"></div>
-            <div class="cardstories_frame_borderbottom"></div>
-          </div>
-          <div class="cardstories_submit"></div>
-          <div class="cardstories_back"></div>
-          <div class="cardstories_hint"></div>
-          <div class="cardstories_invitegirl"></div>
-          <div class="cardstories_invitegirlshadow"></div>
-          <!-- Facebook invite & send -->
-          <div class="cardstories_fb_label">To invite your Facebook friends to play, click on "Recommend". <br />The game you've created will be published on your Facebook wall:</div>
-          <div class="hidden" id="facebook_url">http://www.facebook.com/plugins/like.php?href={GAME_URL}&amp;layout=standard&amp;width=450&amp;show_faces=false&amp;action=recommend&amp;colorscheme=light&amp;font&amp;height=80</div>
-          <iframe class="cardstories_fb_invite" src="none" scrolling="no" frameborder="0" allowTransparency="true"></iframe>
-          <!-- TODO: "Send" FB button doesn't yet work with iframe. Add &send=true to the above URL when it does -->
-          <div class="cardstories_text_label">Or type in your friends emails here, separated by spaces:</div>
-          <div class="cardstories_text_label_tiny">(We promise to never give or sell the emails to anyone. We hate spams just like you.)</div>
-          <div class="cardstories_text_bordertop"></div>
-          <textarea class="cardstories_text" cols="88" rows="5" name="sentence"></textarea>
-          <div class="cardstories_text_borderbottom"></div>
-        </div>
-
         <div class="cardstories_invitation">
           <div class="cardstories_participate">
             <div class="cardstories_sentence"></div>
@@ -340,6 +315,17 @@
               </div>
               <div class="cardstories_board">
                 <div class="cardstories_progress"></div>
+                  <div class="cardstories_advertise">
+                    <div class="cardstories_text_label">Type in your friends emails here, separated by spaces:</div>
+                    <div class="cardstories_text_label_tiny">(We promise to never give or sell the emails to anyone. We hate spams just like you.)</div>
+                    <div class="cardstories_text_frame">
+                      <div class="cardstories_text_container">
+                        <textarea class="cardstories_text" name="sentence"></textarea>
+                      </div>
+                    </div>
+                    <button class="cardstories_submit">Submit</button>
+                    <button class="cardstories_back">Back</button>
+                  </div>
                 <div class="cardstories_sentence_box">
                   <div class="cardstories_sentence"></div>
                   <div class="cardstories_sentence_footer"></div>
