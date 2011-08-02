@@ -29,7 +29,7 @@ for dirpath, dirnames, filenames in os.walk('static'):
                 if dirname == 'mockups':
                     del dirnames[i]
 	    if filenames:
-                filenames = filter(lambda f: re.match('.*.(html|css|js|png|jpg|gif)$', f), filenames)
+                filenames = filter(lambda f: re.match('.*.(html|css|js|png|jpg|gif|eot|woff|ttf|svg)$', f), filenames)
 	        data_files.append(['/usr/share/cardstories/' + dirpath, [os.path.join(dirpath, f) for f in filenames]])
 
 for dirpath, dirnames, filenames in os.walk('website'):

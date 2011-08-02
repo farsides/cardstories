@@ -148,6 +148,15 @@
                     fontSize: small_fontsize
                 }, duration, function() {
                     el.hide();
+                    // Reset to original size.
+                    el.css({
+                        top: big_top,
+                        left: big_left,
+                        width: big_width,
+                        height: big_height,
+                        fontSize: big_fontsize
+                    });
+                
                     if (cb !== undefined) {
                         cb();
                     }
@@ -166,38 +175,111 @@
                 return { 'value':card };
             });
 
+            // Set up modal box behavior
+            var box = $('.cardstories_game_about_creativity', element);
+            var button = $('.cardstories_game_about_creativity_ok', box);
+            var button_img = $('img', button);
+            var button_img_src = button_img.attr('src');
+            var button_img_src_over = button_img.metadata({type: 'attr', name: 'data'}).over;
+            var button_a = $('a', button);
+            button_a.mousedown(function() {
+                button_img.attr('src', button_img_src_over);
+            });
+            button_a.mouseup(function() {
+                button_img.attr('src', button_img_src);
+                // Hide the box and disable the modal overlay.
+                $this.animate_scale(true, 5, 500, box, function() {
+                    $('.cardstories_modal_overlay', element).hide();
+                });
+            });
+
             var deferred = $.Deferred();
             var q = $({});
-            var card;
+            var card_value, card_index;
+
+            // Deal the cards
             q.queue('chain', function(next) {
                 $this.create_pick_card_animate(cards, element, root, function() {next();});
             });
+
+            // Set up the dock for card selection, and show the modal box.  The
+            // user won't be able to select a card until "OK" is clicked.
             q.queue('chain', function(next) {
-                var ok = function(_card) {
-                    card = _card;
+                var ok = function(_card_value, _card_index) {
+                    // The selected card will be needed later in the 'chain' queue.
+                    card_value = _card_value;
+                    card_index = _card_index;
                     next();
                 };
 
-                $this.select_cards('create_pick_card', cards, ok, element).done(function() {
+                $this.select_cards('create_pick_card', cards, ok, element, root).done(function() {
                     deferred.resolve();
                 });
 
-                // Delay the appearance of the info box artificially, since
+                // Delay the appearance of the modal box artificially, since
                 // jqDock doesn't provide a hook for when expansion finishes.
                 $this.setTimeout(function() {
-                    var box = $('.cardstories_game_about_creativity', element);
                     $this.animate_scale(false, 5, 500, box);
                 }, 300);
+            });
+
+            q.queue('chain', function(next) {
+                $this.create_pick_card_animate_fly_to_deck(card_index, element, function() {next();});
+            });
+            q.queue('chain', function(next) {
+                $this.animate_center_picked_card(element, card_index, card_value, function() {next();});
             });
             q.queue('chain', function(next) {
                 var dst_element = $('.cardstories_create .cardstories_write_sentence', root);
                 $this.animate_progress_bar(element, dst_element, root, function() {next();});
             });
+
+            // Finally, initialize the next state.
             q.queue('chain', function(next) {
-                $this.create_write_sentence(player_id, card, root);
+                $this.create_write_sentence(player_id, card_value, root);
             });
+
             q.dequeue('chain');
             return deferred;
+        },
+
+        animate_center_picked_card: function(element, index, card, callback) {
+            var dock = $('.cardstories_cards_hand .cardstories_cards', element);
+            var card_element = $('.cardstories_card', dock).eq(index);
+            var card_selected = $('.cardstories_card_foreground', card_element);
+
+            // Image size & position varies according to the state of jqDock when it was frozen)
+            // The dock element is contained in multiple <div> - left position is the sum of all elements
+            var initial_left = card_element.parents('div[class^="jqDockMouse"]').position().left;
+            initial_left += card_element.parents('.jqDock').position().left;
+            initial_left += dock.position().left;
+            // Top position of the card: top position of the bottom of the dock minus card height
+            var dock_bottom_pos = dock.position().top + dock.height();
+            var initial_top = dock_bottom_pos - card_element.height();
+
+            // Replace the docked card by an absolutely positioned image, to be able to move it
+            var card_flyover = $('.cardstories_card_flyover', element);
+            var src = card_flyover.metadata({type: 'attr', name: 'data'}).card.supplant({card: card});
+
+            $('.cardstories_card_foreground', card_flyover).attr('src', src);
+            card_flyover.css({
+                top: initial_top,
+                left: initial_left,
+                width: card_selected.width(),
+                height: card_selected.height(),
+                display: 'block'
+            });
+            dock.css({'display': 'none'});
+
+            // Center the card
+            card_flyover.animate({
+                    top: dock_bottom_pos - 292,
+                    left: 278,
+                    height: 292,
+                    width: 220,
+                }, 500, function() {
+                    callback();
+            });
         },
 
         create_pick_card_animate: function(card_specs, element, root, cb) {
@@ -300,6 +382,72 @@
                 next();
             });
 
+            q.dequeue('chain');
+        },
+
+        create_pick_card_animate_fly_to_deck: function(card_index, element, cb) {
+            var deck = $('.cardstories_deck', element);
+            var cards = $('.cardstories_card', deck);
+            var docked_cards = $('.cardstories_cards_hand .cardstories_card', element);
+            var nr_of_cards = cards.length;
+            var card_fly_velocity = 1.2;   // in pixels per milisecond
+            var card_delay = 100;   // delay in ms after each subsequent card starts "flying" back to the deck
+            var deck_cover = $('.cardstories_deck_cover', deck);
+            var final_top = parseInt(deck_cover.css('top'), 10);
+            var final_left = parseInt(deck_cover.css('left'), 10);
+            var final_width = deck_cover.width();
+            var final_height = deck_cover.height();
+            var deck_offset = deck.offset();
+            var q = $({});
+
+            cards.each(function(i) {
+                var card = $(this);
+                var rindex = nr_of_cards - i - 1;
+                // Hide the chosen card (we will use the one handled by jqDock)
+                // and move on to the next one.
+                if (rindex === card_index) {
+                    card.hide();
+                    return;
+                }
+
+                var docked_card = docked_cards.find('.cardstories_card_foreground').eq(rindex);
+                var height = docked_card.height();
+                var width = docked_card.width();
+                var starting_left = docked_card.offset().left - deck_offset.left;
+                var starting_top = parseInt(card.css('top'), 10) - height + final_height;
+                var fly_length = Math.sqrt(Math.pow(starting_top - final_top, 2) + Math.pow(starting_left - final_left, 2));
+                var fly_duration = fly_length / card_fly_velocity;
+
+                card.css({top: starting_top, left: starting_left, height: height, width: width});
+
+                // The first card should start flying immediately,
+                // but each subsequent card should be delayed.
+                if (i !== 0) {
+                    q.delay(card_delay, 'chain');
+                }
+
+                q.queue('chain', function(next) {
+                    var final_props = {
+                        top: final_top,
+                        left: final_left,
+                        width: final_width,
+                        height: final_height
+                    };
+                    var count = 0;
+                    card.animate(final_props, fly_duration, function() {
+                        // hide the card so that non-rounded borders aren't too obvious in IE8.
+                        card.hide();
+                        // The callback function should be called after the last card
+                        // reaches its final position.
+                        if (rindex === (card_index === 0 ? 1 : 0)) {
+                            cb();
+                        }
+                    });
+                    next();
+                });
+            });
+
+            docked_cards.filter(':not(.cardstories_card_selected)').hide();
             q.dequeue('chain');
         },
 
@@ -459,8 +607,11 @@
                         var root = $(element).parents('.cardstories_root');
                         var interval = $this.setInterval(function() {
                             if (animation_done) {
-                                $this.reload(player_id, data.game_id, root); 
                                 clearInterval(interval);
+                                var dst_element = $('.cardstories_invitation .cardstories_owner', root);
+                                $this.animate_progress_bar(element, dst_element, root, function() {
+                                    $this.reload(player_id, data.game_id, root); 
+                                });
                             }
                         }, 250);
                     }
@@ -808,7 +959,7 @@
                 $this.send_game(player_id, game.id, element, 'action=pick&player_id=' + player_id + '&game_id=' + game.id + '&card=' + card);
             };
             var cards = $.map(game.self[2], function(card,index) { return {'value':card}; });
-            return $this.select_cards('invitation_pick', cards, ok, element);
+            return $this.select_cards('invitation_pick', cards, ok, element, root);
         },
 
         invitation_pick_wait: function(player_id, game, root) {
@@ -824,23 +975,26 @@
             });
         },
 
-        select_cards: function(id, cards, ok, element) {
+        select_cards: function(id, cards, ok, element, root) {
+            var $this = this;
             var confirm = $('.cardstories_card_confirm', element);
-            var middle = confirm.metadata({type: "attr", name: "data"}).middle;
+            if (confirm.children().length == 0) {
+                var snippets = $('.cardstories_snippets', root);
+                var confirm_snippet = $('.cardstories_card_confirm', snippets);
+                confirm_snippet.clone().children().appendTo(confirm);
+            }
             var confirm_callback = function(card, index, nudge, cards_element) {
-                confirm.show();
-                var wrapper = confirm.closest('.cardstories_active');
-                wrapper.toggleClass('cardstories_card_confirm_right', index >= middle);
+                $this.animate_scale(false, 5, 300, confirm);
                 $('.cardstories_card_confirm_ok', confirm).unbind('click').click(function() {
-                    confirm.hide();
-                    ok(card);
-                    wrapper.removeClass('cardstories_card_confirm_right');
-                    nudge();
+                    $this.animate_scale(true, 5, 300, confirm, function() {
+                        ok(card, index);
+                        nudge();
+                    });
                 });
                 $('.cardstories_card_confirm_cancel', confirm).unbind('click').click(function() {
-                    confirm.hide();
-                    wrapper.removeClass('cardstories_card_confirm_right');
-                    nudge();
+                    $this.animate_scale(true, 5, 300, confirm, function() {
+                        nudge();
+                    });
                 });
             };
             var hand = $('.cardstories_cards_hand', element);
@@ -1058,7 +1212,7 @@
                 }
                 cards.push(card);
             }
-            return $this.select_cards('vote_voter', cards, ok, element);
+            return $this.select_cards('vote_voter', cards, ok, element, root);
         },
 
         vote_voter_wait: function(player_id, game, root) {

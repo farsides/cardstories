@@ -170,6 +170,21 @@
     width: 776px;
 }
 
+.cardstories .cardstories_pane .cardstories_board .cardstories_modal_overlay { 
+    position: absolute;
+    top: 59px;
+    left: 0px;
+    height: 563px;
+    width: 776px;
+    z-index: 9998;
+
+    /* IE Hack: even if naturally transparent, the modal has to have opacity
+     * specified, otherwise it lets clicks through.*/
+    background-color: #FFFFFF;
+    filter: alpha(opacity=0);
+    opacity: 0;
+}
+
 .cardstories .cardstories_pane .cardstories_sidebar { 
     position: absolute;
     top: 0px;
@@ -179,9 +194,19 @@
 }
 
 .cardstories .cardstories_pane .cardstories_sidebar .cardstories_deck { 
-    background: transparent url('images/card_deck.png') no-repeat left top;
+    background: transparent url('images/card_deck_base.png') no-repeat left top;
     width: 216px;
     height: 217px;
+}
+
+.cardstories .cardstories_pane .cardstories_sidebar .cardstories_deck_cards { 
+    background: transparent url('images/card_deck.png') no-repeat left top;
+    position: absolute;
+    left:45px;
+    top:13px;
+    width: 135px;
+    height: 153px;
+    z-index: 7;
 }
 
 .cardstories_player_seat {
@@ -539,51 +564,84 @@
 }
 
 .cardstories_card_confirm { 
-    position: absolute;
-    top: 290px;
-    right: 20px;
-    height: 148px;
-    width: 236px;
-    z-index: 5;
     display: none;
-    background: transparent url('images/select_continue.png') no-repeat left top;
-}
-
-.cardstories_card_confirm_right .cardstories_card_confirm { 
-   left: 50px;
- }
-
-
-
-
-.cardstories_card_confirm_ok { 
     position: absolute;
-    top: 60px;
-    right: 15px;
-    height: 50px;
-    width: 109px;
-    background: transparent url('images/select_ok.png') no-repeat left top;
-    background-position: 0px 0px;
+    z-index: 5;
+    left: 231px;
+    top: 81px;
+    height: 120px;
+    width: 298px;
+    text-align:center;
+    font-size: 10px;
+    font-family: "Licon";
+    color:#FFFFFF;
 }
 
-.cardstories_card_confirm_ok:hover {
-    background: transparent url('images/select_ok.png') no-repeat left top;
-    background-position: -109px 0px;
+.cardstories_card_confirm img {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
 }
 
+.cardstories_card_confirm a {
+    display: block;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+
+    /* IE quirk: make the whole button clickable. */
+    background: url(#);
+}
+
+.cardstories_card_confirm a:active {
+    color: black;
+}
+
+.cardstories_card_confirm span {
+    position: relative;
+    top: 0.25em;
+}
+
+.cardstories_card_confirm_h1 {
+    margin: 0.3em 0;
+    font-size: 2.4em; 
+}
+
+.cardstories_card_confirm_h2 {
+    margin: 0;
+    font-family: "Helvetica";
+    font-size: 1.4em; 
+}
+
+.cardstories_card_confirm_buttons { 
+    position: relative;
+    top: 0.8em;
+    margin: 0 auto;
+    font-size: 2.0em; 
+    width: 12.75em;
+    height: 1.7em;
+}
+
+.cardstories_card_confirm_ok,
 .cardstories_card_confirm_cancel { 
-    position: absolute;
-    top: 60px;
-    left: 20px;
-    width: 91px;
-    height: 38px;
-    background: transparent url('images/select_cancel.png') no-repeat left top;
-    background-position: 0px 0px;
+    position: relative;
+    width: 6.3em;
+    height: 100%;
 }
 
-.cardstories_card_confirm_cancel:hover { 
-    background: transparent url('images/select_cancel.png') no-repeat left top;
-    background-position: -91px 0px;
+.cardstories_card_confirm_cancel {
+    float: left;
+}
+
+.cardstories_card_confirm_ok {
+    float: right;
 }
 
 /* state create : pick a card */
@@ -592,7 +650,11 @@
     z-index: 1;
 }
 
-.cardstories .cardstories_create .cardstories_pick_card .cardstories_deck .cardstories_card {
+.cardstories .cardstories_create .cardstories_pick_card .cardstories_deck .cardstories_deck_cover {
+    display: none;
+}
+
+.cardstories .cardstories_create .cardstories_pick_card .cardstories_deck img {
     position: absolute;
     top: 15px;
     left: 56px;
@@ -603,7 +665,7 @@
 .cardstories .cardstories_create .cardstories_game_about_creativity { 
     display: none;
     position: absolute;
-    z-index: 1;
+    z-index: 9999;
     font-size: 10px;
     left: 230px;
     top: 90px;
@@ -614,7 +676,7 @@
     color:#FFFFFF;
 }
 
-.cardstories .cardstories_create .cardstories_game_about_creativity_background { 
+.cardstories .cardstories_create .cardstories_game_about_creativity_background {
     position: absolute;
     top: 0px;
     left: 0px;
@@ -648,7 +710,7 @@
     height: 2em;
 }
 
-.cardstories .cardstories_create .cardstories_game_about_creativity_ok_background {
+.cardstories .cardstories_create .cardstories_game_about_creativity_ok > img {
     position: absolute;
     z-index: -1;
     top: 0px;
@@ -657,9 +719,27 @@
     height: 100%;
 }
 
-.cardstories .cardstories_create .cardstories_game_about_creativity_ok > span {
+.cardstories .cardstories_create .cardstories_game_about_creativity_ok > a {
+    display: block;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+
+    /* IE quirk: make the whole button clickable. */
+    background: url(#);
+}
+
+.cardstories .cardstories_create .cardstories_game_about_creativity_ok > a > span {
     position: relative;
-    top: 11px;
+    top: 0.46em;
+}
+
+.cardstories .cardstories_create .cardstories_game_about_creativity_ok > a:active {
+    color: black;
 }
 
 .cardstories .cardstories_create .cardstories_pick_card .cardstories_board .cardstories_cards {
@@ -691,6 +771,24 @@
 
 .cardstories_card_6 {
     z-index: 6;
+}
+
+.cardstories .cardstories_create .cardstories_pick_card .cardstories_board .cardstories_card_flyover {
+    position: absolute;
+    display: none;
+}
+
+.cardstories .cardstories_create .cardstories_pick_card .cardstories_board .cardstories_card_flyover .cardstories_card_foreground,
+.cardstories .cardstories_create .cardstories_pick_card .cardstories_board .cardstories_card_flyover .cardstories_card_background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.cardstories .cardstories_create .cardstories_pick_card .cardstories_board .cardstories_cards_hand {
+    /*display: none;*/
 }
 
 /* state create : write a sentence */
@@ -1271,10 +1369,6 @@
     width: 327px;
 }
 
-.cardstories .cardstories_invitation .cardstories_pick.cardstories_card_confirm_right .cardstories_pick_mask_chose_a_card {
-    display: none;
-}
-
 .cardstories .cardstories_invitation .cardstories_pick .cardstories_card_confirm {
     top: 350px;
 }
@@ -1363,10 +1457,6 @@
     background: transparent url('images/vote_mask_chose_a_card.png') no-repeat left top;
     height: 339px;
     width: 278px;
-}
-
-.cardstories .cardstories_vote .cardstories_voter.cardstories_card_confirm_right .cardstories_vote_mask_chose_a_card {
-    display: none;
 }
 
 .cardstories .cardstories_vote .cardstories_card_inactive .cardstories_card_my {

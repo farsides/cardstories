@@ -63,6 +63,21 @@
             <div class="cardstories_help"></div>
             <div class="cardstories_logout"></div>
           </div>
+          <div class="cardstories_card_confirm">
+            <img src="../css/images/select_continue.png" />
+            <p class="cardstories_card_confirm_h1">CARD PICKED</p>
+            <p class="cardstories_card_confirm_h2">Continue with this card?</p>
+            <div class="cardstories_card_confirm_buttons">
+              <div class="cardstories_card_confirm_cancel">
+                <img alt="" src="../css/images/select_cancel.png" data="{over:'../css/images/select_cancel_over.png'}" />
+                <a href="javascript://"><span>NO</span></a>
+              </div>
+              <div class="cardstories_card_confirm_ok">
+                <img alt="" src="../css/images/select_ok.png" data="{over:'../css/images/select_ok_over.png'}" />
+                <a href="javascript://"><span>YES</span></a>
+              </div>
+            </div>
+          </div>
         </div>
         <a href="javascript:" class="cardstories_go_lobby"></a>
         <div class="cardstories_subscribe">
@@ -76,6 +91,8 @@
             <div class="cardstories_pane">
               <div class="cardstories_sidebar">
                 <div class="cardstories_deck">
+                  <div class="cardstories_deck_cards"></div>
+                  <img class="cardstories_deck_cover" src="../css/images/card-back.png" />
                   <img class="cardstories_card cardstories_card_1" data="{final_left:716}" alt="" src="../css/images/card-back.png" />
                   <img class="cardstories_card cardstories_card_2" data="{final_left:646}" alt="" src="../css/images/card-back.png" />
                   <img class="cardstories_card cardstories_card_3" data="{final_left:576}" alt="" src="../css/images/card-back.png" />
@@ -85,6 +102,7 @@
                 </div>
               </div>
               <div class="cardstories_board">
+                <div class="cardstories_modal_overlay"></div>
                 <div class="cardstories_progress"></div>
                 <div class="cardstories_game_about_creativity">
                   <img class="cardstories_game_about_creativity_background" alt="" src="../css/images/gamemaster_pick_a_card_modal_box.png" />
@@ -92,15 +110,11 @@
                   <p class="cardstories_game_about_creativity_text_second_line">Amongst your cards,</p>
                   <p class="cardstories_game_about_creativity_text_third_line">choose one that inspires you.</p>
                   <div class="cardstories_game_about_creativity_ok">
-                    <img class="cardstories_game_about_creativity_ok_background" alt="" src="../css/images/gamemaster_pick_a_card_modal_box_button_ok_on.png" />
-                    <span>OK</span>
+                    <img alt="" src="../css/images/gamemaster_pick_a_card_modal_box_button_ok_on.png" data="{over:'../css/images/gamemaster_pick_a_card_modal_box_button_ok_over.png'}" />
+                    <a href="javascript://"><span>OK</span></a>
                   </div>
                 </div>
-                <div class="cardstories_card_confirm" data="{middle:3}">
-                  <div class="cardstories_progress_owner"></div>
-                  <div class="cardstories_card_confirm_ok"></div>
-                  <div class="cardstories_card_confirm_cancel"></div>
-                </div>
+                <div class="cardstories_card_confirm"></div>
                 <div class="cardstories_cards_hand" data="{active:2,size:142,distance:142}">
                   <div class="cardstories_cards">
                     <a class="cardstories_card" href="javascript:"><img alt="" src="../css/images/card_small_visiblepart.png" /></a>
@@ -115,6 +129,10 @@
                     <img class="cardstories_card_background" src="templatebackground" alt="" />
                   </div>
                 </div>
+                <div class="cardstories_card_flyover" data="{card:'css/images/card0{card}.png'}">
+                  <img class="cardstories_card_background" src="css/images/card_bg_selected.png" alt="" />
+                  <img class="cardstories_card_foreground" src="" alt="" />
+                </div>
                 <div class="cardstories_owner_seat">
                     <div class="cardstories_nickname">Nick</div>
                 </div>
@@ -124,7 +142,9 @@
           <div class="cardstories_write_sentence">
             <div class="cardstories_pane">
               <div class="cardstories_sidebar">
-                <div class="cardstories_deck">Deck of cards</div>
+                <div class="cardstories_deck">
+                  <div class="cardstories_deck_cards"></div>
+                </div>
               </div>
               <div class="cardstories_board">
                 <div class="cardstories_progress"></div>
@@ -290,10 +310,7 @@
           </div>
           <div class="cardstories_pick">
             <div class="cardstories_sentence"></div>
-            <div class="cardstories_card_confirm" data="{middle:3}">
-              <div class="cardstories_card_confirm_ok"></div>
-              <div class="cardstories_card_confirm_cancel"></div>
-            </div>
+            <div class="cardstories_card_confirm"></div>
             <div class="cardstories_cards_hand" data="{active:2,size:200,distance:200}">
               <div class="cardstories_cards">
                 <a class="cardstories_card" href="javascript:"><img alt="" src="../css/images/card_medium_visiblepart.png" /></a>
@@ -317,7 +334,9 @@
           <div class="cardstories_owner" data="{waiting:'Waiting'}">
             <div class="cardstories_pane">
               <div class="cardstories_sidebar">
-                <div class="cardstories_deck">Deck of cards</div>
+                <div class="cardstories_deck">
+                  <div class="cardstories_deck_cards"></div>
+                </div>
               </div>
               <div class="cardstories_board">
                 <div class="cardstories_progress"></div>
@@ -355,10 +374,7 @@
         <div class="cardstories_vote">
           <div class="cardstories_voter">
             <div class="cardstories_sentence"></div>
-            <div class="cardstories_card_confirm" data="{middle:3}">
-              <div class="cardstories_card_confirm_ok"></div>
-              <div class="cardstories_card_confirm_cancel"></div>
-            </div>
+            <div class="cardstories_card_confirm"></div>
             <div class="cardstories_cards_hand" data="{active:2,size:200,distance:200}">
               <div class="cardstories_cards">
                 <a class="cardstories_card" href="javascript:"><img alt="" src="../css/images/card_medium_visiblepart.png" /></a>

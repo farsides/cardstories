@@ -22,8 +22,11 @@ var cardstories_default_setInterval = $.cardstories.setInterval;
 var cardstories_default_ajax = $.cardstories.ajax;
 var cardstories_original_error = $.cardstories.error;
 var cardstories_original_poll_ignore = $.cardstories.poll_ignore;
+var cardstories_original_create_pick_card_animate_fly_to_deck = $.cardstories.create_pick_card_animate_fly_to_deck;
+var cardstories_original_animate_center_picked_card = $.cardstories.animate_center_picked_card;
 var cardstories_original_create_write_sentence_animate_end = $.cardstories.create_write_sentence_animate_end;
 var cardstories_original_animate_progress_bar = $.cardstories.animate_progress_bar;
+var cardstories_original_animate_scale = $.cardstories.animate_scale;
 
 function setup() {
     $.cardstories.setTimeout = function(cb, delay) { return window.setTimeout(cb, delay); };
@@ -33,6 +36,18 @@ function setup() {
     $.cardstories.confirm_participate = true;
     $.cardstories.poll_ignore = function() { throw 'poll_ignore'; };
     $.cardstories.error = cardstories_original_error;
+    $.cardstories.create_write_sentence_animate_end = function(card, element, root, cb) { cb(); };
+    $.cardstories.animate_center_picked_card = function(element, index, card, cb) { cb(); };
+    $.cardstories.animate_progress_bar = function(src, dst, root, cb) { cb(); };
+    $.cardstories.create_pick_card_animate_fly_to_deck = function(card_index, element, cb) { cb(); };
+    $.cardstories.animate_scale = function(reverse, factor, duration, el, cb) {
+        if (reverse) {
+            el.hide();
+        } else {
+            el.show();
+        }
+        if (cb !== undefined) cb();
+    };
 }
 
 test("error", function() {
@@ -247,6 +262,7 @@ test("animate_progress_bar", function() {
     var final_left = dst_mark.css('left');
     dst_mark.remove();
 
+    $.cardstories.animate_progress_bar = cardstories_original_animate_progress_bar;
     $.cardstories.animate_progress_bar(src, dst, root, function() {
         equal(src_mark.css('left'), final_left, 'mark is at final position');
 
@@ -273,6 +289,7 @@ test("animate_scale", function() {
     var duration = 500;
 
     equal(el.css('display'), 'none', 'Element starts hidden');
+    $.cardstories.animate_scale = cardstories_original_animate_scale;
     $.cardstories.animate_scale(false, factor, duration, el, function () {
         equal(el.css('display'), 'block', 'Element is visible after animation.');
         equal(parseInt(el.css('top'), 10), orig_top, 'Element achieves proper top.');
@@ -321,6 +338,7 @@ test("animate_scale reverse", function() {
 
     el.show();
     equal(el.css('display'), 'block', 'Element starts visible');
+    $.cardstories.animate_scale = cardstories_original_animate_scale;
     $.cardstories.animate_scale(true, factor, duration, el, function () {
         equal(el.css('display'), 'none', 'Element is invisible after animation.');
         // Show the element, otherwise some versions of FF report faulty values.
@@ -473,10 +491,52 @@ test("send_game on error", function() {
     $.cardstories.send_game(player_id, game_id, $('#qunit-fixture .cardstories_create'), 'QUERY');
 });
 
+test("create_pick_card_animate_fly_to_deck", function() {
+    setup();
+    stop();
+    expect(17);
+
+    var player_id = 42;
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_create .cardstories_pick_card', root);
+    var final_top = $('.cardstories_deck .cardstories_deck_cover', element).css('top');
+    var final_left = $('.cardstories_deck .cardstories_deck_cover', element).css('left');
+    var deck_cards = $('.cardstories_deck .cardstories_card', element);
+    var board_cards = $('.cardstories_cards_hand .cardstories_card', element);
+
+    $.cardstories.animate_progress_bar = $.noop;
+
+    $.cardstories.create_pick_card_animate_fly_to_deck = cardstories_original_create_pick_card_animate_fly_to_deck;
+    $.cardstories.create_pick_card(player_id, root).done(function() {
+        var card_index = 3;
+        board_cards.eq(card_index + 1).addClass('cardstories_card_selected');
+
+        $.cardstories.create_pick_card_animate_fly_to_deck(card_index, element, function() {
+            board_cards.each(function(i) {
+                var card = $(this);
+                var display = card.hasClass('cardstories_card_selected') ? 'block' : 'none';
+                equal(card.css('display'), display, 'only selected card is visible on the board');
+            });
+
+            deck_cards.each(function(i) {
+                var card = $(this);
+                if (i === card_index - 1) {
+                    equal(card.css('display'), 'none', 'selected card is hidden');
+                } else {
+                    equal(card.css('top'), final_top, 'card is animated back to the deck');
+                    equal(card.css('left'), final_left, 'card is animated back to the deck');
+                }
+            });
+
+            start();
+        });
+    });
+});
+
 test("create", function() {
     setup();
     stop();
-    expect(14);
+    expect(16);
 
     var player_id = 15;
     var game_id = 7;
@@ -497,27 +557,26 @@ test("create", function() {
     $.cardstories.reload = function(player_id2, game_id2, root2) {
         equal(player_id2, player_id);
         equal(game_id2, game_id);
-
-        // Clean up
-        $.cardstories.create_write_sentence_animate_end = cardstories_original_create_write_sentence_animate_end;
-        $.cardstories.animate_progress_bar = cardstories_original_animate_progress_bar;
         start();
     };
-
-    $.cardstories.create_write_sentence_animate_end = function(card, element, root, cb) {cb();};
-    $.cardstories.animate_progress_bar = function(src, dst, root, cb) {cb();};
 
     var element = $('#qunit-fixture .cardstories_create');
     equal($('.cardstories_pick_card.cardstories_active', element).length, 0, 'pick_card not active');
     $.cardstories.
         create(player_id, $('#qunit-fixture .cardstories')).
-        done(function(is_ready) {
+        done(function() {
+            equal($('.cardstories_modal_overlay', element).css('display'), 'block', 'modal overlay is on');
+            var button = $('.cardstories_game_about_creativity_ok', element);
+            var anchor = $('a', button);
+            anchor.mousedown();
+            anchor.mouseup();
+            equal($('.cardstories_modal_overlay', element).css('display'), 'none', 'modal overlay is off');
             equal($('.cardstories_pick_card.cardstories_active', element).length, 1, 'pick_card active');
             equal($('.cardstories_write_sentence.cardstories_active', element).length, 0, 'sentence not active');
             var first_card = $('.cardstories_cards_hand .cardstories_card:nth(0)', element);
             card = first_card.metadata({type: "attr", name: "data"}).card;
             first_card.click();
-            $('.cardstories_card_confirm_ok', element).click();
+            $('.cardstories_card_confirm_ok', element).find('a').click();
             equal($('.cardstories_write_sentence.cardstories_active', element).length, 1, 'sentence active');
             ok($('.cardstories_sentence', element).attr('placeholder') !== undefined, 'placeholder is set');
             equal($('.cardstories_sentence', element).attr('placeholder'), $('.cardstories_sentence', element).val());
@@ -545,25 +604,18 @@ test("create on error", function() {
 
     $.cardstories.error = function(err) {
         equal(err, 'error on create', 'calls $.cardstories.error');
+        start();
     };
-
-    $.cardstories.create_write_sentence_animate_end = function(card, element, root, cb) {cb();};
-    $.cardstories.animate_progress_bar = function(src, dst, root, cb) {cb();};
 
     var element = $('#qunit-fixture .cardstories_create');
     $.cardstories.
         create(player_id, $('#qunit-fixture .cardstories')).
-        done(function(is_ready) {
+        done(function() {
             var first_card = $('.cardstories_cards_hand .cardstories_card:nth(0)', element);
             first_card.click();
-            $('.cardstories_card_confirm_ok', element).click();
+            $('.cardstories_card_confirm_ok', element).find('a').click();
             $('.cardstories_write_sentence .cardstories_sentence', element).val('SENTENCE');
             $('.cardstories_write_sentence .cardstories_submit', element).submit();
-
-            // Clean up
-            $.cardstories.create_write_sentence_animate_end = cardstories_original_create_write_sentence_animate_end;
-            $.cardstories.animate_progress_bar = cardstories_original_animate_progress_bar;
-            start();
         });
 });
 
@@ -782,7 +834,7 @@ test("invitation_pick", function() {
             equal(ignored_request.game_id, game_id, 'poll_ignore request game_id');
             equal(new_poll, undefined, 'poll_ignore metadata not set');
             $('.cardstories_card:nth(4)', element).click();
-            $('#qunit-fixture .cardstories_invitation .cardstories_card_confirm_ok').click();
+            $('#qunit-fixture .cardstories_invitation .cardstories_card_confirm_ok').find('a').click();
             start();
         };
 
@@ -798,7 +850,7 @@ test("invitation_pick", function() {
             equal($('.cardstories_card:nth(0) .cardstories_card_foreground', element).attr('src'), 'PATH/card0' + cards[0] + '.png');
             equal($('.cardstories_card:nth(5) .cardstories_card_foreground', element).attr('src'), 'PATH/card0' + cards[5] + '.png');
             $('.cardstories_card:nth(4)', element).click();
-            $('#qunit-fixture .cardstories_invitation .cardstories_card_confirm_ok').click();
+            $('#qunit-fixture .cardstories_invitation .cardstories_card_confirm_ok').find('a').click();
 
             window.setTimeout(invitation_picked, 50);
         });
@@ -1072,7 +1124,7 @@ test("vote_voter", function() {
             equal(ignored_request.game_id, game_id, 'poll_ignore request game_id');
             equal(new_poll, undefined, 'poll_ignore metadata not set');
             $('.cardstories_card:nth(4)', element).click();
-            $('#qunit-fixture .cardstories_vote .cardstories_card_confirm_ok').click();
+            $('#qunit-fixture .cardstories_vote .cardstories_card_confirm_ok').find('a').click();
             start();
         };
 
@@ -1093,7 +1145,7 @@ test("vote_voter", function() {
             equal($('.cardstories_card:nth(5) .cardstories_card_foreground', element).attr('src'), 'PATH/nocard.png');
             $('.cardstories_picked', element).click(); // must do nothing
             $('.cardstories_card:nth(4)', element).click();
-            $('#qunit-fixture .cardstories_vote .cardstories_card_confirm_ok').click();
+            $('#qunit-fixture .cardstories_vote .cardstories_card_confirm_ok').find('a').click();
 
             window.setTimeout(vote_voted, 50);
         });
@@ -1595,6 +1647,55 @@ test("create_pick_card_animate", function() {
     });
 });
 
+test("animate_center_picked_card", function() {
+    setup();
+    stop();
+    expect(3);
+
+    $.cardstories.animate_center_picked_card = cardstories_original_animate_center_picked_card;
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('#qunit-fixture .cardstories_create .cardstories_pick_card');
+    var card_flyover = $('#qunit-fixture .cardstories_create .cardstories_pick_card .cardstories_card_flyover');
+    var cards = [{'value':1},
+                 {'value':2},
+                 {'value':3},
+                 {'value':4},
+                 {'value':5},
+                 {'value':6}];
+    var selected = 1;
+    
+    root.addClass('cardstories_root');
+    $('.cardstories_create .cardstories_pick_card .cardstories_cards', root).show();
+    $.cardstories.set_active(root, $('.cardstories_create .cardstories_pick_card', root));
+
+    // First display the dock
+    var onReady = function(is_ready) {
+        // Then select one of the cards
+        $('.cardstories_cards_hand .cardstories_card', element).eq(selected).click();
+    };
+    var meta = $('.cardstories_cards_hand .cardstories_card_template', element).metadata({type: "attr", name: "data"});
+    var select = function(card, index, nudge, element) {
+        equal(card_flyover.css('display'), 'none', 'flyover card is not visible initially');
+
+        // And play the animation
+        $.cardstories.animate_center_picked_card(element, index, card, function() {
+            equal(card_flyover.css('display'), 'block', 'flyover card visible after animation');
+            equal(card_flyover.position().left, 278, 'flyover card should be moved');
+
+            // Remove selected attribute
+            nudge();
+
+            start();
+        });
+    };
+    $.cardstories.
+        display_or_select_cards('animate_center_picked_card',
+                                cards,
+                                select, 
+                                element).
+        done(onReady);
+});
+
 test("create_write_sentence_animate_start", function() {
     setup();
     stop();
@@ -1617,6 +1718,7 @@ test("create_write_sentence_animate_start", function() {
         equal(write_box.css('display'), 'block', 'write box is visible after animation');
         equal(card_shadow.css('display'), 'block', 'card shadow is visible after animation');
         equal(card_imgs.width(), final_width, 'after animation card grows to its original width');
+
         start();
     });
 
@@ -1657,6 +1759,7 @@ test("create_write_sentence_animate_end", function() {
     equal(card_shadow.css('display'), 'block', 'card shadow is visible initially');
     equal(sentence_box.css('display'), 'none', 'sentence box is invisible initially');
 
+    $.cardstories.create_write_sentence_animate_end = cardstories_original_create_write_sentence_animate_end;
     $.cardstories.create_write_sentence_animate_end(card, element, root, function() {
         equal(write_box.css('display'), 'none', 'write box is invisible after animation');
         equal(card_shadow.css('display'), 'none', 'card shadow is invisible after animation');
@@ -2048,29 +2151,28 @@ test("display_or_select_cards twice", function() {
 test("select_cards ok", function() {
     setup();
     stop();
-    expect(2);
+    expect(1);
 
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_create .cardstories_pick_card', root);
     $.cardstories.set_active(root, element);
     var confirm = $('.cardstories_card_confirm', element);
-    var middle = confirm.metadata({type: "attr", name: "data"}).middle;
     var cards = [{'value':1},{'value':2},{'value':3},{'value':4},{'value':5},{'value':6}];
     var selected = 5;
     var onReady = function(is_ready) {
         $('.cardstories_cards_hand .cardstories_card', element).eq(selected).click();
-        $('.cardstories_card_confirm_ok', element).click();
+        $('.cardstories_card_confirm_ok', element).find('a').click();
     };
     var ok_callback = function(card) {
         equal(cards[selected].value, card, 'selected card');
-        ok(element.hasClass('cardstories_card_confirm_right'), 'selected card is to the right of the middle position defined in the HTML meta data');
         start();
     };
     $.cardstories.
         select_cards('ok',
                      cards,
                      ok_callback, 
-                     element).
+                     element,
+                     root).
         done(onReady);
   });
 
@@ -2082,12 +2184,11 @@ test("select_cards cancel", function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_create', root);
     var confirm = $('.cardstories_card_confirm', element);
-    var middle = confirm.metadata({type: "attr", name: "data"}).middle;
     var cards = [{'value':1},{'value':2},{'value':3},{'value':4},{'value':5},{'value':6}];
     var selected = 4;
     var onReady = function(is_ready) {
         $('.cardstories_cards_hand .cardstories_card', element).eq(selected).click();
-        $('.cardstories_card_confirm_cancel', element).click();
+        $('.cardstories_card_confirm_cancel', element).find('a').click();
         ok(true);
         start();
     };
@@ -2098,7 +2199,8 @@ test("select_cards cancel", function() {
         select_cards('cancel',
                      cards,
                      ok_callback, 
-                     element).
+                     element,
+                     root).
         done(onReady);
   });
 
