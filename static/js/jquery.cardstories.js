@@ -259,7 +259,8 @@
 
             // Replace the docked card by an absolutely positioned image, to be able to move it
             var card_flyover = $('.cardstories_card_flyover', element);
-            var src = card_flyover.metadata({type: 'attr', name: 'data'}).card.supplant({card: card});
+            var meta = card_flyover.metadata({type: 'attr', name: 'data'});
+            var src = meta.card.supplant({card: card});
 
             $('.cardstories_card_foreground', card_flyover).attr('src', src);
             card_flyover.css({
@@ -273,10 +274,10 @@
 
             // Center the card
             card_flyover.animate({
-                    top: dock_bottom_pos - 292,
-                    left: 278,
-                    height: 292,
-                    width: 220,
+                    top: dock_bottom_pos - meta.final_height,
+                    left: meta.final_left,
+                    height: meta.final_height,
+                    width: meta.final_width,
                 }, 500, function() {
                     callback();
             });
