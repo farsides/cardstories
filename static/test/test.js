@@ -341,13 +341,11 @@ test("animate_scale reverse", function() {
     $.cardstories.animate_scale = cardstories_original_animate_scale;
     $.cardstories.animate_scale(true, factor, duration, el, function () {
         equal(el.css('display'), 'none', 'Element is invisible after animation.');
-        // Show the element, otherwise some versions of FF report faulty values.
-        el.show();
-        equal(parseInt(el.css('top'), 10), dst_top, 'Element achieves proper top.');
-        equal(parseInt(el.css('left'), 10), dst_left, 'Element achieves proper left.');
-        equal(el.width(), dst_width, 'Element achieves proper width.');
-        equal(el.height(), dst_height, 'Element achieves proper height.');
-        equal(parseInt(el.css('font-size'), 10), dst_fontsize.toFixed(), 'Element achieves proper font size.');
+        equal(parseInt(el.css('top'), 10), orig_top, 'Element achieves proper top.');
+        equal(parseInt(el.css('left'), 10), orig_left, 'Element achieves proper left.');
+        equal(el.width(), orig_width, 'Element achieves proper width.');
+        equal(el.height(), orig_height, 'Element achieves proper height.');
+        equal(parseInt(el.css('font-size'), 10), orig_fontsize, 'Element achieves proper font size.');
 
         // Cleanup
         el.css({
