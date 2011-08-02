@@ -22,6 +22,7 @@ var cardstories_default_setInterval = $.cardstories.setInterval;
 var cardstories_default_ajax = $.cardstories.ajax;
 var cardstories_original_error = $.cardstories.error;
 var cardstories_original_poll_ignore = $.cardstories.poll_ignore;
+var cardstories_original_create_pick_card_animate = $.cardstories.create_pick_card_animate;
 var cardstories_original_create_pick_card_animate_fly_to_deck = $.cardstories.create_pick_card_animate_fly_to_deck;
 var cardstories_original_animate_center_picked_card = $.cardstories.animate_center_picked_card;
 var cardstories_original_create_write_sentence_animate_end = $.cardstories.create_write_sentence_animate_end;
@@ -36,10 +37,11 @@ function setup() {
     $.cardstories.confirm_participate = true;
     $.cardstories.poll_ignore = function() { throw 'poll_ignore'; };
     $.cardstories.error = cardstories_original_error;
-    $.cardstories.create_write_sentence_animate_end = function(card, element, root, cb) { cb(); };
-    $.cardstories.animate_center_picked_card = function(element, index, card, cb) { cb(); };
-    $.cardstories.animate_progress_bar = function(src, dst, root, cb) { cb(); };
+    $.cardstories.create_pick_card_animate = function(cards, element, root, cb) { cb(); };
     $.cardstories.create_pick_card_animate_fly_to_deck = function(card_index, element, cb) { cb(); };
+    $.cardstories.animate_center_picked_card = function(element, index, card, cb) { cb(); };
+    $.cardstories.create_write_sentence_animate_end = function(card, element, root, cb) { cb(); };
+    $.cardstories.animate_progress_bar = function(src, dst, root, cb) { cb(); };
     $.cardstories.animate_scale = function(reverse, factor, duration, el, cb) {
         if (reverse) {
             el.hide();
@@ -241,9 +243,26 @@ test("display_progress_bar", function() {
     equal($('.cardstories_step4', pbar).attr('class'), 'cardstories_step4', 'step 4 is bare');
     equal($('.cardstories_step5', pbar).attr('class'), 'cardstories_step5', 'step 5 is bare');
     equal($('.cardstories_step6', pbar).attr('class'), 'cardstories_step6', 'step 6 is bare');
+});
 
-    // Clean it up
-    pbar.children().remove();
+test("display_modal", function() {
+    setup();
+    stop();
+    expect(2);
+
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_create', root);
+    var modal = $('.cardstories_info', element);
+    var overlay = $('.cardstories_modal_overlay', element);
+
+    equal(overlay.css('display'), 'block', 'modal overlay is on');
+    $.cardstories.display_modal(modal, overlay, function () {
+        var a = modal.find('a');
+        a.mousedown();
+        a.mouseup();
+        equal(overlay.css('display'), 'none', 'modal overlay is off');
+        start();
+    });
 });
 
 test("animate_progress_bar", function() {
@@ -267,9 +286,6 @@ test("animate_progress_bar", function() {
     $.cardstories.animate_progress_bar = cardstories_original_animate_progress_bar;
     $.cardstories.animate_progress_bar(src, dst, root, function() {
         equal(src_mark.css('left'), final_left, 'mark is at final position');
-
-        // Clean it up
-        src_mark.remove();
         start();
     });
 });
@@ -279,8 +295,8 @@ test("animate_scale", function() {
     stop();
     expect(7);
 
-    var root = $('#qunit-fixture .cardstories');
-    var el = $('.cardstories_game_about_creativity', root);
+    var element = $('#qunit-fixture .cardstories .cardstories_create');
+    var el = $('.cardstories_info', element);
     var orig_top = parseInt(el.css('top'), 10);
     var orig_left = parseInt(el.css('left'), 10);
     var orig_width = el.width();
@@ -299,16 +315,6 @@ test("animate_scale", function() {
         equal(el.width(), orig_width, 'Element achieves proper width.');
         equal(el.height(), orig_height, 'Element achieves proper height.');
         equal(parseInt(el.css('font-size'), 10), orig_fontsize, 'Element achieves proper font size.');
-
-        // Cleanup
-        el.css({
-            top: orig_top,
-            left: orig_left,
-            width: orig_width,
-            height: orig_height,
-            fontSize: orig_fontsize,
-            display: 'none'
-        });
         start();
     });
 });
@@ -318,10 +324,10 @@ test("animate_scale reverse", function() {
     stop();
     expect(7);
 
-    var root = $('#qunit-fixture .cardstories');
+    var element = $('#qunit-fixture .cardstories .cardstories_create');
     // Make sure the element and its ancestors are visible,
     // to prevent some versions of FF report faulty values.
-    var el = $('.cardstories_game_about_creativity', root).show();
+    var el = $('.cardstories_info', element).show();
     el.parents().show();
     var orig_top = parseInt(el.css('top'), 10);
     var orig_left = parseInt(el.css('left'), 10);
@@ -553,16 +559,19 @@ test("create", function() {
         start();
     };
 
+    $.cardstories.setTimeout = function(cb, delay) {
+        cb();
+    }
+
     var element = $('#qunit-fixture .cardstories_create');
     equal($('.cardstories_pick_card.cardstories_active', element).length, 0, 'pick_card not active');
     $.cardstories.
         create(player_id, $('#qunit-fixture .cardstories')).
         done(function() {
             equal($('.cardstories_modal_overlay', element).css('display'), 'block', 'modal overlay is on');
-            var button = $('.cardstories_game_about_creativity_ok', element);
-            var anchor = $('a', button);
-            anchor.mousedown();
-            anchor.mouseup();
+            var a = $('.cardstories_info', element).find('a');
+            a.mousedown();
+            a.mouseup();
             equal($('.cardstories_modal_overlay', element).css('display'), 'none', 'modal overlay is off');
             equal($('.cardstories_pick_card.cardstories_active', element).length, 1, 'pick_card active');
             equal($('.cardstories_write_sentence.cardstories_active', element).length, 0, 'sentence not active');
@@ -1591,6 +1600,7 @@ test("create_pick_card_animate", function() {
         ok(parseInt(card.css('top'), 10) < final_top, 'card starts higher than its final position');
     });
 
+    $.cardstories.create_pick_card_animate = cardstories_original_create_pick_card_animate;
     $.cardstories.create_pick_card_animate(card_specs, element, root, function() {
         cards.each(function(i) {
             var card = $(this);

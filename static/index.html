@@ -78,10 +78,10 @@
         <div class="cardstories_help"></div>
         <div class="cardstories_logout"></div>
       </div>
-      <div class="cardstories_card_confirm">
-        <img src="css/images/select_continue.png" />
-        <p class="cardstories_card_confirm_h1">CARD PICKED</p>
-        <p class="cardstories_card_confirm_h2">Continue with this card?</p>
+      <div class="cardstories_modal cardstories_card_confirm">
+        <img alt="" src="css/images/select_continue.png" />
+        <p class="cardstories_modal_h1">CARD PICKED</p>
+        <p class="cardstories_modal_h2">Continue with this card?</p>
         <div class="cardstories_card_confirm_buttons">
           <div class="cardstories_card_confirm_cancel">
             <img alt="" src="css/images/select_cancel.png" data="{over:'css/images/select_cancel_over.png'}" />
@@ -118,17 +118,17 @@
             <div class="cardstories_board">
               <div class="cardstories_progress"></div>
               <div class="cardstories_modal_overlay"></div>
-              <div class="cardstories_game_about_creativity">
-                <img class="cardstories_game_about_creativity_background" src="css/images/gamemaster_pick_a_card_modal_box.png" />
-                <p class="cardstories_game_about_creativity_text_first_line">THIS GAME IS ABOUT CREATIVITY</p>
-                <p class="cardstories_game_about_creativity_text_second_line">Amongst your cards,</p>
-                <p class="cardstories_game_about_creativity_text_third_line">choose one that inspires you.</p>
-                <div class="cardstories_game_about_creativity_ok">
-                  <img alt="" src="css/images/gamemaster_pick_a_card_modal_box_button_ok_on.png" data="{over:'css/images/gamemaster_pick_a_card_modal_box_button_ok_over.png'}" />
+              <div class="cardstories_modal cardstories_info">
+                <img alt="" src="css/images/modal_background.png" />
+                <p class="cardstories_modal_h1">THIS GAME IS ABOUT CREATIVITY</p>
+                <p class="cardstories_modal_h2">Amongst your cards,</p>
+                <p class="cardstories_modal_h2"><font style="font-weight:bold">choose one that inspires you.</font></p>
+                <div class="cardstories_modal_button">
+                  <img alt="" src="css/images/modal_button_on.png" data="{over:'css/images/modal_button_over.png'}" />
                   <a href="javascript://"><span>OK</span></a>
                 </div>
 	            </div>
-              <div class="cardstories_card_confirm"></div>
+              <div class="cardstories_modal cardstories_card_confirm"></div>
               <div class="cardstories_cards_hand" data="{active:2,size:142,distance:142}">
                 <div class="cardstories_cards">
                   <a class="cardstories_card" href="javascript://"><img src="css/images/card_small_visiblepart.png" /></a>
@@ -237,7 +237,7 @@
               <div class="cardstories_player_seat cardstories_player_seat_3 cardstories_player_top_right"><div class="cardstories_player_name"></div></div>
               <div class="cardstories_player_seat cardstories_player_seat_4 cardstories_player_bottom_right"><div class="cardstories_player_name"></div></div>
               <div class="cardstories_self_seat cardstories_player_seat_5"></div>
-              <div class="cardstories_card_confirm"></div>
+              <div class="cardstories_modal cardstories_card_confirm"></div>
               <div class="cardstories_cards_hand" data="{active:3,size:200,distance:200}">
                 <div class="cardstories_cards">
                   <a class="cardstories_card" href="javascript://"><img src="css/images/card_small_visiblepart.png" /></a>
@@ -274,6 +274,17 @@
             </div>
             <div class="cardstories_board">
               <div class="cardstories_progress"></div>
+              <div class="cardstories_modal_overlay"></div>
+              <div class="cardstories_modal cardstories_info">
+                <img alt="" src="css/images/modal_background.png" />
+                <p class="cardstories_modal_h1">INVITE YOUR FRIENDS TO GUESS YOUR CARD.</p>
+                <p class="cardstories_modal_h2">You can click on <font style="font-weight:bold">"Invite a Friend"</font> around the table,</p>
+                <p class="cardstories_modal_h2">or you can <font style="font-weight:bold">check who's online on the chat</font> and invite them.</p>
+                <div class="cardstories_modal_button">
+                  <img alt="" src="css/images/modal_button_on.png" data="{over:'css/images/modal_button_over.png'}" />
+                  <a href="javascript://"><span>OK</span></a>
+                </div>
+              </div>
               <div class="cardstories_advertise">
                 <div class="cardstories_text_label">Type in your friends emails here, separated by spaces:</div>
                 <div class="cardstories_text_label_tiny">(We promise to never give or sell the emails to anyone. We hate spams just like you.)</div>
@@ -328,7 +339,7 @@
           <div class="cardstories_bubble_player_vote_for_a_card"></div>
           <div class="cardstories_vote_mask_chose_a_card"></div>
           <div class="cardstories_sentence"></div>
-          <div class="cardstories_card_confirm"></div>
+          <div class="cardstories_modal cardstories_card_confirm"></div>
           <div class="cardstories_cards_hand" data="{active:2,size:200,distance:200}">
             <div class="cardstories_cards">
               <a class="cardstories_card" href="javascript://"><img src="css/images/card_small_visiblepart.png" /></a>

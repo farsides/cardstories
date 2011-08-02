@@ -175,24 +175,6 @@
                 return { 'value':card };
             });
 
-            // Set up modal box behavior
-            var box = $('.cardstories_game_about_creativity', element);
-            var button = $('.cardstories_game_about_creativity_ok', box);
-            var button_img = $('img', button);
-            var button_img_src = button_img.attr('src');
-            var button_img_src_over = button_img.metadata({type: 'attr', name: 'data'}).over;
-            var button_a = $('a', button);
-            button_a.mousedown(function() {
-                button_img.attr('src', button_img_src_over);
-            });
-            button_a.mouseup(function() {
-                button_img.attr('src', button_img_src);
-                // Hide the box and disable the modal overlay.
-                $this.animate_scale(true, 5, 500, box, function() {
-                    $('.cardstories_modal_overlay', element).hide();
-                });
-            });
-
             var deferred = $.Deferred();
             var q = $({});
             var card_value, card_index;
@@ -219,7 +201,7 @@
                 // Delay the appearance of the modal box artificially, since
                 // jqDock doesn't provide a hook for when expansion finishes.
                 $this.setTimeout(function() {
-                    $this.animate_scale(false, 5, 500, box);
+                    $this.display_modal($('.cardstories_info', element), $('.cardstories_modal_overlay', element));
                 }, 300);
             });
 
@@ -906,6 +888,8 @@
             this.display_progress_bar(3, element, root);
             $('.cardstories_sentence', element).text(game.sentence);
 
+            this.display_modal($('.cardstories_info', element), $('.cardstories_modal_overlay', element));
+
             //
             // Proceed to vote, if possible
             //
@@ -1429,6 +1413,31 @@
             
             // Finally, place the children into the destination.
             tmp_bar.children().appendTo(dst_bar);
+        },
+
+        display_modal: function(modal, overlay, cb) {
+            var $this = this;
+            var button = $('.cardstories_modal_button', modal);
+            var button_img = $('img', button);
+            var button_img_src = button_img.attr('src');
+            var button_img_src_over = button_img.metadata({type: 'attr', name: 'data'}).over;
+            var button_a = $('a', button);
+            button_a.mousedown(function() {
+                button_img.attr('src', button_img_src_over);
+            });
+            button_a.mouseup(function() {
+                button_img.attr('src', button_img_src);
+                // Hide the box and disable the modal overlay.
+                $this.animate_scale(true, 5, 500, modal, function() {
+                    overlay.hide();
+                });
+            });
+
+            this.animate_scale(false, 5, 500, modal, function () {
+                if (cb !== undefined) {
+                    cb();
+                }
+            });
         },
 
         email: function(game_id, root) {
