@@ -245,6 +245,78 @@
     top: 0.46em;
 }
 
+.cardstories .cardstories_invite_friend {
+    display: none;
+    position: absolute;
+    width: 70px;
+    height: 140px;
+    font-size: 10px;
+    text-align:center;
+    font-family: "Helvetica";
+    color:#FFFFFF;
+}
+
+.cardstories .cardstories_invite_friend img:first-child {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+}
+
+.cardstories .cardstories_invite_friend a {
+    display: block;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+    background: url(#); /* IE quirk: make the whole button clickable. */
+}
+
+.cardstories .cardstories_invite_friend a:hover {
+    color: #0A5F61;
+}
+
+.cardstories .cardstories_invite_friend a:active {
+    color: #008082;
+}
+
+.cardstories .cardstories_invite_friend a > span {
+    position: relative;
+    display: block;
+    top: 4.5em;
+    margin: 0 auto;
+    width: 50%;
+}
+
+.cardstories .cardstories_friend_slot1,
+.cardstories .cardstories_friend_slot4 {
+    top: 115px;
+}
+
+.cardstories .cardstories_friend_slot2,
+.cardstories .cardstories_friend_slot5 {
+    top: 265px;
+}
+
+.cardstories .cardstories_friend_slot3 {
+    top: 415px;
+}
+
+.cardstories .cardstories_friend_slot1,
+.cardstories .cardstories_friend_slot2,
+.cardstories .cardstories_friend_slot3 {
+    left: 15px;
+}
+
+.cardstories .cardstories_friend_slot4,
+.cardstories .cardstories_friend_slot5 {
+    left: 687px;
+}
+
 .cardstories .cardstories_pane .cardstories_sidebar { 
     position: absolute;
     top: 0px;

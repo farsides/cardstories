@@ -888,8 +888,6 @@
             this.display_progress_bar(3, element, root);
             $('.cardstories_sentence', element).text(game.sentence);
 
-            this.display_modal($('.cardstories_info', element), $('.cardstories_modal_overlay', element));
-
             //
             // Proceed to vote, if possible
             //
@@ -927,7 +925,20 @@
                 cards.push(card);
             }
             
+            // First display the modal.
+            var q = $({});
+            q.queue('chain', function(next) {
+                $this.display_modal($('.cardstories_info', element), $('.cardstories_modal_overlay', element), function() {next();});
+            });
+
+            // Then the friend slots.
+            q.queue('chain', function(next) {
+                $this.display_friend_slots($('.cardstories_invite_friend', element), root, function() {next();});
+            });
+
             // TODO: display the cards without jqDock
+
+            q.dequeue('chain');
         },
 
         invitation_pick: function(player_id, game, root) {
@@ -1437,6 +1448,37 @@
                 if (cb !== undefined) {
                     cb();
                 }
+            });
+        },
+
+        display_friend_slots: function(slots, root, cb) {
+            var $this = this;
+            slots.each(function(i) {
+                var slot = $(this);
+
+                // Copy over the snippet first.
+                var snippets = $('.cardstories_snippets', root);
+                var slot_snippet = $('.cardstories_invite_friend', snippets);
+                slot_snippet.clone().children().appendTo(slot);
+
+                // Now apply the button behavior.
+                var img = $('img', slot);
+                var img_src = img.attr('src');
+                var img_meta = img.metadata({type: 'attr', name: 'data'});
+                var out = function() {img.attr('src', img_src);};
+                var over = function() {img.attr('src', img_meta.over);};
+                var down = function() {img.attr('src', img_meta.down);};
+                var a = $('a', slot);
+                a.hover(over, out);
+                a.mousedown(down);
+                a.mouseup(over);
+
+                // Finally animate it in.
+                $this.animate_scale(false, 5, 300, slot, function() {
+                    if (cb !== undefined && i === slots.length - 1) {
+                        cb();
+                    }
+                });
             });
         },
 

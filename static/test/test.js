@@ -265,6 +265,28 @@ test("display_modal", function() {
     });
 });
 
+test("display_friend_slots", function() {
+    setup();
+    stop();
+    expect(10);
+
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_invitation .cardstories_owner', root);
+    var slots = $('.cardstories_invite_friend', element);
+
+    slots.each(function(i) {
+        var slot = $(this);
+        equal(slot.css('display'), 'none', 'slot ' + i + ' starts hidden');
+    });
+    $.cardstories.display_friend_slots(slots, root, function () {
+        slots.each(function(i) {
+            var slot = $(this);
+            equal(slot.css('display'), 'block', 'slot ' + i + ' is visible');
+        });
+        start();
+    });
+});
+
 test("animate_progress_bar", function() {
     setup();
     stop();
