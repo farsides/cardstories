@@ -807,10 +807,12 @@ test("invitation_pick", function() {
     $.cardstories.
         invitation(player_id, game, $('#qunit-fixture .cardstories')).
         done(function(is_ready) {
+            var card_template = $('#qunit-fixture .cardstories_invitation .cardstories_pick .cardstories_card_template');
+            var meta = card_template.metadata({type: 'attr', name: 'data'});
             equal($('#qunit-fixture .cardstories_invitation .cardstories_pick.cardstories_active').length, 1);    
             equal($('#qunit-fixture .cardstories_invitation .cardstories_pick .cardstories_sentence').text(), sentence); // invitation_board function side effect 
-            equal($('.cardstories_card:nth(0) .cardstories_card_foreground', element).attr('src'), 'PATH/card0' + cards[0] + '.png');
-            equal($('.cardstories_card:nth(5) .cardstories_card_foreground', element).attr('src'), 'PATH/card0' + cards[5] + '.png');
+            equal($('.cardstories_card:nth(0) .cardstories_card_foreground', element).attr('src'), meta.card.supplant({card: cards[0]}));//'PATH/card0' + cards[0] + '.png');
+            equal($('.cardstories_card:nth(5) .cardstories_card_foreground', element).attr('src'), meta.card.supplant({card: cards[5]}));//'PATH/card0' + cards[5] + '.png');
             $('.cardstories_card:nth(4)', element).click();
             $('#qunit-fixture .cardstories_invitation .cardstories_card_confirm_ok').find('a').click();
 
@@ -1097,14 +1099,16 @@ test("vote_voter", function() {
     $.cardstories.
         vote(player_id, game, $('#qunit-fixture .cardstories')).
         done(function(is_ready) {
+            var card_template = $('.cardstories_card_template', element);
+            var meta = card_template.metadata({type: 'attr', name: 'data'});
             equal($('#qunit-fixture .cardstories_vote .cardstories_voter.cardstories_active').length, 1);
             equal($('#qunit-fixture .cardstories_voter .cardstories_sentence').text(), sentence);
             for(var i = 0; i < board.length; i++) {
-                equal($('.cardstories_card:nth(' + i + ') .cardstories_card_foreground', element).attr('src'), 'PATH/card0' + board[i] + '.png');
+                equal($('.cardstories_card:nth(' + i + ') .cardstories_card_foreground', element).attr('src'), meta.card.supplant({card: board[i]}));
             }
             equal($('.cardstories_card:nth(0) .cardstories_card_foreground', element).attr('alt'), ' ', 'card0 alt was reset');
             equal($('.cardstories_card:nth(1) .cardstories_card_foreground', element).attr('alt'), ' My Card', 'card1 alt was set');
-            equal($('.cardstories_card:nth(5) .cardstories_card_foreground', element).attr('src'), 'PATH/nocard.png');
+            equal($('.cardstories_card:nth(5) .cardstories_card_foreground', element).attr('src'), meta.nocard);
             $('.cardstories_picked', element).click(); // must do nothing
             $('.cardstories_card:nth(4)', element).click();
             $('#qunit-fixture .cardstories_vote .cardstories_card_confirm_ok').find('a').click();
@@ -1657,7 +1661,7 @@ test("create_write_sentence_animate_start", function() {
     stop();
     expect(7);
 
-    var card = 42;
+    var card = 12;
     var root = $('#qunit-fixture .cardstories');
     var element = root.find('.cardstories_create .cardstories_write_sentence');
 
@@ -1680,7 +1684,7 @@ test("create_write_sentence_animate_start", function() {
 
     equal(write_box.css('display'), 'none', 'write box is not visible initially');
     equal(card_shadow.css('display'), 'none', 'card shadow is not visible initially');
-    ok(card_foreground.attr('src').match(/42/), 'src attribute is set properly to show the chosen card');
+    ok(card_foreground.attr('src').match(card), 'src attribute is set properly to show the chosen card');
     equal(card_imgs.width(), starting_width, 'card starts out at starting width');
 });
 
@@ -2050,7 +2054,7 @@ test("display_or_select_cards select no bg", function() {
         start();
     };
     var background = $('.cardstories_card_template .cardstories_card_background', element);
-    equal(background.attr('src'), 'templatebackground');
+    ok(background.attr('src'), 'src attribute is not blank');
     meta.card_bg = '';
     $.cardstories.
         display_or_select_cards('select no bg',
