@@ -1022,10 +1022,11 @@
             // integrate with the animation.
             var start_collapsed = id === 'create_pick_card';
             id += '_saved_element';
-            var saved_elements = root.data('cardstories_saved_elements') || {};
+            var $root = $(root);
+            var saved_elements = $root.data('cardstories_saved_elements') || {};
             if (saved_elements[id] === undefined) {
                 saved_elements[id] = element.html();
-                root.data('cardstories_saved_elements', saved_elements);
+                $root.data('cardstories_saved_elements', saved_elements);
             } else {
                 element.html(saved_elements[id]);
             }
