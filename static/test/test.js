@@ -31,7 +31,7 @@ var cardstories_default_animate_progress_bar = $.cardstories.animate_progress_ba
 var cardstories_default_animate_scale = $.cardstories.animate_scale;
 
 function setup() {
-    $.cardstories.setTimeout = function(cb, delay) { return window.setTimeout(cb, delay); };
+    $.cardstories.setTimeout = function(cb, delay) { return window.setTimeout(cb, 0); };
     $.cardstories.setInterval = function(cb, delay) { return window.setInterval(cb, delay); };
     $.cardstories.ajax = function(o) { throw o; };
     $.cardstories.reload = $.cardstories.game_or_lobby;
