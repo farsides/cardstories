@@ -25,7 +25,6 @@ var cardstories_default_error = $.cardstories.error;
 var cardstories_default_poll_ignore = $.cardstories.poll_ignore;
 var cardstories_default_create_pick_card_animate = $.cardstories.create_pick_card_animate;
 var cardstories_default_create_pick_card_animate_fly_to_deck = $.cardstories.create_pick_card_animate_fly_to_deck;
-var cardstories_default_animate_center_picked_card = $.cardstories.animate_center_picked_card;
 var cardstories_default_create_write_sentence = $.cardstories.create_write_sentence;
 var cardstories_default_create_write_sentence_animate_end = $.cardstories.create_write_sentence_animate_end;
 var cardstories_default_animate_progress_bar = $.cardstories.animate_progress_bar;
@@ -1483,7 +1482,6 @@ asyncTest("create_pick_card_animate_fly_to_deck", 17, function() {
 });
 
 asyncTest("animate_center_picked_card", 3, function() {
-    $.cardstories.animate_center_picked_card = cardstories_default_animate_center_picked_card;
     var root = $('#qunit-fixture .cardstories');
     var element = $('#qunit-fixture .cardstories_create .cardstories_pick_card');
     var card_flyover = $('#qunit-fixture .cardstories_create .cardstories_pick_card .cardstories_card_flyover');
