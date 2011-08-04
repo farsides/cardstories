@@ -62,49 +62,49 @@ test("error", function() {
   });
 
 test("setTimeout", function() {
-  expect(2);
+    expect(2);
 
-  $.cardstories.setTimeout = cardstories_default_setTimeout;
+    $.cardstories.setTimeout = cardstories_default_setTimeout;
 
-  var setTimeout = $.cardstories.window.setTimeout;
-  $.cardstories.window.setTimeout = function(cb, delay) {
-    equal(cb, 'a function');
-    equal(delay, 42);
-  };
+    var setTimeout = $.cardstories.window.setTimeout;
+    $.cardstories.window.setTimeout = function(cb, delay) {
+      equal(cb, 'a function');
+      equal(delay, 42);
+    };
 
-  $.cardstories.setTimeout('a function', 42);
-  $.cardstories.window.setTimeout = setTimeout;
+    $.cardstories.setTimeout('a function', 42);
+    $.cardstories.window.setTimeout = setTimeout;
 });
 
 test("setInterval", function() {
-  expect(2);
+    expect(2);
 
-  $.cardstories.setInterval = cardstories_default_setInterval;
+    $.cardstories.setInterval = cardstories_default_setInterval;
 
-  var setInterval = $.cardstories.window.setInterval;
-  $.cardstories.window.setInterval = function(cb, delay) {
-    equal(cb, 'a function');
-    equal(delay, 42);
-  };
+    var setInterval = $.cardstories.window.setInterval;
+    $.cardstories.window.setInterval = function(cb, delay) {
+      equal(cb, 'a function');
+      equal(delay, 42);
+    };
 
-  $.cardstories.setInterval('a function', 42);
-  $.cardstories.window.setInterval = setInterval;
+    $.cardstories.setInterval('a function', 42);
+    $.cardstories.window.setInterval = setInterval;
 });
 
 test("ajax", function() {
-  expect(2);
+    expect(2);
 
-  $.cardstories.ajax = cardstories_default_ajax;
-  var ajax = jQuery.ajax;
-  jQuery.ajax = function(options) {
-    equal(options, 'some ajax options', 'calls jQuery.ajax with the supplied options');
-    return 'some ajax result';
-  };
+    $.cardstories.ajax = cardstories_default_ajax;
+    var ajax = jQuery.ajax;
+    jQuery.ajax = function(options) {
+      equal(options, 'some ajax options', 'calls jQuery.ajax with the supplied options');
+      return 'some ajax result';
+    };
 
-  var result = $.cardstories.ajax('some ajax options');
-  equal(result, 'some ajax result', 'returns the result of jQuery.ajax call');
+    var result = $.cardstories.ajax('some ajax options');
+    equal(result, 'some ajax result', 'returns the result of jQuery.ajax call');
 
-  jQuery.ajax = ajax;
+    jQuery.ajax = ajax;
 });
 
 test("reload", function() {
