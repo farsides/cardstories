@@ -495,7 +495,7 @@
             });
 
             // If defined, run the callback (used in the tests).
-            if (cb !== undefined) { cb('beginning'); }
+            if (cb !== undefined) { cb('before_animation'); }
 
             // Animate towards the final state.
             var q = $({});
@@ -518,7 +518,7 @@
             });
             // If set, run the callback at the end of the queue.
             if (cb !== undefined) {
-                q.queue('chain', function(next) {cb('end');});
+                q.queue('chain', function(next) {cb('after_animation');});
             }
             q.dequeue('chain');
         },

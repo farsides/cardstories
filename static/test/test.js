@@ -1508,12 +1508,12 @@ asyncTest("create_write_sentence_animate_start", 7, function() {
     var starting_width = 220;
 
     $.cardstories.create_write_sentence_animate_start(card, element, root, function(when) {
-        if (when === 'beginning') {
+        if (when === 'before_animation') {
             equal(write_box.css('display'), 'none', 'write box is not visible initially');
             equal(card_shadow.css('display'), 'none', 'card shadow is not visible initially');
             ok(card_foreground.attr('src').match(card), 'src attribute is set properly to show the chosen card');
             equal(card_imgs.width(), starting_width, 'card starts out at starting width');
-        } else if (when === 'end') {
+        } else if (when === 'after_animation') {
             equal(write_box.css('display'), 'block', 'write box is visible after animation');
             equal(card_shadow.css('display'), 'block', 'card shadow is visible after animation');
             equal(card_imgs.width(), final_width, 'after animation card grows to its original width');
