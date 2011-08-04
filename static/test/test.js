@@ -14,7 +14,6 @@
 //     You should have received a copy of the GNU General Public License
 //     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
-module("cardstories");
 
 var cardstories_default_reload = $.cardstories.reload;
 var cardstories_default_setTimeout = $.cardstories.setTimeout;
@@ -50,8 +49,10 @@ function setup() {
     };
 }
 
+module("cardstories", {setup: setup});
+
+
 test("error", function() {
-    setup();
     expect(1);
 
     var alert = window.alert;
@@ -135,7 +136,6 @@ test("xhr_error", function() {
 });
 
 test("play_again_finish_state", function() {
-    setup();
     expect(5);
     var player_id = 5;
     var game = {
@@ -209,7 +209,6 @@ test("reload_link", function() {
   });
 
 test("notify_active", function() {
-    setup();
     expect(1);
     stop();
 
@@ -225,7 +224,6 @@ test("notify_active", function() {
 });
 
 test("display_progress_bar", function() {
-    setup();
     expect(6);
 
     var root = $('#qunit-fixture .cardstories');
@@ -247,7 +245,6 @@ test("display_progress_bar", function() {
 });
 
 test("animate_progress_bar", function() {
-    setup();
     stop();
     expect(1);
 
@@ -275,7 +272,6 @@ test("animate_progress_bar", function() {
 });
 
 test("animate_scale", function() {
-    setup();
     stop();
     expect(7);
 
@@ -314,7 +310,6 @@ test("animate_scale", function() {
 });
 
 test("animate_scale reverse", function() {
-    setup();
     stop();
     expect(7);
 
@@ -355,7 +350,6 @@ test("animate_scale reverse", function() {
 });
 
 test("subscribe", function() {
-    setup();
     expect(6);
 
     var player_id = 'player@test.com';
@@ -380,7 +374,6 @@ test("subscribe", function() {
 });
 
 test("widget subscribe", function() {
-    setup();
     expect(3);
 
     equal($.cookie('CARDSTORIES_ID'), null);
@@ -390,7 +383,6 @@ test("widget subscribe", function() {
 });
 
 test("welcome_url", function() {
-    setup();
     expect(1);
 
     var location = $.cardstories.location;
@@ -404,7 +396,6 @@ test("welcome_url", function() {
 });
 
 test("confirm_results_publication", function () {
-    setup();
     expect(5);
     var player_id = 15;
     var game_id = 101;
@@ -440,7 +431,6 @@ test("confirm_results_publication", function () {
 });
 
 test("send_game", function() {
-    setup();
     expect(5);
     stop();
 
@@ -466,7 +456,6 @@ test("send_game", function() {
 });
 
 test("send_game on error", function() {
-    setup();
     expect(1);
 
     var player_id = 15;
@@ -485,7 +474,6 @@ test("send_game on error", function() {
 });
 
 test("create_pick_card_animate_fly_to_deck", function() {
-    setup();
     stop();
     expect(17);
 
@@ -527,7 +515,6 @@ test("create_pick_card_animate_fly_to_deck", function() {
 });
 
 test("create", function() {
-    setup();
     stop();
     expect(16);
 
@@ -584,7 +571,6 @@ test("create", function() {
 });
 
 test("create on error", function() {
-    setup();
     stop();
     expect(1);
 
@@ -613,7 +599,6 @@ test("create on error", function() {
 });
 
 test("widget lobby", function() {
-    setup();
     expect(4);
 
     var player_id = 15;
@@ -628,7 +613,6 @@ test("widget lobby", function() {
 });
 
 test("game", function() {
-    setup();
     expect(5);
 
     var player_id = 15;
@@ -662,7 +646,6 @@ test("game", function() {
 });
 
 test("game on error", function() {
-    setup();
     expect(1);
 
     $.cardstories.ajax = function(options) {
@@ -678,7 +661,6 @@ test("game on error", function() {
 });
 
 test("invitation_owner_invite_more", function() {
-    setup();
     expect(4);
 
     var player1 = 'player1';
@@ -709,7 +691,6 @@ test("invitation_owner_invite_more", function() {
 });
 
 test("invitation_owner", function() {
-    setup();
     stop();
     expect(6);
 
@@ -759,7 +740,6 @@ test("invitation_owner", function() {
 });
 
 test("invitation_pick", function() {
-    setup();
     stop();
     expect(11);
 
@@ -822,7 +802,6 @@ test("invitation_pick", function() {
 });
 
 test("invitation_pick_wait", function() {
-    setup();
     expect(8);
 
     var player_id = 15;
@@ -860,7 +839,6 @@ test("invitation_pick_wait", function() {
 });
 
 test("invitation_anonymous", function() {
-    setup();
     expect(2);
 
     var player_id = null;
@@ -906,7 +884,6 @@ test("invitation_anonymous", function() {
 });
 
 test("invitation_board", function() {
-    setup();
     expect(27);
 
     var player_id = null;
@@ -966,7 +943,6 @@ test("invitation_board", function() {
 });
 
 test("invitation_board_seat", function() {
-    setup();
     expect(3);
 
     var player_id = 100;
@@ -984,7 +960,6 @@ test("invitation_board_seat", function() {
 });
 
 test("invitation_participate", function() {
-    setup();
     expect(11);
 
     var player_id = 15;
@@ -1019,7 +994,6 @@ test("invitation_participate", function() {
 });
 
 test("widget invitation", function() {
-    setup();
     expect(7);
 
     var player_id = 15;
@@ -1053,7 +1027,6 @@ test("widget invitation", function() {
 });
 
 test("vote_voter", function() {
-    setup();
     stop();
     expect(18);
 
@@ -1118,7 +1091,6 @@ test("vote_voter", function() {
 });
 
 test("invitation_voter_wait", function() {
-    setup();
     expect(8);
 
     var player_id = 15;
@@ -1153,7 +1125,6 @@ test("invitation_voter_wait", function() {
 });
 
 test("vote_anonymous", function() {
-    setup();
     expect(3);
 
     var player_id = null;
@@ -1195,7 +1166,6 @@ test("vote_anonymous", function() {
 });
 
 test("vote_viewer", function() {
-    setup();
     expect(7);
 
     var player_id = 15;
@@ -1224,7 +1194,6 @@ test("vote_viewer", function() {
 });
 
 test("vote_owner", function() {
-    setup();
     expect(8);
 
     var player_id = 15;
@@ -1278,7 +1247,6 @@ test("vote_owner", function() {
 });
 
 test("complete", function() {
-    setup();
     expect(9);
 
     var player_id = 15;
@@ -1326,7 +1294,6 @@ test("complete", function() {
 });
 
 test("results_board", function() {
-    setup();
     expect(24);
 
     var player_id = 15;
@@ -1398,7 +1365,6 @@ test("results_board", function() {
   });
 
 test("advertise", function() {
-    setup();
     expect(6);
 
     var owner_id = 15;
@@ -1435,7 +1401,6 @@ test("advertise", function() {
 });
 
 test("refresh_lobby", function() {
-    setup();
     expect(15);
 
     var in_progress;
@@ -1474,7 +1439,6 @@ test("refresh_lobby", function() {
 });
 
 test("refresh_lobby on error", function() {
-    setup();
     expect(1);
 
     var root = $('#qunit-fixture .cardstories');
@@ -1492,7 +1456,6 @@ test("refresh_lobby on error", function() {
 });
 
 test("lobby_games", function() {
-    setup();
     expect(24);
 
     var player_id = 10;
@@ -1560,7 +1523,6 @@ test("lobby_games", function() {
   });
 
 test("lobby_games without games", function() {
-    setup();
     expect(1);
 
     var player_id = 10;
@@ -1571,7 +1533,6 @@ test("lobby_games without games", function() {
 });
 
 test("create_pick_card_animate", function() {
-    setup();
     stop();
     expect(30); // there are 6 cards, we set 5 assertions on each
 
@@ -1608,7 +1569,6 @@ test("create_pick_card_animate", function() {
 });
 
 test("animate_center_picked_card", function() {
-    setup();
     stop();
     expect(3);
 
@@ -1657,7 +1617,6 @@ test("animate_center_picked_card", function() {
 });
 
 test("create_write_sentence_animate_start", function() {
-    setup();
     stop();
     expect(7);
 
@@ -1689,7 +1648,6 @@ test("create_write_sentence_animate_start", function() {
 });
 
 test("create_write_sentence_animate_end", function() {
-    setup();
     stop();
     expect(14);
 
@@ -1737,7 +1695,6 @@ test("create_write_sentence_animate_end", function() {
 });
 
 test("poll_discard", function() {
-    setup();
     expect(3);
 
     var root = $('#qunit-fixture .cardstories');
@@ -1773,7 +1730,6 @@ test("poll_ignore", function() {
 });
 
 test("start_story", function() {
-    setup();
     expect(3);
 
     var player_id = 222;
@@ -1789,7 +1745,6 @@ test("start_story", function() {
 });
 
 test("lobby_in_progress", function() {
-    setup();
     expect(10);
 
     var player_id = 10;
@@ -1825,7 +1780,6 @@ test("lobby_in_progress", function() {
   });
 
 test("lobby_finished", function() {
-    setup();
     expect(10);
 
     var player_id = 10;
@@ -1862,7 +1816,6 @@ test("lobby_finished", function() {
   });
 
 test("poll", function() {
-    setup();
     expect(18);
 
     var player_id = 11;
@@ -1950,7 +1903,6 @@ var stabilize = function(e, x, y) {
 };
 
 test("display_or_select_cards move", function() {
-    setup();
     stop();
     expect(2);
 
@@ -1977,7 +1929,6 @@ test("display_or_select_cards move", function() {
   });
 
 test("display_or_select_cards select", function() {
-    setup();
     stop();
     expect(9);
 
@@ -2025,7 +1976,6 @@ test("display_or_select_cards select", function() {
   });
 
 test("display_or_select_cards select no bg", function() {
-    setup();
     stop();
     expect(4);
 
@@ -2065,7 +2015,6 @@ test("display_or_select_cards select no bg", function() {
   });
 
 test("display_or_select_cards twice", function() {
-    setup();
     stop();
     expect(2);
 
@@ -2109,7 +2058,6 @@ test("display_or_select_cards twice", function() {
   });
 
 test("select_cards ok", function() {
-    setup();
     stop();
     expect(1);
 
@@ -2137,7 +2085,6 @@ test("select_cards ok", function() {
   });
 
 test("select_cards cancel", function() {
-    setup();
     stop();
     expect(1);
 
@@ -2165,7 +2112,6 @@ test("select_cards cancel", function() {
   });
 
 test("select_cards single", function() {
-    setup();
     expect(6);
     stop();
 
@@ -2191,7 +2137,6 @@ test("select_cards single", function() {
   });
 
 test("create_deck", function() {
-    setup();
     expect(29);
     var deck = $.cardstories.create_deck();
     var i;
@@ -2206,7 +2151,6 @@ test("create_deck", function() {
   });
 
 test("credits", function() {
-    setup();
     expect(4);
 
     var root = $('#qunit-fixture .cardstories');
@@ -2221,7 +2165,6 @@ test("credits", function() {
   });
 
 test("solo", function() {
-    setup();
     expect(2);
 
     var root = $('#qunit-fixture .cardstories');
@@ -2248,7 +2191,6 @@ test("solo", function() {
 });
 
 test("solo on error", function() {
-    setup();
     expect(1);
 
     var root = $('#qunit-fixture .cardstories');
@@ -2267,7 +2209,6 @@ test("solo on error", function() {
 });
 
 test("poll on error", function() {
-    setup();
     expect(1);
 
     var root = $('#qunit-fixture .cardstories');
@@ -2303,7 +2244,6 @@ test("trigger_keypress, trigger_keydown helpers", function() {
 });
 
 test("onbeforeunload", function() {
-    setup();
     expect(1);
 
     $(window).trigger('beforeunload');
