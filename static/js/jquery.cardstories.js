@@ -93,7 +93,13 @@
             tmp_mark.remove();
 
             // Animate the mark.
-            mark.animate({left: final_left}, 500, cb);
+            // I fail to understand why, but tmp_mark and final_left are sometimes
+            // undefined during test runs, which wracks havoc on IE8.
+            if (typeof final_left !== 'undefined') {
+                mark.animate({left: final_left}, 500, cb);
+            } else if (cb) {
+                cb();
+            }
         },
 
         // For best results with animate_scale, the element must be positioned
@@ -106,6 +112,10 @@
 
             var big_top = parseInt(el.css('top'), 10);
             var big_left = parseInt(el.css('left'), 10);
+            // I fail to understand why, but el.css('top/left') is sometimes blank during test runs,
+            // which wracks havoc upon IE8.
+            big_top = isNaN(big_top) ? 0 : big_top;
+            big_left = isNaN(big_left) ? 0 : big_left;
             var big_width = el.width();
             var big_height = el.height();
             var big_fontsize = parseInt(el.css('font-size'), 10);
