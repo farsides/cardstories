@@ -205,14 +205,15 @@
                 };
 
                 $this.select_cards('create_pick_card', cards, ok, element, root).done(function() {
-                    deferred.resolve();
+                    // Delay the appearance of the modal box artificially, since
+                    // jqDock doesn't provide a hook for when expansion finishes.
+                    $this.setTimeout(function() {
+                        $this.display_modal($('.cardstories_info', element), $('.cardstories_modal_overlay', element), function() {
+                            deferred.resolve();
+                        });
+                    }, 250);
                 });
 
-                // Delay the appearance of the modal box artificially, since
-                // jqDock doesn't provide a hook for when expansion finishes.
-                $this.setTimeout(function() {
-                    $this.display_modal($('.cardstories_info', element), $('.cardstories_modal_overlay', element));
-                }, 300);
             });
 
             q.queue('chain', function(next) {
