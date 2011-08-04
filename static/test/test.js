@@ -431,44 +431,6 @@ test("send_game on error", 1, function() {
     $.cardstories.send_game(player_id, game_id, $('#qunit-fixture .cardstories_create'), 'QUERY');
 });
 
-asyncTest("create_pick_card_animate_fly_to_deck", 17, function() {
-    var player_id = 42;
-    var root = $('#qunit-fixture .cardstories');
-    var element = $('.cardstories_create .cardstories_pick_card', root);
-    var final_top = $('.cardstories_deck .cardstories_deck_cover', element).css('top');
-    var final_left = $('.cardstories_deck .cardstories_deck_cover', element).css('left');
-    var deck_cards = $('.cardstories_deck .cardstories_card', element);
-    var board_cards = $('.cardstories_cards_hand .cardstories_card', element);
-
-    $.cardstories.animate_progress_bar = $.noop;
-
-    $.cardstories.create_pick_card_animate_fly_to_deck = cardstories_default_create_pick_card_animate_fly_to_deck;
-    $.cardstories.create_pick_card(player_id, root).done(function() {
-        var card_index = 3;
-        board_cards.eq(card_index + 1).addClass('cardstories_card_selected');
-
-        $.cardstories.create_pick_card_animate_fly_to_deck(card_index, element, function() {
-            board_cards.each(function(i) {
-                var card = $(this);
-                var display = card.hasClass('cardstories_card_selected') ? 'block' : 'none';
-                equal(card.css('display'), display, 'only selected card is visible on the board');
-            });
-
-            deck_cards.each(function(i) {
-                var card = $(this);
-                if (i === card_index - 1) {
-                    equal(card.css('display'), 'none', 'selected card is hidden');
-                } else {
-                    equal(card.css('top'), final_top, 'card is animated back to the deck');
-                    equal(card.css('left'), final_left, 'card is animated back to the deck');
-                }
-            });
-
-            start();
-        });
-    });
-});
-
 asyncTest("create", 16, function() {
     var player_id = 15;
     var game_id = 7;
@@ -1460,6 +1422,44 @@ asyncTest("create_pick_card_animate", 30, function() {
             equal(card.attr('src'), src_template.supplant({card: card_specs[cards.length - i - 1].value}), 'the foregournd image is shown');
         });
         start();
+    });
+});
+
+asyncTest("create_pick_card_animate_fly_to_deck", 17, function() {
+    var player_id = 42;
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_create .cardstories_pick_card', root);
+    var final_top = $('.cardstories_deck .cardstories_deck_cover', element).css('top');
+    var final_left = $('.cardstories_deck .cardstories_deck_cover', element).css('left');
+    var deck_cards = $('.cardstories_deck .cardstories_card', element);
+    var board_cards = $('.cardstories_cards_hand .cardstories_card', element);
+
+    $.cardstories.animate_progress_bar = $.noop;
+
+    $.cardstories.create_pick_card_animate_fly_to_deck = cardstories_default_create_pick_card_animate_fly_to_deck;
+    $.cardstories.create_pick_card(player_id, root).done(function() {
+        var card_index = 3;
+        board_cards.eq(card_index + 1).addClass('cardstories_card_selected');
+
+        $.cardstories.create_pick_card_animate_fly_to_deck(card_index, element, function() {
+            board_cards.each(function(i) {
+                var card = $(this);
+                var display = card.hasClass('cardstories_card_selected') ? 'block' : 'none';
+                equal(card.css('display'), display, 'only selected card is visible on the board');
+            });
+
+            deck_cards.each(function(i) {
+                var card = $(this);
+                if (i === card_index - 1) {
+                    equal(card.css('display'), 'none', 'selected card is hidden');
+                } else {
+                    equal(card.css('top'), final_top, 'card is animated back to the deck');
+                    equal(card.css('left'), final_left, 'card is animated back to the deck');
+                }
+            });
+
+            start();
+        });
     });
 });
 
