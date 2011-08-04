@@ -1504,7 +1504,9 @@ asyncTest("animate_center_picked_card", 3, function() {
         display_or_select_cards('animate_center_picked_card',
                                 cards,
                                 select,
-                                element).
+                                element,
+                                root
+                               ).
         done(onReady);
 });
 
@@ -1797,7 +1799,9 @@ asyncTest("display_or_select_cards move", 2, function() {
         display_or_select_cards('move',
                                 [{'value':1},{'value':2},{'value':3},{'value':4},{'value':5},{'value':6}],
                                 function() {},
-                                element).
+                                element,
+                                root
+                               ).
         done(onReady);
   });
 
@@ -1841,7 +1845,9 @@ asyncTest("display_or_select_cards select", 9, function() {
         display_or_select_cards('select',
                                 cards,
                                 select,
-                                element).
+                                element,
+                                root
+                               ).
         done(onReady);
   });
 
@@ -1877,7 +1883,9 @@ asyncTest("display_or_select_cards select no bg", 4, function() {
         display_or_select_cards('select no bg',
                                 cards,
                                 select,
-                                element).
+                                element,
+                                root
+                               ).
         done(onReady);
   });
 
@@ -1905,7 +1913,9 @@ asyncTest("display_or_select_cards twice", 2, function() {
         display_or_select_cards('twice',
                                 create_cards(card1),
                                 undefined,
-                                element).
+                                element,
+                                root
+                               ).
         done(function(is_ready) {
             check(is_ready);
             card1 = 22;
@@ -1913,7 +1923,9 @@ asyncTest("display_or_select_cards twice", 2, function() {
                 display_or_select_cards('twice',
                                         create_cards(card1),
                                         undefined,
-                                        element).
+                                        element,
+                                        root
+                                       ).
                 done(function(is_ready) {
                     check(is_ready);
                     start();
@@ -1987,7 +1999,9 @@ asyncTest("select_cards single", 6, function() {
         display_or_select_cards('single',
                                 [{'value':1},{'value':2},{'value':3},{'value':4},{'value':5},{'value':6}],
                                 function() {},
-                                element).
+                                element,
+                                root
+                               ).
         done(onReady);
   });
 

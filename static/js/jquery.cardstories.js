@@ -995,18 +995,20 @@
                 });
             };
             var hand = $('.cardstories_cards_hand', element);
-            return this.display_or_select_cards(id, cards, confirm_callback, hand);
+            return this.display_or_select_cards(id, cards, confirm_callback, hand, root);
         },
 
-        display_or_select_cards: function(id, cards, select_callback, element) {
+        display_or_select_cards: function(id, cards, select_callback, element, root) {
             // In create_pick_card, jqDock needs to start collapsed, to better
             // integrate with the animation.
             var start_collapsed = id === 'create_pick_card';
             id += '_saved_element';
-            if(this[id] === undefined) {
-                this[id] = element.html();
+            var saved_elements = root.data('cardstories_saved_elements') || {};
+            if (saved_elements[id] === undefined) {
+                saved_elements[id] = element.html();
+                root.data('cardstories_saved_elements', saved_elements);
             } else {
-                element.html(this[id]);
+                element.html(saved_elements[id]);
             }
             var meta = element.metadata({type: "attr", name: "data"});
             var active_card = meta.active;
