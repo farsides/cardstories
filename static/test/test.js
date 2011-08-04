@@ -15,6 +15,8 @@
 //     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 //
 
+$.fx.off = true;
+
 var cardstories_default_reload = $.cardstories.reload;
 var cardstories_default_setTimeout = $.cardstories.setTimeout;
 var cardstories_default_setInterval = $.cardstories.setInterval;
@@ -37,18 +39,6 @@ function setup() {
     $.cardstories.poll_ignore = function() { throw 'poll_ignore'; };
     $.cardstories.error = cardstories_default_error;
     $.cardstories.create_write_sentence = cardstories_default_create_write_sentence;
-    $.cardstories.create_write_sentence_animate_end = function(card, element, root, cb) { cb(); };
-    $.cardstories.animate_center_picked_card = function(element, index, card, cb) { cb(); };
-    $.cardstories.animate_progress_bar = function(src, dst, root, cb) { cb(); };
-    $.cardstories.create_pick_card_animate_fly_to_deck = function(card_index, element, cb) { cb(); };
-    $.cardstories.animate_scale = function(reverse, factor, duration, el, cb) {
-        if (reverse) {
-            el.hide();
-        } else {
-            el.show();
-        }
-        if (cb !== undefined) cb();
-    };
 }
 
 module("cardstories", {setup: setup});
