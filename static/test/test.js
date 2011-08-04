@@ -952,7 +952,7 @@ test("invitation_board_seat", function() {
     var game = {};
 
     var element = $('#qunit-fixture .cardstories_invitation .cardstories_board .cardstories_owner_seat');
-    player = [ 'player1', card1, 'y', card3, [card1, card2] ];
+    var player = [ 'player1', card1, 'y', card3, [card1, card2] ];
     $.cardstories.invitation_board_seat(player_id, game, $('#qunit-fixture .cardstories'), element, player, 'owner');
     ok(element.hasClass('cardstories_player_picked'), 'picked');
     ok(element.hasClass('cardstories_player_voted'), 'voted');
