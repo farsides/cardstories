@@ -39,6 +39,7 @@ function setup() {
     $.cardstories.poll_ignore = function() { throw 'poll_ignore'; };
     $.cardstories.error = cardstories_default_error;
     $.cardstories.create_write_sentence = cardstories_default_create_write_sentence;
+    $.cardstories.animate_progress_bar = cardstories_default_animate_progress_bar;
 }
 
 module("cardstories", {setup: setup});
@@ -226,7 +227,6 @@ asyncTest("animate_progress_bar", 1, function() {
     var final_left = dst_mark.css('left');
     dst_mark.remove();
 
-    $.cardstories.animate_progress_bar = cardstories_default_animate_progress_bar;
     $.cardstories.animate_progress_bar(src, dst, root, function() {
         equal(src_mark.css('left'), final_left, 'mark is at final position');
         start();
@@ -1418,8 +1418,6 @@ asyncTest("create_pick_card_animate_fly_to_deck", 17, function() {
     var final_left = $('.cardstories_deck .cardstories_deck_cover', element).css('left');
     var deck_cards = $('.cardstories_deck .cardstories_card', element);
     var board_cards = $('.cardstories_cards_hand .cardstories_card', element);
-
-    $.cardstories.animate_progress_bar = $.noop;
 
     $.cardstories.create_pick_card_animate_fly_to_deck = cardstories_default_create_pick_card_animate_fly_to_deck;
     $.cardstories.create_pick_card(player_id, root).done(function() {
