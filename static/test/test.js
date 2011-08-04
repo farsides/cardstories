@@ -19,13 +19,13 @@ var cardstories_default_reload = $.cardstories.reload;
 var cardstories_default_setTimeout = $.cardstories.setTimeout;
 var cardstories_default_setInterval = $.cardstories.setInterval;
 var cardstories_default_ajax = $.cardstories.ajax;
-var cardstories_original_error = $.cardstories.error;
-var cardstories_original_poll_ignore = $.cardstories.poll_ignore;
-var cardstories_original_create_pick_card_animate_fly_to_deck = $.cardstories.create_pick_card_animate_fly_to_deck;
-var cardstories_original_animate_center_picked_card = $.cardstories.animate_center_picked_card;
-var cardstories_original_create_write_sentence_animate_end = $.cardstories.create_write_sentence_animate_end;
-var cardstories_original_animate_progress_bar = $.cardstories.animate_progress_bar;
-var cardstories_original_animate_scale = $.cardstories.animate_scale;
+var cardstories_default_error = $.cardstories.error;
+var cardstories_default_poll_ignore = $.cardstories.poll_ignore;
+var cardstories_default_create_pick_card_animate_fly_to_deck = $.cardstories.create_pick_card_animate_fly_to_deck;
+var cardstories_default_animate_center_picked_card = $.cardstories.animate_center_picked_card;
+var cardstories_default_create_write_sentence_animate_end = $.cardstories.create_write_sentence_animate_end;
+var cardstories_default_animate_progress_bar = $.cardstories.animate_progress_bar;
+var cardstories_default_animate_scale = $.cardstories.animate_scale;
 
 function setup() {
     $.cardstories.setTimeout = function(cb, delay) { return window.setTimeout(cb, delay); };
@@ -34,7 +34,7 @@ function setup() {
     $.cardstories.reload = $.cardstories.game_or_lobby;
     $.cardstories.confirm_participate = true;
     $.cardstories.poll_ignore = function() { throw 'poll_ignore'; };
-    $.cardstories.error = cardstories_original_error;
+    $.cardstories.error = cardstories_default_error;
     $.cardstories.create_write_sentence_animate_end = function(card, element, root, cb) { cb(); };
     $.cardstories.animate_center_picked_card = function(element, index, card, cb) { cb(); };
     $.cardstories.animate_progress_bar = function(src, dst, root, cb) { cb(); };
@@ -261,7 +261,7 @@ test("animate_progress_bar", function() {
     var final_left = dst_mark.css('left');
     dst_mark.remove();
 
-    $.cardstories.animate_progress_bar = cardstories_original_animate_progress_bar;
+    $.cardstories.animate_progress_bar = cardstories_default_animate_progress_bar;
     $.cardstories.animate_progress_bar(src, dst, root, function() {
         equal(src_mark.css('left'), final_left, 'mark is at final position');
 
@@ -287,7 +287,7 @@ test("animate_scale", function() {
     var duration = 500;
 
     equal(el.css('display'), 'none', 'Element starts hidden');
-    $.cardstories.animate_scale = cardstories_original_animate_scale;
+    $.cardstories.animate_scale = cardstories_default_animate_scale;
     $.cardstories.animate_scale(false, factor, duration, el, function () {
         equal(el.css('display'), 'block', 'Element is visible after animation.');
         equal(parseInt(el.css('top'), 10), orig_top, 'Element achieves proper top.');
@@ -335,7 +335,7 @@ test("animate_scale reverse", function() {
 
     el.show();
     equal(el.css('display'), 'block', 'Element starts visible');
-    $.cardstories.animate_scale = cardstories_original_animate_scale;
+    $.cardstories.animate_scale = cardstories_default_animate_scale;
     $.cardstories.animate_scale(true, factor, duration, el, function () {
         equal(el.css('display'), 'none', 'Element is invisible after animation.');
         // Show the element, otherwise some versions of FF report faulty values.
@@ -487,7 +487,7 @@ test("create_pick_card_animate_fly_to_deck", function() {
 
     $.cardstories.animate_progress_bar = $.noop;
 
-    $.cardstories.create_pick_card_animate_fly_to_deck = cardstories_original_create_pick_card_animate_fly_to_deck;
+    $.cardstories.create_pick_card_animate_fly_to_deck = cardstories_default_create_pick_card_animate_fly_to_deck;
     $.cardstories.create_pick_card(player_id, root).done(function() {
         var card_index = 3;
         board_cards.eq(card_index + 1).addClass('cardstories_card_selected');
@@ -1572,7 +1572,7 @@ test("animate_center_picked_card", function() {
     stop();
     expect(3);
 
-    $.cardstories.animate_center_picked_card = cardstories_original_animate_center_picked_card;
+    $.cardstories.animate_center_picked_card = cardstories_default_animate_center_picked_card;
     var root = $('#qunit-fixture .cardstories');
     var element = $('#qunit-fixture .cardstories_create .cardstories_pick_card');
     var card_flyover = $('#qunit-fixture .cardstories_create .cardstories_pick_card .cardstories_card_flyover');
@@ -1677,7 +1677,7 @@ test("create_write_sentence_animate_end", function() {
     equal(card_shadow.css('display'), 'block', 'card shadow is visible initially');
     equal(sentence_box.css('display'), 'none', 'sentence box is invisible initially');
 
-    $.cardstories.create_write_sentence_animate_end = cardstories_original_create_write_sentence_animate_end;
+    $.cardstories.create_write_sentence_animate_end = cardstories_default_create_write_sentence_animate_end;
     $.cardstories.create_write_sentence_animate_end(card, element, root, function() {
         equal(write_box.css('display'), 'none', 'write box is invisible after animation');
         equal(card_shadow.css('display'), 'none', 'card shadow is invisible after animation');
@@ -1708,7 +1708,7 @@ test("poll_discard", function() {
 });
 
 test("poll_ignore", function() {
-    $.cardstories.poll_ignore = cardstories_original_poll_ignore;
+    $.cardstories.poll_ignore = cardstories_default_poll_ignore;
 
     if (typeof console !== "undefined" && typeof console.log !== "undefined") {
         expect(2);
