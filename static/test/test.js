@@ -23,6 +23,7 @@ var cardstories_default_error = $.cardstories.error;
 var cardstories_default_poll_ignore = $.cardstories.poll_ignore;
 var cardstories_default_create_pick_card_animate_fly_to_deck = $.cardstories.create_pick_card_animate_fly_to_deck;
 var cardstories_default_animate_center_picked_card = $.cardstories.animate_center_picked_card;
+var cardstories_default_create_write_sentence = $.cardstories.create_write_sentence;
 var cardstories_default_create_write_sentence_animate_end = $.cardstories.create_write_sentence_animate_end;
 var cardstories_default_animate_progress_bar = $.cardstories.animate_progress_bar;
 var cardstories_default_animate_scale = $.cardstories.animate_scale;
@@ -35,6 +36,7 @@ function setup() {
     $.cardstories.confirm_participate = true;
     $.cardstories.poll_ignore = function() { throw 'poll_ignore'; };
     $.cardstories.error = cardstories_default_error;
+    $.cardstories.create_write_sentence = cardstories_default_create_write_sentence;
     $.cardstories.create_write_sentence_animate_end = function(card, element, root, cb) { cb(); };
     $.cardstories.animate_center_picked_card = function(element, index, card, cb) { cb(); };
     $.cardstories.animate_progress_bar = function(src, dst, root, cb) { cb(); };
@@ -438,6 +440,20 @@ asyncTest("create", 16, function() {
         start();
     };
 
+    $.cardstories.create_write_sentence = function(player_id, card_value, root) {
+        cardstories_default_create_write_sentence.call($.cardstories, player_id, card_value, root);
+        equal($('.cardstories_write_sentence.cardstories_active', element).length, 1, 'sentence active');
+        ok($('.cardstories_sentence', element).attr('placeholder') !== undefined, 'placeholder is set');
+        equal($('.cardstories_sentence', element).attr('placeholder'), $('.cardstories_sentence', element).val());
+        equal($('.cardstories_write_sentence .cardstories_submit', element).css('display'), 'none', 'OK button is initially hidden');
+        $('.cardstories_write_sentence .cardstories_submit', element).submit();
+        $('.cardstories_write_sentence .cardstories_sentence', element).val('o').change();
+        equal($('.cardstories_write_sentence .cardstories_submit', element).css('display'), 'none', 'OK button is hidden if text is too short');
+        $('.cardstories_write_sentence .cardstories_sentence', element).val(sentence).change();
+        ok($('.cardstories_write_sentence .cardstories_submit', element).css('display') !== 'none', 'OK button is visible if valid text has been set');
+        $('.cardstories_write_sentence .cardstories_submit', element).submit();
+    };
+
     var element = $('#qunit-fixture .cardstories_create');
     equal($('.cardstories_pick_card.cardstories_active', element).length, 0, 'pick_card not active');
     $.cardstories.
@@ -455,16 +471,6 @@ asyncTest("create", 16, function() {
             card = first_card.metadata({type: "attr", name: "data"}).card;
             first_card.click();
             $('.cardstories_card_confirm_ok', element).find('a').click();
-            equal($('.cardstories_write_sentence.cardstories_active', element).length, 1, 'sentence active');
-            ok($('.cardstories_sentence', element).attr('placeholder') !== undefined, 'placeholder is set');
-            equal($('.cardstories_sentence', element).attr('placeholder'), $('.cardstories_sentence', element).val());
-            equal($('.cardstories_write_sentence .cardstories_submit', element).css('display'), 'none', 'OK button is initially hidden');
-            $('.cardstories_write_sentence .cardstories_submit', element).submit();
-            $('.cardstories_write_sentence .cardstories_sentence', element).val('o').change();
-            equal($('.cardstories_write_sentence .cardstories_submit', element).css('display'), 'none', 'OK button is hidden if text is too short');
-            $('.cardstories_write_sentence .cardstories_sentence', element).val(sentence).change();
-            ok($('.cardstories_write_sentence .cardstories_submit', element).css('display') !== 'none', 'OK button is visible if valid text has been set');
-            $('.cardstories_write_sentence .cardstories_submit', element).submit();
         });
 });
 
@@ -482,14 +488,19 @@ asyncTest("create on error", 1, function() {
     };
 
     var element = $('#qunit-fixture .cardstories_create');
+
+    $.cardstories.create_write_sentence = function(player_id, card_value, root) {
+        cardstories_default_create_write_sentence.call($.cardstories, player_id, card_value, root);
+        $('.cardstories_write_sentence .cardstories_sentence', element).val('SENTENCE');
+        $('.cardstories_write_sentence .cardstories_submit', element).submit();
+    };
+
     $.cardstories.
         create(player_id, $('#qunit-fixture .cardstories')).
         done(function() {
             var first_card = $('.cardstories_cards_hand .cardstories_card:nth(0)', element);
             first_card.click();
             $('.cardstories_card_confirm_ok', element).find('a').click();
-            $('.cardstories_write_sentence .cardstories_sentence', element).val('SENTENCE');
-            $('.cardstories_write_sentence .cardstories_submit', element).submit();
         });
 });
 
