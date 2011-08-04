@@ -451,6 +451,7 @@
             var card_template = $('.cardstories_card_template', element);
             var card_imgs = $('img', card_template);
             var card_foreground = card_imgs.filter('.cardstories_card_foreground');
+            var card_flyover = $('.cardstories_pick_card .cardstories_card_flyover', root);
 
             // Set the card's src attribute first.
             var src = card_template.metadata({type: 'attr', name: 'data'}).card.supplant({card: card});
@@ -460,7 +461,7 @@
             var final_left = parseInt(card_template.css('left'), 10); // assuming value in pixels
             var final_width = card_imgs.width();
             var final_height = card_imgs.height();
-            var starting_width = 220;
+            var starting_width = card_flyover.metadata({type: 'attr', name: 'data'}).final_width;
             var ratio = final_width / starting_width;
             var starting_height = Math.ceil(final_height / ratio);
             var animation_duration = 500;
