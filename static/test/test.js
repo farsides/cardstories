@@ -1661,14 +1661,14 @@ test("animate_center_picked_card", function() {
         // Then select one of the cards
         $('.cardstories_cards_hand .cardstories_card', element).eq(selected).click();
     };
-    var meta = $('.cardstories_cards_hand .cardstories_card_template', element).metadata({type: "attr", name: "data"});
     var select = function(card, index, nudge, element) {
         equal(card_flyover.css('display'), 'none', 'flyover card is not visible initially');
 
         // And play the animation
         $.cardstories.animate_center_picked_card(element, index, card, function() {
+            var meta = card_flyover.metadata({type: 'attr', name: 'data'});
             equal(card_flyover.css('display'), 'block', 'flyover card visible after animation');
-            equal(card_flyover.position().left, 278, 'flyover card should be moved');
+            equal(card_flyover.position().left, meta.final_left, 'flyover card should be moved');
 
             // Remove selected attribute
             nudge();
