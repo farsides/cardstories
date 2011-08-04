@@ -218,9 +218,6 @@ test("display_progress_bar", 6, function() {
     equal($('.cardstories_step4', pbar).attr('class'), 'cardstories_step4', 'step 4 is bare');
     equal($('.cardstories_step5', pbar).attr('class'), 'cardstories_step5', 'step 5 is bare');
     equal($('.cardstories_step6', pbar).attr('class'), 'cardstories_step6', 'step 6 is bare');
-
-    // Clean it up
-    pbar.children().remove();
 });
 
 asyncTest("animate_progress_bar", 1, function() {
@@ -240,9 +237,6 @@ asyncTest("animate_progress_bar", 1, function() {
     $.cardstories.animate_progress_bar = cardstories_default_animate_progress_bar;
     $.cardstories.animate_progress_bar(src, dst, root, function() {
         equal(src_mark.css('left'), final_left, 'mark is at final position');
-
-        // Clean it up
-        src_mark.remove();
         start();
     });
 });
@@ -268,16 +262,6 @@ asyncTest("animate_scale", 7, function() {
         equal(el.width(), orig_width, 'Element achieves proper width.');
         equal(el.height(), orig_height, 'Element achieves proper height.');
         equal(parseInt(el.css('font-size'), 10), orig_fontsize, 'Element achieves proper font size.');
-
-        // Cleanup
-        el.css({
-            top: orig_top,
-            left: orig_left,
-            width: orig_width,
-            height: orig_height,
-            fontSize: orig_fontsize,
-            display: 'none'
-        });
         start();
     });
 });
