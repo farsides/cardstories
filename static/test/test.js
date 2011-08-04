@@ -2165,7 +2165,8 @@ test("credits", function() {
   });
 
 test("solo", function() {
-    expect(2);
+    stop();
+    expect(4);
 
     var root = $('#qunit-fixture .cardstories');
     var player_id = 15;
