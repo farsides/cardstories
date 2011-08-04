@@ -185,24 +185,6 @@
                 return { 'value':card };
             });
 
-            // Set up modal box behavior
-            var box = $('.cardstories_game_about_creativity', element);
-            var button = $('.cardstories_game_about_creativity_ok', box);
-            var button_img = $('img', button);
-            var button_img_src = button_img.attr('src');
-            var button_img_src_over = button_img.metadata({type: 'attr', name: 'data'}).over;
-            var button_a = $('a', button);
-            button_a.mousedown(function() {
-                button_img.attr('src', button_img_src_over);
-            });
-            button_a.mouseup(function() {
-                button_img.attr('src', button_img_src);
-                // Hide the box and disable the modal overlay.
-                $this.animate_scale(true, 5, 500, box, function() {
-                    $('.cardstories_modal_overlay', element).hide();
-                });
-            });
-
             var deferred = $.Deferred();
             var q = $({});
             var card_value, card_index;
@@ -229,7 +211,7 @@
                 // Delay the appearance of the modal box artificially, since
                 // jqDock doesn't provide a hook for when expansion finishes.
                 $this.setTimeout(function() {
-                    $this.animate_scale(false, 5, 500, box);
+                    $this.display_modal($('.cardstories_info', element), $('.cardstories_modal_overlay', element));
                 }, 300);
             });
 
@@ -269,7 +251,8 @@
 
             // Replace the docked card by an absolutely positioned image, to be able to move it
             var card_flyover = $('.cardstories_card_flyover', element);
-            var src = card_flyover.metadata({type: 'attr', name: 'data'}).card.supplant({card: card});
+            var meta = card_flyover.metadata({type: 'attr', name: 'data'});
+            var src = meta.card.supplant({card: card});
 
             $('.cardstories_card_foreground', card_flyover).attr('src', src);
             card_flyover.css({
@@ -283,10 +266,10 @@
 
             // Center the card
             card_flyover.animate({
-                    top: dock_bottom_pos - 292,
-                    left: 278,
-                    height: 292,
-                    width: 220,
+                    top: dock_bottom_pos - meta.final_height,
+                    left: meta.final_left,
+                    height: meta.final_height,
+                    width: meta.final_width,
                 }, 500, function() {
                     callback();
             });
@@ -962,7 +945,20 @@
                 cards.push(card);
             }
             
+            // First display the modal.
+            var q = $({});
+            q.queue('chain', function(next) {
+                $this.display_modal($('.cardstories_info', element), $('.cardstories_modal_overlay', element), function() {next();});
+            });
+
+            // Then the friend slots.
+            q.queue('chain', function(next) {
+                $this.display_friend_slots($('.cardstories_invite_friend', element), root, function() {next();});
+            });
+
             // TODO: display the cards without jqDock
+
+            q.dequeue('chain');
         },
 
         invitation_pick: function(player_id, game, root) {
@@ -1451,6 +1447,62 @@
             
             // Finally, place the children into the destination.
             tmp_bar.children().appendTo(dst_bar);
+        },
+
+        display_modal: function(modal, overlay, cb) {
+            var $this = this;
+            var button = $('.cardstories_modal_button', modal);
+            var button_img = $('img', button);
+            var button_img_src = button_img.attr('src');
+            var button_img_src_over = button_img.metadata({type: 'attr', name: 'data'}).over;
+            var button_a = $('a', button);
+            button_a.mousedown(function() {
+                button_img.attr('src', button_img_src_over);
+            });
+            button_a.mouseup(function() {
+                button_img.attr('src', button_img_src);
+                // Hide the box and disable the modal overlay.
+                $this.animate_scale(true, 5, 500, modal, function() {
+                    overlay.hide();
+                });
+            });
+
+            this.animate_scale(false, 5, 500, modal, function () {
+                if (cb !== undefined) {
+                    cb();
+                }
+            });
+        },
+
+        display_friend_slots: function(slots, root, cb) {
+            var $this = this;
+            slots.each(function(i) {
+                var slot = $(this);
+
+                // Copy over the snippet first.
+                var snippets = $('.cardstories_snippets', root);
+                var slot_snippet = $('.cardstories_invite_friend', snippets);
+                slot_snippet.clone().children().appendTo(slot);
+
+                // Now apply the button behavior.
+                var img = $('img', slot);
+                var img_src = img.attr('src');
+                var img_meta = img.metadata({type: 'attr', name: 'data'});
+                var out = function() {img.attr('src', img_src);};
+                var over = function() {img.attr('src', img_meta.over);};
+                var down = function() {img.attr('src', img_meta.down);};
+                var a = $('a', slot);
+                a.hover(over, out);
+                a.mousedown(down);
+                a.mouseup(over);
+
+                // Finally animate it in.
+                $this.animate_scale(false, 5, 300, slot, function() {
+                    if (cb !== undefined && i === slots.length - 1) {
+                        cb();
+                    }
+                });
+            });
         },
 
         email: function(game_id, root) {

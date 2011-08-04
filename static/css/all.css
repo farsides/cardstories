@@ -170,7 +170,7 @@
     width: 776px;
 }
 
-.cardstories .cardstories_pane .cardstories_board .cardstories_modal_overlay { 
+.cardstories .cardstories_modal_overlay {
     position: absolute;
     top: 59px;
     left: 0px;
@@ -183,6 +183,138 @@
     background-color: #FFFFFF;
     filter: alpha(opacity=0);
     opacity: 0;
+}
+
+.cardstories .cardstories_modal {
+    display: none;
+    position: absolute;
+    z-index: 9999;
+    font-size: 10px;
+    text-align:center;
+    font-family: "Licon";
+    color:#FFFFFF;
+}
+
+.cardstories .cardstories_modal img:first-child {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+}
+
+.cardstories .cardstories_modal_h1 {
+    margin: 0.3em 0;
+    font-size: 2.4em; 
+}
+
+.cardstories .cardstories_modal_h2 {
+    margin: 0;
+    font-family: "Helvetica";
+    font-size: 1.1em; 
+}
+
+.cardstories .cardstories_modal_button {
+    position: relative;
+    top: 0.25em;
+    margin: 0 auto;
+    font-size: 2.4em; 
+    width: 6.5em;
+    height: 2em;
+}
+
+.cardstories .cardstories_modal a {
+    display: block;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+    background: url(#); /* IE quirk: make the whole button clickable. */
+}
+
+.cardstories .cardstories_modal a:active {
+    color: black;
+}
+
+.cardstories .cardstories_modal a > span {
+    position: relative;
+    top: 0.46em;
+}
+
+.cardstories .cardstories_invite_friend {
+    display: none;
+    position: absolute;
+    width: 70px;
+    height: 140px;
+    font-size: 10px;
+    text-align:center;
+    font-family: "Helvetica";
+    color:#FFFFFF;
+}
+
+.cardstories .cardstories_invite_friend img:first-child {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+}
+
+.cardstories .cardstories_invite_friend a {
+    display: block;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+    background: url(#); /* IE quirk: make the whole button clickable. */
+}
+
+.cardstories .cardstories_invite_friend a:hover {
+    color: #0A5F61;
+}
+
+.cardstories .cardstories_invite_friend a:active {
+    color: #008082;
+}
+
+.cardstories .cardstories_invite_friend a > span {
+    position: relative;
+    display: block;
+    top: 4.5em;
+    margin: 0 auto;
+    width: 50%;
+}
+
+.cardstories .cardstories_friend_slot1,
+.cardstories .cardstories_friend_slot4 {
+    top: 115px;
+}
+
+.cardstories .cardstories_friend_slot2,
+.cardstories .cardstories_friend_slot5 {
+    top: 265px;
+}
+
+.cardstories .cardstories_friend_slot3 {
+    top: 415px;
+}
+
+.cardstories .cardstories_friend_slot1,
+.cardstories .cardstories_friend_slot2,
+.cardstories .cardstories_friend_slot3 {
+    left: 15px;
+}
+
+.cardstories .cardstories_friend_slot4,
+.cardstories .cardstories_friend_slot5 {
+    left: 687px;
 }
 
 .cardstories .cardstories_pane .cardstories_sidebar { 
@@ -564,65 +696,23 @@
 }
 
 .cardstories_card_confirm { 
-    display: none;
-    position: absolute;
-    z-index: 5;
     left: 231px;
     top: 81px;
     height: 120px;
     width: 298px;
-    text-align:center;
-    font-size: 10px;
-    font-family: "Licon";
-    color:#FFFFFF;
 }
 
-.cardstories_card_confirm img {
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    z-index: -1;
-    width: 100%;
-    height: 100%;
+.cardstories_card_confirm .cardstories_modal_h2 {
+    font-size: 1.4em !important;
 }
 
-.cardstories_card_confirm a {
-    display: block;
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    width: 100%;
-    height: 100%;
-    text-decoration: none;
-    color: inherit;
-
-    /* IE quirk: make the whole button clickable. */
-    background: url(#);
-}
-
-.cardstories_card_confirm a:active {
-    color: black;
-}
-
-.cardstories_card_confirm span {
-    position: relative;
-    top: 0.25em;
-}
-
-.cardstories_card_confirm_h1 {
-    margin: 0.3em 0;
-    font-size: 2.4em; 
-}
-
-.cardstories_card_confirm_h2 {
-    margin: 0;
-    font-family: "Helvetica";
-    font-size: 1.4em; 
+.cardstories_card_confirm a > span {
+    top: 0.25em !important;
 }
 
 .cardstories_card_confirm_buttons { 
     position: relative;
-    top: 0.8em;
+    top: 0.9em;
     margin: 0 auto;
     font-size: 2.0em; 
     width: 12.75em;
@@ -662,84 +752,11 @@
     height: 142px;
 }
 
-.cardstories .cardstories_create .cardstories_game_about_creativity { 
-    display: none;
-    position: absolute;
-    z-index: 9999;
-    font-size: 10px;
+.cardstories .cardstories_create .cardstories_info { 
     left: 230px;
     top: 90px;
     height: 129px;
     width: 301px;
-    text-align:center;
-    font-family: "Licon";
-    color:#FFFFFF;
-}
-
-.cardstories .cardstories_create .cardstories_game_about_creativity_background {
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    z-index: -1;
-    width: 100%;
-    height: 100%;
-}
-
-.cardstories .cardstories_create .cardstories_game_about_creativity_text_first_line {
-    margin: 0.3em 0;
-    font-size: 2.4em; 
-}
-
-.cardstories .cardstories_create .cardstories_game_about_creativity_text_second_line,
-.cardstories .cardstories_create .cardstories_game_about_creativity_text_third_line {
-    margin: 0;
-    font-family: "Helvetica";
-    font-size: 1.1em; 
-}
-
-.cardstories .cardstories_create .cardstories_game_about_creativity_text_third_line {
-    font-weight: bold; 
-}
-
-.cardstories .cardstories_create .cardstories_game_about_creativity_ok {
-    position: relative;
-    top: 0.35em;
-    margin: 0 auto;
-    font-size: 2.4em; 
-    width: 6.5em;
-    height: 2em;
-}
-
-.cardstories .cardstories_create .cardstories_game_about_creativity_ok > img {
-    position: absolute;
-    z-index: -1;
-    top: 0px;
-    left: 0px;
-    width: 100%;
-    height: 100%;
-}
-
-.cardstories .cardstories_create .cardstories_game_about_creativity_ok > a {
-    display: block;
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    width: 100%;
-    height: 100%;
-    text-decoration: none;
-    color: inherit;
-
-    /* IE quirk: make the whole button clickable. */
-    background: url(#);
-}
-
-.cardstories .cardstories_create .cardstories_game_about_creativity_ok > a > span {
-    position: relative;
-    top: 0.46em;
-}
-
-.cardstories .cardstories_create .cardstories_game_about_creativity_ok > a:active {
-    color: black;
 }
 
 .cardstories .cardstories_create .cardstories_pick_card .cardstories_board .cardstories_cards {
@@ -1065,6 +1082,21 @@
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_progress_mark { 
     left: 185px;
+}
+
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_info { 
+    left: 195px;
+    top: 140px;
+    height: 150px;
+    width: 370px;
+}
+
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_info .cardstories_modal_h1 { 
+    margin: 0.6em 0 0.3em 0 !important;
+}
+
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_info .cardstories_modal_button { 
+    top: 0.5em !important;
 }
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_advertise { 
