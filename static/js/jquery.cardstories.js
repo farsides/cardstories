@@ -484,6 +484,9 @@
                 height: starting_height
             });
 
+            // If defined, run the callback (used in the tests).
+            if (cb !== undefined) { cb('beginning'); }
+
             // Animate towards the final state.
             var q = $({});
             q.queue('chain', function(next) {
@@ -498,11 +501,14 @@
             });
             q.queue('chain', function(next) {
                 card_shadow.fadeIn('fast');
-                write_box.fadeIn('fast', function() {next();});
+                write_box.fadeIn('fast', function() {
+                    $(this).show(); // A workaround for http://bugs.jquery.com/ticket/8892
+                    next();
+                });
             });
             // If set, run the callback at the end of the queue.
             if (cb !== undefined) {
-                q.queue('chain', function(next) {cb();});
+                q.queue('chain', function(next) {cb('end');});
             }
             q.dequeue('chain');
         },
@@ -533,7 +539,10 @@
             var q = $({});
             q.queue('chain', function(next) {
                 write_box.fadeOut('fast');
-                sentence_box.fadeIn('fast', function() {next();});
+                sentence_box.fadeIn('fast', function() {
+                    $(this).show(); // A workaround for http://bugs.jquery.com/ticket/8892
+                    next();
+                });
             });
             q.queue('chain', function(next) {
                 write_box.hide();
