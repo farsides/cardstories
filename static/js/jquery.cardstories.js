@@ -669,8 +669,7 @@
                 load_text($(this));
             });
 
-            // TODO: animate this into existence
-            box.show();
+            $this.animate_scale(false, 5, 300, box);
         },
 
         poll_timeout: 300 * 1000, // must be identical to the --poll-timeout value 
@@ -905,7 +904,7 @@
             var invite_friends = $('.cardstories_invite_friends', element);
             invite_friends.unbind('click').click(function() {
                 $.cookie('CARDSTORIES_INVITATIONS', null);
-                $this.advertise(player_id, game.id, root);
+                $this.advertise(player_id, game.id, element);
             });
             //
             // display the cards picked by the current players
