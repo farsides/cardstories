@@ -16,12 +16,17 @@
     margin-top: 80px;
 }
 
+.cardstories img {
+    border: none;
+}
+
 .cardstories textarea:focus,
 .cardstories input:focus {
     outline: none;
 }
 
 .cardstories textarea {
+    overflow: auto;
     resize: none;
 }
 
@@ -416,10 +421,6 @@
 .cardstories_invite_friends,
 .cardstories_ready {
     cursor: pointer;
-}
-
-.cardstories_card img {
-    border: none;
 }
 
 .cardstories_card_border {
@@ -1163,7 +1164,7 @@
     font-family: "Helvetica";
     font-size: 1.1em;
     color: #7A7A7A;
-    background-color: transparent;
+    background-color: #E0E2E2;
     border: none;
 }
 
