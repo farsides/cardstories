@@ -123,6 +123,7 @@ class CardstoriesService(service.Service):
             )
         c.execute(
             "CREATE TABLE player2game ( "
+            "  serial INTEGER PRIMARY KEY, "
             "  player_id INTEGER, "
             "  game_id INTEGER, " 
             "  cards VARCHAR(%d), " % CardstoriesGame.CARDS_PER_PLAYER +

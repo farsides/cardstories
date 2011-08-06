@@ -167,7 +167,7 @@ class CardstoriesGame(pollable):
             board = None
         else:
             board = [ ord(c) for c in board ]
-        rows = yield self.service.db.runQuery("SELECT player_id, cards, picked, vote, win FROM player2game WHERE game_id = ? ORDER BY player_id", [ self.get_id() ])
+        rows = yield self.service.db.runQuery("SELECT player_id, cards, picked, vote, win FROM player2game WHERE game_id = ? ORDER BY serial", [ self.get_id() ])
         picked_count = 0
         voted_count = 0
         players = []

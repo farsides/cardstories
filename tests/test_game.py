@@ -372,6 +372,44 @@ class CardstoriesGameTest(unittest.TestCase):
         # move to complete state
 
     @defer.inlineCallbacks
+    def test08_game_player_order(self):
+        winner_card = 5
+        sentence = 'SENTENCE'
+        owner_id = 15
+        game_id = yield self.game.create(winner_card, sentence, owner_id)
+        # move to invitation state
+        player1 = 16
+        card1 = 20
+        player2 = 17
+        card2 = 25
+        player3 = 18
+        player4 = 19
+        invited = [player3, player4]
+        for player_id in ( player2, player1 ):
+            result = yield self.game.participate(player_id)
+            self.assertEquals([game_id], result['game_id'])
+        yield self.game.invite(invited)
+
+        # invitation state, visitor point of view
+        self.game.modified = 444
+        game_info = yield self.game.game(None)
+        self.assertEquals({'board': None,
+                           'cards': None,
+                           'id': game_id,
+                           'ready': False,
+                           'owner': False,
+                           'owner_id': 15,
+                           'players': [[owner_id, None, u'n', '', None],
+                                       [player2, None, u'n', None, None],
+                                       [player1, None, u'n', None, None]],
+                           'self': None,
+                           'sentence': u'SENTENCE',
+                           'winner_card': None,
+                           'state': u'invitation',
+                           'invited': None,
+                           'modified': self.game.modified}, game_info)
+
+    @defer.inlineCallbacks
     def test09_invitation(self):
         #
         # create a game and invite players
