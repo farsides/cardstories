@@ -16,6 +16,15 @@
     margin-top: 80px;
 }
 
+.cardstories textarea:focus,
+.cardstories input:focus {
+    outline: none;
+}
+
+.cardstories textarea {
+    resize: none;
+}
+
 .cardstories_extras {
     background: transparent url('images/background_plain.png') repeat-x left top;
 }
@@ -1158,6 +1167,14 @@
     border: none;
 }
 
+.cardstories .cardstories_advertise .cardstories_advertise_feedback {
+    display: none;
+    font-family: Helvetica;
+    font-size: 1.2em;
+    margin-top: 20%;
+    text-align: center;
+}
+
 .cardstories .cardstories_advertise .cardstories_advertise_button { 
     position: absolute;
     bottom: 0;
@@ -1172,6 +1189,10 @@
 
 .cardstories .cardstories_advertise .cardstories_advertise_button > a > span { 
     top: 0.25em;
+}
+
+.cardstories .cardstories_advertise .cardstories_invite_more {
+    display: none;
 }
 
 .cardstories .cardstories_advertise .cardstories_advertise_right { 

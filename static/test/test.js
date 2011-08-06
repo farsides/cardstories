@@ -600,16 +600,20 @@ test("invitation_owner_invite_more", 4, function() {
         'invited': [ player2 ]
     };
 
+    var element = $('#qunit-fixture .cardstories_invitation .cardstories_owner');
+    var advertise = $('.cardstories_advertise', element);
+    var textarea = $('.cardstories_advertise_input textarea', advertise);
+
     $.cardstories.poll_ignore = function(ignored_request, ignored_answer, new_poll, old_poll) { };
     $.cardstories.ajax = function(options) { };
 
-    equal($('#qunit-fixture .cardstories_invitation .cardstories_owner.cardstories_active').length, 0);
+    ok(!element.hasClass('cardstories_active'));
     $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
-    equal($('#qunit-fixture .cardstories_invitation .cardstories_owner.cardstories_active').length, 1);
+    ok(element.hasClass('cardstories_active'));
     $.cookie('CARDSTORIES_INVITATIONS', 'UNEXPECTED');
-    $('#qunit-fixture .cardstories_invitation .cardstories_owner .cardstories_invite_friends').click();
-    equal($('#qunit-fixture .cardstories_invitation .cardstories_owner .cardstories_advertise').css('display'), 'block');
-    equal($('#qunit-fixture .cardstories_invitation .cardstories_owner .cardstories_advertise .cardstories_text').val(), '');
+    $('.cardstories_invite_friend', element).first().click();
+    equal(advertise.css('display'), 'block');
+    equal(textarea.val(), textarea.attr('placeholder'));
 });
 
 asyncTest("invitation_owner", 6, function() {
@@ -1253,11 +1257,15 @@ test("results_board", 24, function() {
     equal($('.cardstories_player_name', column).text(), '');
   });
 
-test("advertise", 6, function() {
+test("advertise", 19, function() {
     var owner_id = 15;
     var game_id = 100;
     var element = $('#qunit-fixture .cardstories_invitation .cardstories_owner');
     var advertise = $('.cardstories_advertise', element);
+    var textarea = $('.cardstories_advertise_input textarea', advertise);
+    var submit_button = $('.cardstories_send_invitation', advertise);
+    var more_button = $('.cardstories_invite_more', advertise);
+    var feedback = $('.cardstories_advertise_feedback', advertise);
 
     $.cardstories.ajax = function(options) {
         equal(options.type, 'GET');
@@ -1267,24 +1275,50 @@ test("advertise", 6, function() {
     // the list of invitations is filled by the user
     $.cookie('CARDSTORIES_INVITATIONS', null);
     var text = " \n \t player1 \n\n   \nplayer2";
-    $('.cardstories_text', advertise).text(text);
+    textarea.val(text);
     $.cardstories.advertise(owner_id, game_id, element);
-    $('.cardstories_submit', advertise).click();
+    submit_button.click();
     equal($.cookie('CARDSTORIES_INVITATIONS'), text);
+    equal(feedback.css('display'), 'block', 'Feedback text is visible after submitting');
+    equal(textarea.css('display'), 'none', 'Textarea is not visible after submitting');
+    equal(more_button.css('display'), 'block', 'Invite more button is visible after submitting');
+    equal(submit_button.css('display'), 'none', 'Submit button is not visible after submitting');
+
+    more_button.click();
+    equal(feedback.css('display'), 'none', 'Feedback text not visible anymore');
+    equal(textarea.css('display'), 'block', 'Textarea is visible again');
+    equal(more_button.css('display'), 'none', 'Invite more button is not visible anymore');
+    equal(submit_button.css('display'), 'block', 'Submit button is visible again');
 
     // the list of invitations is retrieved from the cookie
-    $('.cardstories_text', advertise).text('UNEXPECTED');
+    textarea.val('UNEXPECTED');
     $.cardstories.advertise(owner_id, game_id, element);
-    equal($('.cardstories_text', advertise).val(), text);
+    equal(textarea.val(), text);
 
     $.cookie('CARDSTORIES_INVITATIONS', null);
-    $('.cardstories_text', advertise).text('');
+    textarea.val('');
     $.cardstories.advertise(owner_id, game_id, element);
 
     // button should be enabled only when text is not blank
-    ok(!$('.cardstories_submit', advertise).hasClass('cardstories_submit_ready'), 'button should be disabled');
-    $('.cardstories_text', advertise).text('player1').keyup();
-    ok($('.cardstories_submit', advertise).hasClass('cardstories_submit_ready'), 'button should be enabled');
+    text = 'player1';
+    ok(!submit_button.hasClass('cardstories_submit_ready'), 'button should be disabled');
+    textarea.val(text).keyup();
+    ok(submit_button.hasClass('cardstories_submit_ready'), 'button should be enabled');
+
+    var button_img = submit_button.find('img');
+    var over_src = button_img.metadata({type: 'attr', name: 'data'}).over;
+    notEqual(button_img.attr('src'), over_src);
+    submit_button.mouseenter()
+    equal(button_img.attr('src'), over_src);
+    submit_button.mouseleave();
+    notEqual(button_img.attr('src'), over_src);
+
+    // clicking on invite friend button again doesn't do any harm.
+    $('.cardstories_invite_friend', element).first().click();
+    equal(textarea.val(), text);
+
+    $('.cardstories_advertise_close', advertise).click();
+    equal(advertise.css('display'), 'none', 'clicking the close button hides the dialog');
 });
 
 test("refresh_lobby", 15, function() {

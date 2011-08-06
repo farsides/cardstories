@@ -663,32 +663,86 @@
         advertise: function(owner_id, game_id, element) {
             var $this = this;
             var box = $('.cardstories_advertise', element);
-            var text = $.cookie('CARDSTORIES_INVITATIONS');
-            if(text !== undefined && text !== null) {
-                $('.cardstories_text', box).text(text);
-            }
+            // Don't do anything if the box is already visible.
+            if (box.is(':visible')) { return; }
 
-            var load_text = function ($o) {
-                if ($.trim($o.val()).length !== 0) {
-                    $('.cardstories_submit').addClass('cardstories_submit_ready');
-                    $('.cardstories_submit', box).unbind('click').click(function() {
-                        var text = $('.cardstories_text', box).val();
-                        var invites = $.map($.grep(text.split(/\s+/), function(s,i) { return s !== ''; }),
-                                            function(s,i) {
-                                                return 'player_id=' + encodeURIComponent(s);
-                                            });
-                        $.cookie('CARDSTORIES_INVITATIONS', text);
-                        $this.send_game(owner_id, game_id, element, 'action=invite&owner_id=' + owner_id + '&game_id=' + game_id + '&' + invites.join('&'));
-                      });
-                } else {
-                    $('.cardstories_submit', box).unbind('click');
-                    $('.cardstories_submit').removeClass('cardstories_submit_ready');
+            var text = $.cookie('CARDSTORIES_INVITATIONS');
+            var textarea = $('.cardstories_advertise_input textarea', box);
+            if (text !== undefined && text !== null) {
+                textarea.val(text);
+            }
+            textarea.placeholder();
+
+            var background = $('.cardstories_advertise_input img', box);
+            var feedback = $('.cardstories_advertise_feedback', box);
+            var submit_button = $('.cardstories_send_invitation', box);
+            var more_button = $('.cardstories_invite_more', box);
+            var close_button = $('.cardstories_advertise_close', box);
+
+            var toggle_feedback = function(showOrHide) {
+                feedback.toggle(showOrHide);
+                more_button.toggle(showOrHide);
+                background.toggle(!showOrHide);
+                textarea.toggle(!showOrHide);
+                submit_button.toggle(!showOrHide);
+            };
+            toggle_feedback(false);
+
+            close_button.unbind('click').click(function() {
+                $this.animate_scale(true, 5, 300, box);
+            });
+
+            var is_invitation_valid = function(value) {
+                var trimmed = $.trim(value);
+                return trimmed && trimmed != textarea.attr('placeholder');
+            };
+
+            textarea.unbind('keyup click change').bind('keyup click change', function() {
+                var val = textarea.val();
+                submit_button.toggleClass('cardstories_submit_ready', is_invitation_valid(val));
+            }).change();
+
+            submit_button.unbind('click').click(function() {
+                var val = textarea.val();
+                if (is_invitation_valid(val)) {
+                    var invites = $.map($.grep(val.split(/\s+/), function(s,i) { return s !== ''; }),
+                                        function(s,i) {
+                                            return 'player_id=' + encodeURIComponent(s);
+                                        });
+                    $.cookie('CARDSTORIES_INVITATIONS', val);
+                    $this.send_game(owner_id, game_id, element, 'action=invite&owner_id=' + owner_id + '&game_id=' + game_id + '&' + invites.join('&'));
+                    toggle_feedback(true);
+                    textarea.val('');
+                }
+            });
+
+            more_button.unbind('click').click(function() {
+                toggle_feedback(false);
+            });
+
+            var submit_img = submit_button.find('img');
+            var more_img = more_button.find('img');
+            var close_img = close_button.find('img');
+            var submit_out_src = submit_img.attr('src');
+            var submit_in_src = submit_img.metadata({type: 'attr', name: 'data'}).over;
+            var more_out_src = more_img.attr('src');
+            var more_in_src = more_img.metadata({type: 'attr', name: 'data'}).over;
+            var close_out_src = close_img.attr('src');
+            var close_in_src = close_img.metadata({type: 'attr', name: 'data'}).over;
+            var submit_in = function() {
+                if (is_invitation_valid(textarea.val())) {
+                    submit_img.attr('src', submit_in_src);
                 }
             };
-            load_text($('.cardstories_text', box));
-            $('.cardstories_text', box).unbind('keyup').keyup(function () {
-                load_text($(this));
-            });
+            var submit_out = function() { submit_img.attr('src', submit_out_src); };
+            var more_in = function() { more_img.attr('src', more_in_src); };
+            var more_out = function() { more_img.attr('src', more_out_src); };
+            var close_in = function() { close_img.attr('src', close_in_src); };
+            var close_out = function() { close_img.attr('src', close_out_src); };
+
+            submit_button.hover(submit_in, submit_out);
+            more_button.hover(more_in, more_out);
+            close_button.hover(close_in, close_out);
 
             $this.animate_scale(false, 5, 300, box);
         },
@@ -920,14 +974,6 @@
                 });
             }
             //
-            // Navigate to invite more friends, if desired
-            //
-            var invite_friends = $('.cardstories_invite_friends', element);
-            invite_friends.unbind('click').click(function() {
-                $.cookie('CARDSTORIES_INVITATIONS', null);
-                $this.advertise(player_id, game.id, element);
-            });
-            //
             // display the cards picked by the current players
             //
             var players = game.players;
@@ -945,7 +991,7 @@
                 }
                 cards.push(card);
             }
-            
+
             // First display the modal.
             var q = $({});
             q.queue('chain', function(next) {
@@ -953,8 +999,15 @@
             });
 
             // Then the friend slots.
+            var slots = $('.cardstories_invite_friend', element);
             q.queue('chain', function(next) {
-                $this.display_friend_slots($('.cardstories_invite_friend', element), root, function() {next();});
+                $this.display_friend_slots(slots, root, function() {
+                    slots.unbind('click').click(function() {
+                        $.cookie('CARDSTORIES_INVITATIONS', null);
+                        $this.advertise(player_id, game.id, element);
+                    });
+                    next();
+                });
             });
 
             // TODO: display the cards without jqDock
