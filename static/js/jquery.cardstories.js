@@ -93,7 +93,13 @@
             tmp_mark.remove();
 
             // Animate the mark.
-            mark.animate({left: final_left}, 500, cb);
+            // I fail to understand why, but tmp_mark and final_left are sometimes
+            // undefined during test runs, which wracks havoc on IE8.
+            if (typeof final_left !== 'undefined') {
+                mark.animate({left: final_left}, 500, cb);
+            } else if (cb) {
+                cb();
+            }
         },
 
         // For best results with animate_scale, the element must be positioned
@@ -106,6 +112,10 @@
 
             var big_top = parseInt(el.css('top'), 10);
             var big_left = parseInt(el.css('left'), 10);
+            // I fail to understand why, but el.css('top/left') is sometimes blank during test runs,
+            // which wracks havoc upon IE8.
+            big_top = isNaN(big_top) ? 0 : big_top;
+            big_left = isNaN(big_left) ? 0 : big_left;
             var big_width = el.width();
             var big_height = el.height();
             var big_fontsize = parseInt(el.css('font-size'), 10);
@@ -195,14 +205,15 @@
                 };
 
                 $this.select_cards('create_pick_card', cards, ok, element, root).done(function() {
-                    deferred.resolve();
+                    // Delay the appearance of the modal box artificially, since
+                    // jqDock doesn't provide a hook for when expansion finishes.
+                    $this.setTimeout(function() {
+                        $this.display_modal($('.cardstories_info', element), $('.cardstories_modal_overlay', element), function() {
+                            deferred.resolve();
+                        });
+                    }, 250);
                 });
 
-                // Delay the appearance of the modal box artificially, since
-                // jqDock doesn't provide a hook for when expansion finishes.
-                $this.setTimeout(function() {
-                    $this.display_modal($('.cardstories_info', element), $('.cardstories_modal_overlay', element));
-                }, 300);
             });
 
             q.queue('chain', function(next) {
@@ -440,6 +451,7 @@
             var card_template = $('.cardstories_card_template', element);
             var card_imgs = $('img', card_template);
             var card_foreground = card_imgs.filter('.cardstories_card_foreground');
+            var card_flyover = $('.cardstories_pick_card .cardstories_card_flyover', root);
 
             // Set the card's src attribute first.
             var src = card_template.metadata({type: 'attr', name: 'data'}).card.supplant({card: card});
@@ -449,7 +461,7 @@
             var final_left = parseInt(card_template.css('left'), 10); // assuming value in pixels
             var final_width = card_imgs.width();
             var final_height = card_imgs.height();
-            var starting_width = 220;
+            var starting_width = card_flyover.metadata({type: 'attr', name: 'data'}).final_width;
             var ratio = final_width / starting_width;
             var starting_height = Math.ceil(final_height / ratio);
             var animation_duration = 500;
@@ -467,6 +479,9 @@
                 height: starting_height
             });
 
+            // If defined, run the callback (used in the tests).
+            if (cb !== undefined) { cb('before_animation'); }
+
             // Animate towards the final state.
             var q = $({});
             q.queue('chain', function(next) {
@@ -481,11 +496,14 @@
             });
             q.queue('chain', function(next) {
                 card_shadow.fadeIn('fast');
-                write_box.fadeIn('fast', function() {next();});
+                write_box.fadeIn('fast', function() {
+                    $(this).show(); // A workaround for http://bugs.jquery.com/ticket/8892
+                    next();
+                });
             });
             // If set, run the callback at the end of the queue.
             if (cb !== undefined) {
-                q.queue('chain', function(next) {cb();});
+                q.queue('chain', function(next) {cb('after_animation');});
             }
             q.dequeue('chain');
         },
@@ -516,7 +534,10 @@
             var q = $({});
             q.queue('chain', function(next) {
                 write_box.fadeOut('fast');
-                sentence_box.fadeIn('fast', function() {next();});
+                sentence_box.fadeIn('fast', function() {
+                    $(this).show(); // A workaround for http://bugs.jquery.com/ticket/8892
+                    next();
+                });
             });
             q.queue('chain', function(next) {
                 write_box.hide();
@@ -990,18 +1011,21 @@
                 });
             };
             var hand = $('.cardstories_cards_hand', element);
-            return this.display_or_select_cards(id, cards, confirm_callback, hand);
+            return this.display_or_select_cards(id, cards, confirm_callback, hand, root);
         },
 
-        display_or_select_cards: function(id, cards, select_callback, element) {
+        display_or_select_cards: function(id, cards, select_callback, element, root) {
             // In create_pick_card, jqDock needs to start collapsed, to better
             // integrate with the animation.
             var start_collapsed = id === 'create_pick_card';
             id += '_saved_element';
-            if(this[id] === undefined) {
-                this[id] = element.html();
+            var $root = $(root);
+            var saved_elements = $root.data('cardstories_saved_elements') || {};
+            if (saved_elements[id] === undefined) {
+                saved_elements[id] = element.html();
+                $root.data('cardstories_saved_elements', saved_elements);
             } else {
-                element.html(this[id]);
+                element.html(saved_elements[id]);
             }
             var meta = element.metadata({type: "attr", name: "data"});
             var active_card = meta.active;
