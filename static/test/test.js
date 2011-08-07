@@ -595,6 +595,7 @@ test("invitation_owner_invite_more", 4, function() {
         'id': game_id,
         'owner': true,
         'ready': true,
+        'winner_card': 10,
         'players': [ [ player1, null, 'n', card1, [] ],
                      [ player2, null, 'n', null, [] ] ],
         'invited': [ player2 ]
@@ -616,12 +617,13 @@ test("invitation_owner_invite_more", 4, function() {
     equal(textarea.val(), textarea.attr('placeholder'));
 });
 
-asyncTest("invitation_owner", 6, function() {
+asyncTest("invitation_owner", 7, function() {
     var player1 = 'player1';
     var card1 = 5;
     var player2 = 'player2';
     var player_id = player1;
     var game_id = 101;
+    var winner_card = 7;
     var sentence = 'SENTENCE';
 
     var game = {
@@ -629,6 +631,7 @@ asyncTest("invitation_owner", 6, function() {
         'owner': true,
         'ready': true,
         'sentence': sentence,
+        'winner_card': winner_card,
         'players': [ [ player1, null, 'n', card1, [] ],
                      [ player2, null, 'n', null, [] ] ],
         'invited': [ player2 ]
@@ -648,6 +651,11 @@ asyncTest("invitation_owner", 6, function() {
     equal($('#qunit-fixture .cardstories_invitation .cardstories_owner.cardstories_active').length, 0);
     $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
     equal($('#qunit-fixture .cardstories_invitation .cardstories_owner .cardstories_sentence').text(), sentence);
+
+    var picked_card = $('#qunit-fixture .cardstories_invitation .cardstories_owner .cardstories_picked_card');
+    var winner_src = picked_card.metadata({type: 'attr', name: 'data'}).card.supplant({card: winner_card});
+    equal(picked_card.find('.cardstories_card_foreground').attr('src'), winner_src, 'the picked card is shown');
+
     // TODO: Test card display when new display logic is implemented.
     /*
     var cards = $('#qunit-fixture .cardstories_invitation .cardstories_owner .cardstories_cards');
