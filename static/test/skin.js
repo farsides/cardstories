@@ -70,6 +70,7 @@
         'owner': true,
         'ready': false,
         'sentence': 'long sentence is in the flux',
+        'winner_card': 7,
         'players': [ [ 'player1', null, 'n', 5, [] ],
                      [ 'player2', null, 'n', null, [] ],
                      [ 'player3', null, 'n', null, [] ],

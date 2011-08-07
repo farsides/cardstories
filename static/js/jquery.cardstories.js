@@ -970,6 +970,9 @@
             this.notify_active(root, 'invitation_owner');
             this.display_progress_bar(3, element, root);
             $('.cardstories_sentence', element).text(game.sentence);
+            var picked_card = $('.cardstories_picked_card', element);
+            var src = picked_card.metadata({type: 'attr', name: 'data'}).card.supplant({card: game.winner_card});
+            picked_card.find('.cardstories_card_foreground').attr('src', src);
 
             //
             // Proceed to vote, if possible
