@@ -1146,6 +1146,44 @@
     left: -57px;
 }
 
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_go_vote_confirm {
+    left: 235px;
+    top: 140px;
+    height: 173px;
+    width: 306px;
+}
+
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_go_vote_confirm .cardstories_modal_h1 {
+    font-size: 3em;
+    margin: 0.4em 0 0.2em 0;
+}
+
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_go_vote_confirm .cardstories_modal_h2 {
+    margin: 0 3em;
+}
+
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_go_vote_confirm .cardstories_go_vote_confirm_no,
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_go_vote_confirm .cardstories_go_vote_confirm_yes {
+    position: absolute;
+    bottom: 0.3em;
+    top: auto;
+    margin: 0;
+    width: 44%;
+    height: 48%;
+}
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_go_vote_confirm .cardstories_go_vote_confirm_no a span,
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_go_vote_confirm .cardstories_go_vote_confirm_yes a span {
+    display: none;
+}
+
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_go_vote_confirm .cardstories_go_vote_confirm_no {
+    left: 0.6em;
+}
+
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_go_vote_confirm .cardstories_go_vote_confirm_yes {
+    right: 0.8em;
+}
+
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_info { 
     left: 195px;
     top: 140px;
