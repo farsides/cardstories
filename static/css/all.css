@@ -16,6 +16,20 @@
     margin-top: 80px;
 }
 
+.cardstories img {
+    border: none;
+}
+
+.cardstories textarea:focus,
+.cardstories input:focus {
+    outline: none;
+}
+
+.cardstories textarea {
+    overflow: auto;
+    resize: none;
+}
+
 .cardstories_extras {
     background: transparent url('images/background_plain.png') repeat-x left top;
 }
@@ -407,10 +421,6 @@
 .cardstories_invite_friends,
 .cardstories_ready {
     cursor: pointer;
-}
-
-.cardstories_card img {
-    border: none;
 }
 
 .cardstories_card_border {
@@ -1099,8 +1109,99 @@
     top: 0.5em !important;
 }
 
-.cardstories .cardstories_invitation .cardstories_owner .cardstories_advertise { 
+.cardstories .cardstories_advertise { 
+    top: 145px;
+    left: 175px;
+    width: 417px;
+    height: 234px;
+    color: #484C4E;
+}
+
+.cardstories .cardstories_advertise .cardstories_advertise_close { 
+    position: absolute;
+    width: 1.6em;
+    height: 1.6em;
+    top: 1.0em;
+    right: 2em;
+}
+
+.cardstories .cardstories_advertise .cardstories_modal_h1 { 
+    font-size: 4.4em;
+    margin: 0.15em 0 !important;
+}
+
+.cardstories .cardstories_advertise .cardstories_modal_h2 { 
+    font-size: 1.2em;
+}
+
+.cardstories .cardstories_advertise .cardstories_advertise_inner { 
+    width: 37em;
+    height: 16.5em;
+    margin: 0 auto;
+    text-align: left;
+}
+
+.cardstories .cardstories_advertise .cardstories_advertise_left { 
+    position: relative;
+    height: 100%;
+    float: left;
+}
+
+.cardstories .cardstories_advertise .cardstories_advertise_input { 
+    position: relative;
+    font-size: 1em;
+    width: 23.8em;
+    height: 11.5em;
+}
+
+.cardstories .cardstories_advertise .cardstories_advertise_input > textarea { 
+    position: relative;
+    display: block;
+    top: 10%;
+    margin: 0 auto;
+    width: 90%;
+    height: 80%;
+    font-family: "Helvetica";
+    font-size: 1.1em;
+    color: #7A7A7A;
+    background-color: #E0E2E2;
+    border: none;
+}
+
+.cardstories .cardstories_advertise .cardstories_advertise_feedback {
     display: none;
+    font-family: Helvetica;
+    font-size: 1.2em;
+    margin-top: 20%;
+    text-align: center;
+}
+
+.cardstories .cardstories_advertise .cardstories_advertise_button { 
+    position: absolute;
+    bottom: 0;
+    right: 0.25em;
+    margin: 0 auto;
+    font-size: 1.6em;
+    width: 6.5em;
+    height: 1.7em;
+    color: #FFFFFF;
+    text-align: center;
+}
+
+.cardstories .cardstories_advertise .cardstories_advertise_button > a > span { 
+    top: 0.25em;
+}
+
+.cardstories .cardstories_advertise .cardstories_invite_more {
+    display: none;
+}
+
+.cardstories .cardstories_advertise .cardstories_advertise_right { 
+    float: right;
+    width: 10em;
+    height: 100%;
+    padding-left: 1.25em;
+    border-left: 1px solid #999999;
 }
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_card_template {

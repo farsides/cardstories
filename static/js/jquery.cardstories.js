@@ -93,7 +93,13 @@
             tmp_mark.remove();
 
             // Animate the mark.
-            mark.animate({left: final_left}, 500, cb);
+            // I fail to understand why, but tmp_mark and final_left are sometimes
+            // undefined during test runs, which wracks havoc on IE8.
+            if (typeof final_left !== 'undefined') {
+                mark.animate({left: final_left}, 500, cb);
+            } else if (cb) {
+                cb();
+            }
         },
 
         // For best results with animate_scale, the element must be positioned
@@ -106,6 +112,10 @@
 
             var big_top = parseInt(el.css('top'), 10);
             var big_left = parseInt(el.css('left'), 10);
+            // I fail to understand why, but el.css('top/left') is sometimes blank during test runs,
+            // which wracks havoc upon IE8.
+            big_top = isNaN(big_top) ? 0 : big_top;
+            big_left = isNaN(big_left) ? 0 : big_left;
             var big_width = el.width();
             var big_height = el.height();
             var big_fontsize = parseInt(el.css('font-size'), 10);
@@ -195,14 +205,15 @@
                 };
 
                 $this.select_cards('create_pick_card', cards, ok, element, root).done(function() {
-                    deferred.resolve();
+                    // Delay the appearance of the modal box artificially, since
+                    // jqDock doesn't provide a hook for when expansion finishes.
+                    $this.setTimeout(function() {
+                        $this.display_modal($('.cardstories_info', element), $('.cardstories_modal_overlay', element), function() {
+                            deferred.resolve();
+                        });
+                    }, 250);
                 });
 
-                // Delay the appearance of the modal box artificially, since
-                // jqDock doesn't provide a hook for when expansion finishes.
-                $this.setTimeout(function() {
-                    $this.display_modal($('.cardstories_info', element), $('.cardstories_modal_overlay', element));
-                }, 300);
             });
 
             q.queue('chain', function(next) {
@@ -440,6 +451,7 @@
             var card_template = $('.cardstories_card_template', element);
             var card_imgs = $('img', card_template);
             var card_foreground = card_imgs.filter('.cardstories_card_foreground');
+            var card_flyover = $('.cardstories_pick_card .cardstories_card_flyover', root);
 
             // Set the card's src attribute first.
             var src = card_template.metadata({type: 'attr', name: 'data'}).card.supplant({card: card});
@@ -449,7 +461,7 @@
             var final_left = parseInt(card_template.css('left'), 10); // assuming value in pixels
             var final_width = card_imgs.width();
             var final_height = card_imgs.height();
-            var starting_width = 220;
+            var starting_width = card_flyover.metadata({type: 'attr', name: 'data'}).final_width;
             var ratio = final_width / starting_width;
             var starting_height = Math.ceil(final_height / ratio);
             var animation_duration = 500;
@@ -467,6 +479,9 @@
                 height: starting_height
             });
 
+            // If defined, run the callback (used in the tests).
+            if (cb !== undefined) { cb('before_animation'); }
+
             // Animate towards the final state.
             var q = $({});
             q.queue('chain', function(next) {
@@ -481,11 +496,14 @@
             });
             q.queue('chain', function(next) {
                 card_shadow.fadeIn('fast');
-                write_box.fadeIn('fast', function() {next();});
+                write_box.fadeIn('fast', function() {
+                    $(this).show(); // A workaround for http://bugs.jquery.com/ticket/8892
+                    next();
+                });
             });
             // If set, run the callback at the end of the queue.
             if (cb !== undefined) {
-                q.queue('chain', function(next) {cb();});
+                q.queue('chain', function(next) {cb('after_animation');});
             }
             q.dequeue('chain');
         },
@@ -516,7 +534,10 @@
             var q = $({});
             q.queue('chain', function(next) {
                 write_box.fadeOut('fast');
-                sentence_box.fadeIn('fast', function() {next();});
+                sentence_box.fadeIn('fast', function() {
+                    $(this).show(); // A workaround for http://bugs.jquery.com/ticket/8892
+                    next();
+                });
             });
             q.queue('chain', function(next) {
                 write_box.hide();
@@ -642,35 +663,88 @@
         advertise: function(owner_id, game_id, element) {
             var $this = this;
             var box = $('.cardstories_advertise', element);
-            var text = $.cookie('CARDSTORIES_INVITATIONS');
-            if(text !== undefined && text !== null) {
-                $('.cardstories_text', box).text(text);
-            }
+            // Don't do anything if the box is already visible.
+            if (box.is(':visible')) { return; }
 
-            var load_text = function ($o) {
-                if ($.trim($o.val()).length !== 0) {
-                    $('.cardstories_submit').addClass('cardstories_submit_ready');
-                    $('.cardstories_submit', box).unbind('click').click(function() {
-                        var text = $('.cardstories_text', box).val();
-                        var invites = $.map($.grep(text.split(/\s+/), function(s,i) { return s !== ''; }),
-                                            function(s,i) {
-                                                return 'player_id=' + encodeURIComponent(s);
-                                            });
-                        $.cookie('CARDSTORIES_INVITATIONS', text);
-                        $this.send_game(owner_id, game_id, element, 'action=invite&owner_id=' + owner_id + '&game_id=' + game_id + '&' + invites.join('&'));
-                      });
-                } else {
-                    $('.cardstories_submit', box).unbind('click');
-                    $('.cardstories_submit').removeClass('cardstories_submit_ready');
-                }
+            var text = $.cookie('CARDSTORIES_INVITATIONS');
+            var textarea = $('.cardstories_advertise_input textarea', box);
+            if (text !== undefined && text !== null) {
+                textarea.val(text);
+            }
+            textarea.placeholder();
+
+            var background = $('.cardstories_advertise_input img', box);
+            var feedback = $('.cardstories_advertise_feedback', box);
+            var submit_button = $('.cardstories_send_invitation', box);
+            var more_button = $('.cardstories_invite_more', box);
+            var close_button = $('.cardstories_advertise_close', box);
+
+            var toggle_feedback = function(showOrHide) {
+                feedback.toggle(showOrHide);
+                more_button.toggle(showOrHide);
+                background.toggle(!showOrHide);
+                textarea.toggle(!showOrHide);
+                submit_button.toggle(!showOrHide);
             };
-            load_text($('.cardstories_text', box));
-            $('.cardstories_text', box).unbind('keyup').keyup(function () {
-                load_text($(this));
+            toggle_feedback(false);
+
+            close_button.unbind('click').click(function() {
+                $this.animate_scale(true, 5, 300, box);
             });
 
-            // TODO: animate this into existence
-            box.show();
+            var is_invitation_valid = function(value) {
+                var trimmed = $.trim(value);
+                return trimmed && trimmed != textarea.attr('placeholder');
+            };
+
+            textarea.unbind('keyup click change').bind('keyup click change', function() {
+                var val = textarea.val();
+                submit_button.toggleClass('cardstories_submit_ready', is_invitation_valid(val));
+            }).change();
+
+            submit_button.unbind('click').click(function() {
+                var val = textarea.val();
+                if (is_invitation_valid(val)) {
+                    var invites = $.map($.grep(val.split(/\s+/), function(s,i) { return s !== ''; }),
+                                        function(s,i) {
+                                            return 'player_id=' + encodeURIComponent(s);
+                                        });
+                    $.cookie('CARDSTORIES_INVITATIONS', val);
+                    $this.send_game(owner_id, game_id, element, 'action=invite&owner_id=' + owner_id + '&game_id=' + game_id + '&' + invites.join('&'));
+                    toggle_feedback(true);
+                    textarea.val('');
+                }
+            });
+
+            more_button.unbind('click').click(function() {
+                toggle_feedback(false);
+            });
+
+            var submit_img = submit_button.find('img');
+            var more_img = more_button.find('img');
+            var close_img = close_button.find('img');
+            var submit_out_src = submit_img.attr('src');
+            var submit_in_src = submit_img.metadata({type: 'attr', name: 'data'}).over;
+            var more_out_src = more_img.attr('src');
+            var more_in_src = more_img.metadata({type: 'attr', name: 'data'}).over;
+            var close_out_src = close_img.attr('src');
+            var close_in_src = close_img.metadata({type: 'attr', name: 'data'}).over;
+            var submit_in = function() {
+                if (is_invitation_valid(textarea.val())) {
+                    submit_img.attr('src', submit_in_src);
+                }
+            };
+            var submit_out = function() { submit_img.attr('src', submit_out_src); };
+            var more_in = function() { more_img.attr('src', more_in_src); };
+            var more_out = function() { more_img.attr('src', more_out_src); };
+            var close_in = function() { close_img.attr('src', close_in_src); };
+            var close_out = function() { close_img.attr('src', close_out_src); };
+
+            submit_button.hover(submit_in, submit_out);
+            more_button.hover(more_in, more_out);
+            close_button.hover(close_in, close_out);
+
+            $this.animate_scale(false, 5, 300, box);
         },
 
         poll_timeout: 300 * 1000, // must be identical to the --poll-timeout value 
@@ -900,14 +974,6 @@
                 });
             }
             //
-            // Navigate to invite more friends, if desired
-            //
-            var invite_friends = $('.cardstories_invite_friends', element);
-            invite_friends.unbind('click').click(function() {
-                $.cookie('CARDSTORIES_INVITATIONS', null);
-                $this.advertise(player_id, game.id, root);
-            });
-            //
             // display the cards picked by the current players
             //
             var players = game.players;
@@ -925,7 +991,7 @@
                 }
                 cards.push(card);
             }
-            
+
             // First display the modal.
             var q = $({});
             q.queue('chain', function(next) {
@@ -933,8 +999,15 @@
             });
 
             // Then the friend slots.
+            var slots = $('.cardstories_invite_friend', element);
             q.queue('chain', function(next) {
-                $this.display_friend_slots($('.cardstories_invite_friend', element), root, function() {next();});
+                $this.display_friend_slots(slots, root, function() {
+                    slots.unbind('click').click(function() {
+                        $.cookie('CARDSTORIES_INVITATIONS', null);
+                        $this.advertise(player_id, game.id, element);
+                    });
+                    next();
+                });
             });
 
             // TODO: display the cards without jqDock
@@ -991,18 +1064,21 @@
                 });
             };
             var hand = $('.cardstories_cards_hand', element);
-            return this.display_or_select_cards(id, cards, confirm_callback, hand);
+            return this.display_or_select_cards(id, cards, confirm_callback, hand, root);
         },
 
-        display_or_select_cards: function(id, cards, select_callback, element) {
+        display_or_select_cards: function(id, cards, select_callback, element, root) {
             // In create_pick_card, jqDock needs to start collapsed, to better
             // integrate with the animation.
             var start_collapsed = id === 'create_pick_card';
             id += '_saved_element';
-            if(this[id] === undefined) {
-                this[id] = element.html();
+            var $root = $(root);
+            var saved_elements = $root.data('cardstories_saved_elements') || {};
+            if (saved_elements[id] === undefined) {
+                saved_elements[id] = element.html();
+                $root.data('cardstories_saved_elements', saved_elements);
             } else {
-                element.html(this[id]);
+                element.html(saved_elements[id]);
             }
             var meta = element.metadata({type: "attr", name: "data"});
             var active_card = meta.active;

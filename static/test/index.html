@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" /> 
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
     <title>QUnit Test Suite</title>
     <script type="text/javascript" src="../js/jquery/jquery-1.5.1.js"></script>
     <script type="text/javascript" src="../js/supplant.js"></script>
@@ -129,12 +129,12 @@
                     <a class="cardstories_card" href="javascript:"><img alt="" src="../css/images/card_small_visiblepart_full.png" /></a>
                   </div>
                   <div class="cardstories_card_template" data="{card:'../css/images/card0{card}.png',card_bg:'../css/images/card_bg.png',card_bg_selected:'../css/images/card_bg_selected.png',nocard:'../css/images/card-back.png'}">
-                    <img class="cardstories_card_foreground" src="templateforeground" alt="{label}" />
-                    <img class="cardstories_card_background" src="templatebackground" alt="" />
+                    <img class="cardstories_card_foreground" src="" alt="{label}" />
+                    <img class="cardstories_card_background" src="../css/images/card_bg.png" alt="" />
                   </div>
                 </div>
-                <div class="cardstories_card_flyover" data="{card:'css/images/card0{card}.png',final_height:292,final_width:220,final_left:278}">
-                  <img class="cardstories_card_background" src="css/images/card_bg_selected.png" alt="" />
+                <div class="cardstories_card_flyover" data="{card:'../css/images/card0{card}.png',final_height:292,final_width:220,final_left:278}">
+                  <img class="cardstories_card_background" src="../css/images/card_bg_selected.png" alt="" />
                   <img class="cardstories_card_foreground" src="" alt="" />
                 </div>
                 <div class="cardstories_owner_seat">
@@ -177,7 +177,7 @@
           </div>
         </div>
 
-	<div class="cardstories_lobby">
+        <div class="cardstories_lobby">
           <div class="cardstories_in_progress">
             <div class="cardstories_tab">
               <div class="cardstories_tab_in_progress"></div>
@@ -199,13 +199,13 @@
                 <thead><tr><th>ROLE</th><th>SATUS</th><th>STORY</th></tr></thead>
                 <tbody></tbody>
               </table>
-              <div class="cardstories_pager pager"> 
-	        <form> 
-	          <select class="pagesize">  
-	            <option selected="selected" value="1">1</option>  
-                  </select>  
-                </form> 
-              </div> 
+              <div class="cardstories_pager pager">
+                <form>
+                  <select class="pagesize">
+                    <option selected="selected" value="1">1</option>
+                  </select>
+                </form>
+              </div>
             </div>
           </div>
           <div class="cardstories_finished">
@@ -230,13 +230,13 @@
                 <thead><tr><th>ROLE</th><th>WIN</th><th>STORY</th></tr></thead>
                 <tbody></tbody>
               </table>
-              <div class="cardstories_pager pager"> 
-	        <form> 
-	          <select class="pagesize">  
-	            <option selected="selected" value="1">1</option>  
-                  </select>  
-                </form> 
-              </div> 
+              <div class="cardstories_pager pager">
+                <form>
+                  <select class="pagesize">
+                    <option selected="selected" value="1">1</option>
+                  </select>
+                </form>
+              </div>
             </div>
           </div>
           <div class="cardstories_games_test">
@@ -255,18 +255,18 @@
                 <thead><tr><th>ROLE</th><th>WIN</th><th>STATE</th><th>STORY</th></tr></thead>
                 <tbody></tbody>
               </table>
-              <div class="cardstories_pager pager"> 
-	        <form> 
-	          <span class="first">first</span>  
-	          <span class="prev">prev</span>  
-	          <span class="next">next</span>  
-	          <span class="last">last</span>  
-	          <select class="pagesize">  
-	            <option selected="selected" value="2">2</option>  
-	            <option value="1">1</option>  
-                  </select>  
-                </form> 
-              </div> 
+              <div class="cardstories_pager pager">
+                <form>
+                  <span class="first">first</span>
+                  <span class="prev">prev</span>
+                  <span class="next">next</span>
+                  <span class="last">last</span>
+                  <select class="pagesize">
+                    <option selected="selected" value="2">2</option>
+                    <option value="1">1</option>
+                  </select>
+                </form>
+              </div>
             </div>
           </div>
         </div>
@@ -299,9 +299,9 @@
                 <a class="cardstories_card" href="javascript:"><img alt="" src="../css/images/card_medium_visiblepart.png" /></a>
                 <a class="cardstories_card" href="javascript:"><img alt="" src="../css/images/card_medium_visiblepart_full.png" /></a>
               </div>
-              <div class="cardstories_card_template" data="{card:'PATH/card0{card}.png',card_bg:'../css/images/card_bg.png',card_bg_selected:'../css/images/card_bg_selected.png',nocard:'../css/images/card-back.png'}">
-                <img class="cardstories_card_foreground" src="foreground" alt="" />
-                <img class="cardstories_card_background" src="background" alt="" />
+              <div class="cardstories_card_template" data="{card:'../css/images/card0{card}.png',card_bg:'../css/images/card_bg.png',card_bg_selected:'../css/images/card_bg_selected.png',nocard:'../css/images/card-back.png'}">
+                <img class="cardstories_card_foreground" src="" alt="" />
+                <img class="cardstories_card_background" src="" alt="" />
               </div>
             </div>
           </div>
@@ -334,16 +334,33 @@
                   <div class="cardstories_invite_friend cardstories_friend_slot3"></div>
                   <div class="cardstories_invite_friend cardstories_friend_slot4"></div>
                   <div class="cardstories_invite_friend cardstories_friend_slot5"></div>
-                  <div class="cardstories_advertise">
-                    <div class="cardstories_text_label">Type in your friends emails here, separated by spaces:</div>
-                    <div class="cardstories_text_label_tiny">(We promise to never give or sell the emails to anyone. We hate spams just like you.)</div>
-                    <div class="cardstories_text_frame">
-                      <div class="cardstories_text_container">
-                        <textarea class="cardstories_text" name="sentence"></textarea>
+                  <div class="cardstories_modal cardstories_advertise">
+                    <img alt="" src="../css/images/invite_background.png" />
+                    <div class="cardstories_advertise_close">
+                      <a href="javascript://"><img alt="" src="../css/images/invite_close_on.png" data="{over:'../css/images/invite_close_over.png'}" /></a>
+                    </div>
+                    <p class="cardstories_modal_h1">INVITE YOUR FRIENDS</p>
+                    <div class="cardstories_advertise_inner">
+                      <div class="cardstories_advertise_left">
+                        <p class="cardstories_modal_h2">By e-mail</p>
+                        <div class="cardstories_advertise_input">
+                          <img alt="" src="../css/images/invite_input.png" />
+                          <p class="cardstories_advertise_feedback">Your invitation was sent!</p>
+                          <textarea placeholder="Write the emails of the friends you want to invite separated by commas."></textarea>
+                        </div>
+                        <div class="cardstories_advertise_button cardstories_send_invitation">
+                          <img alt="" src="../css/images/invite_button_on.png" data="{over:'../css/images/invite_button_over.png'}" />
+                          <a href="javascript://"><span>SEND INVITATION</span></a>
+                        </div>
+                        <div class="cardstories_advertise_button cardstories_invite_more">
+                          <img alt="" src="../css/images/invite_button_on.png" data="{over:'../css/images/invite_button_over.png'}" />
+                          <a href="javascript://"><span>INVITE MORE</span></a>
+                        </div>
+                      </div>
+                      <div class="cardstories_advertise_right">
+                        <p class="cardstories_modal_h2">By social network</p>
                       </div>
                     </div>
-                    <button class="cardstories_submit">Submit</button>
-                    <button class="cardstories_back">Back</button>
                   </div>
                 <div class="cardstories_sentence_box">
                   <div class="cardstories_sentence"></div>
@@ -369,9 +386,9 @@
                 <a class="cardstories_card" href="javascript:"><img alt="" src="../css/images/card_medium_visiblepart.png" /></a>
                 <a class="cardstories_card" href="javascript:"><img alt="" src="../css/images/card_medium_visiblepart_full.png" /></a>
               </div>
-              <div class="cardstories_card_template" data="{card:'PATH/card0{card}.png',card_bg:'../css/images/card_bg.png',card_bg_selected:'../css/images/card_bg_selected.png',nocard:'PATH/card-back.png'}">
-                <img class="cardstories_card_foreground" src="foreground" alt="{label}" />
-                <img class="cardstories_card_background" src="background" alt="" />
+              <div class="cardstories_card_template" data="{card:'../css/images/card0{card}.png',card_bg:'../css/images/card_bg.png',card_bg_selected:'../css/images/card_bg_selected.png',nocard:'../css/images/card-back.png'}">
+                <img class="cardstories_card_foreground" src="" alt="{label}" />
+                <img class="cardstories_card_background" src="" alt="" />
               </div>
             </div>
           </div>
@@ -389,7 +406,7 @@
                 <a class="cardstories_card" href="javascript:"><img alt="" src="../css/images/card_medium_visiblepart.png" /></a>
                 <a class="cardstories_card" href="javascript:"><img alt="" src="../css/images/card_medium_visiblepart_full.png" /></a>
               </div>
-              <div class="cardstories_card_template" data="{card:'PATH/card0{card}.png',card_bg:'../css/images/card_bg.png',card_bg_selected:'../css/images/card_bg_selected.png',nocard:'PATH/nocard.png'}">
+              <div class="cardstories_card_template" data="{card:'../css/images/card0{card}.png',card_bg:'../css/images/card_bg.png',card_bg_selected:'../css/images/card_bg_selected.png',nocard:'../css/images/card-back.png'}">
                 <img class="cardstories_card_foreground" src="" alt=" {label}" />
                 <img class="cardstories_card_background" src="" alt=" " />
               </div>
@@ -480,7 +497,7 @@
             </div>
             <div class="cardstories_finish">COMPLETE</div>
           </div>
-        </div>        
+        </div>
         <div class="cardstories_confirm_results_publication">
           <div class="cardstories_owner">
             <div class="cardstories_progress_owner"></div>
