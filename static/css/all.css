@@ -268,6 +268,7 @@
     text-align:center;
     font-family: "Helvetica";
     color:#FFFFFF;
+    z-index: 2;
 }
 
 .cardstories .cardstories_invite_friend img:first-child {
@@ -1094,6 +1095,57 @@
     left: 185px;
 }
 
+/* spritely doesn't like classes, only ids */
+#cardstories_deck_player_join_1,
+#cardstories_deck_player_join_2,
+#cardstories_deck_player_join_3, 
+#cardstories_deck_player_join_4, 
+#cardstories_deck_player_join_5 { 
+    display: none;
+    position: absolute;
+    z-index: 1;
+}
+
+#cardstories_deck_player_join_1 { 
+    background: transparent url('images/player_join_1.png') no-repeat left top;
+    width: 596px;
+    height: 388px;
+    top: -30px;
+    left: 10px;
+}
+
+#cardstories_deck_player_join_2 { 
+    background: transparent url('images/player_join_2.png') no-repeat left top;
+    width: 590px;
+    height: 464px;
+    top: -30px;
+    left: 8px;
+}
+
+#cardstories_deck_player_join_3 { 
+    background: transparent url('images/player_join_3.png') no-repeat left top;
+    width: 657px;
+    height: 615px;
+    top: -50px;
+    left: 10px;
+}
+
+#cardstories_deck_player_join_4 { 
+    background: transparent url('images/player_join_4.png') no-repeat left top;
+    width: 980px;
+    height: 432px;
+    top: -30px;
+    left: -57px;
+}
+
+#cardstories_deck_player_join_5 { 
+    background: transparent url('images/player_join_5.png') no-repeat left top;
+    width: 980px;
+    height: 494px;
+    top: -35px;
+    left: -57px;
+}
+
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_info { 
     left: 195px;
     top: 140px;
@@ -1273,22 +1325,6 @@
     bottom: 0px;
     left: 50%;
     margin-left: -6px;
-}
-
-.cardstories .cardstories_invitation .cardstories_owner .cardstories_invite_friends {
-    position: absolute;
-    background-position: 0px 0px;
-    top: 275px;
-    left: 23px;
-    height: 137px;
-    width: 146px;
-    z-index: 20;
-    border: 2px solid black;
-}
-
-.cardstories .cardstories_invitation .cardstories_owner .cardstories_invite_friends:hover {
-    left: 30px;
-    border: 5px solid black;
 }
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_voting {

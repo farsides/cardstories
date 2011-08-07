@@ -71,7 +71,10 @@
         'ready': false,
         'sentence': 'long sentence is in the flux',
         'players': [ [ 'player1', null, 'n', 5, [] ],
-                     [ 'player2', null, 'n', null, [] ] ]
+                     [ 'player2', null, 'n', null, [] ],
+                     [ 'player3', null, 'n', null, [] ],
+                     [ 'player4', null, 'n', null, [] ],
+                     [ 'player5', null, 'n', null, [] ] ]
       };
 
       $.cardstories.invitation_owner('PLAYER1', game, root);

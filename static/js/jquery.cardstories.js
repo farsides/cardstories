@@ -174,6 +174,14 @@
             }
         },
 
+        animate_sprite: function(movie, frames) {
+            movie.show().sprite({
+                fps: frames,
+                no_of_frames: frames,
+                play_frames: frames
+            });
+        },
+
         create_pick_card: function(player_id, root) {
             var $this = this;
             var element = $('.cardstories_create .cardstories_pick_card', root);
@@ -992,25 +1000,120 @@
                 cards.push(card);
             }
 
-            // First display the modal.
             var q = $({});
+            
+            // First display the modal.
             q.queue('chain', function(next) {
-                $this.display_modal($('.cardstories_info', element), $('.cardstories_modal_overlay', element), function() {next();});
+                $this.invitation_owner_modal_helper($('.cardstories_info', element), $('.cardstories_modal_overlay', element), function() {next();});
             });
 
             // Then the friend slots.
-            var slots = $('.cardstories_invite_friend', element);
             q.queue('chain', function(next) {
-                $this.display_friend_slots(slots, root, function() {
-                    slots.unbind('click').click(function() {
-                        $.cookie('CARDSTORIES_INVITATIONS', null);
-                        $this.advertise(player_id, game.id, element);
-                    });
-                    next();
-                });
+                $this.invitation_owner_slots_helper($('.cardstories_invite_friend', element), player_id, game.id, element, root, function() {next();});
+            });
+
+            // Show joining animations, if any.
+            q.queue('chain', function(next) {
+                $this.invitation_owner_join_helper(game, function() {next();});
             });
 
             // TODO: display the cards without jqDock
+
+            q.dequeue('chain');
+        },
+
+        invitation_owner_modal_helper: function(modal, overlay, cb) {
+            if (modal.hasClass('cardstories_noop')) {
+                cb();
+            } else {
+                modal.addClass('cardstories_noop');
+                this.display_modal(modal, overlay, cb);
+            }
+        },
+ 
+        invitation_owner_slots_helper: function(slots, player_id, game_id, element, root, cb) {
+            var $this = this;
+            var snippets = $('.cardstories_snippets', root);
+            var slot_snippet = $('.cardstories_invite_friend', snippets);
+            var last = slots.length - 1;
+            slots.each(function(i) {
+                var slot = $(this);
+
+                if (slot.hasClass('cardstories_noop')) {
+                    if (i === last) {
+                        cb();
+                    }
+                } else {
+                    slot.addClass('cardstories_noop');
+
+                    // Copy over the snippet first.
+                    slot_snippet.clone().children().appendTo(slot);
+
+                    // Now apply the button behavior.
+                    var img = $('img', slot);
+                    var img_src = img.attr('src');
+                    var img_meta = img.metadata({type: 'attr', name: 'data'});
+                    var out = function() {img.attr('src', img_src);};
+                    var over = function() {img.attr('src', img_meta.over);};
+                    var down = function() {img.attr('src', img_meta.down);};
+                    var a = $('a', slot);
+                    a.hover(over, out);
+                    a.mousedown(down);
+                    a.mouseup(over);
+
+                    slot.unbind('click').click(function() {
+                        $.cookie('CARDSTORIES_INVITATIONS', null);
+                        $this.advertise(player_id, game_id, element);
+                    });
+
+                    // Finally animate it in.
+                    $this.animate_scale(false, 5, 300, slot, function() {
+                        if (i === last) {
+                            cb();
+                        }
+                    });
+                }
+            });
+        },
+
+        invitation_owner_join_helper: function(game, cb) {
+            var $this = this;
+            var players = game.players;
+            var last = players.length - 1;
+            var q = $({});
+            for (var i=0, j=1; i < players.length; i++) {
+                // Skip the owner.
+                if (players[i][0] == game.owner_id) {
+                    continue;
+                }
+
+                var movie = $('#cardstories_deck_player_join_' + j);
+                if (!movie.hasClass('cardstories_noop')) {
+                    // Mark it as done ASAP, to minimize the chance of running
+                    // into a race condition.
+                    movie.addClass('cardstories_noop');
+                    
+                    // Queue the animation. Create a new closure for it,
+                    // otherwise the last movie will be played for all players.
+                    q.queue('chain',(function(_movie) {return function(next) {
+                        $this.animate_sprite(_movie, 18);
+                        next();
+                    }})(movie));
+
+                    // Introduce an artificial delay, since Spritely doesn't
+                    // offer an on-complete callback.
+                    q.delay(500, 'chain');
+
+                    // If this is the last player, insert our on-complete callback.
+                    if (i === last) {
+                        q.queue('chain', function(next) {
+                            cb();
+                        });
+                    }
+                }
+
+                j++;
+            }
 
             q.dequeue('chain');
         },
@@ -1525,37 +1628,6 @@
                 if (cb !== undefined) {
                     cb();
                 }
-            });
-        },
-
-        display_friend_slots: function(slots, root, cb) {
-            var $this = this;
-            slots.each(function(i) {
-                var slot = $(this);
-
-                // Copy over the snippet first.
-                var snippets = $('.cardstories_snippets', root);
-                var slot_snippet = $('.cardstories_invite_friend', snippets);
-                slot_snippet.clone().children().appendTo(slot);
-
-                // Now apply the button behavior.
-                var img = $('img', slot);
-                var img_src = img.attr('src');
-                var img_meta = img.metadata({type: 'attr', name: 'data'});
-                var out = function() {img.attr('src', img_src);};
-                var over = function() {img.attr('src', img_meta.over);};
-                var down = function() {img.attr('src', img_meta.down);};
-                var a = $('a', slot);
-                a.hover(over, out);
-                a.mousedown(down);
-                a.mouseup(over);
-
-                // Finally animate it in.
-                $this.animate_scale(false, 5, 300, slot, function() {
-                    if (cb !== undefined && i === slots.length - 1) {
-                        cb();
-                    }
-                });
             });
         },
 
