@@ -174,11 +174,12 @@
             }
         },
 
-        animate_sprite: function(movie, frames) {
+        animate_sprite: function(movie, frames, cb) {
             movie.show().sprite({
                 fps: frames,
                 no_of_frames: frames,
-                play_frames: frames
+                play_frames: frames,
+                oncomplete: cb
             });
         },
 
@@ -994,7 +995,7 @@
 
             // Show joining animations, if any.
             q.queue('chain', function(next) {
-                $this.invitation_owner_join_helper(game, function() {next();});
+                $this.invitation_owner_join_helper(game, element, function() {next();});
             });
 
             // TODO: display the cards without jqDock
@@ -1045,7 +1046,7 @@
             });
         },
 
-        invitation_owner_join_helper: function(game, cb) {
+        invitation_owner_join_helper: function(game, element, cb) {
             var $this = this;
             var players = game.players;
             var last = players.length - 1;
@@ -1064,14 +1065,13 @@
                     
                     // Queue the animation. Create a new closure for it,
                     // otherwise the last movie will be played for all players.
-                    q.queue('chain',(function(_movie) {return function(next) {
-                        $this.animate_sprite(_movie, 18);
-                        next();
-                    }})(movie));
-
-                    // Introduce an artificial delay, since Spritely doesn't
-                    // offer an on-complete callback.
-                    q.delay(500, 'chain');
+                    q.queue('chain',(function(movie, j) {return function(next) {
+                        $this.animate_sprite(movie, 18, function() {
+                            $('.cardstories_player_arms_' + j, element).show();
+                            movie.hide();
+                            next();
+                        });
+                    }})(movie, j));
 
                     // If this is the last player, insert our on-complete callback.
                     if (i === last) {

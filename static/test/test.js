@@ -311,6 +311,7 @@ asyncTest("animate_sprite", 3, function() {
     var frames = 18;
 
     equal(movie.css('display'), 'none', 'movie starts hidden');
+
     // IE does not use 'background-position', but 'background-position-x'.
     if (movie.css('background-position') !== undefined) {
         equal(movie.css('background-position'), '0% 0%', 'movie starts at 0% background position');
@@ -318,17 +319,14 @@ asyncTest("animate_sprite", 3, function() {
         equal(movie.css('background-position-x'), 'left', 'movie starts at 0% background position');
     }
 
-    $.cardstories.animate_sprite(movie, frames);
-
-    // Spritely does not provide an "on complete" callback hook, so use a timeout.
-    window.setTimeout(function() {
+    $.cardstories.animate_sprite(movie, frames, function() {
         if (movie.css('background-position') !== undefined) {
             notEqual(movie.css('background-position'), '0% 0%', 'movie is no longer at 0% background position');
         } else {
             notEqual(movie.css('background-position-x'), 'left', 'movie is no longer at 0% background position');
         }
         start();
-    }, 1000);
+    });
 });
 
 test("subscribe", 6, function() {
@@ -655,27 +653,28 @@ asyncTest("invitation_owner_join_helper", 18, function() {
     }
 
     // Count how often animate_sprite is called.
-    $.cardstories.animate_sprite = function(movie, frames) {
-        movie.show();
+    $.cardstories.animate_sprite = function(movie, frames, cb) {
         ok(true);
+        movie.show();
+        cb();
     }
 
-    $.cardstories.invitation_owner_join_helper(state1, function() {
-        equal($('#cardstories_deck_player_join_1', root).css('display'), 'block', 'movie 1 is visible');
-        equal($('#cardstories_deck_player_join_2', root).css('display'), 'block', 'movie 2 is visible');
-        equal($('#cardstories_deck_player_join_3', root).css('display'), 'none', 'movie 3 is hidden');
-        equal($('#cardstories_deck_player_join_4', root).css('display'), 'none', 'movie 4 is hidden');
-        equal($('#cardstories_deck_player_join_5', root).css('display'), 'none', 'movie 5 is hidden');
+    $.cardstories.invitation_owner_join_helper(state1, element, function() {
+        equal($('.cardstories_player_arms_1', root).css('display'), 'block', 'arm 1 is visible');
+        equal($('.cardstories_player_arms_2', root).css('display'), 'block', 'arm 2 is visible');
+        equal($('.cardstories_player_arms_3', root).css('display'), 'none', 'arm 3 is hidden');
+        equal($('.cardstories_player_arms_4', root).css('display'), 'none', 'arm 4 is hidden');
+        equal($('.cardstories_player_arms_5', root).css('display'), 'none', 'arm 5 is hidden');
 
         // Call it again: animate_sprite should only be called once more for
         // the third player, and the number of expected assertions should
         // reflect this.
-        $.cardstories.invitation_owner_join_helper(state2, function() {
-            equal($('#cardstories_deck_player_join_1', root).css('display'), 'block', 'movie 1 is visible');
-            equal($('#cardstories_deck_player_join_2', root).css('display'), 'block', 'movie 2 is visible');
-            equal($('#cardstories_deck_player_join_3', root).css('display'), 'block', 'movie 3 is visible');
-            equal($('#cardstories_deck_player_join_4', root).css('display'), 'none', 'movie 4 is hidden');
-            equal($('#cardstories_deck_player_join_5', root).css('display'), 'none', 'movie 5 is hidden');
+        $.cardstories.invitation_owner_join_helper(state2, element, function() {
+            equal($('.cardstories_player_arms_1', root).css('display'), 'block', 'arm 1 is visible');
+            equal($('.cardstories_player_arms_2', root).css('display'), 'block', 'arm 2 is visible');
+            equal($('.cardstories_player_arms_3', root).css('display'), 'block', 'arm 3 is visible');
+            equal($('.cardstories_player_arms_4', root).css('display'), 'none', 'arm 4 is hidden');
+            equal($('.cardstories_player_arms_5', root).css('display'), 'none', 'arm 5 is hidden');
             start();
         });
     });

@@ -89,6 +89,9 @@
 					if ($._spritely.instances[el_id]['remaining_frames'] == 0) {
 						$._spritely.instances[el_id]['remaining_frames'] = -1;
 						delete $._spritely.instances[el_id]['remaining_frames'];
+						if (options.oncomplete !== undefined) {
+							options.oncomplete();
+						}
 						return;
 					} else {
 						animate(el);
