@@ -1362,7 +1362,7 @@ test("results_board", 24, function() {
     equal($('.cardstories_player_name', column).text(), '');
   });
 
-test("advertise", 19, function() {
+test("advertise", 16, function() {
     var owner_id = 15;
     var game_id = 100;
     var element = $('#qunit-fixture .cardstories_invitation .cardstories_owner');
@@ -1406,17 +1406,9 @@ test("advertise", 19, function() {
 
     // button should be enabled only when text is not blank
     text = 'player1';
-    ok(!submit_button.hasClass('cardstories_submit_ready'), 'button should be disabled');
+    ok(submit_button.hasClass('cardstories_button_disabled'), 'button should be disabled');
     textarea.val(text).keyup();
-    ok(submit_button.hasClass('cardstories_submit_ready'), 'button should be enabled');
-
-    var button_img = submit_button.find('img');
-    var over_src = button_img.metadata({type: 'attr', name: 'data'}).over;
-    notEqual(button_img.attr('src'), over_src);
-    submit_button.mouseenter()
-    equal(button_img.attr('src'), over_src);
-    submit_button.mouseleave();
-    notEqual(button_img.attr('src'), over_src);
+    ok(!submit_button.hasClass('cardstories_button_disabled'), 'button should be enabled');
 
     // clicking on invite friend button again doesn't do any harm.
     $('.cardstories_invite_friend', element).first().click();
