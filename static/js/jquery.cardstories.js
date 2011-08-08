@@ -688,10 +688,6 @@
             };
             toggle_feedback(false);
 
-            close_button.unbind('click').click(function() {
-                $this.animate_scale(true, 5, 300, box);
-            });
-
             var is_invitation_valid = function(value) {
                 var trimmed = $.trim(value);
                 return trimmed && trimmed != textarea.attr('placeholder');
@@ -699,8 +695,12 @@
 
             textarea.unbind('keyup click change').bind('keyup click change', function() {
                 var val = textarea.val();
-                submit_button.toggleClass('cardstories_submit_ready', is_invitation_valid(val));
+                submit_button.toggleClass('cardstories_button_disabled', !is_invitation_valid(val));
             }).change();
+
+            close_button.unbind('click').click(function() {
+                $this.animate_scale(true, 5, 300, box);
+            });
 
             submit_button.unbind('click').click(function() {
                 var val = textarea.val();
@@ -718,31 +718,8 @@
 
             more_button.unbind('click').click(function() {
                 toggle_feedback(false);
+                textarea.change();
             });
-
-            var submit_img = submit_button.find('img');
-            var more_img = more_button.find('img');
-            var close_img = close_button.find('img');
-            var submit_out_src = submit_img.attr('src');
-            var submit_in_src = submit_img.metadata({type: 'attr', name: 'data'}).over;
-            var more_out_src = more_img.attr('src');
-            var more_in_src = more_img.metadata({type: 'attr', name: 'data'}).over;
-            var close_out_src = close_img.attr('src');
-            var close_in_src = close_img.metadata({type: 'attr', name: 'data'}).over;
-            var submit_in = function() {
-                if (is_invitation_valid(textarea.val())) {
-                    submit_img.attr('src', submit_in_src);
-                }
-            };
-            var submit_out = function() { submit_img.attr('src', submit_out_src); };
-            var more_in = function() { more_img.attr('src', more_in_src); };
-            var more_out = function() { more_img.attr('src', more_out_src); };
-            var close_in = function() { close_img.attr('src', close_in_src); };
-            var close_out = function() { close_img.attr('src', close_out_src); };
-
-            submit_button.hover(submit_in, submit_out);
-            more_button.hover(more_in, more_out);
-            close_button.hover(close_in, close_out);
 
             $this.animate_scale(false, 5, 300, box);
         },
@@ -1501,23 +1478,15 @@
             for (var i=1; i<step; i++) {
                 tmp_bar.children('.cardstories_step' + i).addClass('old');
             }
-            
+
             // Finally, place the children into the destination.
             tmp_bar.children().appendTo(dst_bar);
         },
 
         display_modal: function(modal, overlay, cb) {
             var $this = this;
-            var button = $('.cardstories_modal_button', modal);
-            var button_img = $('img', button);
-            var button_img_src = button_img.attr('src');
-            var button_img_src_over = button_img.metadata({type: 'attr', name: 'data'}).over;
-            var button_a = $('a', button);
-            button_a.mousedown(function() {
-                button_img.attr('src', button_img_src_over);
-            });
+            var button_a = $('.cardstories_modal_button a', modal);
             button_a.mouseup(function() {
-                button_img.attr('src', button_img_src);
                 // Hide the box and disable the modal overlay.
                 $this.animate_scale(true, 5, 500, modal, function() {
                     overlay.hide();
@@ -1540,18 +1509,6 @@
                 var snippets = $('.cardstories_snippets', root);
                 var slot_snippet = $('.cardstories_invite_friend', snippets);
                 slot_snippet.clone().children().appendTo(slot);
-
-                // Now apply the button behavior.
-                var img = $('img', slot);
-                var img_src = img.attr('src');
-                var img_meta = img.metadata({type: 'attr', name: 'data'});
-                var out = function() {img.attr('src', img_src);};
-                var over = function() {img.attr('src', img_meta.over);};
-                var down = function() {img.attr('src', img_meta.down);};
-                var a = $('a', slot);
-                a.hover(over, out);
-                a.mousedown(down);
-                a.mouseup(over);
 
                 // Finally animate it in.
                 $this.animate_scale(false, 5, 300, slot, function() {

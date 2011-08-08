@@ -250,13 +250,53 @@
     background: url(#); /* IE quirk: make the whole button clickable. */
 }
 
-.cardstories .cardstories_modal a:active {
-    color: black;
-}
-
 .cardstories .cardstories_modal a > span {
     position: relative;
     top: 0.46em;
+}
+
+.cardstories .cardstories_img_button a:active {
+    color: black;
+}
+
+.cardstories .cardstories_img_button.cardstories_button_disabled a:active {
+    color: inherit;
+}
+
+.cardstories .cardstories_img_button .cardstories_btn_on,
+.cardstories .cardstories_img_button .cardstories_btn_over,
+.cardstories .cardstories_img_button .cardstories_btn_down,
+.cardstories .cardstories_img_button .cardstories_btn_off {
+    height: 100%;
+    width: 100%;
+}
+
+.cardstories .cardstories_img_button .cardstories_btn_on {
+    display: inline;
+}
+
+.cardstories .cardstories_img_button .cardstories_btn_over,
+.cardstories .cardstories_img_button .cardstories_btn_down,
+.cardstories .cardstories_img_button .cardstories_btn_off {
+    display: none;
+}
+
+.cardstories .cardstories_img_button:hover .cardstories_btn_on {
+    display: none;
+}
+
+.cardstories .cardstories_img_button:hover .cardstories_btn_over {
+    display: inline;
+}
+
+.cardstories .cardstories_img_button.cardstories_button_disabled .cardstories_btn_on,
+.cardstories .cardstories_img_button.cardstories_button_disabled .cardstories_btn_over,
+.cardstories .cardstories_img_button.cardstories_button_disabled .cardstories_btn_down {
+    display: none
+}
+
+.cardstories .cardstories_img_button.cardstories_button_disabled .cardstories_btn_off {
+    display: inline;
 }
 
 .cardstories .cardstories_invite_friend {
@@ -296,6 +336,15 @@
 
 .cardstories .cardstories_invite_friend a:active {
     color: #008082;
+}
+
+.cardstories .cardstories_invite_friend:active .cardstories_btn_down {
+    display: inline;
+}
+
+.cardstories .cardstories_invite_friend:active .cardstories_btn_on,
+.cardstories .cardstories_invite_friend:active .cardstories_btn_over {
+    display: none;
 }
 
 .cardstories .cardstories_invite_friend a > span {
