@@ -1254,15 +1254,15 @@
 
 #cardstories_deck_player_join_3 { 
     background: transparent url('images/player_join_3.png') no-repeat left top;
-    width: 657px;
-    height: 615px;
+    width: 606px;
+    height: 547px;
     top: 10px;
-    left: -1px;
+    left: -6px;
 }
 
 .cardstories_player_arms_3 {
     background: transparent url('images/player_arms_3.png') no-repeat left top;
-    width: 87px;
+    width: 82px;
     height: 91px;
     top: 448px;
     left: 76px;
