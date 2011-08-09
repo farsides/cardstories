@@ -59,6 +59,30 @@
     height: 59px;
 }
 
+.cardstories .cardstories_progress .cardstories_progress_mark1 { 
+    left: 0px;
+}
+
+.cardstories .cardstories_progress .cardstories_progress_mark2 { 
+    left: 90px;
+}
+
+.cardstories .cardstories_progress .cardstories_progress_mark3 { 
+    left: 185px;
+}
+
+.cardstories .cardstories_progress .cardstories_progress_mark4 { 
+    left: 297px;
+}
+
+.cardstories .cardstories_progress .cardstories_progress_mark5 { 
+    left: 421px;
+}
+
+.cardstories .cardstories_progress .cardstories_progress_mark6 { 
+    left: 528px;
+}
+
 .cardstories .cardstories_progress .cardstories_step1,
 .cardstories .cardstories_progress .cardstories_step2,
 .cardstories .cardstories_progress .cardstories_step3,
@@ -926,10 +950,6 @@
 
 /* state create : write a sentence */
 
-.cardstories .cardstories_create .cardstories_write_sentence .cardstories_progress_mark { 
-    left: 90px;
-}
-
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_card_template {
     position: absolute;
     top: 200px;
@@ -1195,10 +1215,6 @@
 }
 
 /* state invitation : owner */
-
-.cardstories .cardstories_invitation .cardstories_owner .cardstories_progress_mark { 
-    left: 185px;
-}
 
 /* spritely doesn't like classes, only ids */
 #cardstories_deck_player_join_1,

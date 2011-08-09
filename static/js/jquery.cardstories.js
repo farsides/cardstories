@@ -82,13 +82,21 @@
             return cards;
         },
 
-        animate_progress_bar: function(src, dst, root, cb) {
-            var mark = $('.cardstories_progress_mark', src);
-            var dst_progress = $('.cardstories_progress', dst);
+        animate_progress_bar: function(step, element, cb) {
+            var progress = $('.cardstories_progress', element);
+            var mark = $('.cardstories_progress_mark', progress);
 
-            // Append a mark temporarily to the destination progress bar so we
-            // can grab it's left position, then remove it.
-            var tmp_mark = mark.clone().css('display', 'none').appendTo(dst_progress);
+            // Advance step data, but save current.
+            var cur = progress.data('step');
+            progress.data('step', step);
+
+            // Append the next mark temporarily to the progress bar so we can
+            // grab it's left position, then remove it.
+            var tmp_mark = $('<div>')
+                            .addClass('cardstories_progress_mark')
+                            .addClass('cardstories_progress_mark' + step)
+                            .css('display', 'none')
+                            .appendTo(progress);
             var final_left = tmp_mark.css('left');
             tmp_mark.remove();
 
@@ -96,8 +104,20 @@
             // I fail to understand why, but tmp_mark and final_left are sometimes
             // undefined during test runs, which wracks havoc on IE8.
             if (typeof final_left !== 'undefined') {
-                mark.animate({left: final_left}, 500, cb);
-            } else if (cb) {
+                mark.animate({left: final_left}, 500, function() {
+                    mark.removeClass('cardstories_progress_mark' + cur);
+                    mark.addClass('cardstories_progress_mark' + step);
+                    $('.cardstories_progress .cardstories_step' + step, element).addClass('selected');
+                    for (var i=cur; i < step; i++) {
+                        $('.cardstories_progress .cardstories_step' + i, element)
+                            .removeClass('selected')
+                            .addClass('old');
+                    }
+                    if (cb !== undefined) {
+                        cb();
+                    }
+                });
+            } else if (cb !== undefined) {
                 cb();
             }
         },
@@ -232,8 +252,7 @@
                 $this.animate_center_picked_card(element, card_index, card_value, function() {next();});
             });
             q.queue('chain', function(next) {
-                var dst_element = $('.cardstories_create .cardstories_write_sentence', root);
-                $this.animate_progress_bar(element, dst_element, root, function() {next();});
+                $this.animate_progress_bar(2, element, function() {next();});
             });
 
             // Finally, initialize the next state.
@@ -621,8 +640,7 @@
                         var interval = $this.setInterval(function() {
                             if (animation_done) {
                                 clearInterval(interval);
-                                var dst_element = $('.cardstories_invitation .cardstories_owner', root);
-                                $this.animate_progress_bar(element, dst_element, root, function() {
+                                $this.animate_progress_bar(3, element, function() {
                                     $this.reload(player_id, data.game_id, root); 
                                 });
                             }
@@ -1033,6 +1051,7 @@
             var slot_snippet = $('.cardstories_active_friend', snippets);
             var last = players.length - 1;
             var q = $({});
+            var progress = $('.cardstories_progress', element);
             for (var i=0, slotno=0; i < players.length; i++) {
                 var player_id = players[i][0];
                 var playerq = 'player' + i;
@@ -1040,6 +1059,16 @@
                 // Skip the owner.
                 if (player_id != game.owner_id) {
                     slotno++;
+
+                    // Animate the progress bar as soon as one player joins.
+                    // Do it in parallel with the other animations.
+                    if (!progress.hasClass('cardstories_noop')) {
+                        progress.addClass('cardstories_noop');
+                        q.queue(playerq, function(next) {
+                            $this.animate_progress_bar(4, element);
+                            next();
+                        });
+                    }
 
                     // Set up the active friend slot and joining animation.
                     var slot = $('.cardstories_active_friend.cardstories_friend_slot' + slotno, element);
@@ -1591,21 +1620,31 @@
         },
 
         display_progress_bar: function(step, element, root) {
+            var dst_bar = $('.cardstories_progress', element);
+
+            // Bail out if the bar is not empty.
+            if (dst_bar.children().length > 0) {
+                return;
+            }
+
             var snippets = $('.cardstories_snippets', root);
             var src_bar = $('.cardstories_progress', snippets);
-            var dst_bar = $('.cardstories_progress', element);
 
             // Clone the source bar.
             var tmp_bar = src_bar.clone();
 
             // Set the proper classes.
+            tmp_bar.children('.cardstories_progress_mark').addClass('cardstories_progress_mark' + step);
             tmp_bar.children('.cardstories_step' + step).addClass('selected');
             for (var i=1; i<step; i++) {
                 tmp_bar.children('.cardstories_step' + i).addClass('old');
             }
 
-            // Finally, place the children into the destination.
+            // Place the children into the destination.
             tmp_bar.children().appendTo(dst_bar);
+            
+            // Finally, store current step.
+            dst_bar.data('step', step);
         },
 
         display_modal: function(modal, overlay, cb) {

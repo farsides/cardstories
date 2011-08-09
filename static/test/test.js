@@ -192,20 +192,30 @@ asyncTest("notify_active", 1, function() {
     $.cardstories.notify_active(root, skin);
 });
 
-test("display_progress_bar", 6, function() {
+test("display_progress_bar", 14, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_create .cardstories_write_sentence', root);
     var pbar = $('.cardstories_progress', element);
     var step = 2;
 
     $.cardstories.display_progress_bar(step, element, root);
-
     ok($('.cardstories_step1', pbar).hasClass('old'), 'step 1 has old class');
     ok($('.cardstories_step2', pbar).hasClass('selected'), 'step 2 is selected');
     equal($('.cardstories_step3', pbar).attr('class'), 'cardstories_step3', 'step 3 is bare');
     equal($('.cardstories_step4', pbar).attr('class'), 'cardstories_step4', 'step 4 is bare');
     equal($('.cardstories_step5', pbar).attr('class'), 'cardstories_step5', 'step 5 is bare');
     equal($('.cardstories_step6', pbar).attr('class'), 'cardstories_step6', 'step 6 is bare');
+    equal(pbar.data('step'), step, 'step was saved');
+
+    // Should do nothing a second time.
+    $.cardstories.display_progress_bar(4, element, root);
+    ok($('.cardstories_step1', pbar).hasClass('old'), 'step 1 has old class');
+    ok($('.cardstories_step2', pbar).hasClass('selected'), 'step 2 is selected');
+    equal($('.cardstories_step3', pbar).attr('class'), 'cardstories_step3', 'step 3 is bare');
+    equal($('.cardstories_step4', pbar).attr('class'), 'cardstories_step4', 'step 4 is bare');
+    equal($('.cardstories_step5', pbar).attr('class'), 'cardstories_step5', 'step 5 is bare');
+    equal($('.cardstories_step6', pbar).attr('class'), 'cardstories_step6', 'step 6 is bare');
+    equal(pbar.data('step'), step, 'step was saved');
 });
 
 asyncTest("display_modal", 2, function() {
@@ -224,22 +234,37 @@ asyncTest("display_modal", 2, function() {
     });
 });
 
-asyncTest("animate_progress_bar", 1, function() {
+asyncTest("animate_progress_bar", 14, function() {
     var root = $('#qunit-fixture .cardstories');
-    var snippets = $('.cardstories_snippets', root);
-    var tmp_mark = $('.cardstories_progress_mark', snippets);
-    var src = $('.cardstories_create .cardstories_pick_card', root);
-    var src_progress = $('.cardstories_progress', src);
-    var dst = $('.cardstories_create .cardstories_write_sentence', root);
-    var dst_progress = $('.cardstories_progress', dst);
+    var element = $('.cardstories_create .cardstories_pick_card', root);
+    var progress = $('.cardstories_progress', element);
+    var cur = 1;
+    var step = 4;
 
-    var src_mark = tmp_mark.clone().appendTo(src_progress);
-    var dst_mark = tmp_mark.clone().appendTo(dst_progress);
+    $.cardstories.display_progress_bar(cur, element, root);
+
+    var dst_mark = $('<div>')
+                    .addClass('cardstories_progress_mark')
+                    .addClass('cardstories_progress_mark' + step)
+                    .appendTo(progress);
     var final_left = dst_mark.css('left');
     dst_mark.remove();
 
-    $.cardstories.animate_progress_bar(src, dst, root, function() {
-        equal(src_mark.css('left'), final_left, 'mark is at final position');
+    ok($('.cardstories_step1', progress).hasClass('selected'), 'step 1 is selected');
+    equal($('.cardstories_step2', progress).attr('class'), 'cardstories_step2', 'step 2 is bare');
+    equal($('.cardstories_step3', progress).attr('class'), 'cardstories_step3', 'step 3 is bare');
+    equal($('.cardstories_step4', progress).attr('class'), 'cardstories_step4', 'step 4 is bare');
+    equal($('.cardstories_step5', progress).attr('class'), 'cardstories_step5', 'step 5 is bare');
+    equal($('.cardstories_step6', progress).attr('class'), 'cardstories_step6', 'step 6 is bare');
+    $.cardstories.animate_progress_bar(step, element, function() {
+        equal($('.cardstories_progress_mark', progress).css('left'), final_left, 'mark is at final position');
+        ok($('.cardstories_step1', progress).hasClass('old'), 'step 1 is old');
+        ok($('.cardstories_step2', progress).hasClass('old'), 'step 2 is old');
+        ok($('.cardstories_step3', progress).hasClass('old'), 'step 3 is old');
+        ok($('.cardstories_step4', progress).hasClass('selected'), 'step 4 is selected');
+        equal($('.cardstories_step5', progress).attr('class'), 'cardstories_step5', 'step 5 is bare');
+        equal($('.cardstories_step6', progress).attr('class'), 'cardstories_step6', 'step 6 is bare');
+        equal(progress.data('step'), step, 'step was saved');
         start();
     });
 });
