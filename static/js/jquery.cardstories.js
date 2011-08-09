@@ -962,24 +962,6 @@
                     $this.send_game(player_id, game.id, element, 'action=voting&owner_id=' + player_id + '&game_id=' + game.id);
                 });
             }
-            //
-            // display the cards picked by the current players
-            //
-            var players = game.players;
-            var waiting = element.metadata({type: "attr", name: "data"}).waiting;
-            var count = $('.cardstories_card', element).length;
-            var cards = [];
-            for(var i = 0; i < count; i++) {
-                var card;
-                if(i < players.length) {
-                    card = { 'value': players[i][3],
-                             'label': players[i][0] };
-                } else {
-                    card = { 'value': null,
-                             'label': waiting };
-                }
-                cards.push(card);
-            }
 
             var q = $({});
             
@@ -988,17 +970,15 @@
                 $this.invitation_owner_modal_helper($('.cardstories_info', element), $('.cardstories_modal_overlay', element), function() {next();});
             });
 
-            // Then the friend slots.
+            // Then the invite friend buttons.
             q.queue('chain', function(next) {
                 $this.invitation_owner_slots_helper($('.cardstories_invite_friend', element), player_id, game.id, element, root, function() {next();});
             });
 
-            // Show joining animations, if any.
+            // Show players joining and picking cards.
             q.queue('chain', function(next) {
                 $this.invitation_owner_join_helper(game, element, root, function() {next();});
             });
-
-            // TODO: display the cards without jqDock
 
             q.dequeue('chain');
         },
@@ -1050,58 +1030,91 @@
             var $this = this;
             var players = game.players;
             var snippets = $('.cardstories_snippets', root);
-            var friend_snippet = $('.cardstories_active_friend', snippets);
+            var slot_snippet = $('.cardstories_active_friend', snippets);
             var last = players.length - 1;
             var q = $({});
-            for (var i=0, j=1; i < players.length; i++) {
+            for (var i=0, slotno=0; i < players.length; i++) {
+                var player_id = players[i][0];
+                var playerq = 'player' + i;
+
                 // Skip the owner.
-                if (players[i][0] == game.owner_id) {
-                    continue;
-                }
+                if (player_id != game.owner_id) {
+                    slotno++;
 
-                var movie = $('#cardstories_deck_player_join_' + j);
-                if (!movie.hasClass('cardstories_noop')) {
-                    // Mark it as done ASAP, to minimize the chance of running
-                    // into a race condition.
-                    movie.addClass('cardstories_noop');
-                    
-                    // Set up the active friend slot.
-                    var friend = $('.cardstories_active_friend.cardstories_friend_slot' + j, element);
-                    friend_snippet.clone().children().appendTo(friend);
+                    // Set up the active friend slot and joining animation.
+                    var slot = $('.cardstories_active_friend.cardstories_friend_slot' + slotno, element);
+                    if (!slot.hasClass('cardstories_noop_join')) {
+                        slot.addClass('cardstories_noop_join');
+                        slot_snippet.clone().children().appendTo(slot);
+                        slot.addClass('cardstories_active_friend_joined');
+                        $('.cardstories_active_friend_name', slot).html(player_id);
+                        $('.cardstories_active_friend_status', slot).html('joined the game!');
 
-                    var friend_name = $('.cardstories_active_friend_name', friend);
-                    var friend_status = $('.cardstories_active_friend_status', friend);
-                    friend.addClass('cardstories_active_friend_joined');
-                    friend_name.html(players[i][0]);
-                    friend_status.html('joined the game!');
+                        // Queue the animation. Create a new closure to save
+                        // elements for later, when dequeueing happens.
+                        q.queue(playerq, (function(slot, slotno) {return function(next) {
+                            var join_sprite = $('#cardstories_deck_player_join_' + slotno);
+                            $('.cardstories_invite_friend.cardstories_friend_slot' + slotno, element).fadeOut();
+                            slot.show();
+                            $this.animate_sprite(join_sprite, 18, function() {
+                                $('.cardstories_player_arms_' + slotno, element).show();
+                                join_sprite.hide();
+                                next();
+                            });
+                        }})(slot, slotno));
 
-                    // Queue the animation. Create a new closure to save
-                    // elements for later, when dequeueing happens.
-                    q.queue('chain',(function(movie, friend, friend_status, j) {return function(next) {
-                        friend.show();
-                        $('.cardstories_invite_friend.cardstories_friend_slot' + j, element).fadeOut();
-                        $this.animate_sprite(movie, 18, function() {
-                            $('.cardstories_player_arms_' + j, element).show();
-                            movie.hide();
-                            $this.setTimeout(function() {
-                                friend.removeClass('cardstories_active_friend_joined');
-                                friend.addClass('cardstories_active_friend_picking');
-                                friend_status.addClass('cardstories_active_friend_status_picking');
-                                friend_status.html('is picking a card<br />...');
-                            }, 300);
-                            next();
-                        });
-                    }})(movie, friend, friend_status, j));
+                        // Artificial delay between joining and picking.
+                        q.delay(300, playerq);
+                    }
 
-                    // If this is the last player, insert our on-complete callback.
-                    if (i === last) {
-                        q.queue('chain', function(next) {
-                            cb();
-                        });
+                    // If the player hasn't picked a card, show the "picking"
+                    // state, but only if it hasn't been shown before.  The
+                    // same goes for the picked state: if a player has picked a
+                    // card and the animation has been shown, don't do it
+                    // again.
+                    if (players[i][3] === null) {
+                        if (!slot.hasClass('cardstories_noop_picking')) {
+                            slot.addClass('cardstories_noop_picking');
+                            q.queue(playerq, (function(slot) {return function(next) {
+                                var status = $('.cardstories_active_friend_status', slot);
+                                slot.removeClass('cardstories_active_friend_joined');
+                                slot.addClass('cardstories_active_friend_picking');
+                                status.addClass('cardstories_active_friend_status_picking');
+                                status.html('is picking a card<br />...');
+                                next();
+                            }})(slot));
+                        }
+                    } else {
+                        if (!slot.hasClass('cardstories_noop_picked')) {
+                            slot.addClass('cardstories_noop_picked');
+                            q.queue(playerq, (function(slot) {return function(next) {
+                                var status = $('.cardstories_active_friend_status', slot);
+                                slot.removeClass('cardstories_active_friend_joined');
+                                slot.removeClass('cardstories_active_friend_picking');
+                                slot.addClass('cardstories_active_friend_picked');
+                                status.removeClass('cardstories_active_friend_status_picking');
+                                status.addClass('cardstories_active_friend_status_picked');
+                                status.html('has picked a card!');
+                                next();
+                            }})(slot));
+                        }
                     }
                 }
 
-                j++;
+                // If this is the last player, insert our on-complete callback.
+                if (i === last) {
+                    q.queue(playerq, function(next) {cb();});
+                }
+
+                // Queue the dequeueing of this player's queue. ;)
+                q.queue('chain', (function(playerq) {return function(next) {
+                    q.dequeue(playerq);
+                    next();
+                }})(playerq));
+                
+                // Introduce an artificial delay between players for
+                // aesthetical reasons.
+                q.delay(350, 'chain');
             }
 
             q.dequeue('chain');

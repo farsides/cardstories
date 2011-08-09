@@ -68,14 +68,15 @@
       game = {
         'id': 100,
         'owner': true,
+        'owner_id': 'Owner',
         'ready': false,
         'sentence': 'long sentence is in the flux',
         'winner_card': 7,
-        'players': [ [ 'Player 1', null, 'n', 5, [] ],
-                     [ 'Player 2', null, 'n', null, [] ],
+        'players': [ [ 'Owner', null, 'n', null, [] ],
+                     [ 'Player 1', null, 'n', null, [] ],
+                     [ 'Player 2', null, 'n', 2, [] ],
                      [ 'Player 3', null, 'n', null, [] ],
-                     [ 'Player 4', null, 'n', null, [] ],
-                     [ 'Player 5', null, 'n', null, [] ] ]
+                     [ 'Player 4', null, 'n', 4, [] ] ]
       };
 
       $.cardstories.invitation_owner('PLAYER1', game, root);
