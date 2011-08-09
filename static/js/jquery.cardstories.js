@@ -995,7 +995,7 @@
 
             // Show joining animations, if any.
             q.queue('chain', function(next) {
-                $this.invitation_owner_join_helper(game, element, function() {next();});
+                $this.invitation_owner_join_helper(game, element, root, function() {next();});
             });
 
             // TODO: display the cards without jqDock
@@ -1046,9 +1046,11 @@
             });
         },
 
-        invitation_owner_join_helper: function(game, element, cb) {
+        invitation_owner_join_helper: function(game, element, root, cb) {
             var $this = this;
             var players = game.players;
+            var snippets = $('.cardstories_snippets', root);
+            var friend_snippet = $('.cardstories_active_friend', snippets);
             var last = players.length - 1;
             var q = $({});
             for (var i=0, j=1; i < players.length; i++) {
@@ -1063,15 +1065,33 @@
                     // into a race condition.
                     movie.addClass('cardstories_noop');
                     
-                    // Queue the animation. Create a new closure for it,
-                    // otherwise the last movie will be played for all players.
-                    q.queue('chain',(function(movie, j) {return function(next) {
+                    // Set up the active friend slot.
+                    var friend = $('.cardstories_active_friend.cardstories_friend_slot' + j, element);
+                    friend_snippet.clone().children().appendTo(friend);
+
+                    var friend_name = $('.cardstories_active_friend_name', friend);
+                    var friend_status = $('.cardstories_active_friend_status', friend);
+                    friend.addClass('cardstories_active_friend_joined');
+                    friend_name.html(players[i][0]);
+                    friend_status.html('joined the game!');
+
+                    // Queue the animation. Create a new closure to save
+                    // elements for later, when dequeueing happens.
+                    q.queue('chain',(function(movie, friend, friend_status, j) {return function(next) {
+                        friend.show();
+                        $('.cardstories_invite_friend.cardstories_friend_slot' + j, element).fadeOut();
                         $this.animate_sprite(movie, 18, function() {
                             $('.cardstories_player_arms_' + j, element).show();
                             movie.hide();
+                            $this.setTimeout(function() {
+                                friend.removeClass('cardstories_active_friend_joined');
+                                friend.addClass('cardstories_active_friend_picking');
+                                friend_status.addClass('cardstories_active_friend_status_picking');
+                                friend_status.html('is picking a card<br />...');
+                            }, 300);
                             next();
                         });
-                    }})(movie, j));
+                    }})(movie, friend, friend_status, j));
 
                     // If this is the last player, insert our on-complete callback.
                     if (i === last) {

@@ -71,11 +71,11 @@
         'ready': false,
         'sentence': 'long sentence is in the flux',
         'winner_card': 7,
-        'players': [ [ 'player1', null, 'n', 5, [] ],
-                     [ 'player2', null, 'n', null, [] ],
-                     [ 'player3', null, 'n', null, [] ],
-                     [ 'player4', null, 'n', null, [] ],
-                     [ 'player5', null, 'n', null, [] ] ]
+        'players': [ [ 'Player 1', null, 'n', 5, [] ],
+                     [ 'Player 2', null, 'n', null, [] ],
+                     [ 'Player 3', null, 'n', null, [] ],
+                     [ 'Player 4', null, 'n', null, [] ],
+                     [ 'Player 5', null, 'n', null, [] ] ]
       };
 
       $.cardstories.invitation_owner('PLAYER1', game, root);

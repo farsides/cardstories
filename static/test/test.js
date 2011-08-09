@@ -626,7 +626,7 @@ test("invitation_owner_slots_helper", 15, function() {
     });
 });
 
-asyncTest("invitation_owner_join_helper", 18, function() {
+asyncTest("invitation_owner_join_helper", 28, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_invitation .cardstories_owner', root);
     var player1 = 'player1';
@@ -659,22 +659,32 @@ asyncTest("invitation_owner_join_helper", 18, function() {
         cb();
     }
 
-    $.cardstories.invitation_owner_join_helper(state1, element, function() {
+    $.cardstories.invitation_owner_join_helper(state1, element, root, function() {
         equal($('.cardstories_player_arms_1', root).css('display'), 'block', 'arm 1 is visible');
         equal($('.cardstories_player_arms_2', root).css('display'), 'block', 'arm 2 is visible');
         equal($('.cardstories_player_arms_3', root).css('display'), 'none', 'arm 3 is hidden');
         equal($('.cardstories_player_arms_4', root).css('display'), 'none', 'arm 4 is hidden');
         equal($('.cardstories_player_arms_5', root).css('display'), 'none', 'arm 5 is hidden');
+        equal($('.cardstories_active_friend.cardstories_friend_slot1', element).css('display'), 'block', 'Active slot 1 is visible');
+        equal($('.cardstories_active_friend.cardstories_friend_slot2', element).css('display'), 'block', 'Active slot 2 is visible');
+        equal($('.cardstories_active_friend.cardstories_friend_slot3', element).css('display'), 'none', 'Active slot 3 is hidden');
+        equal($('.cardstories_active_friend.cardstories_friend_slot4', element).css('display'), 'none', 'Active slot 4 is hidden');
+        equal($('.cardstories_active_friend.cardstories_friend_slot5', element).css('display'), 'none', 'Active slot 5 is hidden');
 
         // Call it again: animate_sprite should only be called once more for
         // the third player, and the number of expected assertions should
         // reflect this.
-        $.cardstories.invitation_owner_join_helper(state2, element, function() {
+        $.cardstories.invitation_owner_join_helper(state2, element, root, function() {
             equal($('.cardstories_player_arms_1', root).css('display'), 'block', 'arm 1 is visible');
             equal($('.cardstories_player_arms_2', root).css('display'), 'block', 'arm 2 is visible');
             equal($('.cardstories_player_arms_3', root).css('display'), 'block', 'arm 3 is visible');
             equal($('.cardstories_player_arms_4', root).css('display'), 'none', 'arm 4 is hidden');
             equal($('.cardstories_player_arms_5', root).css('display'), 'none', 'arm 5 is hidden');
+            equal($('.cardstories_active_friend.cardstories_friend_slot1', element).css('display'), 'block', 'Active slot 1 is visible');
+            equal($('.cardstories_active_friend.cardstories_friend_slot2', element).css('display'), 'block', 'Active slot 2 is visible');
+            equal($('.cardstories_active_friend.cardstories_friend_slot3', element).css('display'), 'block', 'Active slot 3 is visible');
+            equal($('.cardstories_active_friend.cardstories_friend_slot4', element).css('display'), 'none', 'Active slot 4 is hidden');
+            equal($('.cardstories_active_friend.cardstories_friend_slot5', element).css('display'), 'none', 'Active slot 5 is hidden');
             start();
         });
     });

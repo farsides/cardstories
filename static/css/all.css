@@ -299,14 +299,70 @@
     display: inline;
 }
 
-.cardstories .cardstories_invite_friend {
-    display: none;
+/* A div with this class becomes necessary when fading pngs with a transparent
+ * background in IE8. */
+.cardstories .cardstories_ie_opacity_fix {
     position: absolute;
-    width: 70px;
-    height: 140px;
+    display: block;
+    background: #FFFFFF;
+    filter: alpha(opacity=1);
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.cardstories .cardstories_invite_friend,
+.cardstories .cardstories_active_friend {
+    position: absolute;
+    display: none;
     font-size: 10px;
     text-align:center;
     font-family: "Helvetica";
+    width: 77px;
+    height: 155px;
+}
+
+.cardstories .cardstories_active_friend {
+    color: #E5E5E5;
+}
+
+.cardstories .cardstories_active_friend_joined {
+    background: transparent url('images/active_friend.png') no-repeat 7px 5px;
+}
+
+.cardstories .cardstories_active_friend_picking {
+    background: transparent url('images/active_friend_picking.png') no-repeat 7px 5px;
+}
+
+.cardstories .cardstories_active_friend_picked {
+    background: transparent url('images/active_friend_picked.png') no-repeat 7px 5px;
+}
+
+.cardstories .cardstories_active_friend .cardstories_active_friend_name,
+.cardstories .cardstories_active_friend .cardstories_active_friend_status {
+    position: relative;
+    top: 60px;
+    left: 1px;
+    overflow: hidden;
+    margin: 3px auto;
+    width: 60%;
+}
+
+.cardstories .cardstories_active_friend .cardstories_active_friend_name {
+    height: 26px;
+    margin-bottom: 10px;
+}
+
+.cardstories .cardstories_active_friend .cardstories_active_friend_status {
+    height: 39px;
+}
+
+.cardstories .cardstories_active_friend .cardstories_active_friend_status_picking,
+.cardstories .cardstories_active_friend .cardstories_active_friend_status_picked {
+    color: #3E3E40;
+}
+
+.cardstories .cardstories_invite_friend {
     color:#FFFFFF;
     z-index: 2;
 }
@@ -353,27 +409,27 @@
     display: block;
     top: 4.5em;
     margin: 0 auto;
-    width: 50%;
+    width: 60%;
 }
 
 .cardstories .cardstories_friend_slot1,
 .cardstories .cardstories_friend_slot4 {
-    top: 115px;
+    top: 88px;
 }
 
 .cardstories .cardstories_friend_slot2,
 .cardstories .cardstories_friend_slot5 {
-    top: 265px;
+    top: 252px;
 }
 
 .cardstories .cardstories_friend_slot3 {
-    top: 415px;
+    top: 416px;
 }
 
 .cardstories .cardstories_friend_slot1,
 .cardstories .cardstories_friend_slot2,
 .cardstories .cardstories_friend_slot3 {
-    left: 15px;
+    left: 5px;
 }
 
 .cardstories .cardstories_friend_slot4,
@@ -1168,64 +1224,64 @@
     background: transparent url('images/player_join_1.png') no-repeat left top;
     width: 543px;
     height: 286px;
-    top: 0px;
-    left: -2px;
+    top: -15px;
+    left: -7px;
 }
 
 .cardstories_player_arms_1 {
     background: transparent url('images/player_arms_1.png') no-repeat left top;
     width: 89px;
     height: 102px;
-    top: 139px;
-    left: 82px;
+    top: 124px;
+    left: 77px;
 }
 
 #cardstories_deck_player_join_2 { 
     background: transparent url('images/player_join_2.png') no-repeat left top;
     width: 590px;
     height: 395px;
-    top: 5px;
-    left: -2px;
+    top: 0px;
+    left: -7px;
 }
 
 .cardstories_player_arms_2 {
     background: transparent url('images/player_arms_2.png') no-repeat left top;
     width: 91px;
     height: 94px;
-    top: 293px;
-    left: 82px;
+    top: 288px;
+    left: 77px;
 }
 
 #cardstories_deck_player_join_3 { 
     background: transparent url('images/player_join_3.png') no-repeat left top;
     width: 657px;
     height: 615px;
-    top: 0px;
-    left: 0px;
+    top: 10px;
+    left: -1px;
 }
 
 .cardstories_player_arms_3 {
     background: transparent url('images/player_arms_3.png') no-repeat left top;
     width: 87px;
     height: 91px;
-    top: 438px;
-    left: 77px;
+    top: 448px;
+    left: 76px;
 }
 
 #cardstories_deck_player_join_4 { 
     background: transparent url('images/player_join_4.png') no-repeat left top;
     width: 922px;
     height: 382px;
-    top: 0px;
-    left: 2px;
+    top: -10px;
+    left: 4px;
 }
 
 .cardstories_player_arms_4 {
     background: transparent url('images/player_arms_4.png') no-repeat left top;
     width: 86px;
     height: 92px;
-    top: 142px;
-    left: 607px;
+    top: 132px;
+    left: 609px;
 }
 
 #cardstories_deck_player_join_5 { 
@@ -1233,7 +1289,7 @@
     width: 921px;
     height: 433px;
     top: 8px;
-    left: 8px;
+    left: 10px;
 }
 
 .cardstories_player_arms_5 {
@@ -1241,7 +1297,7 @@
     width: 86px;
     height: 103px;
     top: 281px;
-    left: 606px;
+    left: 608px;
 }
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_go_vote_confirm {
