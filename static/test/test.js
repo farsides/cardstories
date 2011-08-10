@@ -226,9 +226,7 @@ asyncTest("display_modal", 2, function() {
 
     equal(overlay.css('display'), 'block', 'modal overlay is on');
     $.cardstories.display_modal(modal, overlay, function () {
-        var a = modal.find('a');
-        a.mousedown();
-        a.mouseup();
+        modal.find('a').click();
         equal(overlay.css('display'), 'none', 'modal overlay is off');
         start();
     });
@@ -509,9 +507,7 @@ asyncTest("create", 16, function() {
         create(player_id, $('#qunit-fixture .cardstories')).
         done(function() {
             equal($('.cardstories_modal_overlay', element).css('display'), 'block', 'modal overlay is on');
-            var a = $('.cardstories_info', element).find('a');
-            a.mousedown();
-            a.mouseup();
+            var a = $('.cardstories_info', element).find('a').click();
             equal($('.cardstories_modal_overlay', element).css('display'), 'none', 'modal overlay is off');
             equal($('.cardstories_pick_card.cardstories_active', element).length, 1, 'pick_card active');
             equal($('.cardstories_write_sentence.cardstories_active', element).length, 0, 'sentence not active');
@@ -617,7 +613,7 @@ test("invitation_owner_modal_helper", 4, function() {
     equal(modal.css('display'), 'none', 'Modal starts hidden');
     $.cardstories.invitation_owner_modal_helper(modal, overlay, function() {
         equal(modal.css('display'), 'block', 'Modal is shown on first run');
-        modal.find('a').mousedown().mouseup();
+        modal.find('a').click();
         equal(modal.css('display'), 'none', 'Modal is closed');
         $.cardstories.invitation_owner_modal_helper(modal, overlay, function() {
             equal(modal.css('display'), 'none', 'Modal continues closed on second run.');
@@ -651,7 +647,7 @@ test("invitation_owner_slots_helper", 15, function() {
     });
 });
 
-asyncTest("invitation_owner_join_helper", 33, function() {
+asyncTest("invitation_owner_join_helper", 37, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_invitation .cardstories_owner', root);
     var player1 = 'player1';
@@ -684,7 +680,11 @@ asyncTest("invitation_owner_join_helper", 33, function() {
         cb();
     }
 
+    $.cardstories.display_modal($('.cardstories_info', element), $('.cardstories_modal_overlay', element));
     $.cardstories.invitation_owner_join_helper(state1, element, root, function() {
+        equal($('.cardstories_modal_overlay', element).css('display'), 'none', 'modal overlay is hidden');
+        equal($('.cardstories_go_vote', element).css('display'), 'block', 'go_vote is shown');
+        ok($('.cardstories_go_vote .cardstories_modal_button', element).hasClass('cardstories_button_disabled'), 'go_vote button is disabled');
         equal($('.cardstories_player_arms_1', element).css('display'), 'block', 'arm 1 is visible');
         equal($('.cardstories_player_arms_2', element).css('display'), 'block', 'arm 2 is visible');
         equal($('.cardstories_player_arms_3', element).css('display'), 'none', 'arm 3 is hidden');
@@ -701,6 +701,7 @@ asyncTest("invitation_owner_join_helper", 33, function() {
         // Call it again: animate_sprite should only be called again when
         // necessary and the number of expected assertions should reflect this.
         $.cardstories.invitation_owner_join_helper(state2, element, root, function() {
+            ok(!$('.cardstories_go_vote .cardstories_modal_button', element).hasClass('cardstories_button_disabled'), 'go_vote button is enabled');
             equal($('.cardstories_player_arms_1', element).css('display'), 'block', 'arm 1 is visible');
             equal($('.cardstories_player_arms_2', element).css('display'), 'block', 'arm 2 is visible');
             equal($('.cardstories_player_arms_3', element).css('display'), 'block', 'arm 3 is visible');

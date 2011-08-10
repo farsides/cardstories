@@ -983,7 +983,7 @@
 
             var q = $({});
             
-            // First display the modal.
+            // Display the modal.
             q.queue('chain', function(next) {
                 $this.invitation_owner_modal_helper($('.cardstories_info', element), $('.cardstories_modal_overlay', element), function() {next();});
             });
@@ -1052,7 +1052,8 @@
             var last = players.length - 1;
             var q = $({});
             var progress = $('.cardstories_progress', element);
-            for (var i=0, slotno=0; i < players.length; i++) {
+            var go_vote = $('.cardstories_go_vote', element);
+            for (var i=0, slotno=0, picked=0; i < players.length; i++) {
                 var player_id = players[i][0];
                 var playerq = 'player' + i;
 
@@ -1066,6 +1067,20 @@
                         progress.addClass('cardstories_noop');
                         q.queue(playerq, function(next) {
                             $this.animate_progress_bar(4, element);
+                            next();
+                        });
+                    }
+
+                    // Show the go-to-vote box as soon as one player joins,
+                    // also in parallel, and hide the modal, if it's visible.
+                    if (!go_vote.hasClass('cardstories_noop_show')) {
+                        go_vote.addClass('cardstories_noop_show');
+                        var modal = $('.cardstories_info', element);
+                        if (modal.css('display') == 'block') {
+                            modal.find('a').click();
+                        }
+                        q.queue(playerq, function(next) {
+                            $this.animate_scale(false, 5, 300, go_vote);
                             next();
                         });
                     }
@@ -1126,6 +1141,21 @@
                                 status.html('has picked a card!');
                                 next();
                             }})(slot));
+                        }
+
+                        // Enable the go to vote button if there are at least two
+                        // cards picked.
+                        picked++;
+                        if (picked == 2) {
+                            if (!go_vote.hasClass('cardstories_noop_enable')) {
+                                go_vote.addClass('cardstories_noop_enable');
+                                q.queue(playerq, function(next) {
+                                    b = go_vote.find('.cardstories_modal_button');
+                                    b.removeClass('cardstories_button_disabled');
+                                    b.find('span').html('GO TO VOTE');
+                                    next();
+                                });
+                            }
                         }
                     }
                 }
@@ -1650,7 +1680,7 @@
         display_modal: function(modal, overlay, cb) {
             var $this = this;
             var button_a = $('.cardstories_modal_button a', modal);
-            button_a.mouseup(function() {
+            button_a.click(function() {
                 // Hide the box and disable the modal overlay.
                 $this.animate_scale(true, 5, 500, modal, function() {
                     overlay.hide();
