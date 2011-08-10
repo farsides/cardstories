@@ -194,9 +194,9 @@
             }
         },
 
-        animate_sprite: function(movie, frames, cb) {
+        animate_sprite: function(movie, fps, frames, cb) {
             movie.show().sprite({
-                fps: frames,
+                fps: fps,
                 no_of_frames: frames,
                 play_frames: frames,
                 oncomplete: cb
@@ -1090,11 +1090,12 @@
                         // Queue the animation. Create a new closure to save
                         // elements for later, when dequeueing happens.
                         q.queue(playerq, (function(slot, slotno) {return function(next) {
-                            var join_sprite = $('#cardstories_deck_player_join_' + slotno);
+                            var join_sprite = $('#cardstories_player_join_' + slotno);
                             $('.cardstories_invite_friend.cardstories_friend_slot' + slotno, element).fadeOut();
                             slot.show();
-                            $this.animate_sprite(join_sprite, 18, function() {
+                            $this.animate_sprite(join_sprite, 18, 18, function() {
                                 $('.cardstories_player_arms_' + slotno, element).show();
+                                $('#cardstories_player_pick_' + slotno, element).show();
                                 join_sprite.hide();
                                 next();
                             });
@@ -1124,7 +1125,7 @@
                     } else {
                         if (!slot.hasClass('cardstories_noop_picked')) {
                             slot.addClass('cardstories_noop_picked');
-                            q.queue(playerq, (function(slot) {return function(next) {
+                            q.queue(playerq, (function(slot, slotno) {return function(next) {
                                 var status = $('.cardstories_active_friend_status', slot);
                                 slot.removeClass('cardstories_active_friend_joined');
                                 slot.removeClass('cardstories_active_friend_picking');
@@ -1132,8 +1133,11 @@
                                 status.removeClass('cardstories_active_friend_status_picking');
                                 status.addClass('cardstories_active_friend_status_picked');
                                 status.html('has picked a card!');
-                                next();
-                            }})(slot));
+                                var pick_sprite = $('#cardstories_player_pick_' + slotno);
+                                $this.animate_sprite(pick_sprite, 18, 7, function() {
+                                    next();
+                                });
+                            }})(slot, slotno));
                         }
 
                         // Enable the go to vote button if there are at least two

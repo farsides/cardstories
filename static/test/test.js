@@ -330,7 +330,7 @@ asyncTest("animate_scale reverse", 7, function() {
 asyncTest("animate_sprite", 3, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_invitation .cardstories_owner', root);
-    var movie = $('#cardstories_deck_player_join_1', element);
+    var movie = $('#cardstories_player_join_1', element);
     var frames = 18;
 
     equal(movie.css('display'), 'none', 'movie starts hidden');
@@ -342,7 +342,7 @@ asyncTest("animate_sprite", 3, function() {
         equal(movie.css('background-position-x'), 'left', 'movie starts at 0% background position');
     }
 
-    $.cardstories.animate_sprite(movie, frames, function() {
+    $.cardstories.animate_sprite(movie, frames, frames, function() {
         if (movie.css('background-position') !== undefined) {
             notEqual(movie.css('background-position'), '0% 0%', 'movie is no longer at 0% background position');
         } else {
@@ -647,7 +647,7 @@ test("invitation_owner_slots_helper", 15, function() {
     });
 });
 
-asyncTest("invitation_owner_join_helper", 37, function() {
+asyncTest("invitation_owner_join_helper", 39, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_invitation .cardstories_owner', root);
     var player1 = 'player1';
@@ -670,11 +670,11 @@ asyncTest("invitation_owner_join_helper", 37, function() {
     };
 
     for (var i=1; i<=5; i++) {
-        equal($('#cardstories_deck_player_join_' + i, root).css('display'), 'none', 'movie ' + i + ' starts hidden');
+        equal($('#cardstories_player_join_' + i, root).css('display'), 'none', 'movie ' + i + ' starts hidden');
     }
 
     // Count how often animate_sprite is called.
-    $.cardstories.animate_sprite = function(movie, frames, cb) {
+    $.cardstories.animate_sprite = function(movie, fps, frames, cb) {
         ok(true, 'counting animate_sprite');
         movie.show();
         cb();

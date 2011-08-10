@@ -1218,11 +1218,11 @@
 /* state invitation : owner */
 
 /* spritely doesn't like classes, only ids */
-#cardstories_deck_player_join_1,
-#cardstories_deck_player_join_2,
-#cardstories_deck_player_join_3, 
-#cardstories_deck_player_join_4, 
-#cardstories_deck_player_join_5 {
+#cardstories_player_join_1,
+#cardstories_player_join_2,
+#cardstories_player_join_3, 
+#cardstories_player_join_4, 
+#cardstories_player_join_5 {
     display: none;
     position: absolute;
     z-index: 3;
@@ -1237,7 +1237,29 @@
     position: absolute;
 }
 
-#cardstories_deck_player_join_1 { 
+#cardstories_player_pick_1,
+#cardstories_player_pick_2,
+#cardstories_player_pick_3, 
+#cardstories_player_pick_4, 
+#cardstories_player_pick_5 {
+    display: none;
+    position: absolute;
+    width: 143px;
+    height: 111px;
+}
+
+#cardstories_player_pick_1,
+#cardstories_player_pick_2,
+#cardstories_player_pick_3 {
+    background: transparent url('images/player_pick_left.png') no-repeat left top;
+}
+
+#cardstories_player_pick_4,
+#cardstories_player_pick_5 {
+    background: transparent url('images/player_pick_right.png') no-repeat left top;
+}
+
+#cardstories_player_join_1 { 
     background: transparent url('images/player_join_1.png') no-repeat left top;
     width: 543px;
     height: 286px;
@@ -1246,14 +1268,19 @@
 }
 
 .cardstories_player_arms_1 {
-    background: transparent url('images/player_arms_1.png') no-repeat left top;
-    width: 89px;
+    background: transparent url('images/player_arm_1.png') no-repeat left top;
+    width: 82px;
     height: 102px;
-    top: 124px;
-    left: 77px;
+    top: 122px;
+    left: 78px;
 }
 
-#cardstories_deck_player_join_2 { 
+#cardstories_player_pick_1 { 
+    top: 133px;
+    left: 91px;
+}
+
+#cardstories_player_join_2 { 
     background: transparent url('images/player_join_2.png') no-repeat left top;
     width: 590px;
     height: 395px;
@@ -1262,14 +1289,19 @@
 }
 
 .cardstories_player_arms_2 {
-    background: transparent url('images/player_arms_2.png') no-repeat left top;
-    width: 91px;
-    height: 94px;
-    top: 288px;
+    background: transparent url('images/player_arm_2.png') no-repeat left top;
+    width: 52px;
+    height: 76px;
+    top: 287px;
     left: 77px;
 }
 
-#cardstories_deck_player_join_3 { 
+#cardstories_player_pick_2 { 
+    top: 289px;
+    left: 93px;
+}
+
+#cardstories_player_join_3 { 
     background: transparent url('images/player_join_3.png') no-repeat left top;
     width: 606px;
     height: 547px;
@@ -1278,14 +1310,19 @@
 }
 
 .cardstories_player_arms_3 {
-    background: transparent url('images/player_arms_3.png') no-repeat left top;
-    width: 82px;
-    height: 91px;
-    top: 448px;
-    left: 76px;
+    background: transparent url('images/player_arm_3.png') no-repeat left top;
+    width: 33px;
+    height: 60px;
+    top: 460px;
+    left: 77px;
 }
 
-#cardstories_deck_player_join_4 { 
+#cardstories_player_pick_3 { 
+    top: 447px;
+    left: 84px;
+}
+
+#cardstories_player_join_4 { 
     background: transparent url('images/player_join_4.png') no-repeat left top;
     width: 922px;
     height: 382px;
@@ -1294,14 +1331,19 @@
 }
 
 .cardstories_player_arms_4 {
-    background: transparent url('images/player_arms_4.png') no-repeat left top;
-    width: 86px;
-    height: 92px;
-    top: 132px;
-    left: 609px;
+    background: transparent url('images/player_arm_4.png') no-repeat left top;
+    width: 55px;
+    height: 84px;
+    top: 134px;
+    left: 640px;
 }
 
-#cardstories_deck_player_join_5 { 
+#cardstories_player_pick_4 { 
+    top: 132px;
+    left: 541px;
+}
+
+#cardstories_player_join_5 { 
     background: transparent url('images/player_join_5.png') no-repeat left top;
     width: 921px;
     height: 433px;
@@ -1310,24 +1352,29 @@
 }
 
 .cardstories_player_arms_5 {
-    background: transparent url('images/player_arms_5.png') no-repeat left top;
-    width: 86px;
-    height: 103px;
+    background: transparent url('images/player_arm_5.png') no-repeat left top;
+    width: 53px;
+    height: 105px;
     top: 281px;
-    left: 608px;
+    left: 641px;
+}
+
+#cardstories_player_pick_5 { 
+    top: 288px;
+    left: 539px;
 }
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_go_vote { 
-    left: 220px;
+    left: 230px;
     top: 185px;
     height: 150px;
-    width: 320px;
+    width: 310px;
 }
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_go_vote .cardstories_modal_h2 { 
     font-size: 1.2em;
     font-weight: bold;
-    width: 60%;
+    width: 75%;
     margin: 2em auto 0.75em auto;
 }
 
