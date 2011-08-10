@@ -1401,14 +1401,13 @@ test("results_board", 24, function() {
     equal($('.cardstories_player_name', column).text(), '');
   });
 
-test("advertise", 16, function() {
+test("advertise", 11, function() {
     var owner_id = 15;
     var game_id = 100;
     var element = $('#qunit-fixture .cardstories_invitation .cardstories_owner');
     var advertise = $('.cardstories_advertise', element);
     var textarea = $('.cardstories_advertise_input textarea', advertise);
     var submit_button = $('.cardstories_send_invitation', advertise);
-    var more_button = $('.cardstories_invite_more', advertise);
     var feedback = $('.cardstories_advertise_feedback', advertise);
 
     $.cardstories.ajax = function(options) {
@@ -1425,14 +1424,7 @@ test("advertise", 16, function() {
     equal($.cookie('CARDSTORIES_INVITATIONS'), text);
     equal(feedback.css('display'), 'block', 'Feedback text is visible after submitting');
     equal(textarea.css('display'), 'none', 'Textarea is not visible after submitting');
-    equal(more_button.css('display'), 'block', 'Invite more button is visible after submitting');
     equal(submit_button.css('display'), 'none', 'Submit button is not visible after submitting');
-
-    more_button.click();
-    equal(feedback.css('display'), 'none', 'Feedback text not visible anymore');
-    equal(textarea.css('display'), 'block', 'Textarea is visible again');
-    equal(more_button.css('display'), 'none', 'Invite more button is not visible anymore');
-    equal(submit_button.css('display'), 'block', 'Submit button is visible again');
 
     // the list of invitations is retrieved from the cookie
     textarea.val('UNEXPECTED');

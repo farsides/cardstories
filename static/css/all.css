@@ -283,8 +283,9 @@
     color: black;
 }
 
-.cardstories .cardstories_img_button.cardstories_button_disabled a:active {
-    color: inherit;
+.cardstories .cardstories_img_button.cardstories_button_disabled a {
+    color: #629999;
+    cursor: default;
 }
 
 .cardstories .cardstories_img_button .cardstories_btn_on,
@@ -1401,6 +1402,8 @@
     height: 1.6em;
     top: 1.0em;
     right: 2em;
+    margin: 0;
+    font-size: inherit;
 }
 
 .cardstories .cardstories_advertise .cardstories_modal_h1 { 
@@ -1432,7 +1435,7 @@
     height: 11.5em;
 }
 
-.cardstories .cardstories_advertise .cardstories_advertise_input > textarea { 
+.cardstories .cardstories_advertise .cardstories_advertise_input > textarea {
     position: relative;
     display: block;
     top: 10%;
@@ -1454,8 +1457,9 @@
     text-align: center;
 }
 
-.cardstories .cardstories_advertise .cardstories_advertise_button { 
+.cardstories .cardstories_advertise .cardstories_send_invitation {
     position: absolute;
+    top: auto;
     bottom: 0;
     right: 0.25em;
     margin: 0 auto;
@@ -1466,7 +1470,7 @@
     text-align: center;
 }
 
-.cardstories .cardstories_advertise .cardstories_advertise_button > a > span { 
+.cardstories .cardstories_advertise .cardstories_send_invitation > a > span {
     top: 0.25em;
 }
 
@@ -1474,7 +1478,7 @@
     display: none;
 }
 
-.cardstories .cardstories_advertise .cardstories_advertise_right { 
+.cardstories .cardstories_advertise .cardstories_advertise_right {
     float: right;
     width: 10em;
     height: 100%;

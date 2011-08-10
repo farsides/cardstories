@@ -186,7 +186,7 @@
                         height: big_height,
                         fontSize: big_fontsize
                     });
-                
+
                     if (cb !== undefined) {
                         cb();
                     }
@@ -687,10 +687,10 @@
             });
         },
 
-        advertise: function(owner_id, game_id, element) {
+        advertise: function(owner_id, game_id, element, root) {
             var $this = this;
             var box = $('.cardstories_advertise', element);
-            // Don't do anything if the box is already visible.
+            var overlay = $('.cardstories_owner .cardstories_modal_overlay', root);
             if (box.is(':visible')) { return; }
 
             var text = $.cookie('CARDSTORIES_INVITATIONS');
@@ -703,12 +703,9 @@
             var background = $('.cardstories_advertise_input img', box);
             var feedback = $('.cardstories_advertise_feedback', box);
             var submit_button = $('.cardstories_send_invitation', box);
-            var more_button = $('.cardstories_invite_more', box);
-            var close_button = $('.cardstories_advertise_close', box);
 
             var toggle_feedback = function(showOrHide) {
                 feedback.toggle(showOrHide);
-                more_button.toggle(showOrHide);
                 background.toggle(!showOrHide);
                 textarea.toggle(!showOrHide);
                 submit_button.toggle(!showOrHide);
@@ -725,10 +722,6 @@
                 submit_button.toggleClass('cardstories_button_disabled', !is_invitation_valid(val));
             }).change();
 
-            close_button.unbind('click').click(function() {
-                $this.animate_scale(true, 5, 300, box);
-            });
-
             submit_button.unbind('click').click(function() {
                 var val = textarea.val();
                 if (is_invitation_valid(val)) {
@@ -740,15 +733,15 @@
                     $this.send_game(owner_id, game_id, element, 'action=invite&owner_id=' + owner_id + '&game_id=' + game_id + '&' + invites.join('&'));
                     toggle_feedback(true);
                     textarea.val('');
+
+                    // Delay closing the modal a bit, so that confirmation is visible.
+                    $this.setTimeout(function() {
+                        $this.close_modal(box, overlay);
+                    }, 700);
                 }
             });
 
-            more_button.unbind('click').click(function() {
-                toggle_feedback(false);
-                textarea.change();
-            });
-
-            $this.animate_scale(false, 5, 300, box);
+            this.display_modal(box, overlay);
         },
 
         poll_timeout: 300 * 1000, // must be identical to the --poll-timeout value 
@@ -1031,7 +1024,7 @@
                     // Bind click behavior.
                     slot.unbind('click').click(function() {
                         $.cookie('CARDSTORIES_INVITATIONS', null);
-                        $this.advertise(player_id, game_id, element);
+                        $this.advertise(player_id, game_id, element, root);
                     });
 
                     // Finally animate it in.
@@ -1678,19 +1671,27 @@
         },
 
         display_modal: function(modal, overlay, cb) {
+            if (modal.is(':visible')) { return; }
+
             var $this = this;
-            var button_a = $('.cardstories_modal_button a', modal);
-            button_a.click(function() {
-                // Hide the box and disable the modal overlay.
-                $this.animate_scale(true, 5, 500, modal, function() {
-                    overlay.hide();
-                });
+            var button = $('.cardstories_modal_button', modal);
+            button.unbind('click').click(function() {
+                if (!$(this).hasClass('cardstories_button_disabled')) {
+                    $this.close_modal(modal, overlay);
+                }
             });
 
+            overlay.show();
             this.animate_scale(false, 5, 500, modal, function () {
                 if (cb !== undefined) {
                     cb();
                 }
+            });
+        },
+
+        close_modal: function(modal, overlay) {
+            this.animate_scale(true, 5, 500, modal, function() {
+                overlay.hide();
             });
         },
 
