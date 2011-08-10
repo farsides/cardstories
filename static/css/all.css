@@ -1470,12 +1470,12 @@
     text-align: center;
 }
 
-.cardstories .cardstories_advertise .cardstories_send_invitation > a > span {
-    top: 0.25em;
+.cardstories .cardstories_advertise .cardstories_send_invitation.cardstories_button_disabled a {
+    color: #868889;
 }
 
-.cardstories .cardstories_advertise .cardstories_invite_more {
-    display: none;
+.cardstories .cardstories_advertise .cardstories_send_invitation > a > span {
+    top: 0.25em;
 }
 
 .cardstories .cardstories_advertise .cardstories_advertise_right {
