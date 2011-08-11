@@ -1222,7 +1222,12 @@
 #cardstories_player_join_2,
 #cardstories_player_join_3, 
 #cardstories_player_join_4, 
-#cardstories_player_join_5 {
+#cardstories_player_join_5,
+#cardstories_player_return_1,
+#cardstories_player_return_2,
+#cardstories_player_return_3, 
+#cardstories_player_return_4, 
+#cardstories_player_return_5 {
     display: none;
     position: absolute;
     z-index: 3;
@@ -1259,12 +1264,20 @@
     background: transparent url('images/player_pick_right.png') no-repeat left top;
 }
 
-#cardstories_player_join_1 { 
-    background: transparent url('images/player_join_1.png') no-repeat left top;
+#cardstories_player_join_1,
+#cardstories_player_return_1 {
     width: 543px;
     height: 286px;
     top: -15px;
     left: -7px;
+}
+
+#cardstories_player_join_1 {
+    background: transparent url('images/player_join_1.png') no-repeat left top;
+}
+
+#cardstories_player_return_1 {
+    background: transparent url('images/player_return_1.png') no-repeat left top;
 }
 
 .cardstories_player_arms_1 {
@@ -1280,12 +1293,20 @@
     left: 91px;
 }
 
-#cardstories_player_join_2 { 
-    background: transparent url('images/player_join_2.png') no-repeat left top;
+#cardstories_player_join_2,
+#cardstories_player_return_2 { 
     width: 590px;
     height: 395px;
     top: 0px;
     left: -7px;
+}
+
+#cardstories_player_join_2 { 
+    background: transparent url('images/player_join_2.png') no-repeat left top;
+}
+
+#cardstories_player_return_2 { 
+    background: transparent url('images/player_return_2.png') no-repeat left top;
 }
 
 .cardstories_player_arms_2 {
@@ -1301,12 +1322,20 @@
     left: 93px;
 }
 
-#cardstories_player_join_3 { 
-    background: transparent url('images/player_join_3.png') no-repeat left top;
+#cardstories_player_join_3,
+#cardstories_player_return_3 { 
     width: 606px;
     height: 547px;
     top: 10px;
     left: -6px;
+}
+
+#cardstories_player_join_3 { 
+    background: transparent url('images/player_join_3.png') no-repeat left top;
+}
+
+#cardstories_player_return_3 { 
+    background: transparent url('images/player_return_3.png') no-repeat left top;
 }
 
 .cardstories_player_arms_3 {
@@ -1322,12 +1351,20 @@
     left: 84px;
 }
 
-#cardstories_player_join_4 { 
-    background: transparent url('images/player_join_4.png') no-repeat left top;
+#cardstories_player_join_4,
+#cardstories_player_return_4 {
     width: 922px;
     height: 382px;
     top: -10px;
     left: 4px;
+}
+
+#cardstories_player_join_4 { 
+    background: transparent url('images/player_join_4.png') no-repeat left top;
+}
+
+#cardstories_player_return_4 { 
+    background: transparent url('images/player_return_4.png') no-repeat left top;
 }
 
 .cardstories_player_arms_4 {
@@ -1343,12 +1380,20 @@
     left: 541px;
 }
 
-#cardstories_player_join_5 { 
-    background: transparent url('images/player_join_5.png') no-repeat left top;
+#cardstories_player_join_5,
+#cardstories_player_return_5 { 
     width: 921px;
     height: 433px;
     top: 8px;
     left: 10px;
+}
+
+#cardstories_player_join_5 { 
+    background: transparent url('images/player_join_5.png') no-repeat left top;
+}
+
+#cardstories_player_return_5 { 
+    background: transparent url('images/player_return_5.png') no-repeat left top;
 }
 
 .cardstories_player_arms_5 {

@@ -1050,9 +1050,17 @@
             var q = $({});
             var progress = $('.cardstories_progress', element);
             var go_vote = $('.cardstories_go_vote', element);
+            var delay_next = false;
             for (var i=0, slotno=0, picked=0; i < players.length; i++) {
                 var player_id = players[i][0];
                 var playerq = 'player' + i;
+
+                // Delay this player, but only if there was at least one change
+                // displayed for the previous ones.
+                if (delay_next) {
+                    q.delay(350, 'chain');
+                    delay_next = false;
+                }
 
                 // Skip the owner.
                 if (player_id != game.owner_id) {
@@ -1086,6 +1094,7 @@
                     var slot = $('.cardstories_active_friend.cardstories_friend_slot' + slotno, element);
                     if (!slot.hasClass('cardstories_noop_join')) {
                         slot.addClass('cardstories_noop_join');
+                        delay_next = true;
                         slot_snippet.clone().children().appendTo(slot);
                         slot.addClass('cardstories_active_friend_joined');
                         $('.cardstories_active_friend_name', slot).html(player_id);
@@ -1117,6 +1126,7 @@
                     if (players[i][3] === null) {
                         if (!slot.hasClass('cardstories_noop_picking')) {
                             slot.addClass('cardstories_noop_picking');
+                            delay_next = true;
                             q.queue(playerq, (function(slot) {return function(next) {
                                 var status = $('.cardstories_active_friend_status', slot);
                                 slot.removeClass('cardstories_active_friend_joined');
@@ -1129,6 +1139,7 @@
                     } else {
                         if (!slot.hasClass('cardstories_noop_picked')) {
                             slot.addClass('cardstories_noop_picked');
+                            delay_next = true;
                             q.queue(playerq, (function(slot, slotno) {return function(next) {
                                 var status = $('.cardstories_active_friend_status', slot);
                                 slot.removeClass('cardstories_active_friend_joined');
@@ -1150,6 +1161,7 @@
                         if (picked == 2) {
                             if (!go_vote.hasClass('cardstories_noop_enable')) {
                                 go_vote.addClass('cardstories_noop_enable');
+                                delay_next = true;
                                 q.queue(playerq, function(next) {
                                     b = go_vote.find('.cardstories_modal_button');
                                     b.removeClass('cardstories_button_disabled');
@@ -1176,10 +1188,6 @@
                     q.dequeue(playerq);
                     next();
                 }})(playerq));
-                
-                // Introduce an artificial delay between players for
-                // aesthetical reasons.
-                q.delay(350, 'chain');
             }
 
             q.dequeue('chain');
@@ -1200,7 +1208,29 @@
 
             $('.cardstories_go_vote_confirm_yes', modal).unbind('click').click(function() {
                 $this.close_modal(modal, overlay, function() {
-                    // TODO: Implement.
+                    var players = game.players;
+                    var q = $({});
+                    for (var i=0, slotno=0; i < players.length; i++) {
+                        if (players[i][0] != game.owner_id) {
+                            slotno++;
+
+                            // Insert an artificial delay between players, for
+                            // aesthetical reasons.
+                            if (slotno > 1) {
+                                q.delay(350, 'chain');
+                            }
+
+                            q.queue('chain', (function(slotno) {return function(next) {
+                                $('#cardstories_player_pick_' + slotno, element).hide();
+                                var return_sprite = $('#cardstories_player_return_' + slotno);
+                                $this.animate_sprite(return_sprite, 18, 18, function() {
+                                    return_sprite.hide();
+                                });
+                                next();
+                            }})(slotno));
+                        }
+                    }
+                    q.dequeue('chain');
                 });
             });
         },

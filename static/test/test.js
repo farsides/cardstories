@@ -720,7 +720,7 @@ asyncTest("invitation_owner_join_helper", 39, function() {
     });
 });
 
-asyncTest("go_vote_confirm", 5, function() {
+asyncTest("go_vote_confirm", 15, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_invitation .cardstories_owner', root);
     var player1 = 'player1';
@@ -730,9 +730,9 @@ asyncTest("go_vote_confirm", 5, function() {
     var state = {
         owner_id: player1,
         winner_card: 7,
-        players: [[player1, null, 'n', 2, []],
+        players: [[player1, null, 'n', null, []],
                   [player2, null, 'n', 4, []],
-                  [player3, null, 'n', 3, []]]
+                  [player3, null, 'n', 6, []]]
     };
 
     var go_vote_box = $('.cardstories_go_vote', element);
@@ -740,6 +740,13 @@ asyncTest("go_vote_confirm", 5, function() {
     var confirmation_box = $('.cardstories_go_vote_confirm', element);
     var ok_button = $('.cardstories_go_vote_confirm_yes', confirmation_box);
     var cancel_button = $('.cardstories_go_vote_confirm_no', confirmation_box);
+
+    // Count how often animate_sprite is called.
+    $.cardstories.animate_sprite = function(movie, fps, frames, cb) {
+        ok(true, 'counting animate_sprite');
+        movie.show();
+        cb();
+    }
 
     $.cardstories.invitation_owner(player1, state, root, function() {
         go_vote_button.click();
@@ -750,11 +757,16 @@ asyncTest("go_vote_confirm", 5, function() {
         equal(confirmation_box.css('display'), 'none', 'confirmation box is not visible after canceling');
         equal(go_vote_box.css('display'), 'block', 'go to vote box is visible again after canceling');
 
+        equal($('#cardstories_player_pick_1', element).css('display'), 'block', 'pick 1 sprite is visible');
+        equal($('#cardstories_player_pick_2', element).css('display'), 'block', 'pick 2 sprite is visible');
         go_vote_button.click();
         ok_button.click();
         equal(confirmation_box.css('display'), 'none', 'confirmation box is not visible after confirmation');
-
-        start();
+        equal($('#cardstories_player_pick_1', element).css('display'), 'none', 'pick 1 sprite is hidden');
+        window.setTimeout(function() {
+            equal($('#cardstories_player_pick_2', element).css('display'), 'none', 'pick 2 sprite is hidden');
+            start();
+        }, 500);
     });
 });
 
