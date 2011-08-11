@@ -720,6 +720,44 @@ asyncTest("invitation_owner_join_helper", 39, function() {
     });
 });
 
+asyncTest("go_vote_confirm", 5, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_invitation .cardstories_owner', root);
+    var player1 = 'player1';
+    var player2 = 'player2';
+    var player3 = 'player3';
+
+    var state = {
+        owner_id: player1,
+        winner_card: 7,
+        players: [[player1, null, 'n', 2, []],
+                  [player2, null, 'n', 4, []],
+                  [player3, null, 'n', 3, []]]
+    };
+
+    var go_vote_box = $('.cardstories_go_vote', element);
+    var go_vote_button = go_vote_box.find('a');
+    var confirmation_box = $('.cardstories_go_vote_confirm', element);
+    var ok_button = $('.cardstories_go_vote_confirm_yes', confirmation_box);
+    var cancel_button = $('.cardstories_go_vote_confirm_no', confirmation_box);
+
+    $.cardstories.invitation_owner(player1, state, root, function() {
+        go_vote_button.click();
+        equal(confirmation_box.css('display'), 'block', 'confirmation box is visible');
+        equal(go_vote_box.css('display'), 'none', 'go to vote box is not visible');
+
+        cancel_button.click();
+        equal(confirmation_box.css('display'), 'none', 'confirmation box is not visible after canceling');
+        equal(go_vote_box.css('display'), 'block', 'go to vote box is visible again after canceling');
+
+        go_vote_button.click();
+        ok_button.click();
+        equal(confirmation_box.css('display'), 'none', 'confirmation box is not visible after confirmation');
+
+        start();
+    });
+});
+
 test("invitation_owner_invite_more", 4, function() {
     var player1 = 'player1';
     var card1 = 5;

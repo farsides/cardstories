@@ -952,7 +952,7 @@
             return deferred;
         },
 
-        invitation_owner: function(player_id, game, root) {
+        invitation_owner: function(player_id, game, root, cb) {
             var $this = this;
             var element = $('.cardstories_invitation .cardstories_owner', root);
             this.set_active(root, element);
@@ -975,7 +975,7 @@
             }
 
             var q = $({});
-            
+
             // Display the modal.
             q.queue('chain', function(next) {
                 $this.invitation_owner_modal_helper($('.cardstories_info', element), $('.cardstories_modal_overlay', element), function() {next();});
@@ -988,7 +988,11 @@
 
             // Show players joining and picking cards.
             q.queue('chain', function(next) {
-                $this.invitation_owner_join_helper(game, element, root, function() {next();});
+                $this.invitation_owner_join_helper(game, element, root, function() {
+                    if (cb !== undefined) {
+                        cb();
+                    }
+                });
             });
 
             q.dequeue('chain');
@@ -1150,6 +1154,10 @@
                                     b = go_vote.find('.cardstories_modal_button');
                                     b.removeClass('cardstories_button_disabled');
                                     b.find('span').html('GO TO VOTE');
+                                    b.click(function() {
+                                        $this.animate_scale(true, 5, 300, go_vote);
+                                        $this.go_vote_confirm(game, element, root);
+                                    });
                                     next();
                                 });
                             }
@@ -1174,6 +1182,22 @@
             }
 
             q.dequeue('chain');
+        },
+
+        go_vote_confirm: function(game, element, root) {
+            var $this = this;
+            var modal = $('.cardstories_go_vote_confirm', element);
+            var overlay = $('.cardstories_modal_overlay', element);
+
+            $('.cardstories_go_vote_confirm_no', modal).unbind('click').click(function() {
+                $this.animate_scale(false, 5, 300, $('.cardstories_go_vote', element));
+            });
+
+            $('.cardstories_go_vote_confirm_yes', modal).unbind('click').click(function() {
+                // TODO: Implement.
+            });
+
+            this.display_modal(modal, overlay);
         },
 
         invitation_pick: function(player_id, game, root) {
@@ -1679,7 +1703,7 @@
 
             var $this = this;
             var button = $('.cardstories_modal_button', modal);
-            button.unbind('click').click(function() {
+            button.one('click', function() {
                 if (!$(this).hasClass('cardstories_button_disabled')) {
                     $this.close_modal(modal, overlay);
                 }
