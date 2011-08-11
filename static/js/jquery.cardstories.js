@@ -1155,8 +1155,9 @@
                                     b.removeClass('cardstories_button_disabled');
                                     b.find('span').html('GO TO VOTE');
                                     b.click(function() {
-                                        $this.animate_scale(true, 5, 300, go_vote);
-                                        $this.go_vote_confirm(game, element, root);
+                                        $this.animate_scale(true, 5, 300, go_vote, function() {
+                                            $this.go_vote_confirm(game, element, root);
+                                        });
                                     });
                                     next();
                                 });
@@ -1189,15 +1190,19 @@
             var modal = $('.cardstories_go_vote_confirm', element);
             var overlay = $('.cardstories_modal_overlay', element);
 
+            this.display_modal(modal, overlay);
+
             $('.cardstories_go_vote_confirm_no', modal).unbind('click').click(function() {
-                $this.animate_scale(false, 5, 300, $('.cardstories_go_vote', element));
+                $this.close_modal(modal, overlay, function() {
+                    $this.animate_scale(false, 5, 300, $('.cardstories_go_vote', element));
+                });
             });
 
             $('.cardstories_go_vote_confirm_yes', modal).unbind('click').click(function() {
-                // TODO: Implement.
+                $this.close_modal(modal, overlay, function() {
+                    // TODO: Implement.
+                });
             });
-
-            this.display_modal(modal, overlay);
         },
 
         invitation_pick: function(player_id, game, root) {
@@ -1717,9 +1722,12 @@
             });
         },
 
-        close_modal: function(modal, overlay) {
+        close_modal: function(modal, overlay, cb) {
             this.animate_scale(true, 5, 500, modal, function() {
                 overlay.hide();
+                if (cb !== undefined) {
+                    cb();
+                }
             });
         },
 
