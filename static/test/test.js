@@ -720,19 +720,21 @@ asyncTest("invitation_owner_join_helper", 39, function() {
     });
 });
 
-asyncTest("go_vote_confirm", 15, function() {
+asyncTest("go_vote_confirm", 28, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_invitation .cardstories_owner', root);
     var player1 = 'player1';
     var player2 = 'player2';
     var player3 = 'player3';
+    var player4 = 'player4';
 
     var state = {
         owner_id: player1,
         winner_card: 7,
         players: [[player1, null, 'n', null, []],
                   [player2, null, 'n', 4, []],
-                  [player3, null, 'n', 6, []]]
+                  [player3, null, 'n', 6, []],
+                  [player4, null, 'n', null, []]]
     };
 
     var go_vote_box = $('.cardstories_go_vote', element);
@@ -740,6 +742,15 @@ asyncTest("go_vote_confirm", 15, function() {
     var confirmation_box = $('.cardstories_go_vote_confirm', element);
     var ok_button = $('.cardstories_go_vote_confirm_yes', confirmation_box);
     var cancel_button = $('.cardstories_go_vote_confirm_no', confirmation_box);
+    var pick_1 = $('#cardstories_player_pick_1', element);
+    var pick_2 = $('#cardstories_player_pick_2', element);
+    var pick_3 = $('#cardstories_player_pick_3', element);
+    var card_1 = pick_1.find('.cardstories_card');
+    var card_2 = pick_2.find('.cardstories_card');
+    var card_3 = pick_3.find('.cardstories_card');
+    var final_left_1 = card_1.metadata({type: 'attr', name: 'data'}).final_left;
+    var final_left_2 = card_2.metadata({type: 'attr', name: 'data'}).final_left;
+    var final_left_3 = card_3.metadata({type: 'attr', name: 'data'}).final_left;
 
     // Count how often animate_sprite is called.
     $.cardstories.animate_sprite = function(movie, fps, frames, cb) {
@@ -747,6 +758,10 @@ asyncTest("go_vote_confirm", 15, function() {
         movie.show();
         cb();
     }
+
+    equal(pick_1.css('display'), 'none', 'card 1 is not visible before animation');
+    equal(pick_2.css('display'), 'none', 'card 2 is not visible before animation');
+    equal(pick_3.css('display'), 'none', 'card 3 is not visible before animation');
 
     $.cardstories.invitation_owner(player1, state, root, function() {
         go_vote_button.click();
@@ -757,16 +772,32 @@ asyncTest("go_vote_confirm", 15, function() {
         equal(confirmation_box.css('display'), 'none', 'confirmation box is not visible after canceling');
         equal(go_vote_box.css('display'), 'block', 'go to vote box is visible again after canceling');
 
-        equal($('#cardstories_player_pick_1', element).css('display'), 'block', 'pick 1 sprite is visible');
-        equal($('#cardstories_player_pick_2', element).css('display'), 'block', 'pick 2 sprite is visible');
+        ok(!pick_1.hasClass('cardstories_no_background'), 'pick 1 sprite is visible');
+        ok(!pick_2.hasClass('cardstories_no_background'), 'pick 2 sprite is visible');
+        ok(!pick_3.hasClass('cardstories_no_background'), 'pick 3 sprite is visible');
+
+        notEqual(card_1.css('display'), 'none', 'card 1 is visible after animation');
+        notEqual(card_2.css('display'), 'none', 'card 2 is visible after animation');
+        equal(card_3.css('display'), 'none', 'card 3 is not visible after animation because the player didn not pick a card');
+
+        notEqual(parseInt(card_1.css('left'), 10), final_left_1, 'card 1 is further from the slot than its final position');
+        notEqual(parseInt(card_2.css('left'), 10), final_left_2, 'card 2 is further from the slot than its final position');
+
         go_vote_button.click();
         ok_button.click();
         equal(confirmation_box.css('display'), 'none', 'confirmation box is not visible after confirmation');
-        equal($('#cardstories_player_pick_1', element).css('display'), 'none', 'pick 1 sprite is hidden');
-        window.setTimeout(function() {
-            equal($('#cardstories_player_pick_2', element).css('display'), 'none', 'pick 2 sprite is hidden');
-            start();
-        }, 500);
+        ok(pick_1.hasClass('cardstories_no_background'), 'pick 1 sprite is hidden');
+
+        // loop until the conditions are met
+        var interval = window.setInterval(function() {
+            if (parseInt(card_2.css('left'), 10) === final_left_2) {
+                ok(pick_2.hasClass('cardstories_no_background'), 'pick 2 sprite is hidden');
+                equal(parseInt(card_1.css('left'), 10), final_left_1, 'card 1 is at its final position');
+                equal(parseInt(card_2.css('left'), 10), final_left_2, 'card 2 is at its final position');
+                clearInterval(interval);
+                start();
+            }
+        }, 100);
     });
 });
 

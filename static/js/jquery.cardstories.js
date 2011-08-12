@@ -1150,6 +1150,7 @@
                                 status.html('has picked a card!');
                                 var pick_sprite = $('#cardstories_player_pick_' + slotno);
                                 $this.animate_sprite(pick_sprite, 18, 7, function() {
+                                    pick_sprite.find('.cardstories_card').show();
                                     next();
                                 });
                             }})(slot, slotno));
@@ -1209,6 +1210,7 @@
             $('.cardstories_go_vote_confirm_yes', modal).unbind('click').click(function() {
                 $this.close_modal(modal, overlay, function() {
                     var players = game.players;
+                    var nr_of_slots = players.length - 1;
                     var q = $({});
                     for (var i=0, slotno=0; i < players.length; i++) {
                         if (players[i][0] != game.owner_id) {
@@ -1221,15 +1223,30 @@
                             }
 
                             q.queue('chain', (function(slotno) {return function(next) {
-                                $('#cardstories_player_pick_' + slotno, element).hide();
+                                $('#cardstories_player_pick_' + slotno, element).addClass('cardstories_no_background');
                                 var return_sprite = $('#cardstories_player_return_' + slotno);
+                                var is_last_slot = slotno === nr_of_slots;
                                 $this.animate_sprite(return_sprite, 18, 18, function() {
                                     return_sprite.hide();
+                                    if (is_last_slot) { next(); }
                                 });
-                                next();
+                                if (!is_last_slot) { next(); }
                             }})(slotno));
                         }
                     }
+
+                    q.queue('chain', function(next) {
+                        var cards = $('.cardstories_player_pick .cardstories_card', element);
+                        cards.each(function(i) {
+                            var card = $(this);
+                            var final_left = card.metadata({type: 'attr', name: 'data'}).final_left;
+                            var cb = function() {
+                                if (i === cards.length - 1) { next(); }
+                            };
+                            card.animate({left: final_left}, 500, cb)
+                        });
+                    });
+
                     q.dequeue('chain');
                 });
             });
