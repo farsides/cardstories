@@ -1409,6 +1409,31 @@
     left: 539px;
 }
 
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_player_pick {
+    position: relative;
+}
+
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_player_pick.cardstories_no_background {
+    background-image: none !important;
+}
+
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_player_pick .cardstories_card {
+    cursor: default;
+    display: none;
+    position: absolute;
+    width: 46px;
+}
+
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_player_pick_left .cardstories_card {
+    left: 93px;
+    top: 10px;
+}
+
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_player_pick_right .cardstories_card {
+    left: 3px;
+    top: 13px;
+}
+
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_go_vote { 
     left: 230px;
     top: 185px;
