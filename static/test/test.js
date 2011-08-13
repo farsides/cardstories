@@ -19,7 +19,7 @@ $.fx.off = true;
 
 var cardstories_default_reload = $.cardstories.reload;
 var cardstories_default_setTimeout = $.cardstories.setTimeout;
-var cardstories_default_setInterval = $.cardstories.setInterval;
+var cardstories_default_delay = $.cardstories.delay;
 var cardstories_default_ajax = $.cardstories.ajax;
 var cardstories_default_error = $.cardstories.error;
 var cardstories_default_poll_ignore = $.cardstories.poll_ignore;
@@ -28,14 +28,14 @@ var cardstories_default_animate_sprite = $.cardstories.animate_sprite;
 
 function setup() {
     $.cardstories.setTimeout = function(cb, delay) { return window.setTimeout(cb, 0); };
-    $.cardstories.setInterval = function(cb, delay) { return window.setInterval(cb, delay); };
+    $.cardstories.delay = function(o, delay, qname) { return; };
     $.cardstories.ajax = function(o) { throw o; };
     $.cardstories.reload = $.cardstories.game_or_lobby;
     $.cardstories.confirm_participate = true;
     $.cardstories.poll_ignore = function() { throw 'poll_ignore'; };
     $.cardstories.error = cardstories_default_error;
     $.cardstories.create_write_sentence = cardstories_default_create_write_sentence;
-    $.cardstories.animate_sprite = cardstories_default_animate_sprite;
+    $.cardstories.animate_sprite = function(movie, fps, frames, cb) { movie.show(); cb(); };
 }
 
 module("cardstories", {setup: setup});
@@ -60,17 +60,18 @@ test("setTimeout", 2, function() {
     $.cardstories.window.setTimeout = setTimeout;
 });
 
-test("setInterval", 2, function() {
-    $.cardstories.setInterval = cardstories_default_setInterval;
-
-    var setInterval = $.cardstories.window.setInterval;
-    $.cardstories.window.setInterval = function(cb, delay) {
-      equal(cb, 'a function');
-      equal(delay, 42);
-    };
-
-    $.cardstories.setInterval('a function', 42);
-    $.cardstories.window.setInterval = setInterval;
+asyncTest("delay", 1, function() {
+    $.cardstories.delay = cardstories_default_delay;
+    var starttime = new Date();
+    var q = $({});
+    $.cardstories.delay(q, 100, 'chain');
+    q.queue('chain', function() {
+        var endtime = new Date();
+        elapsed = endtime.getTime() - starttime.getTime();
+        ok(elapsed > 50, 'elapsed time');
+        start();
+    });
+    q.dequeue('chain');
 });
 
 test("ajax", 2, function() {
@@ -342,6 +343,7 @@ asyncTest("animate_sprite", 3, function() {
         equal(movie.css('background-position-x'), 'left', 'movie starts at 0% background position');
     }
 
+    $.cardstories.animate_sprite = cardstories_default_animate_sprite;
     $.cardstories.animate_sprite(movie, frames, frames, function() {
         if (movie.css('background-position') !== undefined) {
             notEqual(movie.css('background-position'), '0% 0%', 'movie is no longer at 0% background position');
@@ -656,6 +658,7 @@ asyncTest("invitation_owner_join_helper", 39, function() {
     var player4 = 'player4';
     var state1 = {
         'owner_id': player1,
+        'ready': false,
         'players': [ [ player1, null, 'n', null, [] ],
                      [ player2, null, 'n', null, [] ],
                      [ player3, null, 'n', 3, [] ] ]
@@ -663,6 +666,7 @@ asyncTest("invitation_owner_join_helper", 39, function() {
 
     var state2 = {
         'owner_id': player1,
+        'ready': true,
         'players': [ [ player1, null, 'n', null, [] ],
                      [ player2, null, 'n', 2, [] ],
                      [ player3, null, 'n', 3, [] ],
@@ -681,7 +685,7 @@ asyncTest("invitation_owner_join_helper", 39, function() {
     }
 
     $.cardstories.display_modal($('.cardstories_info', element), $('.cardstories_modal_overlay', element));
-    $.cardstories.invitation_owner_join_helper(state1, element, root, function() {
+    $.cardstories.invitation_owner_join_helper(player1, state1, element, root, function() {
         equal($('.cardstories_modal_overlay', element).css('display'), 'none', 'modal overlay is hidden');
         equal($('.cardstories_go_vote', element).css('display'), 'block', 'go_vote is shown');
         ok($('.cardstories_go_vote .cardstories_modal_button', element).hasClass('cardstories_button_disabled'), 'go_vote button is disabled');
@@ -700,7 +704,7 @@ asyncTest("invitation_owner_join_helper", 39, function() {
 
         // Call it again: animate_sprite should only be called again when
         // necessary and the number of expected assertions should reflect this.
-        $.cardstories.invitation_owner_join_helper(state2, element, root, function() {
+        $.cardstories.invitation_owner_join_helper(player1, state2, element, root, function() {
             ok(!$('.cardstories_go_vote .cardstories_modal_button', element).hasClass('cardstories_button_disabled'), 'go_vote button is enabled');
             equal($('.cardstories_player_arms_1', element).css('display'), 'block', 'arm 1 is visible');
             equal($('.cardstories_player_arms_2', element).css('display'), 'block', 'arm 2 is visible');
@@ -720,7 +724,7 @@ asyncTest("invitation_owner_join_helper", 39, function() {
     });
 });
 
-asyncTest("go_vote_confirm", 28, function() {
+asyncTest("invitation_owner_go_vote_confirm", 28, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_invitation .cardstories_owner', root);
     var player1 = 'player1';
@@ -731,10 +735,15 @@ asyncTest("go_vote_confirm", 28, function() {
     var state = {
         owner_id: player1,
         winner_card: 7,
+        ready: true,
         players: [[player1, null, 'n', null, []],
                   [player2, null, 'n', 4, []],
                   [player3, null, 'n', 6, []],
                   [player4, null, 'n', null, []]]
+    };
+
+    $.cardstories.ajax = function(options) {
+        start();
     };
 
     var go_vote_box = $('.cardstories_go_vote', element);
@@ -787,17 +796,9 @@ asyncTest("go_vote_confirm", 28, function() {
         ok_button.click();
         equal(confirmation_box.css('display'), 'none', 'confirmation box is not visible after confirmation');
         ok(pick_1.hasClass('cardstories_no_background'), 'pick 1 sprite is hidden');
-
-        // loop until the conditions are met
-        var interval = window.setInterval(function() {
-            if (parseInt(card_2.css('left'), 10) === final_left_2) {
-                ok(pick_2.hasClass('cardstories_no_background'), 'pick 2 sprite is hidden');
-                equal(parseInt(card_1.css('left'), 10), final_left_1, 'card 1 is at its final position');
-                equal(parseInt(card_2.css('left'), 10), final_left_2, 'card 2 is at its final position');
-                clearInterval(interval);
-                start();
-            }
-        }, 100);
+        ok(pick_2.hasClass('cardstories_no_background'), 'pick 2 sprite is hidden');
+        equal(parseInt(card_1.css('left'), 10), final_left_1, 'card 1 is at its final position');
+        equal(parseInt(card_2.css('left'), 10), final_left_2, 'card 2 is at its final position');
     });
 });
 
@@ -836,8 +837,10 @@ test("invitation_owner_invite_more", 4, function() {
 
 asyncTest("invitation_owner", 7, function() {
     var player1 = 'player1';
-    var card1 = 5;
     var player2 = 'player2';
+    var player3 = 'player3';
+    var player4 = 'player4';
+    var card1 = 5;
     var player_id = player1;
     var game_id = 101;
     var winner_card = 7;
@@ -850,7 +853,9 @@ asyncTest("invitation_owner", 7, function() {
         'sentence': sentence,
         'winner_card': winner_card,
         'players': [ [ player1, null, 'n', card1, [] ],
-                     [ player2, null, 'n', null, [] ] ],
+                     [ player2, null, 'n', null, [] ],
+                     [ player3, null, 'n', 9, [] ],
+                     [ player4, null, 'n', 16, [] ] ],
         'invited': [ player2 ]
     };
 
@@ -884,7 +889,8 @@ asyncTest("invitation_owner", 7, function() {
     equal($('.cardstories_card:nth(2) .cardstories_card_foreground', cards).attr('src'), 'PATH/card-back.png');
     equal($('#qunit-fixture .cardstories_invitation .cardstories_owner.cardstories_active').length, 1);
     */
-    $('#qunit-fixture .cardstories_owner .cardstories_voting').click();
+    $('#qunit-fixture .cardstories_owner .cardstories_go_vote .cardstories_modal_button').click();
+    $('#qunit-fixture .cardstories_owner .cardstories_go_vote_confirm_yes').click();
 });
 
 asyncTest("invitation_pick", 11, function() {

@@ -35,7 +35,9 @@
 
         setTimeout: function(cb, delay) { return $.cardstories.window.setTimeout(cb, delay); },
 
-        setInterval: function(cb, delay) { return $.cardstories.window.setInterval(cb, delay); },
+        delay: function(o, delay, qname) {
+            return o.delay(delay, qname);
+        },
 
         ajax: function(o) {
             return jQuery.ajax(o);
@@ -314,6 +316,7 @@
         },
 
         create_pick_card_animate_fly_to_board: function(cards, element, root, cb) {
+            var $this = this;
             var nr_of_cards = cards.length;
             var card_fly_velocity = 1.2;   // in pixels per milisecond
             var card_delay = 100;   // delay in ms after each subsequent card starts "flying" from the deck
@@ -341,7 +344,7 @@
                 // The first card should start flying immediately,
                 // but each subsequent card should be delayed.
                 if (i !== 0) {
-                    q.delay(card_delay, 'chain');
+                    $this.delay(q, card_delay, 'chain');
                 }
 
                 // The callback passed to this function should be fired
@@ -408,6 +411,7 @@
         },
 
         create_pick_card_animate_fly_to_deck: function(card_index, element, cb) {
+            var $this = this;
             var deck = $('.cardstories_deck', element);
             var cards = $('.cardstories_card', deck);
             var docked_cards = $('.cardstories_cards_hand .cardstories_card', element);
@@ -445,7 +449,7 @@
                 // The first card should start flying immediately,
                 // but each subsequent card should be delayed.
                 if (i !== 0) {
-                    q.delay(card_delay, 'chain');
+                    $this.delay(q, card_delay, 'chain');
                 }
 
                 q.queue('chain', function(next) {
@@ -628,38 +632,32 @@
                 if (!is_sentence_valid()) {
                     return false;
                 }
-                var animation_done = false;
-                $this.create_write_sentence_animate_end(card, element, root, function() {
-                    animation_done = true;
-                });
+
                 var success = function(data, status) {
                     if('error' in data) {
                         $this.error(data.error);
                     } else {
                         var root = $(element).parents('.cardstories_root');
-                        var interval = $this.setInterval(function() {
-                            if (animation_done) {
-                                clearInterval(interval);
-                                $this.animate_progress_bar(3, element, function() {
-                                    $this.reload(player_id, data.game_id, root); 
-                                });
-                            }
-                        }, 250);
+                        $this.animate_progress_bar(3, element, function() {
+                            $this.reload(player_id, data.game_id, root); 
+                        });
                     }
                 };
-                var sentence = encodeURIComponent($('.cardstories_sentence', element).val());
-                $this.ajax({
-                    async: false,
-                    timeout: 30000,
-                    url: $this.url + '?action=create&owner_id=' + player_id + '&card=' + card,
-                    type: 'POST',
-                    data: 'sentence=' + sentence,
-                    dataType: 'json',
-                    global: false,
-                    success: success,
-                    error: $this.xhr_error
-                });
 
+                $this.create_write_sentence_animate_end(card, element, root, function() {
+                    var sentence = encodeURIComponent($('.cardstories_sentence', element).val());
+                    $this.ajax({
+                        async: false,
+                        timeout: 30000,
+                        url: $this.url + '?action=create&owner_id=' + player_id + '&card=' + card,
+                        type: 'POST',
+                        data: 'sentence=' + sentence,
+                        dataType: 'json',
+                        global: false,
+                        success: success,
+                        error: $this.xhr_error
+                    });
+                });
                 return true;
             };
             text.val('').placeholder({ onSubmit: submit });
@@ -963,17 +961,6 @@
             var src = picked_card.metadata({type: 'attr', name: 'data'}).card.supplant({card: game.winner_card});
             picked_card.find('.cardstories_card_foreground').attr('src', src);
 
-            //
-            // Proceed to vote, if possible
-            //
-            var voting = $('.cardstories_voting', element);
-            voting.toggleClass('cardstories_ready', game.ready);
-            if(game.ready) {
-                voting.unbind('click').click(function() {
-                    $this.send_game(player_id, game.id, element, 'action=voting&owner_id=' + player_id + '&game_id=' + game.id);
-                });
-            }
-
             var q = $({});
 
             // Display the modal.
@@ -988,7 +975,7 @@
 
             // Show players joining and picking cards.
             q.queue('chain', function(next) {
-                $this.invitation_owner_join_helper(game, element, root, function() {
+                $this.invitation_owner_join_helper(player_id, game, element, root, function() {
                     if (cb !== undefined) {
                         cb();
                     }
@@ -1041,7 +1028,7 @@
             });
         },
 
-        invitation_owner_join_helper: function(game, element, root, cb) {
+        invitation_owner_join_helper: function(player_id, game, element, root, cb) {
             var $this = this;
             var players = game.players;
             var snippets = $('.cardstories_snippets', root);
@@ -1052,18 +1039,17 @@
             var go_vote = $('.cardstories_go_vote', element);
             var delay_next = false;
             for (var i=0, slotno=0, picked=0; i < players.length; i++) {
-                var player_id = players[i][0];
                 var playerq = 'player' + i;
 
                 // Delay this player, but only if there was at least one change
                 // displayed for the previous ones.
                 if (delay_next) {
-                    q.delay(350, 'chain');
+                    $this.delay(q, 350, 'chain');
                     delay_next = false;
                 }
 
                 // Skip the owner.
-                if (player_id != game.owner_id) {
+                if (players[i][0] != game.owner_id) {
                     slotno++;
 
                     // Animate the progress bar as soon as one player joins.
@@ -1097,7 +1083,7 @@
                         delay_next = true;
                         slot_snippet.clone().children().appendTo(slot);
                         slot.addClass('cardstories_active_friend_joined');
-                        $('.cardstories_active_friend_name', slot).html(player_id);
+                        $('.cardstories_active_friend_name', slot).html(players[i][0]);
                         $('.cardstories_active_friend_status', slot).html('joined the game!');
 
                         // Queue the animation. Create a new closure to save
@@ -1115,7 +1101,7 @@
                         }})(slot, slotno));
 
                         // Artificial delay between joining and picking.
-                        q.delay(300, playerq);
+                        $this.delay(q, 300, playerq);
                     }
 
                     // If the player hasn't picked a card, show the "picking"
@@ -1156,25 +1142,22 @@
                             }})(slot, slotno));
                         }
 
-                        // Enable the go to vote button if there are at least two
-                        // cards picked.
+                        // Only enable the button after the second picked card
+                        // animation, to match server logic.
                         picked++;
-                        if (picked == 2) {
-                            if (!go_vote.hasClass('cardstories_noop_enable')) {
-                                go_vote.addClass('cardstories_noop_enable');
-                                delay_next = true;
-                                q.queue(playerq, function(next) {
-                                    b = go_vote.find('.cardstories_modal_button');
-                                    b.removeClass('cardstories_button_disabled');
-                                    b.find('span').html('GO TO VOTE');
-                                    b.click(function() {
-                                        $this.animate_scale(true, 5, 300, go_vote, function() {
-                                            $this.go_vote_confirm(game, element, root);
-                                        });
+                        if (game.ready && picked == 2 && !go_vote.hasClass('cardstories_noop_enable')) {
+                            go_vote.addClass('cardstories_noop_enable');
+                            q.queue(playerq, function(next) {
+                                b = go_vote.find('.cardstories_modal_button');
+                                b.removeClass('cardstories_button_disabled');
+                                b.find('span').html('GO TO VOTE');
+                                b.click(function() {
+                                    $this.animate_scale(true, 5, 300, go_vote, function() {
+                                        $this.invitation_owner_go_vote_confirm(player_id, game, element, root);
                                     });
-                                    next();
                                 });
-                            }
+                                next();
+                            });
                         }
                     }
                 }
@@ -1194,7 +1177,7 @@
             q.dequeue('chain');
         },
 
-        go_vote_confirm: function(game, element, root) {
+        invitation_owner_go_vote_confirm: function(player_id, game, element, root) {
             var $this = this;
             var modal = $('.cardstories_go_vote_confirm', element);
             var overlay = $('.cardstories_modal_overlay', element);
@@ -1219,7 +1202,7 @@
                             // Insert an artificial delay between players, for
                             // aesthetical reasons.
                             if (slotno > 1) {
-                                q.delay(350, 'chain');
+                                $this.delay(q, 350, 'chain');
                             }
 
                             q.queue('chain', (function(slotno) {return function(next) {
@@ -1236,6 +1219,7 @@
                     }
 
                     q.queue('chain', function(next) {
+                        $this.animate_progress_bar(5, element);
                         var cards = $('.cardstories_player_pick .cardstories_card', element);
                         cards.each(function(i) {
                             var card = $(this);
@@ -1245,6 +1229,11 @@
                             };
                             card.animate({left: final_left}, 500, cb)
                         });
+                    });
+
+                    // Queue the state change.
+                    q.queue('chain', function(next) {
+                        $this.send_game(player_id, game.id, element, 'action=voting&owner_id=' + player_id + '&game_id=' + game.id);
                     });
 
                     q.dequeue('chain');
@@ -1547,7 +1536,9 @@
             var element = $('.cardstories_vote .cardstories_owner', root);
             this.set_active(root, element);
             this.notify_active(root, 'vote_owner');
+            this.display_progress_bar(5, element, root);
             $('.cardstories_sentence', element).text(game.sentence);
+
             // Activate the button to publish the results if the game is ready
             var finish = $('.cardstories_finish', element);
             finish.toggleClass('cardstories_ready', game.ready);
@@ -1556,9 +1547,27 @@
                     $this.confirm_results_publication(player_id, game, root);
                 });
             }
+
+            // Display slots
+            var players = game.players;
+            var snippets = $('.cardstories_snippets', root);
+            var slot_snippet = $('.cardstories_active_friend', snippets);
+            for (var i=0, slotno=0; i < players.length; i++) {
+                if (players[i][0] != game.owner_id) {
+                    slotno++;
+                    var slot = $('.cardstories_active_friend.cardstories_friend_slot' + slotno, element);
+                    slot_snippet.clone().children().appendTo(slot);
+                    slot.addClass('cardstories_active_friend_picking');
+                    $('.cardstories_active_friend_name', slot).html(players[i][0]);
+                    var status = $('.cardstories_active_friend_status', slot);
+                    status.addClass('cardstories_active_friend_status_picking');
+                    status.html('is voting<br />...');
+                    slot.show();
+                }
+            }
             
             // Display the current board state
-            this.results_board(player_id, game, element);
+            //this.results_board(player_id, game, element);
         },
 
         confirm_results_publication: function(player_id, game, root) {

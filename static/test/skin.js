@@ -74,20 +74,24 @@
         'winner_card': 7,
         'players': [ [ 'Owner', null, 'n', null, [] ],
                      [ 'Player 1', null, 'n', null, [] ],
-                     [ 'Player 2', null, 'n', 2, [] ],
-                     [ 'Player 3', null, 'n', null, [] ],
-                     [ 'Player 4', null, 'n', 4, [] ] ]
+                     [ 'Player 2', null, 'n', 2, [] ] ]
       };
 
       $.cardstories.invitation_owner('PLAYER1', game, root);
     } else if(skin == 'invitation_owner_ready') {
       game = {
-	'id': 100,
-	'owner': true,
-	'ready': true,
-	'sentence': 'long sentence is in the flux',
-        'players': [ [ 'player1', null, 'n', 5, [] ],
-                     [ 'player2', null, 'n', null, [] ] ]
+        'id': 100,
+        'owner': true,
+        'owner_id': 'Owner',
+        'ready': true,
+        'sentence': 'long sentence is in the flux',
+        'winner_card': 7,
+        'players': [ [ 'Owner', null, 'n', null, [] ],
+                     [ 'Player 1', null, 'n', 1, [] ],
+                     [ 'Player 2', null, 'n', 2, [] ],
+                     [ 'Player 3', null, 'n', 3, [] ],
+                     [ 'Player 4', null, 'n', 4, [] ],
+                     [ 'Player 5', null, 'n', 5, [] ] ]
       };
 
       $.cardstories.invitation_owner('PLAYER1', game, root);
@@ -156,20 +160,19 @@
       $.cardstories.vote_anonymous(null, game, root);
     } else if(skin == 'vote_owner') {
       game = {
-	'id': 100,
-	'owner': false,
-        'sentence': 'the game sentence',
+        'id': 100,
+        'owner': true,
+        'owner_id': 'Owner',
+	    'ready': false,
         'winner_card': 33,
+        'sentence': 'the game sentence',
         'board': [30,31,32,33,34,35,36],
-        'players': [ [ 'voter11', 30, null, 32, [ ] ],
-                     [ 'voter12', null, null, 30, [ ] ],
-                     [ 'voter21', 30, null, 31, [ ] ],
-                     [ 'voter22', 32, null, 33, [ ] ],
-                     [ 'voter23', 35, null, 34, [ ] ],
-                     [ 'voter24', 35, null, 35, [ ] ],
-                     [ 'voter25', 35, null, 36, [ ] ]
-                   ],
-	'ready': false
+        'players': [ [ 'Owner', 30, null, null, [] ],
+                     [ 'Player 1', null, null, 31, [] ],
+                     [ 'Player 2', 30, null, 32, [] ],
+                     [ 'Player 3', 35, null, 33, [] ],
+                     [ 'Player 4', 35, null, 34, [] ],
+                     [ 'Player 5', 35, null, 35, [] ] ]
       };
       $.cardstories.vote_owner('voter11', game, root);
     } else if(skin == 'vote_owner_ready') {

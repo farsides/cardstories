@@ -875,6 +875,64 @@
     float: right;
 }
 
+.cardstories .cardstories_sentence_box {
+    position: absolute;
+    top: 415px;
+    left: 390px;
+    width: 300px;
+    height: 50px;
+}
+
+.cardstories .cardstories_sentence_box .cardstories_sentence,
+.cardstories .cardstories_sentence_box .cardstories_sentence_bg_box {
+    position: absolute;
+    width: auto;
+    height: auto;
+    bottom: 12px;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+}
+
+.cardstories .cardstories_sentence_box .cardstories_sentence {
+    padding: 10px;
+    color: #4D4D4F;
+    font-size: 10pt;
+    text-align: center;
+    font-family: "helvetica";
+}
+
+.cardstories .cardstories_sentence_box .cardstories_sentence_bg {
+    width: 100%;
+    height: 100%;
+}
+
+.cardstories .cardstories_sentence_box .cardstories_sentence_footer {
+    background: transparent url('images/sentence_bubble_footer.png') repeat left top;
+    position: absolute;
+    width: 18px;
+    height: 13px;
+    bottom: 0px;
+    left: 50%;
+    margin-left: -6px;
+}
+
+.cardstories .cardstories_card_template {
+    position: absolute;
+    top: 469px;
+    left: 493px;
+    width: 113px;
+    height: 143px;
+}
+
+.cardstories .cardstories_card_template img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0px;
+    left: 0px;
+}
+
 /* state create : pick a card */
 
 .cardstories .cardstories_create .cardstories_pick_card .cardstories_sidebar {
@@ -952,7 +1010,6 @@
 /* state create : write a sentence */
 
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_card_template {
-    position: absolute;
     top: 200px;
     left: 265px;
     width: 247px;
@@ -966,14 +1023,6 @@
     left: 251px;
     width: 14px;
     height: 300px;
-}
-
-.cardstories .cardstories_create .cardstories_write_sentence .cardstories_card_template img {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0px;
-    left: 0px;
 }
 
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_write {
@@ -993,16 +1042,7 @@
     width: 524px;
 } 
 
-.cardstories .cardstories_create .cardstories_write_sentence .cardstories_sentence_box {
-    display: none;
-    position: absolute;
-    top: 88px;
-    left: 200px;
-    height: 68px;
-    width: 380px;
-}
-
-.cardstories .cardstories_create .cardstories_write_sentence .cardstories_sentence {
+.cardstories .cardstories_create .cardstories_write_sentence .cardstories_write_box .cardstories_sentence {
     position: absolute;
     border: 0px;
     width: 390px;
@@ -1012,6 +1052,14 @@
     font-family: "helvetica";
     font-size: 11pt;
     overflow: auto;
+}
+
+.cardstories .cardstories_create .cardstories_write_sentence .cardstories_sentence_box {
+    display: none;
+    top: 88px;
+    left: 200px;
+    height: 68px;
+    width: 380px;
 }
 
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_submit {
@@ -1603,100 +1651,12 @@
     border-left: 1px solid #999999;
 }
 
-.cardstories .cardstories_invitation .cardstories_owner .cardstories_card_template {
-    position: absolute;
-    top: 475px;
-    left: 493px;
-    width: 113px;
-    height: 143px;
-}
-
-.cardstories .cardstories_invitation .cardstories_owner .cardstories_card_template img {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0px;
-    left: 0px;
-}
-
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_write {
     position: absolute;
     left: 150px;
     top: 73px;
     height: 108px;
     width: 438px;
-}
-
-.cardstories .cardstories_invitation .cardstories_owner .cardstories_sentence_box {
-    position: absolute;
-    top: 420px;
-    left: 390px;
-    width: 300px;
-    height: 50px;
-}
-
-.cardstories .cardstories_invitation .cardstories_owner .cardstories_sentence_box .cardstories_sentence,
-.cardstories .cardstories_invitation .cardstories_owner .cardstories_sentence_box .cardstories_sentence_bg_box,
-.cardstories .cardstories_create .cardstories_write_sentence .cardstories_sentence_box .cardstories_sentence,
-.cardstories .cardstories_create .cardstories_write_sentence .cardstories_sentence_box .cardstories_sentence_bg_box {
-    width: auto;
-    height: auto;
-    bottom: 12px;
-    top: 0px;
-    left: 0px;
-    right: 0px;
-    position: absolute;
-}
-
-.cardstories .cardstories_invitation .cardstories_owner .cardstories_sentence_box .cardstories_sentence,
-.cardstories .cardstories_create .cardstories_write_sentence .cardstories_sentence_box .cardstories_sentence {
-    padding: 10px;
-    color: #4D4D4F;
-    font-size: 10pt;
-    text-align: center;
-    font-family: "helvetica";
-}
-
-.cardstories .cardstories_invitation .cardstories_owner .cardstories_sentence_box .cardstories_sentence_bg,
-.cardstories .cardstories_create .cardstories_write_sentence .cardstories_sentence_box .cardstories_sentence_bg {
-    width: 100%;
-    height: 100%;
-}
-
-.cardstories .cardstories_invitation .cardstories_owner .cardstories_sentence_box .cardstories_sentence_footer,
-.cardstories .cardstories_create .cardstories_write_sentence .cardstories_sentence_box .cardstories_sentence_footer {
-    background: transparent url('images/sentence_bubble_footer.png') repeat left top;
-    position: absolute;
-    width: 18px;
-    height: 13px;
-    bottom: 0px;
-    left: 50%;
-    margin-left: -6px;
-}
-
-.cardstories .cardstories_invitation .cardstories_owner .cardstories_voting {
-    display: none;
-    position: absolute;
-    background-repeat: no-repeat;
-    background-color: transparent;
-    background-position: top left;
-    bottom: 190px;
-    left: 20px;
-    height: 90px;
-    width: 135px;
-    z-index: 20;
-    border: 2px solid black;
-}
-
-.cardstories .cardstories_invitation .cardstories_owner .cardstories_voting.cardstories_ready {
-    display: block;
-    background: url('images/to_vote.png');
-    background-position: 0px 0px;
-}
-
-.cardstories .cardstories_invitation .cardstories_owner .cardstories_voting.cardstories_ready:hover {
-    background: url('images/to_vote.png');
-    background-position: -135px 0px;
 }
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_cards {
@@ -1946,61 +1906,6 @@
 }
 
 /* state vote, owner view */
-
-.cardstories .cardstories_vote .cardstories_owner {
-    background: transparent url('images/vote_wall.png') no-repeat 13px bottom;
-}
-
-.cardstories .cardstories_vote .cardstories_owner .cardstories_monster {
-    position: absolute;
-    background: transparent url('images/vote_monster.png') no-repeat left top;
-    top: 130px;
-    left: 12px;
-    height: 293px;
-    width: 245px;
-}
-
-.cardstories .cardstories_vote .cardstories_owner .cardstories_finish {
-    position: absolute;
-    z-index: 20;
-    right: 0;
-    bottom: 0;
-}
-
-.cardstories .cardstories_vote .cardstories_owner .cardstories_sentence {
-    position: absolute;
-    z-index: 2;
-    background: transparent url('images/vote_owner_sentence.png') no-repeat left top;
-    top: 230px;
-    right: 20px;
-    height: 85px;
-    width: 723px;
-    text-align: center;
-    line-height: 80px;
-    color: white;
-    font-size: 13pt;
-    color: #F8E8D8;
-}
-
-.cardstories .cardstories_vote .cardstories_owner .cardstories_finish {
-    position: absolute;
-    bottom: 30px;
-    right: 30px;
-    background: transparent url('images/next.png') no-repeat left top;
-    background-position: 0px 0px;
-    height: 73px;
-    width: 106px;
-}
-
-.cardstories .cardstories_vote .cardstories_owner .cardstories_finish.cardstories_ready {
-    background-image: url('images/next.png');
-    background-position: -212px 0px;
-}
-
-.cardstories .cardstories_vote .cardstories_owner .cardstories_finish.cardstories_ready:hover {
-    background-image: url('images/next.png');
-    background-position: -106px 0px;
-}
 
 /* state confirm results publication */
 
