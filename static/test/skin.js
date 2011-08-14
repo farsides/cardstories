@@ -168,11 +168,10 @@
         'sentence': 'the game sentence',
         'board': [30,31,32,33,34,35,36],
         'players': [ [ 'Owner', 30, null, null, [] ],
-                     [ 'Player 1', null, null, 31, [] ],
+                     [ 'Player 1', null, null, null, [] ],
                      [ 'Player 2', 30, null, 32, [] ],
-                     [ 'Player 3', 35, null, 33, [] ],
-                     [ 'Player 4', 35, null, 34, [] ],
-                     [ 'Player 5', 35, null, 35, [] ] ]
+                     [ 'Player 3', null, null, 33, [] ],
+                     [ 'Player 4', 30, null, 34, [] ] ]
       };
       $.cardstories.vote_owner('voter11', game, root);
     } else if(skin == 'vote_owner_ready') {
