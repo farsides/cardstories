@@ -363,6 +363,10 @@
     background: transparent url('images/active_friend_picked.png') no-repeat 7px 5px;
 }
 
+.cardstories .cardstories_active_friend_voted {
+    background: transparent url('images/active_friend_voted.png') no-repeat 7px 5px;
+}
+
 .cardstories .cardstories_active_friend .cardstories_active_friend_name,
 .cardstories .cardstories_active_friend .cardstories_active_friend_status {
     position: relative;
@@ -383,7 +387,8 @@
 }
 
 .cardstories .cardstories_active_friend .cardstories_active_friend_status_picking,
-.cardstories .cardstories_active_friend .cardstories_active_friend_status_picked {
+.cardstories .cardstories_active_friend .cardstories_active_friend_status_picked,
+.cardstories .cardstories_active_friend .cardstories_active_friend_status_voted {
     color: #3E3E40;
 }
 

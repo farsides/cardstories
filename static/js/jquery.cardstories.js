@@ -1596,12 +1596,19 @@
                         $('.cardstories_active_friend_name', slot).html(players[i][0]);
                         var status = $('.cardstories_active_friend_status', slot);
 
-                        // Differentiate between players who picked a cards and the
-                        // ones who didn't.
+                        // Differentiate between players who already voted,
+                        // players who picked cards, and the ones who didn't.
                         if (players[i][3]) {
-                            slot.addClass('cardstories_active_friend_picking');
-                            status.addClass('cardstories_active_friend_status_picking');
-                            status.html('is voting<br />...');
+                            // already voted
+                            if (players[i][1]) {
+                                slot.addClass('cardstories_active_friend_voted');
+                                status.addClass('cardstories_active_friend_status_voted');
+                                status.html('has voted!');
+                            } else {
+                                slot.addClass('cardstories_active_friend_picking');
+                                status.addClass('cardstories_active_friend_status_picking');
+                                status.html('is voting<br />...');
+                            }
 
                             // Active player card.
                             $('.cardstories_card_' + slotno, element).show();

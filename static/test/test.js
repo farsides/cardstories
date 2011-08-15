@@ -1375,7 +1375,7 @@ test("vote_owner_display_helper", 14, function() {
         'players': [ [ owner_id, null, null, null, [] ],
                      [ player1, null, null, null, [] ],
                      [ player2, null, null, 2, [] ],
-                     [ player3, null, null, 3, [] ] ]
+                     [ player3, 4, null, 3, [] ] ]
     };
 
     $.cardstories.vote_owner_display_helper(game, element, root);
@@ -1390,7 +1390,7 @@ test("vote_owner_display_helper", 14, function() {
     equal($('.cardstories_friend_slot5', element).css('display'), 'none', 'fifth slot is hidden');
     ok(!$('.cardstories_friend_slot1', element).hasClass('cardstories_active_friend_picking'), 'first slot is NOT voting');
     ok($('.cardstories_friend_slot2', element).hasClass('cardstories_active_friend_picking'), 'second slot is voting');
-    ok($('.cardstories_friend_slot3', element).hasClass('cardstories_active_friend_picking'), 'third slot is voting');
+    ok($('.cardstories_friend_slot3', element).hasClass('cardstories_active_friend_voted'), 'third slot has voted');
     equal($('.cardstories_card_1', element).css('display'), 'none', 'card 1 is hidden');
     notEqual($('.cardstories_card_2', element).css('display'), 'none', 'card 2 is visible');
     notEqual($('.cardstories_card_3', element).css('display'), 'none', 'card 3 is visible');
