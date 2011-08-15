@@ -961,6 +961,16 @@
             var src = picked_card.metadata({type: 'attr', name: 'data'}).card.supplant({card: game.winner_card});
             picked_card.find('.cardstories_card_foreground').attr('src', src);
 
+            // Bind go vote button, if possible.
+            if (game.ready) {
+                var go_vote = $('.cardstories_go_vote', element);
+                $('.cardstories_modal_button', go_vote).unbind('click').click(function() {
+                    $this.animate_scale(true, 5, 300, go_vote, function() {
+                        $this.invitation_owner_go_vote_confirm(player_id, game, element, root);
+                    });
+                });
+            }
+
             var q = $({});
 
             // Display the modal.
@@ -1142,8 +1152,8 @@
                             }})(slot, slotno));
                         }
 
-                        // Only enable the button after the second picked card
-                        // animation, to match server logic.
+                        // Only visually enable the button after the second
+                        // picked card animation, to match server logic.
                         picked++;
                         if (game.ready && picked == 2 && !go_vote.hasClass('cardstories_noop_enable')) {
                             go_vote.addClass('cardstories_noop_enable');
@@ -1151,11 +1161,6 @@
                                 b = go_vote.find('.cardstories_modal_button');
                                 b.removeClass('cardstories_button_disabled');
                                 b.find('span').html('GO TO VOTE');
-                                b.click(function() {
-                                    $this.animate_scale(true, 5, 300, go_vote, function() {
-                                        $this.invitation_owner_go_vote_confirm(player_id, game, element, root);
-                                    });
-                                });
                                 next();
                             });
                         }
