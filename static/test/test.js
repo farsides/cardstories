@@ -1362,7 +1362,7 @@ test("vote_owner_shuffle_cards", 5, function() {
     });
 });
 
-test("vote_owner initial display", 14, function() {
+test("vote_owner_display_helper", 14, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_vote .cardstories_owner', root);
     var owner_id = 'Owner';
@@ -1378,7 +1378,7 @@ test("vote_owner initial display", 14, function() {
                      [ player3, null, null, 3, [] ] ]
     };
 
-    $.cardstories.vote_owner(owner_id, game, root);
+    $.cardstories.vote_owner_display_helper(game, element, root);
 
     notEqual($('.cardstories_friend_slot1', element).css('display'), 'none', 'first slot is visible');
     notEqual($('.cardstories_friend_slot2', element).css('display'), 'none', 'second slot is visible');

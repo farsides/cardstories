@@ -1550,36 +1550,7 @@
                 });
             }
 
-            // Display active slots and cards.
-            var players = game.players;
-            var snippets = $('.cardstories_snippets', root);
-            var slot_snippet = $('.cardstories_active_friend', snippets);
-            for (var i=0, slotno=0; i < players.length; i++) {
-                if (players[i][0] != game.owner_id) {
-                    slotno++;
-
-                    // Active player slot.
-                    var slot = $('.cardstories_active_friend.cardstories_friend_slot' + slotno, element);
-                    slot_snippet.clone().children().appendTo(slot);
-                    $('.cardstories_active_friend_name', slot).html(players[i][0]);
-                    var status = $('.cardstories_active_friend_status', slot);
-
-                    // Differentiate between players who picked a cards and the
-                    // ones who didn't.
-                    if (players[i][3]) {
-                        slot.addClass('cardstories_active_friend_picking');
-                        status.addClass('cardstories_active_friend_status_picking');
-                        status.html('is voting<br />...');
-
-                        // Active player card.
-                        $('.cardstories_card_' + slotno, element).show();
-                    } else {
-                        slot.addClass('cardstories_active_friend_joined');
-                        status.html('didn\'t pick');
-                    }
-                    slot.show();
-                }
-            }
+            $this.vote_owner_display_helper(game, element, root);
 
             var q = $({});
 
@@ -1600,6 +1571,43 @@
             });
             
             q.dequeue('chain');
+        },
+
+        vote_owner_display_helper: function(game, element, root) {
+            // Display active slots and cards, but only once.
+            if (!element.hasClass('cardstories_noop_init')) {
+                element.addClass('cardstories_noop_init');
+
+                var players = game.players;
+                var snippets = $('.cardstories_snippets', root);
+                var slot_snippet = $('.cardstories_active_friend', snippets);
+                for (var i=0, slotno=0; i < players.length; i++) {
+                    if (players[i][0] != game.owner_id) {
+                        slotno++;
+
+                        // Active player slot.
+                        var slot = $('.cardstories_active_friend.cardstories_friend_slot' + slotno, element);
+                        slot_snippet.clone().children().appendTo(slot);
+                        $('.cardstories_active_friend_name', slot).html(players[i][0]);
+                        var status = $('.cardstories_active_friend_status', slot);
+
+                        // Differentiate between players who picked a cards and the
+                        // ones who didn't.
+                        if (players[i][3]) {
+                            slot.addClass('cardstories_active_friend_picking');
+                            status.addClass('cardstories_active_friend_status_picking');
+                            status.html('is voting<br />...');
+
+                            // Active player card.
+                            $('.cardstories_card_' + slotno, element).show();
+                        } else {
+                            slot.addClass('cardstories_active_friend_joined');
+                            status.html('didn\'t pick');
+                        }
+                        slot.show();
+                    }
+                }
+            }
         },
 
         vote_owner_morph_master_card: function(element, cb) {
