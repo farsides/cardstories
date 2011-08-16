@@ -1337,16 +1337,22 @@ test("vote_owner_morph_master_card", 4, function() {
     });
 });
 
-test("vote_owner_shuffle_cards", 5, function() {
+test("vote_owner_shuffle_cards", 7, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_vote .cardstories_owner', root);
     var game = {
         'owner_id': 'Owner',
-        'players': [ [ 'Owner', null, null, null, [] ],
+        'players': [ [ 'Owner', null, null, 1, [] ],
                      [ 'Player 1', null, null, null, [] ],
                      [ 'Player 2', null, null, 2, [] ],
                      [ 'Player 3', null, null, 3, [] ] ]
     };
+    var card1_l = $('.cardstories_card_1', element).css('left');
+    var card2_l = $('.cardstories_card_2', element).css('left');
+    var card3_l = $('.cardstories_card_3', element).css('left');
+    var card4_l = $('.cardstories_card_4', element).css('left');
+    var card5_l = $('.cardstories_card_5', element).css('left');
+    var card6_l = $('.cardstories_card_6', element).css('left');
     $.cardstories.vote_owner_shuffle_cards(game, element, function() {
         // Check that the sentence box was moved into position.
         var sentence = $('.cardstories_sentence_box', element);
@@ -1355,10 +1361,12 @@ test("vote_owner_shuffle_cards", 5, function() {
 
         // Check that cards were moved to the final positions.  The owner's
         // card is always number 6.
-        notEqual($('.cardstories_card_1', element).css('left'), $('.cardstories_card_slot_1', element).css('left'), 'card 1 is NOT in slot 1');
-        equal($('.cardstories_card_2', element).css('left'), $('.cardstories_card_slot_1', element).css('left'), 'card 2 is in slot 1');
-        equal($('.cardstories_card_3', element).css('left'), $('.cardstories_card_slot_2', element).css('left'), 'card 3 is in slot 2');
-        equal($('.cardstories_card_6', element).css('left'), $('.cardstories_card_slot_3', element).css('left'), 'card 6 is in slot 3');
+        equal($('.cardstories_card_1', element).css('left'), card1_l, 'card 1 was not moved');
+        notEqual($('.cardstories_card_2', element).css('left'), card2_l, 'card 2 was moved');
+        notEqual($('.cardstories_card_3', element).css('left'), card3_l, 'card 3 was moved');
+        equal($('.cardstories_card_4', element).css('left'), card4_l, 'card 4 was not moved');
+        equal($('.cardstories_card_5', element).css('left'), card5_l, 'card 5 was not moved');
+        notEqual($('.cardstories_card_6', element).css('left'), card6_l, 'card 6 was moved');
     });
 });
 
@@ -1394,6 +1402,33 @@ test("vote_owner_display_helper", 14, function() {
     equal($('.cardstories_card_1', element).css('display'), 'none', 'card 1 is hidden');
     notEqual($('.cardstories_card_2', element).css('display'), 'none', 'card 2 is visible');
     notEqual($('.cardstories_card_3', element).css('display'), 'none', 'card 3 is visible');
+});
+
+test("vote_owner_display_cards", 8, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_vote .cardstories_owner', root);
+    var owner_id = 'Owner';
+    var player1 = 'Player 1';
+    var player2 = 'Player 2';
+    var player3 = 'Player 3';
+    var board = [33,30,31,32];
+    var game = {
+        'owner_id': owner_id,
+        'board': board,
+        'winner_card': 30,
+        'players': [ [ owner_id, null, null, 30, [] ],
+                     [ player1, null, null, 31, [] ],
+                     [ player2, null, null, 32, [] ],
+                     [ player3, null, null, 33, [] ] ]
+    };
+
+    $.cardstories.vote_owner_display_cards(game, element, root, function() {
+        for (var i=0; i < board.length; i++) {
+            var slot = $('.cardstories_card_slot_' + (i + 1), element);
+            notEqual(slot.css('display'), 'none', 'slot ' + i + ' is visible');
+            equal(slot.find('.cardstories_card_foreground').attr('src'), '../css/images/card0' + board[i] + '.png', 'slot ' + i + ' shows card ' + board[i]);
+        }
+    });
 });
 
 test("vote_owner", 8, function() {

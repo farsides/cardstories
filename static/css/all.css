@@ -945,6 +945,31 @@
     height: 138px;
 }
 
+.cardstories .cardstories_card_slot img {
+    position:absolute; 
+    top: 0; 
+    left: 0; 
+    border: 0;
+    height:100%;
+    width: 100%;
+}
+
+.cardstories .cardstories_card_slot .cardstories_card_label {
+    display: none;
+    position: relative;
+    top: 115px;
+    width: 80%;
+    height: 13px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.cardstories .cardstories_card_slot .cardstories_card_label > div {
+    position: relative;
+    font-family: "Helvetica";
+    font-size: 10px;
+}
+
 .cardstories .cardstories_card_slot_1,
 .cardstories .cardstories_card_slot_2,
 .cardstories .cardstories_card_slot_3 {
@@ -2145,6 +2170,7 @@
 /* owner view during the vote, complete state (both for owner and player) : the wall of the results */
 
 .cardstories .cardstories_votes {
+    display: none;
     position: absolute;
     bottom: 0px;
     width: 100%;

@@ -1546,6 +1546,11 @@
             this.display_progress_bar(5, element, root);
             $('.cardstories_sentence', element).text(game.sentence);
 
+            // Display owner's card.
+            var picked_card = $('.cardstories_picked_card', element);
+            var src = picked_card.metadata({type: 'attr', name: 'data'}).card.supplant({card: game.winner_card});
+            picked_card.find('.cardstories_card_foreground').attr('src', src);
+
             // Activate the button to publish the results if the game is ready
             var finish = $('.cardstories_finish', element);
             finish.toggleClass('cardstories_ready', game.ready);
@@ -1557,66 +1562,70 @@
 
             $this.vote_owner_display_helper(game, element, root);
 
-            var q = $({});
+            // Only show initial animations once.
+            if (!element.hasClass('cardstories_noop_init')) {
+                element.addClass('cardstories_noop_init');
+                
+                var q = $({});
 
-            // Morph owner card.
-            q.queue('chain', function(next) {
-                $this.vote_owner_morph_master_card(element, next);
-            });
+                // Morph owner card.
+                q.queue('chain', function(next) {
+                    $this.vote_owner_morph_master_card(element, next);
+                });
 
-            // Shuffle cards
-            q.queue('chain', function(next) {
-                $this.vote_owner_shuffle_cards(game, element, next);
-            });
+                // Shuffle and display cards.
+                q.queue('chain', function(next) {
+                    $this.vote_owner_shuffle_cards(game, element, next);
+                });
+                
+                // Display the cards.
+                q.queue('chain', function(next) {
+                    $this.vote_owner_display_cards(game, element, root, next);
+                });
             
-            // Display the current board state
-            q.queue('chain', function(next) {
-                $this.results_board(player_id, game, element);
-                next();
-            });
-            
-            q.dequeue('chain');
+                q.dequeue('chain');
+            }
         },
 
         vote_owner_display_helper: function(game, element, root) {
-            // Display active slots and cards, but only once.
-            if (!element.hasClass('cardstories_noop_init')) {
-                element.addClass('cardstories_noop_init');
+            var players = game.players;
+            var snippets = $('.cardstories_snippets', root);
+            var slot_snippet = $('.cardstories_active_friend', snippets);
+            for (var i=0, slotno=0; i < players.length; i++) {
+                if (players[i][0] != game.owner_id) {
+                    slotno++;
 
-                var players = game.players;
-                var snippets = $('.cardstories_snippets', root);
-                var slot_snippet = $('.cardstories_active_friend', snippets);
-                for (var i=0, slotno=0; i < players.length; i++) {
-                    if (players[i][0] != game.owner_id) {
-                        slotno++;
-
+                    // Only initialize the slot once.
+                    var slot = $('.cardstories_active_friend.cardstories_friend_slot' + slotno, element);
+                    if (slot.children().length == 0) {
                         // Active player slot.
-                        var slot = $('.cardstories_active_friend.cardstories_friend_slot' + slotno, element);
                         slot_snippet.clone().children().appendTo(slot);
                         $('.cardstories_active_friend_name', slot).html(players[i][0]);
-                        var status = $('.cardstories_active_friend_status', slot);
-
-                        // Differentiate between players who already voted,
-                        // players who picked cards, and the ones who didn't.
-                        if (players[i][3]) {
-                            // already voted
-                            if (players[i][1]) {
-                                slot.addClass('cardstories_active_friend_voted');
-                                status.addClass('cardstories_active_friend_status_voted');
-                                status.html('has voted!');
-                            } else {
-                                slot.addClass('cardstories_active_friend_picking');
-                                status.addClass('cardstories_active_friend_status_picking');
-                                status.html('is voting<br />...');
-                            }
-
-                            // Active player card.
-                            $('.cardstories_card_' + slotno, element).show();
-                        } else {
-                            slot.addClass('cardstories_active_friend_joined');
-                            status.html('didn\'t pick');
-                        }
                         slot.show();
+                        
+                        // Active player card, if picked.
+                        if (players[i][3]) {
+                            $('.cardstories_card_' + slotno, element).show();
+                        }
+                    }
+
+                    // Differentiate between players who already voted,
+                    // players who picked cards, and the ones who didn't.
+                    var status = $('.cardstories_active_friend_status', slot);
+                    if (players[i][3]) {
+                        // already voted
+                        if (players[i][1]) {
+                            slot.addClass('cardstories_active_friend_voted');
+                            status.addClass('cardstories_active_friend_status_voted');
+                            status.html('has voted!');
+                        } else {
+                            slot.addClass('cardstories_active_friend_picking');
+                            status.addClass('cardstories_active_friend_status_picking');
+                            status.html('is voting<br />...');
+                        }
+                    } else {
+                        slot.addClass('cardstories_active_friend_joined');
+                        status.html('didn\'t pick');
                     }
                 }
             }
@@ -1624,12 +1633,6 @@
 
         vote_owner_morph_master_card: function(element, cb) {
             var card = $('.cardstories_card_6', element);
-            if (card.is(':visible')) {
-                if (cb !== undefined) {
-                    cb();
-                }
-                return;
-            }
             var template = $('.cardstories_card_template', element);
             var height = template.height();
             var width = template.width();
@@ -1664,6 +1667,7 @@
         },
 
         vote_owner_shuffle_cards: function(game, element, cb) {
+            var $this = this;
             var init_duration = 750;
             var shuffle_duration = 200;
             var shuffle_times = 5;
@@ -1671,20 +1675,11 @@
             var end_duration = 500
 
             // Move sentence box to center.
-            // Bail out if has already been done.
             var sentence = $('.cardstories_sentence_box', element);
-            if (!sentence.hasClass('.cardstories_noop')) {
-                sentence.addClass('cardstories_noop');
-                var meta = sentence.metadata({type: 'attr', name: 'data'});
-                var fl = meta.fl;
-                var ft = meta.ft;
-                sentence.animate({top: ft, left: fl}, init_duration);
-            } else {
-                if (cb !== undefined) {
-                    cb();
-                }
-                return;
-            }
+            var meta = sentence.metadata({type: 'attr', name: 'data'});
+            var fl = meta.fl;
+            var ft = meta.ft;
+            sentence.animate({top: ft, left: fl}, init_duration);
 
             // Choose which cards to animate.
             var players = game.players;
@@ -1743,12 +1738,69 @@
                 var ft = parseInt(card_slot.css('top'), 10);
                 var fl = parseInt(card_slot.css('left'), 10);
                 q.queue(cardq, (function(card, ft, fl) {return function(next) {
-                    card.animate({top: ft, left: fl}, end_duration, function() {
-                        if (cb !== undefined && i === last) {
+                    card.animate({top: ft, left: fl}, end_duration, next);
+                }})(card, ft, fl));
+
+                // Pause for effect.
+                $this.delay(q, 250, cardq);
+
+                // Morph it out.
+                q.queue(cardq, (function(i, card, fl, fw) {return function(next) {
+                    card.animate({width: 0, left: fl + (fw / 2)}, end_duration, function() {
+                        card.hide();
+                        if (i === last && cb !== undefined) {
                             cb();
                         }
+                        next();
                     });
-                }})(card, ft, fl));
+                }})(i, card, fl, fw));
+
+                q.dequeue(cardq);
+            }
+        },
+
+        vote_owner_display_cards: function(game, element, root, cb) {
+            var $this = this;
+            var snippets = $('.cardstories_snippets', root);
+            var slot_snippet = $('.cardstories_card_slot', snippets);
+            var last = game.board.length - 1;
+            var q = $({});
+            for (var i=0; i < game.board.length; i++) {
+                var cardq = 'card' + i;
+                var slot = $('.cardstories_card_slot_' + (i + 1), element);
+
+                // Populate it.
+                slot_snippet.clone().children().appendTo(slot);
+                
+                // Set the proper card.
+                var card = $('.cardstories_card_foreground', slot);
+                var src = card.metadata({type: 'attr', name: 'data'}).card.supplant({card: game.board[i]});
+                card.attr('src', src);
+
+                // Init pre-animation CSS.
+                var fl = parseInt(slot.css('left'), 10);
+                var fw = slot.width();
+                slot.css({'width': 0, 'left': fl + (fw/2)});
+
+                // Animate it in.
+                q.queue(cardq, (function(i, slot, fw, fl) { return function(next) {
+                    slot.show();
+                    slot.animate({'width': fw, 'left': fl}, 500, next);
+                }})(i, slot, fw, fl));
+
+                // Show the label.
+                if (game.winner_card == game.board[i]) {
+                    q.queue(cardq, (function(slot) { return function(next) {
+                        $('.cardstories_card_label', slot).fadeIn('fast', function() {
+                            $(this).show(); // A workaround for http://bugs.jquery.com/ticket/8892
+                            next();
+                        });
+                    }})(slot));
+                }
+
+                if (i === last && cb !== undefined) {
+                    q.queue(cardq, function(next) { cb(); });
+                }
 
                 q.dequeue(cardq);
             }
@@ -1849,6 +1901,11 @@
                   $(this).hide();
                 }
             });
+
+            var votes = $('.cardstories_votes', element);
+            if (!votes.is(':visible')) {
+                votes.show();
+            }
         },
 
         send_game: function(player_id, game_id, element, query) {

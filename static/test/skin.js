@@ -164,32 +164,30 @@
         'owner': true,
         'owner_id': 'Owner',
 	    'ready': false,
-        'winner_card': 33,
         'sentence': 'the game sentence',
-        'board': [30,31,32,33,34,35,36],
-        'players': [ [ 'Owner', 30, null, null, [] ],
-                     [ 'Player 1', null, null, null, [] ],
-                     [ 'Player 2', 30, null, 32, [] ],
-                     [ 'Player 3', null, null, 33, [] ],
-                     [ 'Player 4', 30, null, 34, [] ] ]
+        'winner_card': 30,
+        'board': [32,31,30,33],
+        'players': [ [ 'Owner', null, null, 30, [] ],
+                     [ 'Player 1', null, null, 31, [] ],
+                     [ 'Player 2', null, null, 32, [] ],
+                     [ 'Player 3', 30, null, 33, [] ] ]
       };
-      $.cardstories.vote_owner('voter11', game, root);
+      $.cardstories.vote_owner('Owner', game, root);
     } else if(skin == 'vote_owner_ready') {
       game = {
-	'id': 100,
-	'owner': false,
+        'id': 100,
+        'owner': true,
+        'owner_id': 'Owner',
+	    'ready': true,
         'sentence': 'the game sentence',
-        'winner_card': 33,
-        'board': [30,31,32,33,34,35,36],
-        'players': [ [ 'voter11', 30, null, 32, [ ] ],
-                     [ 'voter12', null, null, 30, [ ] ],
-                     [ 'voter21', 30, null, 31, [ ] ],
-                     [ 'voter22', 32, null, 33, [ ] ],
-                     [ 'voter23', 35, null, 34, [ ] ],
-                     [ 'voter24', 35, null, 35, [ ] ],
-                     [ 'voter25', 35, null, 36, [ ] ]
-                   ],
-	'ready': true
+        'board': [32,31,30,33,35,34],
+        'winner_card': 30,
+        'players': [ [ 'Owner', null, null, 30, [] ],
+                     [ 'Player 1', 32, null, 31, [] ],
+                     [ 'Player 2', 30, null, 32, [] ],
+                     [ 'Player 3', 30, null, 33, [] ],
+                     [ 'Player 4', 31, null, 34, [] ],
+                     [ 'Player 5', 31, null, 35, [] ] ]
       };
       $.cardstories.vote_owner('voter11', game, root);
     } else if(skin == 'confirm_results_publication') {
