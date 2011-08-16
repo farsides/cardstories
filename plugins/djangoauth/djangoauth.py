@@ -96,6 +96,8 @@ class Plugin:
     def postprocess(self, results):
         if type(results) is ListType:
             for result in results:
+                if result.has_key('owner_id'):
+                    result['owner_id'] = yield self.resolve(result['owner_id'])
                 if result.has_key('players'):
                     for player in result['players']:
                         player[0] = yield self.resolve(player[0])

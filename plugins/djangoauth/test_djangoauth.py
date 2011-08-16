@@ -135,12 +135,14 @@ class DjangoAuthTest(unittest.TestCase):
         self.assertEquals(request1.args['player_id'][1], request2.args['player_id'][1])
         self.assertEquals(request1.args['owner_id'][0], request2.args['owner_id'][0])
 
-        result_in = [{ 'players': [ [ request1.args['player_id'][0] ],
+        result_in = [{'owner_id': request1.args['owner_id'][0],
+                      'players': [ [ request1.args['player_id'][0] ],
                                    [ request1.args['owner_id'][0] ]
                                    ],
                       'invited': [ request1.args['player_id'][0] ] }]
         result_out = yield self.auth.postprocess(result_in)
-        self.assertEquals(result_out, [{ 'players': [ [ player ],
+        self.assertEquals(result_out, [{'owner_id': owner, 
+                                        'players': [ [ player ],
                                                      [ owner ] ],
                                         'invited': [ player ]}])
 
