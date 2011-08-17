@@ -30,9 +30,6 @@ class CardstoriesTest(TestCase):
         self.assertTrue('registration_form' in response.context)
         self.assertTrue('login_form' in response.context)
 
-        # Is welcome mode on?
-        self.assertIsNotNone(c.cookies["CARDSTORIES_WELCOME"])
-
 
     def test_01registration(self):
         """
@@ -93,8 +90,10 @@ class CardstoriesTest(TestCase):
 
         # Test successful creation of the user, and redirection.
         data = valid_data.copy()
-        response = c.post(url, data)
+        query = '?game_id=1'
+        response = c.post(url + query, data)
         self.assertEqual(response.status_code, 302)
+        self.assertEqual(response['Location'], 'http://testserver/static/index.html' + query)
 
         # Was the user logged in as the cardstories client expects it?
         self.assertIsNotNone(c.cookies["CARDSTORIES_ID"])
@@ -146,10 +145,12 @@ class CardstoriesTest(TestCase):
         response = c.post(url, data)
         self.assertFormError(response, form, "password", "Invalid password.")
 
-        # Test successful login of the user, and redirection.
+        # Test successful login of the user, and redirection maintaining game_id.
         data = valid_data.copy()
-        response = c.post(url, data)
+        query = '?game_id=1'
+        response = c.post(url + query, data)
         self.assertEqual(response.status_code, 302)
+        self.assertEqual(response['Location'], 'http://testserver/static/index.html' + query)
 
         # Was the user logged in as the cardstories client expects it?
         self.assertIsNotNone(c.cookies["CARDSTORIES_ID"])

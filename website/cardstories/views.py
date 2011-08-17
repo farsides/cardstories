@@ -35,14 +35,21 @@ from django.core.urlresolvers import reverse
 
 from forms import RegistrationForm, LoginForm
 
+def get_gameid_query(request):
+    query = ''
+    if request.GET.get('game_id', '') != '':
+        query += '?game_id=' + request.GET['game_id']
 
-def get_facebook_redirect_uri(encode=True):
+    return query
+
+def get_facebook_redirect_uri(request, encode=True):
     """
     Returns the urllib.quoted facebook redirection URI.
 
     """
     domain = Site.objects.get_current().domain
-    uri = 'http://%s%s' % (domain, reverse(facebook))
+    uri = 'http://%s%s%s' % (domain, reverse(facebook), get_gameid_query(request))
+
     if encode:
         uri = quote(uri, '')
 
@@ -53,7 +60,8 @@ def common_variables(request):
     Common template variables.
 
     """
-    return {'fb_redirect_uri': get_facebook_redirect_uri(),
+    return {'gameid_query': get_gameid_query(request),
+            'fb_redirect_uri': get_facebook_redirect_uri(request),
             'fb_app_id': settings.FACEBOOK_APP_ID,
             'owa_enable': settings.OWA_ENABLE,
             'owa_url': settings.OWA_URL,
@@ -70,10 +78,6 @@ def welcome(request):
     response = render_to_response('cardstories/welcome.html', context,
                               context_instance=RequestContext(request,
                               processors=[common_variables]))
-
-    # Set welcome page URL for redirection.
-    welcome_url = quote(reverse(welcome), '')
-    response.set_cookie('CARDSTORIES_WELCOME', welcome_url)
 
     return response
 
@@ -100,16 +104,14 @@ def register(request):
             # Always call authenticate() before login().
             auth_user = authenticate(username=username, password=password)
             auth_login(request, auth_user)
-            response = HttpResponseRedirect(settings.CARDSTORIES_URL)
+
+            # Redirect maintaining game_id, if set.
+            url = '%s%s' % (settings.CARDSTORIES_URL, get_gameid_query(request))
+            response = HttpResponseRedirect(url)
 
             # Note that the username should be "quoted", which is the
             # equivalent of Javascript's, encodeURIcompontent().
             response.set_cookie('CARDSTORIES_ID', quote(username))
-
-            # Set welcome page URL for redirection, which will be needed for
-            # logout, for example.
-            welcome_url = quote(reverse(welcome), '')
-            response.set_cookie('CARDSTORIES_WELCOME', welcome_url)
 
             return response
     else:
@@ -135,16 +137,14 @@ def login(request):
             # At this point, the user has already been authenticated by form
             # validation (which simplifies user feedback on login errors).
             auth_login(request, form.auth_user)
-            response = HttpResponseRedirect(settings.CARDSTORIES_URL)
+
+            # Redirect maintaining game_id, if set.
+            url = '%s%s' % (settings.CARDSTORIES_URL, get_gameid_query(request))
+            response = HttpResponseRedirect(url)
 
             # Note that the username should be "quoted", which is the
             # equivalent of Javascript's, encodeURIcompontent().
             response.set_cookie('CARDSTORIES_ID', quote(username))
-
-            # Set welcome page URL for redirection, which will be needed for
-            # logout, for example.
-            welcome_url = quote(reverse(welcome), '')
-            response.set_cookie('CARDSTORIES_WELCOME', welcome_url)
 
             return response
     else:
@@ -168,7 +168,7 @@ def facebook(request):
             params = {
                 'client_id': settings.FACEBOOK_APP_ID,
                 'client_secret': settings.FACEBOOK_API_SECRET,
-                'redirect_uri': get_facebook_redirect_uri(encode=False),
+                'redirect_uri': get_facebook_redirect_uri(request, encode=False),
                 'code': request.GET['code'],
             }
 
@@ -181,16 +181,14 @@ def facebook(request):
                 user = authenticate(token=token)
                 if user and user.is_active:
                     auth_login(request, user)
-                    response = HttpResponseRedirect(settings.CARDSTORIES_URL)
+
+                    # Redirect maintaining game_id, if set.
+                    url = '%s%s' % (settings.CARDSTORIES_URL, get_gameid_query(request))
+                    response = HttpResponseRedirect(url)
 
                     # Note that the username should be "quoted", which is the
                     # equivalent of Javascript's, encodeURIcompontent().
                     response.set_cookie('CARDSTORIES_ID', quote(user.username))
-
-                    # Set welcome page URL for redirection, which will be needed for
-                    # logout, for example.
-                    welcome_url = quote(reverse(welcome), '')
-                    response.set_cookie('CARDSTORIES_WELCOME', welcome_url)
 
                     return response
 

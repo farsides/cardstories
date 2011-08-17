@@ -2050,7 +2050,11 @@
 
         login: function(welcome_url, game_id, root) {
             if(welcome_url !== undefined && welcome_url !== null && welcome_url !== '') {
-                $.cardstories.location.href = welcome_url;
+                var href = welcome_url;
+                if (game_id) {
+                    href += '?game_id=' + game_id;
+                }
+                $.cardstories.location.href = href;
             } else {
                 this.email(game_id, root);
             }

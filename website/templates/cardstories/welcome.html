@@ -14,7 +14,7 @@
         {{ registration_form.username.errors }}
         {{ registration_form.password1.errors }}
       </div>
-      <form class="cardstories_registerform" method="post" action="/register/">{% csrf_token %}
+      <form class="cardstories_registerform" method="post" action="/register/{{ gameid_query }}">{% csrf_token %}
         {{ registration_form.name }}
         {{ registration_form.username }}
         {{ registration_form.password1 }}
@@ -28,7 +28,7 @@
         {{ login_form.username.errors }}
         {{ login_form.password.errors }}
       </div>
-      <form class="cardstories_loginform" method="post" action="/login/">{% csrf_token %}
+      <form class="cardstories_loginform" method="post" action="/login/{{ gameid_query }}">{% csrf_token %}
         {{ login_form.username }}
         {{ login_form.password }}
         {{ login_form.password_clear }}
