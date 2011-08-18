@@ -1854,27 +1854,67 @@
     left: 630px;
 }
 
-.cardstories .cardstories_vote .cardstories_owner .cardstories_announce_results { 
+.cardstories .cardstories_vote .cardstories_owner .cardstories_results_announce { 
     left: 245px;
     top: 185px;
     height: 150px;
     width: 280px;
 }
 
-.cardstories .cardstories_vote .cardstories_owner .cardstories_announce_results .cardstories_modal_h2 { 
+.cardstories .cardstories_vote .cardstories_owner .cardstories_results_announce .cardstories_modal_h2 { 
     font-size: 1.2em;
     font-weight: bold;
     width: 75%;
     margin: 3em auto 1em auto;
 }
 
-.cardstories .cardstories_vote .cardstories_owner .cardstories_announce_results .cardstories_modal_button { 
+.cardstories .cardstories_vote .cardstories_owner .cardstories_results_announce .cardstories_modal_button { 
     width: 7.5em;
 }
 
-.cardstories .cardstories_vote .cardstories_owner .cardstories_announce_results .cardstories_modal_button.cardstories_button_disabled {
+.cardstories .cardstories_vote .cardstories_owner .cardstories_results_announce .cardstories_modal_button.cardstories_button_disabled {
     color: #4e9e9e;
     width: 9.5em;
+}
+
+.cardstories .cardstories_vote .cardstories_owner .cardstories_results_confirm { 
+    left: 231px;
+    top: 190px;
+    height: 135px;
+    width: 298px;
+}
+
+.cardstories .cardstories_vote .cardstories_owner .cardstories_results_confirm .cardstories_modal_h2 {
+    width: 60%;
+    margin: 0 auto;
+}
+
+.cardstories .cardstories_vote .cardstories_owner .cardstories_results_confirm a > span {
+    top: 0.25em !important;
+}
+
+.cardstories .cardstories_vote .cardstories_owner .cardstories_results_confirm_buttons { 
+    position: relative;
+    top: 0.75em;
+    margin: 0 auto;
+    font-size: 2.0em; 
+    width: 12.75em;
+    height: 1.7em;
+}
+
+.cardstories .cardstories_vote .cardstories_owner .cardstories_results_confirm_yes,
+.cardstories .cardstories_vote .cardstories_owner .cardstories_results_confirm_no { 
+    position: relative;
+    width: 6.3em;
+    height: 100%;
+}
+
+.cardstories .cardstories_vote .cardstories_owner .cardstories_results_confirm_no {
+    float: left;
+}
+
+.cardstories .cardstories_vote .cardstories_owner .cardstories_results_confirm_yes {
+    float: right;
 }
 
 /* state vote, player point of view : vote for a card */
@@ -2024,50 +2064,6 @@
     background-position: top left;
     width: 100%;
     height: 100%;
-}
-
-/* state confirm results publication */
-
-.cardstories .cardstories_confirm_results_publication {
-    display: none;
-    background: transparent url('images/vote_wall.png') no-repeat 13px bottom;
-}
-
-.cardstories .cardstories_confirm_results_publication .cardstories_announce_confirm {
-    position: absolute;
-    top: 320px;
-    left: 200px;
-    height: 53px;
-    width: 619px;
-    background: transparent url('images/announce_results_question.png') no-repeat 13px bottom;
-}
-
-.cardstories .cardstories_confirm_results_publication .cardstories_notyet_announce_results {
-    position: absolute;
-    top: 430px;
-    left: 160px;
-    height: 258px;
-    width: 328px;
-    cursor: pointer;
-    background: transparent url('images/confirmation_no_off.png') no-repeat 13px bottom;
-}
-
-.cardstories .cardstories_confirm_results_publication .cardstories_notyet_announce_results:hover {
-    background: transparent url('images/confirmation_no_over.png') no-repeat 13px bottom;
-}
-
-.cardstories .cardstories_confirm_results_publication .cardstories_announce_results {
-    position: absolute;
-    top: 430px;
-    left: 540px;
-    height: 258px;
-    width: 328px;
-    cursor: pointer;
-    background: transparent url('images/confirmation_yes_off.png') no-repeat 13px bottom;
-}
-
-.cardstories .cardstories_confirm_results_publication .cardstories_announce_results:hover {
-    background: transparent url('images/confirmation_yes_over.png') no-repeat 13px bottom;
 }
 
 /* state complete */

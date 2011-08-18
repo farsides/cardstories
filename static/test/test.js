@@ -394,40 +394,6 @@ test("welcome_url", 1, function() {
     $.cookie('CARDSTORIES_WELCOME', null);
 });
 
-test("confirm_results_publication", 5, function () {
-    var player_id = 15;
-    var game_id = 101;
-
-    var root = $('#qunit-fixture .cardstories');
-    root.addClass('cardstories_root');
-    var vote_element = $('.cardstories_vote .cardstories_owner', root);
-    var element = $('.cardstories_vote .cardstories_owner', '.cardstories_invitation');
-    var query = 'action=complete&owner_id=' + player_id + '&game_id=' + game_id;
-    var game = {
-        'id': game_id,
-        'state': 'fake_state'
-    };
-    var vote_owner = $.cardstories.vote_owner;
-
-    $.cardstories.vote_owner = function (arg_player_id, arg_game, root) {
-        equal(arg_player_id, player_id);
-        equal(arg_game.id, game_id);
-        ok($(root).hasClass('cardstories_root'), 'cardstories_root');
-        $.cardstories.vote_owner = vote_owner;
-    };
-
-    var send_game = $.cardstories.send_game;
-    $.cardstories.send_game = function (arg_player_id, arg_game_id) {
-        equal(arg_player_id, player_id);
-        equal(arg_game_id, game_id);
-        $.cardstories.send_game = send_game;
-    };
-
-    $.cardstories.confirm_results_publication(player_id, game, root);
-    $('.cardstories_notyet_announce_results').click();
-    $('.cardstories_announce_results').click();
-});
-
 asyncTest("send_game", 5, function() {
     var player_id = 15;
     var game_id = 101;
@@ -1431,7 +1397,7 @@ test("vote_owner_display_cards", 8, function() {
     });
 });
 
-test("vote_owner", 8, function() {
+asyncTest("vote_owner", 8, function() {
     var player_id = 15;
     var game_id = 101;
 
@@ -1460,6 +1426,12 @@ test("vote_owner", 8, function() {
         'ready': true
     };
 
+    $.cardstories.ajax = function(options) {
+        equal(options.type, 'GET');
+        equal(options.url, $.cardstories.url + '?action=complete&owner_id=' + player_id + '&game_id=' + game_id);
+        start();
+    };
+
     $.cardstories.poll_ignore = function(ignored_request, ignored_answer, new_poll, old_poll) {
       equal(ignored_request.game_id, game_id, 'poll_ignore request game_id');
       equal(new_poll, undefined, 'poll_ignore metadata not set');
@@ -1472,14 +1444,11 @@ test("vote_owner", 8, function() {
     var vote = $('#qunit-fixture .cardstories_vote .cardstories_owner');
     equal($('.cardstories_sentence', vote).text(), sentence);
 
-    ok(!$('.cardstories_announce_results .cardstories_modal_button', vote).hasClass('cardstories_button_disabled'), 'cardstories_ready');
-    var confirm_results_publication = $.cardstories.confirm_results_publication;
-    $.cardstories.confirm_results_publication = function (arg_player_id, arg_game, arg_root, arg_vote_element) {
-        equal(arg_player_id, player_id);
-        equal(arg_game.id, game.id);
-    };
-    $('.cardstories_finish', vote).click();
-    $.cardstories.confirm_results_publication = confirm_results_publication;
+    var button = $('.cardstories_results_announce .cardstories_modal_button', vote);
+    ok(!button.hasClass('cardstories_button_disabled'), 'cardstories_ready');
+    button.click();
+    var confirm = $('.cardstories_results_confirm_yes', vote);
+    confirm.click();
 });
 
 test("complete", 9, function() {

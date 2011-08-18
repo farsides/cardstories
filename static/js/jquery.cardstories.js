@@ -1552,14 +1552,14 @@
             picked_card.find('.cardstories_card_foreground').attr('src', src);
 
             // Activate the announce results button if the game is ready.
-            var announce_results = $('.cardstories_announce_results', element);
+            var announce = $('.cardstories_results_announce', element);
             if (game.ready) {
-                b = announce_results.find('.cardstories_modal_button');
+                b = announce.find('.cardstories_modal_button');
                 b.removeClass('cardstories_button_disabled');
                 b.find('span').html('ANNOUNCE RESULTS');
                 b.unbind('click').click(function() {
-                    $this.animate_scale(true, 5, 300, announce_results, function() {
-                        // TODO confirm results
+                    $this.animate_scale(true, 5, 300, announce, function() {
+                        $this.vote_owner_results_confirm(player_id, game, element, root);
                     });
                 });
             }
@@ -1589,11 +1589,35 @@
 
                 // Show the announce results info box.
                 q.queue('chain', function(next) {
-                    $this.animate_scale(false, 5, 300, announce_results, next);
+                    $this.animate_scale(false, 5, 300, announce, next);
                 });
                 
                 q.dequeue('chain');
             }
+        },
+
+        vote_owner_results_confirm: function(player_id, game, element, root) {
+            var $this = this;
+            var modal = $('.cardstories_results_confirm', element);
+            var overlay = $('.cardstories_modal_overlay', element);
+
+            this.display_modal(modal, overlay);
+
+            $('.cardstories_results_confirm_no', modal).unbind('click').click(function() {
+                $this.close_modal(modal, overlay, function() {
+                    $this.animate_scale(false, 5, 300, $('.cardstories_results_announce', element));
+                });
+            });
+
+            $('.cardstories_results_confirm_yes', modal).unbind('click').click(function() {
+                $this.animate_progress_bar(6, element);
+
+                // TODO move cards into final position
+                
+                $this.close_modal(modal, overlay, function() {
+                    $this.send_game(player_id, game.id, element, 'action=complete&owner_id=' + player_id + '&game_id=' + game.id);
+                });
+            });
         },
 
         vote_owner_display_helper: function(game, element, root) {
@@ -1813,20 +1837,6 @@
 
                 q.dequeue(cardq);
             }
-        },
-
-        confirm_results_publication: function(player_id, game, root) {
-            var $this = this;
-            var element = $('.cardstories_confirm_results_publication', root);
-            var vote_element = $('.cardstories_vote .cardstories_owner', root);
-            this.set_active(root, element);
-            this.notify_active(root, 'confirm_results_publication');
-            $('.cardstories_notyet_announce_results').click(function () {
-                $this.vote_owner(player_id, game, root);
-            });
-            $('.cardstories_announce_results').click(function () {
-                $this.send_game(player_id, game.id, vote_element, 'action=complete&owner_id=' + player_id + '&game_id=' + game.id);
-            });
         },
 
         complete: function(player_id, game, root) {
