@@ -1472,7 +1472,7 @@ test("vote_owner", 8, function() {
     var vote = $('#qunit-fixture .cardstories_vote .cardstories_owner');
     equal($('.cardstories_sentence', vote).text(), sentence);
 
-    ok($('.cardstories_finish', vote).hasClass('cardstories_ready'), 'cardstories_ready');
+    ok(!$('.cardstories_announce_results .cardstories_modal_button', vote).hasClass('cardstories_button_disabled'), 'cardstories_ready');
     var confirm_results_publication = $.cardstories.confirm_results_publication;
     $.cardstories.confirm_results_publication = function (arg_player_id, arg_game, arg_root, arg_vote_element) {
         equal(arg_player_id, player_id);

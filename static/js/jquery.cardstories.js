@@ -1551,12 +1551,16 @@
             var src = picked_card.metadata({type: 'attr', name: 'data'}).card.supplant({card: game.winner_card});
             picked_card.find('.cardstories_card_foreground').attr('src', src);
 
-            // Activate the button to publish the results if the game is ready
-            var finish = $('.cardstories_finish', element);
-            finish.toggleClass('cardstories_ready', game.ready);
-            if(game.ready) {
-                finish.click(function() {
-                    $this.confirm_results_publication(player_id, game, root);
+            // Activate the announce results button if the game is ready.
+            var announce_results = $('.cardstories_announce_results', element);
+            if (game.ready) {
+                b = announce_results.find('.cardstories_modal_button');
+                b.removeClass('cardstories_button_disabled');
+                b.find('span').html('ANNOUNCE RESULTS');
+                b.unbind('click').click(function() {
+                    $this.animate_scale(true, 5, 300, announce_results, function() {
+                        // TODO confirm results
+                    });
                 });
             }
 
@@ -1582,7 +1586,12 @@
                 q.queue('chain', function(next) {
                     $this.vote_owner_display_cards(game, element, root, next);
                 });
-            
+
+                // Show the announce results info box.
+                q.queue('chain', function(next) {
+                    $this.animate_scale(false, 5, 300, announce_results, next);
+                });
+                
                 q.dequeue('chain');
             }
         },

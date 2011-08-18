@@ -1854,6 +1854,29 @@
     left: 630px;
 }
 
+.cardstories .cardstories_vote .cardstories_owner .cardstories_announce_results { 
+    left: 245px;
+    top: 185px;
+    height: 150px;
+    width: 280px;
+}
+
+.cardstories .cardstories_vote .cardstories_owner .cardstories_announce_results .cardstories_modal_h2 { 
+    font-size: 1.2em;
+    font-weight: bold;
+    width: 75%;
+    margin: 3em auto 1em auto;
+}
+
+.cardstories .cardstories_vote .cardstories_owner .cardstories_announce_results .cardstories_modal_button { 
+    width: 7.5em;
+}
+
+.cardstories .cardstories_vote .cardstories_owner .cardstories_announce_results .cardstories_modal_button.cardstories_button_disabled {
+    color: #4e9e9e;
+    width: 9.5em;
+}
+
 /* state vote, player point of view : vote for a card */
 
 .cardstories .cardstories_vote .cardstories_voter .cardstories_bubble_player_vote_for_a_card { 
