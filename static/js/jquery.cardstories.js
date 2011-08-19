@@ -1564,7 +1564,7 @@
                 });
             }
 
-            $this.vote_owner_display_helper(game, element, root);
+            $this.vote_owner_display_board(game, element, root);
 
             // Only show initial animations once.
             if (!element.hasClass('cardstories_noop_init')) {
@@ -1620,7 +1620,7 @@
             });
         },
 
-        vote_owner_display_helper: function(game, element, root) {
+        vote_owner_display_board: function(game, element, root) {
             var players = game.players;
             var snippets = $('.cardstories_snippets', root);
             var slot_snippet = $('.cardstories_active_friend', snippets);
@@ -1635,6 +1635,7 @@
                         slot_snippet.clone().children().appendTo(slot);
                         $('.cardstories_active_friend_name', slot).html(players[i][0]);
                         slot.show();
+                        $('.cardstories_player_arms_' + slotno, element).show();
                         
                         // Active player card, if picked.
                         if (players[i][3]) {
@@ -1841,30 +1842,66 @@
 
         complete: function(player_id, game, root) {
             var $this = this;
-            if (game.owner) {
-                $('.play_again', root).show();
-                $('.play_again', root).unbind('click').click(function () {
-                    // "Play again" in this case is just to create a new game and
-                    // the players of this game will be kept as well because
-                    // the CARDSTORIES_INVITATIONS cookie stores those playes emails.
-                    $this.create(player_id, root);
-                });
-            } else {
-                $('.play_again').hide();
-            }
             var element = $('.cardstories_complete', root);
             this.set_active(root, element);
             this.notify_active(root, 'complete');
-            element.toggleClass('cardstories_owner', game.owner);
-            element.toggleClass('cardstories_player', !game.owner);
-            $('.cardstories_set_why', element).unbind('click').click(function() {
-                element.toggleClass('cardstories_why', true);
-            });
-            $('.cardstories_unset_why', element).unbind('click').click(function() {
-                element.toggleClass('cardstories_why', false);
-            });
-            // Display the current board state
-            this.results_board(player_id, game, element);
+            this.display_progress_bar(6, element, root);
+            $('.cardstories_sentence', element).text(game.sentence);
+
+            // Display owner's card.
+            var picked_card = $('.cardstories_picked_card', element);
+            var src = picked_card.metadata({type: 'attr', name: 'data'}).card.supplant({card: game.winner_card});
+            picked_card.find('.cardstories_card_foreground').attr('src', src);
+
+            // Display board
+            this.complete_display_board(game, element, root);
+        },
+
+        complete_display_board: function(game, element, root) {
+            var players = game.players;
+            var snippets = $('.cardstories_snippets', root);
+            var slot_snippet = $('.cardstories_active_friend', snippets);
+            var cardslot_snippet = $('.cardstories_card_slot', snippets);
+            for (var i=0, slotno=0; i < players.length; i++) {
+                if (players[i][0] != game.owner_id) {
+                    slotno++;
+
+                    // Only initialize the slot once.
+                    var slot = $('.cardstories_active_friend.cardstories_friend_slot' + slotno, element);
+                    if (slot.children().length == 0) {
+                        // Active player slot.
+                        slot_snippet.clone().children().appendTo(slot);
+                        $('.cardstories_active_friend_name', slot).html(players[i][0]);
+                        slot.show();
+                        $('.cardstories_player_arms_' + slotno, element).show();
+                        
+                        // Active player card, if picked.
+                        if (players[i][3]) {
+                            var cardslot = $('.cardstories_card_slot_' + slotno, element);
+
+                            // Populate it.
+                            cardslot_snippet.clone().children().appendTo(cardslot);
+                            
+                            // Set the proper card.
+                            var card = $('.cardstories_card_foreground', cardslot);
+                            var src = card.metadata({type: 'attr', name: 'data'}).card.supplant({card: players[i][3]});
+                            card.attr('src', src);
+
+                            cardslot.show();
+                        }
+                    }
+
+                    // Differentiate between players who already voted,
+                    // and the ones who didn't.
+                    var status = $('.cardstories_active_friend_status', slot);
+                    slot.addClass('cardstories_active_friend_joined');
+                    if (players[i][1]) {
+                        // TODO: show envelope
+                    } else {
+                        status.html('didn\'t vote');
+                    }
+                }
+            }
         },
 
         results_board: function(player_id, game, element) {

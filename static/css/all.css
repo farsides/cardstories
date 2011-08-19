@@ -1827,6 +1827,7 @@
     position: absolute;
     width: 46px;
     cursor: default;
+    z-index: 0;
 }
 
 .cardstories .cardstories_vote .cardstories_owner .cardstories_card_1 {
@@ -2068,103 +2069,39 @@
 
 /* state complete */
 
-.cardstories .cardstories_complete {
-    background: transparent url('images/vote_wall.png') no-repeat 13px bottom;
-}
-
-.cardstories .cardstories_complete .cardstories_monster {
-    position: absolute;
-    background: transparent url('images/complete_monster.png') no-repeat left top;
-    top: 130px;
-    left: 12px;
-    height: 293px;
-    width: 245px;
-}
-
-.cardstories .cardstories_complete.cardstories_why .cardstories_monster {
+.cardstories .cardstories_complete .cardstories_card_slot {
     display: none;
-}
-
-.cardstories .cardstories_complete .cardstories_winners {
     position: absolute;
-    left: 210px;
-    top: 35px;
-    height: 20px;
-    width: 450px;
-    text-align: center;
-    line-height: 20px;
-    color: #F8E8D8;
-    font-size: 13px;
+    width: 90px;
+    height: 120px;
 }
 
-.cardstories .cardstories_complete.cardstories_why .cardstories_winners {
-    display: none;
+.cardstories .cardstories_complete .cardstories_card_slot_1 {
+    top: 105px;
+    left: 90px;
 }
 
-.cardstories .cardstories_complete .cardstories_sentence {
-    position: absolute;
-    left: 180px;
-    bottom: 20px;
-    height: 50px;
-    line-height: 50px;
-    width: 500px;
-    text-align: center;
-    color: #F8E8D8;
-    font-size: 13px;
+.cardstories .cardstories_complete .cardstories_card_slot_2 {
+    top: 270px;
+    left: 90px;
 }
 
-.cardstories .cardstories_complete.cardstories_why .cardstories_sentence {
-    left: 450px;
+.cardstories .cardstories_complete .cardstories_card_slot_3 {
+    top: 435px;
+    left: 90px;
 }
 
-.cardstories .cardstories_complete .cardstories_set_why {
-    font-family: "helvetica";
-    font-size: 11px;
-    text-decoration: underline;
-    color: #7A6A59;
-    position: absolute;
-    top: 55px;
-    left: 35px;
+.cardstories .cardstories_complete .cardstories_card_slot_4 {
+    top: 105px;
+    left: 593px;
 }
 
-.cardstories .cardstories_complete.cardstories_why .cardstories_set_why {
-    display: none;
-}
-
-.cardstories .cardstories_complete .cardstories_unset_why {
-    display: none;
-}
-
-.cardstories .cardstories_complete.cardstories_why .cardstories_unset_why {
-    font-family: "helvetica";
-    font-size: 11px;
-    text-decoration: underline;
-    color: #7A6A59;
-    position: absolute;
-    top: 55px;
-    left: 290px;
-    display: block;
+.cardstories .cardstories_complete .cardstories_card_slot_5 {
+    top: 270px;
+    left: 593px;
 }
 
 /* state complete, owner point of view */
-
-.cardstories .cardstories_complete.cardstories_owner .cardstories_complete_explain {
-    position: absolute;
-    background: transparent url('images/complete_owner_explain.png') no-repeat left top;
-    top: 195px;
-    right: 30px;
-    height: 152px;
-    width: 731px;
-}
-
-.cardstories .cardstories_complete.cardstories_owner.cardstories_why .cardstories_complete_explain {
-    position: absolute;
-    background: transparent url('images/complete_owner_why.png') no-repeat left top;
-    top: 195px;
-    left: 12px;
-    height: 150px;
-    width: 988px;
-}
 
 /* state complete, player point of view */
 
