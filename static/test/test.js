@@ -1360,38 +1360,40 @@ test("vote_owner_display_cards", 8, function() {
     });
 });
 
-asyncTest("vote_owner", 8, function() {
-    var player_id = 15;
-    var game_id = 101;
-
-    var voter11 = 11;
-    var voter12 = 12;
-    var voter21 = 21;
-
-    var board1 = 30;
-    var board2 = 31;
-    var board3 = 32;
-    var board = [ board1, board2 ];
-
-    var sentence = 'SENTENCE';
-
+asyncTest("vote_owner", 16, function() {
     var root = $('#qunit-fixture .cardstories');
-
+    var element = $('.cardstories_vote .cardstories_owner', root);
+    var owner_id = 'Owner';
+    var player1 = 'Player 1';
+    var player2 = 'Player 2';
+    var sentence = 'SENTENCE';
+    var board = [32,30,31];
+    var game_id = 100;
     var game = {
         'id': game_id,
         'owner': true,
+        'owner_id': owner_id,
         'sentence': sentence,
+        'ready': true,
         'board': board,
-        'players': [ [ voter11, board1, 'n', board3, [ ] ],
-                     [ voter12, board2, 'n', board1, [ ] ],
-                     [ voter21, board1, 'n', board2, [ ] ]
-                   ],
-        'ready': true
+        'winner_card': 30,
+        'players': [ [ owner_id, null, null, 30, [] ],
+                     [ player1, 30, null, 31, [] ],
+                     [ player2, 30, null, 32, [] ] ]
     };
 
     $.cardstories.ajax = function(options) {
         equal(options.type, 'GET');
-        equal(options.url, $.cardstories.url + '?action=complete&owner_id=' + player_id + '&game_id=' + game_id);
+        equal(options.url, $.cardstories.url + '?action=complete&owner_id=' + owner_id + '&game_id=' + game_id);
+        var destel = $('.cardstories_complete', root);
+        equal($('.cardstories_card_slot_1', element).css('top'), $('.cardstories_card_slot_2', destel).css('top'), 'card 1 in slot 2');
+        equal($('.cardstories_card_slot_1', element).css('left'), $('.cardstories_card_slot_2', destel).css('left'), 'card 1 in slot 2');
+        equal($('.cardstories_card_slot_2', element).css('top'), $('.cardstories_picked_card', destel).css('top'), 'card 2 in author spot');
+        equal($('.cardstories_card_slot_2', element).css('left'), $('.cardstories_picked_card', destel).css('left'), 'card 2 in author spot');
+        equal($('.cardstories_card_slot_3', element).css('top'), $('.cardstories_card_slot_1', destel).css('top'), 'card 3 in slot 1');
+        equal($('.cardstories_card_slot_3', element).css('left'), $('.cardstories_card_slot_1', destel).css('left'), 'card 3 in slot 1');
+        equal($('.cardstories_sentence_box', element).css('top'), $('.cardstories_sentence_box', destel).css('top'), 'sentence box was moved');
+        equal($('.cardstories_sentence_box', element).css('left'), $('.cardstories_sentence_box', destel).css('left'), 'sentence box was moved');
         start();
     };
 
@@ -1400,18 +1402,14 @@ asyncTest("vote_owner", 8, function() {
       equal(new_poll, undefined, 'poll_ignore metadata not set');
     };
 
-    equal($('#qunit-fixture .cardstories_vote .cardstories_owner.cardstories_active').length, 0);
-    $.cardstories.vote(player_id, game, $('#qunit-fixture .cardstories'));
-    equal($('#qunit-fixture .cardstories_vote .cardstories_owner.cardstories_active').length, 1);
-
-    var vote = $('#qunit-fixture .cardstories_vote .cardstories_owner');
-    equal($('.cardstories_sentence', vote).text(), sentence);
-
-    var button = $('.cardstories_results_announce .cardstories_modal_button', vote);
-    ok(!button.hasClass('cardstories_button_disabled'), 'cardstories_ready');
+    ok(!element.hasClass('cardstories_active'), 'element is inactive');
+    $.cardstories.vote(owner_id, game, root);
+    ok(element.hasClass('cardstories_active'), 'element is active');
+    equal($('.cardstories_sentence', element).text(), sentence, 'sentence is set');
+    var button = $('.cardstories_results_announce .cardstories_modal_button', element);
+    ok(!button.hasClass('cardstories_button_disabled'), 'announce button is enabled');
     button.click();
-    var confirm = $('.cardstories_results_confirm_yes', vote);
-    confirm.click();
+    $('.cardstories_results_confirm_yes', element).click();
 });
 
 test("complete", 15, function() {

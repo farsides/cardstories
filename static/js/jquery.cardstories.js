@@ -1610,13 +1610,77 @@
             });
 
             $('.cardstories_results_confirm_yes', modal).unbind('click').click(function() {
-                $this.animate_progress_bar(6, element);
+                var dest_element = $('.cardstories_complete', root);
+                var q = $({});
 
-                // TODO move cards into final position
-                
-                $this.close_modal(modal, overlay, function() {
-                    $this.send_game(player_id, game.id, element, 'action=complete&owner_id=' + player_id + '&game_id=' + game.id);
+                // Start by closing the modal.
+                q.queue('chain', function(next) {
+                    $this.close_modal(modal, overlay, next);
                 });
+
+                // Construct picked card => slot number translation.
+                var card2slot = {};
+                for(var i = 0; i < game.players.length; i++) {
+                  var picked = game.players[i][3];
+                  card2slot[picked] = i;
+                }
+                
+                var last = game.board.length - 1;
+                for (var i=0; i < game.board.length; i++) {
+                    var cardq = 'card' + i;
+                    var slot = $('.cardstories_card_slot_' + (i + 1), element);
+
+                    // Insert an artificial delay for aesthetical reasons.
+                    if (i > 1) {
+                        $this.delay(q, 150, 'chain');
+                    }
+
+                    if (game.winner_card == game.board[i]) {
+                        var dest_slot = $('.cardstories_picked_card', dest_element);
+                        q.queue(cardq, (function(slot, dest_slot) { return function(next) {
+                            $('.cardstories_card_label', slot).fadeOut('fast', next);
+                            slot.animate({
+                                'width': dest_slot.width(),
+                                'height': dest_slot.height(),
+                                'top': parseInt(dest_slot.css('top'), 10),
+                                'left': parseInt(dest_slot.css('left'), 10)
+                            }, 500);
+                            var dest_sentence = $('.cardstories_sentence_box', dest_element);
+                            $('.cardstories_sentence_box', element).animate({
+                                'top': parseInt(dest_sentence.css('top'), 10),
+                                'left': parseInt(dest_sentence.css('left'), 10)
+                            }, 500, next);
+                        }})(slot, dest_slot));
+                    } else {
+                        var dest_slot = $('.cardstories_complete .cardstories_card_slot_' + card2slot[game.board[i]], root);
+                        q.queue(cardq, (function(slot, dest_slot) { return function(next) {
+                            slot.animate({
+                                'width': dest_slot.width(),
+                                'height': dest_slot.height(),
+                                'top': parseInt(dest_slot.css('top'), 10),
+                                'left': parseInt(dest_slot.css('left'), 10)
+                            }, 500, next);
+                        }})(slot, dest_slot));
+                    }
+
+                    if (i === last) {
+                        q.queue(cardq, function(next) {
+                            $this.animate_progress_bar(6, element, next);
+                        });
+
+                        q.queue(cardq, function(next) {
+                            $this.send_game(player_id, game.id, element, 'action=complete&owner_id=' + player_id + '&game_id=' + game.id);
+                        });
+                    }
+
+                    // Queue the dequeueing of this card queue.
+                    q.queue('chain', (function(cardq) {return function(next) {
+                        q.dequeue(cardq);
+                        next();
+                    }})(cardq));
+                }
+
+                q.dequeue('chain');
             });
         },
 
