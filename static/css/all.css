@@ -30,6 +30,33 @@
     resize: none;
 }
 
+.cardstories_loading_bar {
+    background: white;
+    display: none;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: 0;
+    z-index: 999;
+}
+
+.cardstories_loading_bar .cardstories_loading_bar_wrap {
+    border: 1px solid #444;
+    width: 350px;
+    height: 15px;
+}
+
+.cardstories_loading_bar .cardstories_loading_bar_fill {
+    background-color: #44c;
+    height: 100%;
+    width: 0;
+}
+
+.cardstories_preloaded_images {
+    display: none;
+}
+
 .cardstories_extras {
     background: transparent url('images/background_plain.png') repeat-x left top;
 }

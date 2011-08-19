@@ -2175,6 +2175,137 @@
             });
         },
 
+        preload_images_helper: function(root, cb) {
+            var preloaded_images_div = $('.cardstories_preloaded_images', root);
+
+            if (preloaded_images_div.hasClass('cardstories_in_progress')) {
+                // ignoring...
+            } else if (preloaded_images_div.hasClass('cardstories_loaded')) {
+                cb();
+            } else {
+                this.preload_images(root, cb);
+            }
+        },
+
+        preload_images: function(root, cb) {
+            var $this = this;
+            var progress_bar = $('.cardstories_loading_bar', root);
+            var progress_fill = $('.cardstories_loading_bar_fill', progress_bar);
+            var preloaded_images_div = $('.cardstories_preloaded_images', root);
+            var image_path = preloaded_images_div.metadata({type: 'attr', name: 'data'}).image_path;
+            var loaded_count = 0;
+
+            var images = $.map(this.images_to_preload, function(filename) {
+                return {
+                    src: image_path + filename,
+                    img: new Image(),
+                    taken: false
+                };
+            });
+
+            var update_progress = function() {
+                var percent = 100 * loaded_count / images.length;
+                progress_fill.css('width', percent + '%');
+            };
+
+            var load_image = function(i) {
+                var image = images[i];
+                var is_last = i === images.length - 1;
+
+                var onload = function() {
+                    image.img.onload = image.img.onerror = null;
+                    $this.setTimeout(function() {
+                        loaded_count++;
+                        update_progress();
+                        // Append image to the DOM otherwise some browsers won't cache it.
+                        $('<img/>').attr('src', image.src).appendTo(preloaded_images_div);
+                        if (is_last) {
+                            progress_bar.hide();
+                            preloaded_images_div.addClass('cardstories_loaded').removeClass('cardstories_in_progress');
+                            cb();
+                        } else {
+                            load_image(i + 1);
+                        }
+                    }, 1);
+                };
+
+                if (image.taken) {
+                    // This image is already being loaded, so load the next one.
+                    if (!is_last) { load_image(i + 1); }
+                } else {
+                    image.taken = true;
+                    image.img.onload = image.onerror = onload;
+                    image.img.src = image.src;
+                    // If image is already loaded, trigger the load event manually.
+                    // Some browsers will do this for us automatically, while others won't.
+                    if (image.img.complete) {
+                        $this.setTimeout(function() {
+                            if (image.img.onload) {
+                                image.img.onload();
+                            }
+                        }, 1);
+                    } else {
+                        progress_bar.show();
+                    }
+                }
+            };
+
+            load_image(0);
+            load_image(1);
+            load_image(2);
+        },
+
+        images_to_preload: [
+            'player_join_1.png',
+            'player_join_2.png',
+            'player_join_3.png',
+            'player_join_4.png',
+            'player_join_5.png',
+            'player_pick_left.png',
+            'player_pick_right.png',
+            'player_return_1.png',
+            'player_return_2.png',
+            'player_return_3.png',
+            'player_return_4.png',
+            'player_return_5.png',
+            'card01.png',
+            'card02.png',
+            'card03.png',
+            'card04.png',
+            'card05.png',
+            'card06.png',
+            'card07.png',
+            'card08.png',
+            'card09.png',
+            'card010.png',
+            'card011.png',
+            'card012.png',
+            'card013.png',
+            'card014.png',
+            'card015.png',
+            'card016.png',
+            'card017.png',
+            'card018.png',
+            'card019.png',
+            'card020.png',
+            'card021.png',
+            'card022.png',
+            'card023.png',
+            'card024.png',
+            'card025.png',
+            'card026.png',
+            'card027.png',
+            'card028.png',
+            'card029.png',
+            'card030.png',
+            'card031.png',
+            'card032.png',
+            'card033.png',
+            'card034.png',
+            'card035.png',
+            'card036.png'
+        ],
+
         unset_active: function(root) {
             $('.cardstories_active', root).removeClass('cardstories_active');
         },
@@ -2290,11 +2421,14 @@
         },
 
         game_or_lobby: function(player_id, game_id, root) {
-             if(game_id === undefined || game_id === '') {
-               this.refresh_lobby(player_id, true, true, root);
-             } else {
-               this.game(player_id, game_id, root);
-             }
+            var $this = this;
+            this.preload_images_helper(root, function() {
+                if (game_id === undefined || game_id === '') {
+                    $this.refresh_lobby(player_id, true, true, root);
+                } else {
+                    $this.game(player_id, game_id, root);
+                }
+            });
         },
 
         credits: function(root) {
