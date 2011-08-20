@@ -188,8 +188,8 @@ asyncTest("display_modal", 2, function() {
     var modal = $('.cardstories_info', element);
     var overlay = $('.cardstories_modal_overlay', element);
 
-    equal(overlay.css('display'), 'block', 'modal overlay is on');
     $.cardstories.display_modal(modal, overlay, function () {
+        equal(overlay.css('display'), 'block', 'modal overlay is on');
         modal.find('a').click();
         equal(overlay.css('display'), 'none', 'modal overlay is off');
         start();
@@ -1412,7 +1412,7 @@ asyncTest("vote_owner", 16, function() {
     $('.cardstories_results_confirm_yes', element).click();
 });
 
-test("complete", 15, function() {
+test("complete", 20, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var owner_id = 'Owner';
@@ -1445,6 +1445,11 @@ test("complete", 15, function() {
     notEqual($('.cardstories_card_slot_3', element).css('display'), 'none', 'card 3 is visible');
     equal($('.cardstories_card_slot_4', element).css('display'), 'none', 'card 4 is hidden');
     equal($('.cardstories_card_slot_5', element).css('display'), 'none', 'card 5 is hidden');
+    notEqual($('.cardstories_envelope_1', element).css('display'), 'none', 'envelope 1 is visible');
+    equal($('.cardstories_envelope_2', element).css('display'), 'none', 'envelope 2 is hidden');
+    notEqual($('.cardstories_envelope_3', element).css('display'), 'none', 'envelope 3 is visible');
+    equal($('.cardstories_envelope_4', element).css('display'), 'none', 'envelope 4 is hidden');
+    equal($('.cardstories_envelope_5', element).css('display'), 'none', 'envelope 5 is hidden');
 });
 
 test("advertise", 11, function() {

@@ -1935,10 +1935,11 @@
                     if (slot.children().length == 0) {
                         // Active player slot.
                         slot_snippet.clone().children().appendTo(slot);
+                        slot.addClass('cardstories_active_friend_joined');
                         $('.cardstories_active_friend_name', slot).html(players[i][0]);
                         slot.show();
                         $('.cardstories_player_arms_' + slotno, element).show();
-                        
+
                         // Active player card, if picked.
                         if (players[i][3]) {
                             var cardslot = $('.cardstories_card_slot_' + slotno, element);
@@ -1953,16 +1954,11 @@
 
                             cardslot.show();
                         }
-                    }
 
-                    // Differentiate between players who already voted,
-                    // and the ones who didn't.
-                    var status = $('.cardstories_active_friend_status', slot);
-                    slot.addClass('cardstories_active_friend_joined');
-                    if (players[i][1]) {
-                        // TODO: show envelope
-                    } else {
-                        status.html('didn\'t vote');
+                        // Show envelope if player voted.
+                        if (players[i][1]) {
+                            $('.cardstories_envelope_' + slotno, element).show();
+                        }
                     }
                 }
             }

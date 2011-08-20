@@ -209,6 +209,7 @@
 }
 
 .cardstories .cardstories_modal_overlay {
+    display: none;
     position: absolute;
     top: 59px;
     left: 0px;
@@ -1013,6 +1014,10 @@
     left: 56px;
     width: 107px;
     height: 142px;
+}
+
+.cardstories .cardstories_create .cardstories_modal_overlay {
+    display: block;
 }
 
 .cardstories .cardstories_create .cardstories_info { 
@@ -2069,6 +2074,39 @@
 
 /* state complete */
 
+.cardstories .cardstories_envelope {
+    display: none;
+    position: absolute;
+    background: transparent url('images/envelope1.png') no-repeat left top;
+    width: 22px;
+    height: 17px;
+}
+
+.cardstories .cardstories_envelope_1,
+.cardstories .cardstories_envelope_2,
+.cardstories .cardstories_envelope_3 {
+    left: 33px;
+}
+
+.cardstories .cardstories_envelope_4,
+.cardstories .cardstories_envelope_5 {
+    left: 716px;
+}
+
+.cardstories .cardstories_envelope_1,
+.cardstories .cardstories_envelope_4 {
+    top: 205px;
+}
+
+.cardstories .cardstories_envelope_2,
+.cardstories .cardstories_envelope_5 {
+    top: 370px;
+}
+
+.cardstories .cardstories_envelope_3 {
+    top: 535px;
+}
+
 .cardstories .cardstories_complete .cardstories_card_slot {
     display: none;
     position: absolute;
@@ -2076,29 +2114,111 @@
     height: 120px;
 }
 
-.cardstories .cardstories_complete .cardstories_card_slot_1 {
-    top: 105px;
+.cardstories .cardstories_complete .cardstories_card_slot_1,
+.cardstories .cardstories_complete .cardstories_card_slot_2,
+.cardstories .cardstories_complete .cardstories_card_slot_3 {
     left: 90px;
 }
 
-.cardstories .cardstories_complete .cardstories_card_slot_2 {
+.cardstories .cardstories_complete .cardstories_card_slot_4,
+.cardstories .cardstories_complete .cardstories_card_slot_5 {
+    left: 593px;
+}
+
+.cardstories .cardstories_complete .cardstories_card_slot_1,
+.cardstories .cardstories_complete .cardstories_card_slot_4 {
+    top: 105px;
+}
+
+.cardstories .cardstories_complete .cardstories_card_slot_2,
+.cardstories .cardstories_complete .cardstories_card_slot_5 {
     top: 270px;
-    left: 90px;
 }
 
 .cardstories .cardstories_complete .cardstories_card_slot_3 {
     top: 435px;
-    left: 90px;
 }
 
-.cardstories .cardstories_complete .cardstories_card_slot_4 {
+.cardstories .cardstories_complete .cardstories_votes {
+    display: none;
+    position: absolute;
+    width: 116px;
+    height: 120px;
+}
+
+.cardstories .cardstories_complete .cardstories_votes_left {
+    left: 185px;
+}
+
+.cardstories .cardstories_complete .cardstories_votes_right {
+    left: 473px;
+}
+
+.cardstories .cardstories_complete .cardstories_votes_1,
+.cardstories .cardstories_complete .cardstories_votes_4 {
     top: 105px;
-    left: 593px;
 }
 
-.cardstories .cardstories_complete .cardstories_card_slot_5 {
+.cardstories .cardstories_complete .cardstories_votes_2,
+.cardstories .cardstories_complete .cardstories_votes_5 {
     top: 270px;
-    left: 593px;
+}
+
+.cardstories .cardstories_complete .cardstories_votes_3 {
+    top: 435px;
+}
+
+.cardstories .cardstories_complete .cardstories_votes_win {
+    top: 480px;
+    left: 611px;
+}
+
+.cardstories .cardstories_complete .cardstories_vote_slot {
+    width: 100%;
+    height: 17px;
+    margin: 6px 0px;
+}
+
+.cardstories .cardstories_complete .cardstories_voter_name {
+    width: 90px;
+    height: 100%;
+    overflow: hidden;
+    line-height: 17px;
+    font-family: "helvetica";
+    font-size: 10px;
+}
+
+.cardstories .cardstories_complete .cardstories_votes_win .cardstories_voter_name {
+    color: #3E3E40;
+    float: right;
+}
+
+.cardstories .cardstories_complete .cardstories_votes_left .cardstories_voter_name {
+    color: #D8280F;
+    float: right;
+}
+
+.cardstories .cardstories_complete .cardstories_votes_right .cardstories_voter_name {
+    color: #D8280F;
+    text-align: right;
+    float: left;
+}
+
+.cardstories .cardstories_complete .cardstories_votes_win .cardstories_envelope {
+    position: relative;
+    float: left;
+}
+
+.cardstories .cardstories_complete .cardstories_votes_left .cardstories_envelope {
+    position: relative;
+    background: transparent url('images/envelope2.png') no-repeat left top;
+    float: left;
+}
+
+.cardstories .cardstories_complete .cardstories_votes_right .cardstories_envelope {
+    position: relative;
+    background: transparent url('images/envelope2.png') no-repeat left top;
+    float: right;
 }
 
 /* state complete, owner point of view */
@@ -2121,65 +2241,6 @@
     left: 12px;
     height: 150px;
     width: 988px;
-}
-
-/* owner view during the vote, complete state (both for owner and player) : the wall of the results */
-
-.cardstories .cardstories_votes {
-    display: none;
-    position: absolute;
-    bottom: 0px;
-    width: 100%;
-    height: 395px;
-}
-
-.cardstories .cardstories_votes .cardstories_column {
-    width: 135px;
-    display: inline-block;
-    vertical-align: top;
-}
-
-.cardstories .cardstories_votes .cardstories_column .cardstories_card_bg {
-    background: transparent url('small/card_bg.png') no-repeat left top;
-    width: 135px;
-    height: 175px;
-}
-
-.cardstories .cardstories_votes .cardstories_column.cardstories_winner_card .cardstories_card_bg {
-    background: transparent url('small/card_bg_winner.png') no-repeat left top;
-}
-
-.cardstories .cardstories_votes .cardstories_column .cardstories_card {
-    background-repeat: no-repeat;
-    background-color: transparent;
-    background-position: center center;
-    width: 135px;
-    height: 175px;
-}
-
-.cardstories .cardstories_votes .cardstories_column .cardstories_player_name {
-    background: transparent url('images/complete_player_name.png') no-repeat center center;
-    height: 13px;
-    line-height: 13px;
-    width: 125px;
-    padding: 0px 5px;
-    overflow: hidden;
-    margin-top: -20px;
-    margin-bottom: 20px;
-    text-align: center;
-    color: #5C463B;
-    font-size: 8px;
-}
-
-.cardstories .cardstories_votes .cardstories_column .cardstories_voter_name {
-    background: transparent url('images/complete_player_vote.png') no-repeat center center;
-    height: 23px;
-    line-height: 23px;
-    width: 100%;
-    margin-top: 5px;
-    color: #000;
-    font-size: 8px;
-    text-align: center;
 }
 
 /* Dimensions and initial state of all pages */
