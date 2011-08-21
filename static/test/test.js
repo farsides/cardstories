@@ -1412,20 +1412,22 @@ asyncTest("vote_owner", 16, function() {
     $('.cardstories_results_confirm_yes', element).click();
 });
 
-test("complete", 20, function() {
+test("complete", 26, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var owner_id = 'Owner';
     var player1 = 'Player 1';
     var player2 = 'Player 2';
     var player3 = 'Player 3';
+    var player4 = 'Player 4';
     var game = {
         'owner_id': owner_id,
         'board': [],
         'players': [ [ owner_id, null, null, 30, [] ],
-                     [ player1, 30, null, 31, [] ],
-                     [ player2, null, null, 32, [] ],
-                     [ player3, 30, null, 33, [] ] ]
+                     [ player1, 30, 'y', 31, [] ],
+                     [ player2, 31, 'n', 32, [] ],
+                     [ player3, 32, 'n', 33, [] ],
+                     [ player4, 30, 'y', 34, [] ] ]
     };
 
     equal($('#qunit-fixture .cardstories_complete.cardstories_active').length, 0);
@@ -1435,21 +1437,27 @@ test("complete", 20, function() {
     notEqual($('.cardstories_friend_slot1', element).css('display'), 'none', 'first slot is visible');
     notEqual($('.cardstories_friend_slot2', element).css('display'), 'none', 'second slot is visible');
     notEqual($('.cardstories_friend_slot3', element).css('display'), 'none', 'third slot is visible');
+    notEqual($('.cardstories_friend_slot4', element).css('display'), 'none', 'fourth slot is visible');
     equal($('.cardstories_friend_slot1 .cardstories_active_friend_name', element).html(), player1, 'player 1 name is set');
     equal($('.cardstories_friend_slot2 .cardstories_active_friend_name', element).html(), player2, 'player 2 name is set');
     equal($('.cardstories_friend_slot3 .cardstories_active_friend_name', element).html(), player3, 'player 3 name is set');
-    equal($('.cardstories_friend_slot4', element).css('display'), 'none', 'fourth slot is hidden');
+    equal($('.cardstories_friend_slot4 .cardstories_active_friend_name', element).html(), player4, 'player 4 name is set');
     equal($('.cardstories_friend_slot5', element).css('display'), 'none', 'fifth slot is hidden');
     notEqual($('.cardstories_card_slot_1', element).css('display'), 'none', 'card 1 is visible');
     notEqual($('.cardstories_card_slot_2', element).css('display'), 'none', 'card 2 is visible');
     notEqual($('.cardstories_card_slot_3', element).css('display'), 'none', 'card 3 is visible');
-    equal($('.cardstories_card_slot_4', element).css('display'), 'none', 'card 4 is hidden');
+    notEqual($('.cardstories_card_slot_4', element).css('display'), 'none', 'card 4 is visible');
     equal($('.cardstories_card_slot_5', element).css('display'), 'none', 'card 5 is hidden');
-    notEqual($('.cardstories_envelope_1', element).css('display'), 'none', 'envelope 1 is visible');
-    equal($('.cardstories_envelope_2', element).css('display'), 'none', 'envelope 2 is hidden');
-    notEqual($('.cardstories_envelope_3', element).css('display'), 'none', 'envelope 3 is visible');
-    equal($('.cardstories_envelope_4', element).css('display'), 'none', 'envelope 4 is hidden');
-    equal($('.cardstories_envelope_5', element).css('display'), 'none', 'envelope 5 is hidden');
+    ok($('.cardstories_friend_slot1', element).hasClass('cardstories_active_friend_won'), 'friend 1 won');
+    ok($('.cardstories_friend_slot2', element).hasClass('cardstories_active_friend_lost'), 'friend 2 lost');
+    ok($('.cardstories_friend_slot3', element).hasClass('cardstories_active_friend_lost'), 'friend 3 lost');
+    ok($('.cardstories_friend_slot4', element).hasClass('cardstories_active_friend_won'), 'friend 4 won');
+    ok($('.cardstories_votes_1', element).children().length == 1, '1 vote for player 1');
+    ok($('.cardstories_votes_2', element).children().length == 1, '1 vote for player 2');
+    ok($('.cardstories_votes_3', element).children().length == 0, 'no votes for player 3');
+    ok($('.cardstories_votes_4', element).children().length == 0, 'no votes for player 4');
+    ok($('.cardstories_votes_5', element).children().length == 0, 'no votes for player 5');
+    ok($('.cardstories_votes_win', element).children().length == 2, '2 winning votes');
 });
 
 test("advertise", 11, function() {

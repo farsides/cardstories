@@ -1620,9 +1620,12 @@
 
                 // Construct picked card => slot number translation.
                 var card2slot = {};
-                for(var i = 0; i < game.players.length; i++) {
-                  var picked = game.players[i][3];
-                  card2slot[picked] = i;
+                for(var i=0, slotno=0; i < game.players.length; i++) {
+                    if (game.players[i][0] != game.owner_id) {
+                        slotno++;
+                        var picked = game.players[i][3];
+                        card2slot[picked] = slotno;
+                    }
                 }
                 
                 var last = game.board.length - 1;
@@ -1919,6 +1922,20 @@
 
             // Display board
             this.complete_display_board(game, element, root);
+            
+            // Only show initial animations once.
+            if (!element.hasClass('cardstories_noop_init')) {
+                element.addClass('cardstories_noop_init');
+                
+                var q = $({});
+
+                // Animate envelopes.
+                q.queue('chain', function(next) {
+                    $this.complete_display_votes(game, element, root, next);
+                });
+
+                q.dequeue('chain');
+            }
         },
 
         complete_display_board: function(game, element, root) {
@@ -1962,6 +1979,92 @@
                     }
                 }
             }
+        },
+
+        complete_display_votes: function(game, element, root, cb) {
+            var $this = this;
+            var players = game.players;
+
+            // Construct picked card => slot number translation.
+            var card2slot = {};
+            for(var i=0, slotno=0; i < players.length; i++) {
+                var picked = players[i][3];
+                if (players[i][0] != game.owner_id) {
+                    slotno++;
+                    if (picked) {
+                        card2slot[picked] = slotno;
+                    }
+                } else {
+                    card2slot[picked] = 6;
+                }
+            }
+                
+            var snippets = $('.cardstories_snippets', root);
+            var vote_slot_snippet = $('.cardstories_vote_slot', snippets);
+            var q = $({});
+
+            // Insert fashionable delay.
+            $this.delay(q, 400, 'chain');
+
+            for (var i=0, slotno=0; i < players.length; i++) {
+                if (players[i][0] != game.owner_id) {
+                    slotno++;
+                    var voted = players[i][1];
+
+                    // Only include players who voted.
+                    if (voted) {
+                        var votes = $('.cardstories_votes_' + card2slot[voted], element);
+
+                        // Insert the vote
+                        var vote = vote_slot_snippet.clone();
+                        vote.appendTo(votes);
+
+                        // Get top/left coordinates of the destination
+                        // envelope.  Elements must be visible for position()
+                        // to work.
+                        var vpos = votes.position();
+                        var denvelope = $('.cardstories_envelope', vote);
+                        denvelope.show();
+                        var pos = denvelope.show().position();
+                        denvelope.hide();
+                        var dst_top = vpos.top + pos.top;
+                        var dst_left = vpos.left + pos.left;
+
+                        // Queue envelope animation.
+                        var envelope = $('.cardstories_envelope_' + slotno, element);
+                        q.queue('chain', (function(envelope, dst_top, dst_left) { return function(next) {
+                            envelope.animate({'top': dst_top,'left': dst_left}, 500, next);
+                        }})(envelope, dst_top, dst_left));
+
+                        // Show voter name and change slot status.
+                        var voter_name = $('.cardstories_voter_name', vote);
+                        voter_name.html(players[i][0] + '\'s vote');
+                        q.queue('chain', (function(i, slotno, envelope, denvelope, voter_name) { return function(next) {
+                            // If loser, show alternate envelope.
+                            var slot = $('.cardstories_friend_slot' + slotno, element);
+                            var status = $('.cardstories_active_friend_status', slot);
+                            if (players[i][2] == 'n') {
+                                denvelope.show();
+                                envelope.fadeOut('fast');
+                                slot.addClass('cardstories_active_friend_lost');
+                                status.html('LOSES!');
+                            } else {
+                                slot.addClass('cardstories_active_friend_won');
+                                status.html('WINS!');
+                            }
+                            voter_name.fadeIn('fast', next);
+                        }})(i, slotno, envelope, denvelope, voter_name));
+                    }
+                }
+            }
+
+            q.queue('chain', function(next) {
+                if (cb !== undefined) {
+                    cb();
+                }
+            });
+
+            q.dequeue('chain');
         },
 
         results_board: function(player_id, game, element) {

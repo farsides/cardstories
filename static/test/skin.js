@@ -214,11 +214,11 @@
         'board': [30,31,32,33,34,35],
         'winner_card': 30,
         'players': [ [ 'Owner', null, null, 30, [ ] ],
-                     [ 'Player 1', 30, 'y', 31, [ ] ],
-                     [ 'Player 2', null, 'y', 32, [ ] ],
-                     [ 'Player 3', 30, 'n', 33, [ ] ],
-                     [ 'Player 4', 30, 'n', 34, [ ] ],
-                     [ 'Player 5', 31, 'n', 35, [ ] ]
+                     [ 'Player 1', 32, 'n', 31, [ ] ],
+                     [ 'Player 2', 30, 'y', 32, [ ] ],
+                     [ 'Player 3', 30, 'y', 33, [ ] ],
+                     [ 'Player 4', 33, 'n', 34, [ ] ],
+                     [ 'Player 5', 33, 'n', 35, [ ] ]
                    ]
       };
       $.cardstories.complete('Owner', game, root);

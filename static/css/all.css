@@ -368,6 +368,14 @@
     background: transparent url('images/active_friend_voted.png') no-repeat 7px 5px;
 }
 
+.cardstories .cardstories_active_friend_lost {
+    background: transparent url('images/active_friend_loser.png') no-repeat 7px 5px;
+}
+
+.cardstories .cardstories_active_friend_won {
+    background: transparent url('images/active_friend_winner.png') no-repeat 7px 5px;
+}
+
 .cardstories .cardstories_active_friend .cardstories_active_friend_name,
 .cardstories .cardstories_active_friend .cardstories_active_friend_status {
     position: relative;
@@ -2140,7 +2148,6 @@
 }
 
 .cardstories .cardstories_complete .cardstories_votes {
-    display: none;
     position: absolute;
     width: 116px;
     height: 120px;
@@ -2180,6 +2187,7 @@
 }
 
 .cardstories .cardstories_complete .cardstories_voter_name {
+    display: none;
     width: 90px;
     height: 100%;
     overflow: hidden;
@@ -2219,6 +2227,10 @@
     position: relative;
     background: transparent url('images/envelope2.png') no-repeat left top;
     float: right;
+}
+
+.cardstories .cardstories_complete .cardstories_active_friend_status {
+    font-size: 14px;
 }
 
 /* state complete, owner point of view */
