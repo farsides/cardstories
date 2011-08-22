@@ -646,10 +646,13 @@
 
                 $this.create_write_sentence_animate_end(card, element, root, function() {
                     var sentence = encodeURIComponent($('.cardstories_sentence', element).val());
+                    var query = '?action=create';
+                    query += '&owner_id=' + player_id;
+                    query += '&card=' + card;
                     $this.ajax({
                         async: false,
                         timeout: 30000,
-                        url: $this.url + '?action=create&owner_id=' + player_id + '&card=' + card,
+                        url: $this.url + query,
                         type: 'POST',
                         data: 'sentence=' + sentence,
                         dataType: 'json',
@@ -673,10 +676,12 @@
                     $this.setTimeout(function() { $this.reload(player_id, data.game_id, root); }, 30);
                 }
             };
+            var query = '?action=solo';
+            query += '&player_id=' + player_id;
             $this.ajax({
                 async: false,
                 timeout: 30000,
-                url: $this.url + '?action=solo&player_id=' + player_id,
+                url: $this.url + query,
                 type: 'GET',
                 dataType: 'json',
                 global: false,
@@ -770,26 +775,26 @@
                 }
               }
             };
-            var query = 'modified=' + request.modified;
-            var type;
+            var query = '?action=poll';
+            query += '&type=' + ('game_id' in request ? 'game' : 'lobby');
+            query += '&modified=' + request.modified;
             if('player_id' in request) {
-              query += '&player_id=' + request.player_id;
-              type = 'lobby';
+                query += '&player_id=' + request.player_id;
             }
             if('game_id' in request) {
-              query += '&game_id=' + request.game_id;
-              type = 'game';
+                query += '&game_id=' + request.game_id;
             }
             $this.ajax({
-              async: true,
-                  timeout: $this.poll_timeout * 2,
-                  url: $this.url + '?action=poll&type=' + type + '&' + query,
-                  type: 'GET',
-                  dataType: 'json',
-                  global: false,
-                  success: success,
-                  error: $this.xhr_error
-                  });
+                async: true,
+                timeout: $this.poll_timeout * 2,
+                url: $this.url + query,
+                type: 'GET',
+                dataType: 'json',
+                global: false,
+                success: success,
+                error: $this.xhr_error
+            });
+
             return true;
         },
 
@@ -826,28 +831,22 @@
                 $this.poll({ 'modified': data[0].modified, 'player_id': player_id }, root);
               }
             };
-            var query_in_progress;
-            if(in_progress) {
-              query_in_progress = 'true';
-            } else {
-              query_in_progress = 'false';
-            }
-            if(my) {
-              my = 'true';
-            } else {
-              my = 'false';
-            }
+            var query = '?action=state';
+            query += '&type=lobby';
+            query += '&modified=0';
+            query += '&player_id=' + player_id;
+            query += '&in_progress=' + (in_progress ? 'true' : 'false');
+            query += '&my=' + (my ? 'true' : 'false');
             $this.ajax({
-              async: false,
-                  timeout: 30000,
-                  url: $this.url + '?action=state&type=lobby&modified=0&player_id=' + player_id + '&in_progress=' + query_in_progress + '&my=' + my,
-                  type: 'GET',
-                  dataType: 'json',
-                  global: false,
-                  success: success,
-                  error: $this.xhr_error
-                  });
-            
+                async: false,
+                timeout: 30000,
+                url: $this.url + query,
+                type: 'GET',
+                dataType: 'json',
+                global: false,
+                success: success,
+                error: $this.xhr_error
+            });
         },
 
         lobby_games: function(player_id, lobby, element, root) {
@@ -2165,10 +2164,15 @@
                     $this[data[0].state](player_id, data[0], root);
                 }
             };
+            var query = '?action=state';
+            query += '&type=game';
+            query += '&modified=0';
+            query += '&game_id=' + game_id;
+            query += '&player_id=' + player_id;
             $this.ajax({
                 async: false,
                 timeout: 30000,
-                url: $this.url + '?action=state&type=game&modified=0&game_id=' + game_id + '&player_id=' + player_id,
+                url: $this.url + query,
                 type: 'GET',
                 dataType: 'json',
                 global: false,
