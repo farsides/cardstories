@@ -1919,6 +1919,19 @@
             var src = picked_card.metadata({type: 'attr', name: 'data'}).card.supplant({card: game.winner_card});
             picked_card.find('.cardstories_card_foreground').attr('src', src);
 
+            // Enable play again button, if owner.
+            if (game.owner) {
+                $('.cardstories_play_again', element).unbind('click').click(function() {
+                    $('.cardstories_results', element).fadeOut('slow', function() {
+                        // The players of this game will be kept since the
+                        // CARDSTORIES_INVITATIONS cookie stores theirs id's.
+                        $this.create(player_id, root);
+                    });
+                });
+            } else {
+                $('.cardstories_play_again', element).hide();
+            }
+
             // Display board
             this.complete_display_board(game, element, root);
             
@@ -1931,6 +1944,11 @@
                 // Animate envelopes.
                 q.queue('chain', function(next) {
                     $this.complete_display_votes(game, element, root, next);
+                });
+
+                // Show results box.
+                q.queue('chain', function(next) {
+                    $this.complete_display_results(player_id, game, element, next);
                 });
 
                 q.dequeue('chain');
@@ -2038,21 +2056,21 @@
                         // Show voter name and change slot status.
                         var voter_name = $('.cardstories_voter_name', vote);
                         voter_name.html(players[i][0] + '\'s vote');
-                        q.queue('chain', (function(i, slotno, envelope, denvelope, voter_name) { return function(next) {
-                            // If loser, show alternate envelope.
+                        q.queue('chain', (function(i, slotno, vote, envelope, denvelope, voter_name) { return function(next) {
                             var slot = $('.cardstories_friend_slot' + slotno, element);
                             var status = $('.cardstories_active_friend_status', slot);
                             if (players[i][2] == 'n') {
+                                vote.addClass('lost');
+                                slot.addClass('cardstories_active_friend_lost');
                                 denvelope.show();
                                 envelope.fadeOut('fast');
-                                slot.addClass('cardstories_active_friend_lost');
                                 status.html('LOSES!');
                             } else {
                                 slot.addClass('cardstories_active_friend_won');
                                 status.html('WINS!');
                             }
                             voter_name.fadeIn('fast', next);
-                        }})(i, slotno, envelope, denvelope, voter_name));
+                        }})(i, slotno, vote, envelope, denvelope, voter_name));
                     }
                 }
             }
@@ -2066,64 +2084,40 @@
             q.dequeue('chain');
         },
 
-        results_board: function(player_id, game, element) {
-            $('.cardstories_sentence', element).text(game.sentence);
-
-            var i;
-            var board2voters = {};
-            for(i = 0; i < game.board.length; i++) {
-              board2voters[game.board[i]] = [];
-            }
-            var board2player = {};
-            var winners = [];
-            for(i = 0; i < game.players.length; i++) {
-              var vote = game.players[i][1];
-              var picked = game.players[i][3];
-              var voters = board2voters[vote];
-              if(voters !== undefined) {
-                voters.push(game.players[i][0]);
-              }
-              if(game.players[i][2] == 'y') {
-                winners.push(game.players[i][0]);
-              }
-              board2player[picked] = game.players[i];
-            }
-            
-            $('.cardstories_winners', element).text(winners.join(', '));
-
-            var cards = game.board;
-            $('.cardstories_column', element).each(function(index) {
-                if(index < cards.length) {
-                  var card = cards[index];
-                  $(this).toggleClass('cardstories_winner_card', game.winner_card == card);
-                  var c = 'cardstories_card cardstories_complete_card' + card + ' {card:' + card + '}';
-                  $('.cardstories_card', this).attr('class', c);
-                  var player = board2player[card];
-                  if(player !== undefined) {
-                    $('.cardstories_player_name', this).toggleClass('cardstories_win', player[2] == 'y');
-                    $('.cardstories_player_name', this).text(player[0]);
-                  }
-                  var voters = board2voters[card];
-                  if(voters !== undefined) {
-                    $('.cardstories_voter_name', this).each(function(voter_index) {
-                        if(voters.length > voter_index) {
-                          $(this).text(voters[voter_index]);
-                          $(this).show();
-                        } else {
-                          $(this).hide();
-                        }
-                      });
-                  }
-                  $(this).show();
-                } else {
-                  $(this).hide();
+        complete_display_results: function(player_id, game, element, cb) {
+            // Am I a winner?
+            var winner = false;
+            for (var i=0; i < game.players.length; i++) {
+                if (game.players[i][0] == player_id && game.players[i][2] == 'y') {
+                    winner = true;
                 }
-            });
-
-            var votes = $('.cardstories_votes', element);
-            if (!votes.is(':visible')) {
-                votes.show();
             }
+
+            var box = $('.cardstories_results', element);
+            if (game.owner) {
+                if (winner) {
+                    $('.cardstories_won', box).show();
+                } else {
+                    // Determine why the owner lost.  If nobody voted on the
+                    // correct card, it was too hard.  Otherwise, it was too
+                    // easy.
+                    var too_hard = true;
+                    for (var i=0; i < game.players.length; i++) {
+                        if (game.winner_card == game.players[i][1]) {
+                            too_hard = false;
+                            break;
+                        }
+                    }
+
+                    if (too_hard) {
+                        $('.cardstories_lost_2', box).show();
+                    } else {
+                        $('.cardstories_lost_1', box).show();
+                    }
+                }
+            }
+
+            box.fadeIn('slow', cb);
         },
 
         send_game: function(player_id, game_id, element, query) {

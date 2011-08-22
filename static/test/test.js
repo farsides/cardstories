@@ -1412,6 +1412,87 @@ asyncTest("vote_owner", 16, function() {
     $('.cardstories_results_confirm_yes', element).click();
 });
 
+test("complete owner lost easy", 7, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_complete', root);
+    var owner_id = 'Owner';
+    var player1 = 'Player 1';
+    var player2 = 'Player 2';
+    var game = {
+        'owner': true,
+        'owner_id': owner_id,
+        'board': [],
+        'winner_card': 30,
+        'players': [ [ owner_id, null, 'n', 30, [] ],
+                     [ player1, 30, 'y', 31, [] ],
+                     [ player2, 30, 'y', 32, [] ] ]
+    };
+
+    $.cardstories.complete(owner_id, game, root);
+    var box = $('.cardstories_results', element);
+    notEqual(box.css('display'), 'none', 'box is visible');
+    notEqual(box.find('p.cardstories_lost_1').css('display'), 'none', 'lost 1 text is visible');
+    equal(box.find('p.cardstories_lost_2').css('display'), 'none', 'lost 2 text is hidden');
+    equal(box.find('p.cardstories_won').css('display'), 'none', 'won text is hidden');
+    notEqual(box.find('img.cardstories_lost_1').css('display'), 'none', 'lost 1 img is visible');
+    equal(box.find('img.cardstories_lost_2').css('display'), 'none', 'lost 2 img is hidden');
+    equal(box.find('img.cardstories_won').css('display'), 'none', 'won img is hidden');
+});
+
+test("complete owner lost hard", 7, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_complete', root);
+    var owner_id = 'Owner';
+    var player1 = 'Player 1';
+    var player2 = 'Player 2';
+    var game = {
+        'owner': true,
+        'owner_id': owner_id,
+        'board': [],
+        'winner_card': 30,
+        'players': [ [ owner_id, null, 'n', 30, [] ],
+                     [ player1, 32, 'y', 31, [] ],
+                     [ player2, 31, 'y', 32, [] ] ]
+    };
+
+    $.cardstories.complete(owner_id, game, root);
+    var box = $('.cardstories_results', element);
+    notEqual(box.css('display'), 'none', 'box is visible');
+    equal(box.find('p.cardstories_lost_1').css('display'), 'none', 'lost 1 text is hidden');
+    notEqual(box.find('p.cardstories_lost_2').css('display'), 'none', 'lost 2 text is visible');
+    equal(box.find('p.cardstories_won').css('display'), 'none', 'won text is hidden');
+    equal(box.find('img.cardstories_lost_1').css('display'), 'none', 'lost 1 img is hidden');
+    notEqual(box.find('img.cardstories_lost_2').css('display'), 'none', 'lost 2 img is visible');
+    equal(box.find('img.cardstories_won').css('display'), 'none', 'won img is hidden');
+});
+
+test("complete owner won", 7, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_complete', root);
+    var owner_id = 'Owner';
+    var player1 = 'Player 1';
+    var player2 = 'Player 2';
+    var game = {
+        'owner': true,
+        'owner_id': owner_id,
+        'board': [],
+        'winner_card': 30,
+        'players': [ [ owner_id, null, 'y', 30, [] ],
+                     [ player1, 30, 'y', 31, [] ],
+                     [ player2, 31, 'n', 32, [] ] ]
+    };
+
+    $.cardstories.complete(owner_id, game, root);
+    var box = $('.cardstories_results', element);
+    notEqual(box.css('display'), 'none', 'box is visible');
+    equal(box.find('p.cardstories_lost_1').css('display'), 'none', 'lost 1 text is hidden');
+    equal(box.find('p.cardstories_lost_2').css('display'), 'none', 'lost 2 text is hidden');
+    notEqual(box.find('p.cardstories_won').css('display'), 'none', 'won text is visible');
+    equal(box.find('img.cardstories_lost_1').css('display'), 'none', 'lost 1 img is hidden');
+    equal(box.find('img.cardstories_lost_2').css('display'), 'none', 'lost 2 img is hidden');
+    notEqual(box.find('img.cardstories_won').css('display'), 'none', 'won img is visible');
+});
+
 test("complete", 26, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
@@ -1421,9 +1502,11 @@ test("complete", 26, function() {
     var player3 = 'Player 3';
     var player4 = 'Player 4';
     var game = {
+        'owner': true,
         'owner_id': owner_id,
         'board': [],
-        'players': [ [ owner_id, null, null, 30, [] ],
+        'winner_card': 30,
+        'players': [ [ owner_id, null, 'y', 30, [] ],
                      [ player1, 30, 'y', 31, [] ],
                      [ player2, 31, 'n', 32, [] ],
                      [ player3, 32, 'n', 33, [] ],
@@ -1458,6 +1541,40 @@ test("complete", 26, function() {
     ok($('.cardstories_votes_4', element).children().length == 0, 'no votes for player 4');
     ok($('.cardstories_votes_5', element).children().length == 0, 'no votes for player 5');
     ok($('.cardstories_votes_win', element).children().length == 2, '2 winning votes');
+});
+
+test("play_again_finish_state", 4, function() {
+    var player_id = 5;
+    var game = {
+        'id': 7,
+        'owner': true,
+        'state': 'fake_state',
+        'board': [],
+        'players': []
+    };
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_invitation .cardstories_owner', root);
+    var advertise = $('.cardstories_invitation .cardstories_owner .cardstories_advertise', element);
+    $.cardstories.complete(player_id, game, root);
+    notEqual($('.cardstories_play_again', root).css('display'), 'none', 'Play again button is visible when the player is owner');
+    var create = $.cardstories.create;
+    var send_game = $.cardstories.send_game;
+    var $textarea = $('.cardstories_text', advertise);
+    $.cookie('CARDSTORIES_INVITATIONS', null);
+    $textarea.val('aaa@aaa.aaa\nbbb@bbb.bbb\nccc@ccc.ccc');
+    var text = $textarea.val();
+    $.cardstories.send_game = function () {}; //do nothing
+    $.cardstories.advertise(player_id, game.id, element);
+    $('.cardstories_submit', advertise).click();
+    $.cardstories.send_game = send_game;
+    var inv_cookie = $.cookie('CARDSTORIES_INVITATIONS');
+    $.cardstories.create = function (arg_player_id, arg_root) {
+        equal(arg_player_id, player_id);
+        equal(arg_root, root);
+        $.cardstories.create = create;
+    };
+    $('.cardstories_play_again', root).click();
+    equal(text, inv_cookie);
 });
 
 test("advertise", 11, function() {
