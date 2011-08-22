@@ -73,6 +73,7 @@ class CardstoriesResource(resource.Resource):
             content = json.dumps(result)
             request.setHeader("content-length", str(len(content)))
             request.setHeader("content-type", 'application/json; charset="UTF-8"')
+            request.setHeader("cache-control", 'no-cache');
             request.write(content)
             request.finish()
             return result
