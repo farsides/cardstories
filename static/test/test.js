@@ -36,6 +36,7 @@ function setup() {
     $.cardstories.error = cardstories_default_error;
     $.cardstories.create_write_sentence = cardstories_default_create_write_sentence;
     $.cardstories.animate_sprite = function(movie, fps, frames, cb) { movie.show(); cb(); };
+    $.cardstories.preload_images_helper = function(root, cb) { cb(); };
 }
 
 module("cardstories", {setup: setup});
