@@ -148,13 +148,18 @@ test("reload_link", 4, function() {
 asyncTest("notify_active", 1, function() {
     var skin = 'email';
     var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_create .cardstories_write_sentence', root);
 
     root.bind('active.cardstories', function(e, state) {
         equal(state, skin);
         start();
     });
 
-    $.cardstories.notify_active(root, skin);
+    $.cardstories.notify_active(root, element, skin);
+
+    // Should not fire event after element is activated.
+    $.cardstories.set_active(root, element);
+    $.cardstories.notify_active(root, element, skin);
 });
 
 test("display_progress_bar", 14, function() {
