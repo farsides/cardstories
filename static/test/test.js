@@ -210,7 +210,7 @@ asyncTest("animate_progress_bar", 14, function() {
                     .addClass('cardstories_progress_mark')
                     .addClass('cardstories_progress_mark' + step)
                     .appendTo(progress);
-    var final_left = dst_mark.css('left');
+    var final_left = dst_mark.position().left;
     dst_mark.remove();
 
     ok($('.cardstories_step1', progress).hasClass('selected'), 'step 1 is selected');
@@ -220,7 +220,7 @@ asyncTest("animate_progress_bar", 14, function() {
     equal($('.cardstories_step5', progress).attr('class'), 'cardstories_step5', 'step 5 is bare');
     equal($('.cardstories_step6', progress).attr('class'), 'cardstories_step6', 'step 6 is bare');
     $.cardstories.animate_progress_bar(step, element, function() {
-        equal($('.cardstories_progress_mark', progress).css('left'), final_left, 'mark is at final position');
+        equal($('.cardstories_progress_mark', progress).position().left, final_left, 'mark is at final position');
         ok($('.cardstories_step1', progress).hasClass('old'), 'step 1 is old');
         ok($('.cardstories_step2', progress).hasClass('old'), 'step 2 is old');
         ok($('.cardstories_step3', progress).hasClass('old'), 'step 3 is old');
@@ -235,11 +235,16 @@ asyncTest("animate_progress_bar", 14, function() {
 asyncTest("animate_scale", 7, function() {
     var element = $('#qunit-fixture .cardstories .cardstories_create');
     var el = $('.cardstories_info', element);
-    var orig_top = parseInt(el.css('top'), 10);
-    var orig_left = parseInt(el.css('left'), 10);
+    
+    // Grab initial position.
+    element.show();
+    el.show();
+    var orig_top = el.position().top;
+    var orig_left = el.position().left;
     var orig_width = el.width();
     var orig_height = el.height();
     var orig_fontsize = parseInt(el.css('font-size'), 10);
+    el.hide();
 
     var factor = 5;
     var duration = 500;
@@ -247,8 +252,8 @@ asyncTest("animate_scale", 7, function() {
     equal(el.css('display'), 'none', 'Element starts hidden');
     $.cardstories.animate_scale(false, factor, duration, el, function () {
         equal(el.css('display'), 'block', 'Element is visible after animation.');
-        equal(parseInt(el.css('top'), 10), orig_top, 'Element achieves proper top.');
-        equal(parseInt(el.css('left'), 10), orig_left, 'Element achieves proper left.');
+        equal(el.position().top, orig_top, 'Element achieves proper top.');
+        equal(el.position().left, orig_left, 'Element achieves proper left.');
         equal(el.width(), orig_width, 'Element achieves proper width.');
         equal(el.height(), orig_height, 'Element achieves proper height.');
         equal(parseInt(el.css('font-size'), 10), orig_fontsize, 'Element achieves proper font size.');
@@ -656,7 +661,8 @@ asyncTest("invitation_owner_join_helper", 39, function() {
 
 asyncTest("invitation_owner_go_vote_confirm", 28, function() {
     var root = $('#qunit-fixture .cardstories');
-    var element = $('.cardstories_invitation .cardstories_owner', root);
+    var container = $('.cardstories_invitation', root);
+    var element = $('.cardstories_owner', container);
     var player1 = 'player1';
     var player2 = 'player2';
     var player3 = 'player3';
@@ -675,6 +681,10 @@ asyncTest("invitation_owner_go_vote_confirm", 28, function() {
     $.cardstories.ajax = function(options) {
         start();
     };
+
+    // Simulate set_active().
+    container.show();
+    element.show();
 
     var go_vote_box = $('.cardstories_go_vote', element);
     var go_vote_button = go_vote_box.find('a');
@@ -719,16 +729,16 @@ asyncTest("invitation_owner_go_vote_confirm", 28, function() {
         notEqual(card_2.css('display'), 'none', 'card 2 is visible after animation');
         equal(card_3.css('display'), 'none', 'card 3 is not visible after animation because the player didn not pick a card');
 
-        notEqual(parseInt(card_1.css('left'), 10), final_left_1, 'card 1 is further from the slot than its final position');
-        notEqual(parseInt(card_2.css('left'), 10), final_left_2, 'card 2 is further from the slot than its final position');
+        notEqual(card_1.position().left, final_left_1, 'card 1 is further from the slot than its final position');
+        notEqual(card_2.position().left, final_left_2, 'card 2 is further from the slot than its final position');
 
         go_vote_button.click();
         ok_button.click();
         equal(confirmation_box.css('display'), 'none', 'confirmation box is not visible after confirmation');
         ok(pick_1.hasClass('cardstories_no_background'), 'pick 1 sprite is hidden');
         ok(pick_2.hasClass('cardstories_no_background'), 'pick 2 sprite is hidden');
-        equal(parseInt(card_1.css('left'), 10), final_left_1, 'card 1 is at its final position');
-        equal(parseInt(card_2.css('left'), 10), final_left_2, 'card 2 is at its final position');
+        equal(card_1.position().left, final_left_1, 'card 1 is at its final position');
+        equal(card_2.position().left, final_left_2, 'card 2 is at its final position');
     });
 });
 
@@ -1269,7 +1279,8 @@ test("vote_owner_morph_master_card", 4, function() {
 
 test("vote_owner_shuffle_cards", 7, function() {
     var root = $('#qunit-fixture .cardstories');
-    var element = $('.cardstories_vote .cardstories_owner', root);
+    var container = $('.cardstories_vote', root);
+    var element = $('.cardstories_owner', container);
     var game = {
         'owner_id': 'Owner',
         'players': [ [ 'Owner', null, null, 1, [] ],
@@ -1277,26 +1288,31 @@ test("vote_owner_shuffle_cards", 7, function() {
                      [ 'Player 2', null, null, 2, [] ],
                      [ 'Player 3', null, null, 3, [] ] ]
     };
-    var card1_l = $('.cardstories_card_1', element).css('left');
-    var card2_l = $('.cardstories_card_2', element).css('left');
-    var card3_l = $('.cardstories_card_3', element).css('left');
-    var card4_l = $('.cardstories_card_4', element).css('left');
-    var card5_l = $('.cardstories_card_5', element).css('left');
-    var card6_l = $('.cardstories_card_6', element).css('left');
+
+    // Simulate set_active().
+    container.show();
+    element.show();
+
+    var card1_l = $('.cardstories_card_1', element).show().position().left;
+    var card2_l = $('.cardstories_card_2', element).show().position().left;
+    var card3_l = $('.cardstories_card_3', element).show().position().left;
+    var card4_l = $('.cardstories_card_4', element).show().position().left;
+    var card5_l = $('.cardstories_card_5', element).show().position().left;
+    var card6_l = $('.cardstories_card_6', element).show().position().left;
     $.cardstories.vote_owner_shuffle_cards(game, element, function() {
         // Check that the sentence box was moved into position.
         var sentence = $('.cardstories_sentence_box', element);
         var sentence_final_left = sentence.metadata({type: "attr", name: "data"}).fl;
-        equal(parseInt(sentence.css('left'), 10), sentence_final_left, 'sentence box was moved');
+        equal(sentence.position().left, sentence_final_left, 'sentence box was moved');
 
         // Check that cards were moved to the final positions.  The owner's
         // card is always number 6.
-        equal($('.cardstories_card_1', element).css('left'), card1_l, 'card 1 was not moved');
-        notEqual($('.cardstories_card_2', element).css('left'), card2_l, 'card 2 was moved');
-        notEqual($('.cardstories_card_3', element).css('left'), card3_l, 'card 3 was moved');
-        equal($('.cardstories_card_4', element).css('left'), card4_l, 'card 4 was not moved');
-        equal($('.cardstories_card_5', element).css('left'), card5_l, 'card 5 was not moved');
-        notEqual($('.cardstories_card_6', element).css('left'), card6_l, 'card 6 was moved');
+        equal($('.cardstories_card_1', element).show().position().left, card1_l, 'card 1 was not moved');
+        notEqual($('.cardstories_card_2', element).show().position().left, card2_l, 'card 2 was moved');
+        notEqual($('.cardstories_card_3', element).show().position().left, card3_l, 'card 3 was moved');
+        equal($('.cardstories_card_4', element).show().position().left, card4_l, 'card 4 was not moved');
+        equal($('.cardstories_card_5', element).show().position().left, card5_l, 'card 5 was not moved');
+        notEqual($('.cardstories_card_6', element).show().position().left, card6_l, 'card 6 was moved');
     });
 });
 
@@ -1786,9 +1802,12 @@ asyncTest("create_pick_card_animate", 30, function() {
 asyncTest("create_pick_card_animate_fly_to_deck", 17, function() {
     var player_id = 42;
     var root = $('#qunit-fixture .cardstories');
-    var element = $('.cardstories_create .cardstories_pick_card', root);
-    var final_top = $('.cardstories_deck .cardstories_deck_cover', element).css('top');
-    var final_left = $('.cardstories_deck .cardstories_deck_cover', element).css('left');
+    var container = $('.cardstories_create', root);
+    var element = $('.cardstories_pick_card', container);
+    container.show();
+    element.show();
+    var final_top = $('.cardstories_deck .cardstories_deck_cover', element).position().top;
+    var final_left = $('.cardstories_deck .cardstories_deck_cover', element).position().left;
     var deck_cards = $('.cardstories_deck .cardstories_card', element);
     var board_cards = $('.cardstories_cards_hand .cardstories_card', element);
 
@@ -1808,8 +1827,8 @@ asyncTest("create_pick_card_animate_fly_to_deck", 17, function() {
                 if (i === card_index - 1) {
                     equal(card.css('display'), 'none', 'selected card is hidden');
                 } else {
-                    equal(card.css('top'), final_top, 'card is animated back to the deck');
-                    equal(card.css('left'), final_left, 'card is animated back to the deck');
+                    equal(card.position().top, final_top, 'card is animated back to the deck');
+                    equal(card.position().left, final_left, 'card is animated back to the deck');
                 }
             });
 

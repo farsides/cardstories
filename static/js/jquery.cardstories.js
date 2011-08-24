@@ -97,9 +97,8 @@
             var tmp_mark = $('<div>')
                             .addClass('cardstories_progress_mark')
                             .addClass('cardstories_progress_mark' + step)
-                            .css('display', 'none')
                             .appendTo(progress);
-            var final_left = tmp_mark.css('left');
+            var final_left = tmp_mark.position().left;
             tmp_mark.remove();
 
             // Animate the mark.
@@ -128,16 +127,9 @@
         // absolutely, and its children must be sized and positioned relatively
         // (i.e., "em" instead of "px", percentages for widths and heights).
         animate_scale: function(reverse, factor, duration, el, cb) {
-            // In some versions of FF, hidden elements always return 0 for their top and left property.
-            // So make sure to show the element before doing any measurements.
             el.show();
-
-            var big_top = parseInt(el.css('top'), 10);
-            var big_left = parseInt(el.css('left'), 10);
-            // I fail to understand why, but el.css('top/left') is sometimes blank during test runs,
-            // which wracks havoc upon IE8.
-            big_top = isNaN(big_top) ? 0 : big_top;
-            big_left = isNaN(big_left) ? 0 : big_left;
+            var big_top = el.position().top;
+            var big_left = el.position().left;
             var big_width = el.width();
             var big_height = el.height();
             var big_fontsize = parseInt(el.css('font-size'), 10);
@@ -300,7 +292,7 @@
                     top: dock_bottom_pos - meta.final_height,
                     left: meta.final_left,
                     height: meta.final_height,
-                    width: meta.final_width,
+                    width: meta.final_width
                 }, 500, function() {
                     callback();
             });
@@ -324,17 +316,18 @@
             var vertical_rise_duration = 300;
             var q = $({});
 
-            // In some versions of FF, .css('top') always returns zero when used on hidden elements,
-            // that's why we show the container temporarily, get the top, then hide it again.
-            var container = $('.cardstories_cards', element).show();
-            var final_top = parseInt(container.css('top'), 10);
+            var container = $('.cardstories_cards', element);
+
+            // Grab top.
+            container.show();
+            var final_top = container.position().top;
             container.hide();
 
             cards.each(function(i) {
                 var card = $(this);
                 var meta = card.metadata({type: 'attr', name: 'data'});
-                var starting_top = parseInt(card.css('top'), 10);
-                var starting_left = parseInt(card.css('left'), 10);
+                var starting_top = card.position().top;
+                var starting_left = card.position().left;
                 var final_left = meta.final_left;
                 var keyframe_top = final_top + vertical_offset;
 
@@ -419,8 +412,8 @@
             var card_fly_velocity = 1.2;   // in pixels per milisecond
             var card_delay = 100;   // delay in ms after each subsequent card starts "flying" back to the deck
             var deck_cover = $('.cardstories_deck_cover', deck);
-            var final_top = parseInt(deck_cover.css('top'), 10);
-            var final_left = parseInt(deck_cover.css('left'), 10);
+            var final_top = deck_cover.position().top;
+            var final_left = deck_cover.position().left;
             var final_width = deck_cover.width();
             var final_height = deck_cover.height();
             var deck_offset = deck.offset();
@@ -440,7 +433,7 @@
                 var height = docked_card.height();
                 var width = docked_card.width();
                 var starting_left = docked_card.offset().left - deck_offset.left;
-                var starting_top = parseInt(card.css('top'), 10) - height + final_height;
+                var starting_top = card.position().top - height + final_height;
                 var fly_length = Math.sqrt(Math.pow(starting_top - final_top, 2) + Math.pow(starting_left - final_left, 2));
                 var fly_duration = fly_length / card_fly_velocity;
 
@@ -489,8 +482,8 @@
             var src = card_template.metadata({type: 'attr', name: 'data'}).card.supplant({card: card});
             card_foreground.attr('src', src);
 
-            var final_top = parseInt(card_template.css('top'), 10); // assuming the top value is given in pixels
-            var final_left = parseInt(card_template.css('left'), 10); // assuming value in pixels
+            var final_top = card_template.position().top;
+            var final_left = card_template.position().left;
             var final_width = card_imgs.width();
             var final_height = card_imgs.height();
             var starting_width = card_flyover.metadata({type: 'attr', name: 'data'}).final_width;
@@ -544,21 +537,26 @@
             var card_template = $('.cardstories_card_template', element);
             var card_img = $('img', card_template);
             var card_shadow = $('.cardstories_card_shadow', element);
-            var final_element = $('.cardstories_invitation .cardstories_owner', root);
-            var final_card_template = $('.cardstories_card_template', final_element);
+            var final_container = $('.cardstories_invitation', root);
+            var final_element = $('.cardstories_owner', final_container);
+            var final_card_template = $('.cardstories_picked_card', final_element);
             var write_box = $('.cardstories_write', element);
             var sentence_box = $('.cardstories_sentence_box', element);
             var final_sentence_box = $('.cardstories_sentence_box', final_element);
 
             // Calculate final position and dimensions.
-            var card_top = parseInt(final_card_template.css('top'), 10);
-            var card_left = parseInt(final_card_template.css('left'), 10);
-            var card_width = parseInt(final_card_template.css('width'), 10);
-            var card_height = parseInt(final_card_template.css('height'), 10);
-            var sentence_top = parseInt(final_sentence_box.css('top'), 10);
-            var sentence_left = parseInt(final_sentence_box.css('left'), 10);
-            var sentence_width = parseInt(final_sentence_box.css('width'), 10);
-            var sentence_height = parseInt(final_sentence_box.css('height'), 10);
+            final_container.show();
+            final_element.show();
+            var card_top = final_card_template.position().top;
+            var card_left = final_card_template.position().left;
+            var card_width = final_card_template.width();
+            var card_height = final_card_template.height();
+            var sentence_top = final_sentence_box.position().top;
+            var sentence_left = final_sentence_box.position().left;
+            var sentence_width = final_sentence_box.width();
+            var sentence_height = final_sentence_box.height();
+            final_element.hide();
+            final_container.hide();
 
             // Animate!
             var text = $('.cardstories_sentence', write_box).val();
@@ -1627,6 +1625,9 @@
                     }
                 }
                 
+                // Show destination element temporarily, so that positions can be calculated.
+                dest_element.show();
+
                 var last = game.board.length - 1;
                 for (var i=0; i < game.board.length; i++) {
                     var cardq = 'card' + i;
@@ -1639,30 +1640,54 @@
 
                     if (game.winner_card == game.board[i]) {
                         var dest_slot = $('.cardstories_picked_card', dest_element);
-                        q.queue(cardq, (function(slot, dest_slot) { return function(next) {
+                        var dest_sentence = $('.cardstories_sentence_box', dest_element);
+
+                        // Grab final positions.
+                        var dest_slot_pos = {
+                            width: dest_slot.width(),
+                            height: dest_slot.height(),
+                            top: dest_slot.position().top,
+                            left: dest_slot.position().left
+                        };
+                        var dest_sentence_pos = {
+                            top: dest_sentence.position().top,
+                            left: dest_sentence.position().left
+                        };
+
+                        q.queue(cardq, (function(slot, dest_slot_pos, dest_sentence_pos) { return function(next) {
                             $('.cardstories_card_label', slot).fadeOut('fast', next);
                             slot.animate({
-                                'width': dest_slot.width(),
-                                'height': dest_slot.height(),
-                                'top': parseInt(dest_slot.css('top'), 10),
-                                'left': parseInt(dest_slot.css('left'), 10)
+                                'width': dest_slot_pos.width,
+                                'height': dest_slot_pos.height,
+                                'top': dest_slot_pos.top,
+                                'left': dest_slot_pos.left
                             }, 500);
-                            var dest_sentence = $('.cardstories_sentence_box', dest_element);
                             $('.cardstories_sentence_box', element).animate({
-                                'top': parseInt(dest_sentence.css('top'), 10),
-                                'left': parseInt(dest_sentence.css('left'), 10)
+                                'top': dest_sentence_pos.top,
+                                'left': dest_sentence_pos.left
                             }, 500, next);
-                        }})(slot, dest_slot));
+                        }})(slot, dest_slot_pos, dest_sentence_pos));
                     } else {
-                        var dest_slot = $('.cardstories_complete .cardstories_card_slot_' + card2slot[game.board[i]], root);
-                        q.queue(cardq, (function(slot, dest_slot) { return function(next) {
+                        var dest_slot = $('.cardstories_card_slot_' + card2slot[game.board[i]], dest_element);
+
+                        // Grab final position.
+                        dest_slot.show();
+                        dest_slot_pos = {
+                            width: dest_slot.width(),
+                            height: dest_slot.height(),
+                            top: dest_slot.position().top,
+                            left: dest_slot.position().left
+                        };
+                        dest_slot.hide();
+
+                        q.queue(cardq, (function(slot, dest_slot_pos) { return function(next) {
                             slot.animate({
-                                'width': dest_slot.width(),
-                                'height': dest_slot.height(),
-                                'top': parseInt(dest_slot.css('top'), 10),
-                                'left': parseInt(dest_slot.css('left'), 10)
+                                'width': dest_slot_pos.width,
+                                'height': dest_slot_pos.height,
+                                'top': dest_slot_pos.top,
+                                'left': dest_slot_pos.left
                             }, 500, next);
-                        }})(slot, dest_slot));
+                        }})(slot, dest_slot_pos));
                     }
 
                     if (i === last) {
@@ -1681,6 +1706,9 @@
                         next();
                     }})(cardq));
                 }
+
+                // Hide dest_element, after all positions were calculated.
+                dest_element.hide();
 
                 q.dequeue('chain');
             });
@@ -1736,8 +1764,8 @@
             var template = $('.cardstories_card_template', element);
             var height = template.height();
             var width = template.width();
-            var top = parseInt(template.css('top'), 10);
-            var left = parseInt(template.css('left'), 10);
+            var top = template.position().top;
+            var left = template.position().left
             var fleft = left + (width / 2);
 
             var q = $({});
@@ -1816,44 +1844,61 @@
                 var cardq = 'card' + i;
                 var meta = card.metadata({type: 'attr', name: 'data'});
 
+                // Grab destination position.
+                card_slot.show();
+                var card_pos = {
+                    width: card_slot.width(),
+                    height: card_slot.height(),
+                    top: card_slot.position().top,
+                    left: card_slot.position().left,
+                    center_top: meta.ct,
+                    center_left: meta.cl
+                };
+                card_slot.hide();
+                
                 // Animate to center.
-                var fw = card_slot.width();
-                var fh = card_slot.height();
-                var ct = meta.ct;
-                var cl = meta.cl;
-                q.queue(cardq, (function(card, fw, fh, ct, cl) {return function(next) {
-                    card.animate({width: fw, height: fh, top: ct, left: cl}, init_duration, next);
-                }})(card, fw, fh, ct, cl));
+                q.queue(cardq, (function(card, card_pos) {return function(next) {
+                    card.animate({
+                        width: card_pos.width,
+                        height: card_pos.height,
+                        top: card_pos.center_top,
+                        left: card_pos.center_left
+                    }, init_duration, next);
+                }})(card, card_pos));
 
                 // Make quick passes at animating randomly near the center.
                 for (var j=0; j < shuffle_times; j++) {
-                    var rt = ct + rand(shuffle_range, true);
-                    var rl = cl + rand(shuffle_range, true);
+                    var rt = card_pos.center_top + rand(shuffle_range, true);
+                    var rl = card_pos.center_left + rand(shuffle_range, true);
                     q.queue(cardq, (function(card, rt, rl) {return function(next) {
                         card.animate({top: rt, left: rl}, shuffle_duration, 'linear', next);
                     }})(card, rt, rl));
                 }
 
                 // Animate to final position.
-                var ft = parseInt(card_slot.css('top'), 10);
-                var fl = parseInt(card_slot.css('left'), 10);
-                q.queue(cardq, (function(card, ft, fl) {return function(next) {
-                    card.animate({top: ft, left: fl}, end_duration, next);
-                }})(card, ft, fl));
+                q.queue(cardq, (function(card, card_pos) {return function(next) {
+                    card.animate({
+                        top: card_pos.top,
+                        left: card_pos.left
+                    }, end_duration, next);
+                }})(card, card_pos));
 
                 // Pause for effect.
                 $this.delay(q, 250, cardq);
 
                 // Morph it out.
-                q.queue(cardq, (function(i, card, fl, fw) {return function(next) {
-                    card.animate({width: 0, left: fl + (fw / 2)}, end_duration, function() {
+                q.queue(cardq, (function(i, card, card_pos) {return function(next) {
+                    card.animate({
+                        width: 0,
+                        left: card_pos.left + (card_pos.width / 2)
+                    }, end_duration, function() {
                         card.hide();
                         if (i === last && cb !== undefined) {
                             cb();
                         }
                         next();
                     });
-                }})(i, card, fl, fw));
+                }})(i, card, card_pos));
 
                 q.dequeue(cardq);
             }
@@ -1877,16 +1922,22 @@
                 var src = card.metadata({type: 'attr', name: 'data'}).card.supplant({card: game.board[i]});
                 card.attr('src', src);
 
+                // Grab pos.
+                slot.show();
+                var slot_pos = {
+                    width: slot.width(),
+                    left: slot.position().left
+                };
+                slot.hide();
+
                 // Init pre-animation CSS.
-                var fl = parseInt(slot.css('left'), 10);
-                var fw = slot.width();
-                slot.css({'width': 0, 'left': fl + (fw/2)});
+                slot.css({'width': 0, 'left': slot_pos.left + (slot_pos.width / 2)});
 
                 // Animate it in.
-                q.queue(cardq, (function(i, slot, fw, fl) { return function(next) {
+                q.queue(cardq, (function(i, slot, slot_pos) { return function(next) {
                     slot.show();
-                    slot.animate({'width': fw, 'left': fl}, 500, next);
-                }})(i, slot, fw, fl));
+                    slot.animate({'width': slot_pos.width, 'left': slot_pos.left}, 500, next);
+                }})(i, slot, slot_pos));
 
                 // Show the label.
                 if (game.winner_card == game.board[i]) {
