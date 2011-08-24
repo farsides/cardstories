@@ -203,6 +203,7 @@
             this.set_active(root, element);
             this.notify_active(root, 'create_pick_card');
             this.display_progress_bar(1, element, root);
+            this.display_owner_nick(player_id, element);
             var deck = $this.create_deck();
             var cards = $.map(deck, function(card, index) {
                 return { 'value':card };
@@ -607,6 +608,7 @@
             this.set_active(root, element);
             this.notify_active(root, 'create_write_sentence');
             this.display_progress_bar(2, element, root);
+            this.display_owner_nick(player_id, element);
             $('.cardstories_card', element).attr('class', 'cardstories_card cardstories_card' + card + ' {card:' + card + '}');
             this.create_write_sentence_animate_start(card, element, root);
             var text = $('.cardstories_sentence', element);
@@ -953,6 +955,7 @@
             this.set_active(root, element);
             this.notify_active(root, 'invitation_owner');
             this.display_progress_bar(3, element, root);
+            this.display_owner_nick(player_id, element);
             $('.cardstories_sentence', element).text(game.sentence);
             var picked_card = $('.cardstories_picked_card', element);
             var src = picked_card.metadata({type: 'attr', name: 'data'}).card.supplant({card: game.winner_card});
@@ -1541,6 +1544,7 @@
             this.set_active(root, element);
             this.notify_active(root, 'vote_owner');
             this.display_progress_bar(5, element, root);
+            this.display_owner_nick(player_id, element);
             $('.cardstories_sentence', element).text(game.sentence);
 
             // Display owner's card.
@@ -1963,6 +1967,7 @@
             this.set_active(root, element);
             this.notify_active(root, 'complete');
             this.display_progress_bar(6, element, root);
+            this.display_owner_nick(player_id, element);
             $('.cardstories_sentence', element).text(game.sentence);
 
             // Display owner's card.
@@ -2397,6 +2402,12 @@
             
             // Finally, store current step.
             dst_bar.data('step', step);
+        },
+
+        display_owner_nick: function(name, element) {
+            var nickname = $('.cardstories_owner_seat .cardstories_nickname', element);
+            var html = nickname.html();
+            nickname.html(html.supplant({'nick': name}));
         },
 
         display_modal: function(modal, overlay, cb) {

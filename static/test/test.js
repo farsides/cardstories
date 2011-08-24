@@ -183,6 +183,16 @@ test("display_progress_bar", 14, function() {
     equal(pbar.data('step'), step, 'step was saved');
 });
 
+test("display_owner_nick", 1, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_create', root);
+    var name = 'Bogus Name';
+
+    $.cardstories.display_owner_nick(name, element);
+
+    equal($('.cardstories_nickname', element).html(), name, 'Name was properly set.');
+});
+
 asyncTest("display_modal", 2, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_create', root);

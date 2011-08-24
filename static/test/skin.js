@@ -61,9 +61,9 @@
     } else if(skin == 'finished') {
       $.cardstories.lobby_finished('PLAYER1', lobby, root);
     } else if(skin == 'create_pick_card') {
-      $.cardstories.create_pick_card('PLAYER1', root);
+      $.cardstories.create_pick_card('Owner', root);
     } else if(skin == 'create_write_sentence') {
-      $.cardstories.create_write_sentence('PLAYER1', 5, root);
+      $.cardstories.create_write_sentence('Owner', 5, root);
     } else if(skin == 'invitation_owner') {
       game = {
         'id': 100,
@@ -77,7 +77,7 @@
                      [ 'Player 2', null, 'n', 2, [] ] ]
       };
 
-      $.cardstories.invitation_owner('PLAYER1', game, root);
+      $.cardstories.invitation_owner('Owner', game, root);
     } else if(skin == 'invitation_owner_ready') {
       game = {
         'id': 100,
@@ -94,11 +94,11 @@
                      [ 'Player 5', null, 'n', 5, [] ] ]
       };
 
-      $.cardstories.invitation_owner('PLAYER1', game, root);
+      $.cardstories.invitation_owner('Owner', game, root);
     } else if(skin == 'invitation_pick') {
       game = {
-	'id': 100,
-	'self': [5, null, [11,12,13,14,15,16,17]],
+        'id': 100,
+        'self': [5, null, [11,12,13,14,15,16,17]],
         'players': [
             [ 'player1', null, 'n', 5, [] ],
             [ 'player2', null, 'n', null, [] ],
@@ -189,7 +189,7 @@
                      [ 'Player 4', 31, null, 34, [] ],
                      [ 'Player 5', 31, null, 35, [] ] ]
       };
-      $.cardstories.vote_owner('voter11', game, root);
+      $.cardstories.vote_owner('Owner', game, root);
     } else if(skin == 'complete') {
       game = {
 	    'id': 100,
