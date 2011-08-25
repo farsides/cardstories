@@ -25,6 +25,8 @@ var cardstories_default_error = $.cardstories.error;
 var cardstories_default_poll_ignore = $.cardstories.poll_ignore;
 var cardstories_default_create_write_sentence = $.cardstories.create_write_sentence;
 var cardstories_default_animate_sprite = $.cardstories.animate_sprite;
+var cardstories_default_preload_images_helper = $.cardstories.preload_images_helper;
+var cardstories_default_preload_images = $.cardstories.preload_images;
 
 function setup() {
     $.cardstories.setTimeout = function(cb, delay) { return window.setTimeout(cb, 0); };
@@ -37,6 +39,8 @@ function setup() {
     $.cardstories.create_write_sentence = cardstories_default_create_write_sentence;
     $.cardstories.animate_sprite = function(movie, fps, frames, cb) { movie.show(); cb(); };
     $.cardstories.preload_images_helper = function(root, cb) { cb(); };
+    $.cardstories.preload_images = cardstories_default_preload_images;
+    $.cardstories.images_to_preload = ['card01.png', 'card02.png', 'card03.png'];
 }
 
 module("cardstories", {setup: setup});
@@ -554,6 +558,69 @@ test("game on error", 1, function() {
     };
 
     $.cardstories.game(11, 111, 'the root');
+});
+
+test("image preloading fires on game_or_lobby", 2, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var player_id = 'player1';
+    var game_id = 112;
+
+    $.cardstories.preload_images_helper = function(_root, callback) {
+        equal(_root, root);
+        ok(typeof callback === 'function', 'preload_images_helper gets called with a callback');
+    };
+
+    $.cardstories.game_or_lobby(player_id, game_id, root);
+});
+
+test("preload_images_helper", 3, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var preloaded_images_div = $('.cardstories_preloaded_images', root);
+    var cb = function() {
+        ok(false, 'callback should not be called');
+    };
+
+    $.cardstories.preload_images_helper = cardstories_default_preload_images_helper;
+
+    $.cardstories.preload_images = function(_root, _cb) {
+        equal(_root, root, 'preload_images is called with the root');
+        equal(_cb, cb, 'preload_images is called with the callback');
+    };
+    $.cardstories.preload_images_helper(root, cb);
+
+    preloaded_images_div.addClass('cardstories_in_progress');
+    $.cardstories.preload_images = function(root, cb) {
+        ok(false, 'preload images should not be called');
+    };
+    $.cardstories.preload_images_helper(root, cb);
+
+    preloaded_images_div.removeClass('cardstories_in_progress').addClass('cardstories_loaded');
+    cb = function() {
+        ok(true, 'callback is called');
+    };
+    $.cardstories.preload_images_helper(root, cb);
+});
+
+asyncTest("preload_images", 4, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var preloaded_images_div = $('.cardstories_preloaded_images', root);
+    var progress_bar = $('.cardstories_loading_bar', root);
+    var progress_wrapper = $('.cardstories_loading_bar_wrap', progress_bar);
+    var progress_fill = $('.cardstories_loading_bar_fill', progress_wrapper);
+
+    // Make sure progress bar is visible to be able to measure them reliably.
+    progress_fill.parents().andSelf().show();
+    equal(progress_fill.width(), 0, 'progress is at zero width initially');
+
+    var cb = function() {
+        progress_fill.parents().andSelf().show();
+        equal(progress_fill.width(), progress_wrapper.width(), 'progress is at 100% width in the end');
+        ok(preloaded_images_div.hasClass('cardstories_loaded'), 'image holder is marked with the cardstories_loaded class');
+        equal(preloaded_images_div.find('img').length, $.cardstories.images_to_preload.length, 'preloaded images are inserted into the DOM');
+        start();
+    };
+
+    $.cardstories.preload_images(root, cb);
 });
 
 test("invitation_owner_modal_helper", 4, function() {
