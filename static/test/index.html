@@ -35,31 +35,56 @@
     <div id="qunit-fixture">
       <div class="cardstories">
         <div class="cardstories_snippets" style="display: none;">
-          <div class="cardstories_progress">
+          <div class="cardstories_progress owner">
             <div class="cardstories_progress_mark"></div>
-            <div class="cardstories_step1">
+            <div class="cardstories_step_1">
               <div class="cardstories_step_no">1</div>
               <div class="cardstories_step_text">Choose a card</div>
             </div>
-            <div class="cardstories_step2">
+            <div class="cardstories_step_2">
               <div class="cardstories_step_no">2</div>
               <div class="cardstories_step_text">Write the Story</div>
             </div>
-            <div class="cardstories_step3">
+            <div class="cardstories_step_3">
               <div class="cardstories_step_no">3</div>
               <div class="cardstories_step_text">Invite Friends</div>
             </div>
-            <div class="cardstories_step4">
+            <div class="cardstories_step_4">
               <div class="cardstories_step_no">4</div>
               <div class="cardstories_step_text">Wait for others to choose a card</div>
             </div>
-            <div class="cardstories_step5">
+            <div class="cardstories_step_5">
               <div class="cardstories_step_no">5</div>
               <div class="cardstories_step_text">Wait for others to vote</div>
             </div>
-            <div class="cardstories_step6">
+            <div class="cardstories_step_6">
               <div class="cardstories_step_no">6</div>
               <div class="cardstories_step_text">Announce the results</div>
+            </div>
+            <div class="cardstories_help"></div>
+            <div class="cardstories_logout"></div>
+          </div>
+          <div class="cardstories_progress player">
+            <div class="cardstories_progress_mark"></div>
+            <div class="cardstories_step_1">
+              <div class="cardstories_step_no">1</div>
+              <div class="cardstories_step_text">Pick a fake card</div>
+            </div>
+            <div class="cardstories_step_2">
+              <div class="cardstories_step_no">2</div>
+              <div class="cardstories_step_text">Wait for others to choose a card</div>
+            </div>
+            <div class="cardstories_step_3">
+              <div class="cardstories_step_no">3</div>
+              <div class="cardstories_step_text">Guess the author's card</div>
+            </div>
+            <div class="cardstories_step_4">
+              <div class="cardstories_step_no">4</div>
+              <div class="cardstories_step_text">Wait for players to guess</div>
+            </div>
+            <div class="cardstories_step_5">
+              <div class="cardstories_step_no">5</div>
+              <div class="cardstories_step_text">Check the results</div>
             </div>
             <div class="cardstories_help"></div>
             <div class="cardstories_logout"></div>
@@ -81,15 +106,15 @@
               </div>
             </div>
           </div>
-          <div class="cardstories_invite_friend cardstories_img_button">
-            <img class="cardstories_btn_on" alt="" src="../css/images/invite_friend_on.png" />
-            <img class="cardstories_btn_over" alt="" src="../css/images/invite_friend_over.png" />
-            <img class="cardstories_btn_down" alt="" src="../css/images/invite_friend_down.png" />
+          <div class="cardstories_player_invite cardstories_img_button">
+            <img class="cardstories_btn_on" alt="" src="../css/images/player_invite_on.png" />
+            <img class="cardstories_btn_over" alt="" src="../css/images/player_invite_over.png" />
+            <img class="cardstories_btn_down" alt="" src="../css/images/player_invite_down.png" />
             <a href="javascript://"><span>Invite a Friend</span></a>
           </div>
-          <div class="cardstories_active_friend">
-            <p class="cardstories_active_friend_name"></p>
-            <p class="cardstories_active_friend_status"></p>
+          <div class="cardstories_player_seat">
+            <p class="cardstories_player_name"></p>
+            <p class="cardstories_player_status"></p>
           </div>
           <div class="cardstories_card_slot">
             <img alt="" src="../css/images/card_bg.png" />
@@ -159,8 +184,8 @@
                   <img class="cardstories_card_background" src="../css/images/card_bg_selected.png" alt="" />
                   <img class="cardstories_card_foreground" src="" alt="" />
                 </div>
-                <div class="cardstories_owner_seat">
-                  <div class="cardstories_nickname">{nick}</div>
+                <div class="cardstories_master_seat">
+                  <div class="cardstories_master_name">{name}</div>
                 </div>
               </div>
             </div>
@@ -186,8 +211,8 @@
                   <div class="cardstories_sentence"></div>
                   <div class="cardstories_sentence_footer"></div>
                 </div>
-                <div class="cardstories_owner_seat">
-                  <div class="cardstories_nickname">{nick}</div>
+                <div class="cardstories_master_seat owner">
+                  <div class="cardstories_master_name">{name}</div>
                 </div>
                 <div class="cardstories_card_shadow"></div>
                 <div class="cardstories_card_template" data="{card:'../css/images/card0{card}.png'}">
@@ -297,33 +322,73 @@
             <div class="cardstories_sentence"></div>
             <input class="cardstories_submit" type="submit" name="submit_button" value="participate" />
           </div>
-          <div class="cardstories_board">
-            <div class="cardstories_sentence"></div>
-            <div class="cardstories_owner_seat"><div class="cardstories_player_name"></div></div>
-            <div class="cardstories_player_seat_1"><div class="cardstories_player_name"></div></div>
-            <div class="cardstories_player_seat_2"><div class="cardstories_player_name"></div></div>
-            <div class="cardstories_player_seat_3"><div class="cardstories_player_name"></div></div>
-            <div class="cardstories_player_seat_4"><div class="cardstories_player_name"></div></div>
-            <div class="cardstories_player_seat_5 cardstories_self_seat"><div class="cardstories_player_name"></div></div>
-          </div>
           <div class="cardstories_invitation_anonymous">
-            <div class="cardstories_progress_player"></div>
+            <div class="cardstories_pane">
+              <div class="cardstories_sidebar">
+                <div class="cardstories_deck">
+                  <div class="cardstories_deck_cards"></div>
+                </div>
+              </div>
+              <div class="cardstories_board">
+                <div class="cardstories_progress"></div>
+                <div class="cardstories_player_seat cardstories_player_seat_1"></div>
+                <div class="cardstories_player_seat cardstories_player_seat_2"></div>
+                <div class="cardstories_player_seat cardstories_player_seat_3"></div>
+                <div class="cardstories_player_seat cardstories_player_seat_4"></div>
+                <div class="cardstories_player_seat cardstories_player_seat_5"></div>
+                <div class="cardstories_sentence_box">
+                  <div class="cardstories_sentence_bg_box">
+                    <img class="cardstories_sentence_bg" src="../css/images/sentence_bubble_bg.png" />
+                  </div>
+                  <div class="cardstories_sentence"></div>
+                  <div class="cardstories_sentence_footer"></div>
+                </div>
+                <div class="cardstories_master_seat player">
+                  <div class="cardstories_master_name">{name}</div>
+                </div>
+              </div>
+            </div>
           </div>
           <div class="cardstories_pick">
-            <div class="cardstories_sentence"></div>
-            <div class="cardstories_modal cardstories_card_confirm"></div>
-            <div class="cardstories_cards_hand" data="{active:2,size:200,distance:200}">
-              <div class="cardstories_cards">
-                <a class="cardstories_card" href="javascript:"><img alt="" src="../css/images/card_medium_visiblepart.png" /></a>
-                <a class="cardstories_card" href="javascript:"><img alt="" src="../css/images/card_medium_visiblepart.png" /></a>
-                <a class="cardstories_card" href="javascript:"><img alt="" src="../css/images/card_medium_visiblepart.png" /></a>
-                <a class="cardstories_card" href="javascript:"><img alt="" src="../css/images/card_medium_visiblepart.png" /></a>
-                <a class="cardstories_card" href="javascript:"><img alt="" src="../css/images/card_medium_visiblepart.png" /></a>
-                <a class="cardstories_card" href="javascript:"><img alt="" src="../css/images/card_medium_visiblepart_full.png" /></a>
+            <div class="cardstories_pane">
+              <div class="cardstories_sidebar">
+                <div class="cardstories_deck">
+                  <div class="cardstories_deck_cards"></div>
+                </div>
               </div>
-              <div class="cardstories_card_template" data="{card:'../css/images/card0{card}.png',card_bg:'../css/images/card_bg.png',card_bg_selected:'../css/images/card_bg_selected.png',nocard:'../css/images/card-back.png'}">
-                <img class="cardstories_card_foreground" src="" alt="" />
-                <img class="cardstories_card_background" src="" alt="" />
+              <div class="cardstories_board">
+                <div class="cardstories_progress"></div>
+                <div class="cardstories_modal_overlay"></div>
+                <div class="cardstories_player_seat cardstories_player_seat_1"></div>
+                <div class="cardstories_player_seat cardstories_player_seat_2"></div>
+                <div class="cardstories_player_seat cardstories_player_seat_3"></div>
+                <div class="cardstories_player_seat cardstories_player_seat_4"></div>
+                <div class="cardstories_player_seat cardstories_player_seat_5"></div>
+                <div class="cardstories_modal cardstories_card_confirm"></div>
+                <div class="cardstories_cards_hand" data="{active:2,size:142,distance:142}">
+                  <div class="cardstories_cards">
+                    <a class="cardstories_card" href="javascript://"><img src="../css/images/card_small_visiblepart.png" /></a>
+                    <a class="cardstories_card" href="javascript://"><img src="../css/images/card_small_visiblepart.png" /></a>
+                    <a class="cardstories_card" href="javascript://"><img src="../css/images/card_small_visiblepart.png" /></a>
+                    <a class="cardstories_card" href="javascript://"><img src="../css/images/card_small_visiblepart.png" /></a>
+                    <a class="cardstories_card" href="javascript://"><img src="../css/images/card_small_visiblepart.png" /></a>
+                    <a class="cardstories_card" href="javascript://"><img src="../css/images/card_small_visiblepart_full.png" /></a>
+                  </div>
+                  <div class="cardstories_card_template" data="{card:'../css/images/card0{card}.png',card_bg:'../css/images/card_bg.png',card_bg_selected:'../css/images/card_bg_selected.png',nocard:'../css/images/card-back.png'}">
+                    <img class="cardstories_card_foreground" src="" alt="" />
+                    <img class="cardstories_card_background" src="" alt="" />
+                  </div>
+                </div>
+                <div class="cardstories_sentence_box">
+                  <div class="cardstories_sentence_bg_box">
+                    <img class="cardstories_sentence_bg" src="../css/images/sentence_bubble_bg.png" />
+                  </div>
+                  <div class="cardstories_sentence"></div>
+                  <div class="cardstories_sentence_footer"></div>
+                </div>
+                <div class="cardstories_master_seat player">
+                  <div class="cardstories_master_name">{name}</div>
+                </div>
               </div>
             </div>
           </div>
@@ -388,30 +453,30 @@
                       <a href="javascript://"><span>YES PLEASE!</span></a>
                     </div>
                   </div>
-                  <div class="cardstories_invite_friend cardstories_img_button cardstories_friend_slot1"></div>
-                  <div class="cardstories_invite_friend cardstories_img_button cardstories_friend_slot2"></div>
-                  <div class="cardstories_invite_friend cardstories_img_button cardstories_friend_slot3"></div>
-                  <div class="cardstories_invite_friend cardstories_img_button cardstories_friend_slot4"></div>
-                  <div class="cardstories_invite_friend cardstories_img_button cardstories_friend_slot5"></div>
-                  <div class="cardstories_active_friend cardstories_friend_slot1"></div>
-                  <div class="cardstories_active_friend cardstories_friend_slot2"></div>
-                  <div class="cardstories_active_friend cardstories_friend_slot3"></div>
-                  <div class="cardstories_active_friend cardstories_friend_slot4"></div>
-                  <div class="cardstories_active_friend cardstories_friend_slot5"></div>
+                  <div class="cardstories_player_invite cardstories_img_button cardstories_player_seat_1"></div>
+                  <div class="cardstories_player_invite cardstories_img_button cardstories_player_seat_2"></div>
+                  <div class="cardstories_player_invite cardstories_img_button cardstories_player_seat_3"></div>
+                  <div class="cardstories_player_invite cardstories_img_button cardstories_player_seat_4"></div>
+                  <div class="cardstories_player_invite cardstories_img_button cardstories_player_seat_5"></div>
+                  <div class="cardstories_player_seat cardstories_player_seat_1"></div>
+                  <div class="cardstories_player_seat cardstories_player_seat_2"></div>
+                  <div class="cardstories_player_seat cardstories_player_seat_3"></div>
+                  <div class="cardstories_player_seat cardstories_player_seat_4"></div>
+                  <div class="cardstories_player_seat cardstories_player_seat_5"></div>
                   <div id="cardstories_player_pick_1" class="cardstories_player_pick cardstories_player_pick_left">
                     <img class="cardstories_card" src="../css/images/card-back.png" data="{final_left:3}" />
                   </div>
                   <div id="cardstories_player_pick_2" class="cardstories_player_pick cardstories_player_pick_left">
-                    <img class="cardstories_card" src=""../css/images/card-back.png" data="{final_left:3}" />
+                    <img class="cardstories_card" src="../css/images/card-back.png" data="{final_left:3}" />
                   </div>
                   <div id="cardstories_player_pick_3" class="cardstories_player_pick cardstories_player_pick_left">
-                    <img class="cardstories_card" src=""../css/images/card-back.png" data="{final_left:3}" />
+                    <img class="cardstories_card" src="../css/images/card-back.png" data="{final_left:3}" />
                   </div>
                   <div id="cardstories_player_pick_4" class="cardstories_player_pick cardstories_player_pick_right">
-                    <img class="cardstories_card" src=""../css/images/card-back.png" data="{final_left:91}" />
+                    <img class="cardstories_card" src="../css/images/card-back.png" data="{final_left:91}" />
                   </div>
                   <div id="cardstories_player_pick_5" class="cardstories_player_pick cardstories_player_pick_right">
-                    <img class="cardstories_card" src=""../css/images/card-back.png" data="{final_left:91}" />
+                    <img class="cardstories_card" src="../css/images/card-back.png" data="{final_left:91}" />
                   </div>
                   <div class="cardstories_player_arms_1"></div>
                   <div class="cardstories_player_arms_2"></div>
@@ -451,27 +516,13 @@
                   <div class="cardstories_sentence"></div>
                   <div class="cardstories_sentence_footer"></div>
                 </div>
-                <div class="cardstories_owner_seat">
-                  <div class="cardstories_nickname">{nick}</div>
+                <div class="cardstories_master_seat owner">
+                  <div class="cardstories_master_name">{name}</div>
                 </div>
                 <div class="cardstories_card_template cardstories_picked_card" data="{card:'../css/images/card0{card}.png'}">
                   <img alt="" src="../css/images/card_bg.png" class="cardstories_card_background" />
                   <img alt="" src="../css/images/card020.png" class="cardstories_card_foreground" />
                 </div>
-              </div>
-            </div>
-            <div class="cardstories_cards_hand" data="{active:2,size:200,distance:200}">
-              <div class="cardstories_cards">
-                <a class="cardstories_card" href="javascript:"><img alt="" src="../css/images/card_medium_visiblepart.png" /></a>
-                <a class="cardstories_card" href="javascript:"><img alt="" src="../css/images/card_medium_visiblepart.png" /></a>
-                <a class="cardstories_card" href="javascript:"><img alt="" src="../css/images/card_medium_visiblepart.png" /></a>
-                <a class="cardstories_card" href="javascript:"><img alt="" src="../css/images/card_medium_visiblepart.png" /></a>
-                <a class="cardstories_card" href="javascript:"><img alt="" src="../css/images/card_medium_visiblepart.png" /></a>
-                <a class="cardstories_card" href="javascript:"><img alt="" src="../css/images/card_medium_visiblepart_full.png" /></a>
-              </div>
-              <div class="cardstories_card_template" data="{card:'../css/images/card0{card}.png',card_bg:'../css/images/card_bg.png',card_bg_selected:'../css/images/card_bg_selected.png',nocard:'../css/images/card-back.png'}">
-                <img class="cardstories_card_foreground" src="" alt="{label}" />
-                <img class="cardstories_card_background" src="" alt="" />
               </div>
             </div>
           </div>
@@ -551,11 +602,11 @@
                     </div>
                   </div>
                 </div>
-                <div class="cardstories_active_friend cardstories_friend_slot1"></div>
-                <div class="cardstories_active_friend cardstories_friend_slot2"></div>
-                <div class="cardstories_active_friend cardstories_friend_slot3"></div>
-                <div class="cardstories_active_friend cardstories_friend_slot4"></div>
-                <div class="cardstories_active_friend cardstories_friend_slot5"></div>
+                <div class="cardstories_player_seat cardstories_player_seat_1"></div>
+                <div class="cardstories_player_seat cardstories_player_seat_2"></div>
+                <div class="cardstories_player_seat cardstories_player_seat_3"></div>
+                <div class="cardstories_player_seat cardstories_player_seat_4"></div>
+                <div class="cardstories_player_seat cardstories_player_seat_5"></div>
                 <img class="cardstories_card cardstories_card_1" src="../css/images/card-back.png" data="{ct:180,cl:333}" />
                 <img class="cardstories_card cardstories_card_2" src="../css/images/card-back.png" data="{ct:180,cl:333}" />
                 <img class="cardstories_card cardstories_card_3" src="../css/images/card-back.png" data="{ct:180,cl:333}" />
@@ -575,8 +626,8 @@
                   <div class="cardstories_sentence"></div>
                   <div class="cardstories_sentence_footer"></div>
                 </div>
-                <div class="cardstories_owner_seat">
-                  <div class="cardstories_nickname">{nick}</div>
+                <div class="cardstories_master_seat owner">
+                  <div class="cardstories_master_name">{name}</div>
                 </div>
                 <div class="cardstories_card_template cardstories_picked_card" data="{card:'../css/images/card0{card}.png'}">
                   <img src="../css/images/card_bg.png" class="cardstories_card_background" />
@@ -596,11 +647,11 @@
             <div class="cardstories_board">
               <div class="cardstories_progress"></div>
               <div class="cardstories_modal_overlay"></div>
-              <div class="cardstories_active_friend cardstories_friend_slot1"></div>
-              <div class="cardstories_active_friend cardstories_friend_slot2"></div>
-              <div class="cardstories_active_friend cardstories_friend_slot3"></div>
-              <div class="cardstories_active_friend cardstories_friend_slot4"></div>
-              <div class="cardstories_active_friend cardstories_friend_slot5"></div>
+              <div class="cardstories_player_seat cardstories_player_seat_1"></div>
+              <div class="cardstories_player_seat cardstories_player_seat_2"></div>
+              <div class="cardstories_player_seat cardstories_player_seat_3"></div>
+              <div class="cardstories_player_seat cardstories_player_seat_4"></div>
+              <div class="cardstories_player_seat cardstories_player_seat_5"></div>
               <div class="cardstories_card_slot cardstories_card_slot_1"></div>
               <div class="cardstories_card_slot cardstories_card_slot_2"></div>
               <div class="cardstories_card_slot cardstories_card_slot_3"></div>
@@ -642,8 +693,8 @@
                 <div class="cardstories_sentence"></div>
                 <div class="cardstories_sentence_footer"></div>
               </div>
-              <div class="cardstories_owner_seat">
-                <div class="cardstories_nickname">{nick}</div>
+              <div class="cardstories_master_seat">
+                <div class="cardstories_master_name">{name}</div>
               </div>
               <div class="cardstories_card_template cardstories_picked_card" data="{card:'../css/images/card0{card}.png'}">
                 <img src="../css/images/card_bg.png" class="cardstories_card_background" />

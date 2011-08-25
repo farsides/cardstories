@@ -172,34 +172,34 @@ test("display_progress_bar", 14, function() {
     var pbar = $('.cardstories_progress', element);
     var step = 2;
 
-    $.cardstories.display_progress_bar(step, element, root);
-    ok($('.cardstories_step1', pbar).hasClass('old'), 'step 1 has old class');
-    ok($('.cardstories_step2', pbar).hasClass('selected'), 'step 2 is selected');
-    equal($('.cardstories_step3', pbar).attr('class'), 'cardstories_step3', 'step 3 is bare');
-    equal($('.cardstories_step4', pbar).attr('class'), 'cardstories_step4', 'step 4 is bare');
-    equal($('.cardstories_step5', pbar).attr('class'), 'cardstories_step5', 'step 5 is bare');
-    equal($('.cardstories_step6', pbar).attr('class'), 'cardstories_step6', 'step 6 is bare');
+    $.cardstories.display_progress_bar('owner', step, element, root);
+    ok($('.cardstories_step_1', pbar).hasClass('old'), 'step 1 has old class');
+    ok($('.cardstories_step_2', pbar).hasClass('selected'), 'step 2 is selected');
+    equal($('.cardstories_step_3', pbar).attr('class'), 'cardstories_step_3', 'step 3 is bare');
+    equal($('.cardstories_step_4', pbar).attr('class'), 'cardstories_step_4', 'step 4 is bare');
+    equal($('.cardstories_step_5', pbar).attr('class'), 'cardstories_step_5', 'step 5 is bare');
+    equal($('.cardstories_step_6', pbar).attr('class'), 'cardstories_step_6', 'step 6 is bare');
     equal(pbar.data('step'), step, 'step was saved');
 
     // Should do nothing a second time.
-    $.cardstories.display_progress_bar(4, element, root);
-    ok($('.cardstories_step1', pbar).hasClass('old'), 'step 1 has old class');
-    ok($('.cardstories_step2', pbar).hasClass('selected'), 'step 2 is selected');
-    equal($('.cardstories_step3', pbar).attr('class'), 'cardstories_step3', 'step 3 is bare');
-    equal($('.cardstories_step4', pbar).attr('class'), 'cardstories_step4', 'step 4 is bare');
-    equal($('.cardstories_step5', pbar).attr('class'), 'cardstories_step5', 'step 5 is bare');
-    equal($('.cardstories_step6', pbar).attr('class'), 'cardstories_step6', 'step 6 is bare');
+    $.cardstories.display_progress_bar('owner', 4, element, root);
+    ok($('.cardstories_step_1', pbar).hasClass('old'), 'step 1 has old class');
+    ok($('.cardstories_step_2', pbar).hasClass('selected'), 'step 2 is selected');
+    equal($('.cardstories_step_3', pbar).attr('class'), 'cardstories_step_3', 'step 3 is bare');
+    equal($('.cardstories_step_4', pbar).attr('class'), 'cardstories_step_4', 'step 4 is bare');
+    equal($('.cardstories_step_5', pbar).attr('class'), 'cardstories_step_5', 'step 5 is bare');
+    equal($('.cardstories_step_6', pbar).attr('class'), 'cardstories_step_6', 'step 6 is bare');
     equal(pbar.data('step'), step, 'step was saved');
 });
 
-test("display_owner_nick", 1, function() {
+test("display_master_name", 1, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_create', root);
     var name = 'Bogus Name';
 
-    $.cardstories.display_owner_nick(name, element);
+    $.cardstories.display_master_name(name, element);
 
-    equal($('.cardstories_nickname', element).html(), name, 'Name was properly set.');
+    equal($('.cardstories_master_name', element).html(), name, 'Name was properly set.');
 });
 
 asyncTest("display_modal", 2, function() {
@@ -223,29 +223,29 @@ asyncTest("animate_progress_bar", 14, function() {
     var cur = 1;
     var step = 4;
 
-    $.cardstories.display_progress_bar(cur, element, root);
+    $.cardstories.display_progress_bar('owner', cur, element, root);
 
     var dst_mark = $('<div>')
                     .addClass('cardstories_progress_mark')
-                    .addClass('cardstories_progress_mark' + step)
+                    .addClass('cardstories_progress_mark_' + step)
                     .appendTo(progress);
     var final_left = dst_mark.position().left;
     dst_mark.remove();
 
-    ok($('.cardstories_step1', progress).hasClass('selected'), 'step 1 is selected');
-    equal($('.cardstories_step2', progress).attr('class'), 'cardstories_step2', 'step 2 is bare');
-    equal($('.cardstories_step3', progress).attr('class'), 'cardstories_step3', 'step 3 is bare');
-    equal($('.cardstories_step4', progress).attr('class'), 'cardstories_step4', 'step 4 is bare');
-    equal($('.cardstories_step5', progress).attr('class'), 'cardstories_step5', 'step 5 is bare');
-    equal($('.cardstories_step6', progress).attr('class'), 'cardstories_step6', 'step 6 is bare');
+    ok($('.cardstories_step_1', progress).hasClass('selected'), 'step 1 is selected');
+    equal($('.cardstories_step_2', progress).attr('class'), 'cardstories_step_2', 'step 2 is bare');
+    equal($('.cardstories_step_3', progress).attr('class'), 'cardstories_step_3', 'step 3 is bare');
+    equal($('.cardstories_step_4', progress).attr('class'), 'cardstories_step_4', 'step 4 is bare');
+    equal($('.cardstories_step_5', progress).attr('class'), 'cardstories_step_5', 'step 5 is bare');
+    equal($('.cardstories_step_6', progress).attr('class'), 'cardstories_step_6', 'step 6 is bare');
     $.cardstories.animate_progress_bar(step, element, function() {
         equal($('.cardstories_progress_mark', progress).position().left, final_left, 'mark is at final position');
-        ok($('.cardstories_step1', progress).hasClass('old'), 'step 1 is old');
-        ok($('.cardstories_step2', progress).hasClass('old'), 'step 2 is old');
-        ok($('.cardstories_step3', progress).hasClass('old'), 'step 3 is old');
-        ok($('.cardstories_step4', progress).hasClass('selected'), 'step 4 is selected');
-        equal($('.cardstories_step5', progress).attr('class'), 'cardstories_step5', 'step 5 is bare');
-        equal($('.cardstories_step6', progress).attr('class'), 'cardstories_step6', 'step 6 is bare');
+        ok($('.cardstories_step_1', progress).hasClass('old'), 'step 1 is old');
+        ok($('.cardstories_step_2', progress).hasClass('old'), 'step 2 is old');
+        ok($('.cardstories_step_3', progress).hasClass('old'), 'step 3 is old');
+        ok($('.cardstories_step_4', progress).hasClass('selected'), 'step 4 is selected');
+        equal($('.cardstories_step_5', progress).attr('class'), 'cardstories_step_5', 'step 5 is bare');
+        equal($('.cardstories_step_6', progress).attr('class'), 'cardstories_step_6', 'step 6 is bare');
         equal(progress.data('step'), step, 'step was saved');
         start();
     });
@@ -643,7 +643,7 @@ test("invitation_owner_modal_helper", 4, function() {
 test("invitation_owner_slots_helper", 15, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_invitation .cardstories_owner', root);
-    var slots = $('.cardstories_invite_friend', element);
+    var slots = $('.cardstories_player_invite', element);
     var player_id = 10;
     var game_id = 1;
 
@@ -711,13 +711,13 @@ asyncTest("invitation_owner_join_helper", 39, function() {
         equal($('.cardstories_player_arms_3', element).css('display'), 'none', 'arm 3 is hidden');
         equal($('.cardstories_player_arms_4', element).css('display'), 'none', 'arm 4 is hidden');
         equal($('.cardstories_player_arms_5', element).css('display'), 'none', 'arm 5 is hidden');
-        equal($('.cardstories_active_friend.cardstories_friend_slot1', element).css('display'), 'block', 'Active slot 1 is visible');
-        equal($('.cardstories_active_friend.cardstories_friend_slot2', element).css('display'), 'block', 'Active slot 2 is visible');
-        equal($('.cardstories_active_friend.cardstories_friend_slot3', element).css('display'), 'none', 'Active slot 3 is hidden');
-        equal($('.cardstories_active_friend.cardstories_friend_slot4', element).css('display'), 'none', 'Active slot 4 is hidden');
-        equal($('.cardstories_active_friend.cardstories_friend_slot5', element).css('display'), 'none', 'Active slot 5 is hidden');
-        ok($('.cardstories_active_friend.cardstories_friend_slot1', element).hasClass('cardstories_active_friend_picking'), 'Active slot 1 is picking');
-        ok($('.cardstories_active_friend.cardstories_friend_slot2', element).hasClass('cardstories_active_friend_picked'), 'Active slot 2 picked');
+        equal($('.cardstories_player_seat.cardstories_player_seat_1', element).css('display'), 'block', 'Active slot 1 is visible');
+        equal($('.cardstories_player_seat.cardstories_player_seat_2', element).css('display'), 'block', 'Active slot 2 is visible');
+        equal($('.cardstories_player_seat.cardstories_player_seat_3', element).css('display'), 'none', 'Active slot 3 is hidden');
+        equal($('.cardstories_player_seat.cardstories_player_seat_4', element).css('display'), 'none', 'Active slot 4 is hidden');
+        equal($('.cardstories_player_seat.cardstories_player_seat_5', element).css('display'), 'none', 'Active slot 5 is hidden');
+        ok($('.cardstories_player_seat.cardstories_player_seat_1', element).hasClass('cardstories_player_seat_picking'), 'Active slot 1 is picking');
+        ok($('.cardstories_player_seat.cardstories_player_seat_2', element).hasClass('cardstories_player_seat_picked'), 'Active slot 2 picked');
 
         // Call it again: animate_sprite should only be called again when
         // necessary and the number of expected assertions should reflect this.
@@ -728,14 +728,14 @@ asyncTest("invitation_owner_join_helper", 39, function() {
             equal($('.cardstories_player_arms_3', element).css('display'), 'block', 'arm 3 is visible');
             equal($('.cardstories_player_arms_4', element).css('display'), 'none', 'arm 4 is hidden');
             equal($('.cardstories_player_arms_5', element).css('display'), 'none', 'arm 5 is hidden');
-            equal($('.cardstories_active_friend.cardstories_friend_slot1', element).css('display'), 'block', 'Active slot 1 is visible');
-            equal($('.cardstories_active_friend.cardstories_friend_slot2', element).css('display'), 'block', 'Active slot 2 is visible');
-            equal($('.cardstories_active_friend.cardstories_friend_slot3', element).css('display'), 'block', 'Active slot 3 is visible');
-            equal($('.cardstories_active_friend.cardstories_friend_slot4', element).css('display'), 'none', 'Active slot 4 is hidden');
-            equal($('.cardstories_active_friend.cardstories_friend_slot5', element).css('display'), 'none', 'Active slot 5 is hidden');
-            ok($('.cardstories_active_friend.cardstories_friend_slot1', element).hasClass('cardstories_active_friend_picked'), 'Active slot 1 picked');
-            ok($('.cardstories_active_friend.cardstories_friend_slot2', element).hasClass('cardstories_active_friend_picked'), 'Active slot 2 picked');
-            ok($('.cardstories_active_friend.cardstories_friend_slot3', element).hasClass('cardstories_active_friend_picking'), 'Active slot 3 is picking');
+            equal($('.cardstories_player_seat.cardstories_player_seat_1', element).css('display'), 'block', 'Active slot 1 is visible');
+            equal($('.cardstories_player_seat.cardstories_player_seat_2', element).css('display'), 'block', 'Active slot 2 is visible');
+            equal($('.cardstories_player_seat.cardstories_player_seat_3', element).css('display'), 'block', 'Active slot 3 is visible');
+            equal($('.cardstories_player_seat.cardstories_player_seat_4', element).css('display'), 'none', 'Active slot 4 is hidden');
+            equal($('.cardstories_player_seat.cardstories_player_seat_5', element).css('display'), 'none', 'Active slot 5 is hidden');
+            ok($('.cardstories_player_seat.cardstories_player_seat_1', element).hasClass('cardstories_player_seat_picked'), 'Active slot 1 picked');
+            ok($('.cardstories_player_seat.cardstories_player_seat_2', element).hasClass('cardstories_player_seat_picked'), 'Active slot 2 picked');
+            ok($('.cardstories_player_seat.cardstories_player_seat_3', element).hasClass('cardstories_player_seat_picking'), 'Active slot 3 is picking');
             start();
         });
     });
@@ -852,7 +852,7 @@ test("invitation_owner_invite_more", 4, function() {
     $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
     ok(element.hasClass('cardstories_active'));
     $.cookie('CARDSTORIES_INVITATIONS', 'UNEXPECTED');
-    $('.cardstories_invite_friend', element).first().click();
+    $('.cardstories_player_invite', element).first().click();
     equal(advertise.css('display'), 'block');
     equal(textarea.val(), textarea.attr('placeholder'));
 });
@@ -971,7 +971,6 @@ asyncTest("invitation_pick", 11, function() {
 
             window.setTimeout(invitation_picked, 50);
         });
-
 });
 
 test("invitation_pick_wait", 8, function() {
@@ -1052,76 +1051,49 @@ test("invitation_anonymous", 2, function() {
     $.query = _query;
 });
 
-test("invitation_board", 27, function() {
-    var player_id = null;
-    var player1 = 'player1';
+test("invitation_display_board", 15, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var owner_id = 'Owner';
+    var player1 = 'Player 1';
+    var player2 = 'Player 2';
+    var player3 = 'Player 3';
+    var player4 = 'Player 4';
     var game_id = 101;
     var sentence = 'SENTENCE';
-
-    var owner = 'owner';
     var game = {
         'id': game_id,
+        'owner_id': owner_id,
+        'sentence': sentence,
         'players': [
-            [ owner, null, 'n', null, [] ],
+            [ owner_id, null, 'n', null, [] ],
             [ player1, null, 'n', null, [] ],
-            [ 'player2', null, 'n', null, [] ],
-            [ 'player3', null, 'n', null, [] ],
-            [ 'player4', null, 'n', null, [] ],
-            [ 'player5', null, 'n', null, [] ]
-        ],
-        'owner_id': owner,
-        'sentence': sentence
+            [ player2, null, 'n', null, [] ],
+            [ player3, null, 'n', null, [] ],
+            [ player4, null, 'n', null, [] ]
+        ]
     };
 
-    var element = $('#qunit-fixture .cardstories_invitation .cardstories_board');
-    $.cardstories.invitation_board(player_id, game, $('#qunit-fixture .cardstories'), element);
+    // Anonymous view
+    var element = $('.cardstories_invitation .cardstories_invitation_anonymous', root);
+    $.cardstories.invitation_display_board(null, game, element, root);
     equal($('.cardstories_sentence', element).first().text(), sentence);
-    // anonymous view, all players present
-    equal($('.cardstories_owner_seat .cardstories_player_name', element).text(), owner);
-    for(var i = 1; i <= 5; i++) {
-        equal($('.cardstories_player_seat_' + i + ' .cardstories_player_name', element).text(), 'player' + i);
+    for(var i = 1; i <= 4; i++) {
+        equal($('.cardstories_player_seat_' + i + ' .cardstories_player_name', element).text(), 'Player ' + i);
     }
-    // player view, all players present
-    player_id = player1;
-    $.cardstories.invitation_board(player_id, game, $('#qunit-fixture .cardstories'), element);
-    equal($('.cardstories_owner_seat .cardstories_player_name', element).text(), owner);
-    equal($('.cardstories_player_seat_1 .cardstories_player_name', element).text(), 'player2');
-    equal($('.cardstories_player_seat_2 .cardstories_player_name', element).text(), 'player3');
-    equal($('.cardstories_player_seat_3 .cardstories_player_name', element).text(), 'player4');
-    equal($('.cardstories_player_seat_4 .cardstories_player_name', element).text(), 'player5');
-    equal($('.cardstories_player_seat_5 .cardstories_player_name', element).text(), 'player1');
-    equal($('.cardstories_self_seat .cardstories_player_name', element).text(), 'player1');
-    ok(!$('.cardstories_player_seat_4', element).hasClass('cardstories_empty_seat'), 'seat4 is not empty');
-    // player view, one player missing
-    game.players.pop();
-    $.cardstories.invitation_board(player_id, game, $('#qunit-fixture .cardstories'), element);
-    equal($('.cardstories_owner_seat .cardstories_player_name', element).text(), owner);
-    ok(!$('.cardstories_owner_seat', element).hasClass('cardstories_empty_seat'), 'owner not empty seat');
-    equal($('.cardstories_player_seat_1 .cardstories_player_name', element).text(), 'player2');
-    ok(!$('.cardstories_player_seat_1', element).hasClass('cardstories_empty_seat'), 'seat1 not empty');
-    equal($('.cardstories_player_seat_2 .cardstories_player_name', element).text(), 'player3');
-    ok(!$('.cardstories_player_seat_2', element).hasClass('cardstories_empty_seat'), 'seat2 not empty');
-    equal($('.cardstories_player_seat_3 .cardstories_player_name', element).text(), 'player4');
-    ok(!$('.cardstories_player_seat_3', element).hasClass('cardstories_empty_seat'), 'seat3 not empty');
-    equal($('.cardstories_player_seat_4 .cardstories_player_name', element).text(), 'player5');
-    ok($('.cardstories_player_seat_4', element).hasClass('cardstories_empty_seat'), 'seat4 is empty');
-    equal($('.cardstories_self_seat .cardstories_player_name', element).text(), 'player1');
-    ok($('.cardstories_self_seat', element).hasClass('cardstories_self_seat'), 'self seat is not empty');
-});
 
-test("invitation_board_seat", 3, function() {
-    var player_id = 100;
-    var card1 = 10;
-    var card2 = 20;
-    var card3 = 30;
-    var game = {};
-
-    var element = $('#qunit-fixture .cardstories_invitation .cardstories_board .cardstories_owner_seat');
-    var player = [ 'player1', card1, 'y', card3, [card1, card2] ];
-    $.cardstories.invitation_board_seat(player_id, game, $('#qunit-fixture .cardstories'), element, player, 'owner');
-    ok(element.hasClass('cardstories_player_picked'), 'picked');
-    ok(element.hasClass('cardstories_player_voted'), 'voted');
-    ok(element.hasClass('cardstories_player_won'), 'won');
+    // Player view
+    var element = $('.cardstories_invitation .cardstories_pick', root);
+    $.cardstories.invitation_display_board(player2, game, element, root);
+    notEqual($('.cardstories_player_seat_1', element).css('display'), 'none', 'Seat 1 is visible');
+    notEqual($('.cardstories_player_seat_2', element).css('display'), 'none', 'Seat 2 is visible');
+    notEqual($('.cardstories_player_seat_3', element).css('display'), 'none', 'Seat 3 is visible');
+    notEqual($('.cardstories_player_seat_4', element).css('display'), 'none', 'Seat 4 is visible');
+    equal($('.cardstories_player_seat_5', element).css('display'), 'none', 'Seat 5 is hidden');
+    equal($('.cardstories_player_seat_1 .cardstories_player_name', element).text(), player1);
+    equal($('.cardstories_player_seat_2 .cardstories_player_name', element).text(), player2);
+    equal($('.cardstories_player_seat_3 .cardstories_player_name', element).text(), player3);
+    equal($('.cardstories_player_seat_4 .cardstories_player_name', element).text(), player4);
+    ok($('.cardstories_player_seat_2', element).hasClass('cardstories_player_seat_self'), 'self is selected');
 });
 
 test("invitation_participate", 11, function() {
@@ -1416,17 +1388,17 @@ test("vote_owner_display_board", 14, function() {
 
     $.cardstories.vote_owner_display_board(game, element, root);
 
-    notEqual($('.cardstories_friend_slot1', element).css('display'), 'none', 'first slot is visible');
-    notEqual($('.cardstories_friend_slot2', element).css('display'), 'none', 'second slot is visible');
-    notEqual($('.cardstories_friend_slot3', element).css('display'), 'none', 'third slot is visible');
-    equal($('.cardstories_friend_slot1 .cardstories_active_friend_name', element).html(), player1, 'player 1 name is set');
-    equal($('.cardstories_friend_slot2 .cardstories_active_friend_name', element).html(), player2, 'player 2 name is set');
-    equal($('.cardstories_friend_slot3 .cardstories_active_friend_name', element).html(), player3, 'player 3 name is set');
-    equal($('.cardstories_friend_slot4', element).css('display'), 'none', 'fourth slot is hidden');
-    equal($('.cardstories_friend_slot5', element).css('display'), 'none', 'fifth slot is hidden');
-    ok(!$('.cardstories_friend_slot1', element).hasClass('cardstories_active_friend_picking'), 'first slot is NOT voting');
-    ok($('.cardstories_friend_slot2', element).hasClass('cardstories_active_friend_picking'), 'second slot is voting');
-    ok($('.cardstories_friend_slot3', element).hasClass('cardstories_active_friend_voted'), 'third slot has voted');
+    notEqual($('.cardstories_player_seat_1', element).css('display'), 'none', 'first slot is visible');
+    notEqual($('.cardstories_player_seat_2', element).css('display'), 'none', 'second slot is visible');
+    notEqual($('.cardstories_player_seat_3', element).css('display'), 'none', 'third slot is visible');
+    equal($('.cardstories_player_seat_1 .cardstories_player_name', element).html(), player1, 'player 1 name is set');
+    equal($('.cardstories_player_seat_2 .cardstories_player_name', element).html(), player2, 'player 2 name is set');
+    equal($('.cardstories_player_seat_3 .cardstories_player_name', element).html(), player3, 'player 3 name is set');
+    equal($('.cardstories_player_seat_4', element).css('display'), 'none', 'fourth slot is hidden');
+    equal($('.cardstories_player_seat_5', element).css('display'), 'none', 'fifth slot is hidden');
+    ok(!$('.cardstories_player_seat_1', element).hasClass('cardstories_player_seat_picking'), 'first slot is NOT voting');
+    ok($('.cardstories_player_seat_2', element).hasClass('cardstories_player_seat_picking'), 'second slot is voting');
+    ok($('.cardstories_player_seat_3', element).hasClass('cardstories_player_seat_voted'), 'third slot has voted');
     equal($('.cardstories_card_1', element).css('display'), 'none', 'card 1 is hidden');
     notEqual($('.cardstories_card_2', element).css('display'), 'none', 'card 2 is visible');
     notEqual($('.cardstories_card_3', element).css('display'), 'none', 'card 3 is visible');
@@ -1616,24 +1588,24 @@ test("complete", 26, function() {
     $.cardstories.complete(owner_id, game, root);
     equal($('#qunit-fixture .cardstories_complete.cardstories_active').length, 1);
 
-    notEqual($('.cardstories_friend_slot1', element).css('display'), 'none', 'first slot is visible');
-    notEqual($('.cardstories_friend_slot2', element).css('display'), 'none', 'second slot is visible');
-    notEqual($('.cardstories_friend_slot3', element).css('display'), 'none', 'third slot is visible');
-    notEqual($('.cardstories_friend_slot4', element).css('display'), 'none', 'fourth slot is visible');
-    equal($('.cardstories_friend_slot1 .cardstories_active_friend_name', element).html(), player1, 'player 1 name is set');
-    equal($('.cardstories_friend_slot2 .cardstories_active_friend_name', element).html(), player2, 'player 2 name is set');
-    equal($('.cardstories_friend_slot3 .cardstories_active_friend_name', element).html(), player3, 'player 3 name is set');
-    equal($('.cardstories_friend_slot4 .cardstories_active_friend_name', element).html(), player4, 'player 4 name is set');
-    equal($('.cardstories_friend_slot5', element).css('display'), 'none', 'fifth slot is hidden');
+    notEqual($('.cardstories_player_seat_1', element).css('display'), 'none', 'first slot is visible');
+    notEqual($('.cardstories_player_seat_2', element).css('display'), 'none', 'second slot is visible');
+    notEqual($('.cardstories_player_seat_3', element).css('display'), 'none', 'third slot is visible');
+    notEqual($('.cardstories_player_seat_4', element).css('display'), 'none', 'fourth slot is visible');
+    equal($('.cardstories_player_seat_1 .cardstories_player_name', element).html(), player1, 'player 1 name is set');
+    equal($('.cardstories_player_seat_2 .cardstories_player_name', element).html(), player2, 'player 2 name is set');
+    equal($('.cardstories_player_seat_3 .cardstories_player_name', element).html(), player3, 'player 3 name is set');
+    equal($('.cardstories_player_seat_4 .cardstories_player_name', element).html(), player4, 'player 4 name is set');
+    equal($('.cardstories_player_seat_5', element).css('display'), 'none', 'fifth slot is hidden');
     notEqual($('.cardstories_card_slot_1', element).css('display'), 'none', 'card 1 is visible');
     notEqual($('.cardstories_card_slot_2', element).css('display'), 'none', 'card 2 is visible');
     notEqual($('.cardstories_card_slot_3', element).css('display'), 'none', 'card 3 is visible');
     notEqual($('.cardstories_card_slot_4', element).css('display'), 'none', 'card 4 is visible');
     equal($('.cardstories_card_slot_5', element).css('display'), 'none', 'card 5 is hidden');
-    ok($('.cardstories_friend_slot1', element).hasClass('cardstories_active_friend_won'), 'friend 1 won');
-    ok($('.cardstories_friend_slot2', element).hasClass('cardstories_active_friend_lost'), 'friend 2 lost');
-    ok($('.cardstories_friend_slot3', element).hasClass('cardstories_active_friend_lost'), 'friend 3 lost');
-    ok($('.cardstories_friend_slot4', element).hasClass('cardstories_active_friend_won'), 'friend 4 won');
+    ok($('.cardstories_player_seat_1', element).hasClass('cardstories_player_seat_won'), 'friend 1 won');
+    ok($('.cardstories_player_seat_2', element).hasClass('cardstories_player_seat_lost'), 'friend 2 lost');
+    ok($('.cardstories_player_seat_3', element).hasClass('cardstories_player_seat_lost'), 'friend 3 lost');
+    ok($('.cardstories_player_seat_4', element).hasClass('cardstories_player_seat_won'), 'friend 4 won');
     ok($('.cardstories_votes_1', element).children().length == 1, '1 vote for player 1');
     ok($('.cardstories_votes_2', element).children().length == 1, '1 vote for player 2');
     ok($('.cardstories_votes_3', element).children().length == 0, 'no votes for player 3');
@@ -1717,7 +1689,7 @@ test("advertise", 11, function() {
     ok(!submit_button.hasClass('cardstories_button_disabled'), 'button should be enabled');
 
     // clicking on invite friend button again doesn't do any harm.
-    $('.cardstories_invite_friend', element).first().click();
+    $('.cardstories_player_invite', element).first().click();
     equal(textarea.val(), text);
 
     $('.cardstories_advertise_close', advertise).click();

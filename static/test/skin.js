@@ -98,32 +98,30 @@
     } else if(skin == 'invitation_pick') {
       game = {
         'id': 100,
-        'self': [5, null, [11,12,13,14,15,16,17]],
-        'players': [
-            [ 'player1', null, 'n', 5, [] ],
-            [ 'player2', null, 'n', null, [] ],
-            [ 'player3', null, 'n', null, [] ],
-            [ 'player4', null, 'n', null, [] ],
-            [ 'player5', null, 'n', null, [] ],
-            [ 'player6', null, 'n', null, [] ]
-        ],
-        'owner_id': 'player1',
-	'sentence': 'long sentence is in the flux'
+        'owner': false,
+        'owner_id': 'Owner',
+	    'sentence': 'long sentence is in the flux',
+        'self': [32, null, [11,12,13,14,15,16,17]],
+        'players': [ [ 'Owner', null, 'n', 30, [] ],
+                     [ 'Player 1', null, 'n', 31, [] ],
+                     [ 'Player 2', null, 'n', 32, [] ],
+                     [ 'Player 3', null, 'n', 33, [] ],
+                     [ 'Player 4', null, 'n', 34, [] ],
+                     [ 'Player 5', null, 'n', 35, [] ] ]
       };
-      $.cardstories.invitation_pick('player2', game, root);
+      $.cardstories.invitation_pick('Player 2', game, root);
     } else if(skin == 'invitation_anonymous') {
       game = {
-	  'id': null,
-          'players': [
-              [ 'player1', null, 'n', 5, [] ],
-              [ 'player2', null, 'n', null, [] ],
-              [ 'player3', null, 'n', null, [] ],
-              [ 'player4', null, 'n', null, [] ],
-              [ 'player5', null, 'n', null, [] ],
-              [ 'player6', null, 'n', null, [] ]
-          ],
-          'owner_id': 'player1',
-	  'sentence': 'long sentence is in the flux'
+        'id': 100,
+        'owner': false,
+        'owner_id': 'Owner',
+	    'sentence': 'long sentence is in the flux',
+        'players': [ [ 'Owner', null, 'n', 30, [] ],
+                     [ 'Player 1', null, 'n', 31, [] ],
+                     [ 'Player 2', null, 'n', 32, [] ],
+                     [ 'Player 3', null, 'n', 33, [] ],
+                     [ 'Player 4', null, 'n', 34, [] ],
+                     [ 'Player 5', null, 'n', 35, [] ] ]
       };
       $.cardstories.invitation_anonymous('', game, root);
     } else if(skin == 'invitation_pick_wait') {

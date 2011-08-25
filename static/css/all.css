@@ -86,36 +86,12 @@
     height: 59px;
 }
 
-.cardstories .cardstories_progress .cardstories_progress_mark1 { 
-    left: 0px;
-}
-
-.cardstories .cardstories_progress .cardstories_progress_mark2 { 
-    left: 90px;
-}
-
-.cardstories .cardstories_progress .cardstories_progress_mark3 { 
-    left: 185px;
-}
-
-.cardstories .cardstories_progress .cardstories_progress_mark4 { 
-    left: 297px;
-}
-
-.cardstories .cardstories_progress .cardstories_progress_mark5 { 
-    left: 421px;
-}
-
-.cardstories .cardstories_progress .cardstories_progress_mark6 { 
-    left: 528px;
-}
-
-.cardstories .cardstories_progress .cardstories_step1,
-.cardstories .cardstories_progress .cardstories_step2,
-.cardstories .cardstories_progress .cardstories_step3,
-.cardstories .cardstories_progress .cardstories_step4,
-.cardstories .cardstories_progress .cardstories_step5,
-.cardstories .cardstories_progress .cardstories_step6 {
+.cardstories .cardstories_progress .cardstories_step_1,
+.cardstories .cardstories_progress .cardstories_step_2,
+.cardstories .cardstories_progress .cardstories_step_3,
+.cardstories .cardstories_progress .cardstories_step_4,
+.cardstories .cardstories_progress .cardstories_step_5,
+.cardstories .cardstories_progress .cardstories_step_6 {
     position: absolute;
     height: 27px;
     top: 19px;
@@ -144,54 +120,6 @@
     font-size: 27px;
 }
 
-.cardstories .cardstories_progress .cardstories_step1 {
-    left: 42px;
-}
-
-.cardstories .cardstories_progress .cardstories_step2 {
-    left: 134px;
-}
-
-.cardstories .cardstories_progress .cardstories_step3 {
-    left: 232px;
-}
-
-.cardstories .cardstories_progress .cardstories_step4 {
-    left: 324px;
-}
-
-.cardstories .cardstories_progress .cardstories_step5 {
-    left: 455px;
-}
-
-.cardstories .cardstories_progress .cardstories_step6 {
-    left: 568px;
-}
-
-.cardstories .cardstories_progress .cardstories_step1 .cardstories_step_text {
-    width: 40px;
-}
-
-.cardstories .cardstories_progress .cardstories_step2 .cardstories_step_text {
-    width: 45px;
-}
-
-.cardstories .cardstories_progress .cardstories_step3 .cardstories_step_text {
-    width: 40px;
-}
-
-.cardstories .cardstories_progress .cardstories_step4 .cardstories_step_text {
-    width: 78px;
-}
-
-.cardstories .cardstories_progress .cardstories_step5 .cardstories_step_text {
-    width: 65px;
-}
-
-.cardstories .cardstories_progress .cardstories_step6 .cardstories_step_text {
-    width: 60px;
-}
-
 .cardstories .cardstories_progress .cardstories_help {
     position: absolute;
     background: transparent url('images/b_help_on.png') no-repeat left top;
@@ -210,15 +138,140 @@
     left: 715px;
 }
 
-.cardstories .cardstories_top > div { 
-    display: inline-block;
+/* Owner progress bar. */
+
+.cardstories .cardstories_progress.owner .cardstories_progress_mark_1 { 
+    left: 0px;
 }
 
-.cardstories .cardstories_top .cardstories_progress_player > div {
-    display: inline-block;
-    border: 1px solid black;
-    padding: 3px;
-    font-size: 12pt;
+.cardstories .cardstories_progress.owner .cardstories_progress_mark_2 { 
+    left: 90px;
+}
+
+.cardstories .cardstories_progress.owner .cardstories_progress_mark_3 { 
+    left: 185px;
+}
+
+.cardstories .cardstories_progress.owner .cardstories_progress_mark_4 { 
+    left: 297px;
+}
+
+.cardstories .cardstories_progress.owner .cardstories_progress_mark_5 { 
+    left: 421px;
+}
+
+.cardstories .cardstories_progress.owner .cardstories_progress_mark_6 { 
+    left: 528px;
+}
+
+.cardstories .cardstories_progress.owner .cardstories_step_1 {
+    left: 42px;
+}
+
+.cardstories .cardstories_progress.owner .cardstories_step_2 {
+    left: 134px;
+}
+
+.cardstories .cardstories_progress.owner .cardstories_step_3 {
+    left: 232px;
+}
+
+.cardstories .cardstories_progress.owner .cardstories_step_4 {
+    left: 324px;
+}
+
+.cardstories .cardstories_progress.owner .cardstories_step_5 {
+    left: 455px;
+}
+
+.cardstories .cardstories_progress.owner .cardstories_step_6 {
+    left: 568px;
+}
+
+.cardstories .cardstories_progress.owner .cardstories_step_1 .cardstories_step_text {
+    width: 40px;
+}
+
+.cardstories .cardstories_progress.owner .cardstories_step_2 .cardstories_step_text {
+    width: 45px;
+}
+
+.cardstories .cardstories_progress.owner .cardstories_step_3 .cardstories_step_text {
+    width: 40px;
+}
+
+.cardstories .cardstories_progress.owner .cardstories_step_4 .cardstories_step_text {
+    width: 78px;
+}
+
+.cardstories .cardstories_progress.owner .cardstories_step_5 .cardstories_step_text {
+    width: 65px;
+}
+
+.cardstories .cardstories_progress.owner .cardstories_step_6 .cardstories_step_text {
+    width: 60px;
+}
+
+/* Player progress bar. */
+
+.cardstories .cardstories_progress.player .cardstories_progress_mark_1 { 
+    left: 0px;
+}
+
+.cardstories .cardstories_progress.player .cardstories_progress_mark_2 { 
+    left: 115px;
+}
+
+.cardstories .cardstories_progress.player .cardstories_progress_mark_3 { 
+    left: 245px;
+}
+
+.cardstories .cardstories_progress.player .cardstories_progress_mark_4 { 
+    left: 389px;
+}
+
+.cardstories .cardstories_progress.player .cardstories_progress_mark_5 { 
+    left: 512px;
+}
+
+.cardstories .cardstories_progress.player .cardstories_step_1 {
+    left: 42px;
+}
+
+.cardstories .cardstories_progress.player .cardstories_step_2 {
+    left: 144px;
+}
+
+.cardstories .cardstories_progress.player .cardstories_step_3 {
+    left: 280px;
+}
+
+.cardstories .cardstories_progress.player .cardstories_step_4 {
+    left: 420px;
+}
+
+.cardstories .cardstories_progress.player .cardstories_step_5 {
+    left: 555px;
+}
+
+.cardstories .cardstories_progress.player .cardstories_step_1 .cardstories_step_text {
+    width: 60px;
+}
+
+.cardstories .cardstories_progress.player .cardstories_step_2 .cardstories_step_text {
+    width: 80px;
+}
+
+.cardstories .cardstories_progress.player .cardstories_step_3 .cardstories_step_text {
+    width: 80px;
+}
+
+.cardstories .cardstories_progress.player .cardstories_step_4 .cardstories_step_text {
+    width: 78px;
+}
+
+.cardstories .cardstories_progress.player .cardstories_step_5 .cardstories_step_text {
+    width: 65px;
 }
 
 .cardstories .cardstories_pane { 
@@ -364,8 +417,8 @@
     height: 100%;
 }
 
-.cardstories .cardstories_invite_friend,
-.cardstories .cardstories_active_friend {
+.cardstories .cardstories_player_invite,
+.cardstories .cardstories_player_seat {
     position: absolute;
     display: none;
     font-size: 10px;
@@ -375,36 +428,40 @@
     height: 155px;
 }
 
-.cardstories .cardstories_active_friend {
+.cardstories .cardstories_player_seat {
     color: #E5E5E5;
 }
 
-.cardstories .cardstories_active_friend_joined {
-    background: transparent url('images/active_friend.png') no-repeat 7px 5px;
+.cardstories .cardstories_player_seat_joined {
+    background: transparent url('images/player_seat.png') no-repeat 7px 5px;
 }
 
-.cardstories .cardstories_active_friend_picking {
-    background: transparent url('images/active_friend_picking.png') no-repeat 7px 5px;
+.cardstories .cardstories_player_seat_picking {
+    background: transparent url('images/player_seat_picking.png') no-repeat 7px 5px;
 }
 
-.cardstories .cardstories_active_friend_picked {
-    background: transparent url('images/active_friend_picked.png') no-repeat 7px 5px;
+.cardstories .cardstories_player_seat_picked {
+    background: transparent url('images/player_seat_picked.png') no-repeat 7px 5px;
 }
 
-.cardstories .cardstories_active_friend_voted {
-    background: transparent url('images/active_friend_voted.png') no-repeat 7px 5px;
+.cardstories .cardstories_player_seat_voted {
+    background: transparent url('images/player_seat_voted.png') no-repeat 7px 5px;
 }
 
-.cardstories .cardstories_active_friend_lost {
-    background: transparent url('images/active_friend_loser.png') no-repeat 7px 5px;
+.cardstories .cardstories_player_seat_lost {
+    background: transparent url('images/player_seat_loser.png') no-repeat 7px 5px;
 }
 
-.cardstories .cardstories_active_friend_won {
-    background: transparent url('images/active_friend_winner.png') no-repeat 7px 5px;
+.cardstories .cardstories_player_seat_won {
+    background: transparent url('images/player_seat_winner.png') no-repeat 7px 5px;
 }
 
-.cardstories .cardstories_active_friend .cardstories_active_friend_name,
-.cardstories .cardstories_active_friend .cardstories_active_friend_status {
+.cardstories .cardstories_player_seat_self {
+    background: transparent url('images/player_seat_self.png') no-repeat 7px 5px;
+}
+
+.cardstories .cardstories_player_seat .cardstories_player_name,
+.cardstories .cardstories_player_seat .cardstories_player_status {
     position: relative;
     top: 60px;
     left: 1px;
@@ -413,27 +470,27 @@
     width: 65%;
 }
 
-.cardstories .cardstories_active_friend .cardstories_active_friend_name {
+.cardstories .cardstories_player_seat .cardstories_player_name {
     height: 26px;
     margin-bottom: 10px;
 }
 
-.cardstories .cardstories_active_friend .cardstories_active_friend_status {
+.cardstories .cardstories_player_seat .cardstories_player_status {
     height: 39px;
 }
 
-.cardstories .cardstories_active_friend .cardstories_active_friend_status_picking,
-.cardstories .cardstories_active_friend .cardstories_active_friend_status_picked,
-.cardstories .cardstories_active_friend .cardstories_active_friend_status_voted {
+.cardstories .cardstories_player_seat .cardstories_player_status_picking,
+.cardstories .cardstories_player_seat .cardstories_player_status_picked,
+.cardstories .cardstories_player_seat .cardstories_player_status_voted {
     color: #3E3E40;
 }
 
-.cardstories .cardstories_invite_friend {
+.cardstories .cardstories_player_invite {
     color:#FFFFFF;
     z-index: 2;
 }
 
-.cardstories .cardstories_invite_friend img:first-child {
+.cardstories .cardstories_player_invite img:first-child {
     position: absolute;
     top: 0px;
     left: 0px;
@@ -441,7 +498,7 @@
     height: 100%;
 }
 
-.cardstories .cardstories_invite_friend a {
+.cardstories .cardstories_player_invite a {
     display: block;
     position: absolute;
     top: 0px;
@@ -453,24 +510,24 @@
     background: url(#); /* IE quirk: make the whole button clickable. */
 }
 
-.cardstories .cardstories_invite_friend a:hover {
+.cardstories .cardstories_player_invite a:hover {
     color: #0A5F61;
 }
 
-.cardstories .cardstories_invite_friend a:active {
+.cardstories .cardstories_player_invite a:active {
     color: #008082;
 }
 
-.cardstories .cardstories_invite_friend:active .cardstories_btn_down {
+.cardstories .cardstories_player_invite:active .cardstories_btn_down {
     display: inline;
 }
 
-.cardstories .cardstories_invite_friend:active .cardstories_btn_on,
-.cardstories .cardstories_invite_friend:active .cardstories_btn_over {
+.cardstories .cardstories_player_invite:active .cardstories_btn_on,
+.cardstories .cardstories_player_invite:active .cardstories_btn_over {
     display: none;
 }
 
-.cardstories .cardstories_invite_friend a > span {
+.cardstories .cardstories_player_invite a > span {
     position: relative;
     display: block;
     top: 4.5em;
@@ -478,28 +535,28 @@
     width: 60%;
 }
 
-.cardstories .cardstories_friend_slot1,
-.cardstories .cardstories_friend_slot4 {
+.cardstories .cardstories_player_seat_1,
+.cardstories .cardstories_player_seat_4 {
     top: 88px;
 }
 
-.cardstories .cardstories_friend_slot2,
-.cardstories .cardstories_friend_slot5 {
+.cardstories .cardstories_player_seat_2,
+.cardstories .cardstories_player_seat_5 {
     top: 252px;
 }
 
-.cardstories .cardstories_friend_slot3 {
+.cardstories .cardstories_player_seat_3 {
     top: 416px;
 }
 
-.cardstories .cardstories_friend_slot1,
-.cardstories .cardstories_friend_slot2,
-.cardstories .cardstories_friend_slot3 {
+.cardstories .cardstories_player_seat_1,
+.cardstories .cardstories_player_seat_2,
+.cardstories .cardstories_player_seat_3 {
     left: 5px;
 }
 
-.cardstories .cardstories_friend_slot4,
-.cardstories .cardstories_friend_slot5 {
+.cardstories .cardstories_player_seat_4,
+.cardstories .cardstories_player_seat_5 {
     left: 687px;
 }
 
@@ -527,35 +584,7 @@
     z-index: 7;
 }
 
-.cardstories_player_seat {
-    position: absolute;
-    height: 150px;
-    width: 250px;
-    border: 1px solid black;
-}
-
-.cardstories_player_seat.cardstories_player_top_left {
-    top: 150px;
-    left: 0;
-}
-
-.cardstories_player_seat.cardstories_player_bottom_left {
-    bottom: 150px;
-    left: 0;
-}
-
-.cardstories_player_seat.cardstories_player_top_right {
-    top: 150px;
-    right: 0;
-}
-
-.cardstories_player_seat.cardstories_player_bottom_right {
-    bottom: 150px;
-    right: 0;
-}
-
-.cardstories_owner_seat {
-    background: transparent url('images/gamemaster.png') no-repeat left top;
+.cardstories_master_seat {
     position: absolute;
     bottom: 10px;
     left: 50%;
@@ -565,7 +594,15 @@
     border: 0px;
 }
 
-.cardstories_owner_seat .cardstories_nickname {
+.cardstories_master_seat.owner {
+    background: transparent url('images/master_seat_owner.png') no-repeat left top;
+}
+
+.cardstories_master_seat.player {
+    background: transparent url('images/master_seat_player.png') no-repeat left top;
+}
+
+.cardstories_master_seat .cardstories_master_name {
     width: 65px;
     height: 40px;
     top: 35px;
@@ -577,20 +614,10 @@
     text-align: center;
 }
 
-.cardstories_self_seat {
-    position: absolute;
-    bottom: 0;
-    left: 300px;
-    height: 200px;
-    width: 250px;
-    border: 1px solid black;
-}
-
 /* Change cursor to treat buttons as links */
 .cardstories_card,
 .cardstories_submit,
 .cardstories_start_story,
-.cardstories_invite_friends,
 .cardstories_ready {
     cursor: pointer;
 }
@@ -1062,7 +1089,7 @@
     width: 301px;
 }
 
-.cardstories .cardstories_create .cardstories_pick_card .cardstories_board .cardstories_cards {
+.cardstories .cardstories_cards {
     display: none;
     position: absolute;
     top: 393px;
@@ -1105,10 +1132,6 @@
     left: 0;
     width: 100%;
     height: 100%;
-}
-
-.cardstories .cardstories_create .cardstories_pick_card .cardstories_board .cardstories_cards_hand {
-    /*display: none;*/
 }
 
 /* state create : write a sentence */
@@ -1763,14 +1786,13 @@
     width: 438px;
 }
 
-.cardstories .cardstories_invitation .cardstories_owner .cardstories_cards {
-    position: absolute;
-    top: 90px;
-    left: 920px;
-    display: none;
-}
-
 /* state invitation, player point of view : pick a card */
+
+/* Temporary */
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_sentence_box,
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_cards_hand {
+    display: none; 
+}
 
 .cardstories .cardstories_invitation .cardstories_pick .cardstories_bubble_player_pick_a_card { 
     position: absolute;
@@ -1779,16 +1801,6 @@
     background: transparent url('images/player_pick_a_card.png') no-repeat left top;
     height: 347px;
     width: 1001px;
-}
-
-.cardstories .cardstories_invitation .cardstories_pick .cardstories_sentence {
-    position: absolute;
-    z-index: 1;
-    left: 380px;
-    top: 314px;
-    width: 600px;
-    font-size: 13px;
-    color: #7A6A59;
 }
 
 .cardstories .cardstories_invitation .cardstories_pick .cardstories_pick_mask_chose_a_card {
@@ -1969,16 +1981,6 @@
     width: 980px;
 }
 
-.cardstories .cardstories_vote .cardstories_voter .cardstories_sentence {
-    position: absolute;
-    z-index: 1;
-    left: 330px;
-    top: 305px;
-    width: 600px;
-    font-size: 13px;
-    color: #7A6A59;
-}
-
 .cardstories .cardstories_vote .cardstories_voter .cardstories_vote_mask_chose_a_card {
     position: absolute;
     bottom: 80px;
@@ -2001,17 +2003,6 @@
 
 .cardstories .cardstories_vote .cardstories_voter .cardstories_card_confirm {
     top: 350px;
-}
-
-/* state invitation and vote, player point of view : chose a card */
-
-.cardstories .cardstories_invitation .cardstories_pick .cardstories_cards,
-.cardstories .cardstories_vote .cardstories_voter .cardstories_cards {
-    position: absolute;
-    bottom: 15px;
-    right: 20px;
-    z-index: 1;
-    display: none;
 }
 
 /* state vote, anonymous point of view : wait for other players to vote for a card */
@@ -2048,17 +2039,9 @@
     width: 648px;
 }
 
-.cardstories .cardstories_vote .cardstories_voter_wait .cardstories_sentence { 
-    position: absolute;
-    z-index: 2;
-    left: 320px;
-    top: 300px;
-}
-
 /* state invitation and vote, player point of view : wait for others to pick or vote */
 
 .cardstories .cardstories_invitation .cardstories_pick_wait .cardstories_sentence,
-.cardstories .cardstories_invitation .cardstories_invitation_anonymous .cardstories_sentence,
 .cardstories .cardstories_vote .cardstories_vote_anonymous .cardstories_sentence,
 .cardstories .cardstories_vote .cardstories_voter_wait .cardstories_sentence {
     position: absolute;
@@ -2253,7 +2236,7 @@
     float: right;
 }
 
-.cardstories .cardstories_complete .cardstories_active_friend_status {
+.cardstories .cardstories_complete .cardstories_player_status {
     font-size: 14px;
 }
 
