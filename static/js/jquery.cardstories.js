@@ -2294,12 +2294,8 @@
                     image.img.src = image.src;
                     // If image is already loaded, trigger the load event manually.
                     // Some browsers will do this for us automatically, while others won't.
-                    if (image.img.complete) {
-                        $this.setTimeout(function() {
-                            if (image.img.onload) {
-                                image.img.onload();
-                            }
-                        }, 1);
+                    if (image.img.complete && image.img.onload) {
+                        image.img.onload();
                     } else {
                         progress_bar.show();
                     }
