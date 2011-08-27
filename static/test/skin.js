@@ -100,7 +100,7 @@
         'id': 100,
         'owner': false,
         'owner_id': 'Owner',
-	    'sentence': 'long sentence is in the flux',
+        'sentence': 'long sentence is in the flux',
         'self': [32, null, [11,12,13,14,15,16,17]],
         'players': [ [ 'Owner', null, 'n', 30, [] ],
                      [ 'Player 1', null, 'n', 31, [] ],
@@ -115,7 +115,7 @@
         'id': 100,
         'owner': false,
         'owner_id': 'Owner',
-	    'sentence': 'long sentence is in the flux',
+        'sentence': 'long sentence is in the flux',
         'players': [ [ 'Owner', null, 'n', 30, [] ],
                      [ 'Player 1', null, 'n', 31, [] ],
                      [ 'Player 2', null, 'n', 32, [] ],
@@ -126,24 +126,24 @@
       $.cardstories.invitation_anonymous('', game, root);
     } else if(skin == 'invitation_pick_wait') {
       game = {
-	'id': 100,
-	'self': [5, null, [11,12,13,14,15,16,17]],
-	'sentence': 'long sentence is in the flux'
+        'id': 100,
+        'self': [5, null, [11,12,13,14,15,16,17]],
+        'sentence': 'long sentence is in the flux'
       };
       $.cardstories.invitation_pick_wait('PLAYER1', game, root);
     } else if(skin == 'vote_voter' || skin == 'vote_voter_wait' || skin == 'vote_viewer') {
       game = {
-	'id': 100,
-	'board': [21,22,23,24,25,26],
-	'self': [23, 26, [21,12,13,14,15,16,17]],
-	'sentence': 'The sentence is the sentence'
+        'id': 100,
+        'board': [21,22,23,24,25,26],
+        'self': [23, 26, [21,12,13,14,15,16,17]],
+        'sentence': 'The sentence is the sentence'
       };
       $.cardstories[skin]('PLAYER1', game, root);
     } else if(skin == 'vote_anonymous') {
       game = {
-	  'id': null,
-	  'board': [21,22,23,24,25,26],
-	  'self': null,
+          'id': null,
+          'board': [21,22,23,24,25,26],
+          'self': null,
           'players': [
               [ 'player1', null, 'n', 5, [] ],
               [ 'player2', null, 'n', null, [] ],
@@ -153,7 +153,7 @@
               [ 'player6', null, 'n', null, [] ]
           ],
           'owner_id': 'player1',
-	  'sentence': 'The sentence is the sentence'
+          'sentence': 'The sentence is the sentence'
       };
       $.cardstories.vote_anonymous(null, game, root);
     } else if(skin == 'vote_owner') {
@@ -161,7 +161,7 @@
         'id': 100,
         'owner': true,
         'owner_id': 'Owner',
-	    'ready': false,
+        'ready': false,
         'sentence': 'the game sentence',
         'winner_card': 30,
         'board': [32,31,30,33],
@@ -176,7 +176,7 @@
         'id': 100,
         'owner': true,
         'owner_id': 'Owner',
-	    'ready': true,
+        'ready': true,
         'sentence': 'the game sentence',
         'board': [32,31,30,33,35,34],
         'winner_card': 30,
@@ -190,9 +190,9 @@
       $.cardstories.vote_owner('Owner', game, root);
     } else if(skin == 'complete') {
       game = {
-	    'id': 100,
-	    'owner': false,
-	    'ready': true,
+        'id': 100,
+        'owner': false,
+        'ready': true,
         'sentence': 'the game sentence',
         'board': [30,31,32,33],
         'winner_card': 30,
@@ -204,10 +204,10 @@
       $.cardstories.complete('voter11', game, root);
     } else if(skin == 'complete_owner') {
       game = {
-	    'id': 100,
-	    'owner': true,
+        'id': 100,
+        'owner': true,
         'owner_id': 'Owner',
-	    'ready': true,
+        'ready': true,
         'sentence': 'the game sentence',
         'board': [30,31,32,33,34,35],
         'winner_card': 30,
