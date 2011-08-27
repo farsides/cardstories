@@ -568,20 +568,56 @@
     height: 700px;
 }
 
-.cardstories .cardstories_pane .cardstories_sidebar .cardstories_deck { 
+.cardstories .cardstories_deck { 
     background: transparent url('images/card_deck_base.png') no-repeat left top;
     width: 216px;
     height: 217px;
 }
 
-.cardstories .cardstories_pane .cardstories_sidebar .cardstories_deck_cards { 
+.cardstories .cardstories_deck .cardstories_deck_cards { 
     background: transparent url('images/card_deck.png') no-repeat left top;
     position: absolute;
-    left:45px;
-    top:13px;
+    left: 45px;
+    top: 13px;
     width: 135px;
     height: 153px;
     z-index: 7;
+}
+
+.cardstories .cardstories_deck .cardstories_deck_cover {
+    display: none;
+}
+
+.cardstories .cardstories_deck img {
+    position: absolute;
+    top: 15px;
+    left: 56px;
+    width: 107px;
+    height: 142px;
+}
+
+.cardstories .cardstories_deck .cardstories_card_1 {
+    z-index: 1;
+}
+
+.cardstories .cardstories_deck .cardstories_card_2 {
+    z-index: 2;
+}
+
+.cardstories .cardstories_deck .cardstories_card_3 {
+    z-index: 3;
+}
+
+.cardstories .cardstories_deck .cardstories_card_4 {
+    z-index: 4;
+}
+
+.cardstories .cardstories_deck .cardstories_card_5 {
+    z-index: 5;
+}
+
+.cardstories .cardstories_deck .cardstories_card_6 {
+    z-index: 6;
 }
 
 .cardstories_master_seat {
@@ -881,6 +917,23 @@
 
 /* displaying a deck of cards */
 
+.cardstories .cardstories_master_cards,
+.cardstories .cardstories_cards {
+    display: none;
+    position: absolute;
+}
+
+.cardstories .cardstories_cards {
+    top: 393px;
+    left: 77px;
+}
+
+.cardstories .cardstories_master_cards {
+    top: 393px;
+    left: 150px;
+}
+
+.cardstories_master_hand img,
 .cardstories_cards_hand .cardstories_card_foreground,
 .cardstories_cards_hand .cardstories_card_background {
     position:absolute; 
@@ -1066,18 +1119,6 @@
     z-index: 1;
 }
 
-.cardstories .cardstories_create .cardstories_pick_card .cardstories_deck .cardstories_deck_cover {
-    display: none;
-}
-
-.cardstories .cardstories_create .cardstories_pick_card .cardstories_deck img {
-    position: absolute;
-    top: 15px;
-    left: 56px;
-    width: 107px;
-    height: 142px;
-}
-
 .cardstories .cardstories_create .cardstories_modal_overlay {
     display: block;
 }
@@ -1087,37 +1128,6 @@
     top: 90px;
     height: 129px;
     width: 301px;
-}
-
-.cardstories .cardstories_cards {
-    display: none;
-    position: absolute;
-    top: 393px;
-    left: 50px;
-}
-
-.cardstories_card_1 {
-    z-index: 1;
-}
-
-.cardstories_card_2 {
-    z-index: 2;
-}
-
-.cardstories_card_3 {
-    z-index: 3;
-}
-
-.cardstories_card_4 {
-    z-index: 4;
-}
-
-.cardstories_card_5 {
-    z-index: 5;
-}
-
-.cardstories_card_6 {
-    z-index: 6;
 }
 
 .cardstories .cardstories_create .cardstories_pick_card .cardstories_board .cardstories_card_flyover {
@@ -1788,10 +1798,18 @@
 
 /* state invitation, player point of view : pick a card */
 
-/* Temporary */
-.cardstories .cardstories_invitation .cardstories_pick .cardstories_sentence_box,
 .cardstories .cardstories_invitation .cardstories_pick .cardstories_cards_hand {
     display: none; 
+}
+
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_sentence_box {
+    display: none;
+    top: 280px;
+    left: 230px;
+}
+
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_modal_overlay {
+    display: block;
 }
 
 .cardstories .cardstories_invitation .cardstories_pick .cardstories_bubble_player_pick_a_card { 

@@ -241,13 +241,13 @@
             });
 
             q.queue('chain', function(next) {
-                $this.create_pick_card_animate_fly_to_deck(card_index, element, function() {next();});
+                $this.create_pick_card_animate_fly_to_deck(card_index, element, next);
             });
             q.queue('chain', function(next) {
-                $this.animate_center_picked_card(element, card_index, card_value, function() {next();});
+                $this.animate_center_picked_card(element, card_index, card_value, next);
             });
             q.queue('chain', function(next) {
-                $this.animate_progress_bar(2, element, function() {next();});
+                $this.animate_progress_bar(2, element, next);
             });
 
             // Finally, initialize the next state.
@@ -317,18 +317,12 @@
             var vertical_rise_duration = 300;
             var q = $({});
 
-            var container = $('.cardstories_cards', element);
-
-            // Grab top.
-            container.show();
-            var final_top = container.position().top;
-            container.hide();
-
             cards.each(function(i) {
                 var card = $(this);
                 var meta = card.metadata({type: 'attr', name: 'data'});
                 var starting_top = card.position().top;
                 var starting_left = card.position().left;
+                var final_top = meta.final_top;
                 var final_left = meta.final_left;
                 var keyframe_top = final_top + vertical_offset;
 
@@ -413,10 +407,12 @@
             var card_fly_velocity = 1.2;   // in pixels per milisecond
             var card_delay = 100;   // delay in ms after each subsequent card starts "flying" back to the deck
             var deck_cover = $('.cardstories_deck_cover', deck);
+            deck_cover.show();
             var final_top = deck_cover.position().top;
             var final_left = deck_cover.position().left;
             var final_width = deck_cover.width();
             var final_height = deck_cover.height();
+            deck_cover.hide();
             var deck_offset = deck.offset();
             var q = $({});
 
@@ -453,7 +449,6 @@
                         width: final_width,
                         height: final_height
                     };
-                    var count = 0;
                     card.animate(final_props, fly_duration, function() {
                         // hide the card so that non-rounded borders aren't too obvious in IE8.
                         card.hide();
@@ -1261,8 +1256,163 @@
                 $this.send_game(player_id, game.id, element, 'action=pick&player_id=' + player_id + '&game_id=' + game.id + '&card=' + card);
             };
 
+            var q = $({});
+
+            // Show a replay of the author picking a card and writing a sentence.
+            q.queue('chain', function(next) {
+                $this.invitation_replay_master(element, root, next);
+            });
+
+            q.dequeue('chain');
+
             var cards = $.map(game.self[2], function(card,index) { return {'value':card}; });
             return $this.select_cards('invitation_pick', cards, ok, element, root);
+        },
+
+        invitation_replay_master: function(element, root, cb) {
+            var $this = this;
+            var deck = $('.cardstories_deck', element);
+            var cards = $('.cardstories_card', deck);
+            var hand = $('.cardstories_master_hand', element);
+            var meta = hand.metadata({type: "attr", name: "data"});
+            var dock = $('.cardstories_master_cards', hand);
+            var deck_cover = $('.cardstories_deck_cover', deck);
+            deck_cover.show();
+            var final_pos = {
+                width: deck_cover.width(),
+                height: deck_cover.height(),
+                top: deck_cover.position().top,
+                left: deck_cover.position().left
+            };
+            deck_cover.hide();
+
+            var q = $({});
+
+            // Start by dealing cards.
+            q.queue('chain', function(next) {
+                $this.create_pick_card_animate_fly_to_board(cards, element, root, next);
+            });
+            
+            // Dockify the cards, using the jqDock "trick" to get cards to overlap:
+            // http://www.wizzud.com/jqDock/examples/example.php?f=jigsaw
+            // Only expand the dock after it's been set up.
+            q.queue('chain', function(next) {
+                var active_card = $('img', dock).eq(meta.active);
+                var count = dock.children().length;
+                var options = {
+                    size: meta.size,
+                    distance: meta.distance,
+                    setLabel: function(t, i, el) {
+                        $('<img class="cardstories_card_foreground" src="' + t + '" alt="">')
+                            .css({zIndex: count - i})
+                            .appendTo($(el).parent().css({zIndex: 2 * (count - i)}));
+                        return false;
+                    },
+                    onReady: function(ready) {
+                        active_card.jqDock('expand');
+                        // jqDock doesn't provide a hook for when expansion
+                        // finishes, so use a timeout to call next().
+                        $this.setTimeout(next, 500);
+                    }
+                };
+                dock.jqDock(options);
+            });
+
+            // Reposition selected card.
+            var original_pos;
+            q.queue('chain', function(next) {
+                var docked_cards = $('.cardstories_card', hand);
+
+                // Substitute docked cards with absolute positioned ones.
+                cards.each(function(i) {
+                    var card = $(this);
+                    var docked_card = docked_cards.find('.cardstories_card_foreground').eq(i);
+                    card.css({
+                        width: docked_card.width(),
+                        height: docked_card.height(),
+                        top: card.position().top - docked_card.height() + final_pos.height,
+                        left: docked_card.offset().left - deck.offset().left
+                    });
+
+                    // Bring selected card to front, and mark it as such.
+                    if (i === meta.active) {
+                        card.css({zIndex: 20});
+                    }
+
+                    // Hide docked version.
+                    docked_card.hide();
+                });
+
+                // Center and enlarge selected card, saving original pos.
+                var c = cards.eq(meta.active);
+                original_pos = {
+                    width: c.width(),
+                    height: c.height(),
+                    top: c.position().top,
+                    left: c.position().left
+                };
+                var l = c.position().left - ((meta.w - c.width())/2);
+                c.animate({
+                    width: meta.w,
+                    height: meta.h,
+                    top: meta.t,
+                    left: l
+                }, 500, next);
+            });
+
+            // Animate other cards back to deck.
+            q.queue('chain', function(next) {
+                var last = cards.length - 1;
+                if (last == meta.active) {
+                    last -= 1;
+                }
+                cards.each(function(i) {
+                    // Skip selected one.
+                    if (i !== meta.active) {
+                        var card = $(this);
+
+                        // The first card should start flying immediately,
+                        // but each subsequent card should be delayed.
+                        if (i !== 0) {
+                            $this.delay(q, 100, 'cardq');
+                        }
+
+                        q.queue('cardq', function(inner_next) {
+                            card.animate(final_pos, 500, function() {
+                                card.hide();
+                                if (i === last) {
+                                    next();
+                                }
+                            });
+                            inner_next();
+                        });
+                    }
+                });
+
+                q.dequeue('cardq');
+            });
+
+            // Move selected card back down.
+            q.queue('chain', function(next) {
+                var card = cards.eq(meta.active);
+                card.animate(original_pos, 500, next);
+            });
+
+            // Show story.
+            q.queue('chain', function(next) {
+                $('.cardstories_sentence_box', element).fadeIn('normal', function() {
+                    $(this).show(); // A workaround for http://bugs.jquery.com/ticket/8892
+                    next();
+                });
+            });
+
+            q.queue('chain', function(next) {
+                if (cb !== undefined) {
+                    cb();
+                }
+            });
+
+            q.dequeue('chain');
         },
 
         invitation_pick_wait: function(player_id, game, root) {

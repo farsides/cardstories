@@ -915,6 +915,41 @@ asyncTest("invitation_owner", 7, function() {
     $('#qunit-fixture .cardstories_owner .cardstories_go_vote_confirm_yes').click();
 });
 
+asyncTest("invitation_replay_master", 21, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var container = $('.cardstories_invitation', root);
+    var element = $('.cardstories_pick', container);
+    var deck = $('.cardstories_deck', element);
+    var meta = $('.cardstories_master_hand', element).metadata({type: "attr", name: "data"});
+
+    container.show();
+    element.show();
+
+    // Get start pos.
+    var start_left = $('.cardstories_deck_cover', deck).show().position().left;
+
+    ok($('.cardstories_sentence_box', element).is(':hidden'), 'Story starts hidden');
+    ok($('.cardstories_modal_overlay', element).is(':visible'), 'Modal overlay starts on');
+    $.cardstories.invitation_replay_master(element, root, function() {
+        $('.cardstories_card', deck).each(function(i) {
+            var card = $(this);
+            if (i === meta.active) {
+                ok(card.is(':visible'), 'Selected card ' + i + ' is visible');
+                notEqual(card.position().left, start_left, 'Selected card ' + i + ' was moved from start position.');
+            } else {
+                ok(card.is(':hidden'), 'Unselected card ' + i + ' is hidden');
+                equal(card.show().position().left, start_left, 'Unselected card ' + i + ' ends at start position.');
+            }
+        });
+        $('.cardstories_master_hand .cardstories_card_foreground', element).each(function(i) {
+            var card = $(this);
+            ok(card.is(':hidden'), 'Docked card ' + i + ' is hidden')
+        });
+        ok($('.cardstories_sentence_box', element).is(':visible'), 'Story is visible');
+        start();
+    });
+});
+
 asyncTest("invitation_pick", 11, function() {
     var player_id = 15;
     var owner = 150;
@@ -1822,32 +1857,29 @@ test("lobby_games without games", 1, function() {
 
 asyncTest("create_pick_card_animate", 30, function() {
     var root = $('#qunit-fixture .cardstories');
-    var element = $('.cardstories_create .cardstories_pick_card', root);
+    var container = $('.cardstories_create', root);
+    var element = $('.cardstories_pick_card', element);
     var card_specs = [{value: 1}, {value: 2}, {value: 3}, {value: 4}, {value: 5}, {value: 6}];
     var cards = $('.cardstories_deck .cardstories_card', element);
-
-    // Make sure the container (and its ancestors) are visible before measuring top and left,
-    // otherwise some versions of FF report bad values.
-    var container = $('.cardstories_cards', element).show();
-    container.parents().show();
-    var final_top = parseInt(container.css('top'), 10);
-
     var src_template = $('.cardstories_card_template', element).metadata({type: 'attr', name: 'data'}).card;
+
+    container.show();
+    element.show();
 
     cards.each(function() {
         var card = $(this);
         var meta = card.metadata({type: 'attr', name: 'data'});
-        ok(parseInt(card.css('left'), 10) < meta.final_left, 'card starts more left than its final position');
-        ok(parseInt(card.css('top'), 10) < final_top, 'card starts higher than its final position');
+        ok(card.position().left < meta.final_left, 'card starts more left than its final position');
+        ok(card.position().top < meta.final_top, 'card starts higher than its final position');
     });
 
     $.cardstories.create_pick_card_animate(card_specs, element, root, function() {
         cards.each(function(i) {
             var card = $(this);
             var meta = card.metadata({type: 'attr', name: 'data'});
-            equal(parseInt(card.css('left'), 10), meta.final_left, 'card is animated to the left position defined by its metadata');
-            equal(parseInt(card.css('top'), 10), final_top, 'card is animated to the final top position');
-            equal(card.attr('src'), src_template.supplant({card: card_specs[cards.length - i - 1].value}), 'the foregournd image is shown');
+            equal(card.position().left, meta.final_left, 'card is animated to the left position defined by its metadata');
+            equal(card.position().top, meta.final_top, 'card is animated to the final top position');
+            equal(card.attr('src'), src_template.supplant({card: card_specs[cards.length - i - 1].value}), 'the foreground image is shown');
         });
         start();
     });
