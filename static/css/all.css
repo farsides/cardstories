@@ -1800,24 +1800,6 @@
     display: block;
 }
 
-.cardstories .cardstories_invitation .cardstories_pick .cardstories_bubble_player_pick_a_card { 
-    position: absolute;
-    left: 10px;
-    top: 10px;
-    background: transparent url('images/player_pick_a_card.png') no-repeat left top;
-    height: 347px;
-    width: 1001px;
-}
-
-.cardstories .cardstories_invitation .cardstories_pick .cardstories_pick_mask_chose_a_card {
-    position: absolute;
-    bottom: 85px;
-    left: 10px;
-    background: transparent url('images/pick_mask_chose_a_card.png') no-repeat left top;
-    height: 331px;
-    width: 327px;
-}
-
 .cardstories .cardstories_invitation .cardstories_pick .cardstories_card_confirm {
     top: 350px;
 }
@@ -1834,37 +1816,7 @@
     padding: 0px 0px 4px 30px;
 }
 
-.cardstories .cardstories_invitation .cardstories_invitation_anonymous .cardstories_bubble_player_pick_a_card_wait { 
-    position: absolute;
-    z-index: 1;
-    left: 10px;
-    top: 10px;
-    background: transparent url('images/player_pick_a_card_wait.png') no-repeat left top;
-    height: 340px;
-    width: 962px;
-}
-
 /* state invitation, player point of view : wait for other players to pick a card */
-
-.cardstories .cardstories_invitation .cardstories_pick_wait .cardstories_bubble_player_pick_a_card_wait { 
-    position: absolute;
-    z-index: 1;
-    left: 10px;
-    top: 10px;
-    background: transparent url('images/player_pick_a_card_wait.png') no-repeat left top;
-    height: 340px;
-    width: 962px;
-}
-
-.cardstories .cardstories_invitation .cardstories_pick_wait .cardstories_pick_thanks { 
-    position: absolute;
-    z-index: 1;
-    left: 10px;
-    bottom: 100px;
-    background: transparent url('images/pick_thanks.png') no-repeat left top;
-    height: 267px;
-    width: 648px;
-}
 
 /* state invitation, owner point of view */
 

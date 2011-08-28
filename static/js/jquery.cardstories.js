@@ -1275,6 +1275,11 @@
                 $this.invitation_pick_deal_helper(game, element, next);
             });
 
+            // Move card and sentence box to final positions.
+            q.queue('chain', function(next) {
+                $this.invitation_pick_card_box_helper(element, root, next);
+            });
+
             q.dequeue('chain');
 
             var cards = $.map(game.self[2], function(card,index) { return {'value':card}; });
@@ -1347,7 +1352,7 @@
                         zIndex: docked_card.css('z-index')
                     });
 
-                    // Bring selected card to front, and mark it as such.
+                    // Bring selected card to front.
                     if (i === meta.active) {
                         card.css({zIndex: 20});
                     }
@@ -1477,6 +1482,36 @@
             }
 
             q.dequeue('chain');
+        },
+
+        invitation_pick_card_box_helper: function(element, root, cb) {
+            var $this = this;
+            var dest_element = $('.cardstories_invitation .cardstories_pick_wait', root);
+            var dest_sentence = $('.cardstories_sentence_box', dest_element);
+            var dest_card = $('.cardstories_picked_card', dest_element);
+            var sentence = $('.cardstories_sentence_box', element);
+            var active = $('.cardstories_master_hand', element).metadata({type: "attr", name: "data"}).active;
+            var card = $('.cardstories_deck .cardstories_card', element).eq(active);
+
+            // Grab final pos
+            dest_element.show();
+            var sentence_pos = {
+                top: dest_sentence.position().top,
+                left: dest_sentence.position().left
+            };
+            // For the card, we must compensate for the board, since it is
+            // actually inside the deck.
+            var card_pos = {
+                width: dest_card.width(),
+                height: dest_card.height(),
+                top: dest_card.position().top,
+                left: dest_card.position().left + $('.cardstories_board', element).position().left
+            };
+            dest_element.hide();
+
+            // Move them in parallel.
+            sentence.animate(sentence_pos, 500);
+            card.animate(card_pos, 500, cb); 
         },
 
         invitation_pick_wait: function(player_id, game, root) {
