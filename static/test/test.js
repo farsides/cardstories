@@ -319,7 +319,7 @@ asyncTest("animate_scale reverse", 7, function() {
 asyncTest("animate_sprite", 3, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_invitation .cardstories_owner', root);
-    var movie = $('#cardstories_player_join_1', element);
+    var movie = $('.cardstories_player_join_1', element);
     var frames = 18;
 
     equal(movie.css('display'), 'none', 'movie starts hidden');
@@ -691,7 +691,7 @@ asyncTest("invitation_owner_join_helper", 39, function() {
     };
 
     for (var i=1; i<=5; i++) {
-        equal($('#cardstories_player_join_' + i, root).css('display'), 'none', 'movie ' + i + ' starts hidden');
+        equal($('.cardstories_player_join_' + i, root).css('display'), 'none', 'movie ' + i + ' starts hidden');
     }
 
     // Count how often animate_sprite is called.
@@ -773,9 +773,9 @@ asyncTest("invitation_owner_go_vote_confirm", 28, function() {
     var confirmation_box = $('.cardstories_go_vote_confirm', element);
     var ok_button = $('.cardstories_go_vote_confirm_yes', confirmation_box);
     var cancel_button = $('.cardstories_go_vote_confirm_no', confirmation_box);
-    var pick_1 = $('#cardstories_player_pick_1', element);
-    var pick_2 = $('#cardstories_player_pick_2', element);
-    var pick_3 = $('#cardstories_player_pick_3', element);
+    var pick_1 = $('.cardstories_player_pick_1', element);
+    var pick_2 = $('.cardstories_player_pick_2', element);
+    var pick_3 = $('.cardstories_player_pick_3', element);
     var card_1 = pick_1.find('.cardstories_card');
     var card_2 = pick_2.find('.cardstories_card');
     var card_3 = pick_3.find('.cardstories_card');
@@ -807,9 +807,9 @@ asyncTest("invitation_owner_go_vote_confirm", 28, function() {
         ok(!pick_2.hasClass('cardstories_no_background'), 'pick 2 sprite is visible');
         ok(!pick_3.hasClass('cardstories_no_background'), 'pick 3 sprite is visible');
 
-        notEqual(card_1.css('display'), 'none', 'card 1 is visible after animation');
-        notEqual(card_2.css('display'), 'none', 'card 2 is visible after animation');
-        equal(card_3.css('display'), 'none', 'card 3 is not visible after animation because the player didn not pick a card');
+        ok(card_1.is(':visible'), 'card 1 is visible after animation');
+        ok(card_2.is(':visible'), 'card 2 is visible after animation');
+        ok(card_3.is(':hidden'), 'card 3 is not visible after animation because the player didn not pick a card');
 
         notEqual(card_1.position().left, final_left_1, 'card 1 is further from the slot than its final position');
         notEqual(card_2.position().left, final_left_2, 'card 2 is further from the slot than its final position');
@@ -947,6 +947,75 @@ asyncTest("invitation_replay_master", 21, function() {
         });
         ok($('.cardstories_sentence_box', element).is(':visible'), 'Story is visible');
         start();
+    });
+});
+
+asyncTest("invitation_pick_deal_helper", 38, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var container = $('.cardstories_invitation', root);
+    var element = $('.cardstories_pick', container);
+    var player1 = 'player1';
+    var player2 = 'player2';
+    var player3 = 'player3';
+    var player4 = 'player4';
+    var state1 = {
+        'owner_id': player1,
+        'ready': false,
+        'players': [ [ player1, null, 'n', null, [] ],
+                     [ player2, null, 'n', null, [] ],
+                     [ player3, null, 'n', 3, [] ] ]
+    };
+
+    var state2 = {
+        'owner_id': player1,
+        'ready': true,
+        'players': [ [ player1, null, 'n', null, [] ],
+                     [ player2, null, 'n', 2, [] ],
+                     [ player3, null, 'n', 3, [] ],
+                     [ player4, null, 'n', null, [] ] ]
+    };
+
+    container.show();
+    element.show();
+    $.cardstories.invitation_display_board(player1, state1, element, root);
+
+    for (var i=1; i<=5; i++) {
+        ok($('.cardstories_player_join_' + i, element).is(':hidden'), 'movie ' + i + ' starts hidden');
+        ok($('.cardstories_player_arms_' + i, element).is(':hidden'), 'arm ' + i + ' starts hidden');
+        ok($('.cardstories_player_pick_' + i, element).is(':hidden'), 'pick ' + i + ' starts hidden');
+    }
+
+    // Count how often animate_sprite is called.
+    $.cardstories.animate_sprite = function(movie, fps, frames, cb) {
+        ok(true, 'counting animate_sprite');
+        movie.show();
+        cb();
+    }
+
+    $.cardstories.invitation_pick_deal_helper(state1, element, function() {
+        for (var i=1; i<=2; i++) {
+            ok($('.cardstories_player_arms_' + i, element).is(':visible'), 'arm ' + i + ' is visible');
+            ok($('.cardstories_player_pick_' + i, element).is(':visible'), 'pick ' + i + ' is visible');
+        }
+        for (var i=3; i<=5; i++) {
+            ok($('.cardstories_player_arms_' + i, element).is(':hidden'), 'arm ' + i + ' is hidden');
+            ok($('.cardstories_player_pick_' + i, element).is(':hidden'), 'pick ' + i + ' is hidden');
+        }
+
+        // Call it again: animate_sprite should only be called again when
+        // necessary and the number of expected assertions should reflect this.
+        $.cardstories.invitation_display_board(player1, state2, element, root);
+        $.cardstories.invitation_pick_deal_helper(state2, element, function() {
+            for (var i=1; i<=3; i++) {
+                ok($('.cardstories_player_arms_' + i, element).is(':visible'), 'arm ' + i + ' is visible');
+                ok($('.cardstories_player_pick_' + i, element).is(':visible'), 'pick ' + i + ' is visible');
+            }
+            for (var i=4; i<=5; i++) {
+                ok($('.cardstories_player_arms_' + i, element).is(':hidden'), 'arm ' + i + ' is hidden');
+                ok($('.cardstories_player_pick_' + i, element).is(':hidden'), 'pick ' + i + ' is hidden');
+            }
+            start();
+        });
     });
 });
 

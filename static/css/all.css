@@ -1402,17 +1402,16 @@
 
 /* state invitation : owner */
 
-/* spritely doesn't like classes, only ids */
-#cardstories_player_join_1,
-#cardstories_player_join_2,
-#cardstories_player_join_3, 
-#cardstories_player_join_4, 
-#cardstories_player_join_5,
-#cardstories_player_return_1,
-#cardstories_player_return_2,
-#cardstories_player_return_3, 
-#cardstories_player_return_4, 
-#cardstories_player_return_5 {
+.cardstories_player_join_1,
+.cardstories_player_join_2,
+.cardstories_player_join_3, 
+.cardstories_player_join_4, 
+.cardstories_player_join_5,
+.cardstories_player_return_1,
+.cardstories_player_return_2,
+.cardstories_player_return_3, 
+.cardstories_player_return_4, 
+.cardstories_player_return_5 {
     display: none;
     position: absolute;
     z-index: 3;
@@ -1427,41 +1426,34 @@
     position: absolute;
 }
 
-#cardstories_player_pick_1,
-#cardstories_player_pick_2,
-#cardstories_player_pick_3, 
-#cardstories_player_pick_4, 
-#cardstories_player_pick_5 {
+.cardstories_player_pick {
     display: none;
     position: absolute;
     width: 143px;
     height: 111px;
 }
 
-#cardstories_player_pick_1,
-#cardstories_player_pick_2,
-#cardstories_player_pick_3 {
+.cardstories_player_pick_left {
     background: transparent url('images/player_pick_left.png') no-repeat left top;
 }
 
-#cardstories_player_pick_4,
-#cardstories_player_pick_5 {
+.cardstories_player_pick_right {
     background: transparent url('images/player_pick_right.png') no-repeat left top;
 }
 
-#cardstories_player_join_1,
-#cardstories_player_return_1 {
+.cardstories_player_join_1,
+.cardstories_player_return_1 {
     width: 543px;
     height: 286px;
     top: -15px;
     left: -7px;
 }
 
-#cardstories_player_join_1 {
+.cardstories_player_join_1 {
     background: transparent url('images/player_join_1.png') no-repeat left top;
 }
 
-#cardstories_player_return_1 {
+.cardstories_player_return_1 {
     background: transparent url('images/player_return_1.png') no-repeat left top;
 }
 
@@ -1473,24 +1465,24 @@
     left: 78px;
 }
 
-#cardstories_player_pick_1 { 
+.cardstories_player_pick_1 { 
     top: 133px;
     left: 91px;
 }
 
-#cardstories_player_join_2,
-#cardstories_player_return_2 { 
+.cardstories_player_join_2,
+.cardstories_player_return_2 { 
     width: 590px;
     height: 395px;
     top: 0px;
     left: -7px;
 }
 
-#cardstories_player_join_2 { 
+.cardstories_player_join_2 { 
     background: transparent url('images/player_join_2.png') no-repeat left top;
 }
 
-#cardstories_player_return_2 { 
+.cardstories_player_return_2 { 
     background: transparent url('images/player_return_2.png') no-repeat left top;
 }
 
@@ -1502,24 +1494,24 @@
     left: 77px;
 }
 
-#cardstories_player_pick_2 { 
+.cardstories_player_pick_2 { 
     top: 289px;
     left: 93px;
 }
 
-#cardstories_player_join_3,
-#cardstories_player_return_3 { 
+.cardstories_player_join_3,
+.cardstories_player_return_3 { 
     width: 606px;
     height: 547px;
     top: 10px;
     left: -6px;
 }
 
-#cardstories_player_join_3 { 
+.cardstories_player_join_3 { 
     background: transparent url('images/player_join_3.png') no-repeat left top;
 }
 
-#cardstories_player_return_3 { 
+.cardstories_player_return_3 { 
     background: transparent url('images/player_return_3.png') no-repeat left top;
 }
 
@@ -1531,24 +1523,24 @@
     left: 77px;
 }
 
-#cardstories_player_pick_3 { 
+.cardstories_player_pick_3 { 
     top: 447px;
     left: 84px;
 }
 
-#cardstories_player_join_4,
-#cardstories_player_return_4 {
+.cardstories_player_join_4,
+.cardstories_player_return_4 {
     width: 922px;
     height: 382px;
     top: -10px;
     left: 4px;
 }
 
-#cardstories_player_join_4 { 
+.cardstories_player_join_4 { 
     background: transparent url('images/player_join_4.png') no-repeat left top;
 }
 
-#cardstories_player_return_4 { 
+.cardstories_player_return_4 { 
     background: transparent url('images/player_return_4.png') no-repeat left top;
 }
 
@@ -1560,24 +1552,24 @@
     left: 640px;
 }
 
-#cardstories_player_pick_4 { 
+.cardstories_player_pick_4 { 
     top: 132px;
     left: 541px;
 }
 
-#cardstories_player_join_5,
-#cardstories_player_return_5 { 
+.cardstories_player_join_5,
+.cardstories_player_return_5 { 
     width: 921px;
     height: 433px;
     top: 8px;
     left: 10px;
 }
 
-#cardstories_player_join_5 { 
+.cardstories_player_join_5 { 
     background: transparent url('images/player_join_5.png') no-repeat left top;
 }
 
-#cardstories_player_return_5 { 
+.cardstories_player_return_5 { 
     background: transparent url('images/player_return_5.png') no-repeat left top;
 }
 
@@ -1589,32 +1581,28 @@
     left: 641px;
 }
 
-#cardstories_player_pick_5 { 
+.cardstories_player_pick_5 { 
     top: 288px;
     left: 539px;
 }
 
-.cardstories .cardstories_invitation .cardstories_owner .cardstories_player_pick {
-    position: relative;
-}
-
-.cardstories .cardstories_invitation .cardstories_owner .cardstories_player_pick.cardstories_no_background {
+.cardstories .cardstories_player_pick.cardstories_no_background {
     background-image: none !important;
 }
 
-.cardstories .cardstories_invitation .cardstories_owner .cardstories_player_pick .cardstories_card {
+.cardstories .cardstories_player_pick .cardstories_card {
     cursor: default;
     display: none;
     position: absolute;
     width: 46px;
 }
 
-.cardstories .cardstories_invitation .cardstories_owner .cardstories_player_pick_left .cardstories_card {
+.cardstories .cardstories_player_pick_left .cardstories_card {
     left: 93px;
     top: 10px;
 }
 
-.cardstories .cardstories_invitation .cardstories_owner .cardstories_player_pick_right .cardstories_card {
+.cardstories .cardstories_player_pick_right .cardstories_card {
     left: 3px;
     top: 13px;
 }

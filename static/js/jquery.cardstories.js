@@ -1094,12 +1094,12 @@
                         // Queue the animation. Create a new closure to save
                         // elements for later, when dequeueing happens.
                         q.queue(playerq, (function(slot, slotno) {return function(next) {
-                            var join_sprite = $('#cardstories_player_join_' + slotno);
+                            var join_sprite = $('.cardstories_player_join_' + slotno, element);
                             $('.cardstories_player_invite.cardstories_player_seat_' + slotno, element).fadeOut();
                             slot.show();
                             $this.animate_sprite(join_sprite, 18, 18, function() {
                                 $('.cardstories_player_arms_' + slotno, element).show();
-                                $('#cardstories_player_pick_' + slotno, element).show();
+                                $('.cardstories_player_pick_' + slotno, element).show();
                                 join_sprite.hide();
                                 next();
                             });
@@ -1139,7 +1139,7 @@
                                 status.removeClass('cardstories_player_status_picking');
                                 status.addClass('cardstories_player_status_picked');
                                 status.html('has picked a card!');
-                                var pick_sprite = $('#cardstories_player_pick_' + slotno);
+                                var pick_sprite = $('.cardstories_player_pick_' + slotno, element);
                                 $this.animate_sprite(pick_sprite, 18, 7, function() {
                                     pick_sprite.find('.cardstories_card').show();
                                     next();
@@ -1206,8 +1206,8 @@
                             }
 
                             q.queue('chain', (function(slotno) {return function(next) {
-                                $('#cardstories_player_pick_' + slotno, element).addClass('cardstories_no_background');
-                                var return_sprite = $('#cardstories_player_return_' + slotno);
+                                $('.cardstories_player_pick_' + slotno, element).addClass('cardstories_no_background');
+                                var return_sprite = $('.cardstories_player_return_' + slotno, element);
                                 var is_last_slot = slotno === nr_of_slots;
                                 $this.animate_sprite(return_sprite, 18, 18, function() {
                                     return_sprite.hide();
@@ -1250,17 +1250,29 @@
             this.set_active(root, element);
             this.display_progress_bar('player', 1, element, root);
             this.display_master_name(game.owner_id, element);
-            this.invitation_display_board(player_id, game, element, root);
 
             var ok = function(card) {
                 $this.send_game(player_id, game.id, element, 'action=pick&player_id=' + player_id + '&game_id=' + game.id + '&card=' + card);
             };
 
+            // Display the board.
+            this.invitation_display_board(player_id, game, element, root);
+
             var q = $({});
 
-            // Show a replay of the author picking a card and writing a sentence.
+            // Only show initial animations once.
+            if (!element.hasClass('cardstories_noop_init')) {
+                element.addClass('cardstories_noop_init');
+                
+                // Show a replay of the author picking a card and writing a sentence.
+                q.queue('chain', function(next) {
+                    $this.invitation_replay_master(element, root, next);
+                });
+            }
+
+            // Show players being dealt cards.
             q.queue('chain', function(next) {
-                $this.invitation_replay_master(element, root, next);
+                $this.invitation_pick_deal_helper(game, element, next);
             });
 
             q.dequeue('chain');
@@ -1412,6 +1424,57 @@
                     cb();
                 }
             });
+
+            q.dequeue('chain');
+        },
+
+        invitation_pick_deal_helper: function(game, element, cb) {
+            var $this = this;
+            var last = game.players.length - 1;
+            var q = $({});
+            var delay_next = false;
+            for (var i=0, seatno=0; i < game.players.length; i++) {
+                var playerq = 'player' + i;
+
+                // Delay this player, but only if there was at least one change
+                // displayed for the previous ones.
+                if (delay_next) {
+                    $this.delay(q, 350, 'chain');
+                    delay_next = false;
+                }
+
+                // Skip the owner.
+                if (game.players[i][0] != game.owner_id) {
+                    seatno++;
+
+                    // Joining animation.
+                    var seat = $('.cardstories_player_seat.cardstories_player_seat_' + seatno, element);
+                    if (!seat.hasClass('cardstories_noop_join')) {
+                        seat.addClass('cardstories_noop_join');
+                        delay_next = true;
+                        q.queue(playerq, (function(seat, seatno) {return function(next) {
+                            var join_sprite = $('.cardstories_player_join_' + seatno, element);
+                            $this.animate_sprite(join_sprite, 18, 18, function() {
+                                $('.cardstories_player_arms_' + seatno, element).show();
+                                $('.cardstories_player_pick_' + seatno, element).show();
+                                join_sprite.hide();
+                                next();
+                            });
+                        }})(seat, seatno));
+                    }
+                }
+
+                // If this is the last player, insert our on-complete callback.
+                if (i === last) {
+                    q.queue(playerq, function(next) {cb();});
+                }
+
+                // Queue the dequeueing of this player's queue. ;)
+                q.queue('chain', (function(playerq) {return function(next) {
+                    q.dequeue(playerq);
+                    next();
+                }})(playerq));
+            }
 
             q.dequeue('chain');
         },
