@@ -1858,7 +1858,7 @@ test("lobby_games without games", 1, function() {
 asyncTest("create_pick_card_animate", 30, function() {
     var root = $('#qunit-fixture .cardstories');
     var container = $('.cardstories_create', root);
-    var element = $('.cardstories_pick_card', element);
+    var element = $('.cardstories_pick_card', container);
     var card_specs = [{value: 1}, {value: 2}, {value: 3}, {value: 4}, {value: 5}, {value: 6}];
     var cards = $('.cardstories_deck .cardstories_card', element);
     var src_template = $('.cardstories_card_template', element).metadata({type: 'attr', name: 'data'}).card;

@@ -1331,7 +1331,8 @@
                         width: docked_card.width(),
                         height: docked_card.height(),
                         top: card.position().top - docked_card.height() + final_pos.height,
-                        left: docked_card.offset().left - deck.offset().left
+                        left: docked_card.offset().left - deck.offset().left,
+                        zIndex: docked_card.css('z-index')
                     });
 
                     // Bring selected card to front, and mark it as such.
