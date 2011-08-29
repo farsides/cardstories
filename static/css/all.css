@@ -304,6 +304,11 @@
     opacity: 0;
 }
 
+.cardstories .cardstories_modal_overlay.milk {
+    filter: alpha(opacity=60) !important;
+    opacity: 0.6;
+}
+
 .cardstories .cardstories_modal {
     display: none;
     position: absolute;
@@ -479,9 +484,10 @@
     height: 39px;
 }
 
-.cardstories .cardstories_player_seat .cardstories_player_status_picking,
-.cardstories .cardstories_player_seat .cardstories_player_status_picked,
-.cardstories .cardstories_player_seat .cardstories_player_status_voted {
+.cardstories .cardstories_player_seat_self,
+.cardstories .cardstories_player_seat_voted .cardstories_player_status,
+.cardstories .cardstories_player_seat_picked .cardstories_player_status,
+.cardstories .cardstories_player_seat_picking  .cardstories_player_status {
     color: #3E3E40;
 }
 
@@ -1786,10 +1792,6 @@
 
 /* state invitation, player point of view : pick a card */
 
-.cardstories .cardstories_invitation .cardstories_pick .cardstories_cards_hand {
-    display: none; 
-}
-
 .cardstories .cardstories_invitation .cardstories_pick .cardstories_sentence_box {
     display: none;
     top: 280px;
@@ -1805,6 +1807,64 @@
     top: 100px;
     height: 129px;
     width: 321px;
+}
+
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_cards {
+    top: 260px;
+    left: 123px;
+    z-index: 9999;
+}
+
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_card_backs {
+    display: none;
+    position: absolute;
+    top: 260px;
+    left: 160px;
+    z-index: 9999;
+}
+
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_card_backs > img {
+    position: absolute;
+    width: 107px;
+    height: 142px;
+    top: 0px;
+    left: 0px;
+}
+
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_card_backs .cardstories_card_1 {
+    left: 0px;
+}
+
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_card_backs .cardstories_card_2 {
+    left: 70px;
+}
+
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_card_backs .cardstories_card_3 {
+    left: 140px;
+}
+
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_card_backs .cardstories_card_4 {
+    left: 210px;
+}
+
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_card_backs .cardstories_card_5 {
+    left: 280px;
+}
+
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_card_backs .cardstories_card_6 {
+    left: 350px;
+}
+
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_modal_overlay.milk { 
+    z-index: 0;
+}
+
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_player_seat_self { 
+    z-index: 1;
+}
+
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_card_confirm { 
+    top: 70px;
 }
 
 /* state invitation, anonymous view : wait for others */
