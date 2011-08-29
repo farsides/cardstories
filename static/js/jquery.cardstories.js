@@ -1268,17 +1268,22 @@
                 q.queue('chain', function(next) {
                     $this.invitation_replay_master(element, root, next);
                 });
+
+                // Show players being dealt cards.
+                q.queue('chain', function(next) {
+                    $this.invitation_pick_deal_helper(game, element, next);
+                });
+
+                // Move card and sentence box to final positions.
+                q.queue('chain', function(next) {
+                    $this.invitation_pick_card_box_helper(element, root, next);
+                });
+
+                // Show the modal info box.
+                q.queue('chain', function(next) {
+                    $this.display_modal($('.cardstories_info', element), $('.cardstories_modal_overlay', element), next);
+                });
             }
-
-            // Show players being dealt cards.
-            q.queue('chain', function(next) {
-                $this.invitation_pick_deal_helper(game, element, next);
-            });
-
-            // Move card and sentence box to final positions.
-            q.queue('chain', function(next) {
-                $this.invitation_pick_card_box_helper(element, root, next);
-            });
 
             q.dequeue('chain');
 

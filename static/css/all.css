@@ -1800,8 +1800,11 @@
     display: block;
 }
 
-.cardstories .cardstories_invitation .cardstories_pick .cardstories_card_confirm {
-    top: 350px;
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_info { 
+    left: 220px;
+    top: 100px;
+    height: 129px;
+    width: 321px;
 }
 
 /* state invitation, anonymous view : wait for others */
