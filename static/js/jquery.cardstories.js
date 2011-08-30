@@ -2632,12 +2632,13 @@
                         update_progress();
                         // Append image to the DOM otherwise some browsers won't cache it.
                         $('<img/>').attr('src', image.src).appendTo(preloaded_images_div);
-                        if (is_last) {
+                        if (!is_last) {
+                            load_image(i + 1);
+                        }
+                        if (loaded_count === images.length) {
                             progress_bar.hide();
                             preloaded_images_div.addClass('cardstories_loaded').removeClass('cardstories_in_progress');
                             cb();
-                        } else {
-                            load_image(i + 1);
                         }
                     }, 1);
                 };
