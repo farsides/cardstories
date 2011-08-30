@@ -1271,12 +1271,10 @@
                     $this.display_modal($('.cardstories_info', element), $('.cardstories_modal_overlay', element), next, true);
                 });
 
-                // TODO deal player's cards
-                
                 // Morph cards into dock.
                 var card_specs = $.map(game.self[2], function(card, index) { return {'value': card}; });
                 q.queue('chain', function(next) {
-                    $this.invitation_pick_dock_helper(card_specs, element, next);
+                    $this.invitation_pick_dock_helper(player_id, game, card_specs, element, next);
                 });
 
                 // Set up the dock itself and continue immediately, so the
@@ -1533,7 +1531,7 @@
             card.animate(card_pos, 500, cb); 
         },
 
-        invitation_pick_dock_helper: function(card_specs, element, cb) {
+        invitation_pick_dock_helper: function(player_id, game, card_specs, element, cb) {
             var $this = this;
             var container = $('.cardstories_card_backs', element);
             var cards = $('img', container);
@@ -1541,10 +1539,8 @@
             var src_template = $('.cardstories_cards_hand .cardstories_card_template', element).metadata({type: 'attr', name: 'data'}).card;
             var turnaround_duration = 600;
 
-            // TODO: hide sprite.
-            container.show();
-
             // Save initial positions, calculate intermediate ones.
+            container.show();
             var init_pos = [];
             var mid_pos = [];
             cards.each(function(i) {
@@ -1558,12 +1554,35 @@
                     left: card.position().left + card.width()/2
                 });
             });
+            container.hide();
+
+            // What seat are we in?
+            var seatno=0;
+            for (var i=0; i < game.players.length; i++) {
+                if (game.owner_id != game.players[i][0]) {
+                    seatno++;
+                    if (player_id == game.players[i][0]) {
+                        break;
+                    }
+                }
+            }
+            var hand2dock_sprite = $('.cardstories_player_hand2dock_' + seatno, element);
+            var pick_sprite = $('.cardstories_player_pick_' + seatno, element);
 
             var q = $({});
+
+            // Deal cards from hands to dock.
+            q.queue('chain', function(next) {
+                pick_sprite.hide();
+                hand2dock_sprite.show();
+                $this.animate_sprite(hand2dock_sprite, 18, 19, next);
+            });
 
             // Morph cards out, switching image to actual right one.  At the
             // same time, show milky modal overlay.
             q.queue('chain', function(next) {
+                hand2dock_sprite.hide();
+                container.show();
                 $('.cardstories_modal_overlay', element)
                     .addClass('milk')
                     .fadeIn(turnaround_duration);

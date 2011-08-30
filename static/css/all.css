@@ -1592,8 +1592,47 @@
     left: 539px;
 }
 
+.cardstories_player_hand2dock {
+    display: none;
+    position: absolute;
+    width: 608px;
+    height: 351px;
+}
+
+.cardstories_player_hand2dock_1 {
+    background: transparent url('images/player_hand2dock_1.png') no-repeat left top;
+    top: 114px;
+    left: 55px;
+}
+
+.cardstories_player_hand2dock_2 {
+    background: transparent url('images/player_hand2dock_2.png') no-repeat left top;
+    top: 162px;
+    left: 56px;
+}
+
+.cardstories_player_hand2dock_3 {
+    background: transparent url('images/player_hand2dock_3.png') no-repeat left top;
+    top: 222px;
+    left: 61px;
+}
+
+.cardstories_player_hand2dock_4 {
+    background: transparent url('images/player_hand2dock_4.png') no-repeat left top;
+    top: 76px;
+    left: 140px;
+}
+
+.cardstories_player_hand2dock_5 {
+    background: transparent url('images/player_hand2dock_5.png') no-repeat left top;
+    top: 160px;
+    left: 120px;
+}
+
 .cardstories .cardstories_player_pick.cardstories_no_background {
     background-image: none !important;
+    top: 114px;
+    left: 55px;
 }
 
 .cardstories .cardstories_player_pick .cardstories_card {

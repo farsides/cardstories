@@ -101,7 +101,7 @@
         'owner': false,
         'owner_id': 'Owner',
         'sentence': 'long sentence is in the flux',
-        'self': [32, null, [11,12,13,14,15,16,17]],
+        'self': [35, null, [11,12,13,14,15,16,17]],
         'players': [ [ 'Owner', null, 'n', 30, [] ],
                      [ 'Player 1', null, 'n', 31, [] ],
                      [ 'Player 2', null, 'n', 32, [] ],
@@ -109,7 +109,7 @@
                      [ 'Player 4', null, 'n', 34, [] ],
                      [ 'Player 5', null, 'n', 35, [] ] ]
       };
-      $.cardstories.invitation_pick('Player 2', game, root);
+      $.cardstories.invitation_pick('Player 5', game, root);
     } else if(skin == 'invitation_anonymous') {
       game = {
         'id': 100,
