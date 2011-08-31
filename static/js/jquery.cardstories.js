@@ -917,6 +917,7 @@
         },
 
         invitation: function(player_id, game, root) {
+            var $this = this;
             var deferred;
             if(game.owner) {
                 deferred = this.invitation_owner(player_id, game, root);
@@ -935,11 +936,16 @@
                     }
                 }
             }
-            this.poll({ 'modified': game.modified, 'game_id': game.id, 'player_id': player_id }, root);
+
+            // Only execute the poll if deferred was resolved successfully.
+            deferred.done(function() {
+                $this.poll({ 'modified': game.modified, 'game_id': game.id, 'player_id': player_id }, root);
+            });
+
             return deferred;
         },
 
-        invitation_owner: function(player_id, game, root, cb) {
+        invitation_owner: function(player_id, game, root) {
             var $this = this;
             var element = $('.cardstories_invitation .cardstories_owner', root);
             this.notify_active(root, element, 'invitation_owner');
@@ -961,6 +967,7 @@
                 });
             }
 
+            var deferred = $.Deferred();
             var q = $({});
 
             // Display the modal.
@@ -975,14 +982,17 @@
 
             // Show players joining and picking cards.
             q.queue('chain', function(next) {
-                $this.invitation_owner_join_helper(player_id, game, element, root, function() {
-                    if (cb !== undefined) {
-                        cb();
-                    }
-                });
+                $this.invitation_owner_join_helper(player_id, game, element, root, next);
+            });
+
+            // Resolve deferred.
+            q.queue('chain', function(next) {
+                deferred.resolve();
             });
 
             q.dequeue('chain');
+
+            return deferred;
         },
 
         invitation_owner_modal_helper: function(modal, overlay, cb) {
@@ -1242,9 +1252,8 @@
             // Display the board.
             this.invitation_display_board(player_id, game, element, root, true);
 
-            // Deferred for unit tests.
             var deferred = $.Deferred();
-
+            var resolve = false;
             var q = $({});
 
             // Only show initial animations once.
@@ -1285,6 +1294,8 @@
                     });
                     next();
                 });
+            } else {
+                resolve = true;
             }
 
             // Once the player's set up, update board status as players join.
@@ -1293,9 +1304,16 @@
                 $this.invitation_pick_deal_helper(game, element, next);
             });
 
+            // Resolve deferred, if we're not initializing.
+            if (resolve) {
+                q.queue('chain', function(next) {
+                    deferred.resolve();
+                });
+            }
+
             q.dequeue('chain');
 
-            // What happens when the user clicks ok.
+            // Send game when the user clicks ok.
             var ok = function(card_value, card_index) {
                 $this.send_game(player_id, game.id, element, 'action=pick&player_id=' + player_id + '&game_id=' + game.id + '&card=' + card_value);
             };
@@ -1630,6 +1648,7 @@
             $('.cardstories_card_change', element).unbind('click').click(function() {
                 $this.invitation_pick(player_id, game, root);
             });
+            return $.Deferred().resolve();
         },
 
         select_cards: function(id, cards, ok, element, root, start_collapsed) {
@@ -1753,18 +1772,21 @@
         confirm_participate: false,
 
         invitation_participate: function(player_id, game, root) {
+            var $this = this;
             var element = $('.cardstories_invitation .cardstories_participate', root);
             if(this.confirm_participate) {
-              var $this = this;
-              this.notify_active(root, element, 'invitation_participate');
-              this.set_active(root, element);
-              $('.cardstories_sentence', element).text(game.sentence);
-              $('input[type=submit]', element).click(function() {
-                  $this.send_game(player_id, game.id, element, 'action=participate&player_id=' + player_id + '&game_id=' + game.id);
+                this.notify_active(root, element, 'invitation_participate');
+                this.set_active(root, element);
+                $('.cardstories_sentence', element).text(game.sentence);
+                $('input[type=submit]', element).click(function() {
+                    $this.send_game(player_id, game.id, element, 'action=participate&player_id=' + player_id + '&game_id=' + game.id);
                 });
             } else {
-              this.send_game(player_id, game.id, element, 'action=participate&player_id=' + player_id + '&game_id=' + game.id);
+                $this.send_game(player_id, game.id, element, 'action=participate&player_id=' + player_id + '&game_id=' + game.id);
             }
+
+            // There's no need to poll after send_game().
+            return $.Deferred().reject();
         },
 
         invitation_anonymous: function(player_id, game, root) {
@@ -1775,6 +1797,7 @@
             this.display_progress_bar('player', 1, element, root);
             this.display_master_name(game.owner_id, element);
             this.invitation_display_board(player_id, game, element, root, true);
+            return $.Deferred().resolve();
         },
 
         invitation_display_board: function(player_id, game, element, root, setup) {
@@ -1808,7 +1831,7 @@
         },
 
         vote: function(player_id, game, root) {
-            var poll = true;
+            var $this = this;
             var deferred;
             if(game.owner) {
                 deferred = this.vote_owner(player_id, game, root);
@@ -1816,8 +1839,6 @@
                 if(game.self !== null && game.self !== undefined) {
                     if(game.self[1] === null) {
                         deferred = this.vote_voter(player_id, game, root);
-                        // do not disturb a voting player while (s)he is voting
-                        poll = false;
                     } else {
                         deferred = this.vote_voter_wait(player_id, game, root);
                     }
@@ -1829,9 +1850,12 @@
                     }
                 }
             }
-            if(poll) {
-                this.poll({ 'modified': game.modified, 'game_id': game.id, 'player_id': player_id }, root);
-            }
+
+            // Only call poll if deferred was resolved successfully.
+            deferred.done(function() {
+                $this.poll({ 'modified': game.modified, 'game_id': game.id, 'player_id': player_id }, root);
+            });
+
             return deferred;
         },
 
@@ -1846,6 +1870,7 @@
                 var c = 'cardstories_card cardstories_card' + cards[index] + ' {card:' + cards[index] + '}';
                 $(this).attr('class', c);
             });
+            return $.Deferred().resolve();
         },
 
         vote_voter: function(player_id, game, root) {
@@ -1869,7 +1894,11 @@
                 }
                 cards.push(card);
             }
-            return $this.select_cards('vote_voter', cards, ok, element, root);
+            var deferred = $.Deferred();
+            $this.select_cards('vote_voter', cards, ok, element, root, false).done(function() {
+                deferred.resolve();
+            });
+            return deferred;
         },
 
         vote_voter_wait: function(player_id, game, root) {
@@ -1883,6 +1912,7 @@
             $('.cardstories_card_change', element).unbind('click').click(function() {
                 $this.vote_voter(player_id, game, root);
             });
+            return $.Deferred().resolve();
         },
 
         vote_anonymous: function(player_id, game, root) {
@@ -1891,6 +1921,7 @@
             this.notify_active(root, element, 'vote_anonymous');
             this.set_active(root, element);
             $('.cardstories_sentence', element).text(game.sentence);
+            return $.Deferred().resolve();
         },
 
         vote_owner: function(player_id, game, root) {
@@ -1922,11 +1953,12 @@
 
             $this.vote_owner_display_board(game, element, root);
 
+            var deferred = $.Deferred();
+            var q = $({});
+
             // Only show initial animations once.
             if (!element.hasClass('cardstories_noop_init')) {
                 element.addClass('cardstories_noop_init');
-                
-                var q = $({});
 
                 // Morph owner card.
                 q.queue('chain', function(next) {
@@ -1947,9 +1979,16 @@
                 q.queue('chain', function(next) {
                     $this.animate_scale(false, 5, 300, announce, next);
                 });
-                
-                q.dequeue('chain');
             }
+
+            // Resolve deferred.
+            q.queue('chain', function(next) {
+                deferred.resolve();
+            });
+
+            q.dequeue('chain');
+
+            return deferred;
         },
 
         vote_owner_results_confirm: function(player_id, game, element, root) {
