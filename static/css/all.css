@@ -1595,38 +1595,38 @@
 .cardstories_player_hand2dock {
     display: none;
     position: absolute;
-    width: 608px;
-    height: 351px;
+    top: 0px;
+    left: 0px;
 }
 
 .cardstories_player_hand2dock_1 {
     background: transparent url('images/player_hand2dock_1.png') no-repeat left top;
-    top: 114px;
-    left: 55px;
+    width: 634px;
+    height: 438px;
 }
 
 .cardstories_player_hand2dock_2 {
     background: transparent url('images/player_hand2dock_2.png') no-repeat left top;
-    top: 162px;
-    left: 56px;
+    width: 667px;
+    height: 469px;
 }
 
 .cardstories_player_hand2dock_3 {
     background: transparent url('images/player_hand2dock_3.png') no-repeat left top;
-    top: 222px;
-    left: 61px;
+    width: 639px;
+    height: 607px;
 }
 
 .cardstories_player_hand2dock_4 {
     background: transparent url('images/player_hand2dock_4.png') no-repeat left top;
-    top: 76px;
-    left: 140px;
+    width: 706px;
+    height: 466px;
 }
 
 .cardstories_player_hand2dock_5 {
     background: transparent url('images/player_hand2dock_5.png') no-repeat left top;
-    top: 160px;
-    left: 120px;
+    width: 706px;
+    height: 466px;
 }
 
 .cardstories .cardstories_player_pick.cardstories_no_background {
