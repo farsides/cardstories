@@ -1648,6 +1648,11 @@
             this.display_progress_bar('player', 2, element, root);
             this.display_master_name(game.owner_id, element);
             this.invitation_display_board(player_id, game, element, root, true);
+
+            var modal = $('.cardstories_modal', element);
+            var overlay = $('.cardstories_modal_overlay', element);
+            this.display_modal(modal, overlay);
+
             this.invitation_pick_wait_picked_helper(player_id, game, element, root, function() {
                 deferred.resolve();
             });

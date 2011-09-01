@@ -2147,6 +2147,19 @@
     height: 100%;
 }
 
+.cardstories .cardstories_invitation .cardstories_pick_wait .cardstories_modal {
+    left: 235px;
+    top: 185px;
+    height: 145px;
+    width: 300px;
+}
+
+.cardstories .cardstories_invitation .cardstories_pick_wait .cardstories_modal .cardstories_modal_h2 {
+    width: 75%;
+    margin: 1em auto 1em auto;
+}
+
+
 /* state complete */
 
 .cardstories .cardstories_envelope {
