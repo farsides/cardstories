@@ -1101,19 +1101,24 @@ asyncTest("invitation_pick", 10, function() {
     });
 });
 
-test("invitation_pick_wait", 7, function() {
-    var player_id = 15;
-    var owner = 150;
+test("invitation_pick_wait", 23, function() {
+    var player_id = 'The Player';
+    var player2_id = 'Player 2';
+    var player3_id = 'Player 3';
+    var owner_id = 'The Owner';
     var game_id = 101;
     var picked = 5;
-    var cards = [1,2,3,4,picked,5];
+    var cards = [1, 2, 3, 4, picked, 5];
     var sentence = 'SENTENCE';
 
     var game = {
         'id': game_id,
+        'owner_id': owner_id,
         'players': [
-            [ owner, null, 'n', null, [] ],
-            [ player_id, null, 'n', null, [] ]
+            [ owner_id, null, 'n', null, [] ],
+            [ player_id, null, 'n', picked, [] ],
+            [ player2_id, null, 'n', null, [] ],
+            [ player3_id, null, 'n', '', [] ]
         ],
         'self': [picked, null, cards],
         'sentence': sentence
@@ -1124,16 +1129,50 @@ test("invitation_pick_wait", 7, function() {
         equal(new_poll, undefined, 'poll_ignore metadata not set');
     };
 
-    var element = $('#qunit-fixture .cardstories_invitation .cardstories_pick_wait');
-    equal($(element).hasClass('cardstories_active'), false, 'pick_wait not active');
-    $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
-    equal($(element).hasClass('cardstories_active'), true, 'pick_wait active');
-    equal($('.cardstories_sentence', element).text(), sentence);
-    equal($('.cardstories_card', element).metadata().card, picked);
-    var element_pick = $('#qunit-fixture .cardstories_invitation .cardstories_pick');
-    equal($(element_pick).hasClass('cardstories_active'), false, 'pick not active');
-    $('.cardstories_card_change', element).click();
-    //equal($(element_pick).hasClass('cardstories_active'), true, 'pick active');
+    var animations_played = 0;
+    $.cardstories.animate_sprite = function(movie, fps, frames, cb) {
+        animations_played++;
+        cb();
+    };
+
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_invitation .cardstories_pick_wait', root);
+    var element_pick = $('.cardstories_invitation .cardstories_pick', root);
+    var seat1 = $('.cardstories_player_seat_1', element);
+    var seat2 = $('.cardstories_player_seat_2', element);
+    var seat3 = $('.cardstories_player_seat_3', element);
+    var seat4 = $('.cardstories_player_seat_4', element);
+    var seat5 = $('.cardstories_player_seat_5', element);
+    var pick1 = $('.cardstories_player_pick_1', element);
+    var pick2 = $('.cardstories_player_pick_2', element);
+    var pick3 = $('.cardstories_player_pick_3', element);
+
+    equal(element.hasClass('cardstories_active'), false, 'pick_wait not active');
+
+    $.cardstories.invitation(player_id, game, root).done(function() {
+        equal(animations_played, 1, 'only one animation should be played (player3 picking a card)');
+        equal(element.hasClass('cardstories_active'), true, 'pick_wait active');
+        equal(element_pick.hasClass('cardstories_active'), false, 'pick not active');
+        equal($('.cardstories_sentence', element).text(), sentence, 'sentence is set');
+        equal(seat1.css('display'), 'block', 'seat1 is visible');
+        equal(seat2.css('display'), 'block', 'seat2 is visible');
+        equal(seat3.css('display'), 'block', 'seat3 is visible');
+        equal(seat4.css('display'), 'none', 'seat4 is not visible');
+        equal(seat5.css('display'), 'none', 'seat5 is not visible');
+        equal(seat1.find('.cardstories_player_name').text(), player_id, "player's id is displayed");
+        equal(seat2.find('.cardstories_player_name').text(), player2_id, "player2's id is displayed");
+        equal(seat3.find('.cardstories_player_name').text(), player3_id, "player3's id is displayed");
+        var src_template = $('.cardstories_player_self_picked_card', pick1).metadata({type: 'attr', name: 'data'}).card;
+        equal($('.cardstories_card_foreground', pick1).attr('src'), src_template.supplant({card: picked}), "current player's card is displayed");
+        ok(!seat2.hasClass('cardstories_player_seat_waiting'), 'player2 is not in waiting state since he has not picked a card yet');
+        ok(seat3.hasClass('cardstories_player_seat_waiting'), 'player3 is in waiting state since he already picked a card');
+        equal($('.cardstories_card', pick2).css('display'), 'none', "player2's card is not visible since he has not picked it yet");
+        notEqual($('.cardstories_card', pick3).css('display'), 'none', "player3's card is visible since he has already picked it");
+
+        $.cardstories.invitation(player_id, game, root).done(function() {
+            equal(animations_played, 1, 'calling invatiation multiple times doesn not replay the animations');
+        });
+    });
 });
 
 test("invitation_anonymous", 2, function() {

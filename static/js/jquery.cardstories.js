@@ -1638,17 +1638,21 @@
         },
 
         invitation_pick_wait: function(player_id, game, root) {
-            var $this = this;
             var element = $('.cardstories_invitation .cardstories_pick_wait', root);
+            var deferred = $.Deferred();
             this.notify_active(root, element, 'invitation_pick_wait');
             this.set_active(root, element);
+            element.show(); // Because it was hidden in invitation_pick_card_box_helper.
             $('.cardstories_sentence', element).text(game.sentence);
-            var card = game.self[0];
-            $('.cardstories_card', element).attr('class', 'cardstories_card cardstories_wait_card' + card + ' {card:' + card + '}');
-            $('.cardstories_card_change', element).unbind('click').click(function() {
-                $this.invitation_pick(player_id, game, root);
+
+            this.display_progress_bar('player', 2, element, root);
+            this.display_master_name(game.owner_id, element);
+            this.invitation_display_board(player_id, game, element, root, true);
+            this.invitation_pick_wait_picked_helper(player_id, game, element, root, function() {
+                deferred.resolve();
             });
-            return $.Deferred().resolve();
+
+            return deferred;
         },
 
         select_cards: function(id, cards, ok, element, root, start_collapsed) {
@@ -1802,6 +1806,7 @@
 
         invitation_display_board: function(player_id, game, element, root, setup) {
             $('.cardstories_sentence', element).text(game.sentence);
+            var $this = this;
             var players = game.players;
             var snippets = $('.cardstories_snippets', root);
             var seat_snippet = $('.cardstories_player_seat', snippets);
@@ -1817,17 +1822,91 @@
                         seat.show();
                     }
 
+                    var status = $('.cardstories_player_status', seat);
                     // Differentiate between player status.
                     if (players[i][0] == player_id) {
                         seat.addClass('cardstories_player_seat_self');
                         if (setup !== true) {
-                            $('.cardstories_player_status', seat).html('is picking a card<br />...');
+                            status.html('is picking a card<br />...');
                         }
                     } else {
                         seat.addClass('cardstories_player_seat_joined');
                     }
                 }
             }
+        },
+
+        invitation_pick_wait_picked_helper: function(player_id, game, element, root, cb) {
+            var $this = this;
+            var players = game.players;
+            var last = players.length - 1;
+            var q = $({});
+            var delay_next = false;
+
+            for (var i=0, seatno=0; i < players.length; i++) {
+                var playerq = 'player' + i;
+
+                // Skip the owner.
+                if (players[i][0] !== game.owner_id) {
+                    seatno++;
+                    var seat = $('.cardstories_player_seat.cardstories_player_seat_' + seatno, element);
+                    var status = $('.cardstories_player_status', seat);
+
+                    $('.cardstories_player_arms_' + seatno, element).show();
+                    $('.cardstories_player_pick_' + seatno, element).show();
+
+                    // Delay this player, but only if there was at least one change
+                    // displayed for the previous ones.
+                    if (delay_next) {
+                        $this.delay(q, 350, 'chain');
+                        delay_next = false;
+                    }
+
+                    // Deferentiate between players who picked a card
+                    // and those who didn't.
+                    if (players[i][3] !== null) {
+                        if (!seat.hasClass('cardstories_noop_picked')) {
+                            seat.addClass('cardstories_noop_picked');
+                            var card_img = $('.cardstories_player_pick_' + seatno, element).find('img');
+                            if (players[i][0] === player_id) {
+                                var self_card = $('.cardstories_player_self_picked_card', element);
+                                var src_template = self_card.metadata({type: 'attr', name: 'data'}).card;
+                                self_card.find('.cardstories_card_foreground').attr('src', src_template.supplant({card: game.self[0]}));
+                                card_img.replaceWith(self_card);
+                                self_card.show();
+                            } else {
+                                delay_next = true;
+                                q.queue(playerq, (function(seat, seatno, card_img) { return function(next) {
+                                    var pick_sprite = $('.cardstories_player_pick_' + seatno, element);
+                                    $this.animate_sprite(pick_sprite, 18, 7, function() {
+                                        pick_sprite.find('.cardstories_card').show();
+                                        card_img.show();
+                                        seat.addClass('cardstories_player_seat_waiting');
+                                        next();
+                                    });
+                                }})(seat, seatno, card_img));
+                            }
+                            status.html('is waiting for other players<br />...');
+                        }
+                    } else {
+                        seat.addClass('cardstories_player_seat_picking');
+                        status.html('is picking a fake card<br />...');
+                    }
+                }
+
+                // If this is the last player, insert our on-complete callback.
+                if (i === last && cb) {
+                    q.queue(playerq, function(next) {cb();});
+                }
+
+                // Queue the dequeueing of this player's queue. ;)
+                q.queue('chain', (function(playerq) {return function(next) {
+                    q.dequeue(playerq);
+                    next();
+                }})(playerq));
+            }
+
+            q.dequeue('chain');
         },
 
         vote: function(player_id, game, root) {
@@ -2574,7 +2653,7 @@
 
         send_game: function(player_id, game_id, element, query) {
             var $this = this;
-            var root = $(element).parents('.cardstories_root');
+            var root = $(element).closest('.cardstories_root');
             var success = function(data, status) {
                 if('error' in data) {
                     $this.error(data.error);

@@ -449,6 +449,10 @@
     background: transparent url('images/player_seat_picked.png') no-repeat 7px 5px;
 }
 
+.cardstories .cardstories_player_seat_waiting {
+    background: transparent url('images/player_seat_waiting.png') no-repeat 7px 5px;
+}
+
 .cardstories .cardstories_player_seat_voted {
     background: transparent url('images/player_seat_voted.png') no-repeat 7px 5px;
 }
@@ -472,7 +476,7 @@
     left: 1px;
     overflow: hidden;
     margin: 3px auto;
-    width: 65%;
+    width: 70%;
 }
 
 .cardstories .cardstories_player_seat .cardstories_player_name {
@@ -487,7 +491,8 @@
 .cardstories .cardstories_player_seat_self,
 .cardstories .cardstories_player_seat_voted .cardstories_player_status,
 .cardstories .cardstories_player_seat_picked .cardstories_player_status,
-.cardstories .cardstories_player_seat_picking  .cardstories_player_status {
+.cardstories .cardstories_player_seat_waiting .cardstories_player_status,
+.cardstories .cardstories_player_seat_picking .cardstories_player_status {
     color: #3E3E40;
 }
 
@@ -1635,19 +1640,23 @@
     left: 55px;
 }
 
-.cardstories .cardstories_player_pick .cardstories_card {
+.cardstories .cardstories_player_pick .cardstories_card,
+.cardstories .cardstories_player_pick .cardstories_card_template {
     cursor: default;
     display: none;
     position: absolute;
     width: 46px;
+    height: 60px;
 }
 
-.cardstories .cardstories_player_pick_left .cardstories_card {
+.cardstories .cardstories_player_pick_left .cardstories_card,
+.cardstories .cardstories_player_pick_left .cardstories_card_template {
     left: 93px;
     top: 10px;
 }
 
-.cardstories .cardstories_player_pick_right .cardstories_card {
+.cardstories .cardstories_player_pick_right .cardstories_card,
+.cardstories .cardstories_player_pick_right .cardstories_card_template {
     left: 3px;
     top: 13px;
 }
@@ -2100,18 +2109,6 @@
 }
 
 /* state invitation and vote, player point of view : wait for others to pick or vote */
-
-.cardstories .cardstories_invitation .cardstories_pick_wait .cardstories_sentence,
-.cardstories .cardstories_vote .cardstories_vote_anonymous .cardstories_sentence,
-.cardstories .cardstories_vote .cardstories_voter_wait .cardstories_sentence {
-    position: absolute;
-    left: 330px;
-    top: 310px;
-    z-index: 1;
-    width: 600px;
-    font-size: 13px;
-    color: #7A6A59;
-}
 
 .cardstories .cardstories_invitation .cardstories_pick_wait .cardstories_card_change,
 .cardstories .cardstories_vote .cardstories_voter_wait .cardstories_card_change { 
