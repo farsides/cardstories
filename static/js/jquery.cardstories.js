@@ -1256,6 +1256,11 @@
             var resolve = false;
             var q = $({});
 
+            // Send game when the user clicks ok.
+            var ok = function(card_value, card_index) {
+                $this.send_game(player_id, game.id, element, 'action=pick&player_id=' + player_id + '&game_id=' + game.id + '&card=' + card_value);
+            };
+
             // Only show initial animations once.
             if (!element.hasClass('cardstories_noop_init')) {
                 element.addClass('cardstories_noop_init');
@@ -1312,11 +1317,6 @@
             }
 
             q.dequeue('chain');
-
-            // Send game when the user clicks ok.
-            var ok = function(card_value, card_index) {
-                $this.send_game(player_id, game.id, element, 'action=pick&player_id=' + player_id + '&game_id=' + game.id + '&card=' + card_value);
-            };
 
             return deferred;
         },
@@ -1958,31 +1958,72 @@
         },
 
         vote_voter: function(player_id, game, root) {
+            var $this = this;
+            var deferred = $.Deferred();
             var element = $('.cardstories_vote .cardstories_voter', root);
             this.notify_active(root, element, 'vote_voter');
             this.set_active(root, element);
-            var $this = this;
             $('.cardstories_sentence', element).text(game.sentence);
+
+            this.display_progress_bar('player', 3, element, root);
+            this.display_master_name(game.owner_id, element);
+            this.invitation_display_board(player_id, game, element, root, true);
+
+            if (!element.hasClass('cardstories_noop_init')) {
+                element.addClass('cardstories_noop_init');
+                var players = game.players;
+
+                // All seats should be in the waiting state initially.
+                var seats = $('.cardstories_player_seat', element)
+                seats.addClass('cardstories_player_seat_waiting');
+                $('.cardstories_player_status', seats).html('is waiting for other players<br />...');
+
+                // Display player's arms and card.
+                for (var i=0, seatno=0; i < players.length; i++) {
+                    if (players[i][0] != game.owner_id) {
+                        seatno++;
+
+                        $('.cardstories_player_arms_' + seatno, element).show();
+                        var pick = $('.cardstories_player_pick_' + seatno, element);
+                        pick.show();
+                        var card_img = $('.cardstories_card', pick);
+                        card_img.show();
+
+                        // If this is the "self" player, show picked card.
+                        if (players[i][0] === player_id) {
+                            var self_card = $('.cardstories_player_self_picked_card', element);
+                            var src_template = self_card.metadata({type: 'attr', name: 'data'}).card;
+                            self_card.find('.cardstories_card_foreground').attr('src', src_template.supplant({card: game.self[0]}));
+                            card_img.replaceWith(self_card);
+                            self_card.show();
+                        }
+                    }
+                }
+            }
+
+/*
             var ok = function(card) {
                 $this.send_game(player_id, game.id, element, 'action=vote&player_id=' + player_id + '&game_id=' + game.id + '&card=' + card);
             };
+
             var cards = [];
             var picked = game.self[0];
             var voted = game.self[1];
             var titles = [];
-            for(var i = 0; i < game.board.length; i++) {
-                var card = { 'value': game.board[i] };
-                if(card.value == picked) {
-                    card.label = 'My Card';
+            for (var i = 0; i < game.board.length; i++) {
+                var card = {value: game.board[i]};
+                if (card.value === picked) {
+                    card.label = 'YOUR CARD';
                     card.inactive = true;
                 }
                 cards.push(card);
             }
-            var deferred = $.Deferred();
+
             $this.select_cards('vote_voter', cards, ok, element, root, false).done(function() {
                 deferred.resolve();
             });
-            return deferred;
+*/
+            return deferred.resolve();
         },
 
         vote_voter_wait: function(player_id, game, root) {
