@@ -1413,30 +1413,25 @@ test("invitation_voter_wait", 8, function() {
     equal($(element_pick).hasClass('cardstories_active'), true, 'voter active');
 });
 */
-test("vote_anonymous", 3, function() {
-    var player_id = null;
+asyncTest("vote_anonymous", 12, function() {
     var game_id = 101;
+    var owner_id = 'The Owner';
+    var player1_id = 'Player 1';
+    var player2_id = 'Player 2';
     var picked = null;
     var voted = null;
     var board = [1,2,voted,4,picked,6];
     var sentence = 'SENTENCE';
 
-    var _query = $.query;
-
-    // Without player_id in the URL
-    $.query = {
-        'get': function(attr) {
-            if (attr == "anonymous") {
-                return "yes";
-            }
-        }
-    };
-
     var game = {
         'id': game_id,
         'board': board,
+        'owner_id': owner_id,
         'self': null,
-        'sentence': sentence
+        'sentence': sentence,
+        'players': [ [ owner_id, null, 'n', '', [] ],
+                     [ player1_id, null, 'n', '', [] ],
+                     [ player2_id, null, 'n', '', [] ] ]
     };
 
     $.cardstories.poll_ignore = function(ignored_request, ignored_answer, new_poll, old_poll) {
@@ -1444,38 +1439,28 @@ test("vote_anonymous", 3, function() {
         equal(new_poll, undefined, 'poll_ignore metadata not set');
     };
 
-    var element = $('#qunit-fixture .cardstories_vote .cardstories_vote_anonymous');
-    $.cardstories.vote(player_id, game, $('#qunit-fixture .cardstories'));
-    equal($('.cardstories_sentence', element).text(), sentence);
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_vote .cardstories_voter', root);
+    var seat1 = $('.cardstories_player_seat_1', element);
+    var seat2 = $('.cardstories_player_seat_2', element);
+    var seat3 = $('.cardstories_player_seat_3', element);
+    var seat4 = $('.cardstories_player_seat_4', element);
+    var seat5 = $('.cardstories_player_seat_5', element);
 
-    // Restore the original query
-    $.query = _query;
-});
+    ok(!element.hasClass('cardstories_active'), 'pick_wait not active');
 
-test("vote_viewer", 7, function() {
-    var player_id = 15;
-    var game_id = 101;
-    var board = [1,2,3,4,5,6,7];
-    var sentence = 'SENTENCE';
-
-    var game = {
-        'id': game_id,
-        'board': board,
-        'self': null,
-        'sentence': sentence
-    };
-
-    $.cardstories.poll_ignore = function(ignored_request, ignored_answer, new_poll, old_poll) {
-      equal(ignored_request.game_id, game_id, 'poll_ignore request game_id');
-      equal(new_poll, undefined, 'poll_ignore metadata not set');
-    };
-
-    equal($('#qunit-fixture .cardstories_vote .cardstories_viewer.cardstories_active').length, 0);
-    $.cardstories.vote(player_id, game, $('#qunit-fixture .cardstories'));
-    equal($('#qunit-fixture .cardstories_vote .cardstories_viewer.cardstories_active').length, 1);
-    equal($('#qunit-fixture .cardstories_viewer .cardstories_sentence').text(), sentence);
-    equal($('#qunit-fixture .cardstories_viewer .cardstories_card1').metadata().card, 1);
-    equal($('#qunit-fixture .cardstories_viewer .cardstories_card7').metadata().card, 7);
+    $.cardstories.vote(null, game, root).done(function() {
+        ok(element.hasClass('cardstories_active'), 'cardstories_voter active');
+        equal($('.cardstories_sentence', element).text(), sentence, 'sentence is set');
+        equal(seat1.css('display'), 'block', 'seat1 is visible');
+        equal(seat2.css('display'), 'block', 'seat2 is visible');
+        equal(seat3.css('display'), 'none', 'seat3 is not visible');
+        equal(seat4.css('display'), 'none', 'seat4 is not visible');
+        equal(seat5.css('display'), 'none', 'seat5 is not visible');
+        equal(seat1.find('.cardstories_player_name').text(), player1_id, "player1's id is displayed");
+        equal(seat2.find('.cardstories_player_name').text(), player2_id, "player2's id is displayed");
+        start();
+    });
 });
 
 test("vote_owner_morph_master_card", 4, function() {

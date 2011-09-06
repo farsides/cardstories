@@ -2081,17 +2081,6 @@
     top: 350px;
 }
 
-/* state vote, anonymous point of view : wait for other players to vote for a card */
-
-.cardstories .cardstories_vote .cardstories_vote_anonymous .cardstories_bubble_player_vote_wait { 
-    position: absolute;
-    z-index: 1;
-    left: 10px;
-    top: 10px;
-    background: transparent url('images/player_vote_wait.png') no-repeat left top;
-    height: 340px;
-    width: 962px;
-}
 
 /* state vote, player point of view : wait for other players to vote for a card */
 

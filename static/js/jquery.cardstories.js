@@ -1927,11 +1927,7 @@
                         deferred = this.vote_voter_wait(player_id, game, root);
                     }
                 } else {
-                    if ($.query.get('anonymous')) {
-                        deferred = this.vote_anonymous(player_id, game, root);
-                    } else {
-                        deferred = this.vote_viewer(player_id, game, root);
-                    }
+                    deferred = this.vote_anonymous(player_id, game, root);
                 }
             }
 
@@ -1943,32 +1939,7 @@
             return deferred;
         },
 
-        vote_viewer: function(player_id, game, root) {
-            var $this = this;
-            var element = $('.cardstories_vote .cardstories_viewer', root);
-            this.notify_active(root, element, 'vote_viewer');
-            this.set_active(root, element);
-            $('.cardstories_sentence', element).text(game.sentence);
-            var cards = game.board;
-            $('.cardstories_card', element).each(function(index) {
-                var c = 'cardstories_card cardstories_card' + cards[index] + ' {card:' + cards[index] + '}';
-                $(this).attr('class', c);
-            });
-            return $.Deferred().resolve();
-        },
-
-        vote_voter: function(player_id, game, root) {
-            var $this = this;
-            var deferred = $.Deferred();
-            var element = $('.cardstories_vote .cardstories_voter', root);
-            this.notify_active(root, element, 'vote_voter');
-            this.set_active(root, element);
-            $('.cardstories_sentence', element).text(game.sentence);
-
-            this.display_progress_bar('player', 3, element, root);
-            this.display_master_name(game.owner_id, element);
-            this.invitation_display_board(player_id, game, element, root, true);
-
+        vote_init_helper: function(player_id, game, element) {
             if (!element.hasClass('cardstories_noop_init')) {
                 element.addClass('cardstories_noop_init');
                 var players = game.players;
@@ -1994,6 +1965,20 @@
                     }
                 }
             }
+        },
+
+        vote_voter: function(player_id, game, root) {
+            var $this = this;
+            var deferred = $.Deferred();
+            var element = $('.cardstories_vote .cardstories_voter', root);
+            this.notify_active(root, element, 'vote_voter');
+            this.set_active(root, element);
+            $('.cardstories_sentence', element).text(game.sentence);
+
+            this.display_progress_bar('player', 3, element, root);
+            this.display_master_name(game.owner_id, element);
+            this.invitation_display_board(player_id, game, element, root, true);
+            this.vote_init_helper(player_id, game, element);
 
 /*
             var ok = function(card) {
@@ -2036,11 +2021,18 @@
 
         vote_anonymous: function(player_id, game, root) {
             var $this = this;
-            var element = $('.cardstories_vote .cardstories_vote_anonymous', root);
-            this.notify_active(root, element, 'vote_anonymous');
+            var deferred = $.Deferred();
+            var element = $('.cardstories_vote .cardstories_voter', root);
+            this.notify_active(root, element, 'vote_voter');
             this.set_active(root, element);
             $('.cardstories_sentence', element).text(game.sentence);
-            return $.Deferred().resolve();
+
+            this.display_progress_bar('player', 3, element, root);
+            this.display_master_name(game.owner_id, element);
+            this.invitation_display_board(player_id, game, element, root, true);
+            this.vote_init_helper(player_id, game, element);
+
+            return deferred.resolve();
         },
 
         vote_owner: function(player_id, game, root) {

@@ -154,18 +154,17 @@
     } else if(skin == 'vote_anonymous') {
       game = {
           'id': null,
+          'owner_id': 'Owner',
           'board': [21,22,23,24,25,26],
           'self': null,
+          'sentence': 'The sentence is the sentence',
           'players': [
-              [ 'player1', null, 'n', 5, [] ],
-              [ 'player2', null, 'n', null, [] ],
-              [ 'player3', null, 'n', null, [] ],
-              [ 'player4', null, 'n', null, [] ],
-              [ 'player5', null, 'n', null, [] ],
-              [ 'player6', null, 'n', null, [] ]
-          ],
-          'owner_id': 'player1',
-          'sentence': 'The sentence is the sentence'
+              [ 'Player 1', null, 'n', 5, [] ],
+              [ 'Player 2', null, 'n', null, [] ],
+              [ 'Player 3', null, 'n', null, [] ],
+              [ 'Player 4', null, 'n', null, [] ],
+              [ 'Player 5', null, 'n', null, [] ]
+          ]
       };
       $.cardstories.vote_anonymous(null, game, root);
     } else if(skin == 'vote_owner') {
