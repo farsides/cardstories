@@ -1766,6 +1766,7 @@ test("play_again_finish_state", 4, function() {
         'id': 7,
         'owner': true,
         'state': 'fake_state',
+        'winner_card': 15,
         'board': [],
         'players': []
     };
