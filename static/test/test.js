@@ -1360,9 +1360,6 @@ asyncTest("vote_voter", 14, function() {
     var seat3 = $('.cardstories_player_seat_3', element);
     var seat4 = $('.cardstories_player_seat_4', element);
     var seat5 = $('.cardstories_player_seat_5', element);
-    var pick1 = $('.cardstories_player_pick_1', element);
-    var pick2 = $('.cardstories_player_pick_2', element);
-    var pick3 = $('.cardstories_player_pick_3', element);
 
     ok(!element.hasClass('cardstories_active'), 'pick_wait not active');
 
@@ -1377,8 +1374,9 @@ asyncTest("vote_voter", 14, function() {
         equal(seat1.find('.cardstories_player_name').text(), player_id, "player's id is displayed");
         equal(seat2.find('.cardstories_player_name').text(), player2_id, "player2's id is displayed");
         equal(seat3.find('.cardstories_player_name').text(), player3_id, "player3's id is displayed");
-        var src_template = $('.cardstories_player_self_picked_card', pick1).metadata({type: 'attr', name: 'data'}).card;
-        equal($('.cardstories_card_foreground', pick1).attr('src'), src_template.supplant({card: picked}), "current player's card is displayed");
+        var src_template = $('.cardstories_player_self_picked_card', element).metadata({type: 'attr', name: 'data'}).card;
+        var self_card = $('.cardstories_card_1 .cardstories_card_foreground', element);
+        equal(self_card.attr('src'), src_template.supplant({card: picked}), "current player's card is displayed");
         start();
    });
 });

@@ -1973,20 +1973,13 @@
                 element.addClass('cardstories_noop_init');
                 var players = game.players;
 
-                // All seats should be in the waiting state initially.
-                var seats = $('.cardstories_player_seat', element)
-                seats.addClass('cardstories_player_seat_waiting');
-                $('.cardstories_player_status', seats).html('is waiting for other players<br />...');
-
                 // Display player's arms and card.
                 for (var i=0, seatno=0; i < players.length; i++) {
                     if (players[i][0] != game.owner_id) {
                         seatno++;
 
                         $('.cardstories_player_arms_' + seatno, element).show();
-                        var pick = $('.cardstories_player_pick_' + seatno, element);
-                        pick.show();
-                        var card_img = $('.cardstories_card', pick);
+                        var card_img = $('.cardstories_card_' + seatno, element);
                         card_img.show();
 
                         // If this is the "self" player, show picked card.
@@ -1994,6 +1987,7 @@
                             var self_card = $('.cardstories_player_self_picked_card', element);
                             var src_template = self_card.metadata({type: 'attr', name: 'data'}).card;
                             self_card.find('.cardstories_card_foreground').attr('src', src_template.supplant({card: game.self[0]}));
+                            self_card.addClass('cardstories_card cardstories_card_' + seatno);
                             card_img.replaceWith(self_card);
                             self_card.show();
                         }
