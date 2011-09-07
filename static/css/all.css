@@ -1636,8 +1636,6 @@
 
 .cardstories .cardstories_player_pick.cardstories_no_background {
     background-image: none !important;
-    top: 114px;
-    left: 55px;
 }
 
 .cardstories .cardstories_player_pick .cardstories_card,

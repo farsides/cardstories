@@ -1875,8 +1875,12 @@
                             var card_img = $('.cardstories_player_pick_' + seatno, element).find('img');
                             if (players[i][0] === player_id) {
                                 var self_card = $('.cardstories_player_self_picked_card', element);
-                                var src_template = self_card.metadata({type: 'attr', name: 'data'}).card;
-                                self_card.find('.cardstories_card_foreground').attr('src', src_template.supplant({card: game.self[0]}));
+                                var foreground = $('.cardstories_card_foreground', self_card);
+                                var src_template = foreground.metadata({type: 'attr', name: 'data'}).card;
+                                foreground.attr('src', src_template.supplant({card: game.self[0]}));
+                                // Copy card image final_left metadata.
+                                var final_left = card_img.metadata({type: 'attr', name: 'data'}).final_left;
+                                self_card.attr('data', '{final_left:' + final_left + '}');
                                 card_img.replaceWith(self_card);
                                 self_card.show();
                             } else {
@@ -1916,13 +1920,18 @@
 
         vote: function(player_id, game, root) {
             var $this = this;
+            var dom_state = $(root).data('cardstories_dom_state');
             var deferred;
             if(game.owner) {
                 deferred = this.vote_owner(player_id, game, root);
             } else {
                 if(game.self !== null && game.self !== undefined) {
                     if(game.self[1] === null) {
-                        deferred = this.vote_voter(player_id, game, root);
+                        if (dom_state === 'invitation_pick_wait') {
+                            deferred = this.invitation_pick_wait_to_vote_voter(player_id, game, root);
+                        } else {
+                            deferred = this.vote_voter(player_id, game, root);
+                        }
                     } else {
                         deferred = this.vote_voter_wait(player_id, game, root);
                     }
@@ -1956,8 +1965,9 @@
                         // If this is the "self" player, show picked card.
                         if (players[i][0] === player_id) {
                             var self_card = $('.cardstories_player_self_picked_card', element);
-                            var src_template = self_card.metadata({type: 'attr', name: 'data'}).card;
-                            self_card.find('.cardstories_card_foreground').attr('src', src_template.supplant({card: game.self[0]}));
+                            var foreground = $('.cardstories_card_foreground', self_card);
+                            var src_template = foreground.metadata({type: 'attr', name: 'data'}).card;
+                            foreground.attr('src', src_template.supplant({card: game.self[0]}));
                             self_card.addClass('cardstories_card cardstories_card_' + seatno);
                             card_img.replaceWith(self_card);
                             self_card.show();
@@ -1967,10 +1977,111 @@
             }
         },
 
+        invitation_pick_wait_to_vote_voter: function(player_id, game, root) {
+            var $this = this;
+            var deferred = $.Deferred();
+            var element = $('.cardstories_invitation .cardstories_pick_wait', root);
+            var modal = $('.cardstories_modal', element);
+            var overlay = $('.cardstories_modal_overlay', element);
+            var players = game.players;
+            var nr_of_slots = players.length - 1;
+            var player_positions = [];
+            var visitor_positions = [];
+            var q = $({});
+
+            // Separate the players between those who picked cards and those who didn't.
+            for (var i=1; i < $this.SEATS; i++) {
+                var seat = $('.cardstories_player_seat_' + i, element);
+                if (seat.children().length) {
+                    if (seat.hasClass('cardstories_player_seat_waiting') || seat.hasClass('cardstories_player_seat_self')) {
+                        player_positions.push(i);
+                    } else {
+                        visitor_positions.push(i);
+                    }
+                }
+            }
+
+            $this.close_modal(modal, overlay, function() {
+                var visitor_objs = $();
+
+                $.each(visitor_positions, function(i) {
+                    var seatno = visitor_positions[i];
+                    visitor_objs = visitor_objs
+                        .add('.cardstories_player_seat_' + seatno, element)
+                        .add('.cardstories_player_pick_' + seatno, element)
+                        .add('.cardstories_player_arms_' + seatno, element);
+                });
+
+                // Remove players who didn't pick a card from the board by fading them out.
+                if (visitor_objs.length) {
+                    q.queue('chain', function(next) {
+                        var call_next = true;
+                        visitor_objs.fadeOut(function() {
+                            // We need to do this, because the fadeOut callback is called once
+                            // for every animated element. We only want to call next once.
+                            $(this).hide(); // A workaround for http://bugs.jquery.com/ticket/8892
+                            if (call_next) {
+                                call_next = false;
+                                next();
+                            }
+                        });
+                    });
+                }
+
+                $.each(player_positions, function(i) {
+                    var seatno = player_positions[i];
+
+                    // Insert an artificial delay between players, for
+                    // aesthetical reasons.
+                    if (i > 0) {
+                        $this.delay(q, 350, 'chain');
+                    }
+
+                    q.queue('chain', function(next) {
+                        $('.cardstories_player_pick_' + seatno, element).addClass('cardstories_no_background');
+                        var return_sprite = $('.cardstories_player_return_' + seatno, element);
+                        var is_last_seat = i === player_positions.length - 1;
+                        $this.animate_sprite(return_sprite, 18, 18, function() {
+                            return_sprite.hide();
+                            if (is_last_seat) { next(); }
+                        });
+                        if (!is_last_seat) { next(); }
+                    });
+                });
+
+                q.queue('chain', function(next) {
+                    $this.animate_progress_bar(3, element);
+                    var cards = $('.cardstories_player_pick .cardstories_card', element);
+                    cards.each(function(i) {
+                        var card = $(this);
+                        var final_left = card.metadata({type: 'attr', name: 'data'}).final_left;
+                        var cb = function() {
+                            if (i === cards.length - 1) {
+                                next();
+                            }
+                        };
+                        card.animate({left: final_left}, 500, cb);
+                    });
+                });
+
+                // Queue the state change.
+                q.queue('chain', function(next) {
+                    $this.vote_voter(player_id, game, root).done(function() {
+                        deferred.resolve();
+                    });
+                });
+
+                q.dequeue('chain');
+            });
+
+            return  deferred;
+        },
+
         vote_voter: function(player_id, game, root) {
             var $this = this;
             var deferred = $.Deferred();
             var element = $('.cardstories_vote .cardstories_voter', root);
+
             this.notify_active(root, element, 'vote_voter');
             this.set_active(root, element);
             $('.cardstories_sentence', element).text(game.sentence);
@@ -2877,6 +2988,7 @@
         },
 
         notify_active: function(root, element, skin) {
+            $(root).data('cardstories_dom_state', skin);
             // Only trigger the event once per active element.
             if (!$(element).hasClass('cardstories_active')) {
                 $(root).trigger('active.cardstories', [skin]);

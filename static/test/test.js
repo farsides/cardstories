@@ -24,6 +24,7 @@ var cardstories_default_ajax = $.cardstories.ajax;
 var cardstories_default_error = $.cardstories.error;
 var cardstories_default_poll_ignore = $.cardstories.poll_ignore;
 var cardstories_default_create_write_sentence = $.cardstories.create_write_sentence;
+var cardstories_default_vote_voter = $.cardstories.vote_voter;
 var cardstories_default_animate_sprite = $.cardstories.animate_sprite;
 var cardstories_default_preload_images_helper = $.cardstories.preload_images_helper;
 var cardstories_default_preload_images = $.cardstories.preload_images;
@@ -38,6 +39,7 @@ function setup() {
     $.cardstories.poll_ignore = function() { throw 'poll_ignore'; };
     $.cardstories.error = cardstories_default_error;
     $.cardstories.create_write_sentence = cardstories_default_create_write_sentence;
+    $.cardstories.vote_voter = cardstories_default_vote_voter;
     $.cardstories.animate_sprite = function(movie, fps, frames, cb) { movie.show(); cb(); };
     $.cardstories.preload_images_helper = function(root, cb) { cb(); };
     $.cardstories.preload_images = cardstories_default_preload_images;
@@ -1165,7 +1167,7 @@ asyncTest("invitation_pick_wait", 25, function() {
         equal(seat1.find('.cardstories_player_name').text(), player_id, "player's id is displayed");
         equal(seat2.find('.cardstories_player_name').text(), player2_id, "player2's id is displayed");
         equal(seat3.find('.cardstories_player_name').text(), player3_id, "player3's id is displayed");
-        var src_template = $('.cardstories_player_self_picked_card', pick1).metadata({type: 'attr', name: 'data'}).card;
+        var src_template = $('.cardstories_card_foreground', pick1).metadata({type: 'attr', name: 'data'}).card;
         equal($('.cardstories_card_foreground', pick1).attr('src'), src_template.supplant({card: picked}), "current player's card is displayed");
         ok(!seat2.hasClass('cardstories_player_seat_waiting'), 'player2 is not in waiting state since he has not picked a card yet');
         ok(seat3.hasClass('cardstories_player_seat_waiting'), 'player3 is in waiting state since he already picked a card');
@@ -1174,6 +1176,86 @@ asyncTest("invitation_pick_wait", 25, function() {
 
         $.cardstories.invitation(player_id, game, root).done(function() {
             equal(animations_played, 1, 'calling invatiation multiple times doesn not replay the animations');
+            start();
+        });
+    });
+});
+
+asyncTest("invitation_pick_wait_to_vote_voter", 17, function() {
+    var player_id = 'The Player';
+    var player2_id = 'Player 2';
+    var player3_id = 'Player 3';
+    var player4_id = 'Player 4';
+    var owner_id = 'The Owner';
+    var game_id = 101;
+    var picked = 5;
+    var cards = [1, 2, 3, 4, picked, 5];
+    var sentence = 'SENTENCE';
+
+    var game = {
+        'id': game_id,
+        'owner_id': owner_id,
+        'players': [
+            [ owner_id, null, 'n', null, [] ],
+            [ player_id, null, 'n', picked, [] ],
+            [ player2_id, null, 'n', null, [] ],
+            [ player3_id, null, 'n', '', [] ]
+        ],
+        'self': [picked, null, cards],
+        'sentence': sentence
+    };
+
+    var root = $('#qunit-fixture .cardstories');
+    var container = $('.cardstories_invitation', root);
+    var element = $('.cardstories_pick_wait', container);
+    var modal = $('.cardstories_modal', element);
+    var seat1 = $('.cardstories_player_seat_1', element); // picked card, self
+    var seat2 = $('.cardstories_player_seat_2', element); // didn't pick
+    var seat3 = $('.cardstories_player_seat_3', element); // picked card
+    var pick1 = $('.cardstories_player_pick_1', element);
+    var pick2 = $('.cardstories_player_pick_2', element);
+    var pick3 = $('.cardstories_player_pick_3', element);
+
+    $.cardstories.poll_ignore = function(ignored_request, ignored_answer, new_poll, old_poll) {
+        equal(ignored_request.game_id, game_id, 'poll_ignore request game_id');
+        equal(new_poll, undefined, 'poll_ignore metadata not set');
+    };
+
+    $.cardstories.vote_voter = function(_player_id, _game, _root) {
+        equal(_player_id, player_id, 'vote_voter called with player_id');
+        equal(_game, game, 'vote_voter called with game');
+        equal(_root, root, 'vote_voter called with root');
+        return $.Deferred().resolve();
+    };
+
+    $.cardstories.invitation_pick_wait(player_id, game, root).done(function() {
+        equal(modal.css('display'), 'block', 'modal dialog is visible');
+        var card1 = $('.cardstories_card', pick1);
+        var card3 = $('.cardstories_card', pick3);
+        var final_left_1 = card1.metadata({type: 'attr', name: 'data'}).final_left;
+        var final_left_3 = card3.metadata({type: 'attr', name: 'data'}).final_left;
+        notEqual(card1.position().left, final_left_1, 'card1 is not in final position at first');
+        notEqual(card3.position().left, final_left_3, 'card3 is not in final position at first');
+        equal(seat1.css('display'), 'block', 'seat1 is visible initially');
+        equal(seat2.css('display'), 'block', 'seat2 is visible initially');
+        equal(seat3.css('display'), 'block', 'seat3 is visible initially');
+
+        var animations_played = 0;
+        $.cardstories.animate_sprite = function(movie, fps, frames, cb) {
+            animations_played++;
+            cb();
+        };
+
+        $.cardstories.vote(player_id, game, root).done(function() {
+            equal(animations_played, 2, 'two animations were played');
+            // Show the parent divs, so that .position() works.
+            container.show();
+            element.show();
+            equal(card1.position().left, final_left_1, 'card1 is in final position');
+            equal(card3.position().left, final_left_3, 'card3 is in final position');
+            equal(seat1.css('display'), 'block', 'seat1 is visible after transition');
+            notEqual(seat2.css('display'), 'block', 'seat2 is NOT visible after transition');
+            equal(seat3.css('display'), 'block', 'seat3 is visible after transition');
             start();
         });
     });
@@ -1374,8 +1456,8 @@ asyncTest("vote_voter", 14, function() {
         equal(seat1.find('.cardstories_player_name').text(), player_id, "player's id is displayed");
         equal(seat2.find('.cardstories_player_name').text(), player2_id, "player2's id is displayed");
         equal(seat3.find('.cardstories_player_name').text(), player3_id, "player3's id is displayed");
-        var src_template = $('.cardstories_player_self_picked_card', element).metadata({type: 'attr', name: 'data'}).card;
         var self_card = $('.cardstories_card_1 .cardstories_card_foreground', element);
+        var src_template = self_card.metadata({type: 'attr', name: 'data'}).card;
         equal(self_card.attr('src'), src_template.supplant({card: picked}), "current player's card is displayed");
         start();
    });

@@ -137,7 +137,28 @@
                      [ 'Player 4', null, 'n', '', [] ] ]
       };
       $.cardstories.invitation_pick_wait('Player 3', game, root);
-    } else if(skin == 'vote_voter' || skin == 'vote_voter_wait' || skin == 'vote_viewer') {
+    } else if(skin == 'pick_wait_to_vote') {
+      var players1 = [ [ 'Owner', null, 'n', 30, [] ],
+                     [ 'Player 1', null, 'n', '', [] ],
+                     [ 'Player 2', null, 'n', null, [] ],
+                     [ 'Player 3', null, 'n', 33, [] ],
+                     [ 'Player 4', null, 'n', '', [] ] ];
+      var players2 = [ [ 'Owner', null, 'n', 30, [] ],
+                     [ 'Player 1', null, 'n', '', [] ],
+                     [ 'Player 3', null, 'n', 33, [] ],
+                     [ 'Player 4', null, 'n', '', [] ] ];
+      game = {
+        'id': 100,
+        'owner_id': 'Owner',
+        'self': [33, null, [11,12,13,14,15,16,17]],
+        'sentence': 'long sentence is in the flux',
+        'players': players1
+      };
+      $.cardstories.invitation_pick_wait('Player 3', game, root).done(function() {
+          game.players = players2;
+          $.cardstories.invitation_pick_wait_to_vote_voter('Player 3', game, root);
+      });
+    } else if(skin == 'vote_voter' || skin == 'vote_voter_wait') {
       game = {
         'id': 100,
         'owner_id': 'Owner',
