@@ -2036,7 +2036,7 @@
                         if (!seat.hasClass('cardstories_noop_picked')) {
                             seat.addClass('cardstories_noop_picked');
                             var card_img = $('.cardstories_player_pick_' + seatno, element).find('img');
-                            if (players[i][0] === player_id) {
+                            if (players[i][0] == player_id) {
                                 var self_card = $('.cardstories_player_self_picked_card', element);
                                 var foreground = $('.cardstories_card_foreground', self_card);
                                 var src_template = foreground.metadata({type: 'attr', name: 'data'}).card;
@@ -2131,7 +2131,7 @@
                         card_img.show();
 
                         // If this is the "self" player, show picked card.
-                        if (players[i][0] === player_id) {
+                        if (players[i][0] == player_id) {
                             var self_card = $('.cardstories_player_self_picked_card', element);
                             var foreground = $('.cardstories_card_foreground', self_card);
                             var src_template = foreground.metadata({type: 'attr', name: 'data'}).card;
