@@ -2046,6 +2046,11 @@
                                 self_card.attr('data', '{final_left:' + final_left + '}');
                                 card_img.replaceWith(self_card);
                                 self_card.show();
+
+                                // Set pick_sprite to final state.
+                                var pick_sprite = $('.cardstories_player_pick_' + seatno, element);
+                                var x = -(6 * pick_sprite.width());
+                                pick_sprite.css({'background-position': x + 'px 0px'});
                             } else {
                                 delay_next = true;
                                 q.queue(playerq, (function(seat, seatno, card_img) { return function(next) {
