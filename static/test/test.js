@@ -1444,6 +1444,10 @@ asyncTest("vote_voter", 14, function() {
         equal(new_poll, undefined, 'poll_ignore metadata not set');
     };
 
+    $.cardstories.display_modal = function(modal, overlay, cb, cb_on_close) {
+        if (cb !== undefined) {cb();}
+    };
+
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_vote .cardstories_voter', root);
     var seat1 = $('.cardstories_player_seat_1', element);
@@ -1659,7 +1663,7 @@ test("vote_owner_display_cards", 8, function() {
                      [ player3, null, null, 33, [] ] ]
     };
 
-    $.cardstories.vote_owner_display_cards(game, element, root, function() {
+    $.cardstories.vote_owner_display_cards(game.winner_card, game, element, root, function() {
         for (var i=0; i < board.length; i++) {
             var slot = $('.cardstories_card_slot_' + (i + 1), element);
             notEqual(slot.css('display'), 'none', 'slot ' + i + ' is visible');

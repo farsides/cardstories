@@ -2062,22 +2062,20 @@
 
 /* state vote, player point of view : vote for a card */
 
-.cardstories .cardstories_vote .cardstories_voter .cardstories_bubble_player_vote_for_a_card { 
-    position: absolute;
-    left: 10px;
-    top: 10px;
-    background: transparent url('images/player_vote_for_a_card.png') no-repeat left top;
-    height: 342px;
-    width: 980px;
+.cardstories .cardstories_vote .cardstories_info { 
+    left: 250px;
+    top: 150px;
+    height: 110px;
+    width: 260px;
+    padding-top: 2.5em;
 }
 
-.cardstories .cardstories_vote .cardstories_voter .cardstories_vote_mask_chose_a_card {
-    position: absolute;
-    bottom: 80px;
-    left: 10px;
-    background: transparent url('images/vote_mask_chose_a_card.png') no-repeat left top;
-    height: 339px;
-    width: 278px;
+.cardstories .cardstories_vote .cardstories_info .cardstories_modal_h2 {
+    font-weight: bold;
+}
+
+.cardstories .cardstories_vote .cardstories_info .cardstories_modal_button {
+    margin-top: 0.65em;
 }
 
 .cardstories .cardstories_vote .cardstories_card_inactive .cardstories_card_my {

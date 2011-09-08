@@ -2116,7 +2116,7 @@
             return deferred;
         },
 
-        vote_init_helper: function(player_id, game, element, cb) {
+        vote_init_helper: function(player_id, game, element, root, cb) {
             if (!element.hasClass('cardstories_noop_init')) {
                 element.addClass('cardstories_noop_init');
                 var $this = this;
@@ -2162,7 +2162,7 @@
                     });
                 }
 
-                // Switch owner's card with card 6, then suffle them all.
+                // Switch owner's card with card 6
                 var picked = $('.cardstories_picked_card', element);
                 var card6 = $('img.cardstories_card_6', element);
                 card6.css({
@@ -2173,8 +2173,31 @@
                 });
                 picked.hide();
                 card6.show();
+
+                // Shuffle the cards.
                 q.queue('chain', function(next) {
                     $this.vote_owner_shuffle_cards(game, element, next);
+                });
+
+                // Supplant owner's name into modal, before showing it.
+                var info = $('.cardstories_info', element);
+                var html = info.html().supplant({'name': game.owner_id});
+                info.html(html);
+
+                // Show modal.
+                q.queue('chain', function(next) {
+                    var overlay = $('.cardstories_modal_overlay', element);
+                    $this.display_modal(info, overlay, next, true);
+                });
+
+                // Flip out!
+                q.queue('chain', function(next) {
+                    $this.vote_owner_flip_out(game, element, next);
+                });
+
+                // Display cards
+                q.queue('chain', function(next) {
+                    $this.vote_owner_display_cards(game.self[0], game, element, root, next);
                 });
                 
                 if (cb !== undefined) {
@@ -2303,7 +2326,7 @@
             var q = $({});
 
             q.queue('chain', function(next) {
-                $this.vote_init_helper(player_id, game, element, next);
+                $this.vote_init_helper(player_id, game, element, root, next);
             });
 
             // Resolve deferred.
@@ -2364,7 +2387,7 @@
             this.display_progress_bar('player', 3, element, root);
             this.display_master_name(game.owner_id, element);
             this.invitation_display_board(player_id, game, element, root, true);
-            this.vote_init_helper(player_id, game, element);
+            this.vote_init_helper(player_id, game, element, root);
 
             return deferred.resolve();
         },
@@ -2424,7 +2447,7 @@
                 
                 // ... then morph them in.
                 q.queue('chain', function(next) {
-                    $this.vote_owner_display_cards(game, element, root, next);
+                    $this.vote_owner_display_cards(game.winner_card, game, element, root, next);
                 });
 
                 // Show the announce results info box.
@@ -2774,7 +2797,7 @@
             });
         },
 
-        vote_owner_display_cards: function(game, element, root, cb) {
+        vote_owner_display_cards: function(picked, game, element, root, cb) {
             var $this = this;
             var snippets = $('.cardstories_snippets', root);
             var slot_snippet = $('.cardstories_card_slot', snippets);
@@ -2810,7 +2833,7 @@
                 }})(i, slot, slot_pos));
 
                 // Show the label.
-                if (game.winner_card == game.board[i]) {
+                if (picked === game.board[i]) {
                     q.queue(cardq, (function(slot) { return function(next) {
                         $('.cardstories_card_label', slot).fadeIn('fast', function() {
                             $(this).show(); // A workaround for http://bugs.jquery.com/ticket/8892
