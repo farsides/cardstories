@@ -2204,7 +2204,7 @@
                         $('.cardstories_player_pick_' + seatno, element).addClass('cardstories_no_background');
                         var return_sprite = $('.cardstories_player_return_' + seatno, element);
                         var is_last_seat = i === player_positions.length - 1;
-                        $this.animate_sprite(return_sprite, 18, 18, function() {
+                        $this.animate_sprite(return_sprite, 18, 18, false, function() {
                             return_sprite.hide();
                             if (is_last_seat) { next(); }
                         });
