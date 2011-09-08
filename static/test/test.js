@@ -1465,9 +1465,9 @@ asyncTest("vote_voter", 14, function() {
         equal(seat1.find('.cardstories_player_name').text(), player_id, "player's id is displayed");
         equal(seat2.find('.cardstories_player_name').text(), player2_id, "player2's id is displayed");
         equal(seat3.find('.cardstories_player_name').text(), player3_id, "player3's id is displayed");
-        var self_card = $('.cardstories_card_1 .cardstories_card_foreground', element);
+        var self_card = $('.cardstories_player_self_picked_card .cardstories_card_foreground', element);
         var src_template = self_card.metadata({type: 'attr', name: 'data'}).card;
-        equal(self_card.attr('src'), src_template.supplant({card: picked}), "current player's card is displayed");
+        equal(self_card.attr('src'), src_template.supplant({card: picked}), "current player's card was displayed");
         start();
    });
 });
@@ -1554,17 +1554,17 @@ asyncTest("vote_anonymous", 12, function() {
     });
 });
 
-test("vote_owner_morph_master_card", 4, function() {
+test("vote_flip_card", 4, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_vote .cardstories_owner', root);
-    var card = $('.cardstories_card_6', element);
-    var template = $('.cardstories_card_template', element);
+    var front = $('.cardstories_card_template', element);
+    var back = $('.cardstories_card_6', element);
 
-    notEqual(template.css('display'), 'none', 'Template is visible');
-    equal(card.css('display'), 'none', 'Card is invisible');
-    $.cardstories.vote_owner_morph_master_card(element, function () {
-        equal(template.css('display'), 'none', 'Template is invisible');
-        notEqual(card.css('display'), 'none', 'Card is visible');
+    notEqual(front.css('display'), 'none', 'Template is visible');
+    equal(back.css('display'), 'none', 'Card is invisible');
+    $.cardstories.vote_flip_card(front, back, function () {
+        equal(front.css('display'), 'none', 'Template is invisible');
+        notEqual(back.css('display'), 'none', 'Card is visible');
     });
 });
 
