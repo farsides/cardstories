@@ -40,7 +40,7 @@ function setup() {
     $.cardstories.error = cardstories_default_error;
     $.cardstories.create_write_sentence = cardstories_default_create_write_sentence;
     $.cardstories.vote_voter = cardstories_default_vote_voter;
-    $.cardstories.animate_sprite = function(movie, fps, frames, cb) { movie.show(); cb(); };
+    $.cardstories.animate_sprite = function(movie, fps, frames, rewind, cb) { movie.show(); cb(); };
     $.cardstories.preload_images_helper = function(root, cb) { cb(); };
     $.cardstories.preload_images = cardstories_default_preload_images;
     $.cardstories.images_to_preload = ['card01.png', 'card02.png', 'card03.png'];
@@ -336,7 +336,7 @@ asyncTest("animate_sprite", 3, function() {
     }
 
     $.cardstories.animate_sprite = cardstories_default_animate_sprite;
-    $.cardstories.animate_sprite(movie, frames, frames, function() {
+    $.cardstories.animate_sprite(movie, frames, frames, false, function() {
         if (movie.css('background-position') !== undefined) {
             notEqual(movie.css('background-position'), '0% 0%', 'movie is no longer at 0% background position');
         } else {
@@ -699,7 +699,7 @@ asyncTest("invitation_owner_join_helper", 39, function() {
     }
 
     // Count how often animate_sprite is called.
-    $.cardstories.animate_sprite = function(movie, fps, frames, cb) {
+    $.cardstories.animate_sprite = function(movie, fps, frames, rewind, cb) {
         ok(true, 'counting animate_sprite');
         movie.show();
         cb();
@@ -788,7 +788,7 @@ asyncTest("invitation_owner_go_vote_confirm", 28, function() {
     var final_left_3 = card_3.metadata({type: 'attr', name: 'data'}).final_left;
 
     // Count how often animate_sprite is called.
-    $.cardstories.animate_sprite = function(movie, fps, frames, cb) {
+    $.cardstories.animate_sprite = function(movie, fps, frames, rewind, cb) {
         ok(true, 'counting animate_sprite');
         movie.show();
         cb();
@@ -990,7 +990,7 @@ asyncTest("invitation_pick_deal_helper", 38, function() {
     }
 
     // Count how often animate_sprite is called.
-    $.cardstories.animate_sprite = function(movie, fps, frames, cb) {
+    $.cardstories.animate_sprite = function(movie, fps, frames, rewind, cb) {
         ok(true, 'counting animate_sprite');
         movie.show();
         cb();
@@ -1051,12 +1051,15 @@ asyncTest("invitation_pick_card_box_helper", 2, function() {
     });
 });
 
-asyncTest("invitation_pick", 10, function() {
+asyncTest("invitation_pick", 13, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_invitation .cardstories_pick', root);
-    var docked_cards = $('.cardstories_cards_hand .cardstories_cards', element);
-    var player_id = 15;
-    var owner = 150;
+    var hand = $('.cardstories_cards_hand', element);
+    var docked_cards = $('.cardstories_cards', hand);
+    var owner = 'Owner';
+    var player1 = 'Player 1';
+    var player2 = 'Player 2';
+    var player_id = player2;
     var game_id = 101;
     var cards = [1,2,3,4,5,6];
     var picked = 5;
@@ -1064,14 +1067,20 @@ asyncTest("invitation_pick", 10, function() {
     var game = {
         'id': game_id,
         'self': [null, null, cards],
+        'owner_id': owner,
+        'owner': false,
         'players': [[owner, null, 'n', null, []],
-                    [player_id, null, 'n', null, []]],
+                    [player1, null, 'n', null, []],
+                    [player2, null, 'n', null, []]],
         'sentence': sentence
     };
 
     $.cardstories.ajax = function(options) {
         equal(options.type, 'GET');
         equal(options.url, $.cardstories.url + '?action=pick&player_id=' + player_id + '&game_id=' + game_id + '&card=' + picked);
+        equal(hand.css('display'), 'none', 'Dock should be hidden');
+        equal($('.cardstories_card_backs', element).css('display'), 'none', 'Backs should be hidden');
+        notEqual($('.cardstories_card_flyover', element).css('display'), 'none', 'Flyover is visible');
         start();
     };
 
@@ -1132,7 +1141,7 @@ asyncTest("invitation_pick_wait", 25, function() {
     };
 
     var animations_played = 0;
-    $.cardstories.animate_sprite = function(movie, fps, frames, cb) {
+    $.cardstories.animate_sprite = function(movie, fps, frames, rewind, cb) {
         animations_played++;
         cb();
     };
@@ -1241,7 +1250,7 @@ asyncTest("invitation_pick_wait_to_vote_voter", 17, function() {
         equal(seat3.css('display'), 'block', 'seat3 is visible initially');
 
         var animations_played = 0;
-        $.cardstories.animate_sprite = function(movie, fps, frames, cb) {
+        $.cardstories.animate_sprite = function(movie, fps, frames, rewind, cb) {
             animations_played++;
             cb();
         };

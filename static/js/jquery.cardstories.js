@@ -188,11 +188,12 @@
             }
         },
 
-        animate_sprite: function(movie, fps, frames, cb) {
+        animate_sprite: function(movie, fps, frames, rewind, cb) {
             movie.show().sprite({
                 fps: fps,
                 no_of_frames: frames,
                 play_frames: frames,
+                rewind: rewind,
                 oncomplete: cb
             });
         },
@@ -1102,7 +1103,7 @@
                             var join_sprite = $('.cardstories_player_join_' + slotno, element);
                             $('.cardstories_player_invite.cardstories_player_seat_' + slotno, element).fadeOut();
                             slot.show();
-                            $this.animate_sprite(join_sprite, 18, 18, function() {
+                            $this.animate_sprite(join_sprite, 18, 18, false, function() {
                                 $('.cardstories_player_arms_' + slotno, element).show();
                                 $('.cardstories_player_pick_' + slotno, element).show();
                                 join_sprite.hide();
@@ -1138,7 +1139,7 @@
                                 slot.addClass('cardstories_player_seat_picked');
                                 $('.cardstories_player_status', slot).html('has picked a card!');
                                 var pick_sprite = $('.cardstories_player_pick_' + slotno, element);
-                                $this.animate_sprite(pick_sprite, 18, 7, function() {
+                                $this.animate_sprite(pick_sprite, 18, 7, false, function() {
                                     pick_sprite.find('.cardstories_card').show();
                                     next();
                                 });
@@ -1207,7 +1208,7 @@
                                 $('.cardstories_player_pick_' + slotno, element).addClass('cardstories_no_background');
                                 var return_sprite = $('.cardstories_player_return_' + slotno, element);
                                 var is_last_slot = slotno === nr_of_slots;
-                                $this.animate_sprite(return_sprite, 18, 18, function() {
+                                $this.animate_sprite(return_sprite, 18, 18, false, function() {
                                     return_sprite.hide();
                                     if (is_last_slot) { next(); }
                                 });
@@ -1318,7 +1319,169 @@
 
             q.dequeue('chain');
 
+            // Send game when the user clicks ok.
+            var ok = function(card_value, card_index) {
+                $this.invitation_pick_confirm_helper(player_id, game, card_index, card_value, element, function() {
+                    $this.send_game(player_id, game.id, element, 'action=pick&player_id=' + player_id + '&game_id=' + game.id + '&card=' + card_value);
+                });
+            };
+
             return deferred;
+        },
+
+        invitation_pick_confirm_helper: function(player_id, game, card_index, card_value, element, cb) {
+            var $this = this;
+            var hand = $('.cardstories_cards_hand', element);
+            var docked_cards = $('.cardstories_card', hand);
+            var container = $('.cardstories_card_backs', element);
+            var cards = $('img', container);
+            var board = $('.cardstories_board', element);
+            var last = cards.length - 1;
+            var flyover = $('.cardstories_card_flyover', element);
+
+            var q = $({});
+
+            container.show();
+            cards.each(function(i) {
+                var card = $(this);
+                var cardq = 'card' + i;
+                var j = last - i;
+                var docked_card = docked_cards.eq(j);
+                var docked_card_foreground = docked_card.find('.cardstories_card_foreground');
+
+                // If this is the selected card, replace it with one positioned
+                // absolutely to the board.
+                if (card_index === j) {
+                    card.hide();
+                    var meta = flyover.metadata({type: 'attr', name: 'data'});
+                    var src = meta.card.supplant({card: card_value});
+                    $('.cardstories_card_foreground', flyover).attr('src', src);
+                    flyover.css({
+                        width: docked_card_foreground.width(),
+                        height: docked_card_foreground.height(),
+                        top: docked_card_foreground.offset().top - board.offset().top,
+                        left: docked_card_foreground.offset().left - board.offset().left,
+                        zIndex: docked_card.css('z-index')
+                    });
+                    flyover.show();
+                } else {
+                    // Save initial pos.
+                    var init_pos = {
+                        width: card.width(),
+                        height: card.height(),
+                        top: card.position().top,
+                        left: card.position().left
+                    };
+
+                    // Calculate starting position absolutely to the container.
+                    var start_pos = {
+                        width: docked_card_foreground.width(),
+                        height: docked_card_foreground.height(),
+                        top: docked_card_foreground.offset().top - container.offset().top,
+                        left: docked_card_foreground.offset().left - container.offset().left,
+                        zIndex: docked_card.css('z-index')
+                    };
+
+                    // Set the card's properties.
+                    card.css(start_pos);
+
+                    // Animate back to initial position.
+                    q.queue(cardq, function(next) {
+                        card.animate(init_pos, 250, next);
+                    });
+
+                    // Morph out...
+                    q.queue(cardq, function(next) {
+                        card.animate({width: 0, left: init_pos.left + (init_pos.width / 2)}, 250, next);
+                    });
+
+                    // ... and then back in.
+                    q.queue(cardq, function(next) {
+                        var src = card.metadata({type: 'attr', name: 'data'}).nocard;
+                        card.attr('src', src);
+                        card.animate(init_pos, 250, next);
+                    });
+                }
+
+                // If this is the last one, dequeue stage 2.
+                if (card_index === 0) {
+                    if (i === (last - 1)) {
+                        q.queue(cardq, function(next) {
+                            q.dequeue('stage2');
+                        });
+                    }
+                } else if (i === last) {
+                    q.queue(cardq, function(next) {
+                        q.dequeue('stage2');
+                    });
+                }
+
+                q.queue('stage1', function(next) {
+                    q.dequeue(cardq);
+                    next();
+                });
+            });
+
+            // Hide the dock, we don't need it anymore.
+            hand.hide();
+
+            // What seat are we in?
+            var seatno=0;
+            for (var i=0; i < game.players.length; i++) {
+                if (game.owner_id != game.players[i][0]) {
+                    seatno++;
+                    if (player_id == game.players[i][0]) {
+                        break;
+                    }
+                }
+            }
+            var hand2dock_sprite = $('.cardstories_player_hand2dock_' + seatno, element);
+            var overlay = $('.cardstories_modal_overlay', element);
+            q.queue('stage2', function(next) {
+                hand2dock_sprite.show();
+                container.hide();
+                overlay.fadeOut('fast');
+                $this.animate_sprite(hand2dock_sprite, 18, 18, true, next);
+            });
+
+            // Move card back and change seat status.
+            var pick_sprite = $('.cardstories_player_pick_' + seatno, element);
+            var pick_card =  $('.cardstories_card', pick_sprite);
+            q.queue('stage2', function(next) {
+                pick_sprite.show();
+                pick_card.show();
+                var end_pos = {
+                    width: pick_card.width(),
+                    height: pick_card.height(),
+                    top: pick_card.offset().top - board.offset().top,
+                    left: pick_card.offset().left - board.offset().left
+                };
+                pick_card.hide();
+                pick_sprite.hide();
+                flyover.animate(end_pos, 300, next);
+            });
+
+            q.queue('stage2', function(next) {
+                // Set player status
+                var slot = $('.cardstories_player_seat_' + seatno, element);
+                $('.cardstories_player_status', slot).html('has picked a card!');
+
+                // Set last state of the sprite.
+				var x = -(6 * pick_sprite.width());
+				pick_sprite.css({'background-position': x + 'px 0px'});
+                pick_sprite.show();
+                hand2dock_sprite.fadeOut('normal', next);
+            });
+
+            q.queue('stage2', function(next) {
+                $this.animate_progress_bar(2, element, next);
+            });
+
+            if (cb !== undefined) {
+                q.queue('stage2', function(next) {cb();});
+            }
+
+            q.dequeue('stage1');
         },
 
         invitation_replay_master: function(element, root, cb) {
@@ -1494,7 +1657,7 @@
                         delay_next = true;
                         q.queue(playerq, (function(seat, seatno) {return function(next) {
                             var join_sprite = $('.cardstories_player_join_' + seatno, element);
-                            $this.animate_sprite(join_sprite, 18, 18, function() {
+                            $this.animate_sprite(join_sprite, 18, 18, false, function() {
                                 $('.cardstories_player_arms_' + seatno, element).show();
                                 $('.cardstories_player_pick_' + seatno, element).show();
                                 join_sprite.hide();
@@ -1593,7 +1756,7 @@
             q.queue('chain', function(next) {
                 pick_sprite.hide();
                 hand2dock_sprite.show();
-                $this.animate_sprite(hand2dock_sprite, 18, 19, next);
+                $this.animate_sprite(hand2dock_sprite, 18, 19, false, next);
             });
 
             // Morph cards out, switching image to actual right one.  At the
@@ -1887,7 +2050,7 @@
                                 delay_next = true;
                                 q.queue(playerq, (function(seat, seatno, card_img) { return function(next) {
                                     var pick_sprite = $('.cardstories_player_pick_' + seatno, element);
-                                    $this.animate_sprite(pick_sprite, 18, 7, function() {
+                                    $this.animate_sprite(pick_sprite, 18, 7, false, function() {
                                         pick_sprite.find('.cardstories_card').show();
                                         card_img.show();
                                         seat.addClass('cardstories_player_seat_waiting');

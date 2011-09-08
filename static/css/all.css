@@ -1858,7 +1858,6 @@
 .cardstories .cardstories_invitation .cardstories_pick .cardstories_cards {
     top: 260px;
     left: 123px;
-    z-index: 9999;
 }
 
 .cardstories .cardstories_invitation .cardstories_pick .cardstories_card_backs {
@@ -1866,7 +1865,10 @@
     position: absolute;
     top: 260px;
     left: 160px;
-    z-index: 9999;
+}
+
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_card_backs.post_pick {
+    left: 180px;
 }
 
 .cardstories .cardstories_invitation .cardstories_pick .cardstories_card_backs > img {
@@ -1911,6 +1913,20 @@
 
 .cardstories .cardstories_invitation .cardstories_pick .cardstories_card_confirm { 
     top: 70px;
+}
+
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_card_flyover {
+    position: absolute;
+    display: none;
+}
+
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_card_flyover .cardstories_card_foreground,
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_card_flyover .cardstories_card_background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
 }
 
 /* state invitation, anonymous view : wait for others */
