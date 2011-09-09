@@ -1645,7 +1645,7 @@ test("vote_owner_display_board", 14, function() {
     notEqual($('.cardstories_card_3', element).css('display'), 'none', 'card 3 is visible');
 });
 
-test("vote_owner_display_cards", 8, function() {
+test("vote_display_cards", 8, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_vote .cardstories_owner', root);
     var owner_id = 'Owner';
@@ -1663,7 +1663,7 @@ test("vote_owner_display_cards", 8, function() {
                      [ player3, null, null, 33, [] ] ]
     };
 
-    $.cardstories.vote_owner_display_cards(game.winner_card, game, element, root, function() {
+    $.cardstories.vote_display_cards(false, game.winner_card, game, element, root, function() {
         for (var i=0; i < board.length; i++) {
             var slot = $('.cardstories_card_slot_' + (i + 1), element);
             notEqual(slot.css('display'), 'none', 'slot ' + i + ' is visible');

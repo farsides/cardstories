@@ -1081,6 +1081,24 @@
     width: 100%;
 }
 
+.cardstories .cardstories_card_slot .cardstories_card_bg_off {
+    display: inline;
+}
+
+.cardstories .cardstories_card_slot .cardstories_card_bg_on {
+    display: none;
+}
+
+.cardstories .cardstories_card_slot.live:hover .cardstories_card_bg_off,
+.cardstories .cardstories_card_slot.selected .cardstories_card_bg_off {
+    display: none;
+}
+
+.cardstories .cardstories_card_slot.live:hover .cardstories_card_bg_on,
+.cardstories .cardstories_card_slot.selected .cardstories_card_bg_on {
+    display: inline;
+}
+
 .cardstories .cardstories_card_slot .cardstories_card_label {
     display: none;
     position: relative;
@@ -2092,11 +2110,6 @@
     z-index: 100;
     background: transparent url('images/yourcard.png') no-repeat left top;
 }
-
-.cardstories .cardstories_vote .cardstories_voter .cardstories_card_confirm {
-    top: 350px;
-}
-
 
 /* state vote, player point of view : wait for other players to vote for a card */
 

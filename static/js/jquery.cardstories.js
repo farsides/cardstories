@@ -2117,101 +2117,72 @@
         },
 
         vote_init_helper: function(player_id, game, element, root, cb) {
-            if (!element.hasClass('cardstories_noop_init')) {
-                element.addClass('cardstories_noop_init');
-                var $this = this;
-                var players = game.players;
+            var $this = this;
+            var players = game.players;
+            var self_card;
+            var self_card_back;
 
-                // Display player's arms and card.
-                var self_card_back;
-                for (var i=0, seatno=0; i < players.length; i++) {
-                    if (players[i][0] != game.owner_id) {
-                        seatno++;
+            // Display player's arms and card.
+            for (var i=0, seatno=0; i < players.length; i++) {
+                if (players[i][0] != game.owner_id) {
+                    seatno++;
 
-                        $('.cardstories_player_arms_' + seatno, element).show();
-                        var card_img = $('.cardstories_card_' + seatno, element);
-                        card_img.show();
+                    $('.cardstories_player_arms_' + seatno, element).show();
+                    var card_img = $('.cardstories_card_' + seatno, element);
+                    card_img.show();
 
-                        // If this is the "self" player, show picked card.
-                        if (players[i][0] == player_id) {
-                            var self_card = $('.cardstories_player_self_picked_card', element);
-                            var foreground = $('.cardstories_card_foreground', self_card);
-                            var src_template = foreground.metadata({type: 'attr', name: 'data'}).card;
-                            foreground.attr('src', src_template.supplant({card: game.self[0]}));
-                            self_card.css({
-                                top: card_img.position().top,
-                                left: card_img.position().left,
-                                width: card_img.width(),
-                                height: card_img.height()
-                            });
-                            self_card.show();
-                            card_img.hide();
+                    // If this is the "self" player, show picked card.
+                    if (players[i][0] == player_id) {
+                        self_card = $('.cardstories_player_self_picked_card', element);
+                        var foreground = $('.cardstories_card_foreground', self_card);
+                        var src_template = foreground.metadata({type: 'attr', name: 'data'}).card;
+                        foreground.attr('src', src_template.supplant({card: game.self[0]}));
+                        self_card.css({
+                            top: card_img.position().top,
+                            left: card_img.position().left,
+                            width: card_img.width(),
+                            height: card_img.height()
+                        });
+                        self_card.show();
+                        card_img.hide();
 
-                            // Save card back.
-                            self_card_back = card_img;
-                        }
+                        // Save card back.
+                        self_card_back = card_img;
                     }
                 }
-
-                var q = $({});
-
-                // Flip self card.
-                if (self_card) {
-                    q.queue('chain', function(next) {
-                        $this.vote_flip_card(self_card, self_card_back, next);
-                    });
-                }
-
-                // Switch owner's card with card 6
-                var picked = $('.cardstories_picked_card', element);
-                var card6 = $('img.cardstories_card_6', element);
-                card6.css({
-                    top: picked.position().top,
-                    left: picked.position().left,
-                    width: picked.width(),
-                    height: picked.height()
-                });
-                picked.hide();
-                card6.show();
-
-                // Shuffle the cards.
-                q.queue('chain', function(next) {
-                    $this.vote_owner_shuffle_cards(game, element, next);
-                });
-
-                // Supplant owner's name into modal, before showing it.
-                var info = $('.cardstories_info', element);
-                var is_anonymous = !game.self;
-                if (is_anonymous) {
-                    $('.cardstories_voter_info', info).hide();
-                    $('.cardstories_anonymous_info', info).show();
-                }
-                var html = info.html().supplant({'name': game.owner_id});
-                info.html(html);
-
-                // Show modal.
-                q.queue('chain', function(next) {
-                    var overlay = $('.cardstories_modal_overlay', element);
-                    $this.display_modal(info, overlay, next, true);
-                });
-
-                // Flip out!
-                q.queue('chain', function(next) {
-                    $this.vote_owner_flip_out(game, element, next);
-                });
-
-                // Display cards
-                q.queue('chain', function(next) {
-                    var picked = is_anonymous ? null : game.self[0];
-                    $this.vote_owner_display_cards(null, game, element, root, next);
-                });
-
-                if (cb !== undefined) {
-                    q.queue('chain', function(next) {cb();});
-                }
-
-                q.dequeue('chain');
             }
+            
+            // Switch owner's card with card 6 (for later shuffling).
+            var picked = $('.cardstories_picked_card', element);
+            var card6 = $('img.cardstories_card_6', element);
+            card6.css({
+                top: picked.position().top,
+                left: picked.position().left,
+                width: picked.width(),
+                height: picked.height()
+            });
+            picked.hide();
+            card6.show();
+
+            var q = $({});
+
+            // Flip self card.
+            if (self_card) {
+                q.queue('chain', function(next) {
+                    $this.vote_flip_card(self_card, self_card_back, next);
+                });
+            }
+
+            // Shuffle the cards.
+            q.queue('chain', function(next) {
+                $this.vote_owner_shuffle_cards(game, element, next);
+            });
+
+            if (cb !== undefined) {
+                q.queue('chain', function(next) {cb();});
+            }
+
+            q.dequeue('chain');
         },
 
         invitation_pick_wait_to_vote_voter: function(player_id, game, root) {
@@ -2316,24 +2287,46 @@
 
         vote_voter: function(player_id, game, root) {
             var $this = this;
-            var deferred = $.Deferred();
             var element = $('.cardstories_vote .cardstories_voter', root);
-
             this.notify_active(root, element, 'vote_voter');
             this.set_active(root, element);
             $('.cardstories_sentence', element).text(game.sentence);
-
             this.display_progress_bar('player', 3, element, root);
             this.display_master_name(game.owner_id, element);
             this.invitation_display_board(player_id, game, element, root, true);
 
-
             var deferred = $.Deferred();
             var q = $({});
 
-            q.queue('chain', function(next) {
-                $this.vote_init_helper(player_id, game, element, root, next);
-            });
+            if (!element.hasClass('cardstories_noop_init')) {
+                element.addClass('cardstories_noop_init');
+
+                // Common vote board initialization.
+                q.queue('chain', function(next) {
+                    $this.vote_init_helper(player_id, game, element, root, next);
+                });
+                
+                // Supplant owner's name into modal, before showing it.
+                var info = $('.cardstories_info', element);
+                var html = info.html().supplant({'name': game.owner_id});
+                info.html(html);
+
+                // Show modal.
+                q.queue('chain', function(next) {
+                    var overlay = $('.cardstories_modal_overlay', element);
+                    $this.display_modal(info, overlay, next, true);
+                });
+
+                // Flip out!
+                q.queue('chain', function(next) {
+                    $this.vote_owner_flip_out(game, element, next);
+                });
+
+                // Display cards
+                q.queue('chain', function(next) {
+                    $this.vote_display_or_select_cards(game.self[0], game, element, root, next, ok);
+                });
+            }
 
             // Resolve deferred.
             q.queue('chain', function(next) {
@@ -2342,30 +2335,14 @@
 
             q.dequeue('chain');
 
-            return deferred;
-/*
-            var ok = function(card) {
-                $this.send_game(player_id, game.id, element, 'action=vote&player_id=' + player_id + '&game_id=' + game.id + '&card=' + card);
+            // Send game when user clicks ok.
+            var ok = function(card_index, card_value) {
+                $this.animate_progress_bar(4, element, function() {
+                    $this.send_game(player_id, game.id, element, 'action=vote&player_id=' + player_id + '&game_id=' + game.id + '&card=' + card_value);
+                });
             };
 
-            var cards = [];
-            var picked = game.self[0];
-            var voted = game.self[1];
-            var titles = [];
-            for (var i = 0; i < game.board.length; i++) {
-                var card = {value: game.board[i]};
-                if (card.value === picked) {
-                    card.label = 'YOUR CARD';
-                    card.inactive = true;
-                }
-                cards.push(card);
-            }
-
-            $this.select_cards('vote_voter', cards, ok, element, root, false).done(function() {
-                deferred.resolve();
-            });
-*/
-            return deferred.resolve();
+            return deferred;
         },
 
         vote_voter_wait: function(player_id, game, root) {
@@ -2384,18 +2361,57 @@
 
         vote_anonymous: function(player_id, game, root) {
             var $this = this;
-            var deferred = $.Deferred();
             var element = $('.cardstories_vote .cardstories_voter', root);
             this.notify_active(root, element, 'vote_voter');
             this.set_active(root, element);
             $('.cardstories_sentence', element).text(game.sentence);
-
             this.display_progress_bar('player', 3, element, root);
             this.display_master_name(game.owner_id, element);
             this.invitation_display_board(player_id, game, element, root, true);
-            this.vote_init_helper(player_id, game, element, root);
 
-            return deferred.resolve();
+            var deferred = $.Deferred();
+            var q = $({});
+
+            if (!element.hasClass('cardstories_noop_init')) {
+                element.addClass('cardstories_noop_init');
+
+                // Common vote board initialization.
+                q.queue('chain', function(next) {
+                    $this.vote_init_helper(player_id, game, element, root, next);
+                });
+                
+                // Supplant owner's name into modal, before showing it.
+                $('.cardstories_voter_info', info).hide();
+                $('.cardstories_anonymous_info', info).show();
+                var info = $('.cardstories_info', element);
+                var html = info.html().supplant({'name': game.owner_id});
+                info.html(html);
+
+                // Show modal.
+                q.queue('chain', function(next) {
+                    var overlay = $('.cardstories_modal_overlay', element);
+                    $this.display_modal(info, overlay, next, true);
+                });
+
+                // Flip out!
+                q.queue('chain', function(next) {
+                    $this.vote_owner_flip_out(game, element, next);
+                });
+
+                // Display cards
+                q.queue('chain', function(next) {
+                    $this.vote_display_or_select_cards(null, game, element, root, next);
+                });
+            }
+
+            // Resolve deferred.
+            q.queue('chain', function(next) {
+                deferred.resolve();
+            });
+
+            q.dequeue('chain');
+
+            return deferred;
         },
 
         vote_owner: function(player_id, game, root) {
@@ -2453,7 +2469,7 @@
                 
                 // ... then morph them in.
                 q.queue('chain', function(next) {
-                    $this.vote_owner_display_cards(game.winner_card, game, element, root, next);
+                    $this.vote_display_or_select_cards(game.winner_card, game, element, root, next);
                 });
 
                 // Show the announce results info box.
@@ -2803,22 +2819,26 @@
             });
         },
 
-        vote_owner_display_cards: function(picked, game, element, root, cb) {
+        vote_display_or_select_cards: function(picked, game, element, root, cb, ok) {
             var $this = this;
             var snippets = $('.cardstories_snippets', root);
             var slot_snippet = $('.cardstories_card_slot', snippets);
-            var last = game.board.length - 1;
+            var confirm = $('.cardstories_card_confirm', element);
+            var confirm_meta = confirm.metadata({type: 'attr', name: 'data'});
+
             var q = $({});
-            for (var i=0; i < game.board.length; i++) {
+            var last = game.board.length - 1;
+            $.each(game.board, function(i, value) {
                 var cardq = 'card' + i;
-                var slot = $('.cardstories_card_slot_' + (i + 1), element);
+                var slotno = i + 1;
+                var slot = $('.cardstories_card_slot_' + slotno, element);
 
                 // Populate it.
                 slot_snippet.clone().children().appendTo(slot);
 
                 // Set the proper card.
                 var card = $('.cardstories_card_foreground', slot);
-                var src = card.metadata({type: 'attr', name: 'data'}).card.supplant({card: game.board[i]});
+                var src = card.metadata({type: 'attr', name: 'data'}).card.supplant({card: value});
                 card.attr('src', src);
 
                 // Grab pos.
@@ -2833,19 +2853,65 @@
                 slot.css({'width': 0, 'left': slot_pos.left + (slot_pos.width / 2)});
 
                 // Animate it in.
-                q.queue(cardq, (function(i, slot, slot_pos) { return function(next) {
+                q.queue(cardq, function(next) {
                     slot.show();
                     slot.animate({'width': slot_pos.width, 'left': slot_pos.left}, 500, next);
-                }})(i, slot, slot_pos));
+                });
 
-                // Show the label.
-                if (picked === game.board[i]) {
-                    q.queue(cardq, (function(slot) { return function(next) {
+                // Show the label, otherwise, if live, enable it for selection.
+                if (picked === value) {
+                    q.queue(cardq, function(next) {
                         $('.cardstories_card_label', slot).fadeIn('fast', function() {
                             $(this).show(); // A workaround for http://bugs.jquery.com/ticket/8892
                             next();
                         });
-                    }})(slot));
+                    });
+                } else if (ok !== undefined) {
+                    slot.addClass('live');
+                    slot.unbind('click').click(function() {
+                        if(!slot.hasClass('selected')) {
+                            slot.addClass('selected');
+                            var duration = 300;
+                            var small_pos = {
+                                width: slot.width(),
+                                height: slot.height(),
+                                top: slot.position().top,
+                                left: slot.position().left,
+                                zIndex: 0
+                            };
+                            var factor = 1.4;
+                            var large_width = small_pos.width * factor;
+                            var large_height = small_pos.height * factor;
+                            var large_top = small_pos.top - (large_height - small_pos.height)/2;
+                            var large_left = small_pos.left - (large_width - small_pos.width)/2;
+                            slot.css('z-index', 1);
+                            slot.animate({
+                                width: large_width,
+                                height: large_height,
+                                top: large_top,
+                                left: large_left
+                            }, duration);
+                            // Classes don't work for this: animate_scale()
+                            // screws it up.  So we resort to metadata.
+                            if (slotno <= 3) {
+                                confirm.css('top', confirm_meta.bottom);
+                            } else {
+                                confirm.css('top', confirm_meta.top);
+                            }
+                            $this.animate_scale(false, 5, duration, confirm);
+                            $('.cardstories_card_confirm_ok', confirm).unbind('click').click(function() {
+                                $this.animate_scale(true, 5, duration, confirm, function() {
+                                    ok(i, value);
+                                });
+                            });
+                            $('.cardstories_card_confirm_cancel', confirm).unbind('click').click(function() {
+                                slot.animate(small_pos, duration);
+                                $this.animate_scale(true, 5, duration, confirm, function() {
+                                    slot.removeClass('selected');
+                                });
+                            });
+                        }
+                    });
                 }
 
                 if (i === last && cb !== undefined) {
@@ -2853,7 +2919,7 @@
                 }
 
                 q.dequeue(cardq);
-            }
+            });
         },
 
         complete: function(player_id, game, root) {
