@@ -190,8 +190,7 @@
                      [ 'Player 1', 32, null, 31, [] ],
                      [ 'Player 2', 30, null, 32, [] ],
                      [ 'Player 3', 30, null, 33, [] ],
-                     [ 'Player 4', 31, null, 34, [] ],
-                     [ 'Player 5', 31, null, 35, [] ] ]
+                     [ 'Player 4', 31, null, 34, [] ] ]
       };
       $.cardstories.vote_anonymous(null, game, root);
     } else if(skin == 'vote_owner') {

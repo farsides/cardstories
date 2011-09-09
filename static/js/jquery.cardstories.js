@@ -2154,7 +2154,7 @@
                 }
 
                 var q = $({});
-                
+
                 // Flip self card.
                 if (self_card) {
                     q.queue('chain', function(next) {
@@ -2197,9 +2197,10 @@
 
                 // Display cards
                 q.queue('chain', function(next) {
-                    $this.vote_owner_display_cards(game.self[0], game, element, root, next);
+                    var picked = game.self ? game.self[0] : null;
+                    $this.vote_owner_display_cards(null, game, element, root, next);
                 });
-                
+
                 if (cb !== undefined) {
                     q.queue('chain', function(next) {cb();});
                 }
@@ -2809,7 +2810,7 @@
 
                 // Populate it.
                 slot_snippet.clone().children().appendTo(slot);
-                
+
                 // Set the proper card.
                 var card = $('.cardstories_card_foreground', slot);
                 var src = card.metadata({type: 'attr', name: 'data'}).card.supplant({card: game.board[i]});
