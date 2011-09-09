@@ -2181,6 +2181,11 @@
 
                 // Supplant owner's name into modal, before showing it.
                 var info = $('.cardstories_info', element);
+                var is_anonymous = !game.self;
+                if (is_anonymous) {
+                    $('.cardstories_voter_info', info).hide();
+                    $('.cardstories_anonymous_info', info).show();
+                }
                 var html = info.html().supplant({'name': game.owner_id});
                 info.html(html);
 
@@ -2197,7 +2202,7 @@
 
                 // Display cards
                 q.queue('chain', function(next) {
-                    var picked = game.self ? game.self[0] : null;
+                    var picked = is_anonymous ? null : game.self[0];
                     $this.vote_owner_display_cards(null, game, element, root, next);
                 });
 

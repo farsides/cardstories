@@ -2074,6 +2074,10 @@
     font-weight: bold;
 }
 
+.cardstories .cardstories_vote .cardstories_info .cardstories_modal_h2.cardstories_anonymous_info {
+    display: none;
+}
+
 .cardstories .cardstories_vote .cardstories_info .cardstories_modal_button {
     margin-top: 0.65em;
 }
