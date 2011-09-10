@@ -2282,7 +2282,7 @@
                 q.dequeue('chain');
             });
 
-            return  deferred;
+            return deferred;
         },
 
         vote_voter: function(player_id, game, root) {
@@ -2294,6 +2294,13 @@
             this.display_progress_bar('player', 3, element, root);
             this.display_master_name(game.owner_id, element);
             this.invitation_display_board(player_id, game, element, root, true);
+
+            // Send game when user clicks ok.
+            var ok = function(card_index, card_value) {
+                $this.animate_progress_bar(4, element, function() {
+                    $this.send_game(player_id, game.id, element, 'action=vote&player_id=' + player_id + '&game_id=' + game.id + '&card=' + card_value);
+                });
+            };
 
             var deferred = $.Deferred();
             var q = $({});
@@ -2334,13 +2341,6 @@
             });
 
             q.dequeue('chain');
-
-            // Send game when user clicks ok.
-            var ok = function(card_index, card_value) {
-                $this.animate_progress_bar(4, element, function() {
-                    $this.send_game(player_id, game.id, element, 'action=vote&player_id=' + player_id + '&game_id=' + game.id + '&card=' + card_value);
-                });
-            };
 
             return deferred;
         },
@@ -2693,10 +2693,11 @@
 
             // Move sentence box to center.
             var sentence = $('.cardstories_sentence_box', element);
-            var meta = sentence.metadata({type: 'attr', name: 'data'});
-            var fl = meta.fl;
-            var ft = meta.ft;
-            sentence.animate({top: ft, left: fl}, init_duration);
+            var sentence_meta = sentence.metadata({type: 'attr', name: 'data'});
+            sentence.animate({
+                top: sentence_meta.ft,
+                left: sentence_meta.fl
+            }, init_duration);
 
             // Choose which cards to animate.
             var players = game.players;
@@ -2727,11 +2728,11 @@
             // Shuffle all the cards.
             var last = cards.length - 1;
             var q = $({});
-            for (var i=0; i < cards.length; i++) {
-                var card = cards[i];
-                var card_slot = $('.cardstories_card_slot_' + (i + 1), element);
-                var cardq = 'card' + i;
-                var meta = card.metadata({type: 'attr', name: 'data'});
+            $.each(cards, function(i, card) {
+                var cardno = i + 1;
+                var card_slot = $('.cardstories_card_slot_' + cardno, element);
+                var cardq = 'card' + cardno;
+                var card_meta = card.metadata({type: 'attr', name: 'data'});
 
                 // Grab destination position.
                 card_slot.show();
@@ -2740,37 +2741,37 @@
                     height: card_slot.height(),
                     top: card_slot.position().top,
                     left: card_slot.position().left,
-                    center_top: meta.ct,
-                    center_left: meta.cl
+                    center_top: card_meta.ct,
+                    center_left: card_meta.cl
                 };
                 card_slot.hide();
                 
                 // Animate to center.
-                q.queue(cardq, (function(card, card_pos) {return function(next) {
+                q.queue(cardq, function(next) {
                     card.animate({
                         width: card_pos.width,
                         height: card_pos.height,
                         top: card_pos.center_top,
                         left: card_pos.center_left
                     }, init_duration, next);
-                }})(card, card_pos));
+                });
 
                 // Make quick passes at animating randomly near the center.
                 for (var j=0; j < shuffle_times; j++) {
                     var rt = card_pos.center_top + rand(shuffle_range, true);
                     var rl = card_pos.center_left + rand(shuffle_range, true);
-                    q.queue(cardq, (function(card, rt, rl) {return function(next) {
+                    q.queue(cardq, (function(rt, rl) {return function(next) {
                         card.animate({top: rt, left: rl}, shuffle_duration, 'linear', next);
-                    }})(card, rt, rl));
+                    }})(rt, rl));
                 }
 
                 // Animate to final position.
-                q.queue(cardq, (function(card, card_pos) {return function(next) {
+                q.queue(cardq, function(next) {
                     card.animate({
                         top: card_pos.top,
                         left: card_pos.left
                     }, end_duration, next);
-                }})(card, card_pos));
+                });
 
                 // Pause for effect.
                 $this.delay(q, 250, cardq);
@@ -2780,7 +2781,7 @@
                 }
 
                 q.dequeue(cardq);
-            }
+            });
         },
 
         vote_owner_flip_out: function(game, element, cb) {
@@ -2823,8 +2824,11 @@
             var $this = this;
             var snippets = $('.cardstories_snippets', root);
             var slot_snippet = $('.cardstories_card_slot', snippets);
-            var confirm = $('.cardstories_card_confirm', element);
-            var confirm_meta = confirm.metadata({type: 'attr', name: 'data'});
+
+            if (ok !== undefined) {
+                var confirm = $('.cardstories_card_confirm', element);
+                var confirm_meta = confirm.metadata({type: 'attr', name: 'data'});
+            }
 
             var q = $({});
             var last = game.board.length - 1;
