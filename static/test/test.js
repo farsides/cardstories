@@ -1422,11 +1422,10 @@ asyncTest("vote_voter", 29, function() {
         'owner_id': owner_id,
         'self': [picked, null, [11, 12, 13, 14, 15, 16]],
         'sentence': sentence,
-        'winner_card': winner,
-        'players': [ [ owner_id, null, 'n', winner, [] ],
+        'players': [ [ owner_id, null, 'n', null, [] ],
                      [ player_id, null, 'n', picked, [] ],
-                     [ player2_id, null, 'n', 32, [] ],
-                     [ player3_id, null, 'n', voted, [] ] ]
+                     [ player2_id, null, 'n', null, [] ],
+                     [ player3_id, null, 'n', null, [] ] ]
     };
 
     $.cardstories.ajax = function(options) {
@@ -1488,20 +1487,31 @@ asyncTest("vote_voter", 29, function() {
         $('.cardstories_card_confirm_ok a', element).click();
    });
 });
-/*
-test("invitation_voter_wait", 8, function() {
-    var player_id = 15;
-    var game_id = 101;
-    var picked = 5;
-    var voted = 3;
-    var board = [1,2,voted,4,picked,6];
-    var sentence = 'SENTENCE';
 
-    var game = {
-        'id': game_id,
-        'board': board,
-        'self': [picked, voted, [picked,10,11,12,13,14]],
-        'sentence': sentence
+test("vote_voter_wait", 32, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_vote .cardstories_voter_wait');
+    var game_id = 101;
+    var picked = 32;
+    var voted = 30;
+    var hand = [1, 2, 3, 4, 5, picked];
+    var board = [voted, 31, picked, 33, 34];
+    var sentence = 'SENTENCE';
+    var owner_id = 'Owner';
+    var player_id = 'Player 2';
+    game = {
+      'id': game_id,
+      'owner': false,
+      'owner_id': owner_id,
+      'ready': true,
+      'board': board,
+      'self': [picked, voted, hand],
+      'sentence': sentence,
+      'players': [ [ owner_id, null, 'n', '', null ],
+                   [ 'Player 1', null, 'n', '', null ],
+                   [ player_id, voted, 'n', picked, hand],
+                   [ 'Player 3', '', 'n', '', null ],
+                   [ 'Player 4', null, 'n', '', null ] ]
     };
 
     $.cardstories.poll_ignore = function(ignored_request, ignored_answer, new_poll, old_poll) {
@@ -1509,18 +1519,38 @@ test("invitation_voter_wait", 8, function() {
         equal(new_poll, undefined, 'poll_ignore metadata not set');
     };
 
-    var element = $('#qunit-fixture .cardstories_vote .cardstories_voter_wait');
-    equal($(element).hasClass('cardstories_active'), false, 'voter_wait not active');
-    $.cardstories.vote(player_id, game, $('#qunit-fixture .cardstories'));
-    equal($(element).hasClass('cardstories_active'), true, 'voter_wait active');
-    equal($('.cardstories_sentence', element).text(), sentence);
-    equal($('.cardstories_card', element).metadata().card, voted);
-    var element_pick = $('#qunit-fixture .cardstories_vote .cardstories_voter');
-    equal($(element_pick).hasClass('cardstories_active'), false, 'voter not active');
-    $('.cardstories_card_change', element).click();
-    equal($(element_pick).hasClass('cardstories_active'), true, 'voter active');
+    equal(element.hasClass('cardstories_active'), false, 'element not active');
+    $.cardstories.vote(player_id, game, root).done(function() {
+        equal(element.hasClass('cardstories_active'), true, 'voter_wait active');
+        equal($('.cardstories_sentence', element).text(), sentence);
+        ok($('.cardstories_player_seat_1', element).hasClass('cardstories_player_seat_picking'), 'Player 1 is picking');
+        ok($('.cardstories_player_seat_2', element).hasClass('cardstories_player_seat_self'), 'Player 2 is self');
+        ok($('.cardstories_player_seat_3', element).hasClass('cardstories_player_seat_voted'), 'Player 3 voted');
+        ok($('.cardstories_player_seat_4', element).hasClass('cardstories_player_seat_picking'), 'Player 4 is picking');
+        for (var i=1; i<=5; i++) {
+            notEqual($('.cardstories_card_slot_' + i, element).css('display'), 'none', 'Slot ' + i + ' is visible');
+        }
+        equal($('.cardstories_card_slot_6', element).css('display'), 'none', 'Slot 6 is hidden');
+        for (var i=1; i<=6; i++) {
+            ok(!$('.cardstories_card_slot_' + i, element).hasClass('live'), 'Slot ' + i + ' is dead');
+        }
+        ok($('.cardstories_card_slot_1', element).hasClass('selected'), 'Slot 1 was selected');
+        ok(!$('.cardstories_card_slot_2', element).hasClass('selected'), 'Slot 2 was NOT selected');
+        ok(!$('.cardstories_card_slot_3', element).hasClass('selected'), 'Slot 3 was NOT selected');
+        ok(!$('.cardstories_card_slot_4', element).hasClass('selected'), 'Slot 4 was NOT selected');
+        ok(!$('.cardstories_card_slot_5', element).hasClass('selected'), 'Slot 5 was NOT selected');
+    });
+
+    // Player 1 voted.
+    game.players[1][1] = '';
+    $.cardstories.vote(player_id, game, root).done(function() {
+        ok($('.cardstories_player_seat_1', element).hasClass('cardstories_player_seat_voted'), 'Player 1 voted');
+        ok($('.cardstories_player_seat_2', element).hasClass('cardstories_player_seat_self'), 'Player 2 is self');
+        ok($('.cardstories_player_seat_3', element).hasClass('cardstories_player_seat_voted'), 'Player 3 voted');
+        ok($('.cardstories_player_seat_4', element).hasClass('cardstories_player_seat_picking'), 'Player 4 is picking');
+    });
 });
-*/
+
 asyncTest("vote_anonymous", 12, function() {
     var game_id = 101;
     var owner_id = 'The Owner';
@@ -1588,16 +1618,16 @@ test("vote_flip_card", 4, function() {
     });
 });
 
-test("vote_owner_shuffle_cards", 7, function() {
+test("vote_shuffle_cards", 7, function() {
     var root = $('#qunit-fixture .cardstories');
     var container = $('.cardstories_vote', root);
     var element = $('.cardstories_owner', container);
     var game = {
         'owner_id': 'Owner',
         'players': [ [ 'Owner', null, null, 1, [] ],
-                     [ 'Player 1', null, null, null, [] ],
-                     [ 'Player 2', null, null, 2, [] ],
-                     [ 'Player 3', null, null, 3, [] ] ]
+                     [ 'Player 1', null, null, 2, [] ],
+                     [ 'Player 2', null, null, 3, [] ],
+                     [ 'Player 3', null, null, 4, [] ] ]
     };
 
     // Simulate set_active().
@@ -1610,7 +1640,7 @@ test("vote_owner_shuffle_cards", 7, function() {
     var card4_l = $('.cardstories_card_4', element).show().position().left;
     var card5_l = $('.cardstories_card_5', element).show().position().left;
     var card6_l = $('.cardstories_card_6', element).show().position().left;
-    $.cardstories.vote_owner_shuffle_cards(game, element, function() {
+    $.cardstories.vote_shuffle_cards(game, element, function() {
         // Check that the sentence box was moved into position.
         var sentence = $('.cardstories_sentence_box', element);
         var sentence_final_left = sentence.metadata({type: "attr", name: "data"}).fl;
@@ -1618,7 +1648,7 @@ test("vote_owner_shuffle_cards", 7, function() {
 
         // Check that cards were moved to the final positions.  The owner's
         // card is always number 6.
-        equal($('.cardstories_card_1', element).show().position().left, card1_l, 'card 1 was not moved');
+        notEqual($('.cardstories_card_1', element).show().position().left, card2_l, 'card 1 was moved');
         notEqual($('.cardstories_card_2', element).show().position().left, card2_l, 'card 2 was moved');
         notEqual($('.cardstories_card_3', element).show().position().left, card3_l, 'card 3 was moved');
         equal($('.cardstories_card_4', element).show().position().left, card4_l, 'card 4 was not moved');
@@ -1627,7 +1657,7 @@ test("vote_owner_shuffle_cards", 7, function() {
     });
 });
 
-test("vote_owner_display_board", 14, function() {
+test("vote_display_board", 17, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_vote .cardstories_owner', root);
     var owner_id = 'Owner';
@@ -1637,13 +1667,13 @@ test("vote_owner_display_board", 14, function() {
     var game = {
         'owner_id': owner_id,
         'board': [],
-        'players': [ [ owner_id, null, null, null, [] ],
-                     [ player1, null, null, null, [] ],
-                     [ player2, null, null, 2, [] ],
-                     [ player3, 4, null, 3, [] ] ]
+        'players': [ [ owner_id, null, null, 1, [] ],
+                     [ player1, null, null, 2, [] ],
+                     [ player2, null, null, 3, [] ],
+                     [ player3, 1, null, 4, [] ] ]
     };
 
-    $.cardstories.vote_owner_display_board(game, element, root);
+    $.cardstories.vote_display_board(true, owner_id, game, element, root);
 
     notEqual($('.cardstories_player_seat_1', element).css('display'), 'none', 'first slot is visible');
     notEqual($('.cardstories_player_seat_2', element).css('display'), 'none', 'second slot is visible');
@@ -1653,12 +1683,15 @@ test("vote_owner_display_board", 14, function() {
     equal($('.cardstories_player_seat_3 .cardstories_player_name', element).html(), player3, 'player 3 name is set');
     equal($('.cardstories_player_seat_4', element).css('display'), 'none', 'fourth slot is hidden');
     equal($('.cardstories_player_seat_5', element).css('display'), 'none', 'fifth slot is hidden');
-    ok(!$('.cardstories_player_seat_1', element).hasClass('cardstories_player_seat_picking'), 'first slot is NOT voting');
-    ok($('.cardstories_player_seat_2', element).hasClass('cardstories_player_seat_picking'), 'second slot is voting');
-    ok($('.cardstories_player_seat_3', element).hasClass('cardstories_player_seat_voted'), 'third slot has voted');
-    equal($('.cardstories_card_1', element).css('display'), 'none', 'card 1 is hidden');
+    ok($('.cardstories_player_seat_1', element).hasClass('cardstories_player_seat_picking'), 'slot 1 is voting');
+    ok($('.cardstories_player_seat_2', element).hasClass('cardstories_player_seat_picking'), 'slot 2 is voting');
+    ok($('.cardstories_player_seat_3', element).hasClass('cardstories_player_seat_voted'), 'slot 3 has voted');
+    notEqual($('.cardstories_card_1', element).css('display'), 'none', 'card 1 is visible');
     notEqual($('.cardstories_card_2', element).css('display'), 'none', 'card 2 is visible');
     notEqual($('.cardstories_card_3', element).css('display'), 'none', 'card 3 is visible');
+    equal($('.cardstories_card_4', element).css('display'), 'none', 'card 4 is hidden');
+    equal($('.cardstories_card_5', element).css('display'), 'none', 'card 5 is hidden');
+    equal($('.cardstories_card_6', element).css('display'), 'none', 'card 6 is hidden');
 });
 
 test("vote_display_or_select_cards", 8, function() {
@@ -1679,7 +1712,7 @@ test("vote_display_or_select_cards", 8, function() {
                      [ player3, null, null, 33, [] ] ]
     };
 
-    $.cardstories.vote_display_or_select_cards(game.winner_card, game, element, root, function() {
+    $.cardstories.vote_display_or_select_cards(true, game.winner_card, game, element, root, function() {
         for (var i=0; i < board.length; i++) {
             var slot = $('.cardstories_card_slot_' + (i + 1), element);
             notEqual(slot.css('display'), 'none', 'slot ' + i + ' is visible');

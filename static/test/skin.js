@@ -158,7 +158,7 @@
           game.players = players2;
           $.cardstories.invitation_pick_wait_to_vote_voter('Player 3', game, root);
       });
-    } else if(skin == 'vote_voter' || skin == 'vote_voter_wait') {
+    } else if(skin == 'vote_voter') {
       game = {
         'id': 100,
         'owner': false,
@@ -166,14 +166,30 @@
         'ready': true,
         'board': [32,31,30,33,35,34],
         'self': [32, null, [32,31,30,33,35,34]],
-        'winner_card': 30,
         'sentence': 'Fake sentence is fake',
-        'players': [ [ 'Owner', null, null, 30, [] ],
-                     [ 'Player 1', 32, null, 31, [] ],
-                     [ 'Player 2', 30, null, 32, [] ],
-                     [ 'Player 3', 30, null, 33, [] ],
-                     [ 'Player 4', 31, null, 34, [] ],
-                     [ 'Player 5', 31, null, 35, [] ] ]
+        'players': [ [ 'Owner', null, 'n', '', null ],
+                     [ 'Player 1', null, 'n', '', null ],
+                     [ 'Player 2', null, 'n', 32, [32,31,30,33,35,34] ],
+                     [ 'Player 3', null, 'n', '', null ],
+                     [ 'Player 4', null, 'n', '', null ],
+                     [ 'Player 5', null, 'n', '', null ] ]
+      };
+      $.cardstories[skin]('Player 2', game, root);
+    } else if(skin == 'vote_voter_wait') {
+      game = {
+        'id': 100,
+        'owner': false,
+        'owner_id': 'Owner',
+        'ready': true,
+        'board': [32,31,30,33,35,34],
+        'self': [32, 30, [32,31,30,33,35,34]],
+        'sentence': 'Fake sentence is fake',
+        'players': [ [ 'Owner', null, 'n', '', null ],
+                     [ 'Player 1', null, 'n', '', null ],
+                     [ 'Player 2', 30, 'n', 32, [32,31,30,33,35,34]],
+                     [ 'Player 3', '', 'n', '', null ],
+                     [ 'Player 4', null, 'n', '', null ],
+                     [ 'Player 5', '', 'n', '', null ] ]
       };
       $.cardstories[skin]('Player 2', game, root);
     } else if(skin == 'vote_anonymous') {

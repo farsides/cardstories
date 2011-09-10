@@ -1142,7 +1142,7 @@
     left: 456px;
 }
 
-/* state create : pick a card */
+/* state create_pick_card */
 
 .cardstories .cardstories_create .cardstories_pick_card .cardstories_sidebar {
     z-index: 1;
@@ -1173,7 +1173,7 @@
     height: 100%;
 }
 
-/* state create : write a sentence */
+/* state create_write_sentence */
 
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_card_template {
     top: 200px;
@@ -1429,7 +1429,7 @@
     background: transparent url('images/tab_finished_current.png') no-repeat left top;
 }
 
-/* state invitation : owner */
+/* state invitation_owner */
 
 .cardstories_player_join_1,
 .cardstories_player_join_2,
@@ -1854,7 +1854,7 @@
     width: 438px;
 }
 
-/* state invitation, player point of view : pick a card */
+/* state invitation_pick */
 
 .cardstories .cardstories_invitation .cardstories_pick .cardstories_sentence_box {
     display: none;
@@ -1947,7 +1947,21 @@
     height: 100%;
 }
 
-/* state invitation, anonymous view : wait for others */
+/* state invitation_pick_wait */
+
+.cardstories .cardstories_invitation .cardstories_pick_wait .cardstories_modal {
+    left: 235px;
+    top: 185px;
+    height: 145px;
+    width: 300px;
+}
+
+.cardstories .cardstories_invitation .cardstories_pick_wait .cardstories_modal .cardstories_modal_h2 {
+    width: 75%;
+    margin: 1em auto 1em auto;
+}
+
+/* state invitation_anonymous */
 
 .cardstories .cardstories_invitation .cardstories_invitation_anonymous .cardstories_text_label {
     font-family: "helvetica";
@@ -1959,9 +1973,7 @@
     padding: 0px 0px 4px 30px;
 }
 
-/* state invitation, player point of view : wait for other players to pick a card */
-
-/* state invitation, owner point of view */
+/* state invitation_owner, vote_owner */
 
 .cardstories .cardstories_owner .cardstories_cards_hand .cardstories_card_label {
     position: absolute;
@@ -1973,10 +1985,29 @@
     text-decoration: none;
 }
 
-/* state vote, owner view */
+/* state vote_owner, vote_voter, vote_voter_wait, vote_voter_anonymous */
 
-.cardstories .cardstories_vote .cardstories_owner .cardstories_card,
-.cardstories .cardstories_vote .cardstories_voter .cardstories_card {
+.cardstories .cardstories_vote .cardstories_info { 
+    left: 250px;
+    top: 150px;
+    height: 110px;
+    width: 260px;
+    padding-top: 2.5em;
+}
+
+.cardstories .cardstories_vote .cardstories_info .cardstories_modal_h2 {
+    font-weight: bold;
+}
+
+.cardstories .cardstories_vote .cardstories_info .cardstories_modal_h2.cardstories_anonymous_info {
+    display: none;
+}
+
+.cardstories .cardstories_vote .cardstories_info .cardstories_modal_button {
+    margin-top: 0.65em;
+}
+
+.cardstories .cardstories_vote .cardstories_card {
     display: none;
     position: absolute;
     width: 46px;
@@ -1985,35 +2016,32 @@
     z-index: 0;
 }
 
-.cardstories .cardstories_vote .cardstories_owner .cardstories_card_1,
-.cardstories .cardstories_vote .cardstories_voter .cardstories_card_1 {
+.cardstories .cardstories_vote .cardstories_card_1 {
     top: 143px;
     left: 94px;
 }
 
-.cardstories .cardstories_vote .cardstories_owner .cardstories_card_2,
-.cardstories .cardstories_vote .cardstories_voter .cardstories_card_2 {
+.cardstories .cardstories_vote .cardstories_card_2 {
     top: 299px;
     left: 96px;
 }
 
-.cardstories .cardstories_vote .cardstories_owner .cardstories_card_3,
-.cardstories .cardstories_vote .cardstories_voter .cardstories_card_3 {
+.cardstories .cardstories_vote .cardstories_card_3 {
     top: 457px;
     left: 87px;
 }
 
-.cardstories .cardstories_vote .cardstories_owner .cardstories_card_4,
-.cardstories .cardstories_vote .cardstories_voter .cardstories_card_4 {
+.cardstories .cardstories_vote .cardstories_card_4 {
     top: 145px;
     left: 632px;
 }
 
-.cardstories .cardstories_vote .cardstories_owner .cardstories_card_5,
-.cardstories .cardstories_vote .cardstories_voter .cardstories_card_5 {
+.cardstories .cardstories_vote .cardstories_card_5 {
     top: 301px;
     left: 630px;
 }
+
+/* state vote_owner */
 
 .cardstories .cardstories_vote .cardstories_owner .cardstories_results_announce { 
     left: 245px;
@@ -2077,113 +2105,6 @@
 .cardstories .cardstories_vote .cardstories_owner .cardstories_results_confirm_yes {
     float: right;
 }
-
-/* state vote, player point of view : vote for a card */
-
-.cardstories .cardstories_vote .cardstories_info { 
-    left: 250px;
-    top: 150px;
-    height: 110px;
-    width: 260px;
-    padding-top: 2.5em;
-}
-
-.cardstories .cardstories_vote .cardstories_info .cardstories_modal_h2 {
-    font-weight: bold;
-}
-
-.cardstories .cardstories_vote .cardstories_info .cardstories_modal_h2.cardstories_anonymous_info {
-    display: none;
-}
-
-.cardstories .cardstories_vote .cardstories_info .cardstories_modal_button {
-    margin-top: 0.65em;
-}
-
-.cardstories .cardstories_vote .cardstories_card_inactive .cardstories_card_my {
-    position: absolute;
-    bottom: 20px;
-    right: 0px;
-    margin-right: -40px;
-    height: 16px;
-    width: 60px;
-    z-index: 100;
-    background: transparent url('images/yourcard.png') no-repeat left top;
-}
-
-/* state vote, player point of view : wait for other players to vote for a card */
-
-.cardstories .cardstories_vote .cardstories_voter_wait .cardstories_bubble_player_vote_wait { 
-    position: absolute;
-    z-index: 1;
-    left: 10px;
-    top: 10px;
-    background: transparent url('images/player_vote_wait.png') no-repeat left top;
-    height: 340px;
-    width: 962px;
-}
-
-.cardstories .cardstories_vote .cardstories_voter_wait .cardstories_vote_thanks { 
-    position: absolute;
-    z-index: 1;
-    left: 10px;
-    bottom: 100px;
-    background: transparent url('images/vote_thanks.png') no-repeat left top;
-    height: 267px;
-    width: 648px;
-}
-
-/* state invitation and vote, player point of view : wait for others to pick or vote */
-
-.cardstories .cardstories_invitation .cardstories_pick_wait .cardstories_card_change,
-.cardstories .cardstories_vote .cardstories_voter_wait .cardstories_card_change { 
-    position: absolute;
-    z-index: 1;
-    right: 380px;
-    bottom: 118px;
-    background: transparent url('images/change.png') no-repeat left top;
-    width: 206px;
-    height: 86px;
-    background-position: 0px 0px;
-}
-
-.cardstories .cardstories_invitation .cardstories_pick_wait .cardstories_card_change:hover,
-.cardstories .cardstories_vote .cardstories_voter_wait .cardstories_card_change:hover { 
-    background: transparent url('images/change.png') no-repeat left top;
-    background-position: -206px 0px;
-}
-
-.cardstories .cardstories_invitation .cardstories_pick_wait .cardstories_card_bg,
-.cardstories .cardstories_vote .cardstories_voter_wait .cardstories_card_bg {
-    position: absolute;
-    right: 50px;
-    bottom: 30px;
-    width: 298px;
-    height: 395px;
-    background: transparent url('medium/card_bg.png') no-repeat left top;
-}
-
-.cardstories .cardstories_invitation .cardstories_pick_wait .cardstories_card_bg .cardstories_card,
-.cardstories .cardstories_vote .cardstories_voter_wait .cardstories_card_bg .cardstories_card {
-    background-repeat: no-repeat;
-    background-color: transparent;
-    background-position: top left;
-    width: 100%;
-    height: 100%;
-}
-
-.cardstories .cardstories_invitation .cardstories_pick_wait .cardstories_modal {
-    left: 235px;
-    top: 185px;
-    height: 145px;
-    width: 300px;
-}
-
-.cardstories .cardstories_invitation .cardstories_pick_wait .cardstories_modal .cardstories_modal_h2 {
-    width: 75%;
-    margin: 1em auto 1em auto;
-}
-
 
 /* state complete */
 
