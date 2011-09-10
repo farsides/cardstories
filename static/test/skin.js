@@ -198,15 +198,14 @@
         'owner': false,
         'owner_id': 'Owner',
         'ready': true,
-        'board': [32,31,30,33,35,34],
+        'board': [32,31,33,30,35,34],
         'self': null,
-        'winner_card': 30,
         'sentence': 'Fake sentence is fake',
-        'players': [ [ 'Owner', null, null, 30, [] ],
-                     [ 'Player 1', 32, null, 31, [] ],
-                     [ 'Player 2', 30, null, 32, [] ],
-                     [ 'Player 3', 30, null, 33, [] ],
-                     [ 'Player 4', 31, null, 34, [] ] ]
+        'players': [ [ 'Owner', null, 'n', '', null ],
+                     [ 'Player 1', null, 'n', '', null ],
+                     [ 'Player 3', '', 'n', '', null ],
+                     [ 'Player 4', null, 'n', '', null ],
+                     [ 'Player 5', '', 'n', '', null ] ]
       };
       $.cardstories.vote_anonymous(null, game, root);
     } else if(skin == 'vote_owner') {

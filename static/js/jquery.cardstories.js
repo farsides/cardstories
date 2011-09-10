@@ -2347,11 +2347,11 @@
 
         vote_anonymous: function(player_id, game, root) {
             var $this = this;
-            var element = $('.cardstories_vote .cardstories_voter', root);
-            this.notify_active(root, element, 'vote_voter');
+            var element = $('.cardstories_vote .cardstories_anonymous', root);
+            this.notify_active(root, element, 'vote_anonymous');
             this.set_active(root, element);
             $('.cardstories_sentence', element).text(game.sentence);
-            this.display_progress_bar('player', 3, element, root);
+            this.display_progress_bar('player', 4, element, root);
             this.display_master_name(game.owner_id, element);
 
             // Update board state.
@@ -2363,44 +2363,16 @@
             if (!element.hasClass('cardstories_noop_init')) {
                 element.addClass('cardstories_noop_init');
 
-                // Supplant owner's name into modal, and switch text.
-                $('.cardstories_voter_info', info).hide();
-                $('.cardstories_anonymous_info', info).show();
-                var info = $('.cardstories_info', element);
-                var html = info.html().supplant({'name': game.owner_id});
-                info.html(html);
-
-                // Switch owner's card with card 6 (so it can be shuffled).
-                var owner_card = $('.cardstories_picked_card', element);
-                var card6 = $('img.cardstories_card_6', element);
-                card6.css({
-                    top: owner_card.position().top,
-                    left: owner_card.position().left,
-                    width: owner_card.width(),
-                    height: owner_card.height()
-                });
-                owner_card.hide();
-                card6.show();
-
-                // Shuffle the cards.
+                // Display cards.
                 q.queue('chain', function(next) {
-                    $this.vote_shuffle_cards(game, element, next);
+                    $this.vote_display_or_select_cards(false, null, game, element, root, next);
                 });
 
                 // Show modal.
                 q.queue('chain', function(next) {
-                    var overlay = $('.cardstories_modal_overlay', element);
-                    $this.display_modal(info, overlay, next, true);
-                });
-
-                // Flip the cards out.
-                q.queue('chain', function(next) {
-                    $this.vote_flip_out(game, element, next);
-                });
-
-                // Display cards.
-                q.queue('chain', function(next) {
-                    $this.vote_display_or_select_cards(false, null, game, element, root, next);
+                    var info = $('.cardstories_info', element);
+                    $('.cardstories_modal_overlay', element).fadeIn(300);
+                    $this.animate_scale(false, 5, 300, info, next)
                 });
             }
 

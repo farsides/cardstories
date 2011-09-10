@@ -1992,10 +1992,6 @@
     font-weight: bold;
 }
 
-.cardstories .cardstories_vote .cardstories_info .cardstories_modal_h2.cardstories_anonymous_info {
-    display: none;
-}
-
 .cardstories .cardstories_vote .cardstories_info .cardstories_modal_button {
     margin-top: 0.65em;
 }
@@ -2034,8 +2030,9 @@
     left: 630px;
 }
 
-/* state vote_voter_wait */
+/* state vote_voter_wait, vote_anonymous */
 
+.cardstories .cardstories_vote .cardstories_anonymous .cardstories_modal_overlay,
 .cardstories .cardstories_vote .cardstories_voter_wait .cardstories_modal_overlay {
     width: 370px;
     height: 310px;
