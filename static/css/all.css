@@ -1115,30 +1115,23 @@
     font-size: 10px;
 }
 
-.cardstories .cardstories_card_slot_1,
-.cardstories .cardstories_card_slot_2,
-.cardstories .cardstories_card_slot_3 {
+.cardstories .cardstories_card_slot.top {
     top: 100px;
 }
 
-.cardstories .cardstories_card_slot_4,
-.cardstories .cardstories_card_slot_5,
-.cardstories .cardstories_card_slot_6 {
+.cardstories .cardstories_card_slot.bottom {
     top: 253px;
 }
 
-.cardstories .cardstories_card_slot_1,
-.cardstories .cardstories_card_slot_4 {
+.cardstories .cardstories_card_slot.left {
     left: 210px;
 }
 
-.cardstories .cardstories_card_slot_2,
-.cardstories .cardstories_card_slot_5 {
+.cardstories .cardstories_card_slot.middle {
     left: 333px;
 }
 
-.cardstories .cardstories_card_slot_3,
-.cardstories .cardstories_card_slot_6 {
+.cardstories .cardstories_card_slot.right {
     left: 456px;
 }
 
@@ -1985,7 +1978,7 @@
     text-decoration: none;
 }
 
-/* state vote_owner, vote_voter, vote_voter_wait, vote_voter_anonymous */
+/* state vote_owner, vote_voter, vote_voter_wait, vote_anonymous */
 
 .cardstories .cardstories_vote .cardstories_info { 
     left: 250px;
@@ -2039,6 +2032,19 @@
 .cardstories .cardstories_vote .cardstories_card_5 {
     top: 301px;
     left: 630px;
+}
+
+/* state vote_voter_wait */
+
+.cardstories .cardstories_vote .cardstories_voter_wait .cardstories_modal_overlay {
+    width: 370px;
+    height: 310px;
+    top: 90px;
+    left: 200px;
+    z-index: 0;
+    border-radius: 15px;
+    -moz-border-radius: 15px;
+    -webkit-border-radius: 15px;
 }
 
 /* state vote_owner */
@@ -2141,35 +2147,35 @@
     top: 535px;
 }
 
-.cardstories .cardstories_complete .cardstories_card_slot {
+.cardstories .cardstories_complete .cardstories_player_seat_card {
     display: none;
     position: absolute;
     width: 90px;
     height: 120px;
 }
 
-.cardstories .cardstories_complete .cardstories_card_slot_1,
-.cardstories .cardstories_complete .cardstories_card_slot_2,
-.cardstories .cardstories_complete .cardstories_card_slot_3 {
+.cardstories .cardstories_complete .cardstories_player_seat_card_1,
+.cardstories .cardstories_complete .cardstories_player_seat_card_2,
+.cardstories .cardstories_complete .cardstories_player_seat_card_3 {
     left: 90px;
 }
 
-.cardstories .cardstories_complete .cardstories_card_slot_4,
-.cardstories .cardstories_complete .cardstories_card_slot_5 {
+.cardstories .cardstories_complete .cardstories_player_seat_card_4,
+.cardstories .cardstories_complete .cardstories_player_seat_card_5 {
     left: 593px;
 }
 
-.cardstories .cardstories_complete .cardstories_card_slot_1,
-.cardstories .cardstories_complete .cardstories_card_slot_4 {
+.cardstories .cardstories_complete .cardstories_player_seat_card_1,
+.cardstories .cardstories_complete .cardstories_player_seat_card_4 {
     top: 105px;
 }
 
-.cardstories .cardstories_complete .cardstories_card_slot_2,
-.cardstories .cardstories_complete .cardstories_card_slot_5 {
+.cardstories .cardstories_complete .cardstories_player_seat_card_2,
+.cardstories .cardstories_complete .cardstories_player_seat_card_5 {
     top: 270px;
 }
 
-.cardstories .cardstories_complete .cardstories_card_slot_3 {
+.cardstories .cardstories_complete .cardstories_player_seat_card_3 {
     top: 435px;
 }
 

@@ -2321,11 +2321,18 @@
                 });
 
                 // Show modal.
-                //q.queue('chain', function(next) {
-                //    var info = $('.cardstories_info', element);
-                //    var overlay = $('.cardstories_modal_overlay', element);
-                //    $this.display_modal(info, overlay, next, true);
-                //});
+                q.queue('chain', function(next) {
+                    var selected = $('.cardstories_card_slot.selected', element);
+                    var info = $('.cardstories_info', element);
+                    var info_meta = info.metadata({type: 'attr', name: 'data'});
+                    if (selected.hasClass('top')) {
+                        info.css('top', info_meta.bottom);
+                    } else {
+                        info.css('top', info_meta.top);
+                    }
+                    $('.cardstories_modal_overlay', element).fadeIn(300);
+                    $this.animate_scale(false, 5, 300, info, next)
+                });
             }
 
             // Resolve deferred.
@@ -2504,13 +2511,13 @@
                     $this.close_modal(modal, overlay, next);
                 });
 
-                // Construct picked card => slot number translation.
-                var card2slot = {};
-                for(var i=0, slotno=0; i < game.players.length; i++) {
+                // Construct picked card => seat number translation.
+                var card2seat = {};
+                for(var i=0, seatno=0; i < game.players.length; i++) {
                     if (game.players[i][0] != game.owner_id) {
-                        slotno++;
+                        seatno++;
                         var picked = game.players[i][3];
-                        card2slot[picked] = slotno;
+                        card2seat[picked] = seatno;
                     }
                 }
                 
@@ -2518,65 +2525,53 @@
                 dest_element.show();
 
                 var last = game.board.length - 1;
-                for (var i=0; i < game.board.length; i++) {
+                $.each(game.board, function(i, value) {
                     var cardq = 'card' + i;
                     var slot = $('.cardstories_card_slot_' + (i + 1), element);
+                    var sentence = $('.cardstories_sentence_box', element);
 
                     // Insert an artificial delay for aesthetical reasons.
                     if (i > 1) {
                         $this.delay(q, 150, 'chain');
                     }
 
-                    if (game.winner_card == game.board[i]) {
-                        var dest_slot = $('.cardstories_picked_card', dest_element);
+                    if (game.winner_card == value) {
+                        var dest_seat = $('.cardstories_picked_card', dest_element);
                         var dest_sentence = $('.cardstories_sentence_box', dest_element);
 
                         // Grab final positions.
-                        var dest_slot_pos = {
-                            width: dest_slot.width(),
-                            height: dest_slot.height(),
-                            top: dest_slot.position().top,
-                            left: dest_slot.position().left
+                        var dest_seat_pos = {
+                            width: dest_seat.width(),
+                            height: dest_seat.height(),
+                            top: dest_seat.position().top,
+                            left: dest_seat.position().left
                         };
                         var dest_sentence_pos = {
                             top: dest_sentence.position().top,
                             left: dest_sentence.position().left
                         };
 
-                        q.queue(cardq, (function(slot, dest_slot_pos, dest_sentence_pos) { return function(next) {
-                            $('.cardstories_card_label', slot).fadeOut('fast', next);
-                            slot.animate({
-                                'width': dest_slot_pos.width,
-                                'height': dest_slot_pos.height,
-                                'top': dest_slot_pos.top,
-                                'left': dest_slot_pos.left
-                            }, 500);
-                            $('.cardstories_sentence_box', element).animate({
-                                'top': dest_sentence_pos.top,
-                                'left': dest_sentence_pos.left
-                            }, 500, next);
-                        }})(slot, dest_slot_pos, dest_sentence_pos));
+                        q.queue(cardq, function(next) {
+                            $('.cardstories_card_label', slot).fadeOut('fast');
+                            slot.animate(dest_seat_pos, 500);
+                            sentence.animate(dest_sentence_pos, 500, next);
+                        });
                     } else {
-                        var dest_slot = $('.cardstories_card_slot_' + card2slot[game.board[i]], dest_element);
+                        var dest_seat = $('.cardstories_player_seat_card_' + card2seat[value], dest_element);
 
                         // Grab final position.
-                        dest_slot.show();
-                        dest_slot_pos = {
-                            width: dest_slot.width(),
-                            height: dest_slot.height(),
-                            top: dest_slot.position().top,
-                            left: dest_slot.position().left
+                        dest_seat.show();
+                        dest_seat_pos = {
+                            width: dest_seat.width(),
+                            height: dest_seat.height(),
+                            top: dest_seat.position().top,
+                            left: dest_seat.position().left
                         };
-                        dest_slot.hide();
+                        dest_seat.hide();
 
-                        q.queue(cardq, (function(slot, dest_slot_pos) { return function(next) {
-                            slot.animate({
-                                'width': dest_slot_pos.width,
-                                'height': dest_slot_pos.height,
-                                'top': dest_slot_pos.top,
-                                'left': dest_slot_pos.left
-                            }, 500, next);
-                        }})(slot, dest_slot_pos));
+                        q.queue(cardq, function(next) {
+                            slot.animate(dest_seat_pos, 500, next);
+                        });
                     }
 
                     if (i === last) {
@@ -2594,7 +2589,7 @@
                         q.dequeue(cardq);
                         next();
                     }})(cardq));
-                }
+                });
 
                 // Hide dest_element, after all positions were calculated.
                 dest_element.hide();
@@ -2916,7 +2911,7 @@
                                 // screws it up.  So we resort to metadata.
                                 var confirm = $('.cardstories_card_confirm', element);
                                 var confirm_meta = confirm.metadata({type: 'attr', name: 'data'});
-                                if (slotno <= 3) {
+                                if (slot.hasClass('top')) {
                                     confirm.css('top', confirm_meta.bottom);
                                 } else {
                                     confirm.css('top', confirm_meta.top);
@@ -3003,40 +2998,40 @@
         complete_display_board: function(game, element, root) {
             var players = game.players;
             var snippets = $('.cardstories_snippets', root);
-            var slot_snippet = $('.cardstories_player_seat', snippets);
-            var cardslot_snippet = $('.cardstories_card_slot', snippets);
-            for (var i=0, slotno=0; i < players.length; i++) {
+            var seat_snippet = $('.cardstories_player_seat', snippets);
+            var seatcard_snippet = $('.cardstories_card_slot', snippets);
+            for (var i=0, seatno=0; i < players.length; i++) {
                 if (players[i][0] != game.owner_id) {
-                    slotno++;
+                    seatno++;
 
-                    // Only initialize the slot once.
-                    var slot = $('.cardstories_player_seat.cardstories_player_seat_' + slotno, element);
-                    if (slot.children().length == 0) {
-                        // Active player slot.
-                        slot_snippet.clone().children().appendTo(slot);
-                        slot.addClass('cardstories_player_seat_joined');
-                        $('.cardstories_player_name', slot).html(players[i][0]);
-                        slot.show();
-                        $('.cardstories_player_arms_' + slotno, element).show();
+                    // Only initialize the seat once.
+                    var seat = $('.cardstories_player_seat.cardstories_player_seat_' + seatno, element);
+                    if (seat.children().length == 0) {
+                        // Active player seat.
+                        seat_snippet.clone().children().appendTo(seat);
+                        seat.addClass('cardstories_player_seat_joined');
+                        $('.cardstories_player_name', seat).html(players[i][0]);
+                        seat.show();
+                        $('.cardstories_player_arms_' + seatno, element).show();
 
                         // Active player card, if picked.
                         if (players[i][3]) {
-                            var cardslot = $('.cardstories_card_slot_' + slotno, element);
+                            var seatcard = $('.cardstories_player_seat_card_' + seatno, element);
 
                             // Populate it.
-                            cardslot_snippet.clone().children().appendTo(cardslot);
+                            seatcard_snippet.clone().children().appendTo(seatcard);
                             
                             // Set the proper card.
-                            var card = $('.cardstories_card_foreground', cardslot);
+                            var card = $('.cardstories_card_foreground', seatcard);
                             var src = card.metadata({type: 'attr', name: 'data'}).card.supplant({card: players[i][3]});
                             card.attr('src', src);
 
-                            cardslot.show();
+                            seatcard.show();
                         }
 
                         // Show envelope if player voted.
                         if (players[i][1]) {
-                            $('.cardstories_envelope_' + slotno, element).show();
+                            $('.cardstories_envelope_' + seatno, element).show();
                         }
                     }
                 }
@@ -3048,16 +3043,16 @@
             var players = game.players;
 
             // Construct picked card => slot number translation.
-            var card2slot = {};
-            for(var i=0, slotno=0; i < players.length; i++) {
+            var card2seat = {};
+            for(var i=0, seatno=0; i < players.length; i++) {
                 var picked = players[i][3];
                 if (players[i][0] != game.owner_id) {
-                    slotno++;
+                    seatno++;
                     if (picked) {
-                        card2slot[picked] = slotno;
+                        card2seat[picked] = seatno;
                     }
                 } else {
-                    card2slot[picked] = 6;
+                    card2seat[picked] = 6;
                 }
             }
                 
@@ -3068,57 +3063,53 @@
             // Insert fashionable delay.
             $this.delay(q, 400, 'chain');
 
-            for (var i=0, slotno=0; i < players.length; i++) {
-                if (players[i][0] != game.owner_id) {
-                    slotno++;
-                    var voted = players[i][1];
-
-                    // Only include players who voted.
-                    if (voted) {
-                        var votes = $('.cardstories_votes_' + card2slot[voted], element);
-
-                        // Insert the vote
-                        var vote = vote_slot_snippet.clone();
-                        vote.appendTo(votes);
-
-                        // Get top/left coordinates of the destination
-                        // envelope.  Elements must be visible for position()
-                        // to work.
-                        var vpos = votes.position();
-                        var denvelope = $('.cardstories_envelope', vote);
-                        denvelope.show();
-                        var pos = denvelope.show().position();
-                        denvelope.hide();
-                        var dst_top = vpos.top + pos.top;
-                        var dst_left = vpos.left + pos.left;
-
-                        // Queue envelope animation.
-                        var envelope = $('.cardstories_envelope_' + slotno, element);
-                        q.queue('chain', (function(envelope, dst_top, dst_left) { return function(next) {
-                            envelope.animate({'top': dst_top,'left': dst_left}, 500, next);
-                        }})(envelope, dst_top, dst_left));
-
-                        // Show voter name and change slot status.
-                        var voter_name = $('.cardstories_voter_name', vote);
-                        voter_name.html(players[i][0] + '\'s vote');
-                        q.queue('chain', (function(i, slotno, vote, envelope, denvelope, voter_name) { return function(next) {
-                            var slot = $('.cardstories_player_seat_' + slotno, element);
-                            var status = $('.cardstories_player_status', slot);
-                            if (players[i][2] == 'n') {
-                                vote.addClass('lost');
-                                slot.addClass('cardstories_player_seat_lost');
-                                denvelope.show();
-                                envelope.fadeOut('fast');
-                                status.html('LOSES!');
-                            } else {
-                                slot.addClass('cardstories_player_seat_won');
-                                status.html('WINS!');
-                            }
-                            voter_name.fadeIn('fast', next);
-                        }})(i, slotno, vote, envelope, denvelope, voter_name));
-                    }
+            $.each(players, function(i, player) {
+                // Skip the owner and players who didn't vote.
+                if (i === 0 || player[1] === null) {
+                    return;
                 }
-            }
+
+                // Insert the vote
+                var votes = $('.cardstories_votes_' + card2seat[player[1]], element);
+                var vote = vote_slot_snippet.clone();
+                vote.appendTo(votes);
+
+                // Get top/left coordinates of the destination
+                // envelope.  Elements must be visible for position()
+                // to work.
+                var vpos = votes.position();
+                var denvelope = $('.cardstories_envelope', vote);
+                denvelope.show();
+                var pos = denvelope.show().position();
+                denvelope.hide();
+                var dst_top = vpos.top + pos.top;
+                var dst_left = vpos.left + pos.left;
+
+                // Queue envelope animation.
+                var envelope = $('.cardstories_envelope_' + i, element);
+                q.queue('chain', function(next) {
+                    envelope.animate({'top': dst_top,'left': dst_left}, 500, next);
+                });
+
+                // Show voter name and change seat status.
+                var voter_name = $('.cardstories_voter_name', vote);
+                voter_name.html(player[0] + '\'s vote');
+                q.queue('chain', function(next) {
+                    var seat = $('.cardstories_player_seat_' + i, element);
+                    var status = $('.cardstories_player_status', seat);
+                    if (player[2] == 'n') {
+                        vote.addClass('lost');
+                        seat.addClass('cardstories_player_seat_lost');
+                        denvelope.show();
+                        envelope.fadeOut('fast');
+                        status.html('LOSES!');
+                    } else {
+                        seat.addClass('cardstories_player_seat_won');
+                        status.html('WINS!');
+                    }
+                    voter_name.fadeIn('fast', next);
+                });
+            });
 
             q.queue('chain', function(next) {
                 if (cb !== undefined) {

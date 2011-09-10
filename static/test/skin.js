@@ -181,7 +181,7 @@
         'owner': false,
         'owner_id': 'Owner',
         'ready': true,
-        'board': [32,31,30,33,35,34],
+        'board': [32,31,33,30,35,34],
         'self': [32, 30, [32,31,30,33,35,34]],
         'sentence': 'Fake sentence is fake',
         'players': [ [ 'Owner', null, 'n', '', null ],

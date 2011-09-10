@@ -1488,7 +1488,7 @@ asyncTest("vote_voter", 29, function() {
    });
 });
 
-test("vote_voter_wait", 32, function() {
+test("vote_voter_wait", 34, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_vote .cardstories_voter_wait');
     var game_id = 101;
@@ -1539,6 +1539,8 @@ test("vote_voter_wait", 32, function() {
         ok(!$('.cardstories_card_slot_3', element).hasClass('selected'), 'Slot 3 was NOT selected');
         ok(!$('.cardstories_card_slot_4', element).hasClass('selected'), 'Slot 4 was NOT selected');
         ok(!$('.cardstories_card_slot_5', element).hasClass('selected'), 'Slot 5 was NOT selected');
+        equal($('.cardstories_info', element).css('display'), 'block', 'Info modal is visible');
+        equal($('.cardstories_modal_overlay', element).css('display'), 'block', 'Modal overlay is visible');
     });
 
     // Player 1 voted.
@@ -1747,12 +1749,12 @@ asyncTest("vote_owner", 16, function() {
         equal(options.type, 'GET');
         equal(options.url, $.cardstories.url + '?action=complete&owner_id=' + owner_id + '&game_id=' + game_id);
         var destel = $('.cardstories_complete', root);
-        equal($('.cardstories_card_slot_1', element).css('top'), $('.cardstories_card_slot_2', destel).css('top'), 'card 1 in slot 2');
-        equal($('.cardstories_card_slot_1', element).css('left'), $('.cardstories_card_slot_2', destel).css('left'), 'card 1 in slot 2');
-        equal($('.cardstories_card_slot_2', element).css('top'), $('.cardstories_picked_card', destel).css('top'), 'card 2 in author spot');
-        equal($('.cardstories_card_slot_2', element).css('left'), $('.cardstories_picked_card', destel).css('left'), 'card 2 in author spot');
-        equal($('.cardstories_card_slot_3', element).css('top'), $('.cardstories_card_slot_1', destel).css('top'), 'card 3 in slot 1');
-        equal($('.cardstories_card_slot_3', element).css('left'), $('.cardstories_card_slot_1', destel).css('left'), 'card 3 in slot 1');
+        equal($('.cardstories_card_slot_1', element).css('top'), $('.cardstories_player_seat_card_2', destel).css('top'), 'card 1 in seat 2');
+        equal($('.cardstories_card_slot_1', element).css('left'), $('.cardstories_player_seat_card_2', destel).css('left'), 'card 1 in seat 2');
+        equal($('.cardstories_card_slot_2', element).css('top'), $('.cardstories_picked_card', destel).css('top'), 'card 2 in master seat');
+        equal($('.cardstories_card_slot_2', element).css('left'), $('.cardstories_picked_card', destel).css('left'), 'card 2 in master seat');
+        equal($('.cardstories_card_slot_3', element).css('top'), $('.cardstories_player_seat_card_1', destel).css('top'), 'card 3 in seat 1');
+        equal($('.cardstories_card_slot_3', element).css('left'), $('.cardstories_player_seat_card_1', destel).css('left'), 'card 3 in seat 1');
         equal($('.cardstories_sentence_box', element).css('top'), $('.cardstories_sentence_box', destel).css('top'), 'sentence box was moved');
         equal($('.cardstories_sentence_box', element).css('left'), $('.cardstories_sentence_box', destel).css('left'), 'sentence box was moved');
         start();
@@ -1887,11 +1889,11 @@ test("complete", 26, function() {
     equal($('.cardstories_player_seat_3 .cardstories_player_name', element).html(), player3, 'player 3 name is set');
     equal($('.cardstories_player_seat_4 .cardstories_player_name', element).html(), player4, 'player 4 name is set');
     equal($('.cardstories_player_seat_5', element).css('display'), 'none', 'fifth slot is hidden');
-    notEqual($('.cardstories_card_slot_1', element).css('display'), 'none', 'card 1 is visible');
-    notEqual($('.cardstories_card_slot_2', element).css('display'), 'none', 'card 2 is visible');
-    notEqual($('.cardstories_card_slot_3', element).css('display'), 'none', 'card 3 is visible');
-    notEqual($('.cardstories_card_slot_4', element).css('display'), 'none', 'card 4 is visible');
-    equal($('.cardstories_card_slot_5', element).css('display'), 'none', 'card 5 is hidden');
+    notEqual($('.cardstories_player_seat_card_1', element).css('display'), 'none', 'card 1 is visible');
+    notEqual($('.cardstories_player_seat_card_2', element).css('display'), 'none', 'card 2 is visible');
+    notEqual($('.cardstories_player_seat_card_3', element).css('display'), 'none', 'card 3 is visible');
+    notEqual($('.cardstories_player_seat_card_4', element).css('display'), 'none', 'card 4 is visible');
+    equal($('.cardstories_player_seat_card_5', element).css('display'), 'none', 'card 5 is hidden');
     ok($('.cardstories_player_seat_1', element).hasClass('cardstories_player_seat_won'), 'friend 1 won');
     ok($('.cardstories_player_seat_2', element).hasClass('cardstories_player_seat_lost'), 'friend 2 lost');
     ok($('.cardstories_player_seat_3', element).hasClass('cardstories_player_seat_lost'), 'friend 3 lost');
