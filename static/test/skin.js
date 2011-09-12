@@ -137,27 +137,25 @@
                      [ 'Player 4', null, 'n', '', [] ] ]
       };
       $.cardstories.invitation_pick_wait('Player 3', game, root);
-    } else if(skin == 'pick_wait_to_vote') {
-      var players1 = [ [ 'Owner', null, 'n', 30, [] ],
-                     [ 'Player 1', null, 'n', '', [] ],
-                     [ 'Player 2', null, 'n', null, [] ],
-                     [ 'Player 3', null, 'n', 33, [] ],
-                     [ 'Player 4', null, 'n', '', [] ] ];
-      var players2 = [ [ 'Owner', null, 'n', 30, [] ],
-                     [ 'Player 1', null, 'n', '', [] ],
-                     [ 'Player 3', null, 'n', 33, [] ],
-                     [ 'Player 4', null, 'n', '', [] ] ];
-      game = {
-        'id': 100,
-        'owner_id': 'Owner',
-        'self': [33, null, [11,12,13,14,15,16,17]],
-        'sentence': 'long sentence is in the flux',
-        'players': players1
-      };
-      $.cardstories.invitation_pick_wait('Player 3', game, root).done(function() {
-          game.players = players2;
-          $.cardstories.invitation_pick_wait_to_vote_voter('Player 3', game, root);
-      });
+    } else if(skin == 'invitation_pick_wait_to_vote_voter') {
+        old_game = {
+            'id': 100,
+            'owner_id': 'Owner',
+            'self': [33, null, [11,12,13,14,15,33]],
+            'sentence': 'long sentence is in the flux',
+            'players': [['Owner', null, 'n', '', null],
+                        ['Player 1', null, 'n', '', null],
+                        ['Player 2', null, 'n', null, null],
+                        ['Player 3', null, 'n', 33, [11,12,13,14,15,33]],
+                        ['Player 4', null, 'n', '', null]]
+        };
+        game = $.extend(true, {}, old_game);
+        game.players.splice(2,1);
+        $.cardstories.invitation_pick_wait('Player 3', old_game, root).done(function() {
+            window.setTimeout(function() {
+                $.cardstories.invitation_pick_wait_to_vote_voter('Player 3', old_game, game, root);
+            }, 1000);
+        });
     } else if(skin == 'vote_voter') {
       game = {
         'id': 100,
@@ -192,6 +190,36 @@
                      [ 'Player 5', '', 'n', '', null ] ]
       };
       $.cardstories[skin]('Player 2', game, root);
+    } else if(skin == 'vote_voter_wait_to_complete') {
+        old_game = {
+            'id': 100,
+            'owner': false,
+            'owner_id': 'Owner',
+            'ready': true,
+            'board': [32,31,33,30,35,34],
+            'self': [32, 30, [1,2,3,4,5,32]],
+            'winner_card': null,
+            'sentence': 'Fake sentence is fake',
+            'players': [['Owner', null, 'n', '', null],
+                        ['Player 1', '', 'n', '', null],
+                        ['Player 2', 30, 'n', 32, [1,2,3,4,5,32]],
+                        ['Player 3', '', 'n', '', null],
+                        ['Player 4', null, 'n', '', null],
+                        ['Player 5', '', 'n', '', null]]
+        };
+        game = $.extend(true, {}, old_game);
+        game.winner_card = 30;
+        game.players[0] = [ 'Owner', null, 'y', 30, null];
+        game.players[1] = [ 'Player 1', 34, 'n', 31, null];
+        game.players[2][2] = 'y';
+        game.players[3] = [ 'Player 3', 35, 'n', 33, null];
+        game.players[5] = [ 'Player 5', 30, 'y', 35, null];
+        game.players.splice(4,1);
+        $.cardstories.vote_voter_wait('Player 2', old_game, root).done(function() {
+            window.setTimeout(function() {
+                $.cardstories.vote_voter_wait_to_complete('Player 2', old_game, game, root);
+            }, 1000);
+        });
     } else if(skin == 'vote_anonymous') {
       game = {
         'id': 100,
@@ -244,16 +272,18 @@
       game = {
         'id': 100,
         'owner': false,
+        'owner_id': 'Owner',
         'ready': true,
         'sentence': 'the game sentence',
         'board': [30,31,32,33],
+        'self': [31, 32, [1,2,3,4,5,31]],
         'winner_card': 30,
-        'players': [ [ 'voter11', 30, 'y', 32, [ ] ],
-                     [ 'voter12', null, 'y', 30, [ ] ],
-                     [ 'voter21', 30, 'n', 31, [ ] ]
-                   ]
+        'players': [['Owner', null, 'y', 30, []],
+                     ['Player 1', 32, 'n', 31, []],
+                     ['Player 2', 30, 'y', 32, []],
+                     ['Player 4', 33, 'n', 34, []]]
       };
-      $.cardstories.complete('voter11', game, root);
+      $.cardstories.complete_complete('Player 1', game, root);
     } else if(skin == 'complete_owner') {
       game = {
         'id': 100,
@@ -263,15 +293,14 @@
         'sentence': 'the game sentence',
         'board': [30,31,32,33,34,35],
         'winner_card': 30,
-        'players': [ [ 'Owner', null, 'y', 30, [ ] ],
-                     [ 'Player 1', 32, 'n', 31, [ ] ],
-                     [ 'Player 2', 30, 'y', 32, [ ] ],
-                     [ 'Player 3', 35, 'n', 33, [ ] ],
-                     [ 'Player 4', 30, 'y', 34, [ ] ],
-                     [ 'Player 5', 30, 'y', 35, [ ] ]
-                   ]
+        'players': [['Owner', null, 'y', 30, []],
+                    ['Player 1', 32, 'n', 31, []],
+                    ['Player 2', 30, 'y', 32, []],
+                    ['Player 3', 35, 'n', 33, []],
+                    ['Player 4', 30, 'y', 34, []],
+                    ['Player 5', 30, 'y', 35, []]]
       };
-      $.cardstories.complete('Owner', game, root);
+      $.cardstories.complete_complete('Owner', game, root);
     } else if(skin == 'email') {
       $.cardstories.email(undefined, root);
     } else if(skin == 'credits') {

@@ -2044,6 +2044,12 @@
     -webkit-border-radius: 15px;
 }
 
+.cardstories .cardstories_vote .cardstories_anonymous .cardstories_sentence_box,
+.cardstories .cardstories_vote .cardstories_voter_wait .cardstories_sentence_box {
+    top: 490px;
+    left: 230px;
+}
+
 /* state vote_owner */
 
 .cardstories .cardstories_vote .cardstories_owner .cardstories_results_announce { 
