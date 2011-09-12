@@ -2268,9 +2268,9 @@
 .cardstories .cardstories_complete .cardstories_results {
     display: none;
     position: absolute;
-    width: 400px;
-    left: 187px;
-    bottom: 225px;
+    width: 436px;
+    left: 169px;
+    bottom: 215px;
     font-size: 10px;
     text-align: center;
 }
@@ -2281,15 +2281,15 @@
 
 .cardstories .cardstories_complete .cardstories_results > p {
     display: none;
-    width: 22.5em;
-    margin: 0.6em auto;
+    width: 24em;
+    margin: 0.25em auto;
     font-size: 1.2em; 
     font-family: "Helvetica";
 }
 
-.cardstories .cardstories_complete .cardstories_results p.cardstories_lost_1,
-.cardstories .cardstories_complete .cardstories_results p.cardstories_lost_2 {
-    color: red;
+.cardstories .cardstories_complete .cardstories_results .cardstories_lost_1,
+.cardstories .cardstories_complete .cardstories_results .cardstories_lost_2 {
+    color: #D8280F;
 }
 
 .cardstories .cardstories_complete .cardstories_results .cardstories_play_again {
@@ -2297,9 +2297,13 @@
     margin: 0 auto;
     font-size: 1.6em; 
     width: 7em;
-    height: 2.1em;
+    height: 1.8em;
     color: white;
     font-family: "Licon";
+}
+
+.cardstories .cardstories_complete .cardstories_results .cardstories_play_again a > span {
+    top: 0.36em !important;
 }
 
 /* state complete, owner point of view */

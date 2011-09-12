@@ -3267,35 +3267,52 @@
         },
 
         complete_display_results: function(player_id, game, element, cb) {
-            // Am I a winner?
-            var winner = false;
-            for (var i=0; i < game.players.length; i++) {
-                if (game.players[i][0] == player_id && game.players[i][2] == 'y') {
-                    winner = true;
+            // Did the owner lose?
+            var owner_lost = true;
+            if (game.players[0][2] == 'y') {
+                owner_lost = false;
+            }
+
+            // Determine why the owner lost.  If nobody voted on the
+            // correct card, it was too hard.  Otherwise, it was too
+            // easy.
+            var too_hard = true;
+            if (owner_lost) {
+                for (var i=0; i < game.players.length; i++) {
+                    if (game.winner_card == game.players[i][1]) {
+                        too_hard = false;
+                        break;
+                    }
                 }
             }
 
-            var box = $('.cardstories_results', element);
+            var box;
             if (game.owner) {
-                if (winner) {
-                    $('.cardstories_won', box).show();
+                box = $('.cardstories_results.author', element);
+                if (!owner_lost) {
+                    $('.cardstories_won_1', box).show();
+                } else if (!too_hard) {
+                    $('.cardstories_lost_1', box).show();
                 } else {
-                    // Determine why the owner lost.  If nobody voted on the
-                    // correct card, it was too hard.  Otherwise, it was too
-                    // easy.
-                    var too_hard = true;
-                    for (var i=0; i < game.players.length; i++) {
-                        if (game.winner_card == game.players[i][1]) {
-                            too_hard = false;
-                            break;
-                        }
+                    $('.cardstories_lost_2', box).show();
+                }
+            } else {
+                var player_lost = true;
+                for (var i=0; i < game.players.length; i++) {
+                    if (game.players[i][0] == player_id && game.players[i][2] == 'y') {
+                        player_lost = false;
                     }
+                }
 
-                    if (too_hard) {
-                        $('.cardstories_lost_2', box).show();
-                    } else {
-                        $('.cardstories_lost_1', box).show();
-                    }
+                box = $('.cardstories_results.player', element);
+                if (player_lost) {
+                    $('.cardstories_lost_1', box).show();
+                } else if (!owner_lost) {
+                    $('.cardstories_won_1', box).show();
+                } else if (!too_hard) {
+                    $('.cardstories_won_2', box).show();
+                } else {
+                    $('.cardstories_won_3', box).show();
                 }
             }
 

@@ -276,12 +276,12 @@
         'ready': true,
         'sentence': 'the game sentence',
         'board': [30,31,32,33],
-        'self': [31, 32, [1,2,3,4,5,31]],
+        'self': [31, 30, [1,2,3,4,5,31]],
         'winner_card': 30,
-        'players': [['Owner', null, 'y', 30, []],
-                     ['Player 1', 32, 'n', 31, []],
+        'players': [['Owner', null, 'n', 30, []],
+                     ['Player 1', 30, 'y', 31, []],
                      ['Player 2', 30, 'y', 32, []],
-                     ['Player 4', 33, 'n', 34, []]]
+                     ['Player 4', 30, 'y', 34, []]]
       };
       $.cardstories.complete_complete('Player 1', game, root);
     } else if(skin == 'complete_owner') {
