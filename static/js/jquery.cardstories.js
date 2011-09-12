@@ -2645,7 +2645,7 @@
                 }
                 
                 // Show destination element temporarily, so that positions can be calculated.
-                dest_element.show();
+                dest_element.addClass('cardstories_active');
 
                 var last = game.board.length - 1;
                 $.each(game.board, function(i, value) {
@@ -2715,7 +2715,7 @@
                 });
 
                 // Hide dest_element, after all positions were calculated.
-                dest_element.hide();
+                dest_element.removeClass('cardstories_active');
 
                 q.dequeue('chain');
             });
