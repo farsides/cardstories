@@ -2263,7 +2263,7 @@ asyncTest("create_pick_card_animate", 30, function() {
     });
 });
 
-asyncTest("create_pick_card_animate_fly_to_deck", 17, function() {
+asyncTest("create_pick_card_animate_fly_to_deck", 23, function() {
     var player_id = 42;
     var root = $('#qunit-fixture .cardstories');
     var container = $('.cardstories_create', root);
@@ -2278,6 +2278,10 @@ asyncTest("create_pick_card_animate_fly_to_deck", 17, function() {
     $.cardstories.create_pick_card(player_id, root).done(function() {
         var card_index = 3;
         board_cards.eq(card_index + 1).addClass('cardstories_card_selected');
+
+        deck_cards.each(function(i) {
+            equal($(this).css('display'), 'none', 'Deck cards are hidden after dock is created');
+        });
 
         $.cardstories.create_pick_card_animate_fly_to_deck(card_index, element, function() {
             board_cards.each(function(i) {

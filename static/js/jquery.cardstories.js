@@ -229,6 +229,9 @@
                 };
 
                 $this.select_cards('create_pick_card', cards, ok, element, root, true).done(function() {
+                    // Hide the cards in the back.
+                    $('.cardstories_deck .cardstories_card', element).hide();
+
                     // Delay the appearance of the modal box artificially, since
                     // jqDock doesn't provide a hook for when expansion finishes.
                     $this.setTimeout(function() {
@@ -417,7 +420,7 @@
             var q = $({});
 
             cards.each(function(i) {
-                var card = $(this);
+                var card = $(this).show();
                 var rindex = nr_of_cards - i - 1;
                 // Hide the chosen card (we will use the one handled by jqDock)
                 // and move on to the next one.
