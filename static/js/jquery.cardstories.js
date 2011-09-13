@@ -30,7 +30,9 @@
         error: function(error) { alert(error); },
 
         xhr_error: function(xhr, status, error) {
-            $.cardstories.error(error);
+            if (error !== 'abort') {
+                $.cardstories.error(error);
+            }
         },
 
         setTimeout: function(cb, delay) { return $.cardstories.window.setTimeout(cb, delay); },
@@ -664,7 +666,7 @@
         },
 
         solo: function(player_id, root) {
-            this.poll_discard(root); 
+            this.poll_discard(root);
             var $this = this;
             var success = function(data, status) {
                 if('error' in data) {
@@ -750,28 +752,27 @@
         poll: function(request, root) {
             var $this = this;
 
-            if($(root).metadata().poll === undefined) {
-              this.poll_ignore(request);
-              return false;
+            // Only allow one poll (and never allow polling if polling is
+            // undefined).
+            if($(root).data('polling') !== false) {
+                this.poll_ignore(request);
+                return false;
             }
 
-            $(root).metadata().poll += 1; // make sure pending polls results will be ignored
-            var poll = $(root).metadata().poll;
+            $(root).data('polling', true);
             var success = function(answer, status) {
-              if('error' in answer) {
-                $this.error(answer.error);
-              } else {
-                if($(root).metadata().poll != poll) {
-                  $this.poll_ignore(request, answer, $(root).metadata().poll, poll);
+                $(root).data('polling', false);
+                if('error' in answer) {
+                    $this.error(answer.error);
                 } else {
-                  if('timeout' in answer) {
-                    $this.poll(request, root);
-                  } else {
-                    $this.game_or_lobby(request.player_id, request.game_id, root);
-                  }
+                    if('timeout' in answer) {
+                        $this.poll(request, root);
+                    } else {
+                        $this.game_or_lobby(request.player_id, request.game_id, root);
+                    }
                 }
-              }
             };
+
             var query = '?action=poll';
             query += '&type=' + ('game_id' in request ? 'game' : 'lobby');
             query += '&modified=' + request.modified;
@@ -781,7 +782,7 @@
             if('game_id' in request) {
                 query += '&game_id=' + request.game_id;
             }
-            $this.ajax({
+            var poll = $this.ajax({
                 async: true,
                 timeout: $this.poll_timeout * 2,
                 url: $this.url + query,
@@ -792,25 +793,19 @@
                 error: $this.xhr_error
             });
 
+            // Save poll for discarding, if necessary.
+            $(root).data('poll', poll);
+
             return true;
         },
 
-        poll_ignore: function(request, answer, new_poll, old_poll) {
-            if(console && console.log) {
-              if(new_poll !== undefined) {
-                console.log('poll ignored because ' + new_poll + ' higher than ' + old_poll);
-              } else {
-                console.log('poll ignored because metadata is not set');
-              }
-            }
-        },
+        poll_ignore: function(request) {},
 
         poll_discard: function(root) {
-            var meta = $(root).metadata();
-            if(meta.poll !== undefined) {
-              meta.poll += 1;
+            if ($(root).data('polling') === true) {
+                $(root).data('polling', false);
+                $(root).data('poll').abort();
             }
-            return meta.poll;
         },
 
         refresh_lobby: function(player_id, in_progress, my, root) {
@@ -3673,7 +3668,7 @@
         }
         return this.each(function() {
             $(this).toggleClass('cardstories_root', true);
-            $(this).metadata().poll = 1;
+            $(this).data('polling', false);
             $.cardstories.bootstrap(player_id, game_id, this);
             return this;
         });
