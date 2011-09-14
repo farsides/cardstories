@@ -3450,6 +3450,11 @@
         },
 
         images_to_preload: [
+            'player_hand2_dock_1.png',
+            'player_hand2_dock_2.png',
+            'player_hand2_dock_3.png',
+            'player_hand2_dock_4.png',
+            'player_hand2_dock_5.png',
             'player_join_1.png',
             'player_join_2.png',
             'player_join_3.png',
@@ -3462,6 +3467,7 @@
             'player_return_3.png',
             'player_return_4.png',
             'player_return_5.png',
+            'card-back.png',
             'card01.png',
             'card02.png',
             'card03.png',
