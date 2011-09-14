@@ -3450,11 +3450,11 @@
         },
 
         images_to_preload: [
-            'player_hand2_dock_1.png',
-            'player_hand2_dock_2.png',
-            'player_hand2_dock_3.png',
-            'player_hand2_dock_4.png',
-            'player_hand2_dock_5.png',
+            'player_hand2dock_1.png',
+            'player_hand2dock_2.png',
+            'player_hand2dock_3.png',
+            'player_hand2dock_4.png',
+            'player_hand2dock_5.png',
             'player_join_1.png',
             'player_join_2.png',
             'player_join_3.png',
