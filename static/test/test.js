@@ -2099,6 +2099,32 @@ test("advertise", 11, function() {
     equal(advertise.css('display'), 'none', 'clicking the close button hides the dialog');
 });
 
+test("advertise invitation email separators", 6, function() {
+    var owner_id = 15;
+    var game_id = 100;
+    var element = $('#qunit-fixture .cardstories_invitation .cardstories_owner');
+    var advertise = $('.cardstories_advertise', element);
+    var textarea = $('.cardstories_advertise_input textarea', advertise);
+    var submit_button = $('.cardstories_send_invitation', advertise);
+    var feedback = $('.cardstories_advertise_feedback', advertise);
+
+    $.cardstories.ajax = function(options) {
+        equal(options.type, 'GET');
+        equal(options.url, $.cardstories.url + '?action=invite&owner_id=' + owner_id + '&game_id=' + game_id + '&player_id=player1&player_id=player2');
+    };
+
+    var text1 = " \n \t player1 \n\n   \nplayer2";
+    var text2 = "player1;player2 ";
+    var text3 = " player1,  player2;\n";
+
+    $.each([text1, text2, text3], function(i, text) {
+      $.cookie('CARDSTORIES_INVITATIONS', null);
+      textarea.val(text);
+      $.cardstories.advertise(owner_id, game_id, element);
+      submit_button.click();
+    });
+});
+
 test("refresh_lobby", 11, function() {
     var in_progress;
     var my;

@@ -714,6 +714,15 @@
             };
             toggle_feedback(false);
 
+            var tokenize_invitations = function(value) {
+                // Treat commas and semicolons as whitespace.
+                var normalized_value = value.replace(/,|;/g, ' ');
+                var tokens = $.grep(normalized_value.split(/\s+/), function(token) {
+                    return token !== '';
+                });
+                return tokens;
+            };
+
             var is_invitation_valid = function(value) {
                 var trimmed = $.trim(value);
                 return trimmed && trimmed != textarea.attr('placeholder');
@@ -727,10 +736,9 @@
             submit_button.unbind('click').click(function() {
                 var val = textarea.val();
                 if (is_invitation_valid(val)) {
-                    var invites = $.map($.grep(val.split(/\s+/), function(s,i) { return s !== ''; }),
-                                        function(s,i) {
-                                            return 'player_id=' + encodeURIComponent(s);
-                                        });
+                    var invites = $.map(tokenize_invitations(val), function(invite) {
+                        return 'player_id=' + encodeURIComponent(invite);
+                    });
                     $.cookie('CARDSTORIES_INVITATIONS', val);
                     $this.send_game(owner_id, game_id, element, 'action=invite&owner_id=' + owner_id + '&game_id=' + game_id + '&' + invites.join('&'));
                     toggle_feedback(true);
