@@ -9,6 +9,7 @@
 
 {% block content %}
   <div id="fb-root"></div>
+  <div class="owa"></div>
   <div id="header">
     <div class="frame">
       <div class="holder">
@@ -108,7 +109,7 @@
 
 // Initialize Open Web Analytics
 {% if owa_enable %}
-$('.cardstories').owa('{{ owa_url }}', '{{ owa_site_id }}', true);
+$('.owa').owa('{{ owa_url }}', '{{ owa_site_id }}', true);
 {% endif %}
 
 $(document).ready(function() {
