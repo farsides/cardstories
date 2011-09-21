@@ -2797,7 +2797,7 @@
             var height = front.height();
             var width = front.width();
             var top = front.position().top;
-            var left = front.position().left
+            var left = front.position().left;
             var fleft = left + (width / 2);
 
             var q = $({});
