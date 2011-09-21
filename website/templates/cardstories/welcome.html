@@ -3,49 +3,109 @@
 
 {% block title %}Welcome to Cardstories!{% endblock %}
 
+{% block head_script %}{{ block.super }}
+  <script type="text/javascript" src="/static/js/jquery.owa.js"></script>
+{% endblock %}
+
 {% block content %}
-  <div class="cardstories_extras cardstories_active">
-    <div class="cardstories_subscribe cardstories_active">
-      <div class="cardstories_logo_welcome"></div>
-      <a href="http://farsides.com/" target="_blank"><div class="cardstories_logo_farsides"></div></a>
-      <div class="cardstories_reg_title">New players</div>
-      <div class="cardstories_reg_errors">
-        {{ registration_form.name.errors }}
-        {{ registration_form.username.errors }}
-        {{ registration_form.password1.errors }}
+  <div id="fb-root"></div>
+  <div id="header">
+    <div class="frame">
+      <div class="holder">
+        <div class="row">
+          <h1>A CARD GAME THAT PLAYS<br />WITH YOUR CREATIVITY!</h1>
+          <div class="info">
+            <div class="inn">
+              <div class="txt01">I will tell you my story through my card.<br />Try to guess which card I used!</div>
+              <div class="txt02">Your card is this one...<br />WAIT! This one...<br />Or maybe...</div>
+              <div class="txt03">You'll never find it!</div>
+            </div>  
+          </div>  
+          <div class="like">
+            <div><g:plusone size="medium" href="http://cardstories.org"></g:plusone></div>
+            <div><iframe src="//www.facebook.com/plugins/like.php?app_id=195152957223012&amp;href=http%3A%2F%2Fcardstories.org&amp;send=false&amp;layout=button_count&amp;width=90&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;font&amp;height=21" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:90px; height:21px;" allowTransparency="true"></iframe></div>
+          </div>
+          <strong class="logo"><a href="#">CardStories</a></strong>
+        </div>
       </div>
-      <form class="cardstories_registerform" method="post" action="/register/{{ gameid_query }}">{% csrf_token %}
-        {{ registration_form.name }}
-        {{ registration_form.username }}
-        {{ registration_form.password1 }}
-        {{ registration_form.password1_clear }}
-        {{ registration_form.password2 }}
-        {{ registration_form.password2_clear }}
-        <input class="cardstories_reg_submit" type="submit" value="Register" />
-      </form>
-      <div class="cardstories_login_title">Returning players</div>
-      <div class="cardstories_login_errors">
-        {{ login_form.username.errors }}
-        {{ login_form.password.errors }}
+      {% block box %}
+      <div class="box">
+        <div class="inn">
+          <div class="col01">
+            <div class="coltitle">
+              <h2>Register</h2>
+              <div class="errors">
+                {{ registration_form.name.errors }}
+                {{ registration_form.username.errors }}
+                {{ registration_form.password1.errors }}
+              </div>
+            </div>
+            <form class="registration" method="post" action="/register/{{ gameid_query }}">{% csrf_token %}
+              <fieldset>
+                <div class="row">
+                  {{ registration_form.name }}
+                </div>
+                <div class="row">
+                  {{ registration_form.username }}
+                </div>
+                <div class="row">
+                  {{ registration_form.password1 }}
+                  {{ registration_form.password1_clear }}
+                  {{ registration_form.password2 }}
+                  {{ registration_form.password2_clear }}
+                </div>
+                <div class="row"><input type="submit" value="REGISTER" class="button" /></div>
+                <div class="row"><p>We promise to never give or sell your email to anyone. We hate spams just like you.</p></div>
+              </fieldset>  
+            </form>
+          </div>
+          <div class="col01">
+            <div class="coltitle">
+              <h2>Log In</h2>
+              <div class="errors">
+                {{ login_form.username.errors }}
+                {{ login_form.password.errors }}
+              </div>
+            </div>
+            <form class="login" method="post" action="/login/{{ gameid_query }}">{% csrf_token %}
+              <fieldset>
+                <div class="row">
+                  {{ login_form.username }}
+                </div>
+                <div class="row">
+                  {{ login_form.password }}
+                  {{ login_form.password_clear }}
+                </div>
+                <div class="row">
+                  <a href="{% url auth_password_reset %}">Forgot your password?</a>
+                  <input type="submit" value="LOG IN" class="button" />
+                </div>
+              </fieldset>  
+            </form>
+          </div>
+          <div class="col02">
+            <div class="coltitle">
+              <h2>Social Networks</h2>
+            </div>
+            <a href="https://www.facebook.com/dialog/oauth?client_id={{ fb_app_id }}&redirect_uri={{ fb_redirect_uri }}&scope={% fb_perms %}"><img src="/static/css/images/btn-facebook.gif" alt="Connect with Facebook" /></a>
+          </div>
+        </div>  
       </div>
-      <form class="cardstories_loginform" method="post" action="/login/{{ gameid_query }}">{% csrf_token %}
-        {{ login_form.username }}
-        {{ login_form.password }}
-        {{ login_form.password_clear }}
-        <input class="cardstories_login_submit" type="submit" value="Login" />
-      </form>
-      <div class="cardstories_password_reset"><a href="{% url auth_password_reset %}">Forgot your password?</a></div>
-      <div class="cardstories_facebook_title">Facebook users</div>
-      <div class="cardstories_facebook_button">
-          <a href="https://www.facebook.com/dialog/oauth?client_id={{ fb_app_id }}&redirect_uri={{ fb_redirect_uri }}&scope={% fb_perms %}"><img src="http://developers.facebook.com/images/devsite/login-button.png"/></a>
-      </div>
-      <div class="cardstories_privacy_notice">We promise to never give or sell any emails to anyone. We hate spams just like you.</div>
-    </div>
+      {% endblock %}
+    </div>  
   </div>
 {% endblock %}
 
-{% block postcontent %}
-<script>
+{% block body_script %}{{ block.super }}
+<script type="text/javascript">
+
+// Initialize Google+ button
+(function() {
+  var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+  po.src = 'https://apis.google.com/js/plusone.js';
+  var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+})();
+
 // Initialize Open Web Analytics
 {% if owa_enable %}
 $('.cardstories').owa('{{ owa_url }}', '{{ owa_site_id }}', true);
@@ -53,14 +113,14 @@ $('.cardstories').owa('{{ owa_url }}', '{{ owa_site_id }}', true);
 
 $(document).ready(function() {
     // Javascript trickery to allow default field values as labels (including password fields)
-    rp1c = $('.cardstories_reg_password1_clear');
-    rp1 = $('.cardstories_reg_password1');
-    rp2c = $('.cardstories_reg_password2_clear');
-    rp2 = $('.cardstories_reg_password2');
-    lpc = $('.cardstories_login_password_clear');
-    lp = $('.cardstories_login_password');
+    rp1 = $('form.registration input.password1').first();
+    rp2 = $('form.registration input.password2').first();
+    lp = $('form.login input.password').first();
+    rp1c = $('form.registration input.password1.clear');
+    rp2c = $('form.registration input.password2.clear');
+    lpc = $('form.login input.password.clear');
 
-    if (rp1.val() == '' && !rp1.hasClass('cardstories_field_error')) {
+    if (rp1.val() == '' && !rp1.hasClass('error')) {
         rp1c.show();
         rp1.hide();
         rp1c.focus(function() {
@@ -76,7 +136,7 @@ $(document).ready(function() {
         });
     }
 
-    if (rp2.val() == '' && !rp2.hasClass('cardstories_field_error')) {
+    if (rp2.val() == '' && !rp2.hasClass('error')) {
         rp2c.show();
         rp2.hide();
         rp2c.focus(function() {
@@ -92,7 +152,7 @@ $(document).ready(function() {
         });
     }
 
-    if (lp.val() == '' && !lp.hasClass('cardstories_field_error')) {
+    if (lp.val() == '' && !lp.hasClass('error')) {
         lpc.show();
         lp.hide();
         lpc.focus(function() {
@@ -108,8 +168,8 @@ $(document).ready(function() {
         });
     }
   
-    $('.cardstories_default_value').each(function() {
-        if (!$(this).hasClass('cardstories_field_error')) {
+    $('form input.default').each(function() {
+        if (!$(this).hasClass('error')) {
             var default_value = this.value;
             $(this).focus(function() {
                 if(this.value == default_value) {
@@ -124,7 +184,7 @@ $(document).ready(function() {
         }
     });
 
-    $('.cardstories_field_error').first().focus();
+    $('.error').first().focus();
 });
 </script>
 {% endblock %}

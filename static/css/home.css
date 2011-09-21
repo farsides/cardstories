@@ -1,0 +1,437 @@
+@font-face {
+    font-family: 'Licon';
+    src: url('/static/css/font/licon.eot');
+    src: url('/static/css/font/licon.eot?#iefix') format('embedded-opentype'),
+         url('/static/css/font/licon.woff') format('woff'),
+         url('/static/css/font/licon.ttf') format('truetype'),
+         url('/static/css/font/licon.svg#Licon') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+body {
+	margin:0;
+	font:18px/20px Arial, Helvetica, sans-serif;
+	background:#416674;
+	color:#f2e6b4;
+	min-width:1000px;
+}
+img{border-style:none;display:block;}
+form,fieldset {
+	margin:0;
+	padding:0;
+	border:none;
+}
+input,
+textarea,
+select {
+	font:100% arial,sans-serif;
+	vertical-align:middle;
+}
+/*header*/
+#header {
+	width:100%;
+	background:#aca06c url(/static/css/images/bg-header.gif) repeat-x;
+	overflow:hidden;
+}
+#header .frame {
+	width:1000px;
+	margin:0 auto;
+	overflow:hidden;
+	background:url(/static/css/images/bg-header-inn.gif) no-repeat;
+}
+#header .holder {
+	position:relative;
+	overflow:hidden;
+	margin:0 0 45px;
+}
+#header .holder .row {
+	height:1%;
+	overflow:hidden;
+}
+#header h1 {
+	color:#5f4e43;
+	width:331px;
+	text-align:center;
+	margin:342px 0 0 69px;
+	float:left;
+	font:36px/42px Licon, Arial, Helvetica, sans-serif;
+	display:inline;
+}
+.logo {
+	overflow:hidden;
+	text-indent:-9999px;
+	width:292px;
+	height:266px;
+	background:url(/static/css/images/logo.gif) no-repeat;
+	position:absolute;
+	top:42px;
+	left:90px;
+}
+.logo a {
+	display:block;
+	height:100%;
+}
+#header .info {
+	float:right;
+	width:493px;
+	height:496px;
+	position:relative;
+	margin:50px 45px 0 0;
+	display:inline;
+	color:#9a8479;
+	font:14px/16px Arial, Helvetica, sans-serif; 
+}
+#header .info .inn {
+	width:100%;
+	height:100%;
+	background:url(/static/css/images/bg-header-info.png) no-repeat;
+}
+#header .txt01,
+#header .txt02,
+#header .txt03 {
+	position:absolute;
+	text-align:center;
+}
+#header .txt01 {
+	width:134px;
+	left:30px;
+	top:65px;
+}
+#header .txt02 {
+	width:157px;
+	left:262px;
+	top:50px;
+}
+#header .txt03 {
+	width:100px;
+	right:10px;
+	top:170px;
+}
+.like {
+	position:absolute;
+	top:30px;
+	right:7px;
+	margin:0;
+	padding:0;
+	list-style:none;
+	width:500px;
+}
+.like div {
+	float:right;
+	padding:0 0 0 10px;
+}
+
+#header .box {
+	height:1%;
+	overflow:hidden;
+	padding:0 0 10px;
+	background:url(/static/css/images/flower.gif) no-repeat 795px 100%;
+}
+#header .box .inn {
+	background:url(/static/css/images/bg-header-box.gif) repeat-y 391px 0;
+	padding:0 0 0 20px;
+	height:1%;
+	overflow:hidden;
+}
+#header .col01,
+#header .col02 {
+    float:left;
+}
+#header .col01 {
+	width:345px;
+	margin-right:51px;
+}
+#header .coltitle {
+    width:100%;
+    overflow:hidden;
+}
+#header .box h2 {
+    width:auto;
+    float:left;
+	color:#453f27;
+	font:18px/20px Arial, Helvetica, sans-serif;
+	margin:0 0 12px;
+}
+#header .box h3 {
+	color:#453f27;
+	font:12px Arial, Helvetica, sans-serif;
+    margin: 0 0 12px 0;
+}
+.errors {
+    float: right;
+    height: 16px;
+    font-size: 12px;
+    text-align: right;
+    overflow: hidden;
+}
+.errorlist {
+    list-style-type: none;
+    position: relative;
+    padding: 0;
+    margin: 0;
+    color: #D8280F;
+}
+.errorlist li {
+    margin: 0;
+    padding: 0;
+}
+form {
+    height:1%;
+}
+form:after,
+form .row:after {
+	display:block;
+	clear:both;
+	content:" ";
+}
+form .row {
+	height:1%;
+	padding:0 0 5px;
+}
+input:focus {
+    outline: none;
+}
+input.name,
+input.username,
+input.password,
+input.password1,
+input.password2 {
+	border:0;
+	margin:0 0 4px 0;
+	padding:6px 16px;
+	height:18px;
+	color:#76756f;
+	font:12px Arial, Helvetica, sans-serif;
+	overflow:hidden;
+}
+input.name,
+input.username,
+input.password {
+	float:left;
+	width:313px;
+	background:url(/static/css/images/bg-input01.gif) no-repeat;
+}
+input.name.error,
+input.username.error,
+input.password.error {
+	background:url(/static/css/images/bg-input01-error.gif) no-repeat;
+}
+input.password1 {
+	float:left;
+    width:138px;
+	background:url(/static/css/images/bg-input02.gif) no-repeat;
+}
+input.password1.error {
+	background:url(/static/css/images/bg-input02-error.gif) no-repeat;
+}
+input.password2 {
+	float:right;
+	width:139px;
+	background:url(/static/css/images/bg-input03.gif) no-repeat;
+}
+input.password2.error {
+	float:right;
+	width:139px;
+	background:url(/static/css/images/bg-input03-error.gif) no-repeat;
+}
+input.button {
+	float:right;
+	width:104px;
+	height:28px;
+	background:transparent url(/static/css/images/btn-over.png) no-repeat;
+	cursor:pointer;
+	border:0;
+	font:16px Licon, Arial, Helvetica, sans-serif;
+	color:#aca06c;
+}
+input.button:hover {
+	background:transparent url(/static/css/images/btn-on.png) no-repeat;
+}
+form p {
+	margin:0;
+	position:relative;
+	margin:0 -10px 0 -5px;
+	font:9px Arial, Helvetica, sans-serif;
+	color:#605935;
+}
+form a {
+	float:left;
+	color:#5c5533;
+	font:bold 12px/14px Arial, Helvetica, sans-serif;
+	text-decoration:none;
+	margin:7px 0 0;
+}
+form a:hover {
+    text-decoration:underline;
+}
+input.clear {
+    display: none;
+}
+input.error {
+    color: white;
+}
+#header .col02 {
+	width:176px;
+	padding-left:5px;
+}
+.imgRow {
+	width:100%;
+	background:url(/static/css/images/bg-img-row.gif) repeat-x;
+	border-bottom:11px solid #432015;
+	padding:0 0 52px;
+}
+.imgRow .frame {
+	width:1000px;
+	margin:0 auto;
+	overflow:hidden;
+}
+.imgRow .box {
+	width:781px;
+	padding:75px 0 0 43px;
+	height:428px;
+	margin:0 0 0 97px;
+	background:url(/static/css/images/bg-img-row-box.gif) no-repeat;
+}
+.how {
+	width:100%;
+	background:#592b1c url(/static/css/images/bg-how.gif) repeat-x 0 100%;
+}
+.how .frame {
+	width:1000px;
+	margin:0 auto;
+	overflow:hidden;
+	padding:17px 0 0;
+	background:url(/static/css/images/bg-how-frame.gif) no-repeat 0 100%;
+}
+.how h2 {
+	text-align:center;
+	text-transform:uppercase;
+	font:93px/96px Licon, Arial, Helvetica, sans-serif;
+	margin:0 0 55px;
+}
+.how ul.list {
+	margin:0;
+	padding:0;
+	list-style:none;
+	height:1%;
+}
+.how ul.list:after {
+	display:block;
+	clear:both;
+	content:" ";
+}
+.how ul.list li {
+	float:left;
+	width:32%;
+	padding:0 0 25px;
+	position:relative;
+	text-align:center;
+}
+.popup {
+	text-align:center;
+	width:208px;
+	height:52px;
+	position:absolute;
+	top:-35px;
+	left:75px;
+	background:url(/static/css/images/bg-popup.gif) no-repeat;
+	color:#000;
+	font:12px/34px Arial, Helvetica, sans-serif;
+}
+.how ul.list img {margin:0 auto 10px;}
+.how ul.list .numb {
+	position:absolute;
+	top:-7px;
+	left:35px;
+	font:52px/52px Licon, Arial, Helvetica, sans-serif;
+}
+.how ul.list .item .numb {left:15px;}
+.how ul.list p {margin:0 10px;}
+.how ul.list p .info {
+	font-size:13px;
+	letter-spacing:normal;
+	display:block;
+	margin-top:8px;
+	text-align:left;
+}
+.how ul.list h3 {
+	margin:0 20px;
+	font:24px/26px Arial, Helvetica, sans-serif;
+}
+.start {
+	width:353px;
+	height:201px;
+	margin:0 0 0 308px;
+	display:block;
+	background:url(/static/css/images/btn-start.gif) no-repeat;
+	text-indent:-9999px;
+}
+.start:hover {background-position:0 -201px;}
+/*footer*/
+#footer {
+	width:1000px;
+	margin:0 auto;
+	background:url(/static/css/images/bg-footer.gif) no-repeat 0 9px;
+	overflow:hidden;
+	padding:108px 0 15px;
+}
+.farSides {
+	display:block;
+	width:214px;
+	height:63px;
+	background:url(/static/css/images/ico-far-sides.gif) no-repeat;
+	text-indent:-9999px;
+	overflow:hidden;
+	margin:0 0 0 393px;
+}
+#footer ul.list {
+	margin:0;
+	padding:45px 0 25px 113px;
+	list-style:none;
+	height:1%;
+	overflow:hidden;
+}
+#footer ul.list li {
+	float:left;
+	padding:0 15px 0 0;
+}
+#footer ul.list li.item01 {width:192px;}
+#footer ul.list li.item02 {width:166px;}
+#footer ul.list li.item03 {width:210px;}
+#footer ul.list li.item04 {width:200px;}
+#footer ul.list ul {
+	margin:0;
+	padding:0 0 14px;
+	list-style:none;
+	height:1%;
+	overflow:hidden;
+}
+#footer ul.list ul li {
+	float:none;
+	width:auto;
+	height:1%;
+	font:14px/16px Arial, Helvetica, sans-serif;
+	overflow:hidden;
+}
+#footer ul.list h3 {
+	color:#8698a1;
+	margin:0;
+	font:26px/26px Licon, Arial, Helvetica, sans-serif;
+}
+#footer ul.list a {
+	color:#dae2e6;
+	text-decoration:none;
+}
+#footer ul.list a:hover {text-decoration:underline;}
+#footer p {
+	margin:0 0 25px;
+	text-align:center;
+	font:12px/14px Arial, Helvetica, sans-serif;
+}
+.password_reset {
+    position: absolute;
+    top: 597px;
+    left: 400px;
+    color: red;
+    font-size: 11px;
+}

@@ -39,7 +39,7 @@ class CardstoriesForm(forms.Form):
             for f_name in self.fields:
                 if f_name in self.errors:
                     classes = self.fields[f_name].widget.attrs.get('class', '')
-                    classes += ' cardstories_field_error'
+                    classes += ' error'
                     self.fields[f_name].widget.attrs['class'] = classes
 
 
@@ -49,21 +49,21 @@ class RegistrationForm(CardstoriesForm):
 
     """
     name = forms.CharField(required=True, initial="Your name", max_length=30,
-        widget=forms.TextInput(attrs={'class': 'cardstories_reg_name cardstories_default_value'}))
+        widget=forms.TextInput(attrs={'class': 'name default'}))
     username = forms.EmailField(required=True, initial="your@email.com", max_length=75,
-        widget=forms.TextInput(attrs={'class': 'cardstories_reg_email cardstories_default_value'}))
+        widget=forms.TextInput(attrs={'class': 'username default'}))
     password1 = forms.CharField(required=True,
-        widget=forms.PasswordInput(attrs={'class': 'cardstories_reg_password1'}))
+        widget=forms.PasswordInput(attrs={'class': 'password1'}))
     password2 = forms.CharField(required=True,
-        widget=forms.PasswordInput(attrs={'class': 'cardstories_reg_password2'}))
+        widget=forms.PasswordInput(attrs={'class': 'password2'}))
 
     # The following two fields are simply a way to have default values as
     # field labels, which will later be handled appropriately by some
     # Javascript trickery.
     password1_clear = forms.CharField(required=False, initial="Password",
-        widget=forms.TextInput(attrs={'class': 'cardstories_reg_password1_clear'}))
+        widget=forms.TextInput(attrs={'class': 'password1 clear'}))
     password2_clear = forms.CharField(required=False, initial="Confirm password",
-        widget=forms.TextInput(attrs={'class': 'cardstories_reg_password2_clear'}))
+        widget=forms.TextInput(attrs={'class': 'password2 clear'}))
 
     def clean_name(self):
         """
@@ -112,15 +112,15 @@ class LoginForm(CardstoriesForm):
 
     """
     username = forms.EmailField(required=True, initial="your@email.com", max_length=75,
-        widget=forms.TextInput(attrs={'class': 'cardstories_login_email cardstories_default_value'}))
+        widget=forms.TextInput(attrs={'class': 'username default'}))
     password = forms.CharField(required=True,
-        widget=forms.PasswordInput(attrs={'class': 'cardstories_login_password'}))
+        widget=forms.PasswordInput(attrs={'class': 'password'}))
 
     # The following field is simply a way to have a default value as a field
     # label, which will later be handled appropriately by some Javascript
     # trickery.
     password_clear = forms.CharField(required=False, initial="Password",
-        widget=forms.TextInput(attrs={'class': 'cardstories_login_password_clear'}))
+        widget=forms.TextInput(attrs={'class': 'password clear'}))
 
     def clean(self):
         """

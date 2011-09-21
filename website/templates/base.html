@@ -3,20 +3,173 @@
 <head>
   <title>{% block title %}Cardstories{% endblock %}</title>
   <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
-  <link rel="stylesheet" href="/static/css/all.css" type="text/css" media="screen">
   <script type="text/javascript" src="/static/js/jquery/jquery-1.5.1.js"></script>
-  <script type="text/javascript" src="/static/js/jquery.owa.js"></script>
-  {% block head %}{% endblock %}
+  {% block head_script %}
+  <script type="text/javascript" src="/static/js/video.js"></script>
+  <script type="text/javascript" src="/static/js/jquery.easing.1.3.js"></script>
+  {% endblock %}
+  {% block stylesheets %}
+  <link rel="stylesheet" href="/static/css/video-js.css" type="text/css" media="screen">
+  <link rel="stylesheet" href="/static/css/video-js-vim.css" type="text/css" media="screen">
+  <link rel="stylesheet" href="/static/css/home.css" type="text/css" media="screen">
+  {% endblock %}
 </head>
 <body>
-  {%block precontent %}{% endblock %}
-  <div class="cardstories_bg_outer">
-    <div class="cardstories_bg_inner">
-      <div class="cardstories">
-        {%block content %}{% endblock %}
+  {% block content %}
+  <div id="header">
+    <div class="frame">
+      <div class="holder">
+        <div class="row"></div>
+      </div>
+      {% block box %}
+      <div class="box"></div>
+      {% endblock %}
+    </div>  
+  </div>
+  {% endblock %}
+  {% block footer %}
+  <div class="imgRow">
+    <div class="frame">
+      <div class="box">
+        <div class="video-js-box vim-css">
+          <!-- Using the Video for Everybody Embed Code http://camendesign.com/code/video_for_everybody -->
+          <video id="example_video_1" class="video-js" width="724" height="407" controls="controls" preload="auto" poster="/static/css/images/img01.jpg">
+            <source src="/static/video/trailer.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"' />
+            <source src="/static/video/trailer.webm" type='video/webm; codecs="vp8, vorbis"' />
+            <source src="/static/video/trailer.ogv" type='video/ogg; codecs="theora, vorbis"' />
+            <!-- Flash Fallback. Use any flash video player here. Make sure to keep the vjs-flash-fallback class. -->
+            <object id="flash_fallback_1" class="vjs-flash-fallback" width="724" height="407" type="application/x-shockwave-flash" data="/static/video/flowplayer-3.2.7.swf">
+              <param name="movie" value="/static/video/flowplayer-3.2.7.swf" />
+              <param name="allowfullscreen" value="true" />
+              <param name="flashvars" value='config={"playlist":["/static/css/images/img01.jpg", {"url": "/static/video/trailer.mp4", "autoPlay":false, "autoBuffering":true}]}' />
+              <!-- Image Fallback. Typically the same as the poster image. -->
+              <img src="/static/css/images/img01.jpg" width="724" height="407" alt="Poster Image" title="No video playback capabilities." />
+            </object>
+          </video>
+        </div>
       </div>
     </div>
   </div>
-  {%block postcontent %}{% endblock %}
+  <div class="how">
+    <div class="frame">
+      <h2>How to play</h2>
+      <ul class="list">
+        <li>
+          <img src="/static/css/images/img02.jpg" alt="image" />
+          <p>The Game Master picks a card...</p>
+          <span class="numb">1.</span>
+        </li>
+        <li>
+          <img src="/static/css/images/img03.jpg" alt="image" />
+          <p>...and creates a story for it.</p>
+          <span class="numb">2.</span>
+          <div class="popup">"My new haircut has changed me."</div>
+        </li>
+        <li class="item">
+          <img src="/static/css/images/img04.jpg" alt="image" />
+          <h3>That's the Card Story!</h3>
+          <span class="numb">3.</span>
+        </li>
+      </ul>
+      <ul class="list">
+        <li>
+          <img src="/static/css/images/img05.jpg" alt="image" />
+          <p>Without seeing the Card Story, each player chooses one fake card based on the story that was created.<br /><span class="info">*You'll need 3-6 players!</span></p>
+          <span class="numb">4.</span>
+        </li>
+        <li>
+          <img src="/static/css/images/img06.jpg" alt="image" />
+          <p>All the cards are shuffled,<br />including the Card Stories.</p>
+          <span class="numb">5.</span>
+        </li>
+        <li class="item">
+          <img src="/static/css/images/img07.jpg" alt="image" />
+          <p>You win if you prove that you can find THE CARD STORY!</p>
+          <span class="numb">6.</span>
+        </li>
+      </ul>
+      <a class="start" href="#">Start game</a>
+    </div>
+  </div>
+  <!-- footer -->
+  <div id="footer">
+    <a class="farSides" href="#">Card Stories is a game created by Far Sides</a>
+    <ul class="list">
+      <li class="item01">
+        <ul>
+          <li><h3>FOLLOW US</h3></li>
+          <li><a href="http://www.facebook.com/pages/Farsides/179399558771218?sk=wall">Facebook</a></li>
+          <li><a href="http://farsides.com/feed/">RSS</a></li>
+          <li><a href="http://twitter.com/farsidesgames">Twitter</a></li>
+        </ul>
+        <ul>
+          <li><h3>TOOLS</h3></li>
+          <li><a href="http://chat.farsides.com/">Chat/IRC</a></li>
+          <li><a href="http://farsides.com/files/">Files repository</a></li>
+          <li><a href="http://wiki.farsides.com/w/Card_Stories_-_Developer_Documentation">Source code</a></li>
+          <li><a href="http://tickets.farsides.com/projects/cardstories/issues/new">Submit idea/bug</a></li>
+          <li><a href="http://tickets.farsides.com/projects/cardstories/issues?query_id=8">Tracker</a></li>
+          <li><a href="http://wiki.farsides.com/">Wiki</a></li>
+        </ul>
+      </li>
+      <li class="item02">
+        <ul>
+          <li><h3>COMPANY</h3></li>
+          <li><a href="http://farsides.com/company/about-us/">About Us</a></li>
+          <li><a href="http://farsides.com/company/our-ambition/">Our Ambition</a></li>
+          <li><a href="http://farsides.com/company/our-values/">Our Values</a></li>
+        </ul>
+        <ul>
+          <li><h3>BLOG</h3></li>
+          <li><a href="http://farsides.com/category/cardstories/">Card Stories</a></li>
+          <li><a href="http://farsides.com/category/code/">Code</a></li>
+          <li><a href="http://farsides.com/category/game-design/">Game design</a></li>
+          <li><a href="http://farsides.com/category/graphic-design/">Graphic design</a></li>
+          <li><a href="http://farsides.com/category/inspiration/">Inspiration</a></li>
+        </ul>
+      </li>
+      <li class="item03">
+        <ul>
+          <li><h3>GROUPS / FORUM</h3></li>
+          <li><a href="http://farsides.com/groups/business/">Business</a></li>
+          <li><a href="http://farsides.com/groups/code/">Code</a></li>
+          <li><a href="http://farsides.com/groups/game-design/">Game Design</a></li>
+          <li><a href="http://farsides.com/groups/graphic-design/">Graphic Design</a></li>
+          <li><a href="http://farsides.com/groups/hr/">HR</a></li>
+          <li><a href="http://farsides.com/groups/misc/">Misc</a></li>
+          <li><a href="http://farsides.com/groups/project-management/">Project Management</a></li>
+          <li><a href="http://farsides.com/groups/system-network-administration/">Sysadmin</a></li>
+        </ul>
+      </li>
+      <li class="item04">
+        <ul>
+          <li><h3>WIKI</h3></li>
+          <li><a href="http://wiki.farsides.com/w/Social_Contract">Social Contract</a></li>
+          <li><a href="http://wiki.farsides.com/w/Company_manifesto">Company Manifesto</a></li>
+          <li><a href="http://wiki.farsides.com/w/Card_Stories_-_Developer_Documentation">Developer documentation</a></li>
+          <li><a href="http://wiki.farsides.com/w/Introduction_presentation">Introduction presentation</a></li>
+          <li><a href="http://wiki.farsides.com/w/Business_Plan">Business Plan</a></li>
+          <li><a href="http://wiki.farsides.com/w/Description_of_the_Recurring_Contractor_status">Working at Farsides</a></li>
+        </ul>
+      </li>
+    </ul>
+    <p>Powered by Card Stories, a free software game under GNU AGPLv3</p>
+  </div>
+  {% endblock %}
+  {% block body_script %}
+  <script type="text/javascript">
+    // Initialize VideoJS
+    VideoJS.setupAllWhenReady({playerFallbackOrder: ["html5", "flash"]});
+
+    // Smooth scroll to the top.
+    $('a.start').unbind('click').click(function(e) {
+        $('html, body')
+        .stop()
+        .animate({scrollTop: 0}, 750, 'easeInOutExpo');
+
+        e.preventDefault();
+    });
+  </script>
+  {% endblock %}
 </body>
 </html>
