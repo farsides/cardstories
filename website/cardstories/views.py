@@ -77,7 +77,8 @@ def welcome(request):
 
     if request.user.is_authenticated():
         template = 'cardstories/game.html'
-        context = {}
+        context = {'create': request.session.get('create', False)}
+        request.session['create'] = False
     else:
         context = {'registration_form': RegistrationForm(),
                    'login_form': LoginForm()}
@@ -111,8 +112,14 @@ def register(request):
             auth_user = authenticate(username=username, password=password)
             auth_login(request, auth_user)
 
-            # Redirect maintaining game_id, if set.
-            url = '%s%s' % (reverse(welcome), get_gameid_query(request))
+            # The user was just created.
+            request.session['create'] = True
+
+            # Redirect maintaining query string.
+            query = ''
+            if len(request.GET):
+                query = '?%s' % request.GET.urlencode()
+            url = '%s%s' % (reverse(welcome), query)
             return redirect(url);
     else:
         form = RegistrationForm()
@@ -138,8 +145,11 @@ def login(request):
             # validation (which simplifies user feedback on login errors).
             auth_login(request, form.auth_user)
 
-            # Redirect maintaining game_id, if set.
-            url = '%s%s' % (reverse(welcome), get_gameid_query(request))
+            # Redirect maintaining query string.
+            query = ''
+            if len(request.GET):
+                query = '?%s' % request.GET.urlencode()
+            url = '%s%s' % (reverse(welcome), query)
             return redirect(url);
     else:
         form = LoginForm()
@@ -176,8 +186,14 @@ def facebook(request):
                 if user and user.is_active:
                     auth_login(request, user)
 
-                    # Redirect maintaining game_id, if set.
-                    url = '%s%s' % (reverse(welcome), get_gameid_query(request))
+                    # Signal that the user was created
+                    request.session['create'] = True
+
+                    # Redirect maintaining query string.
+                    query = ''
+                    if len(request.GET):
+                        query = '?%s' % request.GET.urlencode()
+                    url = '%s%s' % (reverse(welcome), query)
                     return redirect(url);
 
     context = {'registration_form': RegistrationForm(),

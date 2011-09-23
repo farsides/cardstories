@@ -147,7 +147,7 @@ test("reload_link", 4, function() {
     $.query = {
         'get': function(attr) {}
     };
-    equal($.cardstories.reload_link(player_id), '?');
+    equal($.cardstories.reload_link(player_id), '');
     equal($.cardstories.reload_link(player_id, game_id), '?game_id=' + game_id);
 
     // With player_id in the URL
@@ -594,7 +594,7 @@ test("game on error", 1, function() {
     $.cardstories.game(11, 111, 'the root');
 });
 
-test("image preloading fires on game_or_lobby", 2, function() {
+test("image preloading fires on bootstrap", 2, function() {
     var root = $('#qunit-fixture .cardstories');
     var player_id = 'player1';
     var game_id = 112;
@@ -604,7 +604,7 @@ test("image preloading fires on game_or_lobby", 2, function() {
         ok(typeof callback === 'function', 'preload_images_helper gets called with a callback');
     };
 
-    $.cardstories.game_or_lobby(player_id, game_id, root);
+    $.cardstories.bootstrap(player_id, game_id, null, null, root);
 });
 
 test("preload_images_helper", 3, function() {

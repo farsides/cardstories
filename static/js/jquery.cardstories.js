@@ -51,7 +51,6 @@
         },
 
         reload_link: function(player_id, game_id, root) {
-            var search = '?';
             var params = {};
 
             if(game_id !== undefined && game_id !== '') {
@@ -64,7 +63,10 @@
                 params.player_id = player_id;
             }
 
-            search += $.param(params);
+            var search = '';
+            if (params.game_id || params.player_id) {
+                search += '?' + $.param(params);
+            }
 
             return search;
         },
@@ -3649,27 +3651,30 @@
             }
         },
 
-        bootstrap: function(player_id, game_id, login_url, root) {
+        bootstrap: function(player_id, game_id, login_url, create, root) {
+            var $this = this;
             this.credits(root);
             if(player_id === undefined || player_id === null || player_id === '') {
                 player_id = $.cookie('CARDSTORIES_ID');
             }
-            if(player_id === undefined || player_id === null || player_id === '') {
-                this.login(game_id, login_url, root);
-            } else {
-                this.game_or_lobby(player_id, game_id, root);
-            }
+
+            this.preload_images_helper(root, function() {
+                if(player_id === undefined || player_id === null || player_id === '') {
+                    $this.login(game_id, login_url, root);
+                } else if (create) {
+                    $this.create(player_id, root);
+                } else {
+                    $this.game_or_lobby(player_id, game_id, root);
+                }
+            });
         },
 
         game_or_lobby: function(player_id, game_id, root) {
-            var $this = this;
-            this.preload_images_helper(root, function() {
-                if (game_id === undefined || game_id === '') {
-                    $this.refresh_lobby(player_id, true, true, root);
-                } else {
-                    $this.game(player_id, game_id, root);
-                }
-            });
+            if (game_id === undefined || game_id === '') {
+                this.refresh_lobby(player_id, true, true, root);
+            } else {
+                this.game(player_id, game_id, root);
+            }
         },
 
         credits: function(root) {
@@ -3688,14 +3693,11 @@
 
     };
 
-    $.fn.cardstories = function(player_id, game_id, login_url) {
-        if(player_id === undefined || player_id === '') {
-          player_id = $.cookie('CARDSTORIES_ID');
-        }
+    $.fn.cardstories = function(player_id, game_id, login_url, create) {
         return this.each(function() {
             $(this).toggleClass('cardstories_root', true);
             $(this).data('polling', false);
-            $.cardstories.bootstrap(player_id, game_id, login_url, this);
+            $.cardstories.bootstrap(player_id, game_id, login_url, create, this);
             return this;
         });
     };
