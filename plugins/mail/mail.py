@@ -41,17 +41,22 @@ class Plugin:
         self.service = service
         self.service.listen().addCallback(self.self_notify)
         self.confdir = os.path.join(self.service.settings['plugins-confdir'], 'mail')
-        dir = os.path.join(self.service.settings['plugins-dir'], 'mail')
-        self.templates = {}
-        for allowed in self.ALLOWED:
-            f = open(os.path.join(dir, 'templates', allowed, 'template.html'))
-            self.templates[allowed] = f.read()
-            f.close()
         self.settings = objectify.parse(open(os.path.join(self.confdir, 'mail.xml'))).getroot()
         self.sender = self.settings.get('sender')
         self.host = self.settings.get('host')
         self.url = self.settings.get('url')
         self.static_url = self.settings.get('static_url')
+        try:
+            self.allowed = set(self.settings.allow).intersection(self.ALLOWED)
+            print self.allowed
+        except AttributeError:
+            self.allowed = self.ALLOWED
+        dir = os.path.join(self.service.settings['plugins-dir'], 'mail')
+        self.templates = {}
+        for allowed in self.allowed:
+            f = open(os.path.join(dir, 'templates', allowed, 'template.html'))
+            self.templates[allowed] = f.read()
+            f.close()
         self.sendmail = sendmail
 
     def name(self):
@@ -61,7 +66,7 @@ class Plugin:
         d = defer.succeed(True)
         if changes != None and changes['type'] == 'change':
             details = changes['details']
-            if details['type'] in self.ALLOWED:
+            if details['type'] in self.allowed:
                 d = getattr(self, details['type'])(changes['game'], details)
         self.service.listen().addCallback(self.self_notify)
         return d

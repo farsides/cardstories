@@ -162,11 +162,39 @@ class MailTestAuth(MailTest):
         d.addCallback(check)
         yield d
 
+
+class MailTestAllow(unittest.TestCase):
+
+    def setUp(self):
+        self.database = 'test.sqlite'
+        if os.path.exists(self.database):
+            os.unlink(self.database)
+        self.service = CardstoriesService({'db': self.database,
+                                           'plugins-libdir': '../fixture2',
+                                           'plugins-confdir': '../fixture2',
+                                           'plugins-dir': '../fixture2'})
+        self.auth = auth.Plugin(self.service, [])
+        self.service.startService()
+
+    def tearDown(self):
+        return self.service.stopService()
+
+    def test00_init(self):
+        plugin = mail.Plugin(self.service, [ self.auth ])
+        for allowed in mail.Plugin.ALLOWED:
+            has_key = plugin.templates.has_key(allowed)
+            if allowed in ('invite', 'vote'):
+                self.assertTrue(has_key)
+            else:
+                self.assertFalse(has_key)
+
+
 def Run():
     loader = runner.TestLoader()
 #    loader.methodPrefix = "test_trynow"
     suite = loader.suiteFactory()
     suite.addTest(loader.loadClass(MailTestAuth))
+    suite.addTest(loader.loadClass(MailTestAllow))
 
     return runner.TrialRunner(
         reporter.VerboseTextReporter,

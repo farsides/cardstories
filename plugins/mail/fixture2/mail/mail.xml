@@ -1,0 +1,4 @@
+<mail host="localhost" sender="fake@cardstories.org" url="URL" static_url="STATIC_URL">
+  <allow>invite</allow>
+  <allow>vote</allow>
+</mail>

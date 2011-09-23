@@ -27,6 +27,7 @@ check:
 
 clean:
 	rm -fr fixture/auth
+	rm -fr fixture2/auth
 	rm -fr .coverage _trial_temp*
 	rm -f *,cover
 	rm -f *.pyc

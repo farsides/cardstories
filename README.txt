@@ -153,6 +153,24 @@ OWA url, etc) in:
 
 /usr/share/cardstories/website/local_settings.py
 
+To disable specific email notifications, after deployment edit
+/etc/cardstories/plugins/mail/mail.xml so that it contains only the "allow"
+nodes you need (valid options are 'invite', 'pick', 'voting', 'vote',
+'complete'):
+
+<mail ...>
+  <allow>invite</allow>
+  <allow>vote</allow>
+</mail>
+
+If NO notifications are to be sent, create an empty allow node (for backward
+compatibility, if there aren't any allow nodes, mail will be sent for all
+events):
+
+<mail ...>
+  <allow></allow>
+</mail>
+
 
 ##############
 Usage examples
