@@ -115,11 +115,8 @@ def register(request):
             # The user was just created.
             request.session['create'] = True
 
-            # Redirect maintaining query string.
-            query = ''
-            if len(request.GET):
-                query = '?%s' % request.GET.urlencode()
-            url = '%s%s' % (reverse(welcome), query)
+            # Redirect maintaining game_id, if set.
+            url = '%s%s' % (reverse(welcome), get_gameid_query(request))
             return redirect(url);
     else:
         form = RegistrationForm()
@@ -145,11 +142,8 @@ def login(request):
             # validation (which simplifies user feedback on login errors).
             auth_login(request, form.auth_user)
 
-            # Redirect maintaining query string.
-            query = ''
-            if len(request.GET):
-                query = '?%s' % request.GET.urlencode()
-            url = '%s%s' % (reverse(welcome), query)
+            # Redirect maintaining game_id, if set.
+            url = '%s%s' % (reverse(welcome), get_gameid_query(request))
             return redirect(url);
     else:
         form = LoginForm()
@@ -189,11 +183,8 @@ def facebook(request):
                     # Signal that the user was created
                     request.session['create'] = True
 
-                    # Redirect maintaining query string.
-                    query = ''
-                    if len(request.GET):
-                        query = '?%s' % request.GET.urlencode()
-                    url = '%s%s' % (reverse(welcome), query)
+                    # Redirect maintaining game_id, if set.
+                    url = '%s%s' % (reverse(welcome), get_gameid_query(request))
                     return redirect(url);
 
     context = {'registration_form': RegistrationForm(),
