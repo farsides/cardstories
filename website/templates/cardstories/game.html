@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load facebook %}
+
+{% block title %}Welcome to Cardstories!{% endblock %}
+
+{% block head_script %}{{ block.super }}
+  <script type="text/javascript" src="/static/js/jquery.owa.js"></script>
+  <script type="text/javascript" src="/static/js/jquery.metadata.js"></script>
+  <script type="text/javascript" src="/static/js/jquery.cookie.js"></script>
+  <script type="text/javascript" src="/static/js/jquery.jqDock.min.js"></script>
+  <script type="text/javascript" src="/static/js/jquery.query-2.1.7.js"></script>
+  <script type="text/javascript" src="/static/js/jquery.placeholder-1.0.1.js"></script>
+  <script type="text/javascript" src="/static/js/jquery.spritely-0.5.js"></script>
+  <script type="text/javascript" src="/static/js/jquery.cardstories.js"></script>
+  <script type="text/javascript" src="/static/js/supplant.js"></script>
+  <script type="text/javascript" src="/static/tablesorter/jquery.tablesorter.js"></script>
+  <script type="text/javascript" src="/static/tablesorter/jquery.tablesorter.pager.js"></script>
+  <script type="text/javascript" src="/static/jscrollpane/jquery.jscrollpane.js"></script>
+  <script type="text/javascript" src="/static/test/skin.js"></script>
+{% endblock %}
+
+{% block stylesheets %}{{ block.super }}
+  <link rel="stylesheet" href="/static/css/tablesorter.css" type="text/css" media="screen">
+  <link rel="stylesheet" href="/static/css/all.css" type="text/css" media="screen">
+  <link rel="stylesheet" href="/static/css/images.css" type="text/css" media="screen">
+  <link rel="stylesheet" href="/static/css/credits.css" type="text/css" media="screen">
+{% endblock %}
+
+{% block content %}
+  <div id="fb-root"></div>
+  <div id="header">
+    <div class="frame">
+      <div class="holder">
+        <div class="row">
+          <div class="like">
+            <div><g:plusone size="medium" href="http://cardstories.org"></g:plusone></div>
+            <div>{% fb_like %}</div>
+          </div>
+        </div>
+        <div class="container">
+          <div class="cardstories"></div>
+        </div>
+      </div>
+      <div class="box"><br /><br /></div>
+    </div>  
+  </div>
+{% endblock %}
+
+{% block body_script %}{{ block.super }}
+<script type="text/javascript">
+
+{% if owa_enable %}
+// Initialize Open Web Analytics
+$('.cardstories').owa('{{ owa_url }}', '{{ owa_site_id }}', true);
+$('.cardstories').owa_subscribe('active.cardstories', '?skin=');
+{% endif %}
+
+// Initialize Cardstories
+$.get("/static/cardstories.html", function(data) {
+  $('.cardstories').html(data);
+  var skin = $.query.get('skin');
+  if(skin !== '') {
+    $.cardstories.skin(skin, $('.cardstories'));
+  } else {
+    $('.cardstories').cardstories('{{ user.username }}', $.query.get('game_id'), '{% url website.cardstories.views.welcome %}');
+  }
+});
+
+// Initialize Google+ button
+(function() {
+  var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+  po.src = 'https://apis.google.com/js/plusone.js';
+  var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+})();
+</script>
+{% endblock %}

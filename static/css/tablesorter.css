@@ -1,10 +1,9 @@
 /* tables */
 table.tablesorter {
 	font-family:helvetica;
-	margin:10px 0pt 15px;
 	width: 100%;
 	text-align: left;
-        border-style: hidden; 
+    border-style: hidden; 
 }
 
 table.tablesorter thead tr th,

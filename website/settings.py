@@ -127,7 +127,6 @@ AUTH_PROFILE_MODULE = 'cardstories.UserProfile'
 
 # Cardstories settings
 CARDSTORIES_HOST = 'localhost:5000'
-CARDSTORIES_URL = '/static/index.html'
 
 # Facebook settings.
 FACEBOOK_APP_ID = ''

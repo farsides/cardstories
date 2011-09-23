@@ -30,7 +30,6 @@ class CardstoriesTest(TestCase):
         self.assertTrue('registration_form' in response.context)
         self.assertTrue('login_form' in response.context)
 
-
     def test_01registration(self):
         """
         Test user registration.
@@ -93,10 +92,7 @@ class CardstoriesTest(TestCase):
         query = '?game_id=1'
         response = c.post(url + query, data)
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response['Location'], 'http://testserver/static/index.html' + query)
-
-        # Was the user logged in as the cardstories client expects it?
-        self.assertIsNotNone(c.cookies["CARDSTORIES_ID"])
+        self.assertEqual(response['Location'], 'http://testserver/' + query)
 
         # Try to create the user again: this should fail with a form error.
         response = c.post(url, data)
@@ -150,10 +146,7 @@ class CardstoriesTest(TestCase):
         query = '?game_id=1'
         response = c.post(url + query, data)
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response['Location'], 'http://testserver/static/index.html' + query)
-
-        # Was the user logged in as the cardstories client expects it?
-        self.assertIsNotNone(c.cookies["CARDSTORIES_ID"])
+        self.assertEqual(response['Location'], 'http://testserver/' + query)
 
     def test_03facebook(self):
         """
@@ -288,9 +281,6 @@ class CardstoriesTest(TestCase):
         user = User.objects.get(username=fb_email)
         self.assertEqual(user.first_name, fb_name)
         self.assertEqual(user.get_profile().facebook_id, fb_id)
-
-        # Was the user logged in as the cardstories client expects it?
-        self.assertIsNotNone(c.cookies["CARDSTORIES_ID"])
 
     def test_04getuserid(self):
         """

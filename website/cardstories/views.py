@@ -32,6 +32,7 @@ from django.contrib.sites.models import Site
 from django.template import RequestContext
 from django.conf import settings
 from django.core.urlresolvers import reverse
+from django.shortcuts import redirect
 
 from forms import RegistrationForm, LoginForm
 
@@ -69,17 +70,22 @@ def common_variables(request):
 
 def welcome(request):
     """
-    Simply renders the welcome page, which includes both a registration and
-    login forms.
+    Renders the welcome page, with either registration and
+    login forms, or the game itself.
 
     """
-    context = {'registration_form': RegistrationForm(),
-               'login_form': LoginForm()}
-    response = render_to_response('cardstories/welcome.html', context,
+
+    if request.user.is_authenticated():
+        template = 'cardstories/game.html'
+        context = {}
+    else:
+        context = {'registration_form': RegistrationForm(),
+                   'login_form': LoginForm()}
+        template = 'cardstories/welcome.html'
+
+    return render_to_response(template, context,
                               context_instance=RequestContext(request,
                               processors=[common_variables]))
-
-    return response
 
 def register(request):
     """
@@ -106,14 +112,8 @@ def register(request):
             auth_login(request, auth_user)
 
             # Redirect maintaining game_id, if set.
-            url = '%s%s' % (settings.CARDSTORIES_URL, get_gameid_query(request))
-            response = HttpResponseRedirect(url)
-
-            # Note that the username should be "quoted", which is the
-            # equivalent of Javascript's, encodeURIcompontent().
-            response.set_cookie('CARDSTORIES_ID', quote(username))
-
-            return response
+            url = '%s%s' % (reverse(welcome), get_gameid_query(request))
+            return redirect(url);
     else:
         form = RegistrationForm()
 
@@ -139,14 +139,8 @@ def login(request):
             auth_login(request, form.auth_user)
 
             # Redirect maintaining game_id, if set.
-            url = '%s%s' % (settings.CARDSTORIES_URL, get_gameid_query(request))
-            response = HttpResponseRedirect(url)
-
-            # Note that the username should be "quoted", which is the
-            # equivalent of Javascript's, encodeURIcompontent().
-            response.set_cookie('CARDSTORIES_ID', quote(username))
-
-            return response
+            url = '%s%s' % (reverse(welcome), get_gameid_query(request))
+            return redirect(url);
     else:
         form = LoginForm()
 
@@ -183,14 +177,8 @@ def facebook(request):
                     auth_login(request, user)
 
                     # Redirect maintaining game_id, if set.
-                    url = '%s%s' % (settings.CARDSTORIES_URL, get_gameid_query(request))
-                    response = HttpResponseRedirect(url)
-
-                    # Note that the username should be "quoted", which is the
-                    # equivalent of Javascript's, encodeURIcompontent().
-                    response.set_cookie('CARDSTORIES_ID', quote(user.username))
-
-                    return response
+                    url = '%s%s' % (reverse(welcome), get_gameid_query(request))
+                    return redirect(url);
 
     context = {'registration_form': RegistrationForm(),
                'login_form': LoginForm()}

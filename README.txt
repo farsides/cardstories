@@ -106,20 +106,11 @@ OWA_URL = 'http://localhost:8080/'
 OWA_SITE_ID = '<your_site_id>'
 ----------
 
-Then, proceed to static/index.html and uncomment these lines at the bottom,
-using the same values for OWA_URL and OWA_SITE_ID as above:
-
-$ vim static/index.html
-----------
-$('.cardstories').owa('<OWA_URL>', '<OWA_SITE_ID>')
-                 .owa_subscribe('active.cardstories', 'static/?skin=');
-----------
-
 Once this is done, all relevant page views should be logged.  Game state
 changes will be artificially logged as page views with URLs in the following
 format, where <skin_name> refers to an existing skin in the game.
 
-http://local.cardstories.org/static/index.html?skin=<skin_name>
+http://local.cardstories.org/?skin=<skin_name>
 
 You can then proceed to set up goals in OWA accordingly.
 
