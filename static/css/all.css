@@ -587,6 +587,32 @@
     height: 217px;
 }
 
+.cardstories .cardstories_go_lobby { 
+    display: block;
+    position: absolute;
+    background: transparent url('images/btn_listofgameson.png') no-repeat left top;
+    width: 99px;
+    height: 27px;
+    top: 185px;
+    left: 5px;
+    color: white;
+    font-family: "Licon";
+    font-size: 16px;
+    line-height: 26px;
+    text-align: right;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.cardstories .cardstories_go_lobby > span { 
+    position: relative;
+    right: 8px;
+}
+
+.cardstories .cardstories_deck .cardstories_go_lobby:hover { 
+    background: transparent url('images/btn_listofgamesover.png') no-repeat left top;
+}
+
 .cardstories .cardstories_deck .cardstories_deck_cards { 
     background: transparent url('images/card_deck.png') no-repeat left top;
     position: absolute;

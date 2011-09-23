@@ -532,7 +532,7 @@ test("widget lobby", 4, function() {
     ok($('#qunit-fixture .cardstories').hasClass('cardstories_root'), 'cardstories_root');
 });
 
-test("game", 5, function() {
+test("game", 4, function() {
     var player_id = 15;
     var game_id = 101;
     var card = 1;
@@ -555,12 +555,30 @@ test("game", 5, function() {
     };
 
     $.cardstories.game(player_id, game_id, root);
+});
 
-    // Test link to lobby
-    $.cardstories.reload = function(player_id2) {
-        equal(player_id2, player_id);
+asyncTest("go_lobby", 1, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_invitation .cardstories_owner', root);
+    var player_id = 'Player 1';
+    var game = {
+        'id': 101,
+        'owner': true,
+        'sentence': 'SENTENCE',
+        'winner_card': 30,
+        'players': [[player_id, null, 'n', 30, []]]
     };
-    $('.cardstories_go_lobby', root).click();
+
+    $.cardstories.poll_ignore = function(_request) {};
+
+    $.cardstories.reload = function(_player_id) {
+        equal(_player_id, player_id);
+        start();
+    };
+
+    $.cardstories.invitation(player_id, game, root);
+
+    $('.cardstories_go_lobby', element).click();
 });
 
 test("game on error", 1, function() {

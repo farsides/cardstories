@@ -206,6 +206,7 @@
             this.set_active(root, element, null, 'create_pick_card');
             this.display_progress_bar('owner', 1, element, root);
             this.display_master_name(player_id, element);
+            this.go_lobby(player_id, element);
             var deck = $this.create_deck();
             var cards = $.map(deck, function(card, index) {
                 return { 'value':card };
@@ -608,6 +609,7 @@
             this.set_active(root, element, null, 'create_write_sentence');
             this.display_progress_bar('owner', 2, element, root);
             this.display_master_name(player_id, element);
+            this.go_lobby(player_id, element);
             $('.cardstories_card', element).attr('class', 'cardstories_card cardstories_card' + card + ' {card:' + card + '}');
             this.create_write_sentence_animate_start(card, element, root);
             var text = $('.cardstories_sentence', element);
@@ -954,6 +956,7 @@
             this.set_active(root, element, game, 'invitation_owner');
             this.display_progress_bar('owner', 3, element, root);
             this.display_master_name(game.owner_id, element);
+            this.go_lobby(player_id, element);
             $('.cardstories_sentence', element).text(game.sentence);
             var picked_card = $('.cardstories_picked_card', element);
             var src = picked_card.metadata({type: 'attr', name: 'data'}).card.supplant({card: game.winner_card});
@@ -1249,6 +1252,7 @@
             this.set_active(root, element, game, 'invitation_pick');
             this.display_progress_bar('player', 1, element, root);
             this.display_master_name(game.owner_id, element);
+            this.go_lobby(player_id, element);
 
             // Send game when the user clicks ok.
             var ok = function(card_value, card_index) {
@@ -1809,6 +1813,7 @@
 
             this.display_progress_bar('player', 2, element, root);
             this.display_master_name(game.owner_id, element);
+            this.go_lobby(player_id, element);
             this.invitation_display_board(player_id, game, element, root, true);
 
             var modal = $('.cardstories_modal', element);
@@ -2219,6 +2224,7 @@
             $('.cardstories_sentence', element).text(game.sentence);
             this.display_progress_bar('player', 3, element, root);
             this.display_master_name(game.owner_id, element);
+            this.go_lobby(player_id, element);
 
             // Send game when user clicks ok.
             var ok = function(card_index, card_value) {
@@ -2299,6 +2305,7 @@
             $('.cardstories_sentence', element).text(game.sentence);
             this.display_progress_bar('player', 4, element, root);
             this.display_master_name(game.owner_id, element);
+            this.go_lobby(player_id, element);
 
             // Update board state.
             this.vote_display_board(false, player_id, game, element, root);
@@ -2511,6 +2518,7 @@
             $('.cardstories_sentence', element).text(game.sentence);
             this.display_progress_bar('player', 4, element, root);
             this.display_master_name(game.owner_id, element);
+            this.go_lobby(player_id, element);
 
             // Update board state.
             this.vote_display_board(false, player_id, game, element, root);
@@ -2550,6 +2558,7 @@
             this.set_active(root, element, game, 'vote_owner');
             this.display_progress_bar('owner', 5, element, root);
             this.display_master_name(game.owner_id, element);
+            this.go_lobby(player_id, element);
             $('.cardstories_sentence', element).text(game.sentence);
 
             // Activate the announce results button if the game is ready.
@@ -3084,6 +3093,7 @@
             var element = $('.cardstories_complete', root);
             this.set_active(root, element, game, 'complete');
             this.display_master_name(game.owner_id, element);
+            this.go_lobby(player_id, element);
             $('.cardstories_sentence', element).text(game.sentence);
 
             // Display owner's card.
@@ -3348,13 +3358,15 @@
             $this.ajax(request);
         },
 
-        game: function(player_id, game_id, root) {
+        go_lobby: function(player_id, element) {
             var $this = this;
-
-            // Activate the link to the lobby on each game
-            $('.cardstories_go_lobby', root).unbind('click').click(function() {
+            $('.cardstories_go_lobby', element).unbind('click').click(function() {
                 $this.reload(player_id);
             });
+        },
+
+        game: function(player_id, game_id, root) {
+            var $this = this;
 
             var success = function(data, status) {
                 if('error' in data) {
