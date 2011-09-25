@@ -2,14 +2,14 @@ module("cardstories_chat");
 
 var selector = '#cardstories_chat_example';
 
-var original_plugin_send = $.cardstories_chat.plugin_send;
+var original_send = $.cardstories_chat.send;
 
 function setup() {
     $(selector).cardstories_chat();
-    $.cardstories_chat.plugin_send = original_plugin_send;
+    $.cardstories_chat.send = original_send;
 }
 
-test("plugin_chat", function() {
+test("state", function() {
     setup();
     expect(5);
 
@@ -20,7 +20,7 @@ test("plugin_chat", function() {
         {player_id: 16, sentence: 'Hello all!'},
         {player_id: 32, sentence: 'Goodbye all!'}
     ];
-    $(selector).cardstories_chat('plugin_chat', {messages: messages});
+    $.cardstories_chat.state('Player', {messages: messages}, selector);
 
     ok(display.html().match('16'), 'Display shows player_id');
     ok(display.html().match('Hello all!'), 'Display shows sentence');
@@ -28,18 +28,11 @@ test("plugin_chat", function() {
     ok(display.html().match('Goodbye all!'), 'Display shows sentence');
 });
 
-test("plugin_send", function() {
-    setup();
-    expect(1);
-
-    raises($.cardstories_chat.plugin_send, /No implementation/, 'default implementation throws an error');
-});
-
 test("pressing enter inside input field", function() {
     setup();
     expect(2);
 
-    $.cardstories_chat.plugin_send = function(line) {
+    $.cardstories_chat.send = function(player_id, line) {
         equal(line, 'I pressed enter!');
     };
 

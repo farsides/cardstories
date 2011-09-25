@@ -65,11 +65,107 @@
 
 .cardstories .cardstories_chat {
     position: absolute;
-    height: 396px;
+    margin: 0;
+    padding: 0;
+    background: transparent url('images/chat_bkg.png') no-repeat left top;
+    width: 228px;
+    height: 398px;
+    top: 217px;
+    left: -11px;
+}
+
+.cardstories .cardstories_chat_box {
+    position: relative;
+    top: 1;
+    left: 11px;
     width: 216px;
-    top: 219px;
+    height: 365px;
+}
+
+.cardstories .cardstories_chat_box > div {
+    width: 100%;
+}
+
+.cardstories .cardstories_chat_box .cardstories_chat_header {
+    height: 30px;
+}
+
+.cardstories .cardstories_chat_box .cardstories_chat_header > span {
+    position: relative;
+    left: 10px;
+    line-height: 30px;
+    font-family: "Helvetica";
+    font-weight: bold;
+    font-size: 14px;
+    color: #F4EFDA;
+}
+
+.cardstories .cardstories_chat_box .cardstories_chat_header > a {
+    display: block;
+    position: relative;
+    top: 5px;
+    right: 5px;
+    width: 116px;
+    height: 22px;
+    float: right;
+    cursor: pointer;
+    text-decoration: none;
+    border: none;
+    font-family: "Licon";
+    font-size: 14px;
+    line-height: 20px;
+    color: white;
+    background: transparent url('images/chat_online_on.png') no-repeat left top;
+}
+
+.cardstories .cardstories_chat_box .cardstories_chat_header > a > span {
+    position: relative;
+    left: 10px;
+}
+
+.cardstories .cardstories_chat_box .cardstories_chat_header > a:active {
+    background: transparent url('images/chat_online_over.png') no-repeat left top;
+}
+
+.cardstories .cardstories_chat_box .cardstories_chat_status {
+    height: 34px;
+}
+
+.cardstories .cardstories_chat_box .cardstories_chat_display {
+    position: absolute;
+    padding: 5px;
+    width: 206px;
+    max-height: 289px;
+    bottom: 0px;
     left: 0px;
-    background-color: #e0e4e8;
+    overflow: auto;
+    font-family: "Helvetica";
+    font-size: 10px;
+    color: #595959;
+}
+
+.cardstories .cardstories_chat_box .cardstories_chat_message {
+    padding: 6px 0;
+    line-height: 14px;
+    border-bottom: 1px solid #E9E9E9;
+}
+
+.cardstories .cardstories_chat_box .cardstories_chat_message > span {
+    font-weight: bold;
+}
+
+.cardstories .cardstories_chat .cardstories_chat_input {
+    position: absolute;
+    border: none;
+    padding: 0;
+    top: 370px;
+    left: 61px;
+    width: 163px;
+    height: 24px;
+    font-family: "Helvetica";
+    font-size: 11px;
+    line-height: 24px;
+    color: #808080;
 }
 
 .cardstories .cardstories_progress { 
@@ -295,7 +391,7 @@
     position: absolute;
     top: 59px;
     left: 0px;
-    height: 563px;
+    height: 558px;
     width: 776px;
     z-index: 9998;
 
@@ -609,7 +705,7 @@
     right: 8px;
 }
 
-.cardstories .cardstories_deck .cardstories_go_lobby:hover { 
+.cardstories .cardstories_deck .cardstories_go_lobby:active { 
     background: transparent url('images/btn_listofgamesover.png') no-repeat left top;
 }
 
@@ -1004,10 +1100,6 @@
 }
 
 /* state create_pick_card */
-
-.cardstories .cardstories_create .cardstories_pick_card .cardstories_sidebar {
-    z-index: 1;
-}
 
 .cardstories .cardstories_create .cardstories_modal_overlay {
     display: block;

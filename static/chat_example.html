@@ -5,7 +5,8 @@
   <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
   <script type="text/javascript" src="js/jquery/jquery-1.5.1.js"></script>
   <script type="text/javascript" src="js/jquery.placeholder-1.0.1.js"></script>
-  <script type="text/javascript" src="js/jquery.cardstories-chat.js"></script>
+  <script type="text/javascript" src="js/jquery.cardstories.js"></script>
+  <script type="text/javascript" src="js/jquery.cardstories.chat.js"></script>
   <script type="text/javascript" src="js/supplant.js"></script>
   <style type="text/css">
     html {
@@ -51,13 +52,13 @@
   </div>
 
   <script type="text/javascript">
-    $.cardstories_chat.plugin_send = function(line) {
+    $.cardstories_chat.plugin_send = function(player_id, line) {
         // Pick a random name for the demo.
         var player_id = ['John', 'Bob', 'Amy'][Math.floor(Math.random() * 3)];
         var messages = {messages: [{sentence: line, player_id: player_id}]};
-        $.cardstories_chat.plugin_chat.call(this, messages);
+        this.plugin_state(player_id, messages, $('#cardstories_chat_example'));
     }
-    $('#cardstories_chat_example').cardstories_chat();
+    $('#cardstories_chat_example').cardstories_chat('John');
   </script>
 </body>
 </html>

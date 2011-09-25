@@ -22,7 +22,7 @@ from twisted.internet import defer, reactor
 
 from cardstories.poll import pollable
 
-# how long we retain old messages for in milliseconds
+# How long we retain old messages for in milliseconds
 MESSAGE_EXPIRE_TIME = 3600000
 
 class Plugin(pollable):
@@ -30,12 +30,15 @@ class Plugin(pollable):
     def __init__(self, service, plugins):
         # Register a function to listen to the game events. 
         self.service = service
-        # storage for our messages
+
+        # Storage for our messages
         self.messages = []
+
         # Implement the path conventions
         self.confdir = os.path.join(self.service.settings['plugins-confdir'], self.name())
         self.libdir = os.path.join(self.service.settings['plugins-libdir'], self.name())
-        # initialize the pollable using the service parameters. There is
+
+        # Initialize the pollable using the recommended timeout.
         pollable.__init__(self, self.service.settings.get('poll-timeout', 300))
 
     def name(self):
@@ -51,29 +54,29 @@ class Plugin(pollable):
         if request.args['action'][0] == 'message':
             # remove the message action so it does not flow through
             del request.args['action'] 
-            # convenient access to passed in data
-            args = request.args
-            # put this sentence into the database
-            sentence = args['sentence'][0] # the sentence that was said
-            player_id = args['player_id'][0] # the player who said it
-            result = {"when": int(runtime.seconds() * 1000), "player_id": player_id, "sentence": sentence}
-            self.messages.append(result)
-            # log the chat message for later
-            log.msg('chat: ' + str(player_id) + " - " + str(sentence))
-            # cull out very old messages to stop memory leaks
-            delmessages = [m for m in self.messages if int(runtime.seconds() * 1000) > m["when"] + MESSAGE_EXPIRE_TIME]
+
+            # Build the message.
+            timestamp = int(runtime.seconds() * 1000)
+            player_id = request.args['player_id'][0]
+            sentence = request.args['sentence'][0]
+            message = {"timestamp": timestamp, "player_id": player_id, "sentence": sentence}
+
+            # Save it in our "database".
+            self.messages.append(message)
+
+            # Cull out old messages so we don't leak.
+            delmessages = [m for m in self.messages if m["timestamp"] < timestamp - MESSAGE_EXPIRE_TIME]
             for m in delmessages:
                 self.messages.remove(m)
-            # tell everybody connected about the new sentence
-            #def sendall():
-            #    self.touch(request.args)
-            #reactor.callLater(0.01, sendall)
+
+            # Tell everybody connected that there's a new message.
             self.touch(request.args)
-            return defer.succeed(args)
+
+            return defer.succeed(request.args)
         else:
+            # Just pass the result forward.
             return defer.succeed(result)
 
     def state(self, args):
         """ Tells the client about the current state - all messages since the last update. This will automatically get called by the server when the state changes. """
-        return defer.succeed({"messages": [m for m in self.messages if args['modified'][0] < m["when"]]})
-
+        return defer.succeed({"messages": [m for m in self.messages if m["timestamp"] > int(args['modified'][0])]})
