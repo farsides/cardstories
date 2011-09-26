@@ -52,6 +52,7 @@ data_files.append(['/usr/share/cardstories/plugins/auth', [ 'plugins/auth/auth.p
 data_files.append(['/usr/share/cardstories/plugins/djangoauth', [ 'plugins/djangoauth/djangoauth.py' ]])
 data_files.append(['/usr/share/cardstories/plugins/solo', [ 'plugins/solo/solo.py' ]])
 data_files.append(['/usr/share/cardstories/plugins/mail', [ 'plugins/mail/mail.py' ]])
+data_files.append(['/usr/share/cardstories/plugins/chat', [ 'plugins/chat/chat.py' ]])
 
 for dirpath, dirnames, filenames in os.walk('plugins/mail/templates'):
 	    # Ignore dirnames that start with '.'

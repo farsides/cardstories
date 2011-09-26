@@ -33,7 +33,7 @@
       <div class="box">
         <div class="video-js-box vim-css">
           <!-- Using the Video for Everybody Embed Code http://camendesign.com/code/video_for_everybody -->
-          <video id="example_video_1" class="video-js" width="724" height="407" controls="controls" preload="auto" poster="/static/css/images/img01.jpg">
+          <video id="example_video_1" class="video-js" width="724" height="407" controls="controls" preload="none" poster="/static/css/images/img01.jpg">
             <source src="/static/video/trailer.mp4" type='video/mp4; codecs="avc1.42E01E, mp4a.40.2"' />
             <source src="/static/video/trailer.webm" type='video/webm; codecs="vp8, vorbis"' />
             <source src="/static/video/trailer.ogv" type='video/ogg; codecs="theora, vorbis"' />
@@ -41,7 +41,7 @@
             <object id="flash_fallback_1" class="vjs-flash-fallback" width="724" height="407" type="application/x-shockwave-flash" data="/static/video/flowplayer-3.2.7.swf">
               <param name="movie" value="/static/video/flowplayer-3.2.7.swf" />
               <param name="allowfullscreen" value="true" />
-              <param name="flashvars" value='config={"playlist":["/static/css/images/img01.jpg", {"url": "/static/video/trailer.mp4", "autoPlay":false, "autoBuffering":true}]}' />
+              <param name="flashvars" value='config={"playlist":["/static/css/images/img01.jpg", {"url": "/static/video/trailer.mp4", "autoPlay":false, "autoBuffering":false}]}' />
               <!-- Image Fallback. Typically the same as the poster image. -->
               <img src="/static/css/images/img01.jpg" width="724" height="407" alt="Poster Image" title="No video playback capabilities." />
             </object>
