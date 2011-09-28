@@ -47,8 +47,7 @@ class Plugin:
         self.url = self.settings.get('url')
         self.static_url = self.settings.get('static_url')
         try:
-            self.allowed = set(self.settings.allow).intersection(self.ALLOWED)
-            print self.allowed
+            self.allowed = [str(a) for a in self.settings.allow if a in self.ALLOWED]
         except AttributeError:
             self.allowed = self.ALLOWED
         dir = os.path.join(self.service.settings['plugins-dir'], 'mail')
