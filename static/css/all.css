@@ -15,6 +15,7 @@
     height: 615px; 
     margin: 0 auto;
     line-height: auto;
+    color: black;
 }
 
 .cardstories img {
@@ -2245,6 +2246,7 @@
 
 .cardstories .cardstories_complete .cardstories_results > img {
     display: none;
+    margin: 0 auto;
 }
 
 .cardstories .cardstories_complete .cardstories_results > p {
