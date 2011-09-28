@@ -3878,7 +3878,7 @@
             this.preload_images_helper(root, function() {
                 if(player_id === undefined || player_id === null || player_id === '') {
                     $this.login(game_id, login_url, root);
-                } else if (create) {
+                } else if (create && !game_id) {
                     $this.create(player_id, root);
                 } else {
                     $this.game_or_lobby(player_id, game_id, root);

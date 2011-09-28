@@ -614,6 +614,37 @@ test("image preloading fires on bootstrap", 2, function() {
     $.cardstories.bootstrap(player_id, game_id, null, null, root);
 });
 
+test("automatic game creation", 2, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var player_id = 'player1';
+    var game_id = 112;
+
+    var cardstories_create = $.cardstories.create;
+    var cardstories_game_or_lobby = $.cardstories.game_or_lobby;
+
+    // If create = true, create must be called directly.
+    $.cardstories.create = function(player_id, root) {
+        ok(true, 'create called');
+    };
+    $.cardstories.game_or_lobby = function(player_id, game_id, root) {
+        ok(false, 'game_or_lobby called');
+    };
+    $.cardstories.bootstrap(player_id, null, null, true, root);
+    
+    // However, if game_id is also set, create must not be called.
+    $.cardstories.create = function(player_id, root) {
+        ok(false, 'create called');
+    };
+    $.cardstories.game_or_lobby = function(player_id, game_id, root) {
+        ok(true, 'game_or_lobby called');
+    };
+    $.cardstories.bootstrap(player_id, game_id, null, true, root);
+
+    // Reset
+    $.cardstories.create = cardstories_create;
+    $.cardstories.game_or_lobby = cardstories_game_or_lobby;
+});
+
 test("preload_images_helper", 3, function() {
     var root = $('#qunit-fixture .cardstories');
     var preloaded_images_div = $('.cardstories_preloaded_images', root);
