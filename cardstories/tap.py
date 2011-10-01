@@ -29,7 +29,7 @@ from twisted.conch import manhole, manhole_ssh
 from cardstories.service import CardstoriesService
 from cardstories.plugins import CardstoriesPlugins
 #from cardstories.service import SSLContextFactory
-from cardstories.site import CardstoriesTree, CardstoriesResource, CardstoriesResource, CardstoriesSite
+from cardstories.site import CardstoriesTree, CardstoriesResource, CardstoriesSite
 
 class Options(usage.Options):
     synopsis = "[-h|--help] [-p|--port=<number>] [-s|--ssl-port=<number>] [-P|--ssl-pem=</etc/cardstories/cert.pem>] [-d|--db=</var/lib/cardstories/cardstories.sqlite>] [-v|--verbose]"
