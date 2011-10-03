@@ -51,14 +51,41 @@ select {
     padding-bottom: 20px;
 }
 #header h1 {
-	color:#5f4e43;
-	width:331px;
-	text-align:center;
-	margin:342px 0 0 69px;
-	float:left;
-	font:36px/42px Licon, Arial, Helvetica, sans-serif;
-	display:inline;
+	color: #5f4e43;
+	width: 331px;
+	text-align: center;
+	margin: 310px 0 0 69px;
+	float: left;
+	font: 36px/40px Licon, Arial, Helvetica, sans-serif;
+	display: inline;
 }
+
+#header .cardstories_beta_sign {
+	background: url('images/beta_sign.png') no-repeat;
+    position: absolute;
+    top: 397px;
+    left: 72px;
+    width: 325px;
+    height: 184px;
+    text-align: center;
+    color: #EDE6CC;
+}
+
+#header .cardstories_beta_sign .cardstories_title {
+	font: 33px Licon, Arial, Helvetica, sans-serif;
+    margin: 17px 0 7px 0;
+}
+
+#header .cardstories_beta_sign .cardstories_subtitle {
+	font: 14px Helvetica, Arial, sans-serif; 
+    font-weight: bold;
+}
+
+#header .cardstories_beta_sign .cardstories_message {
+	font: 12px Helvetica, Arial, sans-serif; 
+}
+
+
 .logo {
 	overflow:hidden;
 	text-indent:-9999px;
