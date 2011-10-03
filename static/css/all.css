@@ -997,6 +997,8 @@
     font-size: 10pt;
     text-align: center;
     font-family: "helvetica";
+    font-weight: bold;
+    color: black;
 }
 
 .cardstories .cardstories_sentence_box .cardstories_sentence_bg {
@@ -1172,6 +1174,8 @@
     font-family: "helvetica";
     font-size: 11pt;
     overflow: auto;
+    font-weight: bold;
+    color: black;
 }
 
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_sentence_box {
@@ -1180,6 +1184,8 @@
     left: 200px;
     height: 68px;
     width: 380px;
+    font-weight: bold;
+    color: black;
 }
 
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_submit {
@@ -1822,6 +1828,8 @@
     display: none;
     top: 280px;
     left: 230px;
+    font-weight: bold;
+    color: black;
 }
 
 .cardstories .cardstories_invitation .cardstories_pick .cardstories_modal_overlay {
@@ -2017,6 +2025,8 @@
 .cardstories .cardstories_vote .cardstories_voter_wait .cardstories_sentence_box {
     top: 490px;
     left: 230px;
+    font-weight: bold;
+    color: black;
 }
 
 /* state vote_owner */
