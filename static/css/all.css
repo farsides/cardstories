@@ -417,7 +417,7 @@
     display: none;
     position: absolute;
     z-index: 9999;
-    font-size: 10px;
+    font-size: 11px;
     text-align:center;
     font-family: "Licon";
     color:#FFFFFF;
@@ -434,13 +434,13 @@
 
 .cardstories .cardstories_modal_h1 {
     margin: 0.3em 0;
-    font-size: 2.4em; 
+    font-size: 24px; 
 }
 
 .cardstories .cardstories_modal_h2 {
     margin: 0;
     font-family: "Helvetica";
-    font-size: 1.1em; 
+    font-size: 12px; 
 }
 
 .cardstories .cardstories_modal_button {
@@ -530,7 +530,7 @@
 .cardstories .cardstories_player_seat {
     position: absolute;
     display: none;
-    font-size: 10px;
+    font-size: 11px;
     text-align:center;
     font-family: "Helvetica";
     width: 77px;
@@ -1002,6 +1002,8 @@
     font-size: 10pt;
     text-align: center;
     font-family: "helvetica";
+    font-weight: bold;
+    color: black;
 }
 
 .cardstories .cardstories_sentence_box .cardstories_sentence_bg {
@@ -1177,6 +1179,8 @@
     font-family: "helvetica";
     font-size: 11pt;
     overflow: auto;
+    font-weight: bold;
+    color: black;
 }
 
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_sentence_box {
@@ -1185,6 +1189,8 @@
     left: 200px;
     height: 68px;
     width: 380px;
+    font-weight: bold;
+    color: black;
 }
 
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_submit {
@@ -1827,6 +1833,8 @@
     display: none;
     top: 280px;
     left: 230px;
+    font-weight: bold;
+    color: black;
 }
 
 .cardstories .cardstories_invitation .cardstories_pick .cardstories_modal_overlay {
@@ -2022,6 +2030,8 @@
 .cardstories .cardstories_vote .cardstories_voter_wait .cardstories_sentence_box {
     top: 490px;
     left: 230px;
+    font-weight: bold;
+    color: black;
 }
 
 /* state vote_owner */

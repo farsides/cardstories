@@ -3,18 +3,24 @@
 <head>
   <title>{% block title %}Cardstories{% endblock %}</title>
   <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+  <meta name="Description" content="Match a card with a story told by one of the players, and figure out which card the other players have chosen">
+
   <script type="text/javascript" src="/static/js/jquery/jquery-1.5.1.js"></script>
   {% block head_script %}
   <script type="text/javascript" src="/static/js/video.js"></script>
   <script type="text/javascript" src="/static/js/jquery.easing.1.3.js"></script>
+  <script type="text/javascript" src="/static/js/jquery.validate.min.js"></script>
+  <script type="text/javascript" src="/static/js/jquery.contactable.js"></script>
   {% endblock %}
   {% block stylesheets %}
-  <link rel="stylesheet" href="/static/css/video-js.css" type="text/css" media="screen">
-  <link rel="stylesheet" href="/static/css/video-js-vim.css" type="text/css" media="screen">
-  <link rel="stylesheet" href="/static/css/home.css" type="text/css" media="screen">
+  <link rel="stylesheet" href="/static/css/contactable.css" type="text/css" media="screen" />
+  <link rel="stylesheet" href="/static/css/video-js.css" type="text/css" media="screen" />
+  <link rel="stylesheet" href="/static/css/video-js-vim.css" type="text/css" media="screen" />
+  <link rel="stylesheet" href="/static/css/home.css" type="text/css" media="screen" />
   {% endblock %}
 </head>
 <body>
+  <div id="contactable"></div> 
   {% block content %}
   <div id="header">
     <div class="frame">
@@ -93,7 +99,7 @@
   </div>
   <!-- footer -->
   <div id="footer">
-    <a class="farSides" href="#">Card Stories is a game created by Far Sides</a>
+    <a class="farSides" href="http://farsides.com/">Card Stories is a game created by Far Sides</a>
     <ul class="list">
       <li class="item01">
         <ul>
@@ -151,9 +157,14 @@
           <li><a href="http://wiki.farsides.com/w/Business_Plan">Business Plan</a></li>
           <li><a href="http://wiki.farsides.com/w/Description_of_the_Recurring_Contractor_status">Working at Farsides</a></li>
         </ul>
+        <ul>
+          <li><h3>SOURCE & LICENSING</h3></li>
+          <li><a href="https://gitorious.org/cardstories">Source code</a></li>
+          <li><a href="https://gitorious.org/cardstories/cardstories/blobs/master/LICENSE.txt">Licensing</a></li>
+        </ul>
       </li>
     </ul>
-    <p>Powered by Card Stories, a free software game under GNU AGPLv3</p>
+    <p>Powered by <a href="http://cardstories.org/">Card Stories</a>, a free software game under <a href="http://www.gnu.org/licenses/agpl.html">GNU AGPLv3</a></p>
   </div>
   {% endblock %}
   {% block body_script %}
@@ -168,6 +179,20 @@
         .animate({scrollTop: 0}, 750, 'easeInOutExpo');
 
         e.preventDefault();
+    });
+
+    // Initialize Feedback button
+    $('#contactable').contactable({
+        subject: '[Feedback] '+location.href,
+        name: 'Name',
+        email: 'Email',
+        message : 'Comment, issue or suggestion',
+        recievedMsg : 'Thank you for helping Card Stories to improve!',
+        notRecievedMsg : 'Argh, your message could not be sent. Could you email bar@farsides.com to notify of the issue? Thanks, and sorry for this. :/',
+        disclaimer: "Please let us know what you think! It goes straight to the developers' inbox and helps improving the game.",
+        hideOnSubmit: false,
+        url: '/cardstories-feedback/mail.php',
+        submit : 'Send',
     });
   </script>
   {% endblock %}

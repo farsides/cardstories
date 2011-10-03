@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load facebook %}
 
-{% block title %}Welcome to Cardstories!{% endblock %}
+{% block title %}Card Stories - A Game Playing With Your Imagination{% endblock %}
 
 {% block head_script %}{{ block.super }}
   <script type="text/javascript" src="/static/js/jquery.owa.js"></script>
@@ -26,6 +26,11 @@
             <div>{% fb_like %}</div>
           </div>
           <strong class="logo"><a href="#">CardStories</a></strong>
+          <div class="cardstories_beta_sign">
+              <div class="cardstories_title">Warning!</div>
+              <div class="cardstories_subtitle">Card Stories is currently in beta testing.</div>
+              <div class="cardstories_message">We're opening it for testing by fearless vocal<br />players, to know what's good and what's not while <br />we are finishing the game. Don't expect a flawless <br />experience - it will break apart and make you curse.</div>
+          </div>
         </div>
       </div>
       {% block box %}
