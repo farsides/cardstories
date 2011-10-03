@@ -464,3 +464,6 @@ input.error {
     color: red;
     font-size: 11px;
 }
+#footer a {
+    color: #F2E6B4;
+}
