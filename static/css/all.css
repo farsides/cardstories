@@ -436,6 +436,7 @@
     margin: 0;
     font-family: "Helvetica";
     font-size: 1.1em; 
+    font-weight: bold;
 }
 
 .cardstories .cardstories_modal_button {
@@ -1654,7 +1655,6 @@
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_go_vote .cardstories_modal_h2 { 
     font-size: 1.2em;
-    font-weight: bold;
     width: 75%;
     margin: 2em auto 0.75em auto;
 }
@@ -1968,10 +1968,6 @@
     height: 150px;
 }
 
-.cardstories .cardstories_vote .cardstories_info .cardstories_modal_h2 {
-    font-weight: bold;
-}
-
 .cardstories .cardstories_vote .cardstories_info .cardstories_modal_button {
     margin-top: 0.1em;
 }
@@ -2043,7 +2039,6 @@
 
 .cardstories .cardstories_vote .cardstories_owner .cardstories_results_announce .cardstories_modal_h2 { 
     font-size: 1.2em;
-    font-weight: bold;
     width: 75%;
     margin: 3em auto 1em auto;
 }
