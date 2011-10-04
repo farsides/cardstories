@@ -570,7 +570,7 @@
 .cardstories .cardstories_player_seat .cardstories_player_name,
 .cardstories .cardstories_player_seat .cardstories_player_status {
     position: relative;
-    top: 60px;
+    top: 55px;
     left: 1px;
     overflow: hidden;
     margin: 3px auto;
@@ -579,11 +579,11 @@
 
 .cardstories .cardstories_player_seat .cardstories_player_name {
     height: 26px;
-    margin-bottom: 10px;
+    margin: 10px auto 10px auto;
 }
 
 .cardstories .cardstories_player_seat .cardstories_player_status {
-    height: 39px;
+    height: 44px;
 }
 
 .cardstories .cardstories_player_seat_self,
@@ -1959,9 +1959,8 @@
 .cardstories .cardstories_vote .cardstories_info { 
     left: 250px;
     top: 150px;
-    height: 110px;
-    width: 260px;
-    padding-top: 2.5em;
+    height: 150px;
+    width: 300px;
 }
 
 .cardstories .cardstories_vote .cardstories_info .cardstories_modal_h2 {
@@ -1969,7 +1968,7 @@
 }
 
 .cardstories .cardstories_vote .cardstories_info .cardstories_modal_button {
-    margin-top: 0.65em;
+    margin-top: 0.1em;
 }
 
 .cardstories .cardstories_vote .cardstories_card {
