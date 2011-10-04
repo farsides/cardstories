@@ -72,8 +72,8 @@ select {
 }
 
 #header .cardstories_beta_sign .cardstories_title {
-	font: 33px Licon, Arial, Helvetica, sans-serif;
-    margin: 17px 0 7px 0;
+    font: 33px/42px Licon, Arial, Helvetica, sans-serif;
+    margin: 12px 0 0px 0;
 }
 
 #header .cardstories_beta_sign .cardstories_subtitle {
