@@ -1252,6 +1252,7 @@
     background: transparent url('images/solo_story_off.png') no-repeat left top;
     height: 85px;
     width: 131px;
+    display: none;
 }
 
 .cardstories .cardstories_lobby .cardstories_lobby_header .cardstories_solo:hover {
