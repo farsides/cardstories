@@ -974,10 +974,10 @@
 
 .cardstories .cardstories_sentence_box {
     position: absolute;
-    top: 415px;
+    top: 395px;
     left: 390px;
     width: 300px;
-    height: 50px;
+    height: 70px;
 }
 
 .cardstories .cardstories_sentence_box .cardstories_sentence,
@@ -992,13 +992,15 @@
 }
 
 .cardstories .cardstories_sentence_box .cardstories_sentence {
-    padding: 10px;
+    margin: 10px;
+    height: 35px;
     color: #4D4D4F;
     font-size: 10pt;
     text-align: center;
     font-family: "helvetica";
     font-weight: bold;
     color: black;
+    overflow: hidden;
 }
 
 .cardstories .cardstories_sentence_box .cardstories_sentence_bg {
@@ -2022,7 +2024,7 @@
 
 .cardstories .cardstories_vote .cardstories_anonymous .cardstories_sentence_box,
 .cardstories .cardstories_vote .cardstories_voter_wait .cardstories_sentence_box {
-    top: 490px;
+    top: 470px;
     left: 230px;
     font-weight: bold;
     color: black;
