@@ -404,8 +404,8 @@
 }
 
 .cardstories .cardstories_modal_overlay.milk {
-    filter: alpha(opacity=60) !important;
-    opacity: 0.6;
+    filter: alpha(opacity=35) !important;
+    opacity: 0.35;
 }
 
 .cardstories .cardstories_modal {
@@ -1959,8 +1959,12 @@
 .cardstories .cardstories_vote .cardstories_info { 
     left: 250px;
     top: 150px;
-    height: 150px;
+    height: 110px;
     width: 300px;
+}
+
+.cardstories .cardstories_vote .cardstories_voter .cardstories_info {
+    height: 150px;
 }
 
 .cardstories .cardstories_vote .cardstories_info .cardstories_modal_h2 {
