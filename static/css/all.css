@@ -1034,8 +1034,8 @@
 .cardstories .cardstories_card_slot {
     display: none;
     position: absolute;
-    width: 104px;
-    height: 138px;
+    width: 137px;
+    height: 182px;
 }
 
 .cardstories .cardstories_card_slot img {
@@ -1068,37 +1068,38 @@
 .cardstories .cardstories_card_slot .cardstories_card_label {
     display: none;
     position: relative;
-    top: 115px;
+    top: 158px;
     width: 80%;
-    height: 13px;
+    height: 15px;
     margin: 0 auto;
     text-align: center;
+    font-weight: bold;
 }
 
 .cardstories .cardstories_card_slot .cardstories_card_label > div {
     position: relative;
     font-family: "Helvetica";
-    font-size: 10px;
+    font-size: 12px;
 }
 
 .cardstories .cardstories_card_slot.top {
-    top: 100px;
+    top: 80px;
 }
 
 .cardstories .cardstories_card_slot.bottom {
-    top: 253px;
+    top: 278px;
 }
 
 .cardstories .cardstories_card_slot.left {
-    left: 210px;
+    left: 170px;
 }
 
 .cardstories .cardstories_card_slot.middle {
-    left: 333px;
+    left: 316px;
 }
 
 .cardstories .cardstories_card_slot.right {
-    left: 456px;
+    left: 462px;
 }
 
 /* state create_pick_card */
