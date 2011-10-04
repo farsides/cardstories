@@ -937,12 +937,12 @@
 .cardstories_card_confirm { 
     left: 231px;
     top: 81px;
-    height: 120px;
-    width: 298px;
+    height: 116px;
+    width: 310px;
 }
 
 .cardstories_card_confirm .cardstories_modal_h2 {
-    font-size: 1.4em !important;
+    font-size: 1.3em !important;
 }
 
 .cardstories_card_confirm a > span {
@@ -951,7 +951,7 @@
 
 .cardstories_card_confirm_buttons { 
     position: relative;
-    top: 0.9em;
+    top: 0.5em;
     margin: 0 auto;
     font-size: 2.0em; 
     width: 12.75em;
@@ -975,7 +975,7 @@
 
 .cardstories .cardstories_sentence_box {
     position: absolute;
-    top: 395px;
+    top: 415px;
     left: 390px;
     width: 300px;
     height: 70px;
@@ -994,7 +994,7 @@
 
 .cardstories .cardstories_sentence_box .cardstories_sentence {
     margin: 10px;
-    height: 35px;
+    height: 36px;
     color: #4D4D4F;
     font-size: 10pt;
     text-align: center;
@@ -1021,10 +1021,10 @@
 
 .cardstories .cardstories_card_template {
     position: absolute;
-    top: 469px;
-    left: 493px;
-    width: 113px;
-    height: 143px;
+    top: 489px;
+    left: 497px;
+    width: 97px;
+    height: 123px;
 }
 
 .cardstories .cardstories_card_template img {
@@ -1115,8 +1115,8 @@
 .cardstories .cardstories_create .cardstories_info { 
     left: 230px;
     top: 90px;
-    height: 129px;
-    width: 301px;
+    height: 132px;
+    width: 320px;
 }
 
 .cardstories .cardstories_create .cardstories_pick_card .cardstories_board .cardstories_card_flyover {
@@ -1464,7 +1464,7 @@
     width: 82px;
     height: 102px;
     top: 122px;
-    left: 78px;
+    left: 77px;
 }
 
 .cardstories_player_pick_1 { 
@@ -1653,7 +1653,7 @@
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_go_vote { 
     left: 230px;
     top: 185px;
-    height: 150px;
+    height: 140px;
     width: 310px;
 }
 
@@ -1717,7 +1717,7 @@
 }
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_info .cardstories_modal_button { 
-    top: 0.5em !important;
+    top: 0.3em !important;
 }
 
 .cardstories .cardstories_advertise { 
@@ -1748,8 +1748,8 @@
 }
 
 .cardstories .cardstories_advertise .cardstories_advertise_inner { 
-    width: 37em;
-    height: 16.5em;
+    width: 34em;
+    height: 15em;
     margin: 0 auto;
     text-align: left;
 }
@@ -1763,8 +1763,8 @@
 .cardstories .cardstories_advertise .cardstories_advertise_input { 
     position: relative;
     font-size: 1em;
-    width: 23.8em;
-    height: 11.5em;
+    width: 21.8em;
+    height: 10.5em;
 }
 
 .cardstories .cardstories_advertise .cardstories_advertise_input > textarea {
@@ -1773,7 +1773,7 @@
     top: 10%;
     margin: 0 auto;
     width: 90%;
-    height: 80%;
+    height: 75%;
     font-family: "Helvetica";
     font-size: 1.1em;
     color: #7A7A7A;
@@ -1830,7 +1830,7 @@
 
 .cardstories .cardstories_invitation .cardstories_pick .cardstories_sentence_box {
     display: none;
-    top: 280px;
+    top: 260px;
     left: 230px;
     font-weight: bold;
     color: black;
@@ -1843,8 +1843,8 @@
 .cardstories .cardstories_invitation .cardstories_pick .cardstories_info { 
     left: 220px;
     top: 100px;
-    height: 129px;
-    width: 321px;
+    height: 133px;
+    width: 361px;
 }
 
 .cardstories .cardstories_invitation .cardstories_pick .cardstories_cards {
@@ -1926,7 +1926,7 @@
 .cardstories .cardstories_invitation .cardstories_pick_wait .cardstories_modal {
     left: 235px;
     top: 185px;
-    height: 145px;
+    height: 115px;
     width: 300px;
 }
 
@@ -2012,18 +2012,6 @@
 
 /* state vote_voter_wait, vote_anonymous */
 
-.cardstories .cardstories_vote .cardstories_anonymous .cardstories_modal_overlay,
-.cardstories .cardstories_vote .cardstories_voter_wait .cardstories_modal_overlay {
-    width: 370px;
-    height: 310px;
-    top: 90px;
-    left: 200px;
-    z-index: 0;
-    border-radius: 15px;
-    -moz-border-radius: 15px;
-    -webkit-border-radius: 15px;
-}
-
 .cardstories .cardstories_vote .cardstories_anonymous .cardstories_sentence_box,
 .cardstories .cardstories_vote .cardstories_voter_wait .cardstories_sentence_box {
     top: 470px;
@@ -2044,7 +2032,7 @@
 .cardstories .cardstories_vote .cardstories_owner .cardstories_results_announce .cardstories_modal_h2 { 
     font-size: 1.2em;
     width: 75%;
-    margin: 1em auto 1em auto;
+    margin: 1em auto 0.1em auto;
 }
 
 .cardstories .cardstories_vote .cardstories_owner .cardstories_results_announce .cardstories_modal_button { 
@@ -2064,7 +2052,7 @@
 }
 
 .cardstories .cardstories_vote .cardstories_owner .cardstories_results_confirm .cardstories_modal_h2 {
-    width: 60%;
+    width: 70%;
     margin: 0 auto;
 }
 
