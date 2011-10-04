@@ -764,6 +764,7 @@
     height: 69px;
     width: 147px;
     border: 0px;
+    overflow: hidden;
 }
 
 .cardstories_master_seat.owner {
