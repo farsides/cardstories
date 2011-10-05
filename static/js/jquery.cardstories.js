@@ -772,6 +772,16 @@
                 }
             });
 
+            // Facebook button loading (code snippet)
+            var js, fjs = document.getElementsByTagName('script')[0];
+            if (document.getElementById('facebook-jssdk')) {
+                return;
+            }
+            js = document.createElement('script');
+            js.id = 'facebook-jssdk';
+            js.src = "//connect.facebook.net/en_US/all.js#appId=280081805344240&xfbml=1";
+            fjs.parentNode.insertBefore(js, fjs);
+
             this.display_modal(box, overlay);
         },
 
