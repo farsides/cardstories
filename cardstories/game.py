@@ -156,6 +156,8 @@ class CardstoriesGame(pollable):
     @defer.inlineCallbacks
     def game(self, player_id):
         rows = yield self.service.db.runQuery("SELECT owner_id, sentence, cards, board, state FROM games WHERE id = ?", [self.get_id()])
+        if not rows:
+            raise UserWarning("Game doesn't exist: %s" % self.get_id())
         ( owner_id, sentence, cards, board, state ) = rows[0]
         if owner_id == player_id:
             cards = [ ord(c) for c in cards ]

@@ -34,7 +34,8 @@
 }
 
 .cardstories_loading_bar {
-    background: white;
+    background-image: url('images/loading-bkg.png');
+    background-position: -11px -8px;
     display: none;
     position: absolute;
     bottom: 0;
@@ -45,13 +46,17 @@
 }
 
 .cardstories_loading_bar .cardstories_loading_bar_wrap {
-    border: 1px solid #444;
-    width: 350px;
-    height: 15px;
+    position: absolute;
+    width: 636px;
+    height: 44px;
+    top: 509px;
+    left: 175px;
 }
 
 .cardstories_loading_bar .cardstories_loading_bar_fill {
-    background-color: #44c;
+    background-image: url('images/loading-tongue.png');
+    background-position: top right;
+    background-repeat: no-repeat;
     height: 100%;
     width: 0;
 }

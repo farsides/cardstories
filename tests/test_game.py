@@ -611,6 +611,18 @@ class CardstoriesGameTest(unittest.TestCase):
         result = yield d
         self.assertEqual(result, None)
 
+    @defer.inlineCallbacks
+    def test17_nonexistant_game(self):
+        raises_UserWarning = False
+        try:
+            self.game.id = 12332123
+            yield self.game.game(None)
+        except UserWarning:
+            raises_UserWarning = True
+        except:
+            pass
+        self.assertTrue(raises_UserWarning)
+
 def Run():
     loader = runner.TestLoader()
 #    loader.methodPrefix = "test08_"
