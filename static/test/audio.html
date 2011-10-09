@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>QUnit Test Suite</title>
+    <script type="text/javascript" src="../js/jquery/jquery-1.5.1.js"></script>
+    <script type="text/javascript" src="../js/jquery.cardstories.js"></script>
+    <script type="text/javascript" src="../js/soundmanager2-nodebug-jsmin.js"></script>
+    <script type="text/javascript" src="../js/jquery.cardstories.audio.js"></script>
+
+    <link rel="stylesheet" href="qunit.css" type="text/css" media="screen">
+    <script type="text/javascript" src="qunit.js"></script>
+    <script type="text/javascript" src="audio.js"></script>
+    <script type="text/javascript">
+        // Path to soundManager SWF files.
+        soundManager.url = '../audio/';
+        // Prefer HTML5 audio to flash, where available.
+        soundManager.useHTML5Audio = true;
+        soundManager.preferFlash = false;
+    </script>
+  </head>
+  <body>
+    <h1 id="qunit-header">QUnit Test Suite</h1>
+    <h2 id="qunit-banner"></h2>
+    <div id="qunit-testrunner-toolbar"></div>
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests"></ol>
+    <div id="qunit-fixture">
+      <div id="cardstories_audio_example" data-sounds='{"ring": "../audio/ring.mp3"}'>
+    </div>
+  </body>
+</html>

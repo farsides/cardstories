@@ -14,7 +14,9 @@
   <script type="text/javascript" src="/static/js/jquery.query-2.1.7.js"></script>
   <script type="text/javascript" src="/static/js/jquery.placeholder-1.0.1.js"></script>
   <script type="text/javascript" src="/static/js/jquery.spritely-0.5.js"></script>
+  <script type="text/javascript" src="/static/js/soundmanager2-nodebug-jsmin.js"></script>
   <script type="text/javascript" src="/static/js/jquery.cardstories.js"></script>
+  <script type="text/javascript" src="/static/js/jquery.cardstories.audio.js"></script>
   <script type="text/javascript" src="/static/js/jquery.cardstories.chat.js"></script>
   <script type="text/javascript" src="/static/js/supplant.js"></script>
   <script type="text/javascript" src="/static/tablesorter/jquery.tablesorter.js"></script>
@@ -49,6 +51,12 @@
   <div class="cardstories"></div>
   <script>
     $.get("/static/cardstories.html", function(data) {
+      // Path to soundManager SWF files.
+      soundManager.url = '/static/audio/';
+      // Prefer HTML5 audio to flash, where available.
+      soundManager.useHTML5Audio = true;
+      soundManager.preferFlash = false;
+
       var cardstories = $('.cardstories');
       cardstories.html(data);
       var skin = $.query.get('skin');

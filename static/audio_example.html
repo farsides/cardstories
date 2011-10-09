@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cardstories Chat Plugin</title>
+  <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+  <script type="text/javascript" src="js/jquery/jquery-1.5.1.js"></script>
+  <script type="text/javascript" src="js/soundmanager2-jsmin.js"></script>
+  <script type="text/javascript" src="js/jquery.cardstories.js"></script>
+  <script type="text/javascript" src="js/jquery.cardstories.audio.js"></script>
+  <style type="text/css">
+    #cardstories_audio_example {
+      text-align: center;
+      font-size: 24px;
+      margin: 2em auto;
+    }
+
+    #soundmanager-debug {
+      color: #336699;
+      position: fixed;
+      bottom: 1em;
+      height: 20em;
+      overflow: auto;
+      padding: 0px;
+      margin: 1em;
+      line-height: 1.25;
+      font-family: monaco,"VT-100","lucida console",courier,system;
+      color: #333;
+      border: 1px solid #ccddee;
+      -moz-border-radius: 3px;
+      -khtml-border-radius: 3px;
+      -webkit-border-radius: 3px;
+      background: #f3f9ff;
+    }
+
+    #soundmanager-debug div {
+      font-size: x-small;
+      padding: 0.5em;
+      margin: 0px;
+    }
+
+    #soundmanager-debug .sm2-alt {
+      background-color: white;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div id="cardstories_audio_example" data-sm2-url="audio/" data-sounds='{"ring": "audio/ring.mp3"}'>
+    <a id="play" href="#">Play Sound</a>
+  </div>
+
+  <script type="text/javascript">
+    // Path to soundManager SWF files.
+    soundManager.url = 'audio/';
+    // Prefer HTML5 audio to flash, where available.
+    soundManager.useHTML5Audio = true;
+    soundManager.preferFlash = false;
+
+    var root = $('#cardstories_audio_example');
+    root.cardstories_audio();
+
+    $('#play').click(function() {
+        $.cardstories_audio.play('ring', root);
+        return false;
+    });
+  </script>
+</body>
+</html>

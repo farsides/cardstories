@@ -1,18 +1,15 @@
-module("cardstories_chat");
-
 var selector = '#cardstories_chat_example';
-
 var original_send = $.cardstories_chat.send;
 
 function setup() {
     $(selector).cardstories_chat();
     $.cardstories_chat.send = original_send;
+    $.cardstories_audio = {play: $.noop};
 }
 
-test("state", function() {
-    setup();
-    expect(5);
+module("cardstories_chat", {setup: setup});
 
+test("state", 5, function() {
     var display = $(selector).find('.cardstories_chat_display');
     equal($.trim(display.html()), '', 'Display is initially empty');
 
@@ -28,10 +25,7 @@ test("state", function() {
     ok(display.html().match('Goodbye all!'), 'Display shows sentence');
 });
 
-test("pressing enter inside input field", function() {
-    setup();
-    expect(2);
-
+test("pressing enter inside input field", 2, function() {
     $.cardstories_chat.send = function(player_id, line) {
         equal(line, 'I pressed enter!');
     };
@@ -50,4 +44,13 @@ test("pressing enter inside input field", function() {
     input.val('I pressed enter!');
     input.trigger(event);
     equal(input.val(), '', 'The input value should be emptied after enter is pressed');
+});
+
+test("play_ring", 2, function() {
+    var root = $(selector);
+    $.cardstories_audio.play = function(sound_id, _root) {
+        equal(sound_id, 'ring', 'calls $.cardstories_audio.play with "ring" sound id');
+        equal(_root, root, 'calls $.cardstories_audio.play with the root element');
+    };
+    $.cardstories_chat.play_ring(root);
 });
