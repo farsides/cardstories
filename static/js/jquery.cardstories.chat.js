@@ -84,6 +84,11 @@
                     display.append(div).scrollTop(display[0].scrollHeight);
                 }
             }
+        },
+
+        // Plays the ringing sound (depends on the audio plugin).
+        play_ring: function(root) {
+            $.cardstories_audio.play('ring', root);
         }
     };
 
