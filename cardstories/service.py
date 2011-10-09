@@ -144,11 +144,11 @@ class CardstoriesService(service.Service):
             )
 
     def load(self, c):
-        c.execute("SELECT id FROM games WHERE state != 'complete' AND state != 'canceled'")
-        for (id,) in c.fetchall():
+        c.execute("SELECT id, sentence FROM games WHERE state != 'complete' AND state != 'canceled'")
+        for (id, sentence) in c.fetchall():
             game = CardstoriesGame(self, id)
             game.load(c)
-            self.game_init(game)
+            self.game_init(game, sentence)
             
     def poll(self, args):
         self.required(args, 'poll', 'type', 'modified')
@@ -253,13 +253,13 @@ class CardstoriesService(service.Service):
         d.addCallback(self.game_notify, game_id)
         defer.returnValue(True)
 
-    def game_init(self, game):
+    def game_init(self, game, sentence):
         self.games[game.get_id()] = game
         args = {
             'type': 'init',
             'modified': [0],
-            'game_id': [game.get_id()]
-            }
+            'game_id': [game.get_id()],
+            'sentence': [sentence]}
         d = game.wait(args)
         d.addCallback(self.game_notify, game.get_id())
 
@@ -272,7 +272,7 @@ class CardstoriesService(service.Service):
         game = CardstoriesGame(self)
         d = game.create(card, sentence, owner_id)
         def success(game_id):
-            self.game_init(game)
+            self.game_init(game, sentence)
             return {'game_id': game_id}
         d.addCallback(success)
         return d

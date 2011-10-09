@@ -26,7 +26,8 @@
 
         poll: 'chat',
 
-        message_template: '<div class="cardstories_chat_message"><span>{player_id}:</span> {sentence}</div>',
+        templates: {'chat': '<div class="cardstories_chat_message"><strong>{player_id}:</strong> {sentence}</div>',
+                    'notification': '<div class="cardstories_chat_message"><a href="{href}"><strong>{player_id}</strong> created the game <strong>"{sentence}"</strong> - click here to play!</a></div>'},
 
         init: function(player_id, game_id, root) {
 
@@ -77,9 +78,23 @@
             if (data.messages) {
                 for (var i=0; i < data.messages.length; i++) {
                     var message = data.messages[i];
-                    var sentence = message.sentence;
-                    var player_id = message.player_id;
-                    var div = this.message_template.supplant({player_id: player_id, sentence: sentence});
+                    var tvars = {};
+                    if (message.type == 'chat') {
+                        tvars = {
+                            player_id: message.player_id,
+                            sentence: message.sentence
+                        }
+                    } else if (message.type == 'notification') {
+                        var l = window.location;
+                        var href = l.protocol + '//' + l.host + l.pathname;
+                        href += $.cardstories.reload_link(player_id, message.game_id);
+                        tvars = {
+                            href: href,
+                            player_id: message.player_id,
+                            sentence: message.sentence
+                        }
+                    }
+                    var div = this.templates[message.type].supplant(tvars);
                     var display = $(root).data('cardstories_chat').display;
                     display.append(div).scrollTop(display[0].scrollHeight);
                 }

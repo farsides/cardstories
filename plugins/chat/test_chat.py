@@ -232,6 +232,32 @@ class ChatTest(unittest.TestCase):
         # make sure the flag is now set after we've run the test
         self.assertTrue(self.called)
 
+    @defer.inlineCallbacks
+    def test07_notification_messages(self):
+        # new instance of chat plugin to run the test against
+        chat_instance = Plugin(self.service, [])
+
+        self.count = 0
+        def build_message(self, message): 
+            """
+            message == {'type': 'notification',
+                        'game_id': GAME_ID,
+                        'player_id': 'OWNER_ID',
+                        'sentence': 'SENTENCE'}
+
+            """
+            self.count += 1
+            self.assertEquals(self.count, 1)
+            self.assertEquals(message['type'], 'notification')
+            self.assertEquals(message['player_id'], '15')
+            self.assertEquals(message['sentence'], 'SENTENCE')
+
+        # build_message should only be called once, upon game creation.
+        chat_instance.build_message = build_message
+        # run a game to get into a realistic situation
+        yield self.complete_game()
+
+
 def Run():
     loader = runner.TestLoader()
     suite = loader.suiteFactory()

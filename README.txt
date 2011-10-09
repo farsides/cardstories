@@ -60,8 +60,8 @@ $ PYTHONPATH=.:etc/cardstories twistd --nodaemon cardstories \
 	--plugins-dir plugins \
 	--plugins-libdir /tmp \
 	--plugins-confdir tests \
-	--plugins 'chat djangoauth solo mail' \
-	--plugins-pre-process 'chat djangoauth solo' \
+	--plugins 'djangoauth chat mail' \
+	--plugins-pre-process 'djangoauth chat' \
 	--plugins-post-process 'djangoauth'
 
 On a second terminal window, still from the root of the checkout, run the
@@ -188,8 +188,8 @@ $ PYTHONPATH=.:etc/cardstories twistd --nodaemon cardstories \
 	--plugins-dir plugins \
 	--plugins-libdir /tmp \
 	--plugins-confdir tests \
-	--plugins 'chat auth solo' \
-	--plugins-pre-process 'chat auth solo' \
+	--plugins 'auth chat' \
+	--plugins-pre-process 'auth chat' \
 	--plugins-post-process auth
 
 To check if the webservice replies, run the following (requires curl). The

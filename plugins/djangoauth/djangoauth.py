@@ -105,4 +105,8 @@ class Plugin:
                     invited = result['invited'];
                     for index in range(len(invited)):
                         invited[index] = yield self.resolve(invited[index])
+                if result.has_key('messages'):
+                    for message in result['messages']:
+                        if message.has_key('player_id'):
+                            message['player_id'] = yield self.resolve(message['player_id'])
         defer.returnValue(results)

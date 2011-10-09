@@ -26,10 +26,14 @@ from cardstories.poll import pollable
 MESSAGE_EXPIRE_TIME = 3600000
 
 class Plugin(pollable):
-    """ The chat plugin implements the backend for the in-game chat system. """
+    """
+    The chat plugin implements the backend for the in-game chat system.
+    
+    """
     def __init__(self, service, plugins):
         # Register a function to listen to the game events. 
         self.service = service
+        self.service.listen().addCallback(self.self_notify)
 
         # Storage for our messages
         self.messages = []
@@ -42,32 +46,83 @@ class Plugin(pollable):
         pollable.__init__(self, self.service.settings.get('poll-timeout', 300))
 
     def name(self):
-        """ Method required by all plugins to inspect the plugin's name. """
+        """
+        Method required by all plugins to inspect the plugin's name.
+        
+        """
         return 'chat'
+
+    def self_notify(self, changes):
+        """
+        If a 'change' notification is receive of the 'init' type, call the
+        appropriate method and reinsert our listen() callback so we get called
+        again later, when there's a new event.
+
+        """
+        d = defer.succeed(True)
+        if changes != None and changes['type'] == 'change':
+            details = changes['details']
+            if details['type'] == 'init':
+                d = self.init(changes['game'], details)
+        self.service.listen().addCallback(self.self_notify)
+        return d
+
+    def build_message(self, message):
+        timestamp = int(runtime.seconds() * 1000)
+        message.update({'timestamp': timestamp})
+
+        # Save it in our "database".
+        self.messages.append(message)
+
+        # Cull out old messages so we don't leak.
+        delmessages = [m for m in self.messages
+                       if m['timestamp'] < timestamp - MESSAGE_EXPIRE_TIME]
+        for m in delmessages:
+            self.messages.remove(m)
+
+
+    def init(self, game, details):
+        """
+        Build a 'notification' type message and notify everybody to pick it up.
+        The message format should be:
+
+        message == {'type': 'notification',
+                    'game_id': 10,
+                    'player_id': 'Neo',
+                    'sentence': 'What is the Matrix?'}
+
+        """
+        message = {'type': 'notification',
+                   'game_id': game.id,
+                   'player_id': game.owner_id,
+                   'sentence': details['sentence'][0]}
+        self.build_message(message);
+
+        # Notify pollers.
+        self.touch({})
+
+        return defer.succeed(True)
 
     def preprocess(self, result, request):
         """ 
-            Here we are looking for the 'message' action and we will make a new entry in the database when we receive it.
-            The chat plugin is expecting a message of this format:
-            request.args == { 'player_id': xxxx, 'action': "message", 'sentence': xxxxxxx }
+        Here we are looking for the 'message' action and we will make a new
+        entry in the database when we receive it.  The chat plugin is expecting
+        a message of this format:
+
+        message == {'type': 'chat',
+                    'player_id': 'Scotty',
+                    'sentence': 'Hello, computer?'}
+
         """
         if request.args['action'][0] == 'message':
-            # remove the message action so it does not flow through
+            # Remove the message action so it does not flow through.
             del request.args['action'] 
 
             # Build the message.
-            timestamp = int(runtime.seconds() * 1000)
-            player_id = request.args['player_id'][0]
-            sentence = request.args['sentence'][0]
-            message = {"timestamp": timestamp, "player_id": player_id, "sentence": sentence}
-
-            # Save it in our "database".
-            self.messages.append(message)
-
-            # Cull out old messages so we don't leak.
-            delmessages = [m for m in self.messages if m["timestamp"] < timestamp - MESSAGE_EXPIRE_TIME]
-            for m in delmessages:
-                self.messages.remove(m)
+            message = {'type': 'chat',
+                       'player_id': request.args['player_id'][0],
+                       'sentence': request.args['sentence'][0]}
+            self.build_message(message)
 
             # Tell everybody connected that there's a new message.
             self.touch(request.args)
@@ -78,5 +133,11 @@ class Plugin(pollable):
             return defer.succeed(result)
 
     def state(self, args):
-        """ Tells the client about the current state - all messages since the last update. This will automatically get called by the server when the state changes. """
-        return defer.succeed({"messages": [m for m in self.messages if m["timestamp"] > int(args['modified'][0])]})
+        """
+        Tells the client about the current state - all messages since the
+        last update. This will automatically get called by the server when the
+        state changes.
+
+        """
+        messages = [m.copy() for m in self.messages if m["timestamp"] > int(args['modified'][0])]
+        return defer.succeed({"messages": messages})

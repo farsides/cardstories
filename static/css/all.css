@@ -156,8 +156,9 @@
     border-bottom: 1px solid #E9E9E9;
 }
 
-.cardstories .cardstories_chat_box .cardstories_chat_message > span {
-    font-weight: bold;
+.cardstories .cardstories_chat_box .cardstories_chat_message > a {
+    text-decoration: none;
+    color: inherit;
 }
 
 .cardstories .cardstories_chat .cardstories_chat_input {

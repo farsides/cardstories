@@ -9,20 +9,31 @@ function setup() {
 
 module("cardstories_chat", {setup: setup});
 
-test("state", 5, function() {
+test("state", 8, function() {
     var display = $(selector).find('.cardstories_chat_display');
     equal($.trim(display.html()), '', 'Display is initially empty');
 
+    var player1 = 'Player 1';
+    var player2 = 'Player 2';
+    var player3 = 'Player 3';
+    var sentence1 = 'Hello all!';
+    var sentence2 = 'Goodbye all!'
+    var sentence3 = 'New game.'
+    var game1 = 15;
     var messages = [
-        {player_id: 16, sentence: 'Hello all!'},
-        {player_id: 32, sentence: 'Goodbye all!'}
+        {type: 'chat', player_id: player1, sentence: sentence1},
+        {type: 'chat', player_id: player2, sentence: sentence2},
+        {type: 'notification', game_id: game1, player_id: player3, sentence: sentence3}
     ];
     $.cardstories_chat.state('Player', {messages: messages}, selector);
 
-    ok(display.html().match('16'), 'Display shows player_id');
-    ok(display.html().match('Hello all!'), 'Display shows sentence');
-    ok(display.html().match('32'), 'Display shows player_id');
-    ok(display.html().match('Goodbye all!'), 'Display shows sentence');
+    ok(display.html().match(player1), 'Display shows player_id');
+    ok(display.html().match(sentence1), 'Display shows sentence');
+    ok(display.html().match(player2), 'Display shows player_id');
+    ok(display.html().match(sentence2), 'Display shows sentence');
+    ok(display.html().match(player3), 'Display shows player_id');
+    ok(display.html().match(sentence3), 'Display shows sentence');
+    ok(display.html().match(game1), 'Display shows game URL');
 });
 
 test("pressing enter inside input field", 2, function() {
