@@ -1,9 +1,11 @@
 var selector = '#cardstories_chat_example';
 var original_send = $.cardstories_chat.send;
+var original_play_ring = $.cardstories_chat.play_ring;
 
 function setup() {
     $(selector).cardstories_chat();
     $.cardstories_chat.send = original_send;
+    $.cardstories_chat.play_ring = original_play_ring;
     $.cardstories_audio = {play: $.noop};
 }
 
@@ -64,4 +66,33 @@ test("play_ring", 2, function() {
         equal(_root, root, 'calls $.cardstories_audio.play with the root element');
     };
     $.cardstories_chat.play_ring(root);
+});
+
+test("play ring sound on notification", 2, function() {
+    var root = $(selector);
+    var player_id = 'Player 1';
+    var data = {
+        messages: [{
+            type: 'notification',
+            player_id: 'PLAYER_ID',
+            game_id: 'GAME_ID',
+            sentence: 'SENTENCE'
+        }]
+    };
+    var rang = 0;
+    $.cardstories_chat.play_ring = function(_root) {
+        rang++;
+        equal(_root, root, 'calls $.cardstories_chat.play_ring with the root');
+    };
+
+    var root_data = root.data('cardstories_chat');
+    // Set the timestamp to now so that play_ring won't be called.
+    root_data.initialized_ts = new Date().getTime();
+    root.data('cardstories_chat', root_data);
+    $.cardstories_chat.state(player_id, data, root); // play_ring isn't called.
+    // Now set the timestamp to over 5 seconds ago.
+    root_data.initialized_ts = new Date().getTime() - 50001;
+    root.data('cardstories_chat', root_data);
+    $.cardstories_chat.state(player_id, data, root); // play_ring is called
+    equal(rang, 1, 'play_ring should only be called once');
 });

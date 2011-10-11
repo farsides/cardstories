@@ -43,7 +43,8 @@
             $(root).data('cardstories_chat', {
                 player_id: player_id,
                 display: display,
-                input: input
+                input: input,
+                initialized_ts: new Date().getTime()
             });
 
             // Initialize placeholder.
@@ -76,6 +77,7 @@
         // them to the display div.
         state: function(player_id, data, root) {
             if (data.messages) {
+                var root_data = $(root).data('cardstories_chat');
                 for (var i=0; i < data.messages.length; i++) {
                     var message = data.messages[i];
                     var tvars = {};
@@ -93,9 +95,16 @@
                             player_id: message.player_id,
                             sentence: message.sentence
                         }
+                        // Only play the "ring" sound for notifications that
+                        // happen at least 5 seconds after plugin initialization.
+                        // This is to prevent from flooding the player with rings
+                        // from old notifications on page refresh.
+                        if (new Date().getTime() - root_data.initialized_ts > 5000) {
+                            this.play_ring(root);
+                        }
                     }
                     var div = this.templates[message.type].supplant(tvars);
-                    var display = $(root).data('cardstories_chat').display;
+                    var display = root_data.display;
                     display.append(div).scrollTop(display[0].scrollHeight);
                 }
             }
