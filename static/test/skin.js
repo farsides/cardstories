@@ -140,6 +140,7 @@
     } else if(skin == 'invitation_pick_wait_to_vote_voter') {
         old_game = {
             'id': 100,
+            'board': [33,11,12,13,14,15],
             'owner_id': 'Owner',
             'self': [33, null, [11,12,13,14,15,33]],
             'sentence': 'long sentence is in the flux',

@@ -2570,10 +2570,7 @@
             q.queue('chain', function(next) {
                 var duration = 300;
                 $this.animate_scale(true, 5, duration, $('.cardstories_info', element));
-                $('.cardstories_modal_overlay', element).fadeOut(duration, function() {
-                    $(this).hide();
-                    next();
-                });
+                next();
             });
 
             // Return selected card to original size.
@@ -2721,7 +2718,6 @@
                 // Show modal.
                 q.queue('chain', function(next) {
                     var info = $('.cardstories_info', element);
-                    $('.cardstories_modal_overlay', element).fadeIn(300);
                     $this.animate_scale(false, 5, 300, info, next)
                 });
             }

@@ -1549,7 +1549,7 @@ asyncTest("vote_voter", 28, function() {
    });
 });
 
-test("vote_voter_wait", 32, function() {
+test("vote_voter_wait", 31, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_vote .cardstories_voter_wait');
     var game_id = 101;
@@ -1602,7 +1602,6 @@ test("vote_voter_wait", 32, function() {
         ok(!$('.cardstories_card_slot_4', element).hasClass('selected'), 'Slot 4 was NOT selected');
         ok(!$('.cardstories_card_slot_5', element).hasClass('selected'), 'Slot 5 was NOT selected');
         equal($('.cardstories_info', element).css('display'), 'block', 'Info modal is visible');
-        equal($('.cardstories_modal_overlay', element).css('display'), 'block', 'Modal overlay is visible');
     });
 
     // Player 1 voted.
@@ -1615,7 +1614,7 @@ test("vote_voter_wait", 32, function() {
     });
 });
 
-asyncTest("vote_voter_wait_to_complete", 33, function() {
+asyncTest("vote_voter_wait_to_complete", 31, function() {
     var root = $('#qunit-fixture .cardstories');
     var container = $('.cardstories_vote', root);
     var element = $('.cardstories_voter_wait', container);
@@ -1671,7 +1670,6 @@ asyncTest("vote_voter_wait_to_complete", 33, function() {
 
     $.cardstories.vote_voter_wait(player_id, game1, root).done(function() {
         equal($('.cardstories_info', element).css('display'), 'block', 'modal dialog is visible');
-        equal($('.cardstories_modal_overlay', element).css('display'), 'block', 'overlay is visible');
         equal($('.cardstories_player_seat_1', element).css('display'), 'block', 'seat1 is visible initially');
         equal($('.cardstories_player_seat_2', element).css('display'), 'block', 'seat2 is visible initially');
         equal($('.cardstories_player_seat_3', element).css('display'), 'block', 'seat3 is visible initially');
@@ -1688,7 +1686,6 @@ asyncTest("vote_voter_wait_to_complete", 33, function() {
         $.cardstories.complete(player_id, game2, root);
 
         notEqual($('.cardstories_info', element).css('display'), 'block', 'modal dialog is hidden');
-        notEqual($('.cardstories_modal_overlay', element).css('display'), 'block', 'overlay is hidden');
         equal($('.cardstories_player_seat_1', element).css('display'), 'block', 'seat1 is visible');
         equal($('.cardstories_player_seat_2', element).css('display'), 'block', 'seat2 is visible');
         equal($('.cardstories_player_seat_3', element).css('display'), 'block', 'seat3 is visible');
@@ -1713,7 +1710,7 @@ asyncTest("vote_voter_wait_to_complete", 33, function() {
     });
 });
 
-test("vote_anonymous", 29, function() {
+test("vote_anonymous", 28, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_vote .cardstories_anonymous');
     var game_id = 101;
@@ -1761,7 +1758,6 @@ test("vote_anonymous", 29, function() {
         ok(!$('.cardstories_card_slot_3', element).hasClass('selected'), 'Slot 3 was NOT selected');
         ok(!$('.cardstories_card_slot_4', element).hasClass('selected'), 'Slot 4 was NOT selected');
         equal($('.cardstories_info', element).css('display'), 'block', 'Info modal is visible');
-        equal($('.cardstories_modal_overlay', element).css('display'), 'block', 'Modal overlay is visible');
     });
 
     // Player 1 voted.
