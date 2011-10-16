@@ -155,7 +155,8 @@ class CardstoriesGame(pollable):
 
     @defer.inlineCallbacks
     def game(self, player_id):
-        rows = yield self.service.db.runQuery("SELECT owner_id, sentence, cards, board, state FROM games WHERE id = ?", [self.get_id()])
+        db = self.service.db
+        rows = yield db.runQuery("SELECT owner_id, sentence, cards, board, state FROM games WHERE id = ?", [self.get_id()])
         if not rows:
             raise UserWarning("Game doesn't exist: %s" % self.get_id())
         ( owner_id, sentence, cards, board, state ) = rows[0]
@@ -169,7 +170,7 @@ class CardstoriesGame(pollable):
             board = None
         else:
             board = [ ord(c) for c in board ]
-        rows = yield self.service.db.runQuery("SELECT player_id, cards, picked, vote, win FROM player2game WHERE game_id = ? ORDER BY serial", [ self.get_id() ])
+        rows = yield db.runQuery("SELECT player_id, cards, picked, vote, win FROM player2game WHERE game_id = ? ORDER BY serial", [ self.get_id() ])
         picked_count = 0
         voted_count = 0
         players = []

@@ -623,9 +623,100 @@ class CardstoriesGameTest(unittest.TestCase):
             pass
         self.assertTrue(raises_UserWarning)
 
+    @defer.inlineCallbacks
+    def test18_complete_and_game_race(self):
+        winner_card = 5
+        sentence = 'SENTENCE'
+        owner_id = 15
+        game_id = yield self.game.create(winner_card, sentence, owner_id)
+        voting_players = [ 16, 17 ]
+        players = voting_players + [ 18 ]
+        for player_id in players:
+            yield self.game.participate(player_id)
+            player = yield self.game.player2game(player_id)
+            card = player['cards'][0]
+            yield self.game.pick(player_id,card)
+        
+        yield self.game.voting(owner_id)
+
+        c = self.db.cursor()
+        c.execute("SELECT board FROM games WHERE id = %d" % game_id)
+        board = c.fetchone()[0]
+        winner_id = 16
+        yield self.game.vote(winner_id, winner_card)
+        loser_id = 17
+        yield self.game.vote(loser_id, 120)
+        self.assertEquals(self.game.get_players(), [owner_id] + players)
+        #
+        # the game is about to be completed.
+        # Create the race condition by:
+        # a) calling game() and block it on the first runQuery
+        # b) calling complete() and unblock the game() when it returns
+        # c) resume game() which then needs to cope with the fact 
+        #    that it is now using a game that has been destroyed
+        #
+        #
+        # Replace the runQuery function by a wrapper that blocks the query.
+        # It does it by creating a deferred that will run the original 
+        # query when it fires. This deferred will need to be fired manually
+        # by the enclosing test, when it needs it. This effectively creates
+        # a condition that simulates a lag because the database is not
+        # available.
+        #
+        original_runQuery = self.game.service.db.runQuery
+        query_deferred = defer.Deferred()
+        def fake_runQuery(*args):
+            def f(result):
+                r = original_runQuery(*args)
+                return r
+            query_deferred.addCallback(f)
+            #
+            # Now that the query has been wrapped in the deferred and the
+            # calling function has been interrupted, restore the original
+            # runQuery function so that the code keeps running as expected.
+            #
+            self.game.service.db.runQuery = original_runQuery
+            return query_deferred
+        # 
+        # Because the runQuery is a fake, the deferred returned by self.game.game()
+        # will actually be the deferred returned by the fake_runQuery function.
+        # As a consequence the game.game() function will be blocked in the middle
+        # of its execution, waiting for the deferred returned by fake_runQuery to 
+        # be fired.
+        #
+        self.game.service.db.runQuery = fake_runQuery
+        game_deferred = self.game.game(owner_id)
+        #
+        # The complete() function returns a deferred. The triggerGame() function is
+        # added to the callback list of this deferred so that it resumes the interrupted
+        # game.game() call by firing the deferred returned by fake_runQuery.
+        # As a consequence, game.game() will complete its execution after the game has
+        # been destroyed. It must cope with this because such concurrency will happen,
+        # even if only rarely.
+        #
+        complete_deferred = self.game.complete(owner_id)
+        def triggerGame(result):
+            #
+            # call destroy to reproduce the conditions of the service.py
+            # complete() function. 
+            #
+            self.game.destroy()
+            query_deferred.callback(True)
+            return result
+        complete_deferred.addCallback(triggerGame)
+        result = yield complete_deferred
+        game_result = yield game_deferred
+        self.assertEquals(result['type'], 'complete')
+        self.assertEquals(self.game.get_players(), [owner_id] + voting_players)
+        c.execute("SELECT win FROM player2game WHERE game_id = %d AND player_id != %d" % ( game_id, owner_id ))
+        self.assertEqual(u'y', c.fetchone()[0])
+        self.assertEqual(u'n', c.fetchone()[0])
+        self.assertEqual(c.fetchone(), None)
+        c.close()
+            
 def Run():
     loader = runner.TestLoader()
-#    loader.methodPrefix = "test08_"
+#    loader.methodPrefix = "test18_"
     suite = loader.suiteFactory()
     suite.addTest(loader.loadClass(CardstoriesGameTest))
 
