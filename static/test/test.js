@@ -93,7 +93,7 @@ asyncTest("delay", 1, function() {
     $.cardstories.delay(q, 100, 'chain');
     q.queue('chain', function() {
         var endtime = new Date();
-        elapsed = endtime.getTime() - starttime.getTime();
+        var elapsed = endtime.getTime() - starttime.getTime();
         ok(elapsed > 50, 'elapsed time');
         start();
     });
@@ -153,7 +153,7 @@ test("reload_link", 4, function() {
     // With player_id in the URL
     $.query = {
         'get': function(attr) {
-            if(attr == 'player_id') {
+            if (attr === 'player_id') {
               return player_id;
             }
         }
@@ -364,7 +364,7 @@ asyncTest("animate_sprite", 3, function() {
 
 test("subscribe", 6, function() {
     var player_id = 'player@test.com';
-    var game_id = undefined;
+    var game_id;
     $.cookie('CARDSTORIES_ID', null);
     equal($('#qunit-fixture .cardstories_subscribe.cardstories_active').length, 0);
     $.cardstories.email(game_id, $('#qunit-fixture .cardstories'));
@@ -771,7 +771,7 @@ asyncTest("invitation_owner_join_helper", 39, function() {
         ok(true, 'counting animate_sprite');
         movie.show();
         cb();
-    }
+    };
 
     $.cardstories.display_modal($('.cardstories_info', element), $('.cardstories_modal_overlay', element));
     $.cardstories.invitation_owner_join_helper(player1, state1, element, root, function() {
@@ -856,7 +856,7 @@ asyncTest("invitation_owner_go_vote_confirm", 28, function() {
         ok(true, 'counting animate_sprite');
         movie.show();
         cb();
-    }
+    };
 
     equal(pick_1.css('display'), 'none', 'card 1 is not visible before animation');
     equal(pick_2.css('display'), 'none', 'card 2 is not visible before animation');
@@ -997,7 +997,7 @@ asyncTest("invitation_replay_master", 21, function() {
         });
         $('.cardstories_master_hand .cardstories_card_foreground', element).each(function(i) {
             var card = $(this);
-            ok(card.is(':hidden'), 'Docked card ' + i + ' is hidden')
+            ok(card.is(':hidden'), 'Docked card ' + i + ' is hidden');
         });
         ok($('.cardstories_sentence_box', element).is(':visible'), 'Story is visible');
         start();
@@ -1042,14 +1042,15 @@ asyncTest("invitation_pick_deal_helper", 38, function() {
         ok(true, 'counting animate_sprite');
         movie.show();
         cb();
-    }
+    };
 
     $.cardstories.invitation_pick_deal_helper(state1, element, function() {
-        for (var i=1; i<=2; i++) {
+        var i;
+        for (i=1; i<=2; i++) {
             ok($('.cardstories_player_arms_' + i, element).is(':visible'), 'arm ' + i + ' is visible');
             ok($('.cardstories_player_pick_' + i, element).is(':visible'), 'pick ' + i + ' is visible');
         }
-        for (var i=3; i<=5; i++) {
+        for (i=3; i<=5; i++) {
             ok($('.cardstories_player_arms_' + i, element).is(':hidden'), 'arm ' + i + ' is hidden');
             ok($('.cardstories_player_pick_' + i, element).is(':hidden'), 'pick ' + i + ' is hidden');
         }
@@ -1058,11 +1059,11 @@ asyncTest("invitation_pick_deal_helper", 38, function() {
         // necessary and the number of expected assertions should reflect this.
         $.cardstories.invitation_display_board(player1, state2, element, root);
         $.cardstories.invitation_pick_deal_helper(state2, element, function() {
-            for (var i=1; i<=3; i++) {
+            for (i=1; i<=3; i++) {
                 ok($('.cardstories_player_arms_' + i, element).is(':visible'), 'arm ' + i + ' is visible');
                 ok($('.cardstories_player_pick_' + i, element).is(':visible'), 'pick ' + i + ' is visible');
             }
-            for (var i=4; i<=5; i++) {
+            for (i=4; i<=5; i++) {
                 ok($('.cardstories_player_arms_' + i, element).is(':hidden'), 'arm ' + i + ' is hidden');
                 ok($('.cardstories_player_pick_' + i, element).is(':hidden'), 'pick ' + i + ' is hidden');
             }
@@ -1088,8 +1089,8 @@ asyncTest("invitation_pick_card_box_helper", 2, function() {
     sentence.show();
 
     dest_element.show();
-    var sentence_left = dest_sentence.position().left
-    var card_left = dest_card.position().left + $('.cardstories_board', element).position().left
+    var sentence_left = dest_sentence.position().left;
+    var card_left = dest_card.position().left + $('.cardstories_board', element).position().left;
     dest_element.hide();
 
     $.cardstories.invitation_pick_card_box_helper(element, root, function() {
@@ -1327,7 +1328,7 @@ test("invitation_anonymous", 1, function() {
     // Without player_id in the URL
     $.query = {
         'get': function(attr) {
-            if (attr == "anonymous") {
+            if (attr === "anonymous") {
                 return "yes";
             }
         }
@@ -1390,7 +1391,7 @@ test("invitation_display_board", 16, function() {
     }
 
     // Player view
-    var element = $('.cardstories_invitation .cardstories_pick', root);
+    element = $('.cardstories_invitation .cardstories_pick', root);
     $.cardstories.invitation_display_board(player2, game, element, root, false);
     notEqual($('.cardstories_player_seat_1', element).css('display'), 'none', 'Seat 1 is visible');
     notEqual($('.cardstories_player_seat_2', element).css('display'), 'none', 'Seat 2 is visible');
@@ -1473,7 +1474,7 @@ asyncTest("vote_voter", 28, function() {
     var player3_id = 'Player3';
     var owner_id = 'The Owner';
     var game_id = 101;
-    var winner = 30
+    var winner = 30;
     var picked = 31;
     var voted = 33;
     var board = [30, picked, 32, voted];
@@ -1560,7 +1561,7 @@ test("vote_voter_wait", 31, function() {
     var sentence = 'SENTENCE';
     var owner_id = 'Owner';
     var player_id = 'Player 2';
-    game = {
+    var game = {
       'id': game_id,
       'owner': false,
       'owner_id': owner_id,
@@ -1627,7 +1628,7 @@ asyncTest("vote_voter_wait_to_complete", 31, function() {
     var sentence = 'SENTENCE';
     var owner_id = 'Owner';
     var player_id = 'Player 2';
-    game1 = {
+    var game1 = {
         'id': game_id,
         'owner': false,
         'owner_id': owner_id,
@@ -1643,7 +1644,7 @@ asyncTest("vote_voter_wait_to_complete", 31, function() {
                     ['Player 4', null, 'n', '', null],
                     ['Player 5', '', 'n', '', null]]
     };
-    game2 = {
+    var game2 = {
         'id': game_id,
         'owner': false,
         'owner_id': owner_id,
@@ -1719,7 +1720,7 @@ test("vote_anonymous", 28, function() {
     var sentence = 'SENTENCE';
     var owner_id = 'Owner';
     var player_id = null;
-    game = {
+    var game = {
       'id': game_id,
       'owner': false,
       'owner_id': owner_id,
@@ -2052,12 +2053,12 @@ test("complete", 28, function() {
     ok($('.cardstories_player_seat_1', element).hasClass('cardstories_player_seat_won'), 'seat 1 won');
     ok($('.cardstories_player_seat_2', element).hasClass('cardstories_player_seat_lost'), 'seat 2 lost');
     ok($('.cardstories_player_seat_3', element).hasClass('cardstories_player_seat_lost'), 'seat 3 lost');
-    ok($('.cardstories_votes_1', element).children().length == 1, '1 vote for seat 1');
-    ok($('.cardstories_votes_2', element).children().length == 0, 'no votes for seat 2');
-    ok($('.cardstories_votes_3', element).children().length == 0, 'no votes for seat 3');
-    ok($('.cardstories_votes_4', element).children().length == 0, 'no votes for seat 4');
-    ok($('.cardstories_votes_5', element).children().length == 0, 'no votes for seat 5');
-    ok($('.cardstories_votes_win', element).children().length == 1, '1 winning votes');
+    ok($('.cardstories_votes_1', element).children().length === 1, '1 vote for seat 1');
+    ok($('.cardstories_votes_2', element).children().length === 0, 'no votes for seat 2');
+    ok($('.cardstories_votes_3', element).children().length === 0, 'no votes for seat 3');
+    ok($('.cardstories_votes_4', element).children().length === 0, 'no votes for seat 4');
+    ok($('.cardstories_votes_5', element).children().length === 0, 'no votes for seat 5');
+    ok($('.cardstories_votes_win', element).children().length === 1, '1 winning votes');
     equal($('.cardstories_results.author', element).css('display'), 'block', 'author results is visible');
     equal($('.cardstories_results img.cardstories_won_1', element).css('display'), 'inline', 'won image is visible');
     equal($('.cardstories_results img.cardstories_lost_1', element).css('display'), 'none', 'lost image 1 is hidden');
@@ -2646,7 +2647,7 @@ test("poll", 13, function() {
 
 var stabilize = function(e, x, y) {
     var previous = 0;
-    while(previous != $(e).height()) {
+    while(previous !== $(e).height()) {
         previous = $(e).height();
         $(e).trigger({ type: 'mousemove', pageX: x, pageY: y});
     }
@@ -2843,7 +2844,7 @@ asyncTest("select_cards single", 6, function() {
         links.each(function(index) {
             $(this).click();
             var tmp = index === 0;
-            var condition = $(this).hasClass('cardstories_card_selected') == tmp;
+            var condition = $(this).hasClass('cardstories_card_selected') === tmp;
             var not = $(this).hasClass('cardstories_card_selected') ? '' : 'not';
             ok(condition, 'Card ' + index + ' ' + not +  ' picked.');
         });
@@ -2867,7 +2868,7 @@ test("create_deck", 29, function() {
         var card = deck.pop();
         equal(typeof card, "number");
         for(i = 0; i < deck.length; i++) {
-            ok(deck[i] != card, 'duplicate of ' + card);
+            ok(deck[i] !== card, 'duplicate of ' + card);
         }
     }
   });
