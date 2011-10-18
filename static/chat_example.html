@@ -55,7 +55,7 @@
     $.cardstories_chat.send = function(player_id, line) {
         // Pick a random name for the demo.
         var player_id = ['John', 'Bob', 'Amy'][Math.floor(Math.random() * 3)];
-        var messages = {messages: [{sentence: line, player_id: player_id}]};
+        var messages = {messages: [{sentence: line, player_id: player_id, type: 'chat'}]};
         this.state(player_id, messages, $('#cardstories_chat_example'));
     }
     $('#cardstories_chat_example').cardstories_chat('John');
