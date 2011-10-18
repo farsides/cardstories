@@ -105,7 +105,14 @@
                     }
                     var div = this.templates[message.type].supplant(tvars);
                     var display = root_data.display;
-                    display.append(div).scrollTop(display[0].scrollHeight);
+                    display.append(div);
+                    // Wait a bit before scrolling to the top for the dimensions
+                    // to settle, otherwise the display sometimes doesn't get scrolled
+                    // to the bottom no page load.
+                    // (It remains to be seen if this actually works).
+                    setTimeout(function() {
+                        display.scrollTop(display[0].scrollHeight);
+                    }, 50);
                 }
             }
         },

@@ -59,6 +59,28 @@ test("pressing enter inside input field", 2, function() {
     equal(input.val(), '', 'The input value should be emptied after enter is pressed');
 });
 
+asyncTest("scroll", 1, function() {
+    var root = $(selector);
+    var display = $('.cardstories_chat_display', root);
+    var data = {
+        messages: [{
+            type: 'notification',
+            player_id: 'PLAYER_ID',
+            game_id: 'GAME_ID',
+            sentence: 'SENTENCE'
+        }]
+    };
+
+    display.scroll(function() {
+        ok(display.scrollTop() > 0);
+        start();
+    });
+
+    for (var i = 0; i < 20; i++) {
+        $.cardstories_chat.state('player_id', data, root);
+    }
+});
+
 test("play_ring", 2, function() {
     var root = $(selector);
     $.cardstories_audio.play = function(sound_id, _root) {
