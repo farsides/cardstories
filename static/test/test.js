@@ -479,7 +479,7 @@ asyncTest("create", 16, function() {
         equal(submit.css('display'), 'none', 'OK button is hidden if text is too short');
         sentencel.val(sentence).change();
         ok(submit.css('display') !== 'none', 'OK button is visible if valid text has been set');
-        submit.submit();
+        submit.closest('form').submit();
     };
 
     equal($('.cardstories_pick_card.cardstories_active', element).length, 0, 'pick_card not active');

@@ -622,7 +622,7 @@
             this.go_lobby(player_id, element);
             $('.cardstories_card', element).attr('class', 'cardstories_card cardstories_card' + card + ' {card:' + card + '}');
             this.create_write_sentence_animate_start(card, element, root);
-            var text = $('.cardstories_sentence', element);
+            var text = $('textarea.cardstories_sentence', element);
             var input = $('.cardstories_submit', element).hide();
 
             var is_sentence_valid = function() {
@@ -650,7 +650,7 @@
                     } else {
                         var root = $(element).parents('.cardstories_root');
                         $this.animate_progress_bar(3, element, function() {
-                            $this.reload(player_id, data.game_id, root); 
+                            $this.reload(player_id, data.game_id, root);
                         });
                     }
                 };
