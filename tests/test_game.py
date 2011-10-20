@@ -240,10 +240,11 @@ class CardstoriesGameTest(unittest.TestCase):
         self.assertEquals(self.game.get_players(), [owner_id] + players)
         result = yield self.game.complete(owner_id)
         self.assertEquals(result['type'], 'complete')
-        self.assertEquals(self.game.get_players(), [owner_id] + voting_players)
-        c.execute("SELECT win FROM player2game WHERE game_id = %d AND player_id != %d" % ( game_id, owner_id ))
-        self.assertEqual(u'y', c.fetchone()[0])
+        self.assertEquals(self.game.get_players(), [owner_id] + players)
+        c.execute("SELECT win, vote FROM player2game WHERE game_id = %d AND player_id != %d" % ( game_id, owner_id ))
+        self.assertEqual((u'y', chr(winner_card)), c.fetchone())
         self.assertEqual(u'n', c.fetchone()[0])
+        self.assertEqual((u'n', None), c.fetchone())
         self.assertEqual(c.fetchone(), None)
         c.close()
             
@@ -707,11 +708,6 @@ class CardstoriesGameTest(unittest.TestCase):
         result = yield complete_deferred
         game_result = yield game_deferred
         self.assertEquals(result['type'], 'complete')
-        self.assertEquals(self.game.get_players(), [owner_id] + voting_players)
-        c.execute("SELECT win FROM player2game WHERE game_id = %d AND player_id != %d" % ( game_id, owner_id ))
-        self.assertEqual(u'y', c.fetchone()[0])
-        self.assertEqual(u'n', c.fetchone()[0])
-        self.assertEqual(c.fetchone(), None)
         c.close()
             
 def Run():

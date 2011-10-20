@@ -309,7 +309,6 @@ class CardstoriesGame(pollable):
     def complete(self, owner_id):
         game = yield self.game(self.get_owner_id())
         no_vote = filter(lambda player: player[1] == None and player[0] != self.get_owner_id(), game['players'])
-        yield self.leave([ player[0] for player in no_vote ])
         yield self.service.db.runInteraction(self.completeInteraction, self.get_id(), owner_id)
         result = yield self.touch(type = 'complete')
         defer.returnValue(result)
