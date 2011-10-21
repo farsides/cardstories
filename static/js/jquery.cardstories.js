@@ -3456,6 +3456,8 @@
                         voter_name.html(player[0] + '\'s vote');
                         voter_name.fadeIn('fast', next);
                     } else {
+                        seat.addClass('cardstories_player_seat_no_vote');
+                        status.html("DIDN'T VOTE!");
                         next();
                     }
                 });
