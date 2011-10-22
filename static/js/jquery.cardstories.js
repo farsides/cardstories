@@ -625,6 +625,9 @@
             var text = $('textarea.cardstories_sentence', element);
             var input = $('.cardstories_submit', element).hide();
 
+            // Show number of characters remaining
+            text.limit('100','#cardstories_char_left_counter');
+
             var is_sentence_valid = function() {
                 var trimmedText = $.trim(text.val());
                 var placeholderValue = $.data(text[0], 'placeholderValue');

@@ -1209,6 +1209,14 @@
     color: black;
 }
 
+.cardstories .cardstories_create .cardstories_write_sentence .cardstories_char_left {
+    position: absolute;
+    left: 40px;
+    top: 80px;
+    font-family: "Licon";
+    font-size: 14px;
+}
+
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_submit {
     position: absolute;
     background: transparent url('images/b_ok_on.png') no-repeat left top;
