@@ -3935,4 +3935,8 @@
         $.cardstories.error = $.cardstories.noop;
     });
 
+    // Default jQuery animation interval is 13ms. Increase it to 33ms (30 fps)
+    // for better performance.
+    $.fx.interval = 33;
+
 })(jQuery);
