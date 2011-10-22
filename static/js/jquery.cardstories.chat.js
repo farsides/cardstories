@@ -86,6 +86,7 @@
                             player_id: message.player_id,
                             sentence: message.sentence
                         }
+                        this.play_sound('pop', root, root_data.initialized_ts);
                     } else if (message.type == 'notification') {
                         var l = window.location;
                         var href = l.protocol + '//' + l.host + l.pathname;
@@ -95,13 +96,7 @@
                             player_id: message.player_id,
                             sentence: message.sentence
                         }
-                        // Only play the "ring" sound for notifications that
-                        // happen at least 5 seconds after plugin initialization.
-                        // This is to prevent from flooding the player with rings
-                        // from old notifications on page refresh.
-                        if (new Date().getTime() - root_data.initialized_ts > 5000) {
-                            this.play_ring(root);
-                        }
+                        this.play_sound('ring', root, root_data.initialized_ts);
                     }
                     var div = this.templates[message.type].supplant(tvars);
                     var display = root_data.display;
@@ -117,9 +112,15 @@
             }
         },
 
-        // Plays the ringing sound (depends on the audio plugin).
-        play_ring: function(root) {
-            $.cardstories_audio.play('ring', root);
+        // Plays a sound (depends on the audio plugin).
+        play_sound: function(sound_id, root, initialized_ts) {
+            // Only play the sound for notifications that
+            // happen at least 5 seconds after plugin initialization.
+            // This is to prevent from flooding the player with rings
+            // from old notifications on page refresh.
+            if (new Date().getTime() - initialized_ts > 5000) {
+                $.cardstories_audio.play(sound_id, root);
+            }
         }
     };
 

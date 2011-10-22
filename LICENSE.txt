@@ -134,4 +134,18 @@ static/js/jquery.validate:
    http://www.opensource.org/licenses/mit-license.php
    http://www.gnu.org/licenses/gpl.html
 
+static/audio/pop.mp3:
+
+ Copyright (c) 2007 Herbert Boland
+ Licensed under the Creative Commons CC-BY 3.0
+   http://creativecommons.org/licenses/by/3.0/
+
+static/audio/ring.mp3:
+ 
+ Copyright (c) 2007 cfork
+ Licensed under the Creative Commons CC-BY 3.0
+   http://creativecommons.org/licenses/by/3.0/
+
+ 
+
 
