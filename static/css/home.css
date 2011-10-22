@@ -136,6 +136,9 @@ select {
 	right:15px;
 	top:170px;
 }
+.fb-connect {
+    margin-top: -5px;
+}
 .like {
 	position:absolute;
 	top:30px;
