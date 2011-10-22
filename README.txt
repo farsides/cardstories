@@ -188,6 +188,7 @@ $ PYTHONPATH=.:etc/cardstories twistd --nodaemon cardstories \
 	--plugins-dir plugins \
 	--plugins-libdir /tmp \
 	--plugins-confdir tests \
+	--plugins-logdir log \
 	--plugins 'auth chat' \
 	--plugins-pre-process 'auth chat' \
 	--plugins-post-process auth

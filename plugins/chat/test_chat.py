@@ -16,11 +16,10 @@
 # along with this program in a file in the toplevel directory called
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
-import sys
-import os
+import sys, os, shutil
 sys.path.insert(0, os.path.abspath("../..")) # so that for M-x pdb works
 import sqlite3
-from time import sleep
+from time import sleep, strftime
 
 from twisted.python import runtime
 from twisted.trial import unittest, runner, reporter
@@ -42,9 +41,18 @@ class ChatTest(unittest.TestCase):
         self.database = 'test.sqlite'
         if os.path.exists(self.database):
             os.unlink(self.database)
+
+        # Make sure the log dir has an empty 'chat/' subdir
+        self.test_logdir = 'test_logdir.tmp'
+        if os.path.exists(self.test_logdir):
+            shutil.rmtree(self.test_logdir)
+        os.mkdir(self.test_logdir)
+        os.mkdir(os.path.join(self.test_logdir, 'chat'))
+
         self.service = CardstoriesService({'db': self.database,
                                            'plugins-confdir': 'CONFDIR',
                                            'plugins-libdir': 'LIBDIR',
+                                           'plugins-logdir': self.test_logdir,
                                            'static': 'STATIC'
                                            })
         self.service.startService()
@@ -127,6 +135,12 @@ class ChatTest(unittest.TestCase):
         # verify the message we added is in the list
         self.assertEquals(chat_instance.messages[0]["player_id"], player_id)
         self.assertEquals(chat_instance.messages[0]["sentence"], sentence)
+        # check that the message has been recorded in log file
+        with open(os.path.join(self.test_logdir, 'chat', '%s.log' % strftime('%Y-%m-%d'))) as f:
+            lines = f.readlines()
+            self.assertEquals(len(lines), 1)
+            self.assertIn(sentence, lines[0])
+            self.assertIn('player_%d' % player_id, lines[0])
     
     
     @defer.inlineCallbacks
