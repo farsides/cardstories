@@ -155,7 +155,8 @@ class CardstoriesGame(pollable):
 
     @defer.inlineCallbacks
     def game(self, player_id):
-        rows = yield self.service.db.runQuery("SELECT owner_id, sentence, cards, board, state FROM games WHERE id = ?", [self.get_id()])
+        db = self.service.db
+        rows = yield db.runQuery("SELECT owner_id, sentence, cards, board, state FROM games WHERE id = ?", [self.get_id()])
         if not rows:
             raise UserWarning("Game doesn't exist: %s" % self.get_id())
         ( owner_id, sentence, cards, board, state ) = rows[0]
@@ -169,7 +170,7 @@ class CardstoriesGame(pollable):
             board = None
         else:
             board = [ ord(c) for c in board ]
-        rows = yield self.service.db.runQuery("SELECT player_id, cards, picked, vote, win FROM player2game WHERE game_id = ? ORDER BY serial", [ self.get_id() ])
+        rows = yield db.runQuery("SELECT player_id, cards, picked, vote, win FROM player2game WHERE game_id = ? ORDER BY serial", [ self.get_id() ])
         picked_count = 0
         voted_count = 0
         players = []
@@ -308,7 +309,6 @@ class CardstoriesGame(pollable):
     def complete(self, owner_id):
         game = yield self.game(self.get_owner_id())
         no_vote = filter(lambda player: player[1] == None and player[0] != self.get_owner_id(), game['players'])
-        yield self.leave([ player[0] for player in no_vote ])
         yield self.service.db.runInteraction(self.completeInteraction, self.get_id(), owner_id)
         result = yield self.touch(type = 'complete')
         defer.returnValue(result)

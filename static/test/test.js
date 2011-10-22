@@ -2018,13 +2018,14 @@ test("complete owner won", 7, function() {
     notEqual(box.find('img.cardstories_won').css('display'), 'none', 'won img is visible');
 });
 
-test("complete", 28, function() {
+test("complete", 30, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var owner_id = 'Owner';
     var player1 = 'Player 1';
     var player2 = 'Player 2';
     var player3 = 'Player 3';
+    var player4 = 'Player 4';
     var game = {
         'owner': true,
         'owner_id': owner_id,
@@ -2032,8 +2033,9 @@ test("complete", 28, function() {
         'winner_card': 30,
         'players': [ [ owner_id, null, 'y', 30, [] ],
                      [ player1, 30, 'y', 31, [] ],
-                     [ player2, 34, 'n', 32, [] ], // Voted for removed card
-                     [ player3, 31, 'n', 33, [] ] ]
+                     [ player2, 34, 'n', 32, [] ], // Voted for the card of the non voting player
+                     [ player3, 31, 'n', 33, [] ],
+                     [ player4, null, 'n', 34, [] ] ]
     };
 
     equal($('#qunit-fixture .cardstories_complete.cardstories_active').length, 0);
@@ -2043,7 +2045,7 @@ test("complete", 28, function() {
     notEqual($('.cardstories_player_seat_1', element).css('display'), 'none', 'seat 1 is visible');
     notEqual($('.cardstories_player_seat_2', element).css('display'), 'none', 'seat 2 is visible');
     notEqual($('.cardstories_player_seat_3', element).css('display'), 'none', 'seat 3 is visible');
-    equal($('.cardstories_player_seat_4', element).css('display'), 'none', 'seat 4 is hidden');
+    notEqual($('.cardstories_player_seat_4', element).css('display'), 'none', 'seat 4 is visible');
     equal($('.cardstories_player_seat_5', element).css('display'), 'none', 'seat 5 is hidden');
     equal($('.cardstories_player_seat_1 .cardstories_player_name', element).html(), player1, 'seat 1 name is set');
     equal($('.cardstories_player_seat_2 .cardstories_player_name', element).html(), player2, 'seat 2 name is set');
@@ -2051,17 +2053,19 @@ test("complete", 28, function() {
     notEqual($('.cardstories_player_seat_card_1', element).css('display'), 'none', 'card 1 is visible');
     notEqual($('.cardstories_player_seat_card_2', element).css('display'), 'none', 'card 2 is visible');
     notEqual($('.cardstories_player_seat_card_3', element).css('display'), 'none', 'card 3 is visible');
-    equal($('.cardstories_player_seat_card_4', element).css('display'), 'none', 'card 4 is hidden');
+    notEqual($('.cardstories_player_seat_card_4', element).css('display'), 'none', 'card 4 is visible');
     equal($('.cardstories_player_seat_card_5', element).css('display'), 'none', 'card 5 is hidden');
     ok($('.cardstories_player_seat_1', element).hasClass('cardstories_player_seat_won'), 'seat 1 won');
     ok($('.cardstories_player_seat_2', element).hasClass('cardstories_player_seat_lost'), 'seat 2 lost');
     ok($('.cardstories_player_seat_3', element).hasClass('cardstories_player_seat_lost'), 'seat 3 lost');
-    ok($('.cardstories_votes_1', element).children().length === 1, '1 vote for seat 1');
-    ok($('.cardstories_votes_2', element).children().length === 0, 'no votes for seat 2');
-    ok($('.cardstories_votes_3', element).children().length === 0, 'no votes for seat 3');
-    ok($('.cardstories_votes_4', element).children().length === 0, 'no votes for seat 4');
-    ok($('.cardstories_votes_5', element).children().length === 0, 'no votes for seat 5');
-    ok($('.cardstories_votes_win', element).children().length === 1, '1 winning votes');
+    ok($('.cardstories_player_seat_4', element).hasClass('cardstories_player_seat_lost'), 'seat 4 lost');
+    ok($('.cardstories_player_seat_4', element).hasClass('cardstories_player_seat_no_vote'), 'seat 4 did not vote');
+    ok($('.cardstories_votes_1', element).children().length == 1, '1 vote for seat 1');
+    ok($('.cardstories_votes_2', element).children().length == 0, 'no votes for seat 2');
+    ok($('.cardstories_votes_3', element).children().length == 0, 'no votes for seat 3');
+    ok($('.cardstories_votes_4', element).children().length == 1, '1 votes for seat 4');
+    ok($('.cardstories_votes_5', element).children().length == 0, 'no votes for seat 5');
+    ok($('.cardstories_votes_win', element).children().length == 1, '1 winning votes');
     equal($('.cardstories_results.author', element).css('display'), 'block', 'author results is visible');
     equal($('.cardstories_results img.cardstories_won_1', element).css('display'), 'inline', 'won image is visible');
     equal($('.cardstories_results img.cardstories_lost_1', element).css('display'), 'none', 'lost image 1 is hidden');

@@ -280,8 +280,8 @@
         'self': [31, 30, [1,2,3,4,5,31]],
         'winner_card': 30,
         'players': [['Owner', null, 'n', 30, []],
-                     ['Player 1', 30, 'y', 31, []],
-                     ['Player 2', 30, 'y', 32, []],
+                     ['Player 1', 32, 'y', 31, []],
+                     ['Player 2', null, 'n', 32, []],
                      ['Player 4', 30, 'y', 34, []]]
       };
       $.cardstories.complete_complete('Player 1', game, root);
