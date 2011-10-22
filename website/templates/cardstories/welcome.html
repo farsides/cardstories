@@ -49,9 +49,6 @@
             <form class="registration" method="post" action="/register/{{ gameid_query }}">{% csrf_token %}
               <fieldset>
                 <div class="row">
-                  {{ registration_form.name }}
-                </div>
-                <div class="row">
                   {{ registration_form.username }}
                 </div>
                 <div class="row">
@@ -59,6 +56,9 @@
                   {{ registration_form.password1_clear }}
                   {{ registration_form.password2 }}
                   {{ registration_form.password2_clear }}
+                </div>
+                <div class="row">
+                  {{ registration_form.name }}
                 </div>
                 <div class="row"><input type="submit" value="REGISTER" class="button" /></div>
                 <div class="row"><p>We promise to never give or sell your email to anyone. We hate spams just like you.</p></div>
