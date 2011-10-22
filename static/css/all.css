@@ -161,6 +161,17 @@
     color: inherit;
 }
 
+.cardstories .cardstories_chat_box .cardstories_chat_message .cardstories_join_button {
+    display: inline-block;
+    background: transparent url('images/join.png') no-repeat left top;
+    width: 98px;
+    height: 27px;
+    font-family: "Licon";
+    font-size: 14pt;
+    color:#FFFFFF;
+    padding: 5px 0 0 20px;
+}
+
 .cardstories .cardstories_chat .cardstories_chat_input {
     position: absolute;
     border: none;
