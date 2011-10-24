@@ -16,7 +16,7 @@
 # along with this program in a file in the toplevel directory called
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
-import os, time
+import os, time, codecs
 from lxml import objectify
 from twisted.python import runtime, log
 from twisted.internet import defer, reactor
@@ -99,7 +99,7 @@ class Plugin(pollable):
         log_filename = '%s.log' % time.strftime('%Y-%m-%d')
         log_filepath = os.path.join(self.logdir, log_filename)
 
-        with open(log_filepath, 'a') as f:
+        with codecs.open(log_filepath, mode='ab', encoding='utf-8', errors='replace', buffering=1) as f:
             f.write(log_text)
 
     def init(self, game, details):
