@@ -3644,7 +3644,7 @@
                 var is_last = i === images.length - 1;
 
                 var onload = function() {
-                    image.img.onload = image.img.onerror = null;
+                    image.img = image.img.onload = image.img.onerror = null;
                     $this.setTimeout(function() {
                         loaded_count++;
                         update_progress();
