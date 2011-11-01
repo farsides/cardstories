@@ -676,7 +676,7 @@ test("preload_images_helper", 3, function() {
     $.cardstories.preload_images_helper(root, cb);
 });
 
-asyncTest("preload_images", 4, function() {
+asyncTest("preload_images", 3, function() {
     var root = $('#qunit-fixture .cardstories');
     var preloaded_images_div = $('.cardstories_preloaded_images', root);
     var progress_bar = $('.cardstories_loading_bar', root);
@@ -691,7 +691,6 @@ asyncTest("preload_images", 4, function() {
         progress_fill.parents().andSelf().show();
         equal(progress_fill.width(), progress_wrapper.width(), 'progress is at 100% width in the end');
         ok(preloaded_images_div.hasClass('cardstories_loaded'), 'image holder is marked with the cardstories_loaded class');
-        equal(preloaded_images_div.find('img').length, $.cardstories.images_to_preload.length, 'preloaded images are inserted into the DOM');
         start();
     };
 

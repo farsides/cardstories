@@ -3648,8 +3648,6 @@
                     $this.setTimeout(function() {
                         loaded_count++;
                         update_progress();
-                        // Append image to the DOM otherwise some browsers won't cache it.
-                        $('<img/>').attr('src', image.src).appendTo(preloaded_images_div);
                         if (!is_last) {
                             load_image(i + 1);
                         }
