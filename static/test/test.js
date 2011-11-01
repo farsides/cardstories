@@ -23,6 +23,7 @@ var cardstories_default_delay = $.cardstories.delay;
 var cardstories_default_ajax = $.cardstories.ajax;
 var cardstories_default_error = $.cardstories.error;
 var cardstories_default_poll_ignore = $.cardstories.poll_ignore;
+var cardstories_default_create = $.cardstories.create;
 var cardstories_default_create_write_sentence = $.cardstories.create_write_sentence;
 var cardstories_default_animate_sprite = $.cardstories.animate_sprite;
 var cardstories_default_preload_images_helper = $.cardstories.preload_images_helper;
@@ -54,6 +55,7 @@ function setup() {
     $.cardstories.confirm_participate = true;
     $.cardstories.poll_ignore = function() { throw 'poll_ignore'; };
     $.cardstories.error = cardstories_default_error;
+    $.cardstories.create = cardstories_default_create;
     $.cardstories.create_write_sentence = cardstories_default_create_write_sentence;
     $.cardstories.animate_sprite = function(movie, fps, frames, rewind, cb) { movie.show(); cb(); };
     $.cardstories.preload_images_helper = function(root, cb) { cb(); };
@@ -2078,7 +2080,7 @@ test("complete", 30, function() {
     equal($('.cardstories_results img.cardstories_lost_2', element).css('display'), 'none', 'lost image 2 is hidden');
 });
 
-test("play_again_finish_state", 4, function() {
+test("play_again_finish_state", 5, function() {
     var player_id = 5;
     var game = {
         'id': 7,
@@ -2089,28 +2091,21 @@ test("play_again_finish_state", 4, function() {
         'players': [['Owner', null, 'y', 30, []]]
     };
     var root = $('#qunit-fixture .cardstories');
-    var element = $('.cardstories_invitation .cardstories_owner', root);
-    var advertise = $('.cardstories_invitation .cardstories_owner .cardstories_advertise', element);
+    var element = $('.cardstories_complete', root);
+    var play_again_button = $('.cardstories_play_again', element);
+    var author_results = $('.cardstories_results', element);
+
     $.cardstories.complete(player_id, game, root);
-    notEqual($('.cardstories_play_again', root).css('display'), 'none', 'Play again button is visible when the player is owner');
-    var create = $.cardstories.create;
-    var send = $.cardstories.send;
-    var $textarea = $('.cardstories_text', advertise);
-    $.cookie('CARDSTORIES_INVITATIONS', null);
-    $textarea.val('aaa@aaa.aaa\nbbb@bbb.bbb\nccc@ccc.ccc');
-    var text = $textarea.val();
-    $.cardstories.send = function () {}; //do nothing
-    $.cardstories.advertise(player_id, game.id, element);
-    $('.cardstories_submit', advertise).click();
-    $.cardstories.send = send;
-    var inv_cookie = $.cookie('CARDSTORIES_INVITATIONS');
-    $.cardstories.create = function (arg_player_id, arg_root) {
-        equal(arg_player_id, player_id);
-        equal(arg_root, root);
-        $.cardstories.create = create;
+    notEqual(play_again_button.css('display'), 'none', 'play again button is visible when the player is owner');
+
+    $.cardstories.create = function(_player_id, _root) {
+        equal(_player_id, player_id);
+        equal(_root, root);
     };
-    $('.cardstories_play_again', root).click();
-    equal(text, inv_cookie);
+
+    equal(author_results.css('display'), 'block', 'results are visible before clicking the button');
+    play_again_button.click();
+    notEqual(author_results.css('display'), 'block', 'results fade out after clicking the button');
 });
 
 test("advertise", 11, function() {

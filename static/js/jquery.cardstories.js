@@ -3288,9 +3288,10 @@
                 this.display_progress_bar('owner', 6, element, root);
                 master_seat.addClass('owner');
                 $('.cardstories_play_again', element).unbind('click').click(function() {
-                    $('.cardstories_results', element).fadeOut('slow', function() {
+                    $('.cardstories_results.author', element).fadeOut('slow', function() {
                         // The players of this game will be kept since the
                         // CARDSTORIES_INVITATIONS cookie stores theirs id's.
+                        $(this).hide(); // A workaround for http://bugs.jquery.com/ticket/8892
                         $this.create(player_id, root);
                     });
                 });
@@ -3302,11 +3303,11 @@
 
             // Display board
             this.complete_display_board(game, element, root);
-            
+
             // Only show initial animations once.
             if (!element.hasClass('cardstories_noop_init')) {
                 element.addClass('cardstories_noop_init');
-                
+
                 var q = $({});
 
                 // Animate envelopes.
