@@ -36,6 +36,7 @@
                 return;
             }
 
+            var $this = this;
             var display = $('.cardstories_chat_display', root);
             var input = $('.cardstories_chat_input', root);
 
@@ -47,12 +48,18 @@
                 initialized_ts: new Date().getTime()
             });
 
+            // Scroll chat div to bottom on window load event.
+            // This is needed since exact element dimensions are not known yet
+            // when the domready event fires in some browsers (Chrome for example).
+            $(window).load(function() {
+                $this.scroll_to_bottom(root);
+            });
+
             // Initialize placeholder.
             input.placeholder();
 
             // Send message on enter, but only if there's at least one
             // character and we're not sending the placeholder itself.
-            var $this = this;
             input.keydown(function(event) {
                 if (event.which === 13) {
                     var sentence = input.val();
@@ -99,17 +106,17 @@
                         this.play_sound('ring', root, root_data.initialized_ts);
                     }
                     var div = this.templates[message.type].supplant(tvars);
-                    var display = root_data.display;
-                    display.append(div);
-                    // Wait a bit before scrolling to the top for the dimensions
-                    // to settle, otherwise the display sometimes doesn't get scrolled
-                    // to the bottom no page load.
-                    // (It remains to be seen if this actually works).
-                    setTimeout(function() {
-                        display.scrollTop(display[0].scrollHeight);
-                    }, 50);
+                    root_data.display.append(div);
+                    this.scroll_to_bottom(root);
                 }
             }
+        },
+
+        // Scrolls the chat window to the bottom, so that the last received message
+        // is in the viewport.
+        scroll_to_bottom: function(root) {
+            var display = $(root).data('cardstories_chat').display;
+            display.scrollTop(display[0].scrollHeight);
         },
 
         // Plays a sound (depends on the audio plugin).
