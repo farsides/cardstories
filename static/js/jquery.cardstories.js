@@ -3666,7 +3666,7 @@
                     if (!is_last) { load_image(i + 1); }
                 } else {
                     image.taken = true;
-                    image.img.onload = image.onerror = onload;
+                    image.img.onload = image.img.onerror = onload;
                     image.img.src = image.src;
                     // If image is already loaded, trigger the load event manually.
                     // Some browsers will do this for us automatically, while others won't.
