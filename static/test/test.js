@@ -895,7 +895,7 @@ asyncTest("invitation_owner_go_vote_confirm", 28, function() {
     });
 });
 
-test("invitation_owner_invite_more", 4, function() {
+test("invitation_owner_invite_more", 6, function() {
     var player1 = 'player1';
     var card1 = 5;
     var player2 = 'player2';
@@ -913,8 +913,9 @@ test("invitation_owner_invite_more", 4, function() {
     };
 
     var element = $('#qunit-fixture .cardstories_invitation .cardstories_owner');
-    var advertise = $('.cardstories_advertise', element);
-    var textarea = $('.cardstories_advertise_input textarea', advertise);
+    var invite_button = $('.cardstories_player_invite', element).first();
+    var advertise_dialog = $('.cardstories_advertise', element);
+    var textarea = $('.cardstories_advertise_input textarea', advertise_dialog);
 
     $.cardstories.poll_ignore = function(_request) {};
     $.cardstories.ajax = function(options) {};
@@ -923,9 +924,15 @@ test("invitation_owner_invite_more", 4, function() {
     $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
     ok(element.hasClass('cardstories_active'));
     $.cookie('CARDSTORIES_INVITATIONS', 'UNEXPECTED');
-    $('.cardstories_player_invite', element).first().click();
-    equal(advertise.css('display'), 'block');
+    invite_button.click();
+    equal(advertise_dialog.css('display'), 'block');
     equal(textarea.val(), textarea.attr('placeholder'));
+    // Close the dialog.
+    $('.cardstories_advertise_close', advertise_dialog).click();
+    equal(advertise_dialog.css('display'), 'none', 'clicking the close button hides the dialog');
+    // clicking an invite button should bring up the dialog again.
+    invite_button.click();
+    notEqual(advertise_dialog.css('display'), 'none', 'clicking the invite button shows the dialog again');
 });
 
 asyncTest("invitation_owner", 6, function() {
@@ -2110,10 +2117,11 @@ test("advertise", 11, function() {
     var owner_id = 15;
     var game_id = 100;
     var element = $('#qunit-fixture .cardstories_invitation .cardstories_owner');
-    var advertise = $('.cardstories_advertise', element);
-    var textarea = $('.cardstories_advertise_input textarea', advertise);
-    var submit_button = $('.cardstories_send_invitation', advertise);
-    var feedback = $('.cardstories_advertise_feedback', advertise);
+    var invite_button = $('.cardstories_player_invite:first', element);
+    var advertise_dialog = $('.cardstories_advertise', element);
+    var textarea = $('.cardstories_advertise_input textarea', advertise_dialog);
+    var submit_button = $('.cardstories_send_invitation', advertise_dialog);
+    var feedback = $('.cardstories_advertise_feedback', advertise_dialog);
 
     $.cardstories.ajax = function(options) {
         equal(options.type, 'GET');
@@ -2147,11 +2155,11 @@ test("advertise", 11, function() {
     ok(!submit_button.hasClass('cardstories_button_disabled'), 'button should be enabled');
 
     // clicking on invite friend button again doesn't do any harm.
-    $('.cardstories_player_invite', element).first().click();
+    invite_button.click();
     equal(textarea.val(), text);
 
-    $('.cardstories_advertise_close', advertise).click();
-    equal(advertise.css('display'), 'none', 'clicking the close button hides the dialog');
+    $('.cardstories_advertise_close', advertise_dialog).click();
+    equal(advertise_dialog.css('display'), 'none', 'clicking the close button hides the dialog');
 });
 
 test("advertise invitation email separators", 6, function() {
