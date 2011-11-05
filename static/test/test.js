@@ -2080,9 +2080,9 @@ test("complete", 30, function() {
     equal($('.cardstories_results img.cardstories_lost_2', element).css('display'), 'none', 'lost image 2 is hidden');
 });
 
-test("play_again_finish_state", 5, function() {
+test("play_again_finish_state author", 4, function() {
     var player_id = 5;
-    var game = {
+    var game_author = {
         'id': 7,
         'owner': true,
         'state': 'fake_state',
@@ -2092,20 +2092,44 @@ test("play_again_finish_state", 5, function() {
     };
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
-    var play_again_button = $('.cardstories_play_again', element);
-    var author_results = $('.cardstories_results', element);
-
-    $.cardstories.complete(player_id, game, root);
-    notEqual(play_again_button.css('display'), 'none', 'play again button is visible when the player is owner');
+    var results = $('.cardstories_results.author', element);
+    var play_again_button = $('.cardstories_play_again', results);
 
     $.cardstories.create = function(_player_id, _root) {
         equal(_player_id, player_id);
         equal(_root, root);
     };
 
-    equal(author_results.css('display'), 'block', 'results are visible before clicking the button');
+    $.cardstories.complete(player_id, game_author, root);
+    equal(results.css('display'), 'block', 'author results are visible before clicking the button');
     play_again_button.click();
-    notEqual(author_results.css('display'), 'block', 'results fade out after clicking the button');
+    notEqual(results.css('display'), 'block', 'author results fade out after clicking the button');
+});
+
+test("play_again_finish_state player", 4, function() {
+    var player_id = 5;
+    var game = {
+        'id': 7,
+        'owner': false,
+        'state': 'fake_state',
+        'winner_card': 15,
+        'board': [],
+        'players': [['Owner', null, 'y', 30, []]]
+    };
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_complete', root);
+    var results = $('.cardstories_results.player', element);
+    var play_again_button = $('.cardstories_play_again', results);
+
+    $.cardstories.create = function(_player_id, _root) {
+        equal(_player_id, player_id);
+        equal(_root, root);
+    };
+
+    $.cardstories.complete(player_id, game, root);
+    equal(results.css('display'), 'block', 'player results are visible before clicking the button');
+    play_again_button.click();
+    notEqual(results.css('display'), 'block', 'player results fade out after clicking the button');
 });
 
 test("advertise", 11, function() {

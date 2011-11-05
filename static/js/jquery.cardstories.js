@@ -3282,23 +3282,26 @@
             var src = picked_card.metadata({type: 'attr', name: 'data'}).card.supplant({card: game.winner_card});
             picked_card.find('.cardstories_card_foreground').attr('src', src);
 
-            // Enable play again button, if owner.
+            // Enable play again button.
+            $('.cardstories_play_again', element).unbind('click').click(function() {
+                var results = $('.cardstories_results', element);
+                var class_name = game.owner ? 'author' : 'player';
+                results.filter('.' + class_name).fadeOut('slow', function() {
+                    // The players of this game will be kept since the
+                    // CARDSTORIES_INVITATIONS cookie stores theirs id's.
+                    $(this).hide(); // A workaround for http://bugs.jquery.com/ticket/8892
+                    $this.create(player_id, root);
+                });
+            });
+
+            // Set progress bar and master seat class.
             var master_seat = $('.cardstories_master_seat', element);
             if (game.owner) {
                 this.display_progress_bar('owner', 6, element, root);
                 master_seat.addClass('owner');
-                $('.cardstories_play_again', element).unbind('click').click(function() {
-                    $('.cardstories_results.author', element).fadeOut('slow', function() {
-                        // The players of this game will be kept since the
-                        // CARDSTORIES_INVITATIONS cookie stores theirs id's.
-                        $(this).hide(); // A workaround for http://bugs.jquery.com/ticket/8892
-                        $this.create(player_id, root);
-                    });
-                });
             } else {
                 this.display_progress_bar('player', 5, element, root);
                 master_seat.addClass('player');
-                $('.cardstories_play_again', element).hide();
             }
 
             // Display board
