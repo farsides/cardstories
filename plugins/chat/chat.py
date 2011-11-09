@@ -16,7 +16,8 @@
 # along with this program in a file in the toplevel directory called
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
-import os
+import os, time, codecs
+from lxml import objectify
 from twisted.python import runtime, log
 from twisted.internet import defer, reactor
 
@@ -41,6 +42,7 @@ class Plugin(pollable):
         # Implement the path conventions
         self.confdir = os.path.join(self.service.settings['plugins-confdir'], self.name())
         self.libdir = os.path.join(self.service.settings['plugins-libdir'], self.name())
+        self.logdir = os.path.join(self.service.settings['plugins-logdir'], self.name())
 
         # Initialize the pollable using the recommended timeout.
         pollable.__init__(self, self.service.settings.get('poll-timeout', 300))
@@ -74,12 +76,31 @@ class Plugin(pollable):
         # Save it in our "database".
         self.messages.append(message)
 
+        # Log the message
+        self.log_message(message)
+
         # Cull out old messages so we don't leak.
         delmessages = [m for m in self.messages
                        if m['timestamp'] < timestamp - MESSAGE_EXPIRE_TIME]
         for m in delmessages:
             self.messages.remove(m)
 
+    def log_message(self, message):
+        """
+        Write down the message to a text file on the filesystem
+        """
+
+        log_time = time.strftime('%d-%m-%Y %H:%M:%S')
+        if message['type'] == 'chat':
+            log_text = '%s <player_%s> %s\n' % (log_time, message['player_id'], message['sentence'])
+        elif message['type'] == 'notification':
+            log_text = '%s ** player_%s created the game "%s" (id=%d)\n' % (log_time, message['player_id'], message['sentence'], message['game_id'])
+
+        log_filename = '%s.log' % time.strftime('%Y-%m-%d')
+        log_filepath = os.path.join(self.logdir, log_filename)
+
+        with codecs.open(log_filepath, mode='ab', encoding='utf-8', errors='replace', buffering=1) as f:
+            f.write(log_text)
 
     def init(self, game, details):
         """

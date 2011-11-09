@@ -11,6 +11,7 @@
   <script type="text/javascript" src="/static/js/jquery.query-2.1.7.js"></script>
   <script type="text/javascript" src="/static/js/jquery.placeholder-1.0.1.js"></script>
   <script type="text/javascript" src="/static/js/jquery.spritely-0.5.js"></script>
+  <script type="text/javascript" src="/static/js/jquery.limit-1.2.source.js"></script>
   <script type="text/javascript" src="/static/js/soundmanager2-nodebug-jsmin.js"></script>
   <script type="text/javascript" src="/static/js/jquery.cardstories.js"></script>
   <script type="text/javascript" src="/static/js/jquery.cardstories.audio.js"></script>
@@ -41,7 +42,7 @@
           </div>
         </div>
         <div class="container">
-          <div class="cardstories" data-sounds='{"ring": "/static/audio/ring.mp3"}'></div>
+          <div class="cardstories" data-sounds='{"ring": "/static/audio/ring.mp3", "pop": "/static/audio/pop.mp3"}'></div>
         </div>
       </div>
       <div class="box"><br /><br /></div>
@@ -62,7 +63,6 @@ $('.cardstories').owa_subscribe('active.cardstories', '?skin=');
 soundManager.url = '/static/audio/';
 // Prefer HTML5 audio to flash, where available.
 soundManager.useHTML5Audio = true;
-soundManager.preferFlash = false;
 
 // Initialize Cardstories
 $.get("/static/cardstories.html", function(data) {

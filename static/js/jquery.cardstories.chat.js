@@ -27,7 +27,7 @@
         poll: 'chat',
 
         templates: {'chat': '<div class="cardstories_chat_message"><strong>{player_id}:</strong> {sentence}</div>',
-                    'notification': '<div class="cardstories_chat_message"><a href="{href}"><strong>{player_id}</strong> created the game <strong>"{sentence}"</strong> - click here to play!</a></div>'},
+                    'notification': '<div class="cardstories_chat_message"><a href="{href}"><strong>{player_id}</strong> created the game <strong>"{sentence}"</strong> <span class="cardstories_join_button">Join game</span></a></div>'},
 
         init: function(player_id, game_id, root) {
 
@@ -36,6 +36,7 @@
                 return;
             }
 
+            var $this = this;
             var display = $('.cardstories_chat_display', root);
             var input = $('.cardstories_chat_input', root);
 
@@ -47,12 +48,18 @@
                 initialized_ts: new Date().getTime()
             });
 
+            // Scroll chat div to bottom on window load event.
+            // This is needed since exact element dimensions are not known yet
+            // when the domready event fires in some browsers (Chrome for example).
+            $(window).load(function() {
+                $this.scroll_to_bottom(root);
+            });
+
             // Initialize placeholder.
             input.placeholder();
 
             // Send message on enter, but only if there's at least one
             // character and we're not sending the placeholder itself.
-            var $this = this;
             input.keydown(function(event) {
                 if (event.which === 13) {
                     var sentence = input.val();
@@ -86,6 +93,7 @@
                             player_id: message.player_id,
                             sentence: message.sentence
                         }
+                        this.play_sound('pop', root, root_data.initialized_ts);
                     } else if (message.type == 'notification') {
                         var l = window.location;
                         var href = l.protocol + '//' + l.host + l.pathname;
@@ -95,24 +103,31 @@
                             player_id: message.player_id,
                             sentence: message.sentence
                         }
-                        // Only play the "ring" sound for notifications that
-                        // happen at least 5 seconds after plugin initialization.
-                        // This is to prevent from flooding the player with rings
-                        // from old notifications on page refresh.
-                        if (new Date().getTime() - root_data.initialized_ts > 5000) {
-                            this.play_ring(root);
-                        }
+                        this.play_sound('ring', root, root_data.initialized_ts);
                     }
                     var div = this.templates[message.type].supplant(tvars);
-                    var display = root_data.display;
-                    display.append(div).scrollTop(display[0].scrollHeight);
+                    root_data.display.append(div);
+                    this.scroll_to_bottom(root);
                 }
             }
         },
 
-        // Plays the ringing sound (depends on the audio plugin).
-        play_ring: function(root) {
-            $.cardstories_audio.play('ring', root);
+        // Scrolls the chat window to the bottom, so that the last received message
+        // is in the viewport.
+        scroll_to_bottom: function(root) {
+            var display = $(root).data('cardstories_chat').display;
+            display.scrollTop(display[0].scrollHeight);
+        },
+
+        // Plays a sound (depends on the audio plugin).
+        play_sound: function(sound_id, root, initialized_ts) {
+            // Only play the sound for notifications that
+            // happen at least 5 seconds after plugin initialization.
+            // This is to prevent from flooding the player with rings
+            // from old notifications on page refresh.
+            if (new Date().getTime() - initialized_ts > 5000) {
+                $.cardstories_audio.play(sound_id, root);
+            }
         }
     };
 

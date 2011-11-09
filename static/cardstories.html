@@ -162,10 +162,11 @@
         <div class="cardstories_board">
           <div class="cardstories_progress"></div>
           <div class="cardstories_write">
-            <form action="javascript://">
+            <form action="javascript:void(0)">
               <div class="cardstories_write_box">
-                <textarea class="cardstories_sentence" cols="60" rows="3" name="sentence" placeholder="Write a story about the card that doesn't describe the image too closely - let your imagination go wild! :p"></textarea>
+                <textarea class="cardstories_sentence" cols="60" rows="3" name="sentence" placeholder="Write a short story about the card that doesn't describe the image too closely - let your imagination go wild! :p"></textarea>
               </div>
+              <div class="cardstories_char_left"><span id="cardstories_char_left_counter"></span> characters left</div>
               <input class="cardstories_submit" type="submit" name="submit" value="" />
             </form>
           </div>
@@ -325,7 +326,7 @@
             <img alt="" src="/static/css/images/modal_background.png" />
             <p class="cardstories_modal_h1">CHOOSE A FAKE CARD</p>
             <p class="cardstories_modal_h2">In your deck, choose a fake card matching the story.</p>
-            <p class="cardstories_modal_h2">Trick your opponents to think this is the Card Story!</p>
+            <p class="cardstories_modal_h2 cardstories_hint">Hints: Nobody has the same card as the game master's. <br />You must trick your opponents to think this is the Card Story!</p>
             <div class="cardstories_modal_button cardstories_img_button">
               <img class="cardstories_btn_on" alt="" src="/static/css/images/modal_button_on.png" />
               <img class="cardstories_btn_over" alt="" src="/static/css/images/modal_button_over.png" />
@@ -403,6 +404,7 @@
             <img alt="" src="/static/css/images/modal_background.png" />
             <p class="cardstories_modal_h1">PLEASE WAIT</p>
             <p class="cardstories_modal_h2">Each of your opponents is choosing<br />a fake card in his own deck.</p>
+            <p class="cardstories_modal_h2 cardstories_hint">Hint: Everyone has different cards,<br />and nobody has the game master's card.</p>
           </div>
         </div>
       </div>
@@ -442,6 +444,7 @@
           <div class="cardstories_modal cardstories_go_vote">
             <img alt="" src="/static/css/images/modal_background.png" />
             <p class="cardstories_modal_h2">The players are choosing fake cards to confuse each other.</p>
+            <p class="cardstories_modal_h2 cardstories_hint">Cards are different for each player, and none of them has your card.</p>
             <div class="cardstories_modal_button cardstories_img_button cardstories_button_disabled">
               <img class="cardstories_btn_on" alt="" src="/static/css/images/modal_button_on.png" />
               <img class="cardstories_btn_over" alt="" src="/static/css/images/modal_button_over.png" />
@@ -506,7 +509,6 @@
             <div class="cardstories_advertise_inner">
               <div class="cardstories_advertise_left">
                 <p class="cardstories_modal_h2">By social network</p>
-
                 <div class="fb-like" data-send="true" data-layout="box_count" data-width="450" data-show-faces="false" data-font="arial"></div>
               </div>
               <div class="cardstories_advertise_right">
@@ -889,6 +891,11 @@
             <strong>neither too easy nor too hard</strong> to guess.
             He confused <strong>some people but not everyone.</strong>
           </p>
+          <div class="cardstories_img_button cardstories_play_again">
+            <img class="cardstories_btn_on" alt="" src="/static/css/images/play_again_button_on.png" />
+            <img class="cardstories_btn_over" alt="" src="/static/css/images/play_again_button_over.png" />
+            <a href="javascript://"><span>PLAY AGAIN!</span></a>
+          </div>
         </div>
         <div class="cardstories_sentence_box">
           <div class="cardstories_sentence_bg_box">

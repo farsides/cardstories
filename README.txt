@@ -59,6 +59,7 @@ $ PYTHONPATH=.:etc/cardstories twistd --nodaemon cardstories \
 	--db /tmp/cardstories.sqlite \
 	--plugins-dir plugins \
 	--plugins-libdir /tmp \
+	--plugins-logdir log/ \
 	--plugins-confdir tests \
 	--plugins 'djangoauth chat mail' \
 	--plugins-pre-process 'djangoauth chat' \
@@ -188,6 +189,7 @@ $ PYTHONPATH=.:etc/cardstories twistd --nodaemon cardstories \
 	--plugins-dir plugins \
 	--plugins-libdir /tmp \
 	--plugins-confdir tests \
+	--plugins-logdir log \
 	--plugins 'auth chat' \
 	--plugins-pre-process 'auth chat' \
 	--plugins-post-process auth

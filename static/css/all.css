@@ -161,6 +161,17 @@
     color: inherit;
 }
 
+.cardstories .cardstories_chat_box .cardstories_chat_message .cardstories_join_button {
+    display: inline-block;
+    background: transparent url('images/join.png') no-repeat left top;
+    width: 98px;
+    height: 27px;
+    font-family: "Licon";
+    font-size: 14pt;
+    color:#FFFFFF;
+    padding: 5px 0 0 20px;
+}
+
 .cardstories .cardstories_chat .cardstories_chat_input {
     position: absolute;
     border: none;
@@ -1198,6 +1209,14 @@
     color: black;
 }
 
+.cardstories .cardstories_create .cardstories_write_sentence .cardstories_char_left {
+    position: absolute;
+    left: 40px;
+    top: 80px;
+    font-family: "Licon";
+    font-size: 14px;
+}
+
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_submit {
     position: absolute;
     background: transparent url('images/b_ok_on.png') no-repeat left top;
@@ -1659,7 +1678,7 @@
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_go_vote { 
     left: 230px;
     top: 185px;
-    height: 140px;
+    height: 190px;
     width: 310px;
 }
 
@@ -1667,6 +1686,11 @@
     font-size: 1.2em;
     width: 75%;
     margin: 2em auto 0.75em auto;
+}
+
+.cardstories .cardstories_invitation .cardstories_owner .cardstories_go_vote .cardstories_modal_h2.cardstories_hint { 
+    font-style: italic;
+    font-weight: normal;
 }
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_go_vote .cardstories_button_disabled {
@@ -1855,8 +1879,18 @@
 .cardstories .cardstories_invitation .cardstories_pick .cardstories_info { 
     left: 220px;
     top: 100px;
-    height: 133px;
+    height: 165px;
     width: 361px;
+}
+
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_info .cardstories_modal_h2 { 
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+}
+
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_info .cardstories_modal_h2.cardstories_hint { 
+    font-style: italic;
+    font-weight: normal;
 }
 
 .cardstories .cardstories_invitation .cardstories_pick .cardstories_cards {
@@ -1938,13 +1972,18 @@
 .cardstories .cardstories_invitation .cardstories_pick_wait .cardstories_modal {
     left: 235px;
     top: 185px;
-    height: 115px;
+    height: 140px;
     width: 300px;
 }
 
 .cardstories .cardstories_invitation .cardstories_pick_wait .cardstories_modal .cardstories_modal_h2 {
     width: 75%;
     margin: 1em auto 1em auto;
+}
+
+.cardstories .cardstories_invitation .cardstories_pick_wait .cardstories_modal .cardstories_modal_h2.cardstories_hint { 
+    font-style: italic;
+    font-weight: normal;
 }
 
 /* state invitation_anonymous */

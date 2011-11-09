@@ -622,8 +622,11 @@
             this.go_lobby(player_id, element);
             $('.cardstories_card', element).attr('class', 'cardstories_card cardstories_card' + card + ' {card:' + card + '}');
             this.create_write_sentence_animate_start(card, element, root);
-            var text = $('.cardstories_sentence', element);
+            var text = $('textarea.cardstories_sentence', element);
             var input = $('.cardstories_submit', element).hide();
+
+            // Show number of characters remaining
+            text.limit('100','#cardstories_char_left_counter');
 
             var is_sentence_valid = function() {
                 var trimmedText = $.trim(text.val());
@@ -650,7 +653,7 @@
                     } else {
                         var root = $(element).parents('.cardstories_root');
                         $this.animate_progress_bar(3, element, function() {
-                            $this.reload(player_id, data.game_id, root); 
+                            $this.reload(player_id, data.game_id, root);
                         });
                     }
                 };
@@ -774,18 +777,17 @@
 
             // Facebook button loading (code snippet)
             var js, fjs = document.getElementsByTagName('script')[0];
-            if (document.getElementById('facebook-jssdk')) {
-                return;
+            if (!document.getElementById('facebook-jssdk')) {
+                js = document.createElement('script');
+                js.id = 'facebook-jssdk';
+                js.src = "//connect.facebook.net/en_US/all.js#appId=280081805344240&xfbml=1";
+                fjs.parentNode.insertBefore(js, fjs);
             }
-            js = document.createElement('script');
-            js.id = 'facebook-jssdk';
-            js.src = "//connect.facebook.net/en_US/all.js#appId=280081805344240&xfbml=1";
-            fjs.parentNode.insertBefore(js, fjs);
 
             this.display_modal(box, overlay);
         },
 
-        poll_timeout: 300 * 1000, // must be identical to the --poll-timeout value 
+        poll_timeout: 300 * 1000, // must be identical to the --poll-timeout value
                                   // server side
 
         poll: function(root, request, cb) {
@@ -1005,12 +1007,12 @@
               if(game[0] in lobby.win) {
                 win = lobby.win[game[0]];
               }
-              row = template.supplant({'game_id': game[0],
-                                       'sentence': game[1],
-                                       'state': game[2],
-                                       'role': role,
-                                       'win': win
-                                      });
+              var row = template.supplant({'game_id': game[0],
+                                           'sentence': game[1],
+                                           'state': game[2],
+                                           'role': role,
+                                           'win': win
+                                          });
               rows.push(row);
             }
             $('.cardstories_games tbody', element).html(rows.join('\n'));
@@ -1262,7 +1264,7 @@
                                 join_sprite.hide();
                                 next();
                             });
-                        }})(slot, slotno));
+                        };})(slot, slotno));
 
                         // Artificial delay between joining and picking.
                         $this.delay(q, 300, playerq);
@@ -1282,7 +1284,7 @@
                                 slot.addClass('cardstories_player_seat_picking');
                                 $('.cardstories_player_status', slot).html('is picking a card<br />...');
                                 next();
-                            }})(slot));
+                            };})(slot));
                         }
                     } else {
                         if (!slot.hasClass('cardstories_noop_picked')) {
@@ -1296,7 +1298,7 @@
                                     pick_sprite.find('.cardstories_card').show();
                                     next();
                                 });
-                            }})(slot, slotno));
+                            };})(slot, slotno));
                         }
 
                         // Only visually enable the button after the second
@@ -1305,7 +1307,7 @@
                         if (game.ready && picked == 2 && !go_vote.hasClass('cardstories_noop_enable')) {
                             go_vote.addClass('cardstories_noop_enable');
                             q.queue(playerq, function(next) {
-                                b = go_vote.find('.cardstories_modal_button');
+                                var b = go_vote.find('.cardstories_modal_button');
                                 b.removeClass('cardstories_button_disabled');
                                 b.find('span').html('GO TO VOTE');
                                 next();
@@ -1323,7 +1325,7 @@
                 q.queue('chain', (function(playerq) {return function(next) {
                     q.dequeue(playerq);
                     next();
-                }})(playerq));
+                };})(playerq));
             }
 
             q.dequeue('chain');
@@ -1366,7 +1368,7 @@
                                     if (is_last_slot) { next(); }
                                 });
                                 if (!is_last_slot) { next(); }
-                            }})(slotno));
+                            };})(slotno));
                         }
                     }
 
@@ -1381,7 +1383,7 @@
                                     next();
                                 }
                             };
-                            card.animate({left: final_left}, 500, cb)
+                            card.animate({left: final_left}, 500, cb);
                         });
                     });
 
@@ -1411,13 +1413,15 @@
 
             // Send game when the user clicks ok.
             var ok = function(card_value, card_index) {
-                $this.send({
-                    action: 'pick',
-                    player_id: player_id,
-                    game_id: game.id,
-                    card: card_value
-                }, function() {
-                    $this.game(player_id, game.id, root);
+                $this.invitation_pick_confirm_helper(player_id, game, card_index, card_value, element, function() {
+                    $this.send({
+                        action: 'pick',
+                        player_id: player_id,
+                        game_id: game.id,
+                        card: card_value
+                    }, function() {
+                        $this.game(player_id, game.id, root);
+                    });
                 });
             };
 
@@ -1431,7 +1435,7 @@
             // Only show initial animations once.
             if (!element.hasClass('cardstories_noop_init')) {
                 element.addClass('cardstories_noop_init');
-                
+
                 // Show a replay of the author picking a card and writing a sentence.
                 q.queue('chain', function(next) {
                     $this.invitation_replay_master(element, root, next);
@@ -1484,20 +1488,6 @@
             }
 
             q.dequeue('chain');
-
-            // Send game when the user clicks ok.
-            var ok = function(card_value, card_index) {
-                $this.invitation_pick_confirm_helper(player_id, game, card_index, card_value, element, function() {
-                    $this.send({
-                        action: 'pick',
-                        player_id: player_id,
-                        game_id: game.id,
-                        card: card_value
-                    }, function() {
-                        $this.game(player_id, game.id, root);
-                    });
-                });
-            };
 
             return deferred;
         },
@@ -1836,7 +1826,7 @@
                                 join_sprite.hide();
                                 next();
                             });
-                        }})(seat, seatno));
+                        };})(seat, seatno));
                     }
                 }
 
@@ -1849,7 +1839,7 @@
                 q.queue('chain', (function(playerq) {return function(next) {
                     q.dequeue(playerq);
                     next();
-                }})(playerq));
+                };})(playerq));
             }
 
             q.dequeue('chain');
@@ -2237,7 +2227,7 @@
                                         seat.addClass('cardstories_player_seat_waiting');
                                         next();
                                     });
-                                }})(seat, seatno, card_img));
+                                };})(seat, seatno, card_img));
                             }
                             status.html('is waiting for other players<br />...');
                         }
@@ -2256,7 +2246,7 @@
                 q.queue('chain', (function(playerq) {return function(next) {
                     q.dequeue(playerq);
                     next();
-                }})(playerq));
+                };})(playerq));
             }
 
             q.dequeue('chain');
@@ -2516,7 +2506,7 @@
                         info.css('top', info_meta.top);
                     }
                     $('.cardstories_modal_overlay', element).fadeIn(300);
-                    $this.animate_scale(false, 5, 300, info, next)
+                    $this.animate_scale(false, 5, 300, info, next);
                 });
             }
 
@@ -2539,7 +2529,8 @@
             // finding out who didn't vote.
             var card2seat = {};
             var absent_seats = $();
-            for (var i=0; i < old_game.players.length; i++) {
+            var i;
+            for (i=0; i < old_game.players.length; i++) {
                 var found = false;
                 for (var j=0; j < game.players.length; j++) {
                     if (old_game.players[i][0] == game.players[j][0]) {
@@ -2558,7 +2549,7 @@
             // Figure out which cards in the board are absent, due to the
             // player not having voted.
             var absent_cards = $();
-            for (var i=0; i < old_game.board.length; i++) {
+            for (i=0; i < old_game.board.length; i++) {
                 if (card2seat[old_game.board[i]] === undefined) {
                     absent_cards = absent_cards.add('.cardstories_card_slot_' + (i + 1), element);
                 }
@@ -2583,7 +2574,7 @@
                     height: tmp.height(),
                     top: tmp.position().top,
                     left: tmp.position().left
-                }
+                };
                 tmp.remove();
                 card.animate(final_pos, 300, next);
             });
@@ -2604,7 +2595,7 @@
                                 next();
                             }
                         });
-                    })
+                    });
                 });
             }
 
@@ -2627,14 +2618,15 @@
                 // Hide label.
                 $('.cardstories_card_label', slot).hide();
 
+                var dest_seat, dest_seat_pos;
                 // Animate each card to the seat of the player who picked it.
                 if (value === game.winner_card) {
                     delay_next = true;
-                    var dest_seat = $('.cardstories_picked_card', dest_element);
+                    dest_seat = $('.cardstories_picked_card', dest_element);
                     var dest_sentence = $('.cardstories_sentence_box', dest_element);
 
                     // Grab final positions.
-                    var dest_seat_pos = {
+                    dest_seat_pos = {
                         width: dest_seat.width(),
                         height: dest_seat.height(),
                         top: dest_seat.position().top,
@@ -2651,7 +2643,7 @@
                     });
                 } else if (card2seat[value] !== undefined) {
                     delay_next = true;
-                    var dest_seat = $('.cardstories_player_seat_card_' + card2seat[value], dest_element);
+                    dest_seat = $('.cardstories_player_seat_card_' + card2seat[value], dest_element);
 
                     // Grab final position.
                     dest_seat.show();
@@ -2683,7 +2675,7 @@
                 q.queue('chain', (function(cardq) {return function(next) {
                     q.dequeue(cardq);
                     next();
-                }})(cardq));
+                };})(cardq));
             });
 
             // Hide dest_element, after all positions were calculated.
@@ -2718,7 +2710,7 @@
                 // Show modal.
                 q.queue('chain', function(next) {
                     var info = $('.cardstories_info', element);
-                    $this.animate_scale(false, 5, 300, info, next)
+                    $this.animate_scale(false, 5, 300, info, next);
                 });
             }
 
@@ -2744,7 +2736,7 @@
             // Activate the announce results button if the game is ready.
             var announce = $('.cardstories_results_announce', element);
             if (game.ready) {
-                b = announce.find('.cardstories_modal_button');
+                var b = announce.find('.cardstories_modal_button');
                 b.removeClass('cardstories_button_disabled');
                 b.find('span').html('ANNOUNCE RESULTS');
                 b.unbind('click').click(function() {
@@ -2838,7 +2830,7 @@
                         card2seat[picked] = seatno;
                     }
                 }
-                
+
                 // Show destination element temporarily, so that positions can be calculated.
                 dest_element.addClass('cardstories_active');
 
@@ -2853,12 +2845,13 @@
                         $this.delay(q, 150, 'chain');
                     }
 
+                    var dest_seat, dest_seat_pos;
                     if (game.winner_card == value) {
-                        var dest_seat = $('.cardstories_picked_card', dest_element);
+                        dest_seat = $('.cardstories_picked_card', dest_element);
                         var dest_sentence = $('.cardstories_sentence_box', dest_element);
 
                         // Grab final positions.
-                        var dest_seat_pos = {
+                        dest_seat_pos = {
                             width: dest_seat.width(),
                             height: dest_seat.height(),
                             top: dest_seat.position().top,
@@ -2875,7 +2868,7 @@
                             sentence.animate(dest_sentence_pos, 500, next);
                         });
                     } else {
-                        var dest_seat = $('.cardstories_player_seat_card_' + card2seat[value], dest_element);
+                        dest_seat = $('.cardstories_player_seat_card_' + card2seat[value], dest_element);
 
                         // Grab final position.
                         dest_seat.show();
@@ -2912,7 +2905,7 @@
                     q.queue('chain', (function(cardq) {return function(next) {
                         q.dequeue(cardq);
                         next();
-                    }})(cardq));
+                    };})(cardq));
                 });
 
                 // Hide dest_element, after all positions were calculated.
@@ -2938,7 +2931,7 @@
                         $('.cardstories_player_name', seat).html(players[i][0]);
                         seat.show();
                         $('.cardstories_player_arms_' + seatno, element).show();
-                        
+
                         // Only show hand cards during setup phase.
                         if (setup) {
                             // If we're a player, show the card we picked.
@@ -3055,7 +3048,7 @@
                     n = n - (range/2);
                 }
                 return n;
-            }
+            };
 
             // Shuffle all the cards.
             var last = cards.length - 1;
@@ -3077,7 +3070,7 @@
                     center_left: card_meta.cl
                 };
                 card_slot.hide();
-                
+
                 // Animate to center.
                 q.queue(cardq, function(next) {
                     card.animate({
@@ -3094,7 +3087,7 @@
                     var rl = card_pos.center_left + rand(shuffle_range, true);
                     q.queue(cardq, (function(rt, rl) {return function(next) {
                         card.animate({top: rt, left: rl}, shuffle_duration, 'linear', next);
-                    }})(rt, rl));
+                    };})(rt, rl));
                 }
 
                 // Animate to final position.
@@ -3289,31 +3282,35 @@
             var src = picked_card.metadata({type: 'attr', name: 'data'}).card.supplant({card: game.winner_card});
             picked_card.find('.cardstories_card_foreground').attr('src', src);
 
-            // Enable play again button, if owner.
+            // Enable play again button.
+            $('.cardstories_play_again', element).unbind('click').click(function() {
+                var results = $('.cardstories_results', element);
+                var class_name = game.owner ? 'author' : 'player';
+                results.filter('.' + class_name).fadeOut('slow', function() {
+                    // The players of this game will be kept since the
+                    // CARDSTORIES_INVITATIONS cookie stores theirs id's.
+                    $(this).hide(); // A workaround for http://bugs.jquery.com/ticket/8892
+                    $this.create(player_id, root);
+                });
+            });
+
+            // Set progress bar and master seat class.
             var master_seat = $('.cardstories_master_seat', element);
             if (game.owner) {
                 this.display_progress_bar('owner', 6, element, root);
                 master_seat.addClass('owner');
-                $('.cardstories_play_again', element).unbind('click').click(function() {
-                    $('.cardstories_results', element).fadeOut('slow', function() {
-                        // The players of this game will be kept since the
-                        // CARDSTORIES_INVITATIONS cookie stores theirs id's.
-                        $this.create(player_id, root);
-                    });
-                });
             } else {
                 this.display_progress_bar('player', 5, element, root);
                 master_seat.addClass('player');
-                $('.cardstories_play_again', element).hide();
             }
 
             // Display board
             this.complete_display_board(game, element, root);
-            
+
             // Only show initial animations once.
             if (!element.hasClass('cardstories_noop_init')) {
                 element.addClass('cardstories_noop_init');
-                
+
                 var q = $({});
 
                 // Animate envelopes.
@@ -3390,7 +3387,7 @@
                     card2seat[picked] = 6;
                 }
             }
-                
+
             var snippets = $('.cardstories_snippets', root);
             var vote_slot_snippet = $('.cardstories_vote_slot', snippets);
             var q = $({});
@@ -3405,17 +3402,18 @@
                 }
 
                 var envelope = $('.cardstories_envelope_' + i, element);
+                var vote, denvelope;
                 if (card2seat[player[1]] !== undefined) {
                     // Insert the vote
                     var votes = $('.cardstories_votes_' + card2seat[player[1]], element);
-                    var vote = vote_slot_snippet.clone();
+                    vote = vote_slot_snippet.clone();
                     vote.appendTo(votes);
 
                     // Get top/left coordinates of the destination
-                    // envelope.  Elements must be visible for position()
+                    // envelope. Elements must be visible for position()
                     // to work.
                     var vpos = votes.position();
-                    var denvelope = $('.cardstories_envelope', vote);
+                    denvelope = $('.cardstories_envelope', vote);
                     denvelope.show();
                     var pos = denvelope.show().position();
                     denvelope.hide();
@@ -3483,8 +3481,9 @@
             // correct card, it was too hard.  Otherwise, it was too
             // easy.
             var too_hard = true;
+            var i;
             if (owner_lost) {
-                for (var i=0; i < game.players.length; i++) {
+                for (i=0; i < game.players.length; i++) {
                     if (game.winner_card == game.players[i][1]) {
                         too_hard = false;
                         break;
@@ -3504,7 +3503,7 @@
                 }
             } else {
                 var player_lost = true;
-                for (var i=0; i < game.players.length; i++) {
+                for (i=0; i < game.players.length; i++) {
                     if (game.players[i][0] == player_id && game.players[i][2] == 'y') {
                         player_lost = false;
                     }
@@ -3648,12 +3647,10 @@
                 var is_last = i === images.length - 1;
 
                 var onload = function() {
-                    image.img.onload = image.img.onerror = null;
+                    image.img = image.img.onload = image.img.onerror = null;
                     $this.setTimeout(function() {
                         loaded_count++;
                         update_progress();
-                        // Append image to the DOM otherwise some browsers won't cache it.
-                        $('<img/>').attr('src', image.src).appendTo(preloaded_images_div);
                         if (!is_last) {
                             load_image(i + 1);
                         }
@@ -3670,7 +3667,7 @@
                     if (!is_last) { load_image(i + 1); }
                 } else {
                     image.taken = true;
-                    image.img.onload = image.onerror = onload;
+                    image.img.onload = image.img.onerror = onload;
                     image.img.src = image.src;
                     // If image is already loaded, trigger the load event manually.
                     // Some browsers will do this for us automatically, while others won't.
@@ -3845,7 +3842,7 @@
             var $this = this;
             var element = $('.cardstories_subscribe', root);
             this.set_active(root, element, null, 'email');
-            validator = $(".cardstories_emailform", element).submit(function() {
+            $(".cardstories_emailform", element).submit(function() {
                 var player_id = encodeURIComponent($('.cardstories_email', element).val());
                 $.cookie('CARDSTORIES_ID', player_id);
                 $this.game_or_lobby(player_id, game_id, root, 0);
@@ -3940,5 +3937,9 @@
     $(window).bind("beforeunload", function() {
         $.cardstories.error = $.cardstories.noop;
     });
+
+    // Default jQuery animation interval is 13ms. Increase it to 33ms (30 fps)
+    // for better performance.
+    $.fx.interval = 33;
 
 })(jQuery);

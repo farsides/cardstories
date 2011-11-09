@@ -37,7 +37,8 @@
                 $.each($root.data('sounds'), function(sound_id, url) {
                     sounds[sound_id] = soundManager.createSound({
                         id: sound_id,
-                        url: url
+                        url: url,
+                        volume: 25
                     });
                 });
 

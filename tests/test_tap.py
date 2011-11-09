@@ -70,6 +70,7 @@ class CardstoriesServerTest(unittest.TestCase):
         plugins = 'P1 P2 P3'
         plugins_dir = 'PLUGINDIR'
         plugins_libdir = 'PLUGINDIR/LIB'
+        plugins_logdir = 'LOGDIR'
         plugins_confdir = 'PLUGINDIR/CONF'
         plugins_pre_process = 'P1 P2'
         plugins_post_process = 'P2 P1'
@@ -81,6 +82,7 @@ class CardstoriesServerTest(unittest.TestCase):
                                '--plugins', plugins,
                                '--plugins-dir', plugins_dir,
                                '--plugins-libdir', plugins_libdir,
+                               '--plugins-logdir', plugins_logdir,
                                '--plugins-confdir', plugins_confdir,
                                '--plugins-pre-process', plugins_pre_process,
                                '--plugins-post-process', plugins_post_process
@@ -92,6 +94,7 @@ class CardstoriesServerTest(unittest.TestCase):
         self.assertEquals(plugins_dir, settings['plugins-dir'])
         self.assertEquals(plugins_libdir, settings['plugins-libdir'])
         self.assertEquals(plugins_confdir, settings['plugins-confdir'])
+        self.assertEquals(plugins_logdir, settings['plugins-logdir'])
         self.assertEquals(plugins_pre_process, settings['plugins-pre-process'])
         self.assertEquals(plugins_post_process, settings['plugins-post-process'])
         self.assertEquals(int(self.port), settings['port'])

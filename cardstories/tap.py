@@ -48,6 +48,7 @@ class Options(usage.Options):
          ["plugins-libdir", "", "/var/lib/cardstories/plugins", "plugins storage directory", str],
          ["plugins-confdir", "", "/etc/cardstories/plugins", "plugins configuration directory", str],
          ["plugins-dir", "", "/usr/share/cardstories/plugins", "plugins directory", str],
+         ["plugins-logdir", "", "/var/log/cardstories", "plugins log directory", str],
          ["plugins", "", "", "white space separated list of plugins to load, either a path name of a name in plugins-dir without the trailing .py", str],
          ["plugins-pre-process", "", "", "white space separated list of plugins to rework the incoming HTTP request", str],
          ["plugins-post-process", "", "", "white space separated list of plugins to reworkd the JSON result of a request", str]

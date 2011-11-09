@@ -22,6 +22,7 @@
             </div>  
           </div>  
           <div class="like">
+            <div class="fb-connect"><a href="https://www.facebook.com/dialog/oauth?client_id={{ fb_app_id }}&redirect_uri={{ fb_redirect_uri }}&scope={% fb_perms %}"><img src="/static/css/images/btn-facebook.png" alt="Connect with Facebook" /></a></div>
             <div><g:plusone size="medium" href="http://cardstories.org"></g:plusone></div>
             <div>{% fb_like %}</div>
           </div>
@@ -48,9 +49,6 @@
             <form class="registration" method="post" action="/register/{{ gameid_query }}">{% csrf_token %}
               <fieldset>
                 <div class="row">
-                  {{ registration_form.name }}
-                </div>
-                <div class="row">
                   {{ registration_form.username }}
                 </div>
                 <div class="row">
@@ -58,6 +56,9 @@
                   {{ registration_form.password1_clear }}
                   {{ registration_form.password2 }}
                   {{ registration_form.password2_clear }}
+                </div>
+                <div class="row">
+                  {{ registration_form.name }}
                 </div>
                 <div class="row"><input type="submit" value="REGISTER" class="button" /></div>
                 <div class="row"><p>We promise to never give or sell your email to anyone. We hate spams just like you.</p></div>
@@ -92,7 +93,7 @@
             <div class="coltitle">
               <h2>Social Networks</h2>
             </div>
-            <a href="https://www.facebook.com/dialog/oauth?client_id={{ fb_app_id }}&redirect_uri={{ fb_redirect_uri }}&scope={% fb_perms %}"><img src="/static/css/images/btn-facebook.gif" alt="Connect with Facebook" /></a>
+            <a href="https://www.facebook.com/dialog/oauth?client_id={{ fb_app_id }}&redirect_uri={{ fb_redirect_uri }}&scope={% fb_perms %}"><img src="/static/css/images/btn-facebook.png" alt="Connect with Facebook" /></a>
           </div>
         </div>  
       </div>
