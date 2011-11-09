@@ -62,20 +62,23 @@ class CardstoriesResource(resource.Resource):
         # catch errors and dump a trace ...
         def failed(reason):
             reason.printTraceback()
-            body = reason.getTraceback()
-            request.setResponseCode(http.INTERNAL_SERVER_ERROR)
-            request.setHeader('content-type',"text/html")
-            request.setHeader('content-length', str(len(body)))
-            request.write(body)
-            request.finish()
+            if not request._disconnected:
+                body = reason.getTraceback()
+                request.setResponseCode(http.INTERNAL_SERVER_ERROR)
+                request.setHeader('content-type',"text/html")
+                request.setHeader('content-length', str(len(body)))
+                request.write(body)
+                request.finish()
+            return True
         # ... or return the JSON result to the caller
         def succeed(result):
-            content = json.dumps(result)
-            request.setHeader("content-length", str(len(content)))
-            request.setHeader("content-type", 'application/json; charset="UTF-8"')
-            request.setHeader("cache-control", 'no-cache');
-            request.write(content)
-            request.finish()
+            if not request._disconnected:
+                content = json.dumps(result)
+                request.setHeader("content-length", str(len(content)))
+                request.setHeader("content-type", 'application/json; charset="UTF-8"')
+                request.setHeader("cache-control", 'no-cache');
+                request.write(content)
+                request.finish()
             return result
         d.addCallbacks(succeed, failed)
 

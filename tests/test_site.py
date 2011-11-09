@@ -122,6 +122,19 @@ class CardstoriesResourceTest(unittest.TestCase):
         d.addCallback(finish)
         return d
 
+    def test01_wrap_http_disconnected(self):
+        resource = CardstoriesResource(self.service)
+        self.site = CardstoriesSite(resource, {}, [])
+        request = server.Request(self.Channel(self.site), True)
+        request.site = self.site
+        request.method = 'GET'
+        request._disconnected = True
+        d = resource.wrap_http(request)
+        def finish(result):
+            self.assertEquals('', request.transport.getvalue())
+        d.addCallback(finish)
+        return d
+
     def test02_wrap_http_plugin(self):
         class MyService:
             def handle(self, result, args):
@@ -191,6 +204,22 @@ class CardstoriesResourceTest(unittest.TestCase):
         d.addCallback(finish)
         return d
 
+    def test03_wrap_http_fail_disconnected(self):
+        resource = CardstoriesResource(self.service)
+        fail_string = 'FAIL STRING'
+        def fail(result, request):
+            raise Exception(fail_string)
+        resource.handle = fail
+        self.site = CardstoriesSite(resource, {}, [])
+        request = server.Request(self.Channel(self.site), True)
+        request.site = self.site
+        request._disconnected = True
+        d = resource.wrap_http(request)
+        def finish(result):
+            self.assertSubstring('', request.transport.getvalue())
+        d.addCallback(finish)
+        return d
+
     def test04_handle(self):
         resource = CardstoriesResource(self.service)
         self.site = CardstoriesSite(resource, {}, [])
@@ -236,7 +265,7 @@ class AGPLResourceTest(unittest.TestCase):
 
 def Run():
     loader = runner.TestLoader()
-#    loader.methodPrefix = "test_trynow"
+#    loader.methodPrefix = "test03"
     suite = loader.suiteFactory()
     suite.addTest(loader.loadClass(CardstoriesSiteTest))
     suite.addTest(loader.loadClass(CardstoriesResourceTest))
