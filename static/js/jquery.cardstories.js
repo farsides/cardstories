@@ -21,6 +21,8 @@
 
         SEATS: 6,
 
+        NB_CARDS: 37,
+
         window: window,
 
         location: location,
@@ -85,8 +87,9 @@
 
         create_deck: function() {
             var deck = [];
+            var $this = this;
             var i;
-            for(i = 1; i <= 36; i++) {
+            for(i = 1; i <= $this.NB_CARDS; i++) {
                 deck.push(i);
             }
             var cards = [];
@@ -3759,7 +3762,8 @@
             'card033.png',
             'card034.png',
             'card035.png',
-            'card036.png'
+            'card036.png',
+            'card037.png'
         ],
 
         unset_active: function(root) {
