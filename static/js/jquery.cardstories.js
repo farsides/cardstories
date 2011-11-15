@@ -1112,10 +1112,15 @@
             var picked_card = $('.cardstories_picked_card', element);
             var src = picked_card.metadata({type: 'attr', name: 'data'}).card.supplant({card: game.winner_card});
             picked_card.find('.cardstories_card_foreground').attr('src', src);
+            var go_vote = $('.cardstories_go_vote', element);
+
+            // Bind countdown select.
+            $('.cardstories_countdown_select', go_vote).unbind('change').change(function() {
+                $this.send_countdown_duration($(this).val(), game.owner_id, game.id, root);
+            });
 
             // Bind go vote button, if possible.
             if (game.ready) {
-                var go_vote = $('.cardstories_go_vote', element);
                 $('.cardstories_modal_button', go_vote).unbind('click').click(function() {
                     $this.animate_scale(true, 5, 300, go_vote, function() {
                         $this.invitation_owner_go_vote_confirm(player_id, game, element, root);
@@ -1304,12 +1309,18 @@
                         // Only visually enable the button after the second
                         // picked card animation, to match server logic.
                         picked++;
-                        if (game.ready && picked == 2 && !go_vote.hasClass('cardstories_noop_enable')) {
-                            go_vote.addClass('cardstories_noop_enable');
+                        if (game.ready && picked == 2) {
                             q.queue(playerq, function(next) {
-                                var b = go_vote.find('.cardstories_modal_button');
-                                b.removeClass('cardstories_button_disabled');
-                                b.find('span').html('GO TO VOTE');
+                                // Start the countdown.
+                                var countdown_select = go_vote.find('.cardstories_countdown_select');
+                                $this.start_countdown(game.countdown_finish, countdown_select);
+                                // Enable the button.
+                                if (!go_vote.hasClass('cardstories_noop_enable')) {
+                                    go_vote.addClass('cardstories_noop_enable');
+                                    var b = go_vote.find('.cardstories_modal_button');
+                                    b.removeClass('cardstories_button_disabled');
+                                    b.find('span').html('GO TO VOTE');
+                                }
                                 next();
                             });
                         }
@@ -2732,10 +2743,20 @@
             this.display_master_name(game.owner_id, element);
             this.go_lobby(player_id, element);
             $('.cardstories_sentence', element).text(game.sentence);
-
-            // Activate the announce results button if the game is ready.
             var announce = $('.cardstories_results_announce', element);
+
+            // Bind countdown select.
+            $('.cardstories_countdown_select', announce).unbind('change').change(function() {
+                $this.send_countdown_duration($(this).val(), game.owner_id, game.id, root);
+            });
+
+            // Activate the announce results button if the game is ready
+            // and run the countdown.
             if (game.ready) {
+                // Start the countdown.
+                var countdown_select = announce.find('.cardstories_countdown_select');
+                $this.start_countdown(game.countdown_finish, countdown_select);
+                // Enable the button.
                 var b = announce.find('.cardstories_modal_button');
                 b.removeClass('cardstories_button_disabled');
                 b.find('span').html('ANNOUNCE RESULTS');
@@ -3836,6 +3857,94 @@
                     cb();
                 }
             });
+        },
+
+        send_countdown_duration: function(duration, owner_id, game_id, root) {
+            var $this = this;
+            $this.send({
+                action: 'set_countdown',
+                duration: duration,
+                game_id: game_id
+            }, function() {
+                $this.game(owner_id, game_id, root);
+            });
+        },
+
+        start_countdown: function(end_ts, select_element) {
+            var $this = this;
+            // Cancel any running countdowns first.
+            var meta_reset_fn = select_element.data('cardstories_countdown_reset');
+            if (meta_reset_fn) { meta_reset_fn(); }
+
+            var timeout;
+            var element = select_element.find('option:selected');
+            var original_html = element.html();
+
+            // Clears any timeout and resets the html back into original state.
+            var reset = function() {
+                clearTimeout(timeout);
+                element.html(original_html);
+            };
+            // Save it as metadata on the DOM element to be able to cancel
+            // the countdown later.
+            select_element.data('cardstories_countdown_reset', reset);
+
+            // Returns a difference between two date/time objects, broken down into
+            // days, hours, minutes and seconds.
+            var timedelta = function(time1, time2) {
+                var diff_secs = Math.round((time1 - time2) / 1000);
+                var days = Math.floor(diff_secs / 86400);
+                var hours = Math.floor((diff_secs % 86400) / 3600);
+                var minutes = Math.floor((diff_secs % 3600) / 60);
+                var seconds = diff_secs % 60;
+
+                return {days: days, hours: hours, minutes: minutes, seconds: seconds};
+            };
+
+            // Returns a string representing approximate duration.
+            // If duration is more than a day, returns "x days",
+            // if more than an hour, returns "x hours", and so on.
+            // If duration is zero return "0 seconds".
+            var pprint_timedelta = function(tdelta) {
+                var result;
+                if (tdelta.days > 0) {
+                    result = tdelta.days + ' days';
+                } else if (tdelta.hours > 0) {
+                    result = tdelta.hours + ' hours';
+                } else if (tdelta.minutes > 0) {
+                    result = tdelta.minutes + ' minutes';
+                } else {
+                    result = tdelta.seconds + ' seconds';
+                }
+                return result;
+            };
+
+            // Refreshes the contents of element with the current countdown.
+            var refresh = function() {
+                var now_ts = $.now();
+                // Countdown will finish in diff_ms miliseconds.
+                var diff_ms = end_ts - now_ts;
+
+                // If we are already over the countdown finish deadline,
+                // just print 0 seconds and stop.
+                if (diff_ms < 0) {
+                    element.html('0 seconds');
+                } else {
+                    // Round down to the nearest full second (next tick).
+                    var next_tick_ms = diff_ms % 1000;
+                    // Account for the fact that diff_ms may be a multiple of 1000.
+                    if (next_tick_ms === 0 && diff_ms > 0) { next_tick_ms = 1000; }
+                    var tdelta = timedelta(diff_ms, next_tick_ms);
+                    // Display the time left.
+                    element.html(pprint_timedelta(tdelta));
+                    // Rinse and repeat.
+                    if (next_tick_ms !== 0) {
+                        timeout = $.cardstories.setTimeout(refresh, next_tick_ms);
+                    }
+                }
+            };
+            // Immediately start refreshing the countdown time.
+            refresh();
         },
 
         email: function(game_id, root) {

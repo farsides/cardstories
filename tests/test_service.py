@@ -535,7 +535,7 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         #
         class Plugin(pollable):
             def __init__(self):
-                pollable.__init__(self, 200000000000)
+                pollable.__init__(self, 200000000)
             def name(self):
                 return 'plugin'
         plugin = Plugin()
@@ -721,6 +721,25 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         self.assertEquals(state[0]['type'], 'game')
         self.assertEquals(state[1]['type'], 'lobby')
         self.assertEquals(state[2]['type'], 'plugin')
+
+    @defer.inlineCallbacks
+    def test13_set_countdown(self):
+        card = 7
+        sentence = 'SENTENCE'
+        owner_id = 52
+        game = yield self.service.create({ 'action': ['create'],
+                                           'card': [card],
+                                           'sentence': [sentence],
+                                           'owner_id': [owner_id]})
+
+        gameId = game['game_id']
+        yield self.service.set_countdown({ 'action': ['set_countdown'],
+                                           'duration': ['3600'],
+                                           'game_id': [game['game_id']] })
+
+        game = self.service.games[game['game_id']]
+        self.assertEquals(3600, game.get_countdown_duration())
+
 
 def Run():
     loader = runner.TestLoader()

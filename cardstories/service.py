@@ -48,7 +48,7 @@ class CardstoriesPlayer(pollable):
 
 class CardstoriesService(service.Service):
 
-    ACTIONS_GAME = ( 'participate', 'voting', 'pick', 'vote', 'complete', 'invite' )
+    ACTIONS_GAME = ( 'participate', 'voting', 'pick', 'vote', 'complete', 'invite', 'set_countdown' )
     ACTIONS = ACTIONS_GAME + ( 'create', 'poll', 'state' )
 
     def __init__(self, settings):
@@ -358,6 +358,12 @@ class CardstoriesService(service.Service):
 
         game_id = self.required_game_id(args)
         return self.game_method(game_id, args['action'][0], player_ids)
+
+    def set_countdown(self, args):
+        self.required(args, 'set_countdown', 'duration')
+        duration = int(args['duration'][0])
+        game_id = self.required_game_id(args)
+        return self.game_method(game_id, args['action'][0], duration)
 
     @defer.inlineCallbacks
     def lobby(self, args):

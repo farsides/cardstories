@@ -17,6 +17,7 @@
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
 import random
+import time
 
 from twisted.python import runtime, log
 from twisted.internet import defer, reactor
@@ -30,6 +31,7 @@ class CardstoriesGame(pollable):
     NCARDS = 36
     NPLAYERS = 6
     CARDS_PER_PLAYER = 7
+    DEFAULT_COUNTDOWN_DURATION = 60 # needs to be coordinated with the value on the UI
 
     def __init__(self, service, id = None):
         self.service = service
@@ -46,6 +48,7 @@ class CardstoriesGame(pollable):
         return pollable.touch(self, kwargs)
 
     def destroy(self):
+        self.clear_countdown()
         if hasattr(self, 'timer') and self.timer.active():
             self.timer.cancel()
         if hasattr(self, 'service'):
@@ -213,10 +216,11 @@ class CardstoriesGame(pollable):
                             'modified': self.get_modified(),
                             'sentence': sentence,
                             'winner_card': winner_card,
-                            'cards': cards, 
-                            'board': board, 
+                            'cards': cards,
+                            'board': board,
                             'state': state,
                             'ready': ready,
+                            'countdown_finish': self.get_countdown_finish(),
                             'self': myself,
                             'owner': owner_id == player_id,
                             'owner_id': owner_id,
@@ -246,6 +250,7 @@ class CardstoriesGame(pollable):
 
     @defer.inlineCallbacks
     def voting(self, owner_id):
+        self.clear_countdown()
         game = yield self.game(self.get_owner_id())
         discarded = []
         board = []
@@ -271,15 +276,57 @@ class CardstoriesGame(pollable):
                             'vote': self.ord(rows[0][2]),
                             'win': rows[0][3] })
 
+    def is_countdown_active(self):
+        return hasattr(self, 'countdown_timer') and self.countdown_timer.active()
+
+    def get_countdown_duration(self):
+        custom_duration = hasattr(self, 'countdown_duration') and self.countdown_duration
+        return custom_duration or self.DEFAULT_COUNTDOWN_DURATION
+
+    def set_countdown_duration(self, duration):
+        self.countdown_duration = duration
+
+    def get_countdown_finish(self):
+        if self.is_countdown_active():
+            return int(round(self.countdown_timer.getTime() * 1000))
+
+    def start_countdown(self):
+        duration = self.get_countdown_duration()
+        self.countdown_timer = reactor.callLater(duration, self.state_change)
+
+    def reset_countdown(self):
+        self.countdown_timer.cancel()
+        self.start_countdown()
+
+    def clear_countdown(self):
+        if hasattr(self, 'countdown_duration'):
+            del self.countdown_duration
+        if self.is_countdown_active():
+            self.countdown_timer.cancel()
+
+    @defer.inlineCallbacks
+    def set_countdown(self, duration):
+        self.set_countdown_duration(duration)
+        if self.is_countdown_active():
+            self.reset_countdown()
+        result = yield self.touch(type = 'set_countdown')
+        defer.returnValue(result)
+
     @defer.inlineCallbacks
     def pick(self, player_id, card):
         yield self.service.db.runOperation("UPDATE player2game SET picked = ? WHERE game_id = ? AND player_id = ?", [ chr(card), self.get_id(), player_id ])
+        count = yield self.service.db.runQuery("SELECT COUNT(*) FROM player2game WHERE game_id = ? AND picked IS NOT NULL", [ self.get_id() ])
+        if count[0][0] >= self.MIN_PICKED and not self.is_countdown_active():
+            self.start_countdown()
         result = yield self.touch(type = 'pick', player_id = player_id, card = card)
         defer.returnValue(result)
 
     @defer.inlineCallbacks
     def vote(self, player_id, vote):
         yield self.service.db.runOperation("UPDATE player2game SET vote = ? WHERE game_id = ? AND player_id = ?", [ chr(vote), self.get_id(), player_id ])
+        count = yield self.service.db.runQuery("SELECT COUNT(*) FROM player2game WHERE game_id = ? AND vote IS NOT NULL", [ self.get_id() ])
+        if count[0][0] >= self.MIN_VOTED and not self.is_countdown_active():
+            self.start_countdown()
         result = yield self.touch(type = 'vote', player_id = player_id, vote = vote)
         defer.returnValue(result)
 
@@ -307,6 +354,7 @@ class CardstoriesGame(pollable):
 
     @defer.inlineCallbacks
     def complete(self, owner_id):
+        self.clear_countdown()
         game = yield self.game(self.get_owner_id())
         no_vote = filter(lambda player: player[1] == None and player[0] != self.get_owner_id(), game['players'])
         yield self.service.db.runInteraction(self.completeInteraction, self.get_id(), owner_id)

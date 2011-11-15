@@ -20,6 +20,7 @@ import sys
 import os
 sys.path.insert(0, os.path.abspath("..")) # so that for M-x pdb works
 import sqlite3
+import time
 
 from twisted.trial import unittest, runner, reporter
 from twisted.internet import defer, reactor
@@ -274,6 +275,7 @@ class CardstoriesGameTest(unittest.TestCase):
                            'cards': None,
                            'id': game_id,
                            'ready': False,
+                           'countdown_finish': None,
                            'owner': False,
                            'owner_id': 15,
                            'players': [[owner_id, None, u'n', '', None],
@@ -319,6 +321,9 @@ class CardstoriesGameTest(unittest.TestCase):
         # invitation state, owner point of view
         game_info = yield self.game.game(owner_id)
         self.assertTrue(game_info['ready'])
+        self.assertTrue(type(game_info['countdown_finish']) is long)
+        now_ms = time.time() * 1000
+        self.assertTrue(game_info['countdown_finish'] > now_ms)
 
         # move to vote state
         result = yield self.game.voting(owner_id)
@@ -331,6 +336,7 @@ class CardstoriesGameTest(unittest.TestCase):
         self.assertEquals(self.game.NCARDS, len(game_info['cards']) + sum(map(lambda player: len(player[4]), game_info['players'])))
         self.assertTrue(game_info['owner'])
         self.assertFalse(game_info['ready'])
+        self.assertEquals(game_info['countdown_finish'], None)
         self.assertEquals(game_id, game_info['id'])
         self.assertEquals(owner_id, game_info['players'][0][0])
         self.assertEquals(winner_card, game_info['players'][0][3])
@@ -355,10 +361,15 @@ class CardstoriesGameTest(unittest.TestCase):
         game_info = yield self.game.game(player1)
         game_info['board'].sort()
         player1_cards = game_info['players'][1][4]
+        countdown_finish = game_info['countdown_finish']
+        self.assertTrue(type(countdown_finish) is long)
+        now_ms = time.time() * 1000
+        self.assertTrue(countdown_finish > now_ms)
         self.assertEquals({'board': [winner_card, card1, card2],
                            'cards': None,
                            'id': game_id,
                            'ready': True,
+                           'countdown_finish': countdown_finish,
                            'owner': False,
                            'owner_id': 15,
                            'players': [[owner_id, None, u'n', '', None],
@@ -398,6 +409,7 @@ class CardstoriesGameTest(unittest.TestCase):
                            'cards': None,
                            'id': game_id,
                            'ready': False,
+                           'countdown_finish': None,
                            'owner': False,
                            'owner_id': 15,
                            'players': [[owner_id, None, u'n', '', None],
@@ -409,6 +421,54 @@ class CardstoriesGameTest(unittest.TestCase):
                            'state': u'invitation',
                            'invited': None,
                            'modified': self.game.modified}, game_info)
+
+    @defer.inlineCallbacks
+    def test08_game_countdown_timeout(self):
+        winner_card = 5
+        sentence = 'SENTENCE'
+        owner_id = 15
+        game_id = yield self.game.create(winner_card, sentence, owner_id)
+        # move to invitation state
+        player1 = 16
+        card1 = 20
+        player2 = 17
+        card2 = 25
+        for player_id in ( player1, player2 ):
+            result = yield self.game.participate(player_id)
+
+        # change countdown duration prior to game ready
+        yield self.game.set_countdown(1)
+
+        # players vote
+        result = yield self.game.pick(player1, card1)
+        self.assertEquals([game_id], result['game_id'])
+        result = yield self.game.pick(player2, card2)
+        self.assertEquals([game_id], result['game_id'])
+
+        game_info = yield self.game.game(owner_id)
+        now_ms = time.time() * 1000
+        self.assertTrue(now_ms < game_info['countdown_finish'] < now_ms + 1000)
+
+        # move to vote state manually
+        result = yield self.game.voting(owner_id)
+
+        # every player vote
+        result = yield self.game.vote(player1, card2)
+        self.assertEquals([game_id], result['game_id'])
+        result = yield self.game.vote(player2, card1)
+        self.assertEquals([game_id], result['game_id'])
+
+        # change countdown duration after game ready
+        yield self.game.set_countdown(0.01)
+
+        # auto move to complete state
+        d = self.game.poll({'modified':[self.game.get_modified()]})
+        def check(result):
+            game_info = yield self.game.game(owner_id)
+            self.assertEqual(game_info['state'], 'complete')
+            self.assertEqual(game_info['countdown_finish'], None)
+            self.assertEqual(result, None)
+        d.addCallback(check)
 
     @defer.inlineCallbacks
     def test09_invitation(self):
@@ -709,7 +769,42 @@ class CardstoriesGameTest(unittest.TestCase):
         game_result = yield game_deferred
         self.assertEquals(result['type'], 'complete')
         c.close()
-            
+
+    @defer.inlineCallbacks
+    def test19_countdown(self):
+        winner_card = 5
+        sentence = 'SENTENCE'
+        owner_id = 15
+        yield self.game.create(winner_card, sentence, owner_id)
+        self.assertEqual(self.game.get_countdown_duration(), self.game.DEFAULT_COUNTDOWN_DURATION)
+        self.assertFalse(self.game.is_countdown_active())
+        self.assertEqual(self.game.get_countdown_finish(), None)
+
+        duration = 200
+        self.game.set_countdown_duration(duration)
+        self.assertEqual(self.game.get_countdown_duration(), duration)
+        self.assertFalse(self.game.is_countdown_active())
+        self.assertEqual(self.game.get_countdown_finish(), None)
+
+        self.game.start_countdown()
+        self.assertTrue(self.game.is_countdown_active())
+        self.assertTrue(type(self.game.get_countdown_finish()) is long)
+        now_ms = time.time() * 1000
+        self.assertTrue(self.game.get_countdown_finish() > now_ms)
+
+        self.game.clear_countdown()
+        self.assertEqual(self.game.get_countdown_duration(), self.game.DEFAULT_COUNTDOWN_DURATION)
+        self.assertFalse(self.game.is_countdown_active())
+        self.assertEqual(self.game.get_countdown_finish(), None)
+
+        self.game.set_countdown_duration(0.01)
+        self.game.start_countdown()
+        d = self.game.poll({'modified': [self.game.get_modified()]})
+        def check(result):
+            self.assertFalse(self.game.is_countdown_active())
+            self.assertEqual(result, None)
+        d.addCallback(check)
+
 def Run():
     loader = runner.TestLoader()
 #    loader.methodPrefix = "test18_"

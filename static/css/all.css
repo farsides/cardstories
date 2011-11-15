@@ -1685,7 +1685,7 @@
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_go_vote .cardstories_modal_h2 { 
     font-size: 1.2em;
     width: 75%;
-    margin: 2em auto 0.75em auto;
+    margin: 0.75em auto;
 }
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_go_vote .cardstories_modal_h2.cardstories_hint { 
@@ -2076,7 +2076,7 @@
 .cardstories .cardstories_vote .cardstories_owner .cardstories_results_announce { 
     left: 245px;
     top: 185px;
-    height: 150px;
+    height: 172px;
     width: 310px;
 }
 

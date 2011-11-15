@@ -31,6 +31,8 @@ var cardstories_default_preload_images = $.cardstories.preload_images;
 var cardstories_default_display_modal = $.cardstories.display_modal;
 var cardstories_default_vote_voter = $.cardstories.vote_voter;
 var cardstories_default_complete_complete = $.cardstories.complete_complete;
+var cardstories_default_send_countdown_duration = $.cardstories.send_countdown_duration;
+var cardstories_default_start_countdown = $.cardstories.start_countdown;
 
 // Load the cardstories html at the beginning, synchronously (as opposed to
 // $.get(), which does it asynchronously and returns results only after QUnit
@@ -64,6 +66,8 @@ function setup() {
     $.cardstories.display_modal = cardstories_default_display_modal;
     $.cardstories.vote_voter = cardstories_default_vote_voter;
     $.cardstories.complete_complete = cardstories_default_complete_complete;
+    $.cardstories.send_countdown_duration = cardstories_default_send_countdown_duration;
+    $.cardstories.start_countdown = cardstories_default_start_countdown;
 }
 
 module("cardstories", {setup: setup});
@@ -742,7 +746,7 @@ test("invitation_owner_slots_helper", 15, function() {
     });
 });
 
-asyncTest("invitation_owner_join_helper", 39, function() {
+asyncTest("invitation_owner_join_helper", 41, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_invitation .cardstories_owner', root);
     var player1 = 'player1';
@@ -752,14 +756,17 @@ asyncTest("invitation_owner_join_helper", 39, function() {
     var state1 = {
         'owner_id': player1,
         'ready': false,
+        'countdown_finish': null,
         'players': [ [ player1, null, 'n', null, [] ],
                      [ player2, null, 'n', null, [] ],
                      [ player3, null, 'n', 3, [] ] ]
     };
 
+    var countdown_finish = 60000;
     var state2 = {
         'owner_id': player1,
         'ready': true,
+        'countdown_finish': countdown_finish,
         'players': [ [ player1, null, 'n', null, [] ],
                      [ player2, null, 'n', 2, [] ],
                      [ player3, null, 'n', 3, [] ],
@@ -778,6 +785,11 @@ asyncTest("invitation_owner_join_helper", 39, function() {
     };
 
     $.cardstories.display_modal($('.cardstories_info', element), $('.cardstories_modal_overlay', element));
+
+    $.cardstories.start_countdown = function() {
+        ok(false, 'countdown should not be started yet (game not ready)');
+    };
+
     $.cardstories.invitation_owner_join_helper(player1, state1, element, root, function() {
         equal($('.cardstories_modal_overlay', element).css('display'), 'none', 'modal overlay is hidden');
         equal($('.cardstories_go_vote', element).css('display'), 'block', 'go_vote is shown');
@@ -794,6 +806,12 @@ asyncTest("invitation_owner_join_helper", 39, function() {
         equal($('.cardstories_player_seat.cardstories_player_seat_5', element).css('display'), 'none', 'Active slot 5 is hidden');
         ok($('.cardstories_player_seat.cardstories_player_seat_1', element).hasClass('cardstories_player_seat_picking'), 'Active slot 1 is picking');
         ok($('.cardstories_player_seat.cardstories_player_seat_2', element).hasClass('cardstories_player_seat_picked'), 'Active slot 2 picked');
+
+        // start_countdown should be called this time (game is ready).
+        $.cardstories.start_countdown = function(end_ts, elem) {
+            equal(end_ts, countdown_finish);
+            ok(elem.hasClass('cardstories_countdown_select'));
+        };
 
         // Call it again: animate_sprite should only be called again when
         // necessary and the number of expected assertions should reflect this.
@@ -937,19 +955,20 @@ test("invitation_owner_invite_more", 6, function() {
     notEqual(advertise_dialog.css('display'), 'none', 'clicking the invite button shows the dialog again');
 });
 
-asyncTest("invitation_owner", 6, function() {
+asyncTest("invitation_owner", 10, function() {
     var player1 = 'player1';
     var player2 = 'player2';
     var player3 = 'player3';
     var player4 = 'player4';
     var card1 = 5;
-    var player_id = player1;
+    var owner_id = player1;
     var game_id = 101;
     var winner_card = 7;
     var sentence = 'SENTENCE';
 
     var game = {
         'id': game_id,
+        'owner_id': owner_id,
         'owner': true,
         'ready': true,
         'sentence': sentence,
@@ -963,7 +982,7 @@ asyncTest("invitation_owner", 6, function() {
 
     $.cardstories.ajax = function(options) {
         equal(options.type, 'GET');
-        equal(options.url, $.cardstories.url + '?action=voting&owner_id=' + player_id + '&game_id=' + game_id);
+        equal(options.url, $.cardstories.url + '?action=voting&owner_id=' + owner_id + '&game_id=' + game_id);
         start();
     };
 
@@ -971,15 +990,28 @@ asyncTest("invitation_owner", 6, function() {
         equal(_request.game_id, game_id, 'poll_ignore request game_id');
     };
 
-    equal($('#qunit-fixture .cardstories_invitation .cardstories_owner.cardstories_active').length, 0);
-    $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
-    equal($('#qunit-fixture .cardstories_invitation .cardstories_owner .cardstories_sentence').text(), sentence);
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_invitation .cardstories_owner', root);
 
-    var picked_card = $('#qunit-fixture .cardstories_invitation .cardstories_owner .cardstories_picked_card');
+    ok(!element.hasClass('cardstories_active'), 'invitation owner is not active');
+    $.cardstories.invitation(owner_id, game, root);
+    equal($('.cardstories_sentence', element).text(), sentence);
+
+    // Check that countdown select is bound to send_countdown_duration.
+    var countdown_duration_val = '3600';
+    $.cardstories.send_countdown_duration = function(val, _owner_id, _game_id, _root) {
+        equal(val, countdown_duration_val);
+        equal(_owner_id, owner_id);
+        equal(_game_id, game_id);
+        equal(_root, root);
+    };
+    $('.cardstories_countdown_select', element).val(countdown_duration_val).change();
+
+    var picked_card = $('.cardstories_picked_card', element);
     var winner_src = picked_card.metadata({type: 'attr', name: 'data'}).card.supplant({card: winner_card});
     equal(picked_card.find('.cardstories_card_foreground').attr('src'), winner_src, 'the picked card is shown');
-    $('#qunit-fixture .cardstories_owner .cardstories_go_vote .cardstories_modal_button').click();
-    $('#qunit-fixture .cardstories_owner .cardstories_go_vote_confirm_yes').click();
+    $('.cardstories_go_vote .cardstories_modal_button', element).click();
+    $('.cardstories_go_vote_confirm_yes', element).click();
 });
 
 asyncTest("invitation_replay_master", 21, function() {
@@ -1896,7 +1928,7 @@ test("vote_display_or_select_cards", 8, function() {
     });
 });
 
-asyncTest("vote_owner", 11, function() {
+asyncTest("vote_owner", 17, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_vote .cardstories_owner', root);
     var owner_id = 'Owner';
@@ -1905,12 +1937,14 @@ asyncTest("vote_owner", 11, function() {
     var sentence = 'SENTENCE';
     var board = [32,30,31];
     var game_id = 100;
+    var countdown_finish = 345678;
     var game = {
         'id': game_id,
         'owner': true,
         'owner_id': owner_id,
         'sentence': sentence,
         'ready': true,
+        'countdown_finish': countdown_finish,
         'board': board,
         'winner_card': 30,
         'players': [ [ owner_id, null, null, 30, [] ],
@@ -1936,7 +1970,25 @@ asyncTest("vote_owner", 11, function() {
 
     ok(!element.hasClass('cardstories_active'), 'element is inactive');
     root.addClass('cardstories_root');
+
+    // start_countdown should be called.
+    $.cardstories.start_countdown = function(end_ts, elem) {
+        equal(end_ts, countdown_finish);
+        ok(elem.hasClass('cardstories_countdown_select'));
+    };
+
     $.cardstories.vote(owner_id, game, root);
+
+    // Check that countdown select is bound to send_countdown_duration.
+    var countdown_duration_val = '86400';
+    $.cardstories.send_countdown_duration = function(val, _owner_id, _game_id, _root) {
+        equal(val, countdown_duration_val);
+        equal(_owner_id, owner_id);
+        equal(_game_id, game_id);
+        equal(_root, root);
+    };
+    $('.cardstories_countdown_select', element).val(countdown_duration_val).change();
+
     ok(element.hasClass('cardstories_active'), 'element is active');
     equal($('.cardstories_sentence', element).text(), sentence, 'sentence is set');
     var button = $('.cardstories_results_announce .cardstories_modal_button', element);
@@ -2905,6 +2957,92 @@ test("create_deck", 29, function() {
         }
     }
   });
+
+test('send_countdown_duration', 6, function() {
+    var duration = '3600';
+    var owner_id = 'OWNER';
+    var game_id = 101;
+    var root = $('#qunit-fixture .cardstories');
+    $.cardstories.send_countdown_duration = cardstories_default_send_countdown_duration;
+
+    var default_send = $.cardstories.send;
+    $.cardstories.send = function(query, callback) {
+        equal(query.action, 'set_countdown');
+        equal(query.duration, duration);
+        equal(query.game_id, game_id);
+        callback();
+    };
+
+    var default_game = $.cardstories.game;
+    $.cardstories.game = function(_owner_id, _game_id, _root) {
+        equal(_owner_id, owner_id);
+        equal(_game_id, game_id);
+        equal(_root, root);
+
+        $.cardstories.send = default_send;
+        $.cardstories.game = default_game;
+    };
+
+    $.cardstories.send_countdown_duration(duration, owner_id, game_id, root);
+});
+
+test("start_countdown", 12, function() {
+    var select = $('<select></select>');
+    var option1 = $('<option value="1">initial 1</option>');
+    var option2 = $('<option value="2">initial 2</option>');
+    select.append(option1).append(option2);
+
+    // Mock out the time.
+    var original_now = $.now;
+    var current_time = 42;
+    $.now = function() { return current_time; };
+
+    var count = 0;
+    $.cardstories.setTimeout = function(fn, delay) {
+        equal(option1.text(), (3 - count) + ' seconds');
+        current_time += delay;
+        count++;
+        fn();
+    };
+
+    // Start a 3 second contdown.
+    $.cardstories.start_countdown(current_time + 3001, select);
+    equal(option1.text(), '0 seconds', 'option keeps final text after countdown finished');
+    equal(option2.text(), 'initial 2', 'second option is not affected by the countdown');
+
+    var deferred;
+    $.cardstories.setTimeout = function(fn, delay) {
+        current_time += delay;
+        deferred = $.Deferred();
+        deferred.done(fn);
+    };
+
+    var one_hour = 60 * 60 * 1000;
+    // Start a 1 day timeout, with the second option selected.
+    select.val('2'); // select the second option
+    $.cardstories.start_countdown(current_time + 24*one_hour + 1, select);
+    // State is freezed because deferred in mocked timeout hasn't been
+    // released yet. Take this opportunity to inspect option values.
+    equal(option1.text(), 'initial 1', 'option1 is reset back to original state');
+    equal(option2.text(), '1 days', 'option2 shows time remaining');
+    // Move time forward almost one hour.
+    current_time += one_hour - 1;
+    deferred.resolve();
+    equal(option2.text(), '23 hours', 'option2 shows time remaining');
+    // Move forward next 22 hours.
+    current_time += 22 * one_hour;
+    deferred.resolve();
+    equal(option2.text(), '59 minutes', 'option2 shows time remaining');
+    // Move forward another 59 minutes (the countdown has finished by then).
+    current_time += one_hour - 1000;
+    deferred.resolve();
+    equal(option2.text(), '0 seconds', 'option2 shows the countdown has come to an end');
+    // No more timeouts should be scheduled at this point, which means
+    // no more fresh deferreds created.
+    ok(deferred.isResolved(), 'deferred has already been resolved');
+
+    $.now = original_now;
+});
 
 test("credits", 4, function() {
     var root = $('#qunit-fixture .cardstories');
