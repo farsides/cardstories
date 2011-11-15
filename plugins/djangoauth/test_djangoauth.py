@@ -146,6 +146,15 @@ class DjangoAuthTest(unittest.TestCase):
                                                      [ owner ] ],
                                         'invited': [ player ]}])
 
+    @defer.inlineCallbacks
+    def test02_resolve(self):
+        player = 'test02@foo.com'
+        ( player_id, ) = yield self.auth.create_players((player, ))
+        resolved_player = yield self.auth.resolve(player_id)
+        self.assertEquals(player, resolved_player)
+        self.auth.getPage = None
+        resolved_player = yield self.auth.resolve(player_id)
+        self.assertEquals(player, resolved_player) # the second time around the cached answer is returned
 
 class DjangoAuthMailTest(MailTest):
     """
@@ -191,7 +200,8 @@ class DjangoAuthMailTest(MailTest):
         players = ('owner@foo.com', 'player1@foo.com', 'player2@foo.com')
         (self.owner_name, self.player1_name, self.player2_name) = players
         (self.owner_id, self.player1, self.player2) = yield self.auth.create_players(players)
-
+        owner = yield self.auth.resolve(self.owner_id)
+        self.assertEquals(owner, players[0])
 
 def Run():
     loader = runner.TestLoader()

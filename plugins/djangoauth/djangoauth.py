@@ -37,6 +37,7 @@ class Plugin:
         self.settings = objectify.parse(open(os.path.join(self.confdir, 'djangoauth.xml'))).getroot()
         self.host = self.settings.get('host')
         self.getPage = client.getPage
+        self.id2name = {}
         log.msg('plugin djangoauth initialized')
 
     def name(self):
@@ -49,7 +50,11 @@ class Plugin:
 
     @defer.inlineCallbacks
     def resolve(self, id):
-        name = yield self.getPage("http://%s/getusername/%s/" % (self.host, str(id)))
+        if self.id2name.has_key(id):
+            name = self.id2name[id]
+        else:
+            name = yield self.getPage("http://%s/getusername/%s/" % (self.host, str(id)))
+            self.id2name[id] = name
         defer.returnValue(name)
 
     @defer.inlineCallbacks
