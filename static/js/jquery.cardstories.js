@@ -3458,22 +3458,25 @@
                 q.queue('chain', function(next) {
                     var seat = $('.cardstories_player_seat_' + i, element);
                     var status = $('.cardstories_player_status', seat);
-                    if (player[2] == 'n') {
-                        seat.addClass('cardstories_player_seat_lost');
-                        status.html('LOSES!');
-                        if (card2seat[player[1]] !== undefined) {
-                            vote.addClass('lost');
-                            denvelope.show();
-                            envelope.fadeOut('fast');
-                        }
-                    } else {
-                        seat.addClass('cardstories_player_seat_won');
-                        status.html('WINS!');
-                    }
-                    if (card2seat[player[1]] !== undefined) {
+                    var player_voted = player[1] !== null;
+
+                    if (player_voted) {
                         var voter_name = $('.cardstories_voter_name', vote);
                         voter_name.html(player[0] + '\'s vote');
                         voter_name.fadeIn('fast', next);
+
+                        if (player[2] === 'n') {
+                            seat.addClass('cardstories_player_seat_lost');
+                            status.html('LOSES!');
+                            if (card2seat[player[1]] !== undefined) {
+                                vote.addClass('lost');
+                                denvelope.show();
+                                envelope.fadeOut('fast');
+                            }
+                        } else {
+                            seat.addClass('cardstories_player_seat_won');
+                            status.html('WINS!');
+                        }
                     } else {
                         seat.addClass('cardstories_player_seat_no_vote');
                         status.html("DIDN'T VOTE!");
@@ -3523,22 +3526,26 @@
                     $('.cardstories_lost_2', box).show();
                 }
             } else {
+                var player_voted = false;
                 var player_lost = true;
                 for (i=0; i < game.players.length; i++) {
-                    if (game.players[i][0] == player_id && game.players[i][2] == 'y') {
-                        player_lost = false;
+                    if (game.players[i][0] == player_id) {
+                        if (game.players[i][1] !== null) { player_voted = true; }
+                        if (game.players[i][2] === 'y') { player_lost = false; }
                     }
                 }
 
                 box = $('.cardstories_results.player', element);
-                if (player_lost) {
-                    $('.cardstories_lost_1', box).show();
-                } else if (!owner_lost) {
-                    $('.cardstories_won_1', box).show();
-                } else if (!too_hard) {
-                    $('.cardstories_won_2', box).show();
-                } else {
-                    $('.cardstories_won_3', box).show();
+                if (player_voted) {
+                    if (player_lost) {
+                        $('.cardstories_lost_1', box).show();
+                    } else if (!owner_lost) {
+                        $('.cardstories_won_1', box).show();
+                    } else if (!too_hard) {
+                        $('.cardstories_won_2', box).show();
+                    } else {
+                        $('.cardstories_won_3', box).show();
+                    }
                 }
             }
 

@@ -304,6 +304,23 @@
                     ['Player 5', 30, 'y', 35, []]]
       };
       $.cardstories.complete_complete('Owner', game, root);
+    } else if(skin == 'complete_anonymous') {
+      game = {
+        'id': 100,
+        'owner': false,
+        'owner_id': 'Owner',
+        'ready': true,
+        'sentence': 'the game sentence',
+        'board': [30,31,32,33,34,35],
+        'winner_card': 30,
+        'players': [['Owner', null, 'y', 30, []],
+                    ['Player 1', 32, 'n', 31, []],
+                    ['Player 2', 30, 'y', 33, []],
+                    ['Player 3', null, 'n', 32, []],
+                    ['Player 4', 30, 'y', 34, []],
+                    ['Player 5', 30, 'y', 35, []]]
+      };
+      $.cardstories.complete_complete('Player 3', game, root);
     } else if(skin == 'email') {
       $.cardstories.email(undefined, root);
     } else if(skin == 'credits') {
