@@ -100,7 +100,7 @@ class Plugin(pollable):
         log_filepath = os.path.join(self.logdir, log_filename)
 
         with codecs.open(log_filepath, mode='ab', encoding='utf-8', errors='replace', buffering=1) as f:
-            f.write(log_text)
+            f.write(log_text.decode('utf-8'))
 
     def init(self, game, details):
         """
