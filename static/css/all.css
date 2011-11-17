@@ -792,6 +792,14 @@
     background: transparent url('images/master_seat_player.png') no-repeat left top;
 }
 
+.cardstories_master_seat.cardstories_master_seat_won {
+    background-image: url('images/master_seat_win.png');
+}
+
+.cardstories_master_seat.cardstories_master_seat_lost {
+    background-image: url('images/master_seat_lose.png');
+}
+
 .cardstories_master_seat .cardstories_master_name {
     width: 65px;
     height: 40px;
@@ -802,6 +810,11 @@
     font-size: 10pt;
     color: #4D4D4F;
     text-align: center;
+}
+
+.cardstories_master_seat.cardstories_master_seat_won .cardstories_master_name,
+.cardstories_master_seat.cardstories_master_seat_lost .cardstories_master_name {
+    color: #e5e5e5;
 }
 
 /* Change cursor to treat buttons as links */
