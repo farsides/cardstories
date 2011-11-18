@@ -289,6 +289,22 @@ class ChatTest(unittest.TestCase):
             lines = f.readlines()
             self.assertIn(unicode_sentence, lines[0].decode('utf-8'))
 
+    @defer.inlineCallbacks
+    def test09_escape_html(self):
+        # new instance of the chat plugin to test
+        chat_instance = Plugin(self.service, [])
+        # create a message event request
+        player_id = 201
+        naughty_sentence = '<script>alert("haha!")</script>'
+        now = int(runtime.seconds() * 1000)
+        request = Request(action = ['message'], player_id = [player_id], sentence=[naughty_sentence])
+        # run the request
+        result = yield chat_instance.preprocess(True, request)
+        # check to make sure our naughty message is returned properly escaped
+        state = yield chat_instance.state({"modified": [now - 1]})
+        self.assertEquals(state['messages'][0]['player_id'], player_id)
+        self.assertEquals(state['messages'][0]['sentence'], '&lt;script&gt;alert("haha!")&lt;/script&gt;')
+
 
 def Run():
     loader = runner.TestLoader()
