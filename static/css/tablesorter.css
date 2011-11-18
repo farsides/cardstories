@@ -1,6 +1,6 @@
 /* tables */
 table.tablesorter {
-	font-family:helvetica;
+        font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
 	width: 100%;
 	text-align: left;
     border-style: hidden; 
