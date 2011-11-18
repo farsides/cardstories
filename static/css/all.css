@@ -1188,7 +1188,7 @@
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_write_box .cardstories_sentence {
     position: absolute;
     border: 0px;
-    width: 390px;
+    width: 399px;
     height: 40px;
     top: 14px;
     left: 14px;
@@ -1197,6 +1197,7 @@
     overflow: auto;
     font-weight: bold;
     color: black;
+    padding: 1px;
 }
 
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_sentence_box {
