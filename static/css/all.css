@@ -588,7 +588,7 @@
 .cardstories .cardstories_player_seat .cardstories_player_name,
 .cardstories .cardstories_player_seat .cardstories_player_status {
     position: relative;
-    top: 55px;
+    top: 52px;
     left: 1px;
     overflow: hidden;
     margin: 3px auto;
@@ -795,7 +795,7 @@
 .cardstories_master_seat .cardstories_master_name {
     width: 65px;
     height: 40px;
-    top: 35px;
+    top: 30px;
     left: 65px;
     position: absolute;
     font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;

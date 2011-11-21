@@ -71,7 +71,7 @@ $.get("/static/cardstories.html", function(data) {
   if(skin !== '') {
     $.cardstories.skin(skin, $('.cardstories'));
   } else {
-    $('.cardstories').cardstories('{{ user.username }}', $.query.get('game_id'), '{% url website.cardstories.views.welcome %}', {% if create %}true{% else %}false{% endif %});
+    $('.cardstories').cardstories('{{ user_name }}', $.query.get('game_id'), '{% url website.cardstories.views.welcome %}', {% if create %}true{% else %}false{% endif %});
   }
 });
 

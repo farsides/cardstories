@@ -40,7 +40,7 @@
   "model": "auth.user", 
   "fields": {
    "username": "testuser3@email.com", 
-   "first_name": "Test User 3", 
+   "first_name": "", 
    "last_name": "", 
    "is_active": false, 
    "is_superuser": false, 

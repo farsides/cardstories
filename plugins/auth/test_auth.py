@@ -125,6 +125,14 @@ class AuthTest(unittest.TestCase):
         names = yield self.auth.resolve_players(ids)
         self.assertEquals(players, names)
 
+    @defer.inlineCallbacks
+    def test03_email_resolution(self):
+        players = [u'owner@foo.com', u'player1@foo.com', u'player']
+        ids = yield self.auth.create_players(players)
+        self.assertEquals([1, 2, 3], ids)
+        names = yield self.auth.resolve_player_emails(ids)
+        self.assertEquals(players, names)
+
 
 def Run():
     loader = runner.TestLoader()

@@ -336,7 +336,7 @@ class CardstoriesTest(TestCase):
 
     def test_05getusername(self):
         """
-        Test getuserid.  Requires 'users' fixture.
+        Test getusername. Requires 'users' fixture.
 
         """
         c = self.client
@@ -357,13 +357,48 @@ class CardstoriesTest(TestCase):
         response = c.get(url)
         self.assertEqual(response.status_code, 404)
 
-        # Return proper username for pre-existing user.
+        # Return proper name for pre-existing user.
+        url = "%s/%s/" % (base_url, "1")
+        response = c.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, "Test User 1")
+
+        # Returns an "inferred" name based on first part of email.
+        url = "%s/%s/" % (base_url, "3")
+        response = c.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, "testuser3")
+
+    def test_06getuseremail(self):
+        """
+        Test getuseremail. Requires 'users' fixture.
+
+        """
+        c = self.client
+        base_url = "/getuseremail"
+
+        # Empty request must 404.
+        url = "%s/%s/" % (base_url, "")
+        response = c.get(url)
+        self.assertEqual(response.status_code, 404)
+
+        # Try to get a user with invalid id format.
+        url = "%s/%s/" % (base_url, "4adfe$#")
+        response = c.get(url)
+        self.assertEqual(response.status_code, 404)
+
+        # Try to get a user that doesn't exist.
+        url = "%s/%s/" % (base_url, "4")
+        response = c.get(url)
+        self.assertEqual(response.status_code, 404)
+
+        # Return proper email for pre-existing user.
         url = "%s/%s/" % (base_url, "1")
         response = c.get(url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, "testuser1@email.com")
 
-    def test_06getloggedinuserid(self):
+    def test_07getloggedinuserid(self):
         """
         Test getloggedinuserid.  Requires 'users' fixture.
 
