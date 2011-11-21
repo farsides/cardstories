@@ -48,7 +48,8 @@
         },
 
         ajax: function(o) {
-            return jQuery.ajax(o);
+            var options = $.extend({cache: false}, o);
+            return jQuery.ajax(options);
         },
 
         reload: function(player_id, game_id, root) {

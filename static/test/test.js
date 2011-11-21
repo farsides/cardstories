@@ -106,15 +106,16 @@ asyncTest("delay", 1, function() {
     q.dequeue('chain');
 });
 
-test("ajax", 2, function() {
+test("ajax", 3, function() {
     $.cardstories.ajax = cardstories_default_ajax;
     var ajax = jQuery.ajax;
     jQuery.ajax = function(options) {
-      equal(options, 'some ajax options', 'calls jQuery.ajax with the supplied options');
+      equal(options.some, 'options', 'calls jQuery.ajax with the supplied options');
+      ok(options.cache === false, 'merges cache: false into the ajax options');
       return 'some ajax result';
     };
 
-    var result = $.cardstories.ajax('some ajax options');
+    var result = $.cardstories.ajax({some: 'options'});
     equal(result, 'some ajax result', 'returns the result of jQuery.ajax call');
 
     jQuery.ajax = ajax;
