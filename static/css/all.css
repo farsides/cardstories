@@ -100,7 +100,7 @@
     position: relative;
     left: 10px;
     line-height: 30px;
-    font-family: "Helvetica";
+    font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
     font-weight: bold;
     font-size: 14px;
     color: #F4EFDA;
@@ -145,7 +145,7 @@
     bottom: 0px;
     left: 0px;
     overflow: auto;
-    font-family: "Helvetica";
+    font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
     font-size: 10px;
     color: #595959;
 }
@@ -180,7 +180,7 @@
     left: 61px;
     width: 163px;
     height: 24px;
-    font-family: "Helvetica";
+    font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
     font-size: 11px;
     line-height: 24px;
     color: #808080;
@@ -212,7 +212,7 @@
     height: 27px;
     top: 19px;
     left: 0px;
-    font-family: "helvetica";
+    font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
     font-size: 10px;
     color: #CED0D2;
 }
@@ -451,7 +451,7 @@
 
 .cardstories .cardstories_modal_h2 {
     margin: 0;
-    font-family: "Helvetica";
+    font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
     font-size: 1.1em; 
     font-weight: bold;
 }
@@ -544,7 +544,7 @@
     display: none;
     font-size: 11px;
     text-align:center;
-    font-family: "Helvetica";
+    font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
     width: 77px;
     height: 155px;
 }
@@ -588,7 +588,7 @@
 .cardstories .cardstories_player_seat .cardstories_player_name,
 .cardstories .cardstories_player_seat .cardstories_player_status {
     position: relative;
-    top: 55px;
+    top: 52px;
     left: 1px;
     overflow: hidden;
     margin: 3px auto;
@@ -795,10 +795,10 @@
 .cardstories_master_seat .cardstories_master_name {
     width: 65px;
     height: 40px;
-    top: 35px;
+    top: 30px;
     left: 65px;
     position: absolute;
-    font-family: "helvetica";
+    font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
     font-size: 10pt;
     color: #4D4D4F;
     text-align: center;
@@ -1015,7 +1015,7 @@
     color: #4D4D4F;
     font-size: 10pt;
     text-align: center;
-    font-family: "helvetica";
+    font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
     font-weight: bold;
     color: black;
     overflow: hidden;
@@ -1099,7 +1099,7 @@
 
 .cardstories .cardstories_card_slot .cardstories_card_label > div {
     position: relative;
-    font-family: "Helvetica";
+    font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
     font-size: 12px;
 }
 
@@ -1188,15 +1188,16 @@
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_write_box .cardstories_sentence {
     position: absolute;
     border: 0px;
-    width: 390px;
+    width: 399px;
     height: 40px;
     top: 14px;
     left: 14px;
-    font-family: "helvetica";
+    font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
     font-size: 11pt;
     overflow: auto;
     font-weight: bold;
     color: black;
+    padding: 1px;
 }
 
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_sentence_box {
@@ -1805,7 +1806,7 @@
     margin: 0 auto;
     width: 90%;
     height: 75%;
-    font-family: "Helvetica";
+    font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
     font-size: 1.1em;
     color: #7A7A7A;
     background-color: #E0E2E2;
@@ -1814,7 +1815,7 @@
 
 .cardstories .cardstories_advertise .cardstories_advertise_feedback {
     display: none;
-    font-family: Helvetica;
+    font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
     font-size: 1.2em;
     margin-top: 20%;
     text-align: center;
@@ -1989,7 +1990,7 @@
 /* state invitation_anonymous */
 
 .cardstories .cardstories_invitation .cardstories_invitation_anonymous .cardstories_text_label {
-    font-family: "helvetica";
+    font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
     font-size: 12pt;
     color: #1D1D1B;
     background-color: #fff;
@@ -2247,7 +2248,7 @@
     height: 100%;
     overflow: hidden;
     line-height: 17px;
-    font-family: "helvetica";
+    font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
     font-size: 10px;
     color: #3E3E40;
 }
@@ -2305,7 +2306,7 @@
     width: 24em;
     margin: 0.25em auto;
     font-size: 1.2em; 
-    font-family: "Helvetica";
+    font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
 }
 
 .cardstories .cardstories_complete .cardstories_results .cardstories_lost_1,

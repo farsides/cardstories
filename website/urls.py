@@ -43,6 +43,7 @@ urlpatterns += patterns('website.cardstories.views',
     (r'^facebook/', 'facebook'),
     (r'^getuserid/(.+)/', 'getuserid'),
     (r'^getusername/(\d+)/', 'getusername'),
+    (r'^getuseremail/(\d+)/', 'getuseremail'),
     (r'^getloggedinuserid/(.+)/', 'getloggedinuserid'),
 )
 

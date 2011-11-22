@@ -42,7 +42,7 @@
 	width:325px;
 	padding:5px;
 	border:1px solid #dfdfdf;
-	font-family: helvetica;
+        font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
 	font-size:1em;
 	margin-bottom:10px;
 }
@@ -60,7 +60,7 @@
 	color:#010101;
 	text-transform:uppercase;
 	font-weight:bolder;
-	font-family:Helvetica;
+        font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
 	margin-top:10px;
 }
 
@@ -109,7 +109,7 @@
 }
 
 #contactable #callback {
-	font-family: helvetica;
+        font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
 	font-size:1em;
 	color: #FFF;
 	width:325px;

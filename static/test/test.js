@@ -106,15 +106,16 @@ asyncTest("delay", 1, function() {
     q.dequeue('chain');
 });
 
-test("ajax", 2, function() {
+test("ajax", 3, function() {
     $.cardstories.ajax = cardstories_default_ajax;
     var ajax = jQuery.ajax;
     jQuery.ajax = function(options) {
-      equal(options, 'some ajax options', 'calls jQuery.ajax with the supplied options');
+      equal(options.some, 'options', 'calls jQuery.ajax with the supplied options');
+      ok(options.cache === false, 'merges cache: false into the ajax options');
       return 'some ajax result';
     };
 
-    var result = $.cardstories.ajax('some ajax options');
+    var result = $.cardstories.ajax({some: 'options'});
     equal(result, 'some ajax result', 'returns the result of jQuery.ajax call');
 
     jQuery.ajax = ajax;
@@ -2078,7 +2079,7 @@ test("complete owner won", 7, function() {
     notEqual(box.find('img.cardstories_won').css('display'), 'none', 'won img is visible');
 });
 
-test("complete", 30, function() {
+test("complete", 29, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var owner_id = 'Owner';
@@ -2118,7 +2119,6 @@ test("complete", 30, function() {
     ok($('.cardstories_player_seat_1', element).hasClass('cardstories_player_seat_won'), 'seat 1 won');
     ok($('.cardstories_player_seat_2', element).hasClass('cardstories_player_seat_lost'), 'seat 2 lost');
     ok($('.cardstories_player_seat_3', element).hasClass('cardstories_player_seat_lost'), 'seat 3 lost');
-    ok($('.cardstories_player_seat_4', element).hasClass('cardstories_player_seat_lost'), 'seat 4 lost');
     ok($('.cardstories_player_seat_4', element).hasClass('cardstories_player_seat_no_vote'), 'seat 4 did not vote');
     ok($('.cardstories_votes_1', element).children().length == 1, '1 vote for seat 1');
     ok($('.cardstories_votes_2', element).children().length == 0, 'no votes for seat 2');
@@ -2130,6 +2130,42 @@ test("complete", 30, function() {
     equal($('.cardstories_results img.cardstories_won_1', element).css('display'), 'inline', 'won image is visible');
     equal($('.cardstories_results img.cardstories_lost_1', element).css('display'), 'none', 'lost image 1 is hidden');
     equal($('.cardstories_results img.cardstories_lost_2', element).css('display'), 'none', 'lost image 2 is hidden');
+});
+
+test("complete player didn't vote", 12, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_complete', root);
+    var owner_id = 'Owner';
+    var player1 = 'Player 1';
+    var player2 = 'Player 2';
+    var player3 = 'Player 3';
+    var player4 = 'Player 4';
+    var game = {
+        'owner': false,
+        'owner_id': owner_id,
+        'board': [],
+        'winner_card': 30,
+        'players': [ [ owner_id, null, 'y', 30, [] ],
+                     [ player1, 30, 'y', 31, [] ],
+                     [ player2, 34, 'n', 32, [] ], // Voted for the card of the non voting player.
+                     [ player3, 31, 'n', 33, [] ],
+                     [ player4, null, 'n', 34, [] ] ] // Didn't vote.
+    };
+
+    $.cardstories.complete(player4, game, root);
+
+    notEqual($('.cardstories_player_seat_4', element).css('display'), 'none', 'seat 4 is visible');
+    equal($('.cardstories_player_seat_4 .cardstories_player_name', element).html(), player4, 'seat 4 name is set');
+    notEqual($('.cardstories_player_seat_card_4', element).css('display'), 'none', 'card 4 is visible');
+    ok($('.cardstories_player_seat_4', element).hasClass('cardstories_player_seat_no_vote'), 'seat 4 did not vote');
+    ok(!$('.cardstories_player_seat_4', element).hasClass('cardstories_player_seat_lost'), 'seat 4 did not lose');
+    ok(!$('.cardstories_player_seat_4', element).hasClass('cardstories_player_seat_won'), 'seat 4 did not win');
+    equal($('.cardstories_results.player .cardstories_play_again', element).css('display'), 'block', 'play again button is visible');
+    equal($('.cardstories_results img.cardstories_won_1', element).css('display'), 'none', 'result illustration is not visible');
+    equal($('.cardstories_results img.cardstories_won_2', element).css('display'), 'none', 'result illustration is not visible');
+    equal($('.cardstories_results img.cardstories_won_3', element).css('display'), 'none', 'result illustration is not visible');
+    equal($('.cardstories_results img.cardstories_lost_1', element).css('display'), 'none', 'result illustration is not visible');
+    equal($('.cardstories_results p', element).css('display'), 'none', 'result explanation is not visible');
 });
 
 test("play_again_finish_state author", 4, function() {

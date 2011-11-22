@@ -75,6 +75,9 @@ class Plugin:
         names = map(lambda row: row[0], rows)
         defer.returnValue(names)
 
+    def resolve_player_emails(self, ids):
+        return self.resolve_players(ids)
+
     @defer.inlineCallbacks
     def preprocess(self, result, request):
         for (key, values) in request.args.iteritems():

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2011 Chris McCormick <chris@mccormick.cx>
 #
@@ -270,6 +271,39 @@ class ChatTest(unittest.TestCase):
         chat_instance.build_message = build_message
         # run a game to get into a realistic situation
         yield self.complete_game()
+
+    @defer.inlineCallbacks
+    def test08_nonascii_characters(self):
+        # new instance of the chat plugin to test
+        chat_instance = Plugin(self.service, [])
+        # create a message event request
+        player_id = 200
+        # The sentence is a 'str' object. Create it by encoding a unicode string.
+        unicode_sentence = u"你好 Matjaž Gregorič"
+        sentence_bytes = unicode_sentence.encode('utf-8')
+        request = Request(action = ['message'], player_id = [player_id], sentence=[sentence_bytes])
+        # run the request
+        result = yield chat_instance.preprocess(True, request)
+        # check that the message has been recorded in log file
+        with open(os.path.join(self.test_logdir, 'chat', '%s.log' % strftime('%Y-%m-%d'))) as f:
+            lines = f.readlines()
+            self.assertIn(unicode_sentence, lines[0].decode('utf-8'))
+
+    @defer.inlineCallbacks
+    def test09_escape_html(self):
+        # new instance of the chat plugin to test
+        chat_instance = Plugin(self.service, [])
+        # create a message event request
+        player_id = 201
+        naughty_sentence = '<script>alert("haha!")</script>'
+        now = int(runtime.seconds() * 1000)
+        request = Request(action = ['message'], player_id = [player_id], sentence=[naughty_sentence])
+        # run the request
+        result = yield chat_instance.preprocess(True, request)
+        # check to make sure our naughty message is returned properly escaped
+        state = yield chat_instance.state({"modified": [now - 1]})
+        self.assertEquals(state['messages'][0]['player_id'], player_id)
+        self.assertEquals(state['messages'][0]['sentence'], '&lt;script&gt;alert("haha!")&lt;/script&gt;')
 
 
 def Run():

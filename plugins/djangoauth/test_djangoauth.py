@@ -94,18 +94,23 @@ class DjangoAuthTest(unittest.TestCase):
 
     @defer.inlineCallbacks
     def test01_translate(self):
+        owner_name = u'Game Owner'
         rand = ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for i in xrange(10))
-        owner = u'%s@email.com' % rand
-        player = u'player@email.com'
-        invited = u'invited@email.com'
+        owner_email = u'%s@email.com' % rand
+        player_email = u'player@email.com'
+        invited_email = u'invited@email.com'
+        # For players that aren't created with names, the part of email
+        # before the '@' character is returned by django.
+        player_name = u'player'
+        invited_name = u'invited'
 
         # First, create the owner and log him in so that we can get a sessionid
         # from the cookie.
         from django.test.client import Client
         c = Client()
         url = "/register/"
-        data = {'name': rand,
-                'username': owner,
+        data = {'name': owner_name,
+                'username': owner_email,
                 'password1': rand,
                 'password2': rand}
         c.post(url, data)
@@ -113,9 +118,9 @@ class DjangoAuthTest(unittest.TestCase):
 
         class request:
             def __init__(self):
-                self.args = {'action': ['invite'], 
-                             'player_id': [ player, invited ],
-                             'owner_id': [ owner ]}
+                self.args = {'action': ['invite'],
+                             'player_id': [ player_email, invited_email ],
+                             'owner_id': [ owner_email ]}
 
             def getCookie(self, key):
                 return sessionid
@@ -141,11 +146,34 @@ class DjangoAuthTest(unittest.TestCase):
                                    ],
                       'invited': [ request1.args['player_id'][0] ] }]
         result_out = yield self.auth.postprocess(result_in)
-        self.assertEquals(result_out, [{'owner_id': owner, 
-                                        'players': [ [ player ],
-                                                     [ owner ] ],
-                                        'invited': [ player ]}])
+        self.assertEquals(result_out, [{'owner_id': owner_name,
+                                        'players': [ [ 'player' ],
+                                                     [ 'Game Owner' ] ],
+                                        'invited': [ 'player' ]}])
 
+    @defer.inlineCallbacks
+    def test02_resolve(self):
+        player_email = 'test02@foo.com'
+        # For players that are created without the 'name' attribute,
+        # the first part of the email (up to first '@' character) is
+        # returned by django as the name.
+        inferred_name = 'test02'
+        ( player_id, ) = yield self.auth.create_players((player_email, ))
+        resolved_player = yield self.auth.resolve(player_id)
+        self.assertEquals(inferred_name, resolved_player)
+        self.auth.getPage = None
+        resolved_player = yield self.auth.resolve(player_id)
+        self.assertEquals(inferred_name, resolved_player) # the second time around the cached answer is returned
+
+    @defer.inlineCallbacks
+    def test03_resolve_email(self):
+        player_email = 'test03@foo.com'
+        ( player_id, ) = yield self.auth.create_players((player_email, ))
+        resolved_email = yield self.auth.resolve_email(player_id)
+        self.assertEquals(player_email, resolved_email)
+        self.auth.getPage = None
+        resolved_email = yield self.auth.resolve_email(player_id)
+        self.assertEquals(player_email, resolved_email) # the second time around the cached answer is returned
 
 class DjangoAuthMailTest(MailTest):
     """
@@ -188,10 +216,11 @@ class DjangoAuthMailTest(MailTest):
 
     @defer.inlineCallbacks
     def create_players(self):
-        players = ('owner@foo.com', 'player1@foo.com', 'player2@foo.com')
+        players = ('the.owner@foo.com', 'player1@foo.com', 'player2@foo.com')
         (self.owner_name, self.player1_name, self.player2_name) = players
         (self.owner_id, self.player1, self.player2) = yield self.auth.create_players(players)
-
+        owner = yield self.auth.resolve(self.owner_id)
+        self.assertEquals(owner, 'the.owner')
 
 def Run():
     loader = runner.TestLoader()

@@ -37,6 +37,8 @@ class Plugin:
         self.settings = objectify.parse(open(os.path.join(self.confdir, 'djangoauth.xml'))).getroot()
         self.host = self.settings.get('host')
         self.getPage = client.getPage
+        self.id2name = {}
+        self.id2email = {}
         log.msg('plugin djangoauth initialized')
 
     def name(self):
@@ -49,8 +51,21 @@ class Plugin:
 
     @defer.inlineCallbacks
     def resolve(self, id):
-        name = yield self.getPage("http://%s/getusername/%s/" % (self.host, str(id)))
+        if self.id2name.has_key(id):
+            name = self.id2name[id]
+        else:
+            name = yield self.getPage("http://%s/getusername/%s/" % (self.host, str(id)))
+            self.id2name[id] = name
         defer.returnValue(name)
+
+    @defer.inlineCallbacks
+    def resolve_email(self, id):
+        if self.id2email.has_key(id):
+            email = self.id2email[id]
+        else:
+            email = yield self.getPage("http://%s/getuseremail/%s/" % (self.host, str(id)))
+            self.id2email[id] = email
+        defer.returnValue(email)
 
     @defer.inlineCallbacks
     def create_players(self, names):
@@ -67,6 +82,14 @@ class Plugin:
             name = yield self.resolve(id)
             names.append(name)
         defer.returnValue(names)
+
+    @defer.inlineCallbacks
+    def resolve_player_emails(self, ids):
+        emails = []
+        for id in ids:
+            email = yield self.resolve_email(id)
+            emails.append(email)
+        defer.returnValue(emails)
 
     @defer.inlineCallbacks
     def preprocess(self, result, request):

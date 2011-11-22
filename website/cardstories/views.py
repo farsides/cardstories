@@ -56,6 +56,16 @@ def get_facebook_redirect_uri(request, encode=True):
 
     return uri
 
+# If user's first_name attribute is not blank, it returns it's contents.
+# Otherwise returns the first part of email (up to the @ character).
+def get_user_display_name(user):
+    # We are only using the first_name field, which may actually store
+    # a full name/nickname/whatever.
+    name = user.first_name and user.first_name.strip()
+    if not name:
+        name = user.email.split('@')[0]
+    return name
+
 def common_variables(request):
     """
     Common template variables.
@@ -77,7 +87,8 @@ def welcome(request):
 
     if request.user.is_authenticated():
         template = 'cardstories/game.html'
-        context = {'create': request.session.get('create', False)}
+        context = {'create': request.session.get('create', False),
+                   'user_name': get_user_display_name(request.user)}
         request.session['create'] = False
     else:
         context = {'registration_form': RegistrationForm(),
@@ -220,10 +231,9 @@ def getuserid(request, username):
             if not form.is_valid():
                 return HttpResponseBadRequest()
 
-            # Create the user with an unusable password and generic name.  The
-            # user will need to click on "forgot password" to obtain a new one.
+            # Create the user with an unusable password. The user will need
+            # to click on "forgot password" to obtain a new one.
             user = User.objects.create_user(username, username)
-            user.first_name = name
             user.save()
         else:
             return HttpResponseNotFound()
@@ -233,9 +243,19 @@ def getuserid(request, username):
 
 def getusername(request, userid):
     """
-    Returns a user's username based on supplied id, if found. Returns 404 if
-    not.
+    Returns a user's name based on supplied id, if found.
+    Returns 404 if not found.
+    """
+    try:
+        user = User.objects.get(id=userid)
+        return HttpResponse(get_user_display_name(user), mimetype="text/plain")
+    except User.DoesNotExist:
+        return HttpResponseNotFound()
 
+def getuseremail(request, userid):
+    """
+    Returns a user's email (= username) based on supplied id, if found.
+    Returns 404 if not found.
     """
     try:
         user = User.objects.get(id=userid)

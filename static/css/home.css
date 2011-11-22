@@ -77,12 +77,12 @@ select {
 }
 
 #header .cardstories_beta_sign .cardstories_subtitle {
-	font: 14px Helvetica, Arial, sans-serif; 
+    font: 14px Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
     font-weight: bold;
 }
 
 #header .cardstories_beta_sign .cardstories_message {
-	font: 12px Helvetica, Arial, sans-serif; 
+    font: 12px Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
 }
 
 
@@ -108,7 +108,7 @@ select {
 	margin:50px 30px 0 0;
 	display:inline;
 	color:#9a8479;
-	font:14px/16px Arial, Helvetica, sans-serif; 
+        font: 14px/16px Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
 }
 #header .info .inn {
 	width:100%;
@@ -180,12 +180,12 @@ select {
     width:auto;
     float:left;
 	color:#453f27;
-	font:18px/20px Arial, Helvetica, sans-serif;
+        font: 18px/20px Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
 	margin:0 0 12px;
 }
 #header .box h3 {
 	color:#453f27;
-	font:12px Arial, Helvetica, sans-serif;
+        font: 12px Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
     margin: 0 0 12px 0;
 }
 .errors {
@@ -232,7 +232,7 @@ input.password2 {
 	padding:6px 16px;
 	height:18px;
 	color:#76756f;
-	font:12px Arial, Helvetica, sans-serif;
+        font: 12px Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
 	overflow:hidden;
 }
 input.name,
@@ -282,13 +282,13 @@ form p {
 	margin:0;
 	position:relative;
 	margin:0 -10px 0 -5px;
-	font:9px Arial, Helvetica, sans-serif;
+        font: 9px Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
 	color:#605935;
 }
 form a {
 	float:left;
 	color:#5c5533;
-	font:bold 12px/14px Arial, Helvetica, sans-serif;
+        font: bold 12px/14px Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
 	text-decoration:none;
 	margin:7px 0 0;
 }
@@ -326,7 +326,7 @@ input.error {
 .how {
 	width:100%;
 	background:#592b1c url(images/bg-how.gif) repeat-x 0 100%;
-    font:18px/20px Arial, Helvetica, sans-serif;
+        font: 18px/20px Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
 }
 .how .frame {
 	width:1000px;
@@ -368,7 +368,7 @@ input.error {
 	left:75px;
 	background:url(images/bg-popup.gif) no-repeat;
 	color:#000;
-	font:12px/34px Arial, Helvetica, sans-serif;
+        font: 12px/34px Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
 }
 .how ul.list img {margin:0 auto 10px;}
 .how ul.list .numb {
@@ -388,7 +388,7 @@ input.error {
 }
 .how ul.list h3 {
 	margin:0 20px;
-	font:24px/26px Arial, Helvetica, sans-serif;
+        font: 24px/26px Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
 }
 .start {
 	width:353px;
@@ -442,7 +442,7 @@ input.error {
 	float:none;
 	width:auto;
 	height:1%;
-	font:14px/16px Arial, Helvetica, sans-serif;
+        font: 14px/16px Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
 	overflow:hidden;
 }
 #footer ul.list h3 {
@@ -458,7 +458,7 @@ input.error {
 #footer p {
 	margin:0 0 25px;
 	text-align:center;
-	font:12px/14px Arial, Helvetica, sans-serif;
+        font: 12px/14px Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
 }
 .password_reset {
     position: absolute;
