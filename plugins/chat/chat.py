@@ -87,7 +87,8 @@ class Plugin(pollable):
 
     def log_message(self, message):
         """
-        Write down the message to a text file on the filesystem
+        Write down the message to a text file on the filesystem.
+        The `message` is expected to be a unicode object.
         """
 
         log_time = time.strftime('%d-%m-%Y %H:%M:%S')
@@ -100,7 +101,7 @@ class Plugin(pollable):
         log_filepath = os.path.join(self.logdir, log_filename)
 
         with codecs.open(log_filepath, mode='ab', encoding='utf-8', errors='replace', buffering=1) as f:
-            f.write(log_text.decode('utf-8'))
+            f.write(log_text)
 
     def init(self, game, details):
         """
@@ -137,12 +138,18 @@ class Plugin(pollable):
         """
         if request.args['action'][0] == 'message':
             # Remove the message action so it does not flow through.
-            del request.args['action'] 
+            del request.args['action']
+
+            # Sentence arg in the request is a utf-8 encoded string of bytes.
+            # Decode it into an unicode object.
+            sentence = request.args['sentence'][0].decode('utf8')
+            # Escape HTML characters.
+            sentence = cgi.escape(sentence)
 
             # Build the message.
             message = {'type': 'chat',
                        'player_id': request.args['player_id'][0],
-                       'sentence': cgi.escape(request.args['sentence'][0])}
+                       'sentence': sentence}
             self.build_message(message)
 
             # Tell everybody connected that there's a new message.
