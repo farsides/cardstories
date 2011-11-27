@@ -68,7 +68,7 @@
       game = {
         'id': 100,
         'owner': true,
-        'owner_id': 'Owner',
+        'owner_index': 0,
         'ready': false,
         'sentence': 'long sentence is in the flux',
         'winner_card': 7,
@@ -82,7 +82,7 @@
       game = {
         'id': 100,
         'owner': true,
-        'owner_id': 'Owner',
+        'owner_index': 0,
         'ready': true,
         'sentence': 'long sentence is in the flux',
         'winner_card': 7,
@@ -100,7 +100,8 @@
       game = {
         'id': 100,
         'owner': false,
-        'owner_id': 'Owner',
+        'owner_index': 0,
+        'player_index': 5,
         'sentence': 'long sentence is in the flux',
         'self': [35, null, [11,12,13,14,15,16,17]],
         'players': [ [ 'Owner', null, 'n', 30, [] ],
@@ -115,7 +116,7 @@
       game = {
         'id': 100,
         'owner': false,
-        'owner_id': 'Owner',
+        'owner_index': 0,
         'sentence': 'long sentence is in the flux',
         'players': [ [ 'Owner', null, 'n', 30, [] ],
                      [ 'Player 1', null, 'n', 31, [] ],
@@ -128,7 +129,8 @@
     } else if(skin == 'invitation_pick_wait') {
       game = {
         'id': 100,
-        'owner_id': 'Owner',
+        'owner_index': 0,
+        'player_index': 3,
         'self': [33, null, [11,12,13,14,15,16,17]],
         'sentence': 'long sentence is in the flux',
         'players': [ [ 'Owner', null, 'n', 30, [] ],
@@ -142,17 +144,19 @@
         old_game = {
             'id': 100,
             'board': [33,11,12,13,14,15],
-            'owner_id': 'Owner',
+            'owner_index': 0,
+            'player_index': 3,
             'self': [33, null, [11,12,13,14,15,33]],
             'sentence': 'long sentence is in the flux',
-            'players': [['Owner', null, 'n', '', null],
-                        ['Player 1', null, 'n', '', null],
-                        ['Player 2', null, 'n', null, null],
-                        ['Player 3', null, 'n', 33, [11,12,13,14,15,33]],
-                        ['Player 4', null, 'n', '', null]]
+            'players': [['Owner', null, 'n', '', null, 42],
+                        ['Player 1', null, 'n', '', null, 44],
+                        ['Player 2', null, 'n', null, null, 55],
+                        ['Player 3', null, 'n', 33, [11,12,13,14,15,33], 66],
+                        ['Player 4', null, 'n', '', null, 77]]
         };
         game = $.extend(true, {}, old_game);
         game.players.splice(2,1);
+        game.player_index = 2;
         $.cardstories.invitation_pick_wait('Player 3', old_game, root).done(function() {
             window.setTimeout(function() {
                 $.cardstories.invitation_pick_wait_to_vote_voter('Player 3', old_game, game, root);
@@ -162,7 +166,8 @@
       game = {
         'id': 100,
         'owner': false,
-        'owner_id': 'Owner',
+        'owner_index': 0,
+        'player_index': 2,
         'ready': true,
         'board': [32,31,30,33,35,34],
         'self': [32, null, [32,31,30,33,35,34]],
@@ -179,7 +184,8 @@
       game = {
         'id': 100,
         'owner': false,
-        'owner_id': 'Owner',
+        'owner_index': 0,
+        'player_index': 2,
         'ready': true,
         'board': [32,31,33,30,35,34],
         'self': [32, 30, [32,31,30,33,35,34]],
@@ -196,26 +202,27 @@
         old_game = {
             'id': 100,
             'owner': false,
-            'owner_id': 'Owner',
+            'owner_index': 0,
+            'player_index': 2,
             'ready': true,
             'board': [32,31,33,30,35,34],
             'self': [32, 30, [1,2,3,4,5,32]],
             'winner_card': null,
             'sentence': 'Fake sentence is fake',
-            'players': [['Owner', null, 'n', '', null],
-                        ['Player 1', '', 'n', '', null],
-                        ['Player 2', 30, 'n', 32, [1,2,3,4,5,32]],
-                        ['Player 3', '', 'n', '', null],
-                        ['Player 4', null, 'n', '', null],
-                        ['Player 5', '', 'n', '', null]]
+            'players': [['Owner', null, 'n', '', null, 11],
+                        ['Lucy', '', 'n', '', null, 22],
+                        ['Mike', '', 'n', 32, [1,2,3,4,5,32], 33],
+                        ['Bob', '', 'n', '', null, 44],
+                        ['Mike', null, 'n', '', null, 55],
+                        ['Sarah', '', 'n', '', null, 66]]
         };
         game = $.extend(true, {}, old_game);
         game.winner_card = 30;
-        game.players[0] = [ 'Owner', null, 'y', 30, null];
-        game.players[1] = [ 'Player 1', 34, 'n', 31, null];
-        game.players[2][2] = 'y';
-        game.players[3] = [ 'Player 3', 35, 'n', 33, null];
-        game.players[5] = [ 'Player 5', 30, 'y', 35, null];
+        game.players[0] = ['Owner', null, 'y', 30, null, 11];
+        game.players[1] = ['Lucy', 35, 'n', 31, null, 22];
+        game.players[2] = ['Mike', 30, 'y', 32, [1,2,3,4,5,32], 33],
+        game.players[3] = ['Bob', 35, 'n', 33, null, 44];
+        game.players[5] = ['Sarah', 30, 'y', 35, null, 66];
         game.players.splice(4,1);
         $.cardstories.vote_voter_wait('Player 2', old_game, root).done(function() {
             window.setTimeout(function() {
@@ -226,7 +233,7 @@
       game = {
         'id': 100,
         'owner': false,
-        'owner_id': 'Owner',
+        'owner_index': 0,
         'ready': true,
         'board': [32,31,33,30,35,34],
         'self': null,
@@ -242,7 +249,7 @@
       game = {
         'id': 100,
         'owner': true,
-        'owner_id': 'Owner',
+        'owner_index': 0,
         'ready': false,
         'sentence': 'the game sentence',
         'winner_card': 30,
@@ -257,7 +264,7 @@
       game = {
         'id': 100,
         'owner': true,
-        'owner_id': 'Owner',
+        'owner_index': 0,
         'ready': true,
         'sentence': 'the game sentence',
         'board': [32,31,30,33,35,34],
@@ -275,7 +282,8 @@
       game = {
         'id': 100,
         'owner': false,
-        'owner_id': 'Owner',
+        'owner_index': 0,
+        'player_index': 1,
         'ready': true,
         'sentence': 'the game sentence',
         'board': [30,31,32,33],
@@ -291,7 +299,7 @@
       game = {
         'id': 100,
         'owner': true,
-        'owner_id': 'Owner',
+        'owner_index': 0,
         'ready': true,
         'sentence': 'the game sentence',
         'board': [30,31,32,33,34,35],
@@ -308,7 +316,7 @@
       game = {
         'id': 100,
         'owner': false,
-        'owner_id': 'Owner',
+        'owner_index': 0,
         'ready': true,
         'sentence': 'the game sentence',
         'board': [30,31,32,33,34,35],
