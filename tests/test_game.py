@@ -277,17 +277,18 @@ class CardstoriesGameTest(unittest.TestCase):
                            'ready': False,
                            'countdown_finish': None,
                            'owner': False,
-                           'owner_id': 15,
-                           'players': [[owner_id, None, u'n', '', None],
-                                       [player1, None, u'n', None, None],
-                                       [player2, None, u'n', None, None]],
+                           'owner_index': 0,
+                           'player_index': None,
+                           'players': [[owner_id, None, u'n', '', None, owner_id],
+                                       [player1, None, u'n', None, None, player1],
+                                       [player2, None, u'n', None, None, player2]],
                            'self': None,
                            'sentence': u'SENTENCE',
                            'winner_card': None,
                            'state': u'invitation',
                            'invited': None,
                            'modified': self.game.modified}, game_info)
-        
+
         # invitation state, owner point of view
         game_info = yield self.game.game(owner_id)
         self.assertEquals([winner_card], game_info['board'])
@@ -299,6 +300,8 @@ class CardstoriesGameTest(unittest.TestCase):
         self.assertEquals(game_id, game_info['id'])
         self.assertEquals(invited, game_info['invited'])
         self.assertNotEquals(id(invited), id(game_info['invited']))
+        self.assertEquals(0, game_info['owner_index'])
+        self.assertEquals(0, game_info['player_index'])
         self.assertEquals(owner_id, game_info['players'][0][0])
         self.assertEquals(1, len(game_info['players'][0][4]))
         self.assertEquals(winner_card, game_info['players'][0][3])
@@ -338,6 +341,8 @@ class CardstoriesGameTest(unittest.TestCase):
         self.assertFalse(game_info['ready'])
         self.assertEquals(game_info['countdown_finish'], None)
         self.assertEquals(game_id, game_info['id'])
+        self.assertEquals(0, game_info['owner_index'])
+        self.assertEquals(0, game_info['player_index'])
         self.assertEquals(owner_id, game_info['players'][0][0])
         self.assertEquals(winner_card, game_info['players'][0][3])
         self.assertEquals(1, len(game_info['players'][0][4]))
@@ -371,10 +376,11 @@ class CardstoriesGameTest(unittest.TestCase):
                            'ready': True,
                            'countdown_finish': countdown_finish,
                            'owner': False,
-                           'owner_id': 15,
-                           'players': [[owner_id, None, u'n', '', None],
-                                       [player1, '', u'n', card1, player1_cards],
-                                       [player2, '', u'n', '', None]],
+                           'owner_index': 0,
+                           'player_index': 1,
+                           'players': [[owner_id, None, u'n', '', None, owner_id],
+                                       [player1, '', u'n', card1, player1_cards, player1],
+                                       [player2, '', u'n', '', None, player2]],
                            'self': [card1, card2, player1_cards],
                            'sentence': u'SENTENCE',
                            'winner_card': None,
@@ -411,16 +417,23 @@ class CardstoriesGameTest(unittest.TestCase):
                            'ready': False,
                            'countdown_finish': None,
                            'owner': False,
-                           'owner_id': 15,
-                           'players': [[owner_id, None, u'n', '', None],
-                                       [player2, None, u'n', None, None],
-                                       [player1, None, u'n', None, None]],
+                           'owner_index': 0,
+                           'player_index': None,
+                           'players': [[owner_id, None, u'n', '', None, owner_id,],
+                                       [player2, None, u'n', None, None, player2],
+                                       [player1, None, u'n', None, None, player1]],
                            'self': None,
                            'sentence': u'SENTENCE',
                            'winner_card': None,
                            'state': u'invitation',
                            'invited': None,
                            'modified': self.game.modified}, game_info)
+
+        game_info = yield self.game.game(player2)
+        self.assertEquals(1, game_info['player_index'])
+
+        game_info = yield self.game.game(player1)
+        self.assertEquals(2, game_info['player_index'])
 
     @defer.inlineCallbacks
     def test08_game_countdown_timeout(self):

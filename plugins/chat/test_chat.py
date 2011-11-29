@@ -273,7 +273,7 @@ class ChatTest(unittest.TestCase):
         yield self.complete_game()
 
     @defer.inlineCallbacks
-    def test08_nonascii_characters(self):
+    def test08_nonascii_characters_message(self):
         # new instance of the chat plugin to test
         chat_instance = Plugin(self.service, [])
         # create a message event request
@@ -290,7 +290,25 @@ class ChatTest(unittest.TestCase):
             self.assertIn(unicode_sentence, lines[0].decode('utf-8'))
 
     @defer.inlineCallbacks
-    def test09_escape_html(self):
+    def test09_nonascii_characters_notification(self):
+        # new instance of the chat plugin to test
+        chat_instance = Plugin(self.service, [])
+        # create a message event request
+        class FakeGame:
+            id = 102
+            owner_id = 303
+        unicode_sentence = u"我不明白 šal čez želodec"
+        changes = {'type': 'change',
+                   'details': {'type': 'init',
+                               'sentence': [unicode_sentence]},
+                   'game': FakeGame()}
+        result = yield chat_instance.self_notify(changes)
+        with open(os.path.join(self.test_logdir, 'chat', '%s.log' % strftime('%Y-%m-%d'))) as f:
+            lines = f.readlines()
+            self.assertIn(unicode_sentence, lines[0].decode('utf-8'))
+
+    @defer.inlineCallbacks
+    def test10_escape_html(self):
         # new instance of the chat plugin to test
         chat_instance = Plugin(self.service, [])
         # create a message event request

@@ -581,6 +581,7 @@ asyncTest("go_lobby", 1, function() {
     var game = {
         'id': 101,
         'owner': true,
+        'owner_index': 0,
         'sentence': 'SENTENCE',
         'winner_card': 30,
         'players': [[player_id, null, 'n', 30, []]]
@@ -755,7 +756,7 @@ asyncTest("invitation_owner_join_helper", 41, function() {
     var player3 = 'player3';
     var player4 = 'player4';
     var state1 = {
-        'owner_id': player1,
+        'owner_index': 0,
         'ready': false,
         'countdown_finish': null,
         'players': [ [ player1, null, 'n', null, [] ],
@@ -765,7 +766,7 @@ asyncTest("invitation_owner_join_helper", 41, function() {
 
     var countdown_finish = 60000;
     var state2 = {
-        'owner_id': player1,
+        'owner_index': 0,
         'ready': true,
         'countdown_finish': countdown_finish,
         'players': [ [ player1, null, 'n', null, [] ],
@@ -846,7 +847,7 @@ asyncTest("invitation_owner_go_vote_confirm", 28, function() {
     var player4 = 'player4';
 
     var state = {
-        owner_id: player1,
+        owner_index: 0,
         winner_card: 7,
         ready: true,
         players: [[player1, null, 'n', null, []],
@@ -926,6 +927,7 @@ test("invitation_owner_invite_more", 6, function() {
     var game = {
         'id': game_id,
         'owner': true,
+        'owner_index': 0,
         'ready': true,
         'winner_card': 10,
         'players': [ [ player1, null, 'n', card1, [] ],
@@ -962,14 +964,14 @@ asyncTest("invitation_owner", 10, function() {
     var player3 = 'player3';
     var player4 = 'player4';
     var card1 = 5;
-    var owner_id = player1;
     var game_id = 101;
+    var owner_id = player1;
     var winner_card = 7;
     var sentence = 'SENTENCE';
 
     var game = {
         'id': game_id,
-        'owner_id': owner_id,
+        'owner_index': 0,
         'owner': true,
         'ready': true,
         'sentence': sentence,
@@ -1056,7 +1058,7 @@ asyncTest("invitation_pick_deal_helper", 38, function() {
     var player3 = 'player3';
     var player4 = 'player4';
     var state1 = {
-        'owner_id': player1,
+        'owner_index': 0,
         'ready': false,
         'players': [ [ player1, null, 'n', null, [] ],
                      [ player2, null, 'n', null, [] ],
@@ -1064,7 +1066,7 @@ asyncTest("invitation_pick_deal_helper", 38, function() {
     };
 
     var state2 = {
-        'owner_id': player1,
+        'owner_index': 0,
         'ready': true,
         'players': [ [ player1, null, 'n', null, [] ],
                      [ player2, null, 'n', 2, [] ],
@@ -1150,8 +1152,13 @@ asyncTest("invitation_pick", 12, function() {
     var hand = $('.cardstories_cards_hand', element);
     var docked_cards = $('.cardstories_cards', hand);
     var owner = 'Owner';
-    var player1 = 'Player1';
-    var player2 = 'Player2';
+    // Players 1-5 all share the same name.
+    var player1 = 'Player';
+    var player2 = player1;
+    var player3 = player1;
+    var player4 = player1;
+    // Final player 5 has a different name.
+    var player5 = 'The Player';
     var player_id = player2;
     var game_id = 101;
     var cards = [1,2,3,4,5,6];
@@ -1160,11 +1167,15 @@ asyncTest("invitation_pick", 12, function() {
     var game = {
         'id': game_id,
         'self': [null, null, cards],
-        'owner_id': owner,
         'owner': false,
+        'owner_index': 0,
+        'player_index': 5,
         'players': [[owner, null, 'n', null, []],
                     [player1, null, 'n', null, []],
-                    [player2, null, 'n', null, []]],
+                    [player2, null, 'n', null, []],
+                    [player3, null, 'n', null, []],
+                    [player4, null, 'n', null, []],
+                    [player5, null, 'n', null, []]],
         'sentence': sentence
     };
 
@@ -1216,7 +1227,8 @@ asyncTest("invitation_pick_wait", 23, function() {
 
     var game = {
         'id': game_id,
-        'owner_id': owner_id,
+        'owner_index': 0,
+        'player_index': 1,
         'players': [
             [ owner_id, null, 'n', null, [] ],
             [ player_id, null, 'n', picked, [] ],
@@ -1282,11 +1294,11 @@ asyncTest("invitation_pick_wait", 23, function() {
 });
 
 asyncTest("invitation_pick_wait_to_vote_voter", 16, function() {
-    var player_id = 'The Player';
-    var player2_id = 'Player 2';
-    var player3_id = 'Player 3';
-    var player4_id = 'Player 4';
-    var owner_id = 'The Owner';
+    var owner_name = 'Johnny';
+    var player_name = 'Emily';
+    var player2_name = player_name; // player two shares player one's name
+    var player3_name = owner_name;  // player three shares owner's name
+    var player4_name = 'Steven';
     var game_id = 101;
     var picked = 5;
     var cards = [1, 2, 3, 4, picked, 6];
@@ -1294,12 +1306,13 @@ asyncTest("invitation_pick_wait_to_vote_voter", 16, function() {
 
     var game = {
         'id': game_id,
-        'owner_id': owner_id,
+        'owner_index': 0,
+        'player_index': 1,
         'players': [
-            [ owner_id, null, 'n', null, [] ],
-            [ player_id, null, 'n', picked, [] ],
-            [ player2_id, null, 'n', null, [] ],
-            [ player3_id, null, 'n', '', [] ]
+            [ owner_name, null, 'n', null, [], 42 ],
+            [ player_name, null, 'n', picked, [], 43 ],
+            [ player2_name, null, 'n', null, [], 44 ],
+            [ player3_name, null, 'n', '', [], 45 ]
         ],
         'self': [picked, null, cards],
         'sentence': sentence
@@ -1326,13 +1339,13 @@ asyncTest("invitation_pick_wait_to_vote_voter", 16, function() {
     };
 
     $.cardstories.vote_voter = function(_player_id, _game, _root) {
-        equal(_player_id, player_id, 'vote_voter called with player_id');
+        equal(_player_id, player_name, 'vote_voter called with player_id');
         equal(_game, game2, 'vote_voter called with game2');
         equal(_root, root, 'vote_voter called with root');
         return $.Deferred().resolve();
     };
 
-    $.cardstories.invitation_pick_wait(player_id, game, root).done(function() {
+    $.cardstories.invitation_pick_wait(player_name, game, root).done(function() {
         equal(modal.css('display'), 'block', 'modal dialog is visible');
         var card1 = $('.cardstories_card', pick1);
         var card3 = $('.cardstories_card', pick3);
@@ -1350,7 +1363,7 @@ asyncTest("invitation_pick_wait_to_vote_voter", 16, function() {
             cb();
         };
 
-        $.cardstories.vote(player_id, game2, root).done(function() {
+        $.cardstories.vote(player_name, game2, root).done(function() {
             equal(animations_played, 2, 'two animations were played');
             equal(card1.position().left, final_left_1, 'card1 is in final position');
             equal(card3.position().left, final_left_3, 'card3 is in final position');
@@ -1389,7 +1402,7 @@ test("invitation_anonymous", 1, function() {
             [ 'player4', null, 'n', null, [] ],
             [ 'player5', null, 'n', null, [] ]
         ],
-        'owner_id': owner,
+        'owner_index': 0,
         'sentence': sentence
     };
 
@@ -1415,7 +1428,8 @@ test("invitation_display_board", 16, function() {
     var sentence = 'SENTENCE';
     var game = {
         'id': game_id,
-        'owner_id': owner_id,
+        'owner_index': 0,
+        'player_index': 2,
         'sentence': sentence,
         'players': [
             [ owner_id, null, 'n', null, [] ],
@@ -1526,7 +1540,8 @@ asyncTest("vote_voter", 28, function() {
     var game = {
         'id': game_id,
         'board': board,
-        'owner_id': owner_id,
+        'owner_index': 0,
+        'player_index': 1,
         'self': [picked, null, [11, 12, 13, 14, 15, 16]],
         'sentence': sentence,
         'players': [ [ owner_id, null, 'n', null, [] ],
@@ -1608,7 +1623,8 @@ test("vote_voter_wait", 31, function() {
     var game = {
       'id': game_id,
       'owner': false,
-      'owner_id': owner_id,
+      'owner_index': 0,
+      'player_index': 2,
       'ready': true,
       'board': board,
       'self': [picked, voted, hand],
@@ -1675,33 +1691,35 @@ asyncTest("vote_voter_wait_to_complete", 31, function() {
     var game1 = {
         'id': game_id,
         'owner': false,
-        'owner_id': owner_id,
+        'owner_index': 0,
+        'player_index': 2,
         'ready': true,
         'board': board,
         'self': [picked, voted, hand],
         'winner_card': null,
         'sentence': sentence,
-        'players': [['Owner', null, 'n', '', null],
-                    ['Player 1', '', 'n', '', null],
-                    [player_id, voted, 'n', picked, hand],
-                    ['Player 3', '', 'n', '', null],
-                    ['Player 4', null, 'n', '', null],
-                    ['Player 5', '', 'n', '', null]]
+        'players': [['Owner', null, 'n', '', null, 42],
+                    ['Player 1', '', 'n', '', null, 44],
+                    [player_id, voted, 'n', picked, hand, 55],
+                    ['Player 3', '', 'n', '', null, 66],
+                    ['Player 4', null, 'n', '', null, 77],
+                    ['Player 5', '', 'n', '', null, 88]]
     };
     var game2 = {
         'id': game_id,
         'owner': false,
-        'owner_id': owner_id,
+        'owner_index': 0,
+        'player_index': 2,
         'ready': true,
         'board': board,
         'self': [picked, voted, hand],
         'winner_card': voted,
         'sentence': sentence,
-        'players': [['Owner', null, 'y', voted, null],
-                    ['Player 1', 34, 'n', 31, null],
-                    [player_id, voted, 'y', picked, hand],
-                    ['Player 3', 35, 'n', 33, null],
-                    ['Player 5', voted, 'y', 35, null]]
+        'players': [['Owner', null, 'y', voted, null, 42],
+                    ['Player 1', 34, 'n', 31, null, 44],
+                    [player_id, voted, 'y', picked, hand, 55],
+                    ['Player 3', 35, 'n', 33, null, 66],
+                    ['Player 5', voted, 'y', 35, null, 88]]
     };
 
     $.cardstories.poll_ignore = function(_request) {
@@ -1767,7 +1785,7 @@ test("vote_anonymous", 28, function() {
     var game = {
       'id': game_id,
       'owner': false,
-      'owner_id': owner_id,
+      'owner_index': 0,
       'ready': true,
       'board': board,
       'self': null,
@@ -1832,7 +1850,7 @@ test("vote_shuffle_cards", 7, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_vote .cardstories_owner', root);
     var game = {
-        'owner_id': 'Owner',
+        'owner_index': 0,
         'players': [ [ 'Owner', null, null, 1, [] ],
                      [ 'Player 1', null, null, 2, [] ],
                      [ 'Player 2', null, null, 3, [] ],
@@ -1854,7 +1872,7 @@ test("vote_shuffle_cards", 7, function() {
         var sentence_final_left = sentence.metadata({type: "attr", name: "data"}).fl;
         equal(sentence.position().left, sentence_final_left, 'sentence box was moved');
 
-        // Check that cards were moved to the final positions.  The owner's
+        // Check that cards were moved to the final positions. The owner's
         // card is always number 6.
         notEqual($('.cardstories_card_1', element).show().position().left, card2_l, 'card 1 was moved');
         notEqual($('.cardstories_card_2', element).show().position().left, card2_l, 'card 2 was moved');
@@ -1873,7 +1891,7 @@ test("vote_display_board", 17, function() {
     var player2 = 'Player 2';
     var player3 = 'Player 3';
     var game = {
-        'owner_id': owner_id,
+        'owner_index': 0,
         'board': [],
         'players': [ [ owner_id, null, null, 1, [] ],
                      [ player1, null, null, 2, [] ],
@@ -1911,7 +1929,7 @@ test("vote_display_or_select_cards", 8, function() {
     var player3 = 'Player 3';
     var board = [33,30,31,32];
     var game = {
-        'owner_id': owner_id,
+        'owner_index': 0,
         'board': board,
         'winner_card': 30,
         'players': [ [ owner_id, null, null, 30, [] ],
@@ -1942,7 +1960,7 @@ asyncTest("vote_owner", 17, function() {
     var game = {
         'id': game_id,
         'owner': true,
-        'owner_id': owner_id,
+        'owner_index': 0,
         'sentence': sentence,
         'ready': true,
         'countdown_finish': countdown_finish,
@@ -2006,7 +2024,7 @@ test("complete owner lost easy", 7, function() {
     var player2 = 'Player 2';
     var game = {
         'owner': true,
-        'owner_id': owner_id,
+        'owner_index': 0,
         'board': [],
         'winner_card': 30,
         'players': [ [ owner_id, null, 'n', 30, [] ],
@@ -2033,7 +2051,7 @@ test("complete owner lost hard", 7, function() {
     var player2 = 'Player 2';
     var game = {
         'owner': true,
-        'owner_id': owner_id,
+        'owner_index': 0,
         'board': [],
         'winner_card': 30,
         'players': [ [ owner_id, null, 'n', 30, [] ],
@@ -2060,7 +2078,7 @@ test("complete owner won", 7, function() {
     var player2 = 'Player 2';
     var game = {
         'owner': true,
-        'owner_id': owner_id,
+        'owner_index': 0,
         'board': [],
         'winner_card': 30,
         'players': [ [ owner_id, null, 'y', 30, [] ],
@@ -2089,7 +2107,7 @@ test("complete", 29, function() {
     var player4 = 'Player 4';
     var game = {
         'owner': true,
-        'owner_id': owner_id,
+        'owner_index': 0,
         'board': [],
         'winner_card': 30,
         'players': [ [ owner_id, null, 'y', 30, [] ],
@@ -2142,7 +2160,7 @@ test("complete player didn't vote", 12, function() {
     var player4 = 'Player 4';
     var game = {
         'owner': false,
-        'owner_id': owner_id,
+        'owner_index': 0,
         'board': [],
         'winner_card': 30,
         'players': [ [ owner_id, null, 'y', 30, [] ],
@@ -2169,14 +2187,15 @@ test("complete player didn't vote", 12, function() {
 });
 
 test("play_again_finish_state author", 4, function() {
-    var player_id = 5;
+    var player_id = 'The Owner';
     var game_author = {
         'id': 7,
         'owner': true,
+        'owner_index': 0,
         'state': 'fake_state',
         'winner_card': 15,
         'board': [],
-        'players': [['Owner', null, 'y', 30, []]]
+        'players': [[player_id, null, 'y', 30, []]]
     };
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
@@ -2195,14 +2214,16 @@ test("play_again_finish_state author", 4, function() {
 });
 
 test("play_again_finish_state player", 4, function() {
-    var player_id = 5;
+    var player_id = 'The Player';
     var game = {
         'id': 7,
         'owner': false,
+        'owner_index': 0,
         'state': 'fake_state',
         'winner_card': 15,
         'board': [],
-        'players': [['Owner', null, 'y', 30, []]]
+        'players': [['Owner', null, 'y', 30, []],
+                    [player_id, 33, 'n', 31, []]]
     };
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);

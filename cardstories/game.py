@@ -179,7 +179,9 @@ class CardstoriesGame(pollable):
         players = []
         winner_card = None
         myself = None
-        for player in rows:
+        myself_index = None
+        owner_index = None
+        for idx, player in enumerate(rows):
             if player[0] == player_id or owner_id == player_id:
                 player_cards = [ ord(c) for c in player[1] ]
             else:
@@ -195,6 +197,9 @@ class CardstoriesGame(pollable):
                 picked_count += 1
             if player[0] == player_id:
                 myself = [ self.ord(player[2]), self.ord(player[3]), player_cards ]
+                myself_index = idx
+            if player[0] == owner_id:
+                owner_index = idx
             if state == 'complete' or owner_id == player_id:
                 if player[0] == owner_id:
                     winner_card = ord(player[1][0])
@@ -206,7 +211,7 @@ class CardstoriesGame(pollable):
                     vote = None
             if player[3] != None:
                 voted_count += 1
-            players.append([ player[0], vote, player[4], picked, player_cards ])
+            players.append([ player[0], vote, player[4], picked, player_cards, player[0] ])
         ready = None
         if state == 'invitation':
             ready = picked_count >= self.MIN_PICKED
@@ -223,8 +228,9 @@ class CardstoriesGame(pollable):
                             'countdown_finish': self.get_countdown_finish(),
                             'self': myself,
                             'owner': owner_id == player_id,
-                            'owner_id': owner_id,
                             'players': players,
+                            'owner_index': owner_index,
+                            'player_index': myself_index,
                             'invited': invited })
 
     def participateInteraction(self, transaction, game_id, player_id):
