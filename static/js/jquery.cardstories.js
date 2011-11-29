@@ -21,7 +21,7 @@
 
         SEATS: 6,
 
-        NB_CARDS: 38,
+        NB_CARDS: 39,
 
         window: window,
 

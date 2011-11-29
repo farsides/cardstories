@@ -28,7 +28,7 @@ class CardstoriesGame(pollable):
 
     MIN_PICKED = 3 # there needs to be at least 3 cards to move to the voting phase
     MIN_VOTED = 2 # there needs to be at least 2 votes to complete the game
-    NCARDS = 38
+    NCARDS = 39
     NPLAYERS = 6
     CARDS_PER_PLAYER = 7
     DEFAULT_COUNTDOWN_DURATION = 60 # needs to be coordinated with the value on the UI
