@@ -3472,6 +3472,19 @@
             });
 
             q.queue('chain', function(next) {
+                var master_seat = $('.cardstories_master_seat', element);
+                var master_name = $('.cardstories_master_name', master_seat);
+                if (players[0][2] === 'y') {
+                    master_seat.addClass('cardstories_master_seat_won');
+                    master_name.html('WINS!');
+                } else {
+                    master_seat.addClass('cardstories_master_seat_lost');
+                    master_name.html('LOSES!');
+                }
+                next();
+            });
+
+            q.queue('chain', function(next) {
                 if (cb !== undefined) {
                     cb();
                 }
