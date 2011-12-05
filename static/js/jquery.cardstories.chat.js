@@ -80,7 +80,7 @@
             });
         },
 
-        // Receives state data from the server.  If there are messages, append
+        // Receives state data from the server. If there are messages, append
         // them to the display div.
         state: function(player_id, data, root) {
             if (data.messages) {
@@ -107,8 +107,8 @@
                     }
                     var div = this.templates[message.type].supplant(tvars);
                     root_data.display.append(div);
-                    this.scroll_to_bottom(root);
                 }
+                this.scroll_to_bottom(root);
             }
         },
 
