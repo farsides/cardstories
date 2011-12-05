@@ -3766,14 +3766,16 @@
             'card034.png',
             'card035.png',
             'card036.png',
-            'card037.png'
+            'card037.png',
+            'card038.png',
+            'card039.png'
         ],
 
         unset_active: function(root) {
             $('.cardstories_active', root).removeClass('cardstories_active');
         },
 
-        set_active: function(root, element, game, dom) { 
+        set_active: function(root, element, game, dom) {
             var trigger = false;
             if (!$(element).hasClass('cardstories_active')) {
                 trigger = true;
