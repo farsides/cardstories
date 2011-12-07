@@ -53,7 +53,7 @@ function setup() {
     $.cardstories.setTimeout = function(cb, delay) { return window.setTimeout(cb, 0); };
     $.cardstories.delay = function(o, delay, qname) { return; };
     $.cardstories.ajax = function(o) { throw o; };
-    $.cardstories.reload = $.cardstories.game_or_lobby;
+    $.cardstories.reload = $.cardstories.game_or_create;
     $.cardstories.confirm_participate = true;
     $.cardstories.poll_ignore = function() { throw 'poll_ignore'; };
     $.cardstories.error = cardstories_default_error;
@@ -369,7 +369,7 @@ asyncTest("animate_sprite", 3, function() {
     });
 });
 
-test("subscribe", 6, function() {
+test("subscribe", 5, function() {
     var player_id = 'player@test.com';
     var game_id;
     $.cookie('CARDSTORIES_ID', null);
@@ -381,11 +381,8 @@ test("subscribe", 6, function() {
     var called = false;
     // any ajax issued as indirect side effect of subscribing is ignored because it is
     // not a direct side effect
-    $.cardstories.ajax = function(options) {
-        called = true;
-    };
+    $.cardstories.ajax = function(options) {};
     $('#qunit-fixture .cardstories_subscribe .cardstories_emailform').submit();
-    ok(called, 'ajax function called, hence input validated');
     equal($.cookie('CARDSTORIES_ID').replace(/%40/g, "@"), player_id);
     $.cookie('CARDSTORIES_ID', null);
     equal($.cookie('CARDSTORIES_ID'), null);
@@ -534,18 +531,6 @@ asyncTest("create on error", 1, function() {
     });
 });
 
-test("widget lobby", 4, function() {
-    var player_id = 15;
-
-    ok(!$('#qunit-fixture .cardstories').hasClass('cardstories_root'), 'no cardstories_root');
-    $.cardstories.ajax = function(options) {
-        equal(options.type, 'GET');
-        equal(options.url, $.cardstories.url + '?action=state&type=lobby&modified=0&player_id=' + player_id + '&in_progress=true&my=true');
-    };
-    $('#qunit-fixture .cardstories').cardstories(player_id);
-    ok($('#qunit-fixture .cardstories').hasClass('cardstories_root'), 'cardstories_root');
-});
-
 asyncTest("game", 4, function() {
     var player_id = 15;
     var game_id = 101;
@@ -572,31 +557,6 @@ asyncTest("game", 4, function() {
 
     root.data('cardstories_modified', 0);
     $.cardstories.game(player_id, game_id, root);
-});
-
-asyncTest("go_lobby", 1, function() {
-    var root = $('#qunit-fixture .cardstories');
-    var element = $('.cardstories_invitation .cardstories_owner', root);
-    var player_id = 'Player 1';
-    var game = {
-        'id': 101,
-        'owner': true,
-        'owner_index': 0,
-        'sentence': 'SENTENCE',
-        'winner_card': 30,
-        'players': [[player_id, null, 'n', 30, []]]
-    };
-
-    $.cardstories.poll_ignore = function(_request) {};
-
-    $.cardstories.reload = function(_player_id) {
-        equal(_player_id, player_id);
-        start();
-    };
-
-    $.cardstories.invitation(player_id, game, root);
-
-    $('.cardstories_go_lobby', element).click();
 });
 
 test("game on error", 1, function() {
@@ -631,29 +591,43 @@ test("automatic game creation", 2, function() {
     var game_id = 112;
 
     var cardstories_create = $.cardstories.create;
-    var cardstories_game_or_lobby = $.cardstories.game_or_lobby;
+    var cardstories_game = $.cardstories.game;
 
-    // If create = true, create must be called directly.
+    // If no game id is provided, create must be called directly.
     $.cardstories.create = function(player_id, root) {
         ok(true, 'create called');
     };
-    $.cardstories.game_or_lobby = function(player_id, game_id, root) {
-        ok(false, 'game_or_lobby called');
+    $.cardstories.game = function(player_id, game_id, root) {
+        ok(false, 'game called');
     };
-    $.cardstories.bootstrap(player_id, null, null, true, root);
+    $.cardstories.bootstrap(player_id, null, null, false, root);
     
-    // However, if game_id is also set, create must not be called.
+    // However, if game_id is set, create must not be called.
     $.cardstories.create = function(player_id, root) {
         ok(false, 'create called');
     };
-    $.cardstories.game_or_lobby = function(player_id, game_id, root) {
-        ok(true, 'game_or_lobby called');
+    $.cardstories.game = function(player_id, game_id, root) {
+        ok(true, 'game called');
     };
     $.cardstories.bootstrap(player_id, game_id, null, true, root);
 
     // Reset
     $.cardstories.create = cardstories_create;
-    $.cardstories.game_or_lobby = cardstories_game_or_lobby;
+    $.cardstories.game = cardstories_game;
+});
+
+test("create new game button", 3, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var player_id = 'player1';
+
+    $.cardstories.reload = function(_player_id, _game_id, _root) {
+        equal(_player_id, player_id);
+        equal(_game_id, undefined);
+        equal(_root, root);
+    };
+
+    $.cardstories.bootstrap(player_id, null, null, false, root);
+    $('.cardstories .cardstories_create .cardstories_pick_card .cardstories_new_story a').click();
 });
 
 test("preload_images_helper", 3, function() {
@@ -2207,15 +2181,15 @@ test("play_again_finish_state author", 4, function() {
     var results = $('.cardstories_results.author', element);
     var play_again_button = $('.cardstories_play_again', results);
 
-    $.cardstories.create = function(_player_id, _root) {
+    $.cardstories.reload = function(_player_id, _game_id, _root) {
         equal(_player_id, player_id);
+        equal(_game_id, undefined);
         equal(_root, root);
     };
 
     $.cardstories.complete(player_id, game_author, root);
     equal(results.css('display'), 'block', 'author results are visible before clicking the button');
     play_again_button.click();
-    notEqual(results.css('display'), 'block', 'author results fade out after clicking the button');
 });
 
 test("play_again_finish_state player", 4, function() {
@@ -2235,15 +2209,15 @@ test("play_again_finish_state player", 4, function() {
     var results = $('.cardstories_results.player', element);
     var play_again_button = $('.cardstories_play_again', results);
 
-    $.cardstories.create = function(_player_id, _root) {
+    $.cardstories.reload = function(_player_id, _game_id, _root) {
         equal(_player_id, player_id);
+        equal(_game_id, undefined);
         equal(_root, root);
     };
 
     $.cardstories.complete(player_id, game, root);
     equal(results.css('display'), 'block', 'player results are visible before clicking the button');
     play_again_button.click();
-    notEqual(results.css('display'), 'block', 'player results fade out after clicking the button');
 });
 
 test("advertise", 11, function() {
@@ -2652,22 +2626,6 @@ test("poll_discard", 1, function() {
 
     root.data('polling', true);
     $.cardstories.poll_discard(root);
-});
-
-test("start_story", 3, function() {
-    var player_id = 222;
-    var root = $('#qunit-fixture .cardstories');
-
-    var abort = function() {
-        ok(true, 'abort called');
-    };
-
-    root.data('poll', {abort: abort});
-    root.data('polling', true);
-
-    equal($('#qunit-fixture .cardstories_create .cardstories_pick_card.cardstories_active').length, 0, 'pick_card not active');
-    $.cardstories.start_story(player_id, root);
-    equal($('#qunit-fixture .cardstories_create .cardstories_pick_card.cardstories_active').length, 1, 'pick_card active');
 });
 
 test("lobby_in_progress", 10, function() {

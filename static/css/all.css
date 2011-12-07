@@ -695,36 +695,37 @@
     height: 700px;
 }
 
+.cardstories .cardstories_new_story {
+    display: block;
+    position: absolute;
+    background: transparent url('images/new_story.png') no-repeat left top;
+    width: 242px;
+    height: 63px;
+    top: 0px;
+    left: 400px;
+    margin-top: -63px;
+}
+
+.cardstories .cardstories_new_story .cardstories_img_button {
+    width: 115px;
+    height: 30px;
+    position: absolute;
+    top: 17px;
+    left: 118px;
+}
+
+.cardstories .cardstories_new_story .cardstories_img_button div {
+    position: absolute;
+    top: 7px;
+    left: 10px;
+    color: white;
+    font-family: Licon;
+}
+
 .cardstories .cardstories_deck { 
     background: transparent url('images/card_deck_base.png') no-repeat left top;
     width: 216px;
     height: 217px;
-}
-
-.cardstories .cardstories_go_lobby { 
-    display: block;
-    position: absolute;
-    background: transparent url('images/btn_listofgameson.png') no-repeat left top;
-    width: 99px;
-    height: 27px;
-    top: 185px;
-    left: 5px;
-    color: white;
-    font-family: "Licon";
-    font-size: 16px;
-    line-height: 26px;
-    text-align: right;
-    cursor: pointer;
-    text-decoration: none;
-}
-
-.cardstories .cardstories_go_lobby > span { 
-    position: relative;
-    right: 8px;
-}
-
-.cardstories .cardstories_deck .cardstories_go_lobby:active { 
-    background: transparent url('images/btn_listofgamesover.png') no-repeat left top;
 }
 
 .cardstories .cardstories_deck .cardstories_deck_cards { 

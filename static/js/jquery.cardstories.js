@@ -220,7 +220,7 @@
             this.set_active(root, element, null, 'create_pick_card');
             this.display_progress_bar('owner', 1, element, root);
             this.display_master_name(player_id, element);
-            this.go_lobby(player_id, element);
+            this.init_board_buttons(player_id, element, root);
             var deck = $this.create_deck();
             var cards = $.map(deck, function(card, index) {
                 return { 'value':card };
@@ -623,7 +623,7 @@
             this.set_active(root, element, null, 'create_write_sentence');
             this.display_progress_bar('owner', 2, element, root);
             this.display_master_name(player_id, element);
-            this.go_lobby(player_id, element);
+            this.init_board_buttons(player_id, element, root);
             $('.cardstories_card', element).attr('class', 'cardstories_card cardstories_card' + card + ' {card:' + card + '}');
             this.create_write_sentence_animate_start(card, element, root);
             var text = $('textarea.cardstories_sentence', element);
@@ -931,6 +931,7 @@
             }
         },
 
+        // XXX Lobby deactivated (can't be reached) - Move to tabs
         refresh_lobby: function(player_id, in_progress, my, root) {
             var $this = this;
 
@@ -969,7 +970,7 @@
                         'type': ['lobby'],
                         'player_id': player_id
                     }, function() {
-                        $this.game_or_lobby(player_id, undefined, root);
+                        $this.game_or_create(player_id, undefined, root);
                     });
                 }
             };
@@ -1000,6 +1001,7 @@
             });
         },
 
+        // XXX Lobby deactivated (can't be reached) - Move to tabs
         lobby_games: function(player_id, lobby, element, root) {
             var $this = this;
             var template = $('.cardstories_template tbody', element).html();
@@ -1033,10 +1035,7 @@
             }
         },
 
-        start_story: function(player_id, root) {
-            this.create(player_id, root);
-        },
-
+        // XXX Lobby deactivated (can't be reached) - Move to tabs
         lobby_in_progress: function(player_id, lobby, root) {
             var $this = this;
             var element = $('.cardstories_lobby .cardstories_in_progress', root);
@@ -1045,7 +1044,7 @@
                 $this.refresh_lobby(player_id, false, true, root);
               });
             $('.cardstories_start_story', element).click(function() {
-                $this.start_story(player_id, root);
+                $this.create(player_id, root);
               });
             $('.cardstories_solo', element).click(function() {
                 $this.solo(player_id, root);
@@ -1053,6 +1052,7 @@
             this.lobby_games(player_id, lobby, element, root);
         },
 
+        // XXX Lobby deactivated (can't be reached) - Move to tabs
         lobby_finished: function(player_id, lobby, root) {
             var $this = this;
             var element = $('.cardstories_lobby .cardstories_finished', root);
@@ -1061,7 +1061,7 @@
                 $this.refresh_lobby(player_id, true, true, root);
             });
             $('.cardstories_start_story', element).click(function() {
-                $this.start_story(player_id, root);
+                $this.create(player_id, root);
             });
             $('.cardstories_solo', element).click(function() {
                 $this.solo(player_id, root);
@@ -1098,7 +1098,7 @@
                     'game_id': game.id,
                     'player_id': player_id
                 }, function() {
-                    $this.game_or_lobby(player_id, game.id, root);
+                    $this.game_or_create(player_id, game.id, root);
                 });
             }
 
@@ -1111,7 +1111,7 @@
             this.set_active(root, element, game, 'invitation_owner');
             this.display_progress_bar('owner', 3, element, root);
             this.display_master_name(this.master_name(game), element);
-            this.go_lobby(player_id, element);
+            this.init_board_buttons(player_id, element, root);
             $('.cardstories_sentence', element).text(game.sentence);
             var picked_card = $('.cardstories_picked_card', element);
             var src = picked_card.metadata({type: 'attr', name: 'data'}).card.supplant({card: game.winner_card});
@@ -1424,7 +1424,7 @@
             this.set_active(root, element, game, 'invitation_pick');
             this.display_progress_bar('player', 1, element, root);
             this.display_master_name(this.master_name(game), element);
-            this.go_lobby(player_id, element);
+            this.init_board_buttons(player_id, element, root);
 
             // Send game when the user clicks ok.
             var ok = function(card_value, card_index) {
@@ -1969,7 +1969,7 @@
 
             this.display_progress_bar('player', 2, element, root);
             this.display_master_name(this.master_name(game), element);
-            this.go_lobby(player_id, element);
+            this.init_board_buttons(player_id, element, root);
             this.invitation_display_board(player_id, game, element, root, true);
 
             var modal = $('.cardstories_modal', element);
@@ -2276,7 +2276,7 @@
                 'game_id': game.id,
                 'player_id': player_id
             }, function() {
-                $this.game_or_lobby(player_id, game.id, root);
+                $this.game_or_create(player_id, game.id, root);
             });
 
             return deferred;
@@ -2388,7 +2388,7 @@
             $('.cardstories_sentence', element).text(game.sentence);
             this.display_progress_bar('player', 3, element, root);
             this.display_master_name(this.master_name(game), element);
-            this.go_lobby(player_id, element);
+            this.init_board_buttons(player_id, element, root);
 
             // Send game when user clicks ok.
             var ok = function(card_index, card_value) {
@@ -2476,7 +2476,7 @@
             $('.cardstories_sentence', element).text(game.sentence);
             this.display_progress_bar('player', 4, element, root);
             this.display_master_name(this.master_name(game), element);
-            this.go_lobby(player_id, element);
+            this.init_board_buttons(player_id, element, root);
 
             // Update board state.
             this.vote_display_board(false, player_id, game, element, root);
@@ -2688,7 +2688,7 @@
             $('.cardstories_sentence', element).text(game.sentence);
             this.display_progress_bar('player', 4, element, root);
             this.display_master_name(this.master_name(game), element);
-            this.go_lobby(player_id, element);
+            this.init_board_buttons(player_id, element, root);
 
             // Update board state.
             this.vote_display_board(false, player_id, game, element, root);
@@ -2727,7 +2727,7 @@
             this.set_active(root, element, game, 'vote_owner');
             this.display_progress_bar('owner', 5, element, root);
             this.display_master_name(this.master_name(game), element);
-            this.go_lobby(player_id, element);
+            this.init_board_buttons(player_id, element, root);
             $('.cardstories_sentence', element).text(game.sentence);
             var announce = $('.cardstories_results_announce', element);
 
@@ -3281,7 +3281,7 @@
             var element = $('.cardstories_complete', root);
             this.set_active(root, element, game, 'complete');
             this.display_master_name(this.master_name(game), element);
-            this.go_lobby(player_id, element);
+            this.init_board_buttons(player_id, element, root);
             $('.cardstories_sentence', element).text(game.sentence);
 
             // Display owner's card.
@@ -3291,14 +3291,7 @@
 
             // Enable play again button.
             $('.cardstories_play_again', element).unbind('click').click(function() {
-                var results = $('.cardstories_results', element);
-                var class_name = game.owner ? 'author' : 'player';
-                results.filter('.' + class_name).fadeOut('slow', function() {
-                    // The players of this game will be kept since the
-                    // CARDSTORIES_INVITATIONS cookie stores theirs id's.
-                    $(this).hide(); // A workaround for http://bugs.jquery.com/ticket/8892
-                    $this.create(player_id, root);
-                });
+                $this.reload(player_id, undefined, root);
             });
 
             // Set progress bar and master seat class.
@@ -3572,10 +3565,12 @@
             });
         },
 
-        go_lobby: function(player_id, element) {
+        init_board_buttons: function(player_id, element, root) {
             var $this = this;
-            $('.cardstories_go_lobby', element).unbind('click').click(function() {
-                $this.reload(player_id);
+
+            // Start a new game
+            $('.cardstories_new_story', element).unbind('click').click(function() {
+                $this.reload(player_id, undefined, root);
             });
         },
 
@@ -3968,7 +3963,7 @@
             $(".cardstories_emailform", element).submit(function() {
                 var player_id = encodeURIComponent($('.cardstories_email', element).val());
                 $.cookie('CARDSTORIES_ID', player_id);
-                $this.game_or_lobby(player_id, game_id, root, 0);
+                $this.game_or_create(player_id, game_id, root, 0);
                 return true;
             });
 
@@ -4006,17 +4001,15 @@
             this.preload_images_helper(root, function() {
                 if(player_id === undefined || player_id === null || player_id === '') {
                     $this.login(game_id, login_url, root);
-                } else if (create && !game_id) {
-                    $this.create(player_id, root);
                 } else {
-                    $this.game_or_lobby(player_id, game_id, root);
+                    $this.game_or_create(player_id, game_id, root);
                 }
             });
         },
 
-        game_or_lobby: function(player_id, game_id, root) {
-            if (game_id === undefined || game_id === '') {
-                this.refresh_lobby(player_id, true, true, root);
+        game_or_create: function(player_id, game_id, root) {
+            if (game_id === undefined || game_id === null || game_id === '') {
+                this.create(player_id, root);
             } else {
                 this.game(player_id, game_id, root);
             }
@@ -4043,7 +4036,8 @@
             $(this).toggleClass('cardstories_root', true);
             $(this).data('polling', false);
 
-            // Bootstrap cardstories.
+            // Bootstrap cardstories
+            // "create" is true if the player just created an account
             $.cardstories.bootstrap(player_id, game_id, login_url, create, this);
 
             return this;
