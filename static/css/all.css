@@ -106,8 +106,10 @@
     color: #F4EFDA;
 }
 
+/* XXX Deactivated until the "Check who's online" feature is implemented */
 .cardstories .cardstories_chat_box .cardstories_chat_header > a {
-    display: block;
+    /*display: block*/
+    display: none;
     position: relative;
     top: 5px;
     right: 5px;
@@ -236,7 +238,9 @@
     font-size: 27px;
 }
 
+/* XXX Deactivated until the "help" feature is implemented */
 .cardstories .cardstories_progress .cardstories_help {
+    display: none;
     position: absolute;
     background: transparent url('images/b_help_on.png') no-repeat left top;
     width: 41px;
