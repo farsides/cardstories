@@ -891,6 +891,63 @@ asyncTest("invitation_owner_go_vote_confirm", 28, function() {
     });
 });
 
+test("invitation_owner_confirm_only_when_not_all_players_picked", 2, function() {
+    var player1 = 'player1';
+    var card1 = 5;
+    var player2 = 'player2';
+    var card2 = 6;
+    var player3 = 'player3';
+    var card3 = 7;
+    var player4 = 'player4';
+    var card4 = 8;
+
+    var player_id = player1;
+    var game_id = 101;
+
+    var game = {
+        'id': game_id,
+        'owner': true,
+        'owner_index': 0,
+        'ready': true,
+        'winner_card': card1,
+        'players': [ [ player1, null, 'n', card1, [] ],
+                     [ player2, null, 'n', card2, [] ],
+                     [ player3, null, 'n', card3, [] ],
+                     [ player4, null, 'n', null, [] ] ],
+        'invited': [ player2 ]
+    };
+
+    $.cardstories.poll_ignore = function(_request) {};
+    var element = $('#qunit-fixture .cardstories_invitation .cardstories_owner');
+    var root = $('#qunit-fixture .cardstories');
+
+    var cardstories_invitation_owner_go_to_vote_animate = $.cardstories.invitation_owner_go_to_vote_animate;
+    var cardstories_display_modal = $.cardstories.display_modal;
+
+    // Not everyone picked a card - call confirmation modal
+    $.cardstories.display_modal = function(modal, overlay) {
+        ok(true, 'display_modal called');
+    };
+    $.cardstories.invitation_owner_go_to_vote_animate = function(_player_id, _game, _element, _root) {
+        ok(false, 'invitation_owner_go_to_vote_animate called');
+    };
+    $.cardstories.invitation_owner_go_vote_confirm(player_id, game, element, root);
+    
+    // Everyone picked a card - animate directly
+    game.players[3][3] = card4;
+    $.cardstories.display_modal = function(modal, overlay) {
+        ok(false, 'display_modal called');
+    };
+    $.cardstories.invitation_owner_go_to_vote_animate = function(_player_id, _game, _element, _root) {
+        ok(true, 'invitation_owner_go_to_vote_animate called');
+    };
+    $.cardstories.invitation_owner_go_vote_confirm(player_id, game, element, root);
+    
+    // Reset
+    $.cardstories.invitation_owner_go_to_vote_animate = cardstories_invitation_owner_go_to_vote_animate;
+    $.cardstories.display_modal = cardstories_display_modal;
+});
+
 test("invitation_owner_invite_more", 6, function() {
     var player1 = 'player1';
     var card1 = 5;
@@ -1988,6 +2045,63 @@ asyncTest("vote_owner", 17, function() {
     ok(!button.hasClass('cardstories_button_disabled'), 'announce button is enabled');
     button.click();
     $('.cardstories_results_confirm_yes', element).click();
+});
+
+test("vote_owner_results_confirm_only_when_not_all_players_picked", 2, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_vote .cardstories_owner', root);
+    var player1 = 'player1';
+    var card1 = 5;
+    var player2 = 'player2';
+    var card2 = 6;
+    var player3 = 'player3';
+    var card3 = 7;
+    var player4 = 'player4';
+    var card4 = 8;
+
+    var player_id = player1;
+    var game_id = 101;
+
+    var game = {
+        'id': game_id,
+        'owner': true,
+        'owner_index': 0,
+        'ready': true,
+        'winner_card': card1,
+        'players': [ [ player1, null,  'n', card1, [] ],
+                     [ player2, card1, 'n', card2, [] ],
+                     [ player3, card2, 'n', card3, [] ],
+                     [ player4, null,  'n', card4, [] ] ],
+        'invited': [ player2 ]
+    };
+
+    $.cardstories.poll_ignore = function(_request) {};
+
+    var cardstories_vote_owner_results_animate = $.cardstories.vote_owner_results_animate;
+    var cardstories_display_modal = $.cardstories.display_modal;
+
+    // Not everyone voted - call confirmation modal
+    $.cardstories.display_modal = function(modal, overlay) {
+        ok(true, 'display_modal called');
+    };
+    $.cardstories.vote_owner_results_animate = function(_player_id, _game, _element, _root) {
+        ok(false, 'vote_owner_results_animate called');
+    };
+    $.cardstories.vote_owner_results_confirm(player_id, game, element, root);
+    
+    // Everyone voted - animate directly
+    game.players[3][1] = card3;
+    $.cardstories.display_modal = function(modal, overlay) {
+        ok(false, 'display_modal called');
+    };
+    $.cardstories.vote_owner_results_animate = function(_player_id, _game, _element, _root) {
+        ok(true, 'vote_owner_results_animate called');
+    };
+    $.cardstories.vote_owner_results_confirm(player_id, game, element, root);
+    
+    // Reset
+    $.cardstories.vote_owner_results_animate = cardstories_vote_owner_results_animate;
+    $.cardstories.display_modal = cardstories_display_modal;
 });
 
 test("complete owner lost easy", 8, function() {
