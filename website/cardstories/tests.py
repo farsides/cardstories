@@ -145,8 +145,29 @@ class CardstoriesTest(TestCase):
         data = valid_data.copy()
         query = '?game_id=1'
         response = c.post(url + query, data)
+        self.assertTrue('_auth_user_id' in c.session)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response['Location'], 'http://testserver/' + query)
+
+    def test_02logout(self):
+        '''
+        Test logout
+        '''
+
+        c = self.client
+        data = {"username": "testuser1@email.com",
+                "password": "abc!@#"}
+
+        # Initial state - anonymous
+        self.assertFalse('_auth_user_id' in c.session)
+
+        # Login
+        response = c.post('/login/', data)
+        self.assertTrue('_auth_user_id' in c.session)
+
+        # Logout
+        response = c.get('/logout/')
+        self.assertFalse('_auth_user_id' in c.session)
 
     def test_03facebook(self):
         """

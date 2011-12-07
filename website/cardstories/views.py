@@ -28,6 +28,7 @@ from django.contrib.sessions.models import Session
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as auth_login
+from django.contrib.auth import logout as auth_logout
 from django.contrib.sites.models import Site
 from django.template import RequestContext
 from django.conf import settings
@@ -203,6 +204,15 @@ def facebook(request):
     return render_to_response('cardstories/welcome.html', context,
                               context_instance=RequestContext(request,
                               processors=[common_variables]))
+
+def logout(request):
+    '''De-authenticate the user, if it was authenticated, and redirect
+    him to the homepage'''
+
+    auth_logout(request)
+
+    url = reverse(welcome)
+    return redirect(url)
 
 def getuserid(request, username):
     """
