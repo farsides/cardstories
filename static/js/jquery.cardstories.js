@@ -630,7 +630,7 @@
             var input = $('.cardstories_submit', element).hide();
 
             // Show number of characters remaining
-            text.limit('100','#cardstories_char_left_counter');
+            text.limit('80','#cardstories_char_left_counter');
 
             var is_sentence_valid = function() {
                 var trimmedText = $.trim(text.val());

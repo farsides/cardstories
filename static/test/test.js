@@ -477,14 +477,14 @@ asyncTest("create", 18, function() {
         var sentencel = $('.cardstories_write_sentence .cardstories_sentence', element);
         ok(sentencel.attr('placeholder') !== undefined, 'placeholder is set');
         equal(sentencel.attr('placeholder'), $('.cardstories_sentence', element).val());
-        equal($('#cardstories_char_left_counter', element).html(), "100", 'char_left_counter initial');
+        equal($('#cardstories_char_left_counter', element).html(), "80", 'char_left_counter initial');
         var submit = $('.cardstories_write_sentence .cardstories_submit', element);
         equal(submit.css('display'), 'none', 'OK button is initially hidden');
         sentencel.val('o').change();
         equal(submit.css('display'), 'none', 'OK button is hidden if text is too short');
         sentencel.val(sentence).change();
         sentencel.blur();
-        equal($('#cardstories_char_left_counter', element).html(), (100-sentence.length).toString(), 'char_left_counter initial');
+        equal($('#cardstories_char_left_counter', element).html(), (80-sentence.length).toString(), 'char_left_counter initial');
         ok(submit.css('display') !== 'none', 'OK button is visible if valid text has been set');
         submit.closest('form').submit();
     };
