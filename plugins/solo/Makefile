@@ -21,6 +21,9 @@ export COVERAGE=$(shell which coverage || which python-coverage)
 all:
 
 check:
+	echo "Deactivated solo mode tests (solo mode not used anymore)"
+
+deactivated:
 	${COVERAGE} -e
 	PYTHONPATH=../.. ${COVERAGE} -x test_solo.py
 	${COVERAGE} -m -a -r solo.py
