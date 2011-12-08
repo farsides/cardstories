@@ -188,7 +188,11 @@ def facebook(request):
                 response = parse_qs(data)
                 token = response['access_token'][0]
 
+                # authenticate() tries with all available authentication backends
+                # Here it will be against the Facebook backend, which includes
+                # an automatic registration of the user account based on FB data
                 user = authenticate(token=token)
+
                 if user and user.is_active:
                     auth_login(request, user)
 
