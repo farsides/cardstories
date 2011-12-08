@@ -1213,7 +1213,7 @@
     font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
     font-size: 11pt;
     overflow: auto;
-    font-weight: bold;
+    font-style: italic;
     color: black;
     padding: 1px;
 }
@@ -1234,6 +1234,15 @@
     top: 80px;
     font-family: "Licon";
     font-size: 14px;
+}
+
+.cardstories .cardstories_create .cardstories_write_sentence .cardstories_cursor {
+    position: absolute;
+    left: 50px;
+    top: 55px;
+    width: 30px;
+    height: 30px;
+    z-index: 10;
 }
 
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_submit {

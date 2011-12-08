@@ -146,6 +146,10 @@ static/audio/ring.mp3:
  Licensed under the Creative Commons CC-BY 3.0
    http://creativecommons.org/licenses/by/3.0/
 
- 
+static/css/img/cursor.png:
+
+ Copyright (c) 2011 Ort43v
+ Licensed under the Creative Commons Attribution-Share Alike 3.0 Unported 
+   http://creativecommons.org/licenses/by-sa/3.0/deed.en
 
 
