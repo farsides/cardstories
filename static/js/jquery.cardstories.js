@@ -21,7 +21,7 @@
 
         SEATS: 6,
 
-        NB_CARDS: 40,
+        NB_CARDS: 41,
 
         window: window,
 
@@ -3793,7 +3793,8 @@
             'card037.png',
             'card038.png',
             'card039.png',
-            'card040.png'
+            'card040.png',
+            'card041.png'
         ],
 
         unset_active: function(root) {
