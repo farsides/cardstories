@@ -35,11 +35,26 @@
 
         noop: function() {},
 
+        log: function(message) {
+            var console = this.window.console;
+            if (console && console.log) {
+                console.log(message);
+            }
+        },
+
         error: function(error) { alert(error); },
 
-        xhr_error: function(xhr, status, error) {
-            if (error !== 'abort') {
-                $.cardstories.error(error);
+        xhr_error: function(ajax_request, status, error) {
+            var $this = this;
+            $this.log('XHR ERROR: ' + status + ' ' + error);
+
+            if (error) {
+                $this.error(error);
+            } else {
+                // Retry after 100 miliseconds.
+                $this.setTimeout(function() {
+                    $this.ajax(ajax_request);
+                }, 100);
             }
         },
 
@@ -50,7 +65,13 @@
         },
 
         ajax: function(o) {
-            var options = $.extend({cache: false}, o);
+            var $this = this;
+            var options = $.extend({
+                cache: false,
+                error: function(xhr, status, error) {
+                    $this.xhr_error(options, status, error);
+                }
+            }, o);
             return jQuery.ajax(options);
         },
 
@@ -677,8 +698,7 @@
                         data: 'sentence=' + sentence,
                         dataType: 'json',
                         global: false,
-                        success: success,
-                        error: $this.xhr_error
+                        success: success
                     });
                 });
                 return true;
@@ -705,8 +725,7 @@
                 type: 'GET',
                 dataType: 'json',
                 global: false,
-                success: success,
-                error: $this.xhr_error
+                success: success
             });
         },
 
@@ -845,8 +864,7 @@
                 type: 'GET',
                 dataType: 'json',
                 global: false,
-                success: success,
-                error: $this.xhr_error
+                success: success
             });
 
             // Save poll for discarding, when necessary.
@@ -925,8 +943,7 @@
                     type: 'GET',
                     dataType: 'json',
                     global: false,
-                    success: success,
-                    error: $this.xhr_error
+                    success: success
                 });
             }
         },
@@ -995,8 +1012,7 @@
                 type: 'GET',
                 dataType: 'json',
                 global: false,
-                success: success,
-                error: $this.xhr_error
+                success: success
             });
         },
 
@@ -3567,8 +3583,7 @@
                 type: 'GET',
                 dataType: 'json',
                 global: false,
-                success: success,
-                error: $this.xhr_error
+                success: success
             });
         },
 
@@ -3631,8 +3646,7 @@
                 type: 'GET',
                 dataType: 'json',
                 global: false,
-                success: success,
-                error: $this.xhr_error
+                success: success
             });
         },
 

@@ -106,12 +106,13 @@ asyncTest("delay", 1, function() {
     q.dequeue('chain');
 });
 
-test("ajax", 3, function() {
+test("ajax", 4, function() {
     $.cardstories.ajax = cardstories_default_ajax;
     var ajax = jQuery.ajax;
     jQuery.ajax = function(options) {
       equal(options.some, 'options', 'calls jQuery.ajax with the supplied options');
       ok(options.cache === false, 'merges cache: false into the ajax options');
+      ok(options.error, 'merges an error handler into the ajax options');
       return 'some ajax result';
     };
 
@@ -140,9 +141,44 @@ test("reload", 4, function() {
     $.cardstories.reload_link = reload_link;
 });
 
-test("xhr_error", 1, function() {
+asyncTest("xhr_error", 4, function() {
+    // The log function is always called.
+    var original_log = $.cardstories.log;
+    $.cardstories.log = function(msg) { ok(msg.match('ERROR')); };
+
+    // The error function is only called if the error (third argument) is present.
     $.cardstories.error = function(err) { equal(err, 'an xhr error occurred', 'calls $.cardstories.error'); };
-    $.cardstories.xhr_error({xhr: 'object'}, 500, 'an xhr error occurred');
+
+    // The ajax request is retried only when the error (third argument) is NOT present.
+    $.cardstories.ajax = function(request) {
+        deepEqual(request, {ajax: 'request'}, 'retries the request');
+        start();
+    };
+
+    $.cardstories.xhr_error({ajax: 'request'}, 'error', 'an xhr error occurred');
+    $.cardstories.xhr_error({ajax: 'request'}, 'timeout');
+    $.cardstories.log = original_log;
+});
+
+test("log", 1, function() {
+    var message = 'Testing log';
+
+    var original_window = $.cardstories.window;
+    $.cardstories.window = {
+        console: {
+            log: function(_message) {
+                equal(_message, message, 'calls $.cardstories.window.console.log with message');
+            }
+        }
+    }
+
+    $.cardstories.log(message);
+
+    // Test to see it doesn't break if console.log is not present.
+    $.cardstories.window = {};
+    $.cardstories.log(message);
+
+    $.cardstories.window = original_window;
 });
 
 test("reload_link", 4, function() {
