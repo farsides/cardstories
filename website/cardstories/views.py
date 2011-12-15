@@ -28,6 +28,7 @@ from django.contrib.sessions.models import Session
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as auth_login
+from django.contrib.auth import logout as auth_logout
 from django.contrib.sites.models import Site
 from django.template import RequestContext
 from django.conf import settings
@@ -88,7 +89,7 @@ def welcome(request):
     if request.user.is_authenticated():
         template = 'cardstories/game.html'
         context = {'create': request.session.get('create', False),
-                   'user_name': get_user_display_name(request.user)}
+                   'player_id': request.user.id}
         request.session['create'] = False
     else:
         context = {'registration_form': RegistrationForm(),
@@ -187,7 +188,11 @@ def facebook(request):
                 response = parse_qs(data)
                 token = response['access_token'][0]
 
+                # authenticate() tries with all available authentication backends
+                # Here it will be against the Facebook backend, which includes
+                # an automatic registration of the user account based on FB data
                 user = authenticate(token=token)
+
                 if user and user.is_active:
                     auth_login(request, user)
 
@@ -204,7 +209,16 @@ def facebook(request):
                               context_instance=RequestContext(request,
                               processors=[common_variables]))
 
-def getuserid(request, username):
+def logout(request):
+    '''De-authenticate the user, if it was authenticated, and redirect
+    him to the homepage'''
+
+    auth_logout(request)
+
+    url = reverse(welcome)
+    return redirect(url)
+
+def get_player_id(request, username):
     """
     Returns a user's id based on supplied username, optionally creating the
     user, if so requested.  Username will be validated according to
@@ -241,7 +255,7 @@ def getuserid(request, username):
     response = HttpResponse(user.id, mimetype="text/plain")
     return response
 
-def getusername(request, userid):
+def get_player_name(request, userid):
     """
     Returns a user's name based on supplied id, if found.
     Returns 404 if not found.
@@ -252,7 +266,7 @@ def getusername(request, userid):
     except User.DoesNotExist:
         return HttpResponseNotFound()
 
-def getuseremail(request, userid):
+def get_player_email(request, userid):
     """
     Returns a user's email (= username) based on supplied id, if found.
     Returns 404 if not found.
@@ -263,7 +277,7 @@ def getuseremail(request, userid):
     except User.DoesNotExist:
         return HttpResponseNotFound()
 
-def getloggedinuserid(request, session_key):
+def get_loggedin_player_id(request, session_key):
     """
     Returns a user's id based on a logged in session id. If user is not found,
     a status of 404 will be returned.

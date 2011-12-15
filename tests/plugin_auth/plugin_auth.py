@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2011 Dachary <loic@dachary.org>
+# Copyright (C) 2011 Loic Dachary <loic@dachary.org>
 #
 # This software's license gives you freedom; you can copy, convey,
 # propagate, redistribute and/or modify this program under the terms of
@@ -16,21 +16,12 @@
 # along with this program in a file in the toplevel directory called
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
+from cardstories.auth import Auth
 
-export COVERAGE=$(shell which coverage || which python-coverage)
+class Plugin(Auth):
+    
+    def __init__(self, service, plugins):
+        self.service = service
 
-all:
-
-check:
-	${COVERAGE} -e
-	PYTHONPATH=.. ${COVERAGE} -x test_service.py
-	PYTHONPATH=.. ${COVERAGE} -x test_site.py
-	PYTHONPATH=.. ${COVERAGE} -x test_tap.py
-	PYTHONPATH=.. ${COVERAGE} -x test_game.py
-	PYTHONPATH=.. ${COVERAGE} -x test_poll.py
-	PYTHONPATH=.. ${COVERAGE} -x test_auth.py
-	PYTHONPATH=.. ${COVERAGE} -x test_plugins.py
-	${COVERAGE} -m -a -r ../cardstories/*.py
-
-clean:
-	rm -fr .coverage _trial_temp*
+    def name(self):
+        return 'plugin_auth'

@@ -40,11 +40,12 @@ urlpatterns += patterns('website.cardstories.views',
     (r'^$', 'welcome'),
     (r'^register/', 'register'),
     (r'^login/', 'login'),
+    (r'^logout/', 'logout'),
     (r'^facebook/', 'facebook'),
-    (r'^getuserid/(.+)/', 'getuserid'),
-    (r'^getusername/(\d+)/', 'getusername'),
-    (r'^getuseremail/(\d+)/', 'getuseremail'),
-    (r'^getloggedinuserid/(.+)/', 'getloggedinuserid'),
+    (r'^get_player_id/(.+)/', 'get_player_id'),
+    (r'^get_player_name/(\d+)/', 'get_player_name'),
+    (r'^get_player_email/(\d+)/', 'get_player_email'),
+    (r'^get_loggedin_player_id/(.+)/', 'get_loggedin_player_id'),
 )
 
 # Development urls

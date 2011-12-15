@@ -22,6 +22,7 @@ sys.path.insert(0, os.path.abspath("..")) # so that for M-x pdb works
 from twisted.trial import unittest, runner, reporter
 
 from cardstories.plugins import CardstoriesPlugins
+from cardstories.auth import Auth
 
 class CardstoriesPluginsTest(unittest.TestCase):
     
@@ -49,6 +50,20 @@ class CardstoriesPluginsTest(unittest.TestCase):
         self.assertEquals(plugins.plugins[1].service, service)
         self.assertEquals(service.pollable_plugins[0], plugins.plugins[1])
         self.assertEquals(len(service.pollable_plugins), 1)
+
+    def test02_auth_plugin(self):
+        '''Auth plugins must be registered on the service object'''
+        
+        plugins = CardstoriesPlugins({ 'plugins-dir': '..',
+                                       'plugins': 'plugin_auth'})
+        class Service:
+            def __init__(self):
+                self.auth = None
+        service = Service()
+        plugins.load(service)
+        self.assertEquals(plugins.plugins[0].service, service)
+        self.assertEquals(service.auth, plugins.plugins[0])
+        self.assertIsInstance(service.auth, Auth)
 
 def Run():
     loader = runner.TestLoader()

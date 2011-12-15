@@ -35,6 +35,11 @@ python-django install python-pip and then use it to install Django:
 $ sudo apt-get install python-pip
 $ sudo pip install Django==1.2.5
 
+To run the tests, you will also need the Mock package 
+(http://www.voidspace.org.uk/python/mock/)
+
+$ sudo pip install mock==0.7.2
+
 Now, make sure you are at the root of the cardstories checkout.  At this point,
 create the default database structure for the website (an sqlite database will
 be automatically created at /tmp/cardstories.website):
@@ -62,8 +67,7 @@ $ PYTHONPATH=.:etc/cardstories twistd --nodaemon cardstories \
 	--plugins-logdir log/ \
 	--plugins-confdir tests \
 	--plugins 'djangoauth chat mail' \
-	--plugins-pre-process 'djangoauth chat' \
-	--plugins-post-process 'djangoauth'
+	--plugins-pre-process 'djangoauth chat'
 
 On a second terminal window, still from the root of the checkout, run the
 website development server, which by default binds to localhost and port 8000.

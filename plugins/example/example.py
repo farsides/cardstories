@@ -404,7 +404,7 @@ class Plugin(pollable):
             return defer.succeed(result)
 
     #
-    # The preprocess method is registered as a deferred callback which
+    # The postprocess method is registered as a deferred callback which
     # is triggered after a request has been processed by the
     # CardstoriesService handle function.
     #
@@ -510,9 +510,14 @@ class Plugin(pollable):
     # In the context of a chat plug, the state method would be expected to
     # return the lines written since the last call to the state method.
     #
+    # The return value should also contain a list of all the player_ids
+    # being referenced by the state, so that the service can keep track
+    # of them.
+    #
     def state(self, args):
         args['modified'][0] # unix timestamp 
+        players_id_list = list('1')
         state = {}
         state['counter'] = self.counter
-        return defer.succeed(state)
+        return defer.succeed([state, players_id_list])
 

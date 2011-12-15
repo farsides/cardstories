@@ -106,8 +106,10 @@
     color: #F4EFDA;
 }
 
+/* XXX Deactivated until the "Check who's online" feature is implemented */
 .cardstories .cardstories_chat_box .cardstories_chat_header > a {
-    display: block;
+    /*display: block*/
+    display: none;
     position: relative;
     top: 5px;
     right: 5px;
@@ -236,7 +238,9 @@
     font-size: 27px;
 }
 
+/* XXX Deactivated until the "help" feature is implemented */
 .cardstories .cardstories_progress .cardstories_help {
+    display: none;
     position: absolute;
     background: transparent url('images/b_help_on.png') no-repeat left top;
     width: 41px;
@@ -695,36 +699,37 @@
     height: 700px;
 }
 
+.cardstories .cardstories_new_story {
+    display: block;
+    position: absolute;
+    background: transparent url('images/new_story.png') no-repeat left top;
+    width: 242px;
+    height: 63px;
+    top: 0px;
+    left: 400px;
+    margin-top: -63px;
+}
+
+.cardstories .cardstories_new_story .cardstories_img_button {
+    width: 115px;
+    height: 30px;
+    position: absolute;
+    top: 17px;
+    left: 118px;
+}
+
+.cardstories .cardstories_new_story .cardstories_img_button div {
+    position: absolute;
+    top: 7px;
+    left: 10px;
+    color: white;
+    font-family: Licon;
+}
+
 .cardstories .cardstories_deck { 
     background: transparent url('images/card_deck_base.png') no-repeat left top;
     width: 216px;
     height: 217px;
-}
-
-.cardstories .cardstories_go_lobby { 
-    display: block;
-    position: absolute;
-    background: transparent url('images/btn_listofgameson.png') no-repeat left top;
-    width: 99px;
-    height: 27px;
-    top: 185px;
-    left: 5px;
-    color: white;
-    font-family: "Licon";
-    font-size: 16px;
-    line-height: 26px;
-    text-align: right;
-    cursor: pointer;
-    text-decoration: none;
-}
-
-.cardstories .cardstories_go_lobby > span { 
-    position: relative;
-    right: 8px;
-}
-
-.cardstories .cardstories_deck .cardstories_go_lobby:active { 
-    background: transparent url('images/btn_listofgamesover.png') no-repeat left top;
 }
 
 .cardstories .cardstories_deck .cardstories_deck_cards { 
@@ -1208,7 +1213,7 @@
     font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
     font-size: 11pt;
     overflow: auto;
-    font-weight: bold;
+    font-style: italic;
     color: black;
     padding: 1px;
 }
@@ -1229,6 +1234,15 @@
     top: 80px;
     font-family: "Licon";
     font-size: 14px;
+}
+
+.cardstories .cardstories_create .cardstories_write_sentence .cardstories_cursor {
+    position: absolute;
+    left: 50px;
+    top: 55px;
+    width: 30px;
+    height: 30px;
+    z-index: 10;
 }
 
 .cardstories .cardstories_create .cardstories_write_sentence .cardstories_submit {

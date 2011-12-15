@@ -87,10 +87,11 @@
                 var root_data = $(root).data('cardstories_chat');
                 for (var i=0; i < data.messages.length; i++) {
                     var message = data.messages[i];
+                   	var player_info = $.cardstories.get_player_info_by_id(message.player_id);
                     var tvars = {};
                     if (message.type == 'chat') {
                         tvars = {
-                            player_id: message.player_id,
+                            player_id: player_info.name,
                             sentence: message.sentence
                         }
                         this.play_sound('pop', root, root_data.initialized_ts);
@@ -100,7 +101,7 @@
                         href += $.cardstories.reload_link(player_id, message.game_id);
                         tvars = {
                             href: href,
-                            player_id: message.player_id,
+                            player_id: player_info.name,
                             sentence: message.sentence
                         }
                         this.play_sound('ring', root, root_data.initialized_ts);

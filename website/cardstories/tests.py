@@ -145,8 +145,29 @@ class CardstoriesTest(TestCase):
         data = valid_data.copy()
         query = '?game_id=1'
         response = c.post(url + query, data)
+        self.assertTrue('_auth_user_id' in c.session)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response['Location'], 'http://testserver/' + query)
+
+    def test_02logout(self):
+        '''
+        Test logout
+        '''
+
+        c = self.client
+        data = {"username": "testuser1@email.com",
+                "password": "abc!@#"}
+
+        # Initial state - anonymous
+        self.assertFalse('_auth_user_id' in c.session)
+
+        # Login
+        response = c.post('/login/', data)
+        self.assertTrue('_auth_user_id' in c.session)
+
+        # Logout
+        response = c.get('/logout/')
+        self.assertFalse('_auth_user_id' in c.session)
 
     def test_03facebook(self):
         """
@@ -282,13 +303,13 @@ class CardstoriesTest(TestCase):
         self.assertEqual(user.first_name, fb_name)
         self.assertEqual(user.get_profile().facebook_id, fb_id)
 
-    def test_04getuserid(self):
+    def test_04get_player_id(self):
         """
         Test getuserid. Requires 'users' fixture.
 
         """
         c = self.client
-        base_url = "/getuserid"
+        base_url = "/get_player_id"
 
         # Empty request must 404.
         url = "%s/%s/" % (base_url, "")
@@ -334,13 +355,13 @@ class CardstoriesTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response._container[0], 2)
 
-    def test_05getusername(self):
+    def test_05get_player_name(self):
         """
         Test getusername. Requires 'users' fixture.
 
         """
         c = self.client
-        base_url = "/getusername"
+        base_url = "/get_player_name"
 
         # Empty request must 404.
         url = "%s/%s/" % (base_url, "")
@@ -369,13 +390,13 @@ class CardstoriesTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, "testuser3")
 
-    def test_06getuseremail(self):
+    def test_06get_player_email(self):
         """
         Test getuseremail. Requires 'users' fixture.
 
         """
         c = self.client
-        base_url = "/getuseremail"
+        base_url = "/get_player_email"
 
         # Empty request must 404.
         url = "%s/%s/" % (base_url, "")
@@ -398,13 +419,13 @@ class CardstoriesTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.content, "testuser1@email.com")
 
-    def test_07getloggedinuserid(self):
+    def test_07get_loggedin_player_id(self):
         """
         Test getloggedinuserid.  Requires 'users' fixture.
 
         """
         c = self.client
-        base_url = "/getloggedinuserid"
+        base_url = "/get_loggedin_player_id"
         username = "testuser1@email.com"
 
         # First, log an user in to get his sessionid
