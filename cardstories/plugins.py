@@ -19,7 +19,7 @@
 import os
 import imp
 
-from cardstories import poll
+from cardstories import poll, auth
 
 class CardstoriesPlugins:
 
@@ -34,6 +34,8 @@ class CardstoriesPlugins:
             self.plugins.append(o)
             if isinstance(o, poll.pollable):
                 service.pollable_plugins.append(o)
+            if isinstance(o, auth.Auth):
+                service.auth = o
 
     def path(self, plugin):
         if os.path.exists(plugin):

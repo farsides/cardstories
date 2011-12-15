@@ -165,7 +165,15 @@ class Plugin(pollable):
         Tells the client about the current state - all messages since the
         last update. This will automatically get called by the server when the
         state changes.
-
         """
-        messages = [m.copy() for m in self.messages if m["timestamp"] > int(args['modified'][0])]
-        return defer.succeed({"messages": messages})
+        
+        messages = []
+        players_id_list = []
+
+        for m in self.messages:
+            if m["timestamp"] > int(args['modified'][0]):
+                messages.append(m.copy())
+                players_id_list.append(m['player_id'])
+
+        return defer.succeed([{"messages": messages},
+                              players_id_list])

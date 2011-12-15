@@ -89,7 +89,7 @@ def welcome(request):
     if request.user.is_authenticated():
         template = 'cardstories/game.html'
         context = {'create': request.session.get('create', False),
-                   'user_name': get_user_display_name(request.user)}
+                   'player_id': request.user.id}
         request.session['create'] = False
     else:
         context = {'registration_form': RegistrationForm(),
@@ -218,7 +218,7 @@ def logout(request):
     url = reverse(welcome)
     return redirect(url)
 
-def getuserid(request, username):
+def get_player_id(request, username):
     """
     Returns a user's id based on supplied username, optionally creating the
     user, if so requested.  Username will be validated according to
@@ -255,7 +255,7 @@ def getuserid(request, username):
     response = HttpResponse(user.id, mimetype="text/plain")
     return response
 
-def getusername(request, userid):
+def get_player_name(request, userid):
     """
     Returns a user's name based on supplied id, if found.
     Returns 404 if not found.
@@ -266,7 +266,7 @@ def getusername(request, userid):
     except User.DoesNotExist:
         return HttpResponseNotFound()
 
-def getuseremail(request, userid):
+def get_player_email(request, userid):
     """
     Returns a user's email (= username) based on supplied id, if found.
     Returns 404 if not found.
@@ -277,7 +277,7 @@ def getuseremail(request, userid):
     except User.DoesNotExist:
         return HttpResponseNotFound()
 
-def getloggedinuserid(request, session_key):
+def get_loggedin_player_id(request, session_key):
     """
     Returns a user's id based on a logged in session id. If user is not found,
     a status of 404 will be returned.

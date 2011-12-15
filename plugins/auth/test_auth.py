@@ -48,90 +48,14 @@ class AuthTest(unittest.TestCase):
         os.unlink(self.auth.database)
 
     @defer.inlineCallbacks
-    def test00_translate(self):
-        player = u'player'
-        invited = u'invited'
-        owner = u'owner'
-        class request:
-            def __init__(self):
-                self.args = { 'player_id': [ player, invited ], 'owner_id': [ owner ] }
-        request1 = request()
-        result_in = 'RESULT'
-        result_out = yield self.auth.preprocess(result_in, request1)
-        self.assertEquals(result_in, result_out)
-        self.assertEquals(int, type(request1.args['player_id'][0]))
-        self.assertEquals(int, type(request1.args['player_id'][1]))
-        self.assertEquals(int, type(request1.args['owner_id'][0]))
-        self.assertNotEquals(request1.args['player_id'], request1.args['owner_id'])
-        request2 = request()
-        result_in = 'RESULT'
-        result_out = yield self.auth.preprocess(result_in, request2)
-        self.assertEquals(request1.args['player_id'][0], request2.args['player_id'][0])
-        self.assertEquals(request1.args['player_id'][1], request2.args['player_id'][1])
-        self.assertEquals(request1.args['owner_id'][0], request2.args['owner_id'][0])
-        c = self.db.cursor()
-        c.execute("SELECT id FROM players")
-        self.assertEquals([(1,),(2,),(3,)], c.fetchall())
-
-        result_in = [{ 'players': [ [ request1.args['player_id'][0] ],
-                                   [ request1.args['owner_id'][0] ]
-                                   ],
-                       'owner_id': request1.args['owner_id'][0],
-                       'invited': [ request1.args['player_id'][0] ] }]
-        result_out = yield self.auth.postprocess(result_in)
-        self.assertEquals(result_out, [{ 'players': [ [ player ],
-                                                      [ owner ] ],
-                                         'owner_id': owner,
-                                         'invited': [ player ]}])
-
-    @defer.inlineCallbacks
-    def test01_accent(self):
-        player = 'pl\xc3\xa1y\xe1\xba\xbdr'
-        invited = 'invited'
-        owner = '\xc3\xad\xc3\xb1vit\xc3\xa9d'
-        class request:
-            def __init__(self):
-                self.args = { 'player_id': [ player, invited ], 'owner_id': [ owner ] }
-        request1 = request()
-        result_in = 'RESULT'
-        result_out = yield self.auth.preprocess(result_in, request1)
-        self.assertEquals(result_in, result_out)
-        self.assertEquals(int, type(request1.args['player_id'][0]))
-        self.assertEquals(int, type(request1.args['player_id'][1]))
-        self.assertEquals(int, type(request1.args['owner_id'][0]))
-        self.assertNotEquals(request1.args['player_id'], request1.args['owner_id'])
-        request2 = request()
-        result_in = 'RESULT'
-        result_out = yield self.auth.preprocess(result_in, request2)
-        self.assertEquals(request1.args['player_id'][0], request2.args['player_id'][0])
-        self.assertEquals(request1.args['player_id'][1], request2.args['player_id'][1])
-        self.assertEquals(request1.args['owner_id'][0], request2.args['owner_id'][0])
-        c = self.db.cursor()
-        c.execute("SELECT id FROM players")
-        self.assertEquals([(1,),(2,),(3,)], c.fetchall())
-
-        result_in = [{ 'players': [ [ request1.args['player_id'][0] ],
-                                   [ request1.args['owner_id'][0] ]
-                                   ] }]
-        result_out = yield self.auth.postprocess(result_in)
-        self.assertEquals(result_out, [{ 'players': [ [ unicode(player, 'utf-8') ],
-                                                      [ unicode(owner, 'utf-8') ] ] }])
+    def test02_create_emails(self):
+        emails = [u'owner@foo.com', u'player1@foo.com', u'player']
+        ids = yield self.auth.get_players_ids(emails, create=True)
+        self.assertEquals([1, 2, 3], ids)
         
-    @defer.inlineCallbacks
-    def test02_resolution(self):
-        players = [u'owner@foo.com', u'player1@foo.com', u'player']
-        ids = yield self.auth.create_players(players)
-        self.assertEquals([1, 2, 3], ids)
-        names = yield self.auth.resolve_players(ids)
-        self.assertEquals(players, names)
-
-    @defer.inlineCallbacks
-    def test03_email_resolution(self):
-        players = [u'owner@foo.com', u'player1@foo.com', u'player']
-        ids = yield self.auth.create_players(players)
-        self.assertEquals([1, 2, 3], ids)
-        names = yield self.auth.resolve_player_emails(ids)
-        self.assertEquals(players, names)
+    def test03_get_name(self):
+        name = yield self.auth.get_player_name(3)
+        self.assertEquals("Player 3", name)
 
 
 def Run():

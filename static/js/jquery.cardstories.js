@@ -28,6 +28,8 @@
         location: location,
 
         plugins: {},
+        
+        players_info: {},
 
         register_plugin: function(plugin) {
             this.plugins[plugin.name] = plugin;
@@ -219,7 +221,7 @@
             var element = $('.cardstories_create .cardstories_pick_card', root);
             this.set_active(root, element, null, 'create_pick_card');
             this.display_progress_bar('owner', 1, element, root);
-            this.display_master_name(player_id, element);
+            this.display_master_info($this.get_player_info_by_id(player_id), element);
             this.init_board_buttons(player_id, element, root);
             var deck = $this.create_deck();
             var cards = $.map(deck, function(card, index) {
@@ -622,7 +624,7 @@
             var element = $('.cardstories_create .cardstories_write_sentence', root);
             this.set_active(root, element, null, 'create_write_sentence');
             this.display_progress_bar('owner', 2, element, root);
-            this.display_master_name(player_id, element);
+            this.display_master_info($this.get_player_info_by_id(player_id), element);
             this.init_board_buttons(player_id, element, root);
             $('.cardstories_card', element).attr('class', 'cardstories_card cardstories_card' + card + ' {card:' + card + '}');
             this.create_write_sentence_animate_start(card, element, root);
@@ -889,6 +891,9 @@
                         if (modified !== undefined && modified > 0) {
                             $(root).data('cardstories_modified', modified);
                         }
+                        
+                        // Store players_info data first
+                        $this.update_players_info(data);
 
                         // Call plugin states.
                         $.each(data, function(i) {
@@ -1110,7 +1115,7 @@
             var element = $('.cardstories_invitation .cardstories_owner', root);
             this.set_active(root, element, game, 'invitation_owner');
             this.display_progress_bar('owner', 3, element, root);
-            this.display_master_name(this.master_name(game), element);
+            this.display_master_info($this.get_master_info(game), element);
             this.init_board_buttons(player_id, element, root);
             $('.cardstories_sentence', element).text(game.sentence);
             var picked_card = $('.cardstories_picked_card', element);
@@ -1224,7 +1229,7 @@
                 }
 
                 // Skip the owner.
-                if (i !== game.owner_index) {
+                if (players[i]['id'] != game.owner_id) {
                     slotno++;
 
                     // Animate the progress bar as soon as one player joins.
@@ -1258,7 +1263,8 @@
                         delay_next = true;
                         slot_snippet.clone().children().appendTo(slot);
                         slot.addClass('cardstories_player_seat_joined');
-                        $('.cardstories_player_name', slot).html(players[i][0]);
+                        var player_info = $this.get_player_info_by_id(players[i]['id'])
+                        $('.cardstories_player_name', slot).html(player_info.name);
                         $('.cardstories_player_status', slot).html('joined the game!');
 
                         // Queue the animation. Create a new closure to save
@@ -1284,7 +1290,7 @@
                     // same goes for the picked state: if a player has picked a
                     // card and the animation has been shown, don't do it
                     // again.
-                    if (players[i][3] === null) {
+                    if (players[i]['picked'] === null) {
                         if (!slot.hasClass('cardstories_noop_picking')) {
                             slot.addClass('cardstories_noop_picking');
                             delay_next = true;
@@ -1354,7 +1360,7 @@
             // Keep track of players who haven't picked a card yet
             var not_ready = new Array();
             for(i=0; i<game.players.length; i++) {
-                if(game.players[i][3] === null) {
+                if(game.players[i]['picked'] === null) {
                     not_ready.push(i);
                 }
             }
@@ -1383,7 +1389,7 @@
             var nr_of_slots = players.length - 1;
             var q = $({});
             for (var i=0, slotno=0; i < players.length; i++) {
-                if (i !== game.owner_index) {
+                if (players[i]['id'] != game.owner_id) {
                     slotno++;
 
                     // Insert an artificial delay between players, for
@@ -1439,7 +1445,7 @@
             var element = $('.cardstories_invitation .cardstories_pick', root);
             this.set_active(root, element, game, 'invitation_pick');
             this.display_progress_bar('player', 1, element, root);
-            this.display_master_name(this.master_name(game), element);
+            this.display_master_info($this.get_master_info(game), element);
             this.init_board_buttons(player_id, element, root);
 
             // Send game when the user clicks ok.
@@ -1619,7 +1625,17 @@
             // Hide the dock, we don't need it anymore.
             hand.hide();
 
-            var seatno = game.player_index;
+            // What seat are we in?
+        	var seatno=0;
+        	for (var i=0; i < game.players.length; i++) {
+        		if (game.owner_id != game.players[i]['id']) {
+        			seatno++;
+        			if (player_id == game.players[i]['id']) {
+        				break;
+        			}
+        		}
+        	}
+        	
             var hand2dock_sprite = $('.cardstories_player_hand2dock_' + seatno, element);
             var overlay = $('.cardstories_modal_overlay', element);
             q.queue('stage2', function(next) {
@@ -1832,7 +1848,7 @@
                 }
 
                 // Skip the owner.
-                if (i !== game.owner_index) {
+                if (game.players[i]['id'] != game.owner_id) {
                     seatno++;
 
                     // Joining animation.
@@ -1922,7 +1938,17 @@
             });
             container.hide();
 
-            var seatno = game.player_index;
+            // What seat are we in?
+        	var seatno=0;
+        	for (var i=0; i < game.players.length; i++) {
+        		if (game.owner_id != game.players[i]['id']) {
+        			seatno++;
+        			if (player_id == game.players[i]['id']) {
+        				break;
+        			}
+        		}
+        	}
+        	
             var hand2dock_sprite = $('.cardstories_player_hand2dock_' + seatno, element);
             var pick_sprite = $('.cardstories_player_pick_' + seatno, element);
 
@@ -1977,6 +2003,7 @@
         },
 
         invitation_pick_wait: function(player_id, game, root) {
+        	var $this = this;
             var element = $('.cardstories_invitation .cardstories_pick_wait', root);
             var deferred = $.Deferred();
             this.set_active(root, element, game, 'invitation_pick_wait');
@@ -1984,7 +2011,7 @@
             $('.cardstories_sentence', element).text(game.sentence);
 
             this.display_progress_bar('player', 2, element, root);
-            this.display_master_name(this.master_name(game), element);
+            this.display_master_info($this.get_master_info(game), element);
             this.init_board_buttons(player_id, element, root);
             this.invitation_display_board(player_id, game, element, root, true);
 
@@ -2146,7 +2173,7 @@
             var element = $('.cardstories_invitation .cardstories_invitation_anonymous', root);
             this.set_active(root, element, game, 'invitation_anonymous');
             this.display_progress_bar('player', 1, element, root);
-            this.display_master_name(this.master_name(game), element);
+            this.display_master_info($this.get_master_info(game), element);
             this.invitation_display_board(player_id, game, element, root, true);
             return $.Deferred().resolve();
         },
@@ -2158,20 +2185,21 @@
             var snippets = $('.cardstories_snippets', root);
             var seat_snippet = $('.cardstories_player_seat', snippets);
             for (var i=0, seatno=0; i < players.length; i++) {
-                if (i !== game.owner_index) {
+                if (players[i]['id'] != game.owner_id) {
                     seatno++;
 
                     // Only initialize the seat once.
                     var seat = $('.cardstories_player_seat.cardstories_player_seat_' + seatno, element);
                     if (seat.children().length == 0) {
                         seat_snippet.clone().children().appendTo(seat);
-                        $('.cardstories_player_name', seat).html(players[i][0]);
+                        var player_info = $this.get_player_info_by_id(players[i]['id']);
+                        $('.cardstories_player_name', seat).html(player_info.name);
                         seat.show();
                     }
 
                     var status = $('.cardstories_player_status', seat);
                     // Differentiate between player status.
-                    if (i === game.player_index) {
+                    if (players[i]['id'] == player_id) {
                         seat.addClass('cardstories_player_seat_self');
                         if (setup !== true) {
                             status.html('is picking a card<br />...');
@@ -2194,7 +2222,7 @@
                 var playerq = 'player' + i;
 
                 // Skip the owner.
-                if (i !== game.owner_index) {
+                if (players[i]['id'] !== game.owner_id) {
                     seatno++;
                     var seat = $('.cardstories_player_seat.cardstories_player_seat_' + seatno, element);
                     var status = $('.cardstories_player_status', seat);
@@ -2211,11 +2239,11 @@
 
                     // Deferentiate between players who picked a card
                     // and those who didn't.
-                    if (players[i][3] !== null) {
+                    if (players[i]['picked'] !== null) {
                         if (!seat.hasClass('cardstories_noop_picked')) {
                             seat.addClass('cardstories_noop_picked');
                             var card_img = $('.cardstories_player_pick_' + seatno, element).find('img');
-                            if (i === game.player_index) {
+                            if (players[i]['id'] == player_id) {
                                 var self_card = $('.cardstories_player_self_picked_card', element);
                                 var foreground = $('.cardstories_card_foreground', self_card);
                                 var src_template = foreground.metadata({type: 'attr', name: 'data'}).card;
@@ -2309,7 +2337,7 @@
             for (var i=1; i < old_game.players.length; i++) {
                 var found = false;
                 for (var j=1; j < game.players.length; j++) {
-                    if (old_game.players[i][5] == game.players[j][5]) {
+                    if (old_game.players[i]['id'] == game.players[j]['id']) {
                         found = true;
                         active_seats.push(i);
                         break;
@@ -2403,7 +2431,7 @@
             this.set_active(root, element, game, 'vote_voter');
             $('.cardstories_sentence', element).text(game.sentence);
             this.display_progress_bar('player', 3, element, root);
-            this.display_master_name(this.master_name(game), element);
+            this.display_master_info($this.get_master_info(game), element);
             this.init_board_buttons(player_id, element, root);
 
             // Send game when user clicks ok.
@@ -2431,7 +2459,7 @@
 
                 // Supplant owner's name into modal.
                 var info = $('.cardstories_info', element);
-                var html = info.html().supplant({'name': this.master_name(game)});
+                var html = info.html().supplant({'name': $this.get_master_info(game).name});
                 info.html(html);
 
                 // Switch owner's card with card 6 (so it can be shuffled).
@@ -2491,7 +2519,7 @@
             this.set_active(root, element, game, 'vote_voter_wait');
             $('.cardstories_sentence', element).text(game.sentence);
             this.display_progress_bar('player', 4, element, root);
-            this.display_master_name(this.master_name(game), element);
+            this.display_master_info($this.get_master_info(game), element);
             this.init_board_buttons(player_id, element, root);
 
             // Update board state.
@@ -2546,9 +2574,9 @@
             for (i=0; i < old_game.players.length; i++) {
                 var found = false;
                 for (var j=0; j < game.players.length; j++) {
-                    if (old_game.players[i][5] == game.players[j][5]) {
+                    if (old_game.players[i]['id'] == game.players[j]['id']) {
                         found = true;
-                        card2seat[game.players[j][3]] = i;
+                        card2seat[game.players[j]['picked']] = i;
                         break;
                     }
                 }
@@ -2703,7 +2731,7 @@
             this.set_active(root, element, game, 'vote_anonymous');
             $('.cardstories_sentence', element).text(game.sentence);
             this.display_progress_bar('player', 4, element, root);
-            this.display_master_name(this.master_name(game), element);
+            this.display_master_info($this.get_master_info(game), element);
             this.init_board_buttons(player_id, element, root);
 
             // Update board state.
@@ -2742,7 +2770,7 @@
             var element = $('.cardstories_vote .cardstories_owner', root);
             this.set_active(root, element, game, 'vote_owner');
             this.display_progress_bar('owner', 5, element, root);
-            this.display_master_name(this.master_name(game), element);
+            this.display_master_info($this.get_master_info(game), element);
             this.init_board_buttons(player_id, element, root);
             $('.cardstories_sentence', element).text(game.sentence);
             var announce = $('.cardstories_results_announce', element);
@@ -2830,7 +2858,7 @@
             // Keep track of players who haven't voted yet
             var not_ready = new Array();
             for(i=0; i<game.players.length; i++) {
-                if(game.players[i][1] === null) {
+                if(game.players[i]['vote'] === null) {
                     not_ready.push(i);
                 }
             }
@@ -2861,9 +2889,9 @@
             // Construct picked card => seat number translation.
             var card2seat = {};
             for(var i=0, seatno=0; i < game.players.length; i++) {
-                if (i !== game.owner_index) {
+                if (game.players[i]['id'] != game.owner_id) {
                     seatno++;
-                    var picked = game.players[i][3];
+                    var picked = game.players[i]['picked'];
                     card2seat[picked] = seatno;
                 }
             }
@@ -2952,11 +2980,12 @@
         },
 
         vote_display_board: function(setup, player_id, game, element, root) {
+        	var $this = this;
             var players = game.players;
             var snippets = $('.cardstories_snippets', root);
             var seat_snippet = $('.cardstories_player_seat', snippets);
             for (var i=0, seatno=0; i < players.length; i++) {
-                if (i !== game.owner_index) {
+                if (players[i]['id'] != game.owner_id) {
                     seatno++;
 
                     // Only initialize the seat once.
@@ -2964,7 +2993,8 @@
                     if (seat.children().length == 0) {
                         // Active player seat.
                         seat_snippet.clone().children().appendTo(seat);
-                        $('.cardstories_player_name', seat).html(players[i][0]);
+                        var player_info = $this.get_player_info_by_id(players[i]['id']);
+                        $('.cardstories_player_name', seat).html(player_info.name);
                         seat.show();
                         $('.cardstories_player_arms_' + seatno, element).show();
 
@@ -2973,7 +3003,7 @@
                             // If we're a player, show the card we picked.
                             // Otherwise, just show the regular card.
                             var card = $('.cardstories_card_' + seatno, element);
-                            if (i === game.player_index) {
+                            if (players[i]['id'] == player_id) {
                                 var card_self = $('.cardstories_player_self_picked_card', element);
                                 var foreground = $('.cardstories_card_foreground', card_self);
                                 var src_template = foreground.metadata({type: 'attr', name: 'data'}).card;
@@ -2997,15 +3027,15 @@
 
                     // Update player status whenever the poll returns.
                     var status = $('.cardstories_player_status', seat);
-                    if (i === game.player_index) {
+                    if (players[i]['id'] == player_id) {
                         seat.addClass('cardstories_player_seat_self');
-                        if (players[i][1] !== null) {
+                        if (players[i]['vote'] !== null) {
                             status.html('has voted!');
                         } else {
                             status.html('is voting<br />...');
                         }
                     } else {
-                        if (players[i][1] !== null) {
+                        if (players[i]['vote'] !== null) {
                             seat.addClass('cardstories_player_seat_voted');
                             status.html('has voted!');
                         } else {
@@ -3068,7 +3098,7 @@
             var players = game.players;
             var cards = [];
             for (var i=0, slotno=0; i < players.length; i++) {
-                if (i !== game.owner_index) {
+                if (players[i]['id'] != game.owner_id) {
                     slotno++;
                     cards.push($('.cardstories_card_' + slotno, element));
                 }
@@ -3152,7 +3182,7 @@
             var players = game.players;
             var cards = [];
             for (var i=0, slotno=0; i < players.length; i++) {
-                if (i !== game.owner_index) {
+                if (players[i]['id'] != game.owner_id) {
                     slotno++;
                     cards.push($('.cardstories_card_' + slotno, element));
                 }
@@ -3309,7 +3339,7 @@
             var $this = this;
             var element = $('.cardstories_complete', root);
             this.set_active(root, element, game, 'complete');
-            this.display_master_name(this.master_name(game), element);
+            this.display_master_info($this.get_master_info(game), element);
             this.init_board_buttons(player_id, element, root);
             $('.cardstories_sentence', element).text(game.sentence);
 
@@ -3357,12 +3387,13 @@
         },
 
         complete_display_board: function(game, element, root) {
+        	var $this = this;
             var players = game.players;
             var snippets = $('.cardstories_snippets', root);
             var seat_snippet = $('.cardstories_player_seat', snippets);
             var seatcard_snippet = $('.cardstories_card_slot', snippets);
             for (var i=0, seatno=0; i < players.length; i++) {
-                if (i !== game.owner_index) {
+                if (players[i]['id'] != game.owner_id) {
                     seatno++;
 
                     // Only initialize the seat once.
@@ -3371,12 +3402,13 @@
                         // Active player seat.
                         seat_snippet.clone().children().appendTo(seat);
                         seat.addClass('cardstories_player_seat_joined');
-                        $('.cardstories_player_name', seat).html(players[i][0]);
+                        var player_info = $this.get_player_info_by_id(players[i]['id']);
+                        $('.cardstories_player_name', seat).html(player_info.name);
                         seat.show();
                         $('.cardstories_player_arms_' + seatno, element).show();
 
                         // Active player card, if picked.
-                        if (players[i][3]) {
+                        if (players[i]['picked']) {
                             var seatcard = $('.cardstories_player_seat_card_' + seatno, element);
 
                             // Populate it.
@@ -3384,14 +3416,14 @@
 
                             // Set the proper card.
                             var card = $('.cardstories_card_foreground', seatcard);
-                            var src = card.metadata({type: 'attr', name: 'data'}).card.supplant({card: players[i][3]});
+                            var src = card.metadata({type: 'attr', name: 'data'}).card.supplant({card: players[i]['picked']});
                             card.attr('src', src);
 
                             seatcard.show();
                         }
 
                         // Show envelope if player voted.
-                        if (players[i][1]) {
+                        if (players[i]['vote']) {
                             $('.cardstories_envelope_' + seatno, element).show();
                         }
                     }
@@ -3406,8 +3438,8 @@
             // Construct picked card => slot number translation.
             var card2seat = {};
             for(var i=0, seatno=0; i < players.length; i++) {
-                var picked = players[i][3];
-                if (i !== game.owner_index) {
+                var picked = players[i]['picked'];
+                if (players[i]['id'] != game.owner_id) {
                     seatno++;
                     if (picked) {
                         card2seat[picked] = seatno;
@@ -3426,15 +3458,15 @@
 
             $.each(players, function(i, player) {
                 // Skip the owner.
-                if (i === game.owner_index) {
+                if (players[i]['id'] == game.owner_id) {
                     return;
                 }
 
                 var envelope = $('.cardstories_envelope_' + i, element);
                 var vote, denvelope;
-                if (card2seat[player[1]] !== undefined) {
+                if (card2seat[player['vote']] !== undefined) {
                     // Insert the vote
-                    var votes = $('.cardstories_votes_' + card2seat[player[1]], element);
+                    var votes = $('.cardstories_votes_' + card2seat[player['vote']], element);
                     vote = vote_slot_snippet.clone();
                     vote.appendTo(votes);
 
@@ -3466,17 +3498,18 @@
                 q.queue('chain', function(next) {
                     var seat = $('.cardstories_player_seat_' + i, element);
                     var status = $('.cardstories_player_status', seat);
-                    var player_voted = player[1] !== null;
+                    var player_voted = player['vote'] !== null;
 
                     if (player_voted) {
                         var voter_name = $('.cardstories_voter_name', vote);
-                        voter_name.html(player[0] + '\'s vote');
+                        var player_info = $this.get_player_info_by_id(player['id']);
+                        voter_name.html(player_info.name + '\'s vote');
                         voter_name.fadeIn('fast', next);
 
-                        if (player[2] === 'n') {
+                        if (player['win'] === 'n') {
                             seat.addClass('cardstories_player_seat_lost');
                             status.html('LOSES!');
-                            if (card2seat[player[1]] !== undefined) {
+                            if (card2seat[player['vote']] !== undefined) {
                                 vote.addClass('lost');
                                 denvelope.show();
                                 envelope.fadeOut('fast');
@@ -3496,7 +3529,7 @@
             q.queue('chain', function(next) {
                 var master_seat = $('.cardstories_master_seat', element);
                 var master_name = $('.cardstories_master_name', master_seat);
-                if (players[0][2] === 'y') {
+                if (players[0]['win'] === 'y') {
                     master_seat.addClass('cardstories_master_seat_won');
                     master_name.html('WINS!');
                 } else {
@@ -3518,7 +3551,7 @@
         complete_display_results: function(player_id, game, element, cb) {
             // Did the owner lose?
             var owner_lost = true;
-            if (game.players[0][2] == 'y') {
+            if (game.players[0]['win'] == 'y') {
                 owner_lost = false;
             }
 
@@ -3529,7 +3562,7 @@
             var i;
             if (owner_lost) {
                 for (i=0; i < game.players.length; i++) {
-                    if (game.winner_card == game.players[i][1]) {
+                    if (game.winner_card == game.players[i]['vote']) {
                         too_hard = false;
                         break;
                     }
@@ -3550,9 +3583,9 @@
                 var player_voted = false;
                 var player_lost = true;
                 for (i=0; i < game.players.length; i++) {
-                    if (i === game.player_index) {
-                        if (game.players[i][1] !== null) { player_voted = true; }
-                        if (game.players[i][2] === 'y') { player_lost = false; }
+                    if (game.players[i]['id'] == player_id) {
+                        if (game.players[i]['vote'] !== null) { player_voted = true; }
+                        if (game.players[i]['win'] === 'y') { player_lost = false; }
                     }
                 }
 
@@ -3620,6 +3653,9 @@
                     if (modified !== undefined && modified > 0) {
                         $(root).data('cardstories_modified', modified);
                     }
+                    
+                    // Store players_info data first
+                    $this.update_players_info(data);
 
                     $.each(data, function(i) {
                         var datum = this;
@@ -3850,15 +3886,76 @@
             // Finally, store current step.
             dst_bar.data('step', step);
         },
-
-        master_name: function(game) {
-            return game.players[game.owner_index][0];
+        
+        update_players_info: function(request_data) {
+        	// Store extra information about individual players_id
+        	// using data found in a request answer from the webservice
+        	
+        	var $this = this;
+	        for(var i=0; i<request_data.length; i++) {
+                if(request_data[i].type == 'players_info') {
+                	var players_info = request_data[i];
+			        for(var player_id in request_data[i]) {
+		        		var player_info = players_info[player_id];
+		        		$this.players_info[player_id] = player_info;
+		        	}
+                }
+            }
         },
 
-        display_master_name: function(name, element) {
-            var master_name = $('.cardstories_master_seat .cardstories_master_name', element);
-            var html = master_name.html();
-            master_name.html(html.supplant({'name': name}));
+        get_player_info_by_id: function(player_id) {
+            return this.players_info[player_id];
+        },
+
+        update_player_info_from_ws: function(player_id) {
+            var $this = this;
+            var deferred = $.Deferred();
+
+            var success = function(data, status) {
+                if('error' in data) {
+                    $this.error(data.error);
+                } else {
+                	$this.update_players_info(data);
+                	deferred.resolve();
+                }
+            };
+
+            var request = {
+                action: 'player_info',
+                player_id: player_id
+            };
+
+            $this.ajax({
+                async: false,
+                timeout: 30000,
+                url: $this.url + '?' + $.param(request, true),
+                type: 'GET',
+                dataType: 'json',
+                global: false,
+                success: success,
+                error: $this.xhr_error
+            });
+            
+            return deferred.promise();
+        },
+        
+        get_master_info: function(game) {
+        	// Get the player_info of the game master of a provided game
+        	
+        	var $this = this;
+        	
+            var master_id = game.owner_id;
+            var master_info = $this.get_player_info_by_id(master_id);
+            
+            return master_info;
+        },
+
+        display_master_info: function(master_info, element) {
+            // Display provided player_info on the game master box
+        	
+            var master_name_dom = $('.cardstories_master_seat .cardstories_master_name', element);
+            var master_name_dom_html = master_name_dom.html().supplant({'name': master_info.name});
+            master_name_dom.html(master_name_dom_html);
         },
 
         display_modal: function(modal, overlay, cb, cb_on_close) {
@@ -4026,18 +4123,24 @@
             if(player_id === undefined || player_id === null || player_id === '') {
                 player_id = $.cookie('CARDSTORIES_ID');
             }
+            
+            // Get player_info of the player
+            // Guarantees that we'll always have this information available,
+            // even when displaying a page without info from the server
+            $.when($this.update_player_info_from_ws(player_id)).done(function() {
 
-            // Bootstrap plugins.
-            $.each(this.plugins, function(i) {
-                if (this.init) {this.init(player_id, game_id, root);}
-            });
-
-            this.preload_images_helper(root, function() {
-                if(player_id === undefined || player_id === null || player_id === '') {
-                    $this.login(game_id, login_url, root);
-                } else {
-                    $this.game_or_create(player_id, game_id, root);
-                }
+	            // Bootstrap plugins.
+	            $.each($this.plugins, function(i) {
+	                if (this.init) {this.init(player_id, game_id, root);}
+	            });
+	
+	            $this.preload_images_helper(root, function() {
+	                if(player_id === undefined || player_id === null || player_id === '') {
+	                    $this.login(game_id, login_url, root);
+	                } else {
+	                    $this.game_or_create(player_id, game_id, root);
+	                }
+	            });
             });
         },
 

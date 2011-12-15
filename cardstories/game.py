@@ -17,9 +17,7 @@
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
 import random
-import time
 
-from twisted.python import runtime, log
 from twisted.internet import defer, reactor
 
 from cardstories.poll import pollable
@@ -33,7 +31,7 @@ class CardstoriesGame(pollable):
     CARDS_PER_PLAYER = 7
     DEFAULT_COUNTDOWN_DURATION = 60 # needs to be coordinated with the value on the UI
 
-    def __init__(self, service, id = None):
+    def __init__(self, service, id=None):
         self.service = service
         self.settings = service.settings
         self.id = id
@@ -78,13 +76,13 @@ class CardstoriesGame(pollable):
             self.timer.cancel()
         self.timer = reactor.callLater(self.settings.get('game-timeout', 24 * 60 * 60), self.state_change)
 
-    STATE_CHANGE_TO_VOTE     = 1
+    STATE_CHANGE_TO_VOTE = 1
     STATE_CHANGE_TO_COMPLETE = 2
-    STATE_CHANGE_CANCEL      = 3
+    STATE_CHANGE_CANCEL = 3
 
     @defer.inlineCallbacks
     def state_change(self):
-        game = yield self.game(self.get_owner_id())
+        game, players_id_list = yield self.game(self.get_owner_id())
         if game['state'] == 'invitation':
             if game['ready']:
                 yield self.voting({ 'owner_id': [self.get_owner_id()],
@@ -162,7 +160,7 @@ class CardstoriesGame(pollable):
         rows = yield db.runQuery("SELECT owner_id, sentence, cards, board, state FROM games WHERE id = ?", [self.get_id()])
         if not rows:
             raise UserWarning("Game doesn't exist: %s" % self.get_id())
-        ( owner_id, sentence, cards, board, state ) = rows[0]
+        (owner_id, sentence, cards, board, state) = rows[0]
         if owner_id == player_id:
             cards = [ ord(c) for c in cards ]
             invited = list(self.invited)
@@ -179,15 +177,20 @@ class CardstoriesGame(pollable):
         players = []
         winner_card = None
         myself = None
-        myself_index = None
-        owner_index = None
-        for idx, player in enumerate(rows):
+        players_id_list = [] # Keep track of all players being referenced
+        for player in rows:
+            # player_id
+            players_id_list.append(player[0])
+            
+            # player_cards
             if player[0] == player_id or owner_id == player_id:
                 player_cards = [ ord(c) for c in player[1] ]
             else:
                 player_cards = None
+                
+            # picked
             if player[2] != None:
-                if ( state == 'complete' or player[0] == player_id or owner_id == player_id ):
+                if (state == 'complete' or player[0] == player_id or owner_id == player_id):
                     picked = ord(player[2])
                 else:
                     picked = ''
@@ -195,11 +198,12 @@ class CardstoriesGame(pollable):
                 picked = None
             if player[2] != None:
                 picked_count += 1
+                
+            # self
             if player[0] == player_id:
                 myself = [ self.ord(player[2]), self.ord(player[3]), player_cards ]
-                myself_index = idx
-            if player[0] == owner_id:
-                owner_index = idx
+                
+            # vote / winner_card
             if state == 'complete' or owner_id == player_id:
                 if player[0] == owner_id:
                     winner_card = ord(player[1][0])
@@ -211,13 +215,19 @@ class CardstoriesGame(pollable):
                     vote = None
             if player[3] != None:
                 voted_count += 1
-            players.append([ player[0], vote, player[4], picked, player_cards, player[0] ])
+                
+            # win
+            win = player[4]
+                
+            # players
+            players.append({ 'id': player[0], 'cards': player_cards, 'picked': picked, 'vote': vote, 'win': win })
+            
         ready = None
         if state == 'invitation':
             ready = picked_count >= self.MIN_PICKED
         elif state == 'vote':
             ready = voted_count >= self.MIN_VOTED
-        defer.returnValue({ 'id': self.get_id(),
+        defer.returnValue([{ 'id': self.get_id(),
                             'modified': self.get_modified(),
                             'sentence': sentence,
                             'winner_card': winner_card,
@@ -228,18 +238,18 @@ class CardstoriesGame(pollable):
                             'countdown_finish': self.get_countdown_finish(),
                             'self': myself,
                             'owner': owner_id == player_id,
+                            'owner_id': owner_id,
                             'players': players,
-                            'owner_index': owner_index,
-                            'player_index': myself_index,
-                            'invited': invited })
+                            'invited': invited },
+                            players_id_list])
 
     def participateInteraction(self, transaction, game_id, player_id):
         transaction.execute("SELECT players, cards FROM games WHERE id = %d" % game_id)
-        ( players, cards ) = transaction.fetchall()[0]
-        no_room = UserWarning('player %d cannot join game %d because the %d players limit is reached' % ( player_id, game_id, self.NPLAYERS ))
+        (players, cards) = transaction.fetchall()[0]
+        no_room = UserWarning('player %d cannot join game %d because the %d players limit is reached' % (player_id, game_id, self.NPLAYERS))
         if players >= self.NPLAYERS:
             raise no_room
-        transaction.execute("UPDATE games SET cards = ?, players = players + 1 WHERE id = %d AND players = %d" % ( game_id, players ), [ cards[self.CARDS_PER_PLAYER:] ])
+        transaction.execute("UPDATE games SET cards = ?, players = players + 1 WHERE id = %d AND players = %d" % (game_id, players), [ cards[self.CARDS_PER_PLAYER:] ])
         if transaction.rowcount == 0:
             raise no_room
         transaction.execute("INSERT INTO player2game (game_id, player_id, cards) VALUES (?, ?, ?)", [ game_id, player_id, cards[:self.CARDS_PER_PLAYER] ])
@@ -251,32 +261,32 @@ class CardstoriesGame(pollable):
         if player_id in self.invited:
             self.invited.remove(player_id)
         self.players.append(player_id)
-        result = yield self.touch(type = 'participate', player_id = player_id)
+        result = yield self.touch(type='participate', player_id=player_id)
         defer.returnValue(result)
 
     @defer.inlineCallbacks
     def voting(self, owner_id):
         self.clear_countdown()
-        game = yield self.game(self.get_owner_id())
+        game, players_id_list = yield self.game(self.get_owner_id())
         discarded = []
         board = []
         for player in game['players']:
-            if player[3] == None:
-                discarded.append(player[0])
+            if player['picked'] == None:
+                discarded.append(player['id'])
             else:
-                board.append(player[3])
+                board.append(player['picked'])
         random.shuffle(board)
         yield self.leave(discarded)
         board = ''.join([chr(card) for card in board])
         yield self.service.db.runOperation("UPDATE games SET board = ?, state = 'vote' WHERE id = ?", [ board, self.get_id() ])
         yield self.cancelInvitations()
         self.invited = []
-        result = yield self.touch(type = 'voting')
+        result = yield self.touch(type='voting')
         defer.returnValue(result)
 
     @defer.inlineCallbacks
     def player2game(self, player_id):
-        rows = yield self.service.db.runQuery("SELECT cards, picked, vote, win FROM player2game WHERE game_id = %d AND player_id = %d" % ( self.get_id(), player_id ))
+        rows = yield self.service.db.runQuery("SELECT cards, picked, vote, win FROM player2game WHERE game_id = %d AND player_id = %d" % (self.get_id(), player_id))
         defer.returnValue({ 'cards': map(lambda c: ord(c), rows[0][0]),
                             'picked': self.ord(rows[0][2]),
                             'vote': self.ord(rows[0][2]),
@@ -315,7 +325,7 @@ class CardstoriesGame(pollable):
         self.set_countdown_duration(duration)
         if self.is_countdown_active():
             self.reset_countdown()
-        result = yield self.touch(type = 'set_countdown')
+        result = yield self.touch(type='set_countdown')
         defer.returnValue(result)
 
     @defer.inlineCallbacks
@@ -324,7 +334,7 @@ class CardstoriesGame(pollable):
         count = yield self.service.db.runQuery("SELECT COUNT(*) FROM player2game WHERE game_id = ? AND picked IS NOT NULL", [ self.get_id() ])
         if count[0][0] >= self.MIN_PICKED and not self.is_countdown_active():
             self.start_countdown()
-        result = yield self.touch(type = 'pick', player_id = player_id, card = card)
+        result = yield self.touch(type='pick', player_id=player_id, card=card)
         defer.returnValue(result)
 
     @defer.inlineCallbacks
@@ -333,17 +343,17 @@ class CardstoriesGame(pollable):
         count = yield self.service.db.runQuery("SELECT COUNT(*) FROM player2game WHERE game_id = ? AND vote IS NOT NULL", [ self.get_id() ])
         if count[0][0] >= self.MIN_VOTED and not self.is_countdown_active():
             self.start_countdown()
-        result = yield self.touch(type = 'vote', player_id = player_id, vote = vote)
+        result = yield self.touch(type='vote', player_id=player_id, vote=vote)
         defer.returnValue(result)
 
     def completeInteraction(self, transaction, game_id, owner_id):
-        transaction.execute("SELECT cards FROM player2game WHERE game_id = %d AND player_id = %d" % ( game_id, owner_id ))
+        transaction.execute("SELECT cards FROM player2game WHERE game_id = %d AND player_id = %d" % (game_id, owner_id))
         winner_card = transaction.fetchone()[0]
-        transaction.execute("SELECT vote, player_id FROM player2game WHERE game_id = %d AND player_id != %d AND vote IS NOT NULL" % ( game_id, owner_id ))
+        transaction.execute("SELECT vote, player_id FROM player2game WHERE game_id = %d AND player_id != %d AND vote IS NOT NULL" % (game_id, owner_id))
         players_count = 0
         guessed = []
         failed = []
-        for ( vote, player_id ) in transaction.fetchall():
+        for (vote, player_id) in transaction.fetchall():
             players_count += 1
             if vote == winner_card:
                 guessed.append(player_id)
@@ -361,10 +371,10 @@ class CardstoriesGame(pollable):
     @defer.inlineCallbacks
     def complete(self, owner_id):
         self.clear_countdown()
-        game = yield self.game(self.get_owner_id())
-        no_vote = filter(lambda player: player[1] == None and player[0] != self.get_owner_id(), game['players'])
+        game, players_id_list = yield self.game(self.get_owner_id())
+        no_vote = filter(lambda player: player['vote'] == None and player['id'] != self.get_owner_id(), game['players'])
         yield self.service.db.runInteraction(self.completeInteraction, self.get_id(), owner_id)
-        result = yield self.touch(type = 'complete')
+        result = yield self.touch(type='complete')
         defer.returnValue(result)
 
     def cancelInvitations(self):
@@ -378,7 +388,7 @@ class CardstoriesGame(pollable):
                 invited.append(player_id)
                 yield self.service.db.runQuery("INSERT INTO invitations (player_id, game_id) VALUES (?, ?)", [ player_id, self.get_id() ])
         self.invited += invited
-        result = yield self.touch(type = 'invite', invited = invited)
+        result = yield self.touch(type='invite', invited=invited)
         defer.returnValue(result)
 
     @staticmethod

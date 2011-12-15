@@ -156,9 +156,10 @@ class ChatTest(unittest.TestCase):
         # run the request
         result = yield chat_instance.preprocess(True, request)
         # check to make sure no message is returned if we ask for now or later
-        state = yield chat_instance.state({"modified": [now]})
+        state, players_id_list = yield chat_instance.state({"modified": [now]})
         self.assertTrue(state.has_key('messages'))
         self.assertEquals(len(state['messages']), 0)
+        self.assertEquals(players_id_list, [])
     
     @defer.inlineCallbacks
     def test03_check_added_message_before_now(self):
@@ -172,10 +173,11 @@ class ChatTest(unittest.TestCase):
         # run the request
         result = yield chat_instance.preprocess(True, request)
         # check to make sure no message is returned if we ask for now or later
-        state = yield chat_instance.state({"modified": [now - 1]})
+        state, players_id_list = yield chat_instance.state({"modified": [now - 1]})
         self.assertEquals(len(state['messages']), 1)
         self.assertEquals(state['messages'][0]['player_id'], player_id)
         self.assertEquals(state['messages'][0]['sentence'], sentence)
+        self.assertEquals(players_id_list, [player_id])
 
     @defer.inlineCallbacks
     def test04_check_multiple_messages(self):
@@ -192,11 +194,12 @@ class ChatTest(unittest.TestCase):
             result = yield chat_instance.preprocess(True, request)
         # check to make sure no message is returned if we ask for now or later
         # we check right back to one second ago to make sure all recently added messages are caught
-        state = yield chat_instance.state({"modified": [when[-1] - 1000]})
+        state, players_id_list = yield chat_instance.state({"modified": [when[-1] - 1000]})
         self.assertEquals(len(state['messages']), 3)
         for i in range(3):
             self.assertEquals(state['messages'][i]['player_id'], player_ids[i])
             self.assertEquals(state['messages'][i]['sentence'], sentences[i])
+        self.assertEquals(players_id_list, player_ids)
 
     @defer.inlineCallbacks
     def test05_check_half_of_multiple_messages(self):
@@ -214,13 +217,14 @@ class ChatTest(unittest.TestCase):
             result = yield chat_instance.preprocess(True, request)
         # check to make sure no message is returned if we ask for now or later
         # we check right back to one second ago to make sure all recently added messages are caught
-        state = yield chat_instance.state({"modified": [when[-1] - 150]})
+        state, players_id_list = yield chat_instance.state({"modified": [when[-1] - 150]})
         # this time because of the 100ms delay between messages, and only checking to 150ms ago
         # we should only get the last two messages
         self.assertEquals(len(state['messages']), 2)
         for i in range(2):
             self.assertEquals(state['messages'][i]['player_id'], player_ids[i + 1])
             self.assertEquals(state['messages'][i]['sentence'], sentences[i + 1])
+        self.assertEquals(players_id_list, player_ids[-2:])
     
     @defer.inlineCallbacks
     def test06_touch_state(self):
@@ -319,7 +323,7 @@ class ChatTest(unittest.TestCase):
         # run the request
         result = yield chat_instance.preprocess(True, request)
         # check to make sure our naughty message is returned properly escaped
-        state = yield chat_instance.state({"modified": [now - 1]})
+        state, players_id_list = yield chat_instance.state({"modified": [now - 1]})
         self.assertEquals(state['messages'][0]['player_id'], player_id)
         self.assertEquals(state['messages'][0]['sentence'], '&lt;script&gt;alert("haha!")&lt;/script&gt;')
 

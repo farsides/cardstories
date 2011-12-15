@@ -17,14 +17,11 @@
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
 import os
-import random
 
-from twisted.python import failure, log, runtime
+from twisted.python import failure, runtime
 from twisted.application import service
 from twisted.internet import reactor, defer
-from twisted.web import resource, client
 from twisted.enterprise import adbapi
-import logging
 
 from cardstories.game import CardstoriesGame
 
@@ -33,6 +30,7 @@ from cardstories.game import CardstoriesGame
 import sqlite3
 
 from cardstories.poll import pollable
+from cardstories.auth import Auth
 
 class CardstoriesPlayer(pollable):
     
@@ -48,8 +46,8 @@ class CardstoriesPlayer(pollable):
 
 class CardstoriesService(service.Service):
 
-    ACTIONS_GAME = ( 'participate', 'voting', 'pick', 'vote', 'complete', 'invite', 'set_countdown' )
-    ACTIONS = ACTIONS_GAME + ( 'create', 'poll', 'state' )
+    ACTIONS_GAME = ('participate', 'voting', 'pick', 'vote', 'complete', 'invite', 'set_countdown')
+    ACTIONS = ACTIONS_GAME + ('create', 'poll', 'state', 'player_info')
 
     def __init__(self, settings):
         self.settings = settings
@@ -57,6 +55,7 @@ class CardstoriesService(service.Service):
         self.players = {}
         self.listeners = []
         self.pollable_plugins = []
+        self.auth = Auth() # to be overriden by an auth plugin (contains unimplemented interfaces)
 
     def listen(self):
         d = defer.Deferred()
@@ -112,8 +111,8 @@ class CardstoriesService(service.Service):
             "  owner_id INTEGER, " 
             "  players INTEGER DEFAULT 1, "
             "  sentence TEXT, "
-            "  cards VARCHAR(%d), " % CardstoriesGame.NCARDS +
-            "  board VARCHAR(%d), " % CardstoriesGame.NPLAYERS +
+            "  cards VARCHAR(%d), " % CardstoriesGame.NCARDS + 
+            "  board VARCHAR(%d), " % CardstoriesGame.NPLAYERS + 
             "  state VARCHAR(8) DEFAULT 'invitation', " + # invitation, vote, complete
             "  created DATETIME, " 
             "  completed DATETIME" 
@@ -126,7 +125,7 @@ class CardstoriesService(service.Service):
             "  serial INTEGER PRIMARY KEY, "
             "  player_id INTEGER, "
             "  game_id INTEGER, " 
-            "  cards VARCHAR(%d), " % CardstoriesGame.CARDS_PER_PLAYER +
+            "  cards VARCHAR(%d), " % CardstoriesGame.CARDS_PER_PLAYER + 
             "  picked CHAR(1), " 
             "  vote CHAR(1), " 
             "  win CHAR(1) DEFAULT 'n' "
@@ -160,35 +159,67 @@ class CardstoriesService(service.Service):
         for plugin in self.pollable_plugins:
             if plugin.name() in args['type']:
                 deferreds.append(plugin.poll(args))
-        d = defer.DeferredList(deferreds, fireOnOneCallback = True)
+        d = defer.DeferredList(deferreds, fireOnOneCallback=True)
         d.addCallback(lambda x: x[0])
         return d
+
+    @defer.inlineCallbacks
+    def update_players_info(self, players_info, players_id_list):
+        '''Add new player ids as key to players_info dict, from players_list'''
+
+        for player_id in players_id_list:
+            if player_id not in players_info:
+                info = {}
+                info['name'] = yield self.auth.get_player_name(player_id)
+                players_info[str(player_id)] = info
+
+        defer.returnValue(players_info)
+
+    @defer.inlineCallbacks
+    def player_info(self, args):
+        '''Process requests to retreive player_info for a player_id'''
+
+        self.required(args, 'player_info', 'player_id')
+        
+        players_info = {'type': 'players_info'}
+        yield self.update_players_info(players_info, args['player_id'])
+        defer.returnValue([players_info])
 
     @defer.inlineCallbacks
     def state(self, args):
         self.required(args, 'state', 'type', 'modified')
         states = []
+        players_info = {'type': 'players_info'} # Keep track of all players being referenced
+
         if 'game' in args['type']:
             game_args = {'action': 'game',
                          'game_id': args['game_id'] }
             if args.has_key('player_id'):
                 game_args['player_id'] = args['player_id']
-            game = yield self.game(game_args)
+
+            game, players_id_list = yield self.game(game_args)
             game['type'] = 'game'
             states.append(game)
+            yield self.update_players_info(players_info, players_id_list)
+
         if 'lobby' in args['type']:
-            lobby = yield self.lobby({'action': 'lobby',
+            lobby, players_id_list = yield self.lobby({'action': 'lobby',
                                       'in_progress': args['in_progress'],
                                       'my': args.get('my', ['true']),
                                       'player_id': args['player_id']})
             lobby['type'] = 'lobby'
             states.append(lobby)
+            yield self.update_players_info(players_info, players_id_list)
+
         for plugin in self.pollable_plugins:
             if plugin.name() in args['type']:
-                state = yield plugin.state(args)
+                state, players_id_list = yield plugin.state(args)
                 state['type'] = plugin.name()
                 state['modified'] = plugin.get_modified()
                 states.append(state)
+                yield self.update_players_info(players_info, players_id_list)
+
+        states.append(players_info)
         defer.returnValue(states)
 
     def poll_player(self, args):
@@ -349,15 +380,20 @@ class CardstoriesService(service.Service):
         game_id = self.required_game_id(args)
         return self.game_method(game_id, args['action'][0], owner_id)
 
+    @defer.inlineCallbacks
     def invite(self, args):
         self.required(args, 'invite')
-        if args.has_key('player_id'):
-          player_ids = args['player_id']
+        if args.has_key('invited_email'):
+            player_ids = yield self.auth.get_players_ids(args['invited_email'], create=True)
         else:
-          player_ids = []
+            player_ids = []
+            
+        if args.has_key('player_id'):
+            player_ids += args['player_id']
 
         game_id = self.required_game_id(args)
-        return self.game_method(game_id, args['action'][0], player_ids)
+        result = yield self.game_method(game_id, args['action'][0], player_ids)
+        defer.returnValue(result)
 
     def set_countdown(self, args):
         self.required(args, 'set_countdown', 'duration')
@@ -368,15 +404,19 @@ class CardstoriesService(service.Service):
     @defer.inlineCallbacks
     def lobby(self, args):
         self.required(args, 'lobby', 'player_id', 'in_progress')
+        
+        player_id = args['player_id'][0]
+        players_info = [player_id] # Only the current player is referenced by lobby
+        
         if args['in_progress'][0] == 'true':
             complete = 'state != "complete" AND state != "canceled"'
         else:
             complete = 'state = "complete"'
         order = " ORDER BY created DESC"
+        
         if args.has_key('my') and args['my'][0] == 'true':
-            player_id = args['player_id'][0]
             modified = self.get_or_create_player(player_id).get_modified()
-            sql =  ""
+            sql = ""
             sql += " SELECT id, sentence, state, owner_id = player_id, created FROM games, player2game WHERE player2game.player_id = ? AND " + complete + " AND games.id = player2game.game_id"
             sql += " UNION "
             sql += " SELECT id, sentence, state, owner_id = player_id, created FROM games, invitations WHERE invitations.player_id = ? AND " + complete + " AND games.id = invitations.game_id"
@@ -386,15 +426,17 @@ class CardstoriesService(service.Service):
             modified = 0
             sql = "SELECT id, sentence, state, owner_id = ?, created FROM games WHERE " + complete
             sql += order
-            games = yield self.db.runQuery(sql, [ args['player_id'][0] ])
+            games = yield self.db.runQuery(sql, [ player_id ])
+        
         sql = "SELECT id, win FROM games, player2game WHERE player2game.player_id = ? AND " + complete + " AND games.id = player2game.game_id"
-        rows = yield self.db.runQuery(sql, [ args['player_id'][0] ])
+        rows = yield self.db.runQuery(sql, [ player_id ])
         wins = {}
         for row in rows:
             wins[row[0]] = row[1]
-        defer.returnValue({'modified': modified,
+        defer.returnValue([{'modified': modified,
                            'games': games,
-                           'win': wins})
+                           'win': wins},
+                           players_info])
 
     def handle(self, result, args):
         if not args.has_key('action'):
@@ -420,7 +462,7 @@ class CardstoriesService(service.Service):
     def required(args, method, *keys):
         for key in keys:
             if not args.has_key(key):
-                raise UserWarning, '%s must be given a %s value' % ( method, key )
+                raise UserWarning, '%s must be given a %s value' % (method, key)
         return True
 
     @staticmethod

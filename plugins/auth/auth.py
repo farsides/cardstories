@@ -24,7 +24,9 @@ from twisted.python import log
 from twisted.internet import defer
 from twisted.enterprise import adbapi
 
-class Plugin:
+from cardstories.auth import Auth
+
+class Plugin(Auth):
 
     def __init__(self, service, plugins):
         dirname = os.path.join(service.settings['plugins-libdir'], self.name())
@@ -46,70 +48,30 @@ class Plugin:
                 )
             db.commit()
             db.close()
-        self.db = adbapi.ConnectionPool("sqlite3", database = self.database, cp_noisy = True)
+        self.db = adbapi.ConnectionPool("sqlite3", database=self.database, cp_noisy=True)
         log.msg('plugin auth initialized with ' + self.database)
 
     def name(self):
         return 'auth'
 
-    def create(self, transaction, value):
-        transaction.execute("INSERT INTO players (name) VALUES (?)", [ value ])
+    def create_player_from_email(self, transaction, email):
+        transaction.execute("INSERT INTO players (name) VALUES (?)", [ email ])
         return transaction.lastrowid
         
     @defer.inlineCallbacks
-    def resolve(self, id):
-        row = yield self.db.runQuery("SELECT name FROM players WHERE id = ?", [ id ])
-        defer.returnValue(row[0][0])
+    def get_player_id(self, email, create=False):
+        row = yield self.db.runQuery("SELECT id FROM players WHERE name = ?", [ email ])
+        if row:
+            id = row[0][0]
+        elif create:
+            id = yield self.db.runInteraction(self.create_player_from_email, email)
+        else:
+            id = None
+        defer.returnValue(id)
 
-    @defer.inlineCallbacks
-    def create_players(self, names):
-        ids = []
-        for name in names:
-            id = yield self.db.runInteraction(self.create, name)
-            ids.append(id)
-        defer.returnValue(ids)
+    def get_player_name(self, id):
+        return "Player " + str(id)
 
-    @defer.inlineCallbacks
-    def resolve_players(self, ids):
-        rows = yield self.db.runQuery("SELECT name FROM players WHERE " + ' OR '.join([ 'id = ?' ] * len(ids)), ids)
-        names = map(lambda row: row[0], rows)
-        defer.returnValue(names)
-
-    def resolve_player_emails(self, ids):
-        return self.resolve_players(ids)
-
-    @defer.inlineCallbacks
-    def preprocess(self, result, request):
-        for (key, values) in request.args.iteritems():
-            if key == 'player_id' or key == 'owner_id':
-                new_values = []
-                for value in values:
-                    value = value.decode('utf-8')
-                    row = yield self.db.runQuery("SELECT id FROM players WHERE name = ?", [ value ])
-                    if len(row) == 0:
-                        id = yield self.db.runInteraction(self.create, value)
-                    else:
-                        id = row[0][0]
-                    new_values.append(id)
-                request.args[key] = new_values
-        defer.returnValue(result)
-
-    @defer.inlineCallbacks
-    def postprocess(self, results):
-        if type(results) is ListType:
-            for result in results:
-                if result.has_key('players'):
-                    for player in result['players']:
-                        player[0] = yield self.resolve(player[0])
-                if result.has_key('owner_id'):
-                        result['owner_id'] = yield self.resolve(result['owner_id'])
-                if result.has_key('invited') and result['invited']:
-                    invited = result['invited'];
-                    for index in range(len(invited)):
-                        invited[index] = yield self.resolve(invited[index])
-                if result.has_key('messages'):
-                    for message in result['messages']:
-                        if message.has_key('player_id'):
-                            message['player_id'] = yield self.resolve(message['player_id'])
-        defer.returnValue(results)
-
+    def authenticate(self, request, requested_player_id):
+        # Unsecure/test auth - do not authenticate anything
+        pass

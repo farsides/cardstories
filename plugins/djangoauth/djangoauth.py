@@ -23,13 +23,15 @@
 from lxml import objectify
 import os
 
-from types import ListType
-
 from twisted.python import log
 from twisted.internet import defer
 from twisted.web import client
 
-class Plugin:
+from cardstories.auth import Auth, AuthenticationError
+
+
+
+class Plugin(Auth):
 
     def __init__(self, service, plugins):
         self.service = service
@@ -39,97 +41,55 @@ class Plugin:
         self.getPage = client.getPage
         self.id2name = {}
         self.id2email = {}
+        self.email2id = {}
         log.msg('plugin djangoauth initialized')
 
     def name(self):
         return 'djangoauth'
 
     @defer.inlineCallbacks
-    def create(self, name):
-        id = yield self.getPage("http://%s/getuserid/%s/?create=yes" % (self.host, name))
+    def get_player_id(self, email, create=False):
+        # Use cache if available
+        if email in self.email2id:
+            id = self.email2id[email]
+        else:
+            create_query = ''
+            if create:
+                create_query += '?create=yes'
+            id = yield self.getPage("http://%s/get_player_id/%s/%s" % (self.host, email, create_query))
+            id = int(id)
+            self.email2id[email] = id
         defer.returnValue(id)
 
     @defer.inlineCallbacks
-    def resolve(self, id):
-        if self.id2name.has_key(id):
+    def get_player_name(self, id):
+        # Use cache if available
+        if id in self.id2name:
             name = self.id2name[id]
         else:
-            name = yield self.getPage("http://%s/getusername/%s/" % (self.host, str(id)))
+            name = yield self.getPage("http://%s/get_player_name/%s/" % (self.host, str(id)))
             self.id2name[id] = name
         defer.returnValue(name)
 
     @defer.inlineCallbacks
-    def resolve_email(self, id):
-        if self.id2email.has_key(id):
+    def get_player_email(self, id):
+        # Use cache if available
+        if id in self.id2email:
             email = self.id2email[id]
         else:
-            email = yield self.getPage("http://%s/getuseremail/%s/" % (self.host, str(id)))
+            email = yield self.getPage("http://%s/get_player_email/%s/" % (self.host, str(id)))
             self.id2email[id] = email
         defer.returnValue(email)
 
     @defer.inlineCallbacks
-    def create_players(self, names):
-        ids = []
-        for name in names:
-            id = yield self.create(name)
-            ids.append(id)
-        defer.returnValue(ids)
+    def authenticate(self, request, requested_player_id):
+        '''Ensure that the player_id match the request's session'''
 
-    @defer.inlineCallbacks
-    def resolve_players(self, ids):
-        names = []
-        for id in ids:
-            name = yield self.resolve(id)
-            names.append(name)
-        defer.returnValue(names)
+        sessionid = request.getCookie('sessionid')
+        cookie_player_id = yield self.getPage("http://%s/get_loggedin_player_id/%s/" % (self.host, str(sessionid)))
+        requested_player_id = requested_player_id
 
-    @defer.inlineCallbacks
-    def resolve_player_emails(self, ids):
-        emails = []
-        for id in ids:
-            email = yield self.resolve_email(id)
-            emails.append(email)
-        defer.returnValue(emails)
+        if requested_player_id != cookie_player_id:
+            raise AuthenticationError(requested_player_id, cookie_player_id)
 
-    @defer.inlineCallbacks
-    def preprocess(self, result, request):
-        for (key, values) in request.args.iteritems():
-            if key == 'player_id' or key == 'owner_id':
-                new_values = []
-                for value in values:
-                    value = value.decode('utf-8')
-                    # Invitation player_id's cannot be retrieved using the
-                    # sessionid cookie, which only refers to the logged-in user.
-                    if request.args.has_key('action') and \
-                        request.args['action'][0] == 'invite' and \
-                        key == 'player_id':
-                        id = yield self.create(str(value))
-                    # Otherwise, try to get the id from the session cookie.
-                    else:
-                        sessionid = request.getCookie('sessionid')
-                        id = yield self.getPage("http://%s/getloggedinuserid/%s/" %
-                                                (self.host, str(sessionid)))
-
-                    id = int(id)
-                    new_values.append(id)
-                request.args[key] = new_values
-        defer.returnValue(result)
-
-    @defer.inlineCallbacks
-    def postprocess(self, results):
-        if type(results) is ListType:
-            for result in results:
-                if result.has_key('owner_id'):
-                    result['owner_id'] = yield self.resolve(result['owner_id'])
-                if result.has_key('players'):
-                    for player in result['players']:
-                        player[0] = yield self.resolve(player[0])
-                if result.has_key('invited') and result['invited']:
-                    invited = result['invited'];
-                    for index in range(len(invited)):
-                        invited[index] = yield self.resolve(invited[index])
-                if result.has_key('messages'):
-                    for message in result['messages']:
-                        if message.has_key('player_id'):
-                            message['player_id'] = yield self.resolve(message['player_id'])
-        defer.returnValue(results)
+        defer.returnValue(True)

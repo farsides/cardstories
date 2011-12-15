@@ -30,15 +30,14 @@ from twisted.mail.smtp import sendmail
 
 class Plugin:
 
-    ALLOWED = ( 'invite', 'pick', 'voting', 'vote', 'complete' )
+    ALLOWED = ('invite', 'pick', 'voting', 'vote', 'complete')
 
     def __init__(self, service, plugins):
-        for plugin in plugins:
-            if plugin.name() in ('auth', 'djangoauth'):
-                self.auth = plugin
-                break
-        assert self.auth
         self.service = service
+        # auth plugin is registered on the service
+        # make sure an auth plugin has been loaded before the mail plugin
+        assert self.service.auth
+
         self.service.listen().addCallback(self.self_notify)
         self.confdir = os.path.join(self.service.settings['plugins-confdir'], 'mail')
         self.settings = objectify.parse(open(os.path.join(self.confdir, 'mail.xml'))).getroot()
@@ -72,7 +71,7 @@ class Plugin:
 
     @defer.inlineCallbacks
     def send(self, subject, recipients, template, variables):
-        recipients = yield self.auth.resolve_player_emails(recipients)
+        recipients = yield self.service.auth.get_players_emails(recipients)
         recipients = filter(lambda name: '@' in name, recipients)
         if len(recipients) == 0:
             defer.returnValue(False)
@@ -90,7 +89,7 @@ class Plugin:
 
     @defer.inlineCallbacks
     def pick_or_vote(self, game, player_id, subject, template):
-        ( player_email, ) = yield self.auth.resolve_player_emails([ player_id ])
+        (player_email,) = yield self.service.auth.get_players_emails([ player_id ])
         yield self.send(subject, [ game.get_owner_id() ], template,
                         { 'game_id': game.get_id(),
                           'player_email': player_email
@@ -105,7 +104,7 @@ class Plugin:
     @defer.inlineCallbacks
     def invite(self, game, details):
         recipients = details['invited']
-        ( owner_email, ) = yield self.auth.resolve_player_emails([ game.get_owner_id() ])
+        (owner_email,) = yield self.service.auth.get_players_emails([ game.get_owner_id() ])
         yield self.send("Cardstories - You have been invited to a Game.", recipients, self.templates['invite'],
                         { 'game_id': game.get_id(),
                           'owner_email': owner_email
@@ -120,7 +119,7 @@ class Plugin:
     
     @defer.inlineCallbacks
     def complete(self, game, details):
-        ( owner_email, ) = yield self.auth.resolve_player_emails([ game.get_owner_id() ])
+        (owner_email,) = yield self.service.auth.get_players_emails([ game.get_owner_id() ])
         yield self.send("Cardstories - Results.", game.get_players(), self.templates['complete'],
                         { 'game_id': game.get_id(),
                           'owner_email': owner_email

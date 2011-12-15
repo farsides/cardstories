@@ -1,12 +1,14 @@
 var selector = '#cardstories_chat_example';
 var original_send = $.cardstories_chat.send;
 var original_play_sound = $.cardstories_chat.play_sound;
+var cardstories_default_get_player_info_by_id = $.cardstories.get_player_info_by_id;
 
 function setup() {
     $(selector).cardstories_chat();
     $.cardstories_chat.send = original_send;
     $.cardstories_chat.play_sound = original_play_sound;
     $.cardstories_audio = {play: $.noop};
+    $.cardstories.get_player_info_by_id = function(player_id) { return {'name': "Player " + player_id } };
 }
 
 module("cardstories_chat", {setup: setup});
@@ -15,9 +17,9 @@ test("state", 8, function() {
     var display = $(selector).find('.cardstories_chat_display');
     equal($.trim(display.html()), '', 'Display is initially empty');
 
-    var player1 = 'Player 1';
-    var player2 = 'Player 2';
-    var player3 = 'Player 3';
+    var player1 = 1;
+    var player2 = 2;
+    var player3 = 3;
     var sentence1 = 'Hello all!';
     var sentence2 = 'Goodbye all!'
     var sentence3 = 'New game.'
@@ -29,11 +31,11 @@ test("state", 8, function() {
     ];
     $.cardstories_chat.state('Player', {messages: messages}, selector);
 
-    ok(display.html().match(player1), 'Display shows player_id');
+    ok(display.html().match('Player '+player1), 'Display shows player_id');
     ok(display.html().match(sentence1), 'Display shows sentence');
-    ok(display.html().match(player2), 'Display shows player_id');
+    ok(display.html().match('Player '+player2), 'Display shows player_id');
     ok(display.html().match(sentence2), 'Display shows sentence');
-    ok(display.html().match(player3), 'Display shows player_id');
+    ok(display.html().match('Player '+player3), 'Display shows player_id');
     ok(display.html().match(sentence3), 'Display shows sentence');
     ok(display.html().match(game1), 'Display shows game URL');
 });

@@ -88,7 +88,7 @@ class ExampleTest(unittest.TestCase):
                                     'game_id': [self.game_id],
                                     'player_id': [self.player1],
                                     'owner_id': [self.owner_id] })
-        for player_id in ( self.player1, self.player2 ):
+        for player_id in (self.player1, self.player2):
             yield send('participate', { 'action': ['participate'],
                                              'player_id': [player_id],
                                              'game_id': [self.game_id] })
@@ -303,7 +303,7 @@ class ExampleTest(unittest.TestCase):
             plugin.ok = True
             self.assertEquals(plugin.counter, 1)
             self.assertTrue(result['info'])
-            state = yield plugin.state({'modified': [0]})
+            state, players_list = yield plugin.state({'modified': [0]})
             self.assertEquals(plugin.counter, state['counter'])
             defer.returnValue(result)
         d.addCallback(check)

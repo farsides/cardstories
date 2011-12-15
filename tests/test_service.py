@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2011 Loic Dachary <loic@dachary.org>
 #
@@ -21,10 +22,10 @@ import os
 sys.path.insert(0, os.path.abspath("..")) # so that for M-x pdb works
 import sqlite3
 
-from twisted.python import log
+from mock import Mock
+
 from twisted.trial import unittest, runner, reporter
-from twisted.internet import defer, reactor
-from twisted.web import server, resource, http
+from twisted.internet import defer
 
 from cardstories.service import CardstoriesService
 from cardstories.poll import pollable
@@ -109,7 +110,7 @@ class CardstoriesServiceTestInit(unittest.TestCase):
         db = sqlite3.connect(database)
         c = db.cursor()
         c.execute("INSERT INTO games (id) VALUES (%d)" % game_id)
-        c.execute("INSERT INTO player2game (game_id, player_id) VALUES (%d, %d)" % ( game_id, player_id ))
+        c.execute("INSERT INTO player2game (game_id, player_id) VALUES (%d, %d)" % (game_id, player_id))
         db.commit()
         db.close()
 
@@ -120,7 +121,7 @@ class CardstoriesServiceTestInit(unittest.TestCase):
         self.assertEquals(len(service.games[game_id].pollers), 1)
         yield service.stopService()
 
-class CardstoriesServiceTest(unittest.TestCase):
+class CardstoriesServiceTestBase(unittest.TestCase):
 
     def setUp(self):
         self.database = 'test.sqlite'
@@ -135,7 +136,7 @@ class CardstoriesServiceTest(unittest.TestCase):
         os.unlink(self.database)
         return self.service.stopService()
 
-class CardstoriesServiceTestHandle(CardstoriesServiceTest):
+class CardstoriesServiceTestHandle(CardstoriesServiceTestBase):
 
     def test01_required(self):
         self.assertTrue(CardstoriesService.required({ 'key1': ['a'],
@@ -150,7 +151,7 @@ class CardstoriesServiceTestHandle(CardstoriesServiceTest):
             self.failUnlessSubstring(action, result['error'])
             self.failUnlessSubstring('must be given', result['error'])
 
-class CardstoriesServiceTest(CardstoriesServiceTest):
+class CardstoriesServiceTest(CardstoriesServiceTestBase):
 
     @defer.inlineCallbacks
     def test01_create(self):
@@ -223,7 +224,7 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         game = yield self.service.create({ 'card': [winner_card],
                                            'sentence': [sentence],
                                            'owner_id': [owner_id]})
-        for player_id in ( 16, 17 ):
+        for player_id in (16, 17):
             yield self.service.participate({ 'action': ['participate'],
                                              'player_id': [player_id],
                                              'game_id': [game['game_id']] })
@@ -267,17 +268,18 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         game = yield self.service.create({ 'card': [winner_card],
                                            'sentence': [sentence],
                                            'owner_id': [owner_id]})
-        game_info = yield self.service.game({ 'game_id': [game['game_id']] })
+        game_info, players_id_list = yield self.service.game({ 'game_id': [game['game_id']] })
         self.assertEquals(game['game_id'], game_info['id'])
         self.assertEquals(game_info['winner_card'], None)
-        game_info = yield self.service.game({ 'game_id': [game['game_id']],
+        self.assertIn(owner_id, players_id_list)
+        game_info, players_id_list = yield self.service.game({ 'game_id': [game['game_id']],
                                               'player_id': [owner_id] })
         self.assertEquals(game['game_id'], game_info['id'])
         self.assertEquals(game_info['winner_card'], winner_card)
         # if there is no in core representation of the game, 
         # a temporary one is created
         self.service.games[game_info['id']].destroy()
-        game_info = yield self.service.game({ 'game_id': [game['game_id']] })
+        game_info, players_id_list = yield self.service.game({ 'game_id': [game['game_id']] })
         self.assertEquals(game['game_id'], game_info['id'])
 
     @defer.inlineCallbacks
@@ -294,17 +296,17 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         sentence4 = 'SENTENCE4'
         c = self.db.cursor()
         # in progress
-        c.execute("INSERT INTO games ( id, owner_id, sentence, state, created ) VALUES ( %d, %d, '%s', 'invitation', '2011-02-01' )" % ( game1, player2, sentence1 )) 
-        c.execute("INSERT INTO invitations ( player_id, game_id ) VALUES ( %d, %d )" % ( player1, game1 ))
-        c.execute("INSERT INTO player2game ( player_id, game_id ) VALUES ( %d, %d )" % ( player2, game1 ))
+        c.execute("INSERT INTO games ( id, owner_id, sentence, state, created ) VALUES ( %d, %d, '%s', 'invitation', '2011-02-01' )" % (game1, player2, sentence1)) 
+        c.execute("INSERT INTO invitations ( player_id, game_id ) VALUES ( %d, %d )" % (player1, game1))
+        c.execute("INSERT INTO player2game ( player_id, game_id ) VALUES ( %d, %d )" % (player2, game1))
 
-        c.execute("INSERT INTO games ( id, owner_id, sentence, state, created ) VALUES ( %d, %d, '%s', 'invitation', '2011-05-01' )" % ( game2, player1, sentence2 )) 
-        c.execute("INSERT INTO player2game ( player_id, game_id, win ) VALUES ( %d, %d, 'n' )" % ( player1, game2 ))
+        c.execute("INSERT INTO games ( id, owner_id, sentence, state, created ) VALUES ( %d, %d, '%s', 'invitation', '2011-05-01' )" % (game2, player1, sentence2)) 
+        c.execute("INSERT INTO player2game ( player_id, game_id, win ) VALUES ( %d, %d, 'n' )" % (player1, game2))
         # complete
-        c.execute("INSERT INTO games ( id, owner_id, sentence, state, created ) VALUES ( %d, %d, '%s', 'complete', '2011-03-01' )" % ( game3, player1, sentence3 )) 
-        c.execute("INSERT INTO player2game ( player_id, game_id, win ) VALUES ( %d, %d, 'y' )" % ( player1, game3 ))
+        c.execute("INSERT INTO games ( id, owner_id, sentence, state, created ) VALUES ( %d, %d, '%s', 'complete', '2011-03-01' )" % (game3, player1, sentence3)) 
+        c.execute("INSERT INTO player2game ( player_id, game_id, win ) VALUES ( %d, %d, 'y' )" % (player1, game3))
 
-        c.execute("INSERT INTO games ( id, owner_id, sentence, state, created ) VALUES ( %d, %d, '%s', 'complete', '2011-06-01' )" % ( game4, player2, sentence4 )) 
+        c.execute("INSERT INTO games ( id, owner_id, sentence, state, created ) VALUES ( %d, %d, '%s', 'complete', '2011-06-01' )" % (game4, player2, sentence4)) 
         self.db.commit()
         self.service.load(c)
         c.close()
@@ -316,7 +318,7 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         result = yield self.service.lobby({ 'in_progress': ['true'],
                                             'player_id': [player2] })
         # game2 shows before game1 because it is created before
-        self.assertEquals(result, {
+        self.assertEquals(result, [{
                 #         player2 does not participate in game2
                 'games': [(game2, u'SENTENCE2', u'invitation', 0, u'2011-05-01'),
                 #         player2 participates in game1 and is the author
@@ -324,7 +326,8 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
                 #         player2 did not yet win game1
                 'win': {game1: u'n'},
                 'modified': 0
-                })
+                },
+                [player2]])
 
         #
         # Show player2 games, in progress, with wins from player2.
@@ -332,14 +335,15 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         result = yield self.service.lobby({ 'in_progress': ['true'],
                                             'player_id': [player2],
                                             'my': ['true'] })
-        self.assertEquals(result, {
+        self.assertEquals(result, [{
                 #         player2 participates in game1 and is the author
                 'games': [(game1, u'SENTENCE1', u'invitation', 1, u'2011-02-01')],
                 #         player2 does not participate in game2 therefore it is not shown
                 #         player2 did not yet win game1
                 'win': {game1: u'n'},
                 'modified': self.service.games[game1].modified
-                })
+                },
+                [player2]])
 
         #
         # Show all games, complete, with wins from player1.
@@ -347,7 +351,7 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         result = yield self.service.lobby({ 'in_progress': ['false'],
                                             'player_id': [player1] })
         # game4 shows before game3 because it is created before
-        self.assertEquals(result, {
+        self.assertEquals(result, [{
                 #         player1 did not participate in game3
                 'games': [(game4, u'SENTENCE4', u'complete', 0, u'2011-06-01'),
                 #         player1 participated in game3 and was the author
@@ -355,7 +359,8 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
                 #         player1 won game3
                 'win': {game3: u'y'},
                 'modified': 0
-                })
+                },
+                [player1]])
 
         #
         # Show player1 games, complete, with wins from player1.
@@ -363,7 +368,7 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         result = yield self.service.lobby({ 'in_progress': ['false'],
                                             'player_id': [player1],
                                             'my': ['true']})
-        self.assertEquals(result, {
+        self.assertEquals(result, [{
                 #         player1 participated in game3 and was the author
                 'games': [(game3, u'SENTENCE3', u'complete', 1, u'2011-03-01')],
                 #         player1 did not participate in game3
@@ -373,7 +378,8 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
                 #         global to all games in progress, not just the ones 
                 #         returned by the lobby request
                 'modified': self.service.games[game2].modified
-                })
+                },
+                [player1]])
 
         #
         # Show player1 games, in progress, with wins from player1.
@@ -381,7 +387,7 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         result = yield self.service.lobby({ 'in_progress': ['true'],
                                             'player_id': [player1],
                                             'my': ['true']})
-        self.assertEquals(result, {
+        self.assertEquals(result, [{
                 #         player1 participates in game2 and was the author
                 'games': [(game2, u'SENTENCE2', u'invitation', 1, u'2011-05-01'),
                 #         player1 was invited to game1
@@ -389,7 +395,8 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
                 #         player1 won game3
                 'win': {game2: u'n'},
                 'modified': self.service.games[game2].modified
-                })
+                },
+                [player1]])
 
     @defer.inlineCallbacks
     def test06_get_or_create_player(self):
@@ -565,13 +572,22 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
             yield self.service.participate({ 'action': ['participate'],
                                              'player_id': [player_id],
                                              'game_id': [game['game_id']] })
-        invited = 20
+            
+        invited = 'test@example.com'
+        invited_id = 20
+        # Fake call to auth module (id => name translation)
+        def get_players_ids(emails, create):
+            self.assertEquals(emails, [invited])
+            self.assertEquals(create, True)
+            return [invited_id]
+        self.service.auth.get_players_ids = get_players_ids
+        
         yield self.service.invite({ 'action': ['invite'],
                                     'game_id': [game['game_id']],
-                                    'player_id': [invited],
+                                    'invited_email': [invited],
                                     'owner_id': [owner_id] })
         game = self.service.games[game['game_id']]
-        self.assertEquals([owner_id] + players + [invited], game.get_players())
+        self.assertEquals([owner_id] + players + [invited_id], game.get_players())
         yield game.cancel()
         self.assertFalse(self.service.games.has_key(game.id))
 
@@ -580,6 +596,7 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         card = 5
         sentence = 'SENTENCE'
         owner_id = 15
+        player_id = 18
         game = yield self.service.create({ 'action': ['create'],
                                            'card': [card],
                                            'sentence': [sentence],
@@ -589,7 +606,7 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
             yield self.service.participate({ 'action': ['participate'],
                                              'player_id': [player_id],
                                              'game_id': [game['game_id']] })
-
+        
         gameId = game['game_id']
         yield self.service.invite({ 'action': ['invite'],
                                     'game_id': [gameId],
@@ -597,13 +614,21 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         game = self.service.games[game['game_id']]
         self.assertEquals([owner_id] + players, game.get_players())
 
-        invited = 20
+        invited = 'test@example.com'
+        invited_id = 20
+        # Fake call to auth module (id => name translation)
+        def get_players_ids(emails, create):
+            self.assertEquals(emails, [invited])
+            self.assertEquals(create, True)
+            return [invited_id]
+        self.service.auth.get_players_ids = get_players_ids
         yield self.service.invite({ 'action': ['invite'],
                                     'game_id': [gameId],
-                                    'player_id': [invited],
+                                    'player_id': [player_id],
+                                    'invited_email': [invited],
                                     'owner_id': [owner_id] })
         game = self.service.games[gameId]
-        self.assertEquals([owner_id] + players + [invited], game.get_players())
+        self.assertEquals([owner_id] + players + [invited_id, player_id], game.get_players())
 
         yield game.cancel()
         self.assertFalse(self.service.games.has_key(game.id))
@@ -616,7 +641,7 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         result = yield self.service.create({ 'card': [winner_card],
                                            'sentence': [sentence],
                                            'owner_id': [owner_id]})
-        for player_id in ( 16, 17 ):
+        for player_id in (16, 17):
             yield self.service.participate({ 'action': ['participate'],
                                              'player_id': [player_id],
                                              'game_id': [result['game_id']] })
@@ -663,13 +688,39 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         yield d
 
     @defer.inlineCallbacks
+    def test12_player_info(self):
+        player_id = 20
+        player_name_format = u"pl\xe1y\u1ebdr %d"
+
+        # Fake call to auth module (id => name translation)
+        default_get_player_name = self.service.auth.get_player_name
+        fake_get_player_name = Mock(return_value=player_name_format)
+        self.service.auth.get_player_name = fake_get_player_name
+
+        players_info = yield self.service.player_info({'type': 'player_info', 'player_id': [player_id]})
+        fake_get_player_name.assert_called_once_with(player_id)
+        
+        self.assertEquals(players_info, [{'type': 'players_info', str(player_id): {'name': player_name_format}}])
+
+        self.service.auth.get_player_name = default_get_player_name
+
+    @defer.inlineCallbacks
     def test12_state(self):
         winner_card = 5
         sentence = 'SENTENCE'
         owner_id = 15
+        player_name_format = u"pl\xe1y\u1ebdr %d"
+
+        # Fake call to auth module (id => name translation)
+        def get_player_name(id):
+            return player_name_format % id
+        default_get_player_name = self.service.auth.get_player_name
+        self.service.auth.get_player_name = get_player_name
+
         game = yield self.service.create({ 'card': [winner_card],
                                            'sentence': [sentence],
                                            'owner_id': [owner_id]})
+
         #
         # type = ['game']
         # 
@@ -685,6 +736,7 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         self.assertEquals(game['game_id'], state[0]['id'])
         self.assertEquals(state[0]['winner_card'], winner_card)
         self.assertEquals(state[0]['type'], 'game')
+
         #
         # type = ['plugin']
         #
@@ -692,7 +744,7 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
             def __init__(self):
                 pollable.__init__(self, 200000000000)
             def state(self, args):
-                return {'info': True}
+                return [{'info': True}, [owner_id]]
             def name(self):
                 return 'plugin'
         plugin = Plugin()
@@ -701,6 +753,17 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
                                            'modified': [0]})
         self.assertEquals(state[0]['type'], 'plugin')
         self.assertTrue(state[0]['info'])
+
+        def check_players_info(state, players_info):
+            # Check presence of players_info
+            state_types_list = [x['type'] for x in state if 'type' in x]
+            self.assertIn('players_info', state_types_list)
+
+            # Check values of players_info
+            state_players_info = [x for x in state if x['type'] == 'players_info']
+            self.assertEquals(state_players_info, players_info)
+        check_players_info(state, [{str(owner_id): {'name': player_name_format % owner_id}, 'type': 'players_info'}])
+
         #
         # type = ['lobby']
         #
@@ -710,10 +773,11 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
                                            'player_id': [owner_id] })
         self.assertEquals(state[0]['type'], 'lobby')
         self.assertEquals(state[0]['games'][0][0], game['game_id'])
+        check_players_info(state, [{str(owner_id): {'name': player_name_format % owner_id}, 'type': 'players_info'}])
         #
         # type = ['game','lobby','plugin']
         #
-        state = yield self.service.state({ 'type': ['game','lobby','plugin'],
+        state = yield self.service.state({ 'type': ['game', 'lobby', 'plugin'],
                                            'modified': [0],
                                            'game_id': [game['game_id']],
                                            'in_progress': ['true'],
@@ -721,6 +785,9 @@ class CardstoriesServiceTest(CardstoriesServiceTest):
         self.assertEquals(state[0]['type'], 'game')
         self.assertEquals(state[1]['type'], 'lobby')
         self.assertEquals(state[2]['type'], 'plugin')
+        check_players_info(state, [{str(owner_id): {'name': player_name_format % owner_id}, 'type': 'players_info'}])
+
+        self.service.auth.get_player_name = default_get_player_name
 
     @defer.inlineCallbacks
     def test13_set_countdown(self):
