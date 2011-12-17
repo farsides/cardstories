@@ -16,3 +16,4 @@ _trial_temp*
 .coverage
 website/local_settings.py
 *.log
+log/*

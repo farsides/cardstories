@@ -1,0 +1,1 @@
+PYTHONPATH=.:etc/cardstories twistd --nodaemon cardstories --static $(pwd)/static --port 5000 --interface 0.0.0.0 --db log/cardstories.sqlite --plugins-dir plugins --plugins-libdir /tmp --plugins-confdir tests --plugins 'djangoauth chat solo mail' --plugins-pre-process 'djangoauth chat solo' --plugins-logdir=$(pwd)/log
