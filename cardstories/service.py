@@ -155,7 +155,10 @@ class CardstoriesService(service.Service):
         if 'game' in args['type']:
             game_id = self.required_game_id(args)
             if not self.games.has_key(game_id):
-                # This means the game has been deleted, so just return the poll immediately.
+                # This means the game has been deleted from memory - probably because
+                # it has been completed. The client doesn't seem to be aware of this yet,
+                # so just return the poll immediately to let the client know the state
+                # has changed.
                 return defer.succeed({ 'game_id': [game_id],
                                        'modified': [int(runtime.seconds() * 1000)] })
             else:
