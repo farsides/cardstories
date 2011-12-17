@@ -148,12 +148,18 @@ class CardstoriesService(service.Service):
             game = CardstoriesGame(self, id)
             game.load(c)
             self.game_init(game, sentence)
-            
+
     def poll(self, args):
         self.required(args, 'poll', 'type', 'modified')
         deferreds = []
         if 'game' in args['type']:
-            deferreds.append(self.game_proxy(args))
+            game_id = self.required_game_id(args)
+            if not self.games.has_key(game_id):
+                # This means the game has been deleted, so just return the poll immediately.
+                return defer.succeed({ 'game_id': [game_id],
+                                       'modified': [int(runtime.seconds() * 1000)] })
+            else:
+                deferreds.append(self.games[game_id].poll(args))
         if 'lobby' in args['type']:
             deferreds.append(self.poll_player(args))
         for plugin in self.pollable_plugins:
@@ -336,12 +342,6 @@ class CardstoriesService(service.Service):
                 return game_info
             d.addCallback(destroy)
             return d
-
-    def game_proxy(self, args):
-        game_id = self.required_game_id(args)
-        if not self.games.has_key(game_id):
-            raise UserWarning, 'game_id=%s does not exist' % str(game_id)
-        return getattr(self.games[game_id], args['action'][0])(args)
 
     def game_method(self, game_id, action, *args, **kwargs):
         if not self.games.has_key(game_id):

@@ -328,18 +328,34 @@ class CardstoriesGame(pollable):
         result = yield self.touch(type='set_countdown')
         defer.returnValue(result)
 
+    def pickInteraction(self, transaction, game_id, player_id, card):
+        transaction.execute("SELECT state FROM games WHERE id = ?", [ game_id ])
+        state = transaction.fetchone()[0]
+        if state == 'invitation':
+            transaction.execute("UPDATE player2game SET picked = ? WHERE game_id = ? AND player_id = ?", [ chr(card), game_id, player_id ])
+        else:
+            raise UserWarning("Cannot pick a card because the game is in '%s' state." % state)
+
     @defer.inlineCallbacks
     def pick(self, player_id, card):
-        yield self.service.db.runOperation("UPDATE player2game SET picked = ? WHERE game_id = ? AND player_id = ?", [ chr(card), self.get_id(), player_id ])
+        yield self.service.db.runInteraction(self.pickInteraction, self.get_id(), player_id, card)
         count = yield self.service.db.runQuery("SELECT COUNT(*) FROM player2game WHERE game_id = ? AND picked IS NOT NULL", [ self.get_id() ])
         if count[0][0] >= self.MIN_PICKED and not self.is_countdown_active():
             self.start_countdown()
         result = yield self.touch(type='pick', player_id=player_id, card=card)
         defer.returnValue(result)
 
+    def voteInteraction(self, transaction, game_id, player_id, vote):
+        transaction.execute("SELECT state FROM games WHERE id = ?", [ game_id ])
+        state = transaction.fetchone()[0]
+        if state == 'vote':
+            transaction.execute("UPDATE player2game SET vote = ? WHERE game_id = ? AND player_id = ?", [ chr(vote), game_id, player_id ])
+        else:
+            raise UserWarning("Cannot vote because the game is in '%s' state" % state)
+
     @defer.inlineCallbacks
     def vote(self, player_id, vote):
-        yield self.service.db.runOperation("UPDATE player2game SET vote = ? WHERE game_id = ? AND player_id = ?", [ chr(vote), self.get_id(), player_id ])
+        yield self.service.db.runInteraction(self.voteInteraction, self.get_id(), player_id, vote)
         count = yield self.service.db.runQuery("SELECT COUNT(*) FROM player2game WHERE game_id = ? AND vote IS NOT NULL", [ self.get_id() ])
         if count[0][0] >= self.MIN_VOTED and not self.is_countdown_active():
             self.start_countdown()

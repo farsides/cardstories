@@ -810,6 +810,83 @@ class CardstoriesGameTest(unittest.TestCase):
             self.assertEqual(result, None)
         d.addCallback(check)
 
+    @defer.inlineCallbacks
+    def test20_pick_only_in_invitation_state(self):
+        winner_card = 15
+        sentence = 'SENTENCE'
+        owner_id = 19
+        player1_id = 53
+        player2_id = 54
+        player3_id = 55
+        yield self.game.create(winner_card, sentence, owner_id)
+
+        # Three players joing the game.
+        for player_id in ( player1_id, player2_id, player3_id ):
+            yield self.game.participate(player_id)
+
+        # Two players pick cards.
+        # They can do that while the game is in the 'invitation' state.
+        yield self.game.pick(player1_id, 1)
+        yield self.game.pick(player2_id, 2)
+
+        # Move the game to the 'vote' state.
+        yield self.game.voting(owner_id)
+
+        # The third player can't pick a card anymore.
+        raises_UserWarning = False
+        try:
+            yield self.game.pick(player3_id, 3)
+        except UserWarning:
+            raises_UserWarning = True
+        except:
+            pass
+        self.assertTrue(raises_UserWarning)
+
+    @defer.inlineCallbacks
+    def test21_vote_only_in_vote_state(self):
+        winner_card = 25
+        sentence = 'SENTENCE'
+        owner_id = 12
+        player1_id = 13
+        player2_id = 14
+        player3_id = 15
+        yield self.game.create(winner_card, sentence, owner_id)
+
+        # Three players joing the game.
+        for player_id in ( player1_id, player2_id, player3_id ):
+            yield self.game.participate(player_id)
+
+        # The players pick cards.
+        yield self.game.pick(player1_id, 1)
+        yield self.game.pick(player2_id, 2)
+        yield self.game.pick(player3_id, 3)
+
+        # Move the game to the 'vote' state.
+        yield self.game.voting(owner_id)
+
+        # Two players vote.
+        yield self.game.vote(player1_id, 25)
+        yield self.game.vote(player2_id, 24)
+
+        # Move the game to the complete state and simulate a race condition
+        # where the third player votes after the results have already been
+        # calculated.
+        yield self.game.complete(owner_id)
+
+        # The third player can't vote anymore.
+        raises_UserWarning = False
+        try:
+            yield self.game.vote(player3_id, 25)
+        except UserWarning:
+            raises_UserWarning = True
+        except:
+            pass
+        self.assertTrue(raises_UserWarning)
+
+        vote = yield self.game.service.db.runQuery("SELECT vote FROM player2game WHERE game_id = ? AND player_id = ?", [ self.game.get_id(), player3_id ])
+        self.assertEquals(None, vote[0][0])
+
+
 def Run():
     loader = runner.TestLoader()
 #    loader.methodPrefix = "test18_"

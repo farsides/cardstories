@@ -179,26 +179,16 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         self.assertEquals(self.service.games[result['game_id']].get_id(), result['game_id'])
         c.close()
 
-    def test02_game_proxy(self):
+    def test02_game_method(self):
         game_id = 100
         for action in self.service.ACTIONS:
             getattr(self.service, action)
-        #
-        # checks if the required arguments are present
-        #
-        caught = False
-        try:
-            self.service.game_proxy({'action': 'participate'})
-        except UserWarning, e:
-            caught = True
-            self.failUnlessSubstring('must be given a game_id', e.args[0])
-        self.assertTrue(caught)
         #
         # checks if the game actually exists
         #
         caught = False
         try:
-            self.service.game_proxy({'game_id': [game_id]})
+            self.service.game_method(game_id, 'participate', {'game_id': [game_id]})
         except UserWarning, e:
             caught = True
             self.failUnlessSubstring('does not exist', e.args[0])
@@ -212,8 +202,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
             def destroy(self):
                 pass
         self.service.games[game_id] = Game()
-        self.service.game_proxy({ 'action': ['participate'],
-                                  'game_id': [game_id] })
+        self.service.game_method(game_id, 'participate', {'game_id': [game_id] })
         self.assertTrue(self.service.games[game_id].participated)
         
     @defer.inlineCallbacks
@@ -806,6 +795,20 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
 
         game = self.service.games[game['game_id']]
         self.assertEquals(3600, game.get_countdown_duration())
+
+    @defer.inlineCallbacks
+    def test14_poll_destroyed_game(self):
+        game = yield self.service.create({ 'action': ['create'],
+                                           'card': [12],
+                                           'sentence': ['THE SENTENCE'],
+                                           'owner_id': [22] })
+        game_id = game['game_id']
+        self.service.games[game_id].destroy()
+        result = yield self.service.poll({ 'game_id': [game_id],
+                                           'action': ['poll'],
+                                           'type': ['game'],
+                                           'modified': [1231] })
+        self.assertTrue(type(result['modified'][0]) is long)
 
 
 def Run():
