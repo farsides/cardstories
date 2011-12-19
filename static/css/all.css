@@ -833,21 +833,30 @@
     background-image: url('images/master_seat_lose.png');
 }
 
-.cardstories_master_seat .cardstories_master_name {
+.cardstories_master_seat .cardstories_master_name,
+.cardstories_master_seat .cardstories_master_status {
     width: 65px;
     height: 40px;
-    top: 30px;
-    left: 65px;
     position: absolute;
     font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
     font-size: 10pt;
-    color: #4D4D4F;
     text-align: center;
-	z-index: 10;
+}
+
+.cardstories_master_seat .cardstories_master_name {
+    top: 30px;
+    left: 63px;
+    color: #4D4D4F;
 }
 
 .cardstories_master_seat.cardstories_master_seat_won .cardstories_master_name,
 .cardstories_master_seat.cardstories_master_seat_lost .cardstories_master_name {
+    color: #e5e5e5;
+}
+
+.cardstories_master_seat .cardstories_master_status {
+    top: 47px;
+    left: 63px;
     color: #e5e5e5;
 }
 

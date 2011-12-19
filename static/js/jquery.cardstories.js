@@ -3544,13 +3544,13 @@
 
             q.queue('chain', function(next) {
                 var master_seat = $('.cardstories_master_seat', element);
-                var master_name = $('.cardstories_master_name', master_seat);
+                var master_status = $('.cardstories_master_status', master_seat);
                 if (players[0]['win'] === 'y') {
                     master_seat.addClass('cardstories_master_seat_won');
-                    master_name.html('WINS!');
+                    master_status.html('WINS!');
                 } else {
                     master_seat.addClass('cardstories_master_seat_lost');
-                    master_name.html('LOSES!');
+                    master_status.html('LOSES!');
                 }
                 next();
             });
