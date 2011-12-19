@@ -71,9 +71,9 @@ function setup() {
     $.cardstories.send_countdown_duration = cardstories_default_send_countdown_duration;
     $.cardstories.start_countdown = cardstories_default_start_countdown;
     $.cardstories.update_player_info_from_ws = function(player_id) { return; };
-    $.cardstories.get_player_info_by_id = function(player_id) { 
-    	return {'name': "Player " + player_id,
-    			 'avatar_url': player_id + '.jpg'} 
+    $.cardstories.get_player_info_by_id = function(player_id) {
+        return {'name': "Player " + player_id,
+                'avatar_url': player_id + '.jpg'}
     };
 }
 
@@ -266,10 +266,10 @@ test("display_master_info", 2, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_create', root);
     var player_info = {'name': 'Bogus Name',
-    				   'avatar_url': 'http://example.com/bogus_avatar.jpg'};
-    
+                       'avatar_url': 'http://example.com/bogus_avatar.jpg'};
+
     $.cardstories.display_master_info(player_info, element);
-    
+
     equal($('.cardstories_master_name', element).html(), player_info.name, 'Name was properly set.');
     equal($('.cardstories_master_seat .cardstories_avatar', element).attr('src'), player_info.avatar_url);
 });
@@ -278,10 +278,10 @@ test("display_player_info", 2, function() {
     var root = $('#qunit-fixture .cardstories');
     var seat = $('.cardstories_snippets .cardstories_player_seat', root);
     var player_info = {'name': 'Bogus Name Player',
-    				   'avatar_url': 'http://example.com/bogus_avatar_player.jpg'};
-    
+                       'avatar_url': 'http://example.com/bogus_avatar_player.jpg'};
+
     $.cardstories.display_player_info(player_info, seat);
-    
+
     equal($('.cardstories_player_name', seat).html(), player_info.name, 'Name was properly set.');
     equal($('.cardstories_avatar', seat).attr('src'), player_info.avatar_url);
 });
@@ -289,13 +289,13 @@ test("display_player_info", 2, function() {
 test("get_master_info", 2, function() {
     var game = {'owner_id': 1};
     var player_info = {'name': 'Bogus master name'};
-    
+
     var get_player_info_by_id_orig = $.cardstories.get_player_info_by_id;
     $.cardstories.get_player_info_by_id = function(player_id) {
-    	equal(player_id, game.owner_id);
-    	return player_info;
-    } 
-    
+        equal(player_id, game.owner_id);
+        return player_info;
+    }
+
     var result = $.cardstories.get_master_info(game);
     equal(result.name, player_info.name);
 
@@ -316,20 +316,20 @@ test("update_player_info_from_ws", 3, function() {
 
     var update_players_info_orig = $.cardstories.update_players_info;
     $.cardstories.update_players_info = function(data) {
-    	equal(data[0][player_id].name, player_info.name);
+        equal(data[0][player_id].name, player_info.name);
     }
-    
+
     $.cardstories.update_player_info_from_ws = cardstories_default_update_player_info_from_ws;
     $.cardstories.update_player_info_from_ws(player_id);
     $.cardstories.update_players_info = update_players_info_orig;
 });
 
 test("update_players_info", 1, function() {
-	var player_id = 4;
+    var player_id = 4;
     var player_info = {'name': 'Bogus master name updated'};
     var data = {'type': 'players_info'};
     data[player_id] = player_info;
-    
+
     $.cardstories.update_players_info([data]);
 
     $.cardstories.get_player_info_by_id = cardstories_default_get_player_info_by_id;
@@ -389,7 +389,7 @@ asyncTest("animate_progress_bar", 14, function() {
 asyncTest("animate_scale", 7, function() {
     var element = $('#qunit-fixture .cardstories .cardstories_create');
     var el = $('.cardstories_info', element);
-    
+
     // Grab initial position.
     element.show();
     el.show();
@@ -662,12 +662,12 @@ asyncTest("game", 5, function() {
         };
         options.success([game]);
     };
-    
+
     var update_players_info_orig = $.cardstories.update_players_info;
     $.cardstories.update_players_info = function(data) {
-    	equal(data[0].id, game_id);
+        equal(data[0].id, game_id);
     }
-    
+
     root.data('cardstories_modified', 0);
     $.cardstories.game(player_id, game_id, root);
 
@@ -717,7 +717,7 @@ test("automatic game creation", 2, function() {
         ok(false, 'game called');
     };
     $.cardstories.bootstrap(player_id, null, null, false, root);
-    
+
     // However, if game_id is set, create must not be called.
     $.cardstories.create = function(player_id, root) {
         ok(false, 'create called');
@@ -1048,7 +1048,7 @@ test("invitation_owner_confirm_only_when_not_all_players_picked", 2, function() 
         ok(false, 'invitation_owner_go_to_vote_animate called');
     };
     $.cardstories.invitation_owner_go_vote_confirm(player_id, game, element, root);
-    
+
     // Everyone picked a card - animate directly
     game.players[3]['picked'] = card4;
     $.cardstories.display_modal = function(modal, overlay) {
@@ -1058,7 +1058,7 @@ test("invitation_owner_confirm_only_when_not_all_players_picked", 2, function() 
         ok(true, 'invitation_owner_go_to_vote_animate called');
     };
     $.cardstories.invitation_owner_go_vote_confirm(player_id, game, element, root);
-    
+
     // Reset
     $.cardstories.invitation_owner_go_to_vote_animate = cardstories_invitation_owner_go_to_vote_animate;
     $.cardstories.display_modal = cardstories_display_modal;
@@ -1606,7 +1606,7 @@ test("invitation_display_board", 24, function() {
     equal($('.cardstories_player_seat_5', element).css('display'), 'none', 'Seat 5 is hidden');
 
     for(var i = 1; i <= 4; i++) {
-    	equal($('.cardstories_player_seat_' + i + ' .cardstories_player_name', element).text(), 'Player '+i);
+        equal($('.cardstories_player_seat_' + i + ' .cardstories_player_name', element).text(), 'Player '+i);
         equal($('.cardstories_player_seat_' + i + ' .cardstories_avatar', element).attr('src'), i+'.jpg', "player's " + i + " avatar is displayed");
     }
     ok($('.cardstories_player_seat_2', element).hasClass('cardstories_player_seat_self'), 'self is selected');
@@ -2045,7 +2045,7 @@ test("vote_display_board", 20, function() {
     var game = {
         'owner_id': 0,
         'board': [],
-        'players': [ 
+        'players': [
                     { 'id': owner_id, 'vote': null, 'win': null, 'picked': 1, 'cards': [] },
                     { 'id': player1, 'vote': null, 'win': null, 'picked': 2, 'cards': [] },
                     { 'id': player2, 'vote': null, 'win': null, 'picked': 3, 'cards': [] },
@@ -2213,7 +2213,7 @@ test("vote_owner_results_confirm_only_when_not_all_players_picked", 2, function(
         ok(false, 'vote_owner_results_animate called');
     };
     $.cardstories.vote_owner_results_confirm(player_id, game, element, root);
-    
+
     // Everyone voted - animate directly
     game.players[3]['vote'] = card3;
     $.cardstories.display_modal = function(modal, overlay) {
@@ -2223,7 +2223,7 @@ test("vote_owner_results_confirm_only_when_not_all_players_picked", 2, function(
         ok(true, 'vote_owner_results_animate called');
     };
     $.cardstories.vote_owner_results_confirm(player_id, game, element, root);
-    
+
     // Reset
     $.cardstories.vote_owner_results_animate = cardstories_vote_owner_results_animate;
     $.cardstories.display_modal = cardstories_display_modal;
@@ -2331,9 +2331,9 @@ test("complete", 34, function() {
         'winner_card': 30,
         'players': [ { 'id': owner_id, 'vote': null, 'win': 'y', 'picked': 30, 'cards': [] },
                      { 'id': player1, 'vote': 30, 'win': 'y', 'picked': 31, 'cards': [] },
-        			 { 'id': player2, 'vote': 34, 'win': 'n', 'picked': 32, 'cards': [] }, // Voted for the card of the non voting player
-        			 { 'id': player3, 'vote': 31, 'win': 'n', 'picked': 33, 'cards': [] },
-        			 { 'id': player4, 'vote': null, 'win': 'n', 'picked': 34, 'cards': [] } ]
+                     { 'id': player2, 'vote': 34, 'win': 'n', 'picked': 32, 'cards': [] }, // Voted for the card of the non voting player
+                     { 'id': player3, 'vote': 31, 'win': 'n', 'picked': 33, 'cards': [] },
+                     { 'id': player4, 'vote': null, 'win': 'n', 'picked': 34, 'cards': [] } ]
     };
 
     equal($('#qunit-fixture .cardstories_complete.cardstories_active').length, 0);
