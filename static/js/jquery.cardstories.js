@@ -4118,7 +4118,9 @@
             $(".cardstories_emailform", element).submit(function() {
                 var player_id = encodeURIComponent($('.cardstories_email', element).val());
                 $.cookie('CARDSTORIES_ID', player_id);
-                $this.game_or_create(player_id, game_id, root, 0);
+                $.when($this.update_player_info_from_ws(player_id)).done(function() {
+                    $this.game_or_create(player_id, game_id, root, 0);
+                });
                 return true;
             });
 
@@ -4148,23 +4150,22 @@
                 player_id = $.cookie('CARDSTORIES_ID');
             }
 
-            // Get player_info of the player
-            // Guarantees that we'll always have this information available,
-            // even when displaying a page without info from the server
-            $.when($this.update_player_info_from_ws(player_id)).done(function() {
+            // Bootstrap plugins.
+            $.each($this.plugins, function(i) {
+                if (this.init) {this.init(player_id, game_id, root);}
+            });
 
-                // Bootstrap plugins.
-                $.each($this.plugins, function(i) {
-                    if (this.init) {this.init(player_id, game_id, root);}
-                });
-
-                $this.preload_images_helper(root, function() {
-                    if(player_id === undefined || player_id === null || player_id === '') {
-                        $this.login(game_id, login_url, root);
-                    } else {
+            $this.preload_images_helper(root, function() {
+                if(player_id === undefined || player_id === null || player_id === '') {
+                    $this.login(game_id, login_url, root);
+                } else {
+                    // Get player_info of the player
+                    // Guarantees that we'll always have this information available,
+                    // even when displaying a page without info from the server
+                    $.when($this.update_player_info_from_ws(player_id)).done(function() {
                         $this.game_or_create(player_id, game_id, root);
-                    }
-                });
+                    });
+                }
             });
         },
 
