@@ -28,7 +28,7 @@
         location: location,
 
         plugins: {},
-        
+
         players_info: {},
 
         register_plugin: function(plugin) {
@@ -909,7 +909,7 @@
                         if (modified !== undefined && modified > 0) {
                             $(root).data('cardstories_modified', modified);
                         }
-                        
+
                         // Store players_info data first
                         $this.update_players_info(data);
 
@@ -1189,7 +1189,7 @@
                 this.display_modal(modal, overlay, cb);
             }
         },
- 
+
         invitation_owner_slots_helper: function(slots, player_id, game_id, element, root, cb) {
             var $this = this;
             var snippets = $('.cardstories_snippets', root);
@@ -1393,7 +1393,7 @@
 
                 $('.cardstories_go_vote_confirm_yes', modal).unbind('click').click(function() {
                     $this.close_modal(modal, overlay, function() {
-                    	$this.invitation_owner_go_to_vote_animate(player_id, game, element, root);
+                        $this.invitation_owner_go_to_vote_animate(player_id, game, element, root);
                     });
                 });
             } else {
@@ -1644,16 +1644,16 @@
             hand.hide();
 
             // What seat are we in?
-        	var seatno=0;
-        	for (var i=0; i < game.players.length; i++) {
-        		if (game.owner_id != game.players[i]['id']) {
-        			seatno++;
-        			if (player_id == game.players[i]['id']) {
-        				break;
-        			}
-        		}
-        	}
-        	
+            var seatno=0;
+            for (var i=0; i < game.players.length; i++) {
+                if (game.owner_id != game.players[i]['id']) {
+                    seatno++;
+                    if (player_id == game.players[i]['id']) {
+                        break;
+                    }
+                }
+            }
+
             var hand2dock_sprite = $('.cardstories_player_hand2dock_' + seatno, element);
             var overlay = $('.cardstories_modal_overlay', element);
             q.queue('stage2', function(next) {
@@ -1686,8 +1686,8 @@
                 $('.cardstories_player_status', slot).html('has picked a card!');
 
                 // Set last state of the sprite.
-				var x = -(6 * pick_sprite.width());
-				pick_sprite.css({'background-position': x + 'px 0px'});
+                var x = -(6 * pick_sprite.width());
+                pick_sprite.css({'background-position': x + 'px 0px'});
                 pick_sprite.show();
                 hand2dock_sprite.fadeOut('normal', next);
             });
@@ -1726,7 +1726,7 @@
             q.queue('chain', function(next) {
                 $this.create_pick_card_animate_fly_to_board(cards, element, root, next);
             });
-            
+
             // Dockify the cards, using the jqDock "trick" to get cards to overlap:
             // http://www.wizzud.com/jqDock/examples/example.php?f=jigsaw
             // Only expand the dock after it's been set up.
@@ -1928,7 +1928,7 @@
 
             // Move them in parallel.
             sentence.animate(sentence_pos, 500);
-            card.animate(card_pos, 500, cb); 
+            card.animate(card_pos, 500, cb);
         },
 
         invitation_pick_dock_helper: function(player_id, game, card_specs, element, cb) {
@@ -1957,16 +1957,16 @@
             container.hide();
 
             // What seat are we in?
-        	var seatno=0;
-        	for (var i=0; i < game.players.length; i++) {
-        		if (game.owner_id != game.players[i]['id']) {
-        			seatno++;
-        			if (player_id == game.players[i]['id']) {
-        				break;
-        			}
-        		}
-        	}
-        	
+            var seatno=0;
+            for (var i=0; i < game.players.length; i++) {
+                if (game.owner_id != game.players[i]['id']) {
+                    seatno++;
+                    if (player_id == game.players[i]['id']) {
+                        break;
+                    }
+                }
+            }
+
             var hand2dock_sprite = $('.cardstories_player_hand2dock_' + seatno, element);
             var pick_sprite = $('.cardstories_player_pick_' + seatno, element);
 
@@ -2021,7 +2021,7 @@
         },
 
         invitation_pick_wait: function(player_id, game, root) {
-        	var $this = this;
+            var $this = this;
             var element = $('.cardstories_invitation .cardstories_pick_wait', root);
             var deferred = $.Deferred();
             this.set_active(root, element, game, 'invitation_pick_wait');
@@ -2846,7 +2846,7 @@
                 q.queue('chain', function(next) {
                     $this.vote_flip_out(game, element, next);
                 });
-                
+
                 // Display cards.
                 q.queue('chain', function(next) {
                     $this.vote_display_or_select_cards(true, game.winner_card, game, element, root, next);
@@ -2893,7 +2893,7 @@
 
                 $('.cardstories_results_confirm_yes', modal).unbind('click').click(function() {
                     $this.close_modal(modal, overlay, function() {
-                    	$this.vote_owner_results_animate(player_id, game, element, root);
+                        $this.vote_owner_results_animate(player_id, game, element, root);
                     });
                 });
             } else {
@@ -3000,7 +3000,7 @@
         },
 
         vote_display_board: function(setup, player_id, game, element, root) {
-        	var $this = this;
+            var $this = this;
             var players = game.players;
             var snippets = $('.cardstories_snippets', root);
             var seat_snippet = $('.cardstories_player_seat', snippets);
@@ -3207,7 +3207,7 @@
                     cards.push($('.cardstories_card_' + slotno, element));
                 }
             }
-            
+
             // Always include the owner's card.
             cards.push($('.cardstories_card_6', element));
 
@@ -3266,7 +3266,7 @@
                     q.queue(cardq, function(next) {
                         slot.animate({'width': init_pos.width, 'left': init_pos.left}, 500, next);
                     });
-                } 
+                }
 
                 // If this card was picked by the player, show the label.
                 // If this card was voted for by the player, enlarge it.
@@ -3407,7 +3407,7 @@
         },
 
         complete_display_board: function(game, element, root) {
-        	var $this = this;
+            var $this = this;
             var players = game.players;
             var snippets = $('.cardstories_snippets', root);
             var seat_snippet = $('.cardstories_player_seat', snippets);
@@ -3672,7 +3672,7 @@
                     if (modified !== undefined && modified > 0) {
                         $(root).data('cardstories_modified', modified);
                     }
-                    
+
                     // Store players_info data first
                     $this.update_players_info(data);
 
@@ -3904,19 +3904,19 @@
             // Finally, store current step.
             dst_bar.data('step', step);
         },
-        
+
         update_players_info: function(request_data) {
-        	// Store extra information about individual players_id
-        	// using data found in a request answer from the webservice
-        	
-        	var $this = this;
-	        for(var i=0; i<request_data.length; i++) {
+            // Store extra information about individual players_id
+            // using data found in a request answer from the webservice
+
+            var $this = this;
+            for(var i=0; i<request_data.length; i++) {
                 if(request_data[i].type == 'players_info') {
-                	var players_info = request_data[i];
-			        for(var player_id in request_data[i]) {
-		        		var player_info = players_info[player_id];
-		        		$this.players_info[player_id] = player_info;
-		        	}
+                    var players_info = request_data[i];
+                    for(var player_id in request_data[i]) {
+                        var player_info = players_info[player_id];
+                        $this.players_info[player_id] = player_info;
+                    }
                 }
             }
         },
@@ -3933,8 +3933,8 @@
                 if('error' in data) {
                     $this.error(data.error);
                 } else {
-                	$this.update_players_info(data);
-                	deferred.resolve();
+                    $this.update_players_info(data);
+                    deferred.resolve();
                 }
             };
 
@@ -3953,24 +3953,24 @@
                 success: success,
                 error: $this.xhr_error
             });
-            
+
             return deferred.promise();
         },
-        
+
         get_master_info: function(game) {
-        	// Get the player_info of the game master of a provided game
-        	
-        	var $this = this;
-        	
+            // Get the player_info of the game master of a provided game
+
+            var $this = this;
+
             var master_id = game.owner_id;
             var master_info = $this.get_player_info_by_id(master_id);
-            
+
             return master_info;
         },
 
         display_master_info: function(master_info, element) {
             // Display provided player_info on the game master box
-        	
+
             var master_name_dom = $('.cardstories_master_seat .cardstories_master_name', element);
             var master_name_dom_html = master_name_dom.html().supplant({'name': master_info.name});
             master_name_dom.html(master_name_dom_html);
@@ -3980,12 +3980,12 @@
         },
 
         display_player_info: function(player_info, slot) {
-        	// Displayer provided player_info in a player box
-            
-        	$('.cardstories_player_name', slot).html(player_info.name);
-        	$('.cardstories_avatar', slot).attr('src', player_info.avatar_url);
+            // Displayer provided player_info in a player box
+
+            $('.cardstories_player_name', slot).html(player_info.name);
+            $('.cardstories_avatar', slot).attr('src', player_info.avatar_url);
         },
-        
+
         display_modal: function(modal, overlay, cb, cb_on_close) {
             if (modal.is(':visible')) {
                 if (cb !== undefined) {
@@ -4147,24 +4147,24 @@
             if(player_id === undefined || player_id === null || player_id === '') {
                 player_id = $.cookie('CARDSTORIES_ID');
             }
-            
+
             // Get player_info of the player
             // Guarantees that we'll always have this information available,
             // even when displaying a page without info from the server
             $.when($this.update_player_info_from_ws(player_id)).done(function() {
 
-	            // Bootstrap plugins.
-	            $.each($this.plugins, function(i) {
-	                if (this.init) {this.init(player_id, game_id, root);}
-	            });
-	
-	            $this.preload_images_helper(root, function() {
-	                if(player_id === undefined || player_id === null || player_id === '') {
-	                    $this.login(game_id, login_url, root);
-	                } else {
-	                    $this.game_or_create(player_id, game_id, root);
-	                }
-	            });
+                // Bootstrap plugins.
+                $.each($this.plugins, function(i) {
+                    if (this.init) {this.init(player_id, game_id, root);}
+                });
+
+                $this.preload_images_helper(root, function() {
+                    if(player_id === undefined || player_id === null || player_id === '') {
+                        $this.login(game_id, login_url, root);
+                    } else {
+                        $this.game_or_create(player_id, game_id, root);
+                    }
+                });
             });
         },
 

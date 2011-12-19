@@ -87,7 +87,7 @@
                 var root_data = $(root).data('cardstories_chat');
                 for (var i=0; i < data.messages.length; i++) {
                     var message = data.messages[i];
-                   	var player_info = $.cardstories.get_player_info_by_id(message.player_id);
+                    var player_info = $.cardstories.get_player_info_by_id(message.player_id);
                     var tvars = {};
                     if (message.type == 'chat') {
                         tvars = {
