@@ -22,7 +22,8 @@ from urllib import quote, urlencode, urlopen
 from urlparse import parse_qs
 
 from django.shortcuts import render_to_response
-from django.http import HttpResponse, HttpResponseNotFound
+from django.http import HttpResponse, HttpResponseNotFound, \
+    HttpResponseForbidden
 from django.http import HttpResponseBadRequest
 from django.contrib.sessions.models import Session
 from django.contrib.auth.models import User
@@ -277,6 +278,11 @@ def get_player_email(request, userid):
     Returns a user's email (= username) based on supplied id, if found.
     Returns 404 if not found.
     """
+    
+    # Only the webservice should be able to retreive a player's email
+    if request.META['REMOTE_ADDR'] != settings.WEBSERVICE_IP:
+        return HttpResponseForbidden()
+    
     try:
         user = User.objects.get(id=userid)
         return HttpResponse(user.username, mimetype="text/plain")

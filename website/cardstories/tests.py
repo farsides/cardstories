@@ -455,6 +455,14 @@ class CardstoriesTest(TestCase):
         url = "%s/%s/" % (base_url, "4")
         response = c.get(url)
         self.assertEqual(response.status_code, 404)
+        
+        # Make sure only the WS can request an email
+        default_webservice_ip = settings.WEBSERVICE_IP
+        settings.WEBSERVICE_IP = '127.0.0.2'
+        url = "%s/%s/" % (base_url, "1")
+        response = c.get(url)
+        self.assertEqual(response.status_code, 403)
+        settings.WEBSERVICE_IP = default_webservice_ip
 
         # Return proper email for pre-existing user.
         url = "%s/%s/" % (base_url, "1")
