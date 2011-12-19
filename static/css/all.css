@@ -614,7 +614,7 @@
 }
 
 .cardstories .cardstories_player_seat .cardstories_player_name {
-    height: 26px;
+    height: 28px;
     margin: 10px auto 10px auto;
 }
 
@@ -836,11 +836,12 @@
 .cardstories_master_seat .cardstories_master_name,
 .cardstories_master_seat .cardstories_master_status {
     width: 65px;
-    height: 40px;
+    height: 38px;
     position: absolute;
     font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
     font-size: 10pt;
     text-align: center;
+    overflow: hidden;
 }
 
 .cardstories_master_seat .cardstories_master_name {
@@ -852,6 +853,7 @@
 .cardstories_master_seat.cardstories_master_seat_won .cardstories_master_name,
 .cardstories_master_seat.cardstories_master_seat_lost .cardstories_master_name {
     color: #e5e5e5;
+    height: 20px;
 }
 
 .cardstories_master_seat .cardstories_master_status {

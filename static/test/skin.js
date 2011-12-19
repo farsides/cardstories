@@ -57,7 +57,7 @@
 
     // Don't try to resolve player info
     $.cardstories.get_player_info_by_id = function(player_id) { 
-    	return {'name': "Player " + player_id,
+    	return {'name': "Player " + player_id + " Long Last Nameeeeeeeeeee",
     		     'avatar_url': '/static/css/images/avatars/default/' + player_id % 6 + '.jpg' } 
     };
 	
