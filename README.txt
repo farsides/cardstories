@@ -26,7 +26,7 @@ on a recent installation of Ubuntu or Debian.
 
 First, install the following packages.
 
-$ sudo apt-get install python-twisted python-lxml python-django postfix python-requests python-imaging
+$ sudo apt-get install python-twisted python-lxml python-django postfix python-requests python-imaging python-simplejson
 
 Note that Django must be version 1.2.5 or greater, otherwise things will break
 in interesting ways.  If your distribution is too old (or too new), instead of
@@ -54,6 +54,22 @@ is recommended when running the above syncdb command to chose
 
 127.0.0.1 local.cardstories.org
 
+If for any reason you need to run the website dev server on a different host or
+port, these files that must be modified accordingly (and the cardstories web
+service restarted if it's already running):
+
+   * tests/djangoauth/djangoauth.xml
+   * tests/mail/mail.xml
+
+If the cardstories web service is not running on port 5000, make sure
+to change the CARDSTORIES_HOST parameter here, and restart the website server:
+
+   * website/settings.py
+
+Create the log folder: 
+
+    $ mkdir log/
+
 On one terminal window, run the cardstories web service.  Under default
 configuration, the following command assumes you have postfix configured
 properly for relaying emails sent to 'localhost' (otherwise invitations won't
@@ -77,18 +93,6 @@ However, for local Facebook redirection to work (which you set up above in
 $ sudo website/manage.py runserver 0.0.0.0:80
 
 Now simply access http://local.cardstories.org/, and code away!
-
-If for any reason you need to run the website dev server on a different host or
-port, these files that must be modified accordingly, and the cardstories web
-service restarted:
-
-   * tests/djangoauth/djangoauth.xml
-   * tests/mail/mail.xml
-
-Finally, if the cardstories web service is not running on port 5000, make sure
-to change the CARDSTORIES_HOST parameter here, and restart the website server:
-
-   * website/settings.py
 
 
 ###########################
