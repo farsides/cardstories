@@ -1374,15 +1374,15 @@
             var overlay = $('.cardstories_modal_overlay', element);
 
             // Keep track of players who haven't picked a card yet
-            var not_ready = new Array();
+            var players_not_ready = 0;
             for(i=0; i<game.players.length; i++) {
                 if(game.players[i]['picked'] === null) {
-                    not_ready.push(i);
+                    players_not_ready += 1;
                 }
             }
 
             // If some players haven't picked a card, ask the GM to confirm
-            if(not_ready.length > 0) {
+            if(players_not_ready > 0) {
                 $this.display_modal(modal, overlay);
 
                 $('.cardstories_go_vote_confirm_no', modal).unbind('click').click(function() {
@@ -1392,7 +1392,9 @@
                 });
 
                 $('.cardstories_go_vote_confirm_yes', modal).unbind('click').click(function() {
-                    $this.close_modal(modal, overlay, $this.invitation_owner_go_to_vote_animate, player_id, game, element, root);
+                    $this.close_modal(modal, overlay, function() {
+                    	$this.invitation_owner_go_to_vote_animate(player_id, game, element, root);
+                    });
                 });
             } else {
                 $this.invitation_owner_go_to_vote_animate(player_id, game, element, root);
@@ -2872,15 +2874,15 @@
             var overlay = $('.cardstories_modal_overlay', element);
 
             // Keep track of players who haven't voted yet
-            var not_ready = new Array();
+            var players_not_ready = 0;
             for(i=0; i<game.players.length; i++) {
                 if(game.players[i]['vote'] === null) {
-                    not_ready.push(i);
+                    players_not_ready += 1;
                 }
             }
 
             // If some players haven't picked a card, ask the GM to confirm
-            if(not_ready.length > 1) { // The GM doesn't vote
+            if(players_not_ready > 1) { // The GM doesn't vote
                 this.display_modal(modal, overlay);
 
                 $('.cardstories_results_confirm_no', modal).unbind('click').click(function() {
@@ -2890,7 +2892,9 @@
                 });
 
                 $('.cardstories_results_confirm_yes', modal).unbind('click').click(function() {
-                    $this.close_modal(modal, overlay, $this.vote_owner_results_animate, player_id, game, element, root);
+                    $this.close_modal(modal, overlay, function() {
+                    	$this.vote_owner_results_animate(player_id, game, element, root);
+                    });
                 });
             } else {
                 $this.vote_owner_results_animate(player_id, game, element, root);
@@ -4010,15 +4014,11 @@
             });
         },
 
-        close_modal: function(modal, overlay, cb, player_id, game, element, root) {
+        close_modal: function(modal, overlay, cb) {
             this.animate_scale(true, 5, 500, modal, function() {
                 overlay.hide();
                 if (cb !== undefined) {
-                    if(player_id !== undefined && game !== undefined && element !== undefined && root !== undefined) {
-                        cb(player_id, game, element, root);
-                    } else {
-                        cb();
-                    }
+                    cb();
                 }
             });
         },
