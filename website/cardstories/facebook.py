@@ -49,7 +49,6 @@ class GraphAPI(object):
 
         return response
 
-
 class GraphAPIError(Exception):
     def __init__(self, code, message):
         Exception.__init__(self, message)

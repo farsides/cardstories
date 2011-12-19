@@ -29,6 +29,8 @@ from cardstories.auth import Auth
 class Plugin(Auth):
 
     def __init__(self, service, plugins):
+        self.nb_local_avatars = 6
+        
         dirname = os.path.join(service.settings['plugins-libdir'], self.name())
         self.database = os.path.join(dirname, 'auth.sqlite')
         exists = os.path.exists(self.database)
@@ -71,6 +73,14 @@ class Plugin(Auth):
 
     def get_player_name(self, id):
         return "Player " + str(id)
+
+    def get_player_avatar_url(self, id):
+        '''Allow to use offline by chosing one of the available local avatar images'''
+        
+        avatar_id = int(id) % self.nb_local_avatars
+        avatar_url = '/static/css/images/avatars/default/%d.jpg' % avatar_id
+        
+        return avatar_url
 
     def authenticate(self, request, requested_player_id):
         # Unsecure/test auth - do not authenticate anything

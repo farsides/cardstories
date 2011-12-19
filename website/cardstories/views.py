@@ -23,7 +23,7 @@ from urlparse import parse_qs
 
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseNotFound
-from django.http import HttpResponseBadRequest, HttpResponseRedirect
+from django.http import HttpResponseBadRequest
 from django.contrib.sessions.models import Session
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
@@ -36,6 +36,8 @@ from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
 
 from forms import RegistrationForm, LoginForm
+
+from avatar import Avatar, GravatarAvatar, FacebookAvatar
 
 def get_gameid_query(request):
     query = ''
@@ -124,6 +126,8 @@ def register(request):
             auth_user = authenticate(username=username, password=password)
             auth_login(request, auth_user)
 
+            GravatarAvatar(auth_user).update()
+            
             # The user was just created.
             request.session['create'] = True
 
@@ -148,12 +152,12 @@ def login(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
-            username = form.cleaned_data['username']
-
             # At this point, the user has already been authenticated by form
             # validation (which simplifies user feedback on login errors).
             auth_login(request, form.auth_user)
-
+            
+            GravatarAvatar(form.auth_user).update()
+            
             # Redirect maintaining game_id, if set.
             url = '%s%s' % (reverse(welcome), get_gameid_query(request))
             return redirect(url);
@@ -196,6 +200,8 @@ def facebook(request):
                 if user and user.is_active:
                     auth_login(request, user)
 
+                    FacebookAvatar(user).update()
+                    
                     # Signal that the user was created
                     request.session['create'] = True
 
@@ -274,6 +280,23 @@ def get_player_email(request, userid):
     try:
         user = User.objects.get(id=userid)
         return HttpResponse(user.username, mimetype="text/plain")
+    except User.DoesNotExist:
+        return HttpResponseNotFound()
+
+def get_player_avatar_url(request, userid):
+    """
+    Returns a user's avatar URL, and create/retreive it from gravatar if none yet
+    Returns 404 if the user is not found.
+    """
+    try:
+        user = User.objects.get(id=userid)
+        
+        avatar = Avatar(user)
+        if not avatar.in_cache():
+            avatar = GravatarAvatar(user)
+            avatar.update()
+        
+        return HttpResponse(avatar.get_url(), mimetype="text/plain")
     except User.DoesNotExist:
         return HttpResponseNotFound()
 

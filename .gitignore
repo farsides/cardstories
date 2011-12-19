@@ -17,3 +17,4 @@ _trial_temp*
 website/local_settings.py
 *.log
 log/*
+static/css/images/avatars/cache/*

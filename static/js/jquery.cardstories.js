@@ -1279,8 +1279,8 @@
                         delay_next = true;
                         slot_snippet.clone().children().appendTo(slot);
                         slot.addClass('cardstories_player_seat_joined');
-                        var player_info = $this.get_player_info_by_id(players[i]['id'])
-                        $('.cardstories_player_name', slot).html(player_info.name);
+                        var player_info = $this.get_player_info_by_id(players[i]['id']);
+                        $this.display_player_info(player_info, slot);
                         $('.cardstories_player_status', slot).html('joined the game!');
 
                         // Queue the animation. Create a new closure to save
@@ -2209,7 +2209,7 @@
                     if (seat.children().length == 0) {
                         seat_snippet.clone().children().appendTo(seat);
                         var player_info = $this.get_player_info_by_id(players[i]['id']);
-                        $('.cardstories_player_name', seat).html(player_info.name);
+                        $this.display_player_info(player_info, seat);
                         seat.show();
                     }
 
@@ -3010,7 +3010,7 @@
                         // Active player seat.
                         seat_snippet.clone().children().appendTo(seat);
                         var player_info = $this.get_player_info_by_id(players[i]['id']);
-                        $('.cardstories_player_name', seat).html(player_info.name);
+                        $this.display_player_info(player_info, seat);
                         seat.show();
                         $('.cardstories_player_arms_' + seatno, element).show();
 
@@ -3419,7 +3419,7 @@
                         seat_snippet.clone().children().appendTo(seat);
                         seat.addClass('cardstories_player_seat_joined');
                         var player_info = $this.get_player_info_by_id(players[i]['id']);
-                        $('.cardstories_player_name', seat).html(player_info.name);
+                        $this.display_player_info(player_info, seat);
                         seat.show();
                         $('.cardstories_player_arms_' + seatno, element).show();
 
@@ -3970,8 +3970,18 @@
             var master_name_dom = $('.cardstories_master_seat .cardstories_master_name', element);
             var master_name_dom_html = master_name_dom.html().supplant({'name': master_info.name});
             master_name_dom.html(master_name_dom_html);
+
+            var master_avatar_dom = $('.cardstories_master_seat .cardstories_avatar', element);
+            master_avatar_dom.attr('src', master_info.avatar_url);
         },
 
+        display_player_info: function(player_info, slot) {
+        	// Displayer provided player_info in a player box
+            
+        	$('.cardstories_player_name', slot).html(player_info.name);
+        	$('.cardstories_avatar', slot).attr('src', player_info.avatar_url);
+        },
+        
         display_modal: function(modal, overlay, cb, cb_on_close) {
             if (modal.is(':visible')) {
                 if (cb !== undefined) {

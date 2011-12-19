@@ -41,6 +41,7 @@ class Plugin(Auth):
         self.getPage = client.getPage
         self.id2name = {}
         self.id2email = {}
+        self.id2avatar_url = {}
         self.email2id = {}
         log.msg('plugin djangoauth initialized')
 
@@ -80,6 +81,16 @@ class Plugin(Auth):
             email = yield self.getPage("http://%s/get_player_email/%s/" % (self.host, str(id)))
             self.id2email[id] = email
         defer.returnValue(email)
+
+    @defer.inlineCallbacks
+    def get_player_avatar_url(self, id):
+        # Use cache if available
+        if id in self.id2avatar_url:
+            avatar_url = self.id2avatar_url[id]
+        else:
+            avatar_url = yield self.getPage("http://%s/get_player_avatar_url/%s/" % (self.host, str(id)))
+            self.id2avatar_url[id] = avatar_url
+        defer.returnValue(avatar_url)
 
     @defer.inlineCallbacks
     def authenticate(self, request, requested_player_id):

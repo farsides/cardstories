@@ -40,14 +40,17 @@ class FacebookBackend(ModelBackend):
             if created:
                 user.set_unusable_password()
                 user.email = me['email']
-                if me.get('name'):
-                    user.first_name = me['name']
-                user.save()
+                
+            # Data can change on Facebook, or the user can have logged in
+            # without Facebook before
+            if me.get('name'):
+                user.first_name = me['name']
+            user.save()
 
-                # Also save the user's Facebook id to the custom profile.
-                profile = user.get_profile()
-                profile.facebook_id = me['id']
-                profile.save()
+            # Also save the user's Facebook id to the custom profile.
+            profile = user.get_profile()
+            profile.facebook_id = me['id']
+            profile.save()
 
             return user
 

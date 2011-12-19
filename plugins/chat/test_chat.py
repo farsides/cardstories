@@ -71,7 +71,7 @@ class ChatTest(unittest.TestCase):
                                            'sentence': [sentence],
                                            'owner_id': [owner_id]})
         self.player1 = 16
-        for player_id in ( self.player1, 17 ):
+        for player_id in (self.player1, 17):
             yield self.service.participate({ 'action': ['participate'],
                                              'player_id': [player_id],
                                              'game_id': [game['game_id']] })
@@ -113,7 +113,7 @@ class ChatTest(unittest.TestCase):
         yield self.complete_game()
         # run the preprocess method and make sure it does not affect anything during a normal 'game' event
         result_in = 'RESULT'
-        result_out = yield chat_instance.preprocess(result_in, Request(action = ['game']))
+        result_out = yield chat_instance.preprocess(result_in, Request(action=['game']))
         self.assertEquals(result_in, result_out)
 
     @defer.inlineCallbacks
@@ -124,7 +124,7 @@ class ChatTest(unittest.TestCase):
         player_id = 200
         sentence = "This is my sentence!"
         now = int(runtime.seconds() * 1000)
-        request = Request(action = ['message'], player_id = [player_id], sentence=[sentence])
+        request = Request(action=['message'], player_id=[player_id], sentence=[sentence])
         # verify we have no messages yet
         self.assertEquals(len(chat_instance.messages), 0)
         # run the request
@@ -152,12 +152,13 @@ class ChatTest(unittest.TestCase):
         player_id = 200
         sentence = "This is my sentence!"
         now = int(runtime.seconds() * 1000)
-        request = Request(action = ['message'], player_id = [player_id], sentence=[sentence])
+        request = Request(action=['message'], player_id=[player_id], sentence=[sentence])
         # run the request
         result = yield chat_instance.preprocess(True, request)
         # check to make sure no message is returned if we ask for now or later
-        state, players_id_list = yield chat_instance.state({"modified": [now]})
+        state, players_id_list = yield chat_instance.state({"modified": [now + 1]})
         self.assertTrue(state.has_key('messages'))
+        print state['messages']
         self.assertEquals(len(state['messages']), 0)
         self.assertEquals(players_id_list, [])
     
@@ -169,7 +170,7 @@ class ChatTest(unittest.TestCase):
         player_id = 200
         sentence = "This is my sentence!"
         now = int(runtime.seconds() * 1000)
-        request = Request(action = ['message'], player_id = [player_id], sentence=[sentence])
+        request = Request(action=['message'], player_id=[player_id], sentence=[sentence])
         # run the request
         result = yield chat_instance.preprocess(True, request)
         # check to make sure no message is returned if we ask for now or later
@@ -189,7 +190,7 @@ class ChatTest(unittest.TestCase):
         when = []
         for i in range(3):
             when.append(int(runtime.seconds() * 1000))
-            request = Request(action = ['message'], player_id = [player_ids[i]], sentence=[sentences[i]])
+            request = Request(action=['message'], player_id=[player_ids[i]], sentence=[sentences[i]])
             # run the request
             result = yield chat_instance.preprocess(True, request)
         # check to make sure no message is returned if we ask for now or later
@@ -212,7 +213,7 @@ class ChatTest(unittest.TestCase):
         for i in range(3):
             sleep(0.1)
             when.append(int(runtime.seconds() * 1000))
-            request = Request(action = ['message'], player_id = [player_ids[i]], sentence=[sentences[i]])
+            request = Request(action=['message'], player_id=[player_ids[i]], sentence=[sentences[i]])
             # run the request
             result = yield chat_instance.preprocess(True, request)
         # check to make sure no message is returned if we ask for now or later
@@ -245,7 +246,7 @@ class ChatTest(unittest.TestCase):
         # make sure our flag is false before we run
         self.assertFalse(self.called)
         # run the test request
-        request = Request(action = ['message'], player_id = [player_id], sentence=[sentence])
+        request = Request(action=['message'], player_id=[player_id], sentence=[sentence])
         result = yield chat_instance.preprocess(True, request)
         yield d
         # make sure the flag is now set after we've run the test
@@ -285,7 +286,7 @@ class ChatTest(unittest.TestCase):
         # The sentence is a 'str' object. Create it by encoding a unicode string.
         unicode_sentence = u"你好 Matjaž Gregorič"
         sentence_bytes = unicode_sentence.encode('utf-8')
-        request = Request(action = ['message'], player_id = [player_id], sentence=[sentence_bytes])
+        request = Request(action=['message'], player_id=[player_id], sentence=[sentence_bytes])
         # run the request
         result = yield chat_instance.preprocess(True, request)
         # check that the message has been recorded in log file
@@ -319,7 +320,7 @@ class ChatTest(unittest.TestCase):
         player_id = 201
         naughty_sentence = '<script>alert("haha!")</script>'
         now = int(runtime.seconds() * 1000)
-        request = Request(action = ['message'], player_id = [player_id], sentence=[naughty_sentence])
+        request = Request(action=['message'], player_id=[player_id], sentence=[naughty_sentence])
         # run the request
         result = yield chat_instance.preprocess(True, request)
         # check to make sure our naughty message is returned properly escaped

@@ -74,6 +74,11 @@ class Auth:
 
         raise NotImplementedError(NOT_IMPLEMENTED_ERROR_MSG)
 
+    def get_player_avatar_url(self, player_id):
+        '''Returns the avatar corresponding to the provided player_id'''
+
+        raise NotImplementedError(NOT_IMPLEMENTED_ERROR_MSG)
+
     @defer.inlineCallbacks
     def get_players_ids(self, emails, create=False):
         '''Returns a list of player_id corresponding to the provided list of emails
@@ -105,6 +110,15 @@ class Auth:
             name = yield self.get_player_name(id)
             names.append(name)
         defer.returnValue(names)
+        
+    @defer.inlineCallbacks
+    def get_players_avatars_urls(self, ids):
+        '''Returns a list of avatar URLs, corresponding to the provided player_ids'''
+        avatars_urls = []
+        for id in ids:
+            avatar_url = yield self.get_player_avatar_url(id)
+            avatars_urls.append(avatar_url)
+        defer.returnValue(avatars_urls)
 
     @defer.inlineCallbacks
     def preprocess(self, result, request):
