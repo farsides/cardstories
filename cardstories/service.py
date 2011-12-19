@@ -33,7 +33,7 @@ from cardstories.poll import pollable
 from cardstories.auth import Auth
 
 class CardstoriesPlayer(pollable):
-    
+
     def __init__(self, service, id):
         self.service = service
         self.settings = service.settings
@@ -92,7 +92,7 @@ class CardstoriesService(service.Service):
         db.close()
         self.db = adbapi.ConnectionPool("sqlite3", database=database, cp_noisy=True)
         self.notify({'type': 'start'})
-        
+
     @defer.inlineCallbacks
     def stopService(self):
         yield self.notify({'type': 'stop'})
@@ -106,16 +106,16 @@ class CardstoriesService(service.Service):
 
     def create_base(self, c):
         c.execute(
-            "CREATE TABLE games ( " 
+            "CREATE TABLE games ( "
             "  id INTEGER PRIMARY KEY, "
-            "  owner_id INTEGER, " 
+            "  owner_id INTEGER, "
             "  players INTEGER DEFAULT 1, "
             "  sentence TEXT, "
-            "  cards VARCHAR(%d), " % CardstoriesGame.NCARDS + 
-            "  board VARCHAR(%d), " % CardstoriesGame.NPLAYERS + 
+            "  cards VARCHAR(%d), " % CardstoriesGame.NCARDS +
+            "  board VARCHAR(%d), " % CardstoriesGame.NPLAYERS +
             "  state VARCHAR(8) DEFAULT 'invitation', " + # invitation, vote, complete
-            "  created DATETIME, " 
-            "  completed DATETIME" 
+            "  created DATETIME, "
+            "  completed DATETIME"
             "); ")
         c.execute(
             "CREATE INDEX games_idx ON games (id); "
@@ -124,10 +124,10 @@ class CardstoriesService(service.Service):
             "CREATE TABLE player2game ( "
             "  serial INTEGER PRIMARY KEY, "
             "  player_id INTEGER, "
-            "  game_id INTEGER, " 
-            "  cards VARCHAR(%d), " % CardstoriesGame.CARDS_PER_PLAYER + 
-            "  picked CHAR(1), " 
-            "  vote CHAR(1), " 
+            "  game_id INTEGER, "
+            "  cards VARCHAR(%d), " % CardstoriesGame.CARDS_PER_PLAYER +
+            "  picked CHAR(1), "
+            "  vote CHAR(1), "
             "  win CHAR(1) DEFAULT 'n' "
             "); ")
         c.execute(
@@ -136,7 +136,7 @@ class CardstoriesService(service.Service):
         c.execute(
             "CREATE TABLE invitations ( "
             "  player_id INTEGER, "
-            "  game_id INTEGER" 
+            "  game_id INTEGER"
             "); ")
         c.execute(
             "CREATE UNIQUE INDEX invitations_idx ON invitations (player_id, game_id); "
@@ -155,7 +155,10 @@ class CardstoriesService(service.Service):
         if 'game' in args['type']:
             game_id = self.required_game_id(args)
             if not self.games.has_key(game_id):
-                # This means the game has been deleted, so just return the poll immediately.
+                # This means the game has been deleted from memory - probably because
+                # it has been completed. The client doesn't seem to be aware of this yet,
+                # so just return the poll immediately to let the client know the state
+                # has changed.
                 return defer.succeed({ 'game_id': [game_id],
                                        'modified': [int(runtime.seconds() * 1000)] })
             else:
@@ -187,7 +190,7 @@ class CardstoriesService(service.Service):
         '''Process requests to retreive player_info for a player_id'''
 
         self.required(args, 'player_info', 'player_id')
-        
+
         players_info = {'type': 'players_info'}
         yield self.update_players_info(players_info, args['player_id'])
         defer.returnValue([players_info])
@@ -282,7 +285,7 @@ class CardstoriesService(service.Service):
         for player_id in game.get_players():
             if self.players.has_key(player_id):
                 yield self.players[player_id].touch(args)
-        # 
+        #
         # the functions being notified must not change the game state
         # because the behavior in this case is undefined
         #
@@ -388,7 +391,7 @@ class CardstoriesService(service.Service):
             player_ids = yield self.auth.get_players_ids(args['invited_email'], create=True)
         else:
             player_ids = []
-            
+
         if args.has_key('player_id'):
             player_ids += args['player_id']
 
@@ -405,16 +408,16 @@ class CardstoriesService(service.Service):
     @defer.inlineCallbacks
     def lobby(self, args):
         self.required(args, 'lobby', 'player_id', 'in_progress')
-        
+
         player_id = args['player_id'][0]
         players_info = [player_id] # Only the current player is referenced by lobby
-        
+
         if args['in_progress'][0] == 'true':
             complete = 'state != "complete" AND state != "canceled"'
         else:
             complete = 'state = "complete"'
         order = " ORDER BY created DESC"
-        
+
         if args.has_key('my') and args['my'][0] == 'true':
             modified = self.get_or_create_player(player_id).get_modified()
             sql = ""
@@ -428,7 +431,7 @@ class CardstoriesService(service.Service):
             sql = "SELECT id, sentence, state, owner_id = ?, created FROM games WHERE " + complete
             sql += order
             games = yield self.db.runQuery(sql, [ player_id ])
-        
+
         sql = "SELECT id, win FROM games, player2game WHERE player2game.player_id = ? AND " + complete + " AND games.id = player2game.game_id"
         rows = yield self.db.runQuery(sql, [ player_id ])
         wins = {}
