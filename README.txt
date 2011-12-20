@@ -26,7 +26,7 @@ on a recent installation of Ubuntu or Debian.
 
 First, install the following packages.
 
-$ sudo apt-get install python-twisted python-lxml python-django postfix
+$ sudo apt-get install python-twisted python-lxml python-django postfix python-simplejson
 
 Note that Django must be version 1.2.5 or greater, otherwise things will break
 in interesting ways.  If your distribution is too old (or too new), instead of

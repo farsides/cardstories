@@ -21,6 +21,8 @@ from lxml import objectify
 from twisted.python import runtime, log
 from twisted.internet import defer, reactor
 
+from django.utils.html import urlize
+
 from cardstories.poll import pollable
 
 # How long we retain old messages for in milliseconds
@@ -145,6 +147,11 @@ class Plugin(pollable):
             sentence = request.args['sentence'][0].decode('utf8')
             # Escape HTML characters.
             sentence = cgi.escape(sentence)
+            
+            # Make links from urls
+            sentence = urlize(sentence,None)
+            # Add target=_blank to links, so that they does not open in the same window/tab
+            sentence = sentence.replace('<a ', '<a target="_blank" ')
 
             # Build the message.
             message = {'type': 'chat',
