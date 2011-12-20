@@ -73,7 +73,7 @@ function setup() {
     $.cardstories.update_player_info_from_ws = function(player_id) { return; };
     $.cardstories.get_player_info_by_id = function(player_id) {
         return {'name': "Player " + player_id,
-                'avatar_url': player_id + '.jpg'}
+                'avatar_url': '/static/css/images/avatars/default/' + player_id % 6 + '.jpg'}
     };
 }
 
@@ -478,7 +478,7 @@ asyncTest("animate_sprite", 3, function() {
 });
 
 test("subscribe", 5, function() {
-    var player_id = 'player@test.com';
+    var player_id = 2;
     var game_id;
     $.cookie('CARDSTORIES_ID', null);
     equal($('#qunit-fixture .cardstories_subscribe.cardstories_active').length, 0);
@@ -689,7 +689,7 @@ test("game on error", 1, function() {
 
 test("image preloading fires on bootstrap", 2, function() {
     var root = $('#qunit-fixture .cardstories');
-    var player_id = 'player1';
+    var player_id = 1;
     var game_id = 112;
 
     $.cardstories.update_player_info_from_ws = function() {};
@@ -703,7 +703,7 @@ test("image preloading fires on bootstrap", 2, function() {
 
 test("automatic game creation", 2, function() {
     var root = $('#qunit-fixture .cardstories');
-    var player_id = 'player1';
+    var player_id = 1;
     var game_id = 112;
 
     var cardstories_create = $.cardstories.create;
@@ -734,7 +734,7 @@ test("automatic game creation", 2, function() {
 
 test("create new game button", 3, function() {
     var root = $('#qunit-fixture .cardstories');
-    var player_id = 'player1';
+    var player_id = 1;
 
     $.cardstories.reload = function(_player_id, _game_id, _root) {
         equal(_player_id, player_id);
@@ -1424,9 +1424,9 @@ asyncTest("invitation_pick_wait", 26, function() {
         equal(seat1.find('.cardstories_player_name').text(), 'Player '+player_id, "player's id is displayed");
         equal(seat2.find('.cardstories_player_name').text(), 'Player '+player2_id, "player2's id is displayed");
         equal(seat3.find('.cardstories_player_name').text(), 'Player '+player3_id, "player3's id is displayed");
-        equal(seat1.find('.cardstories_avatar').attr('src'), player_id+'.jpg', "player's avatar is displayed");
-        equal(seat2.find('.cardstories_avatar').attr('src'), player2_id+'.jpg', "player2's avatar is displayed");
-        equal(seat3.find('.cardstories_avatar').attr('src'), player3_id+'.jpg', "player3's avatar is displayed");
+        equal(seat1.find('.cardstories_avatar').attr('src'), '/static/css/images/avatars/default/' + player_id+'.jpg', "player's avatar is displayed");
+        equal(seat2.find('.cardstories_avatar').attr('src'), '/static/css/images/avatars/default/' + player2_id+'.jpg', "player2's avatar is displayed");
+        equal(seat3.find('.cardstories_avatar').attr('src'), '/static/css/images/avatars/default/' + player3_id+'.jpg', "player3's avatar is displayed");
         var src_template = $('.cardstories_card_foreground', pick1).metadata({type: 'attr', name: 'data'}).card;
         equal($('.cardstories_card_foreground', pick1).attr('src'), src_template.supplant({card: picked}), "current player's card is displayed");
         ok(!seat2.hasClass('cardstories_player_seat_waiting'), 'player2 is not in waiting state since he has not picked a card yet');
@@ -1593,7 +1593,7 @@ test("invitation_display_board", 24, function() {
     equal($('.cardstories_sentence', element).first().text(), sentence);
     for(var i = 1; i <= 4; i++) {
         equal($('.cardstories_player_seat_' + i + ' .cardstories_player_name', element).text(), 'Player ' + i);
-        equal($('.cardstories_player_seat_' + i + ' .cardstories_avatar', element).attr('src'), i+'.jpg', "player's " + i + " avatar is displayed");
+        equal($('.cardstories_player_seat_' + i + ' .cardstories_avatar', element).attr('src'), '/static/css/images/avatars/default/' + i + '.jpg', "player's " + i + " avatar is displayed");
     }
 
     // Player view
@@ -1607,7 +1607,7 @@ test("invitation_display_board", 24, function() {
 
     for(var i = 1; i <= 4; i++) {
         equal($('.cardstories_player_seat_' + i + ' .cardstories_player_name', element).text(), 'Player '+i);
-        equal($('.cardstories_player_seat_' + i + ' .cardstories_avatar', element).attr('src'), i+'.jpg', "player's " + i + " avatar is displayed");
+        equal($('.cardstories_player_seat_' + i + ' .cardstories_avatar', element).attr('src'), '/static/css/images/avatars/default/' +i+'.jpg', "player's " + i + " avatar is displayed");
     }
     ok($('.cardstories_player_seat_2', element).hasClass('cardstories_player_seat_self'), 'self is selected');
     notEqual($('.cardstories_player_seat_2 .cardstories_player_status', element).html(), '', 'self status is set');
@@ -1733,9 +1733,9 @@ asyncTest("vote_voter", 31, function() {
         equal(seat1.find('.cardstories_player_name').text(), 'Player '+player_id, "player's id is displayed");
         equal(seat2.find('.cardstories_player_name').text(), 'Player '+player2_id, "player2's id is displayed");
         equal(seat3.find('.cardstories_player_name').text(), 'Player '+player3_id, "player3's id is displayed");
-        equal(seat1.find('.cardstories_avatar').attr('src'), player_id+'.jpg', "player's avatar is displayed");
-        equal(seat2.find('.cardstories_avatar').attr('src'), player2_id+'.jpg', "player2's avatar is displayed");
-        equal(seat3.find('.cardstories_avatar').attr('src'), player3_id+'.jpg', "player3's avatar is displayed");
+        equal(seat1.find('.cardstories_avatar').attr('src'), '/static/css/images/avatars/default/' + player_id+'.jpg', "player's avatar is displayed");
+        equal(seat2.find('.cardstories_avatar').attr('src'), '/static/css/images/avatars/default/' + player2_id+'.jpg', "player2's avatar is displayed");
+        equal(seat3.find('.cardstories_avatar').attr('src'), '/static/css/images/avatars/default/' + player3_id+'.jpg', "player3's avatar is displayed");
         var self_card = $('.cardstories_player_self_picked_card .cardstories_card_foreground', element);
         var src_template = self_card.metadata({type: 'attr', name: 'data'}).card;
         equal(self_card.attr('src'), src_template.supplant({card: picked}), "current player's card was displayed");
@@ -2062,9 +2062,9 @@ test("vote_display_board", 20, function() {
     equal($('.cardstories_player_seat_3 .cardstories_player_name', element).html(), 'Player '+player3, 'player 3 name is set');
     equal($('.cardstories_player_seat_4', element).css('display'), 'none', 'fourth slot is hidden');
     equal($('.cardstories_player_seat_5', element).css('display'), 'none', 'fifth slot is hidden');
-    equal($('.cardstories_player_seat_1 .cardstories_avatar').attr('src'), player1+'.jpg', "player's avatar is displayed");
-    equal($('.cardstories_player_seat_2 .cardstories_avatar').attr('src'), player2+'.jpg', "player2's avatar is displayed");
-    equal($('.cardstories_player_seat_3 .cardstories_avatar').attr('src'), player3+'.jpg', "player3's avatar is displayed");
+    equal($('.cardstories_player_seat_1 .cardstories_avatar').attr('src'), '/static/css/images/avatars/default/' + player1+'.jpg', "player's avatar is displayed");
+    equal($('.cardstories_player_seat_2 .cardstories_avatar').attr('src'), '/static/css/images/avatars/default/' + player2+'.jpg', "player2's avatar is displayed");
+    equal($('.cardstories_player_seat_3 .cardstories_avatar').attr('src'), '/static/css/images/avatars/default/' + player3+'.jpg', "player3's avatar is displayed");
     ok($('.cardstories_player_seat_1', element).hasClass('cardstories_player_seat_picking'), 'slot 1 is voting');
     ok($('.cardstories_player_seat_2', element).hasClass('cardstories_player_seat_picking'), 'slot 2 is voting');
     ok($('.cardstories_player_seat_3', element).hasClass('cardstories_player_seat_voted'), 'slot 3 has voted');
@@ -2348,9 +2348,9 @@ test("complete", 34, function() {
     equal($('.cardstories_player_seat_1 .cardstories_player_name', element).html(), 'Player '+player1, 'seat 1 name is set');
     equal($('.cardstories_player_seat_2 .cardstories_player_name', element).html(), 'Player '+player2, 'seat 2 name is set');
     equal($('.cardstories_player_seat_3 .cardstories_player_name', element).html(), 'Player '+player3, 'seat 3 name is set');
-    equal($('.cardstories_player_seat_1 .cardstories_avatar').attr('src'), player1+'.jpg', "player's avatar is displayed");
-    equal($('.cardstories_player_seat_2 .cardstories_avatar').attr('src'), player2+'.jpg', "player2's avatar is displayed");
-    equal($('.cardstories_player_seat_3 .cardstories_avatar').attr('src'), player3+'.jpg', "player3's avatar is displayed");
+    equal($('.cardstories_player_seat_1 .cardstories_avatar').attr('src'), '/static/css/images/avatars/default/' + player1+'.jpg', "player's avatar is displayed");
+    equal($('.cardstories_player_seat_2 .cardstories_avatar').attr('src'), '/static/css/images/avatars/default/' + player2+'.jpg', "player2's avatar is displayed");
+    equal($('.cardstories_player_seat_3 .cardstories_avatar').attr('src'), '/static/css/images/avatars/default/' + player3+'.jpg', "player3's avatar is displayed");
     notEqual($('.cardstories_player_seat_card_1', element).css('display'), 'none', 'card 1 is visible');
     notEqual($('.cardstories_player_seat_card_2', element).css('display'), 'none', 'card 2 is visible');
     notEqual($('.cardstories_player_seat_card_3', element).css('display'), 'none', 'card 3 is visible');
@@ -2398,7 +2398,7 @@ test("complete player didn't vote", 14, function() {
 
     notEqual($('.cardstories_player_seat_4', element).css('display'), 'none', 'seat 4 is visible');
     equal($('.cardstories_player_seat_4 .cardstories_player_name', element).html(), 'Player '+player4, 'seat 4 name is set');
-    equal($('.cardstories_player_seat_4 .cardstories_avatar').attr('src'), player4+'.jpg', "player4's avatar is displayed");
+    equal($('.cardstories_player_seat_4 .cardstories_avatar').attr('src'), '/static/css/images/avatars/default/' + player4+'.jpg', "player4's avatar is displayed");
     notEqual($('.cardstories_player_seat_card_4', element).css('display'), 'none', 'card 4 is visible');
     ok($('.cardstories_player_seat_4', element).hasClass('cardstories_player_seat_no_vote'), 'seat 4 did not vote');
     ok(!$('.cardstories_player_seat_4', element).hasClass('cardstories_player_seat_lost'), 'seat 4 did not lose');
@@ -2413,7 +2413,7 @@ test("complete player didn't vote", 14, function() {
 });
 
 test("play_again_finish_state author", 4, function() {
-    var player_id = 'The Owner';
+    var player_id = 0;
     var game_author = {
         'id': 7,
         'owner': true,
@@ -2440,7 +2440,7 @@ test("play_again_finish_state author", 4, function() {
 });
 
 test("play_again_finish_state player", 4, function() {
-    var player_id = 'The Player';
+    var player_id = 1;
     var game = {
         'id': 7,
         'owner': false,
