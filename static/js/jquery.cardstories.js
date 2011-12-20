@@ -51,6 +51,8 @@
             $this.log('XHR ERROR: ' + status + ' ' + error);
 
             if (error) {
+                // "abort" type errors aren't real errors, since they are caused
+                // by aborting the ajax request inside poll_discard, so just ignore them.
                 if (error !== 'abort') {
                     $this.error(error);
                 }

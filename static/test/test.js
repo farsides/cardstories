@@ -148,12 +148,13 @@ test("reload", 4, function() {
     $.cardstories.reload_link = reload_link;
 });
 
-asyncTest("xhr_error", 4, function() {
+asyncTest("xhr_error", 5, function() {
     // The log function is always called.
     var original_log = $.cardstories.log;
     $.cardstories.log = function(msg) { ok(msg.match('ERROR')); };
 
     // The error function is only called if the error (third argument) is present.
+    // But not if it equals "abort".
     $.cardstories.error = function(err) { equal(err, 'an xhr error occurred', 'calls $.cardstories.error'); };
 
     // The ajax request is retried only when the error (third argument) is NOT present.
@@ -162,8 +163,13 @@ asyncTest("xhr_error", 4, function() {
         start();
     };
 
+    // The error function will be called here, and request will not be retried.
     $.cardstories.xhr_error({ajax: 'request'}, 'error', 'an xhr error occurred');
+    // The error function will not be called, request will be retried in the backgorund.
     $.cardstories.xhr_error({ajax: 'request'}, 'timeout');
+    // None of the above will happen; the "error" will be ignored (although it will be logged).
+    $.cardstories.xhr_error({ajax: 'request'}, 'abort', 'abort');
+
     $.cardstories.log = original_log;
 });
 
