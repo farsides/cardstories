@@ -26,7 +26,7 @@ on a recent installation of Ubuntu or Debian.
 
 First, install the following packages.
 
-$ sudo apt-get install python-twisted python-lxml python-django postfix python-requests python-imaging python-simplejson
+$ sudo apt-get install python-twisted python-lxml python-django postfix python-imaging python-simplejson
 
 Note that Django must be version 1.2.5 or greater, otherwise things will break
 in interesting ways.  If your distribution is too old (or too new), instead of
@@ -35,10 +35,10 @@ python-django install python-pip and then use it to install Django:
 $ sudo apt-get install python-pip
 $ sudo pip install Django==1.2.5
 
-To run the tests, you will also need the Mock package 
-(http://www.voidspace.org.uk/python/mock/)
+You will also need the requests and Mock packages:
 
 $ sudo pip install mock==0.7.2
+$ sudo pip install requests==0.8.6
 
 Now, make sure you are at the root of the cardstories checkout.  At this point,
 create the default database structure for the website (an sqlite database will
