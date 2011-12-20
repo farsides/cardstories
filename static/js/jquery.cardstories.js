@@ -51,7 +51,9 @@
             $this.log('XHR ERROR: ' + status + ' ' + error);
 
             if (error) {
-                $this.error(error);
+                if (error !== 'abort') {
+                    $this.error(error);
+                }
             } else {
                 // Retry after 100 miliseconds.
                 $this.setTimeout(function() {
