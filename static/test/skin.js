@@ -55,19 +55,22 @@
                     };
     var game;
 
-    // Don't try to resolve names
-    $.cardstories.get_player_info_by_id = function(player_id) { return {'name': "Player " + player_id } };
+    // Don't try to resolve player info
+    $.cardstories.get_player_info_by_id = function(player_id) { 
+    	return {'name': "Player " + player_id + " Long Last Nameeeeeeeeeee",
+    		     'avatar_url': '/static/css/images/avatars/default/' + player_id % 6 + '.jpg' } 
+    };
 	
     if(skin == 'in_progress') {
-      $.cardstories.lobby_in_progress('PLAYER1', lobby, root);
+      $.cardstories.lobby_in_progress(1, lobby, root);
     } else if(skin == 'in_progress_one') {
-      $.cardstories.lobby_in_progress('PLAYER1', lobby_one, root);
+      $.cardstories.lobby_in_progress(1, lobby_one, root);
     } else if(skin == 'finished') {
-      $.cardstories.lobby_finished('PLAYER1', lobby, root);
+      $.cardstories.lobby_finished(1, lobby, root);
     } else if(skin == 'create_pick_card') {
-      $.cardstories.create_pick_card('Owner', root);
+      $.cardstories.create_pick_card(0, root);
     } else if(skin == 'create_write_sentence') {
-      $.cardstories.create_write_sentence('Owner', 5, root);
+      $.cardstories.create_write_sentence(0, 5, root);
     } else if(skin == 'invitation_owner') {
       game = {
         'id': 100,

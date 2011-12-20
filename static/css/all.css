@@ -561,35 +561,49 @@
     color: #E5E5E5;
 }
 
-.cardstories .cardstories_player_seat_joined {
+.cardstories .cardstories_player_seat .cardstories_avatar {
+    width: 52px;
+    height: 52px;
+    position: absolute;
+    left: 13px;
+    top: 8px;
+}
+
+.cardstories .cardstories_player_seat .cardstories_player_seat_box {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.cardstories .cardstories_player_seat_joined .cardstories_player_seat_box {
     background: transparent url('images/player_seat.png') no-repeat 7px 5px;
 }
 
-.cardstories .cardstories_player_seat_picking {
+.cardstories .cardstories_player_seat_picking .cardstories_player_seat_box {
     background: transparent url('images/player_seat_picking.png') no-repeat 7px 5px;
 }
 
-.cardstories .cardstories_player_seat_picked {
+.cardstories .cardstories_player_seat_picked .cardstories_player_seat_box {
     background: transparent url('images/player_seat_picked.png') no-repeat 7px 5px;
 }
 
-.cardstories .cardstories_player_seat_waiting {
+.cardstories .cardstories_player_seat_waiting .cardstories_player_seat_box {
     background: transparent url('images/player_seat_waiting.png') no-repeat 7px 5px;
 }
 
-.cardstories .cardstories_player_seat_voted {
+.cardstories .cardstories_player_seat_voted .cardstories_player_seat_box {
     background: transparent url('images/player_seat_voted.png') no-repeat 7px 5px;
 }
 
-.cardstories .cardstories_player_seat_lost {
+.cardstories .cardstories_player_seat_lost .cardstories_player_seat_box {
     background: transparent url('images/player_seat_loser.png') no-repeat 7px 5px;
 }
 
-.cardstories .cardstories_player_seat_won {
+.cardstories .cardstories_player_seat_won .cardstories_player_seat_box {
     background: transparent url('images/player_seat_winner.png') no-repeat 7px 5px;
 }
 
-.cardstories .cardstories_player_seat_self {
+.cardstories .cardstories_player_seat_self .cardstories_player_seat_box {
     background: transparent url('images/player_seat_self.png') no-repeat 7px 5px;
 }
 
@@ -604,7 +618,7 @@
 }
 
 .cardstories .cardstories_player_seat .cardstories_player_name {
-    height: 26px;
+    height: 28px;
     margin: 10px auto 10px auto;
 }
 
@@ -793,36 +807,62 @@
     overflow: hidden;
 }
 
-.cardstories_master_seat.owner {
+.cardstories_master_seat .cardstories_avatar {
+	width: 52px;
+	height: 52px;
+	position: absolute;
+	left: 6px;
+	top: 9px;
+}
+
+.cardstories_master_seat .cardstories_master_seat_box {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+}
+
+.cardstories_master_seat.owner .cardstories_master_seat_box {
     background: transparent url('images/master_seat_owner.png') no-repeat left top;
 }
 
-.cardstories_master_seat.player {
+.cardstories_master_seat.player .cardstories_master_seat_box {
     background: transparent url('images/master_seat_player.png') no-repeat left top;
 }
 
-.cardstories_master_seat.cardstories_master_seat_won {
+.cardstories_master_seat.cardstories_master_seat_won .cardstories_master_seat_box {
     background-image: url('images/master_seat_win.png');
 }
 
-.cardstories_master_seat.cardstories_master_seat_lost {
+.cardstories_master_seat.cardstories_master_seat_lost .cardstories_master_seat_box {
     background-image: url('images/master_seat_lose.png');
 }
 
-.cardstories_master_seat .cardstories_master_name {
+.cardstories_master_seat .cardstories_master_name,
+.cardstories_master_seat .cardstories_master_status {
     width: 65px;
-    height: 40px;
-    top: 30px;
-    left: 65px;
+    height: 38px;
     position: absolute;
     font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
     font-size: 10pt;
-    color: #4D4D4F;
     text-align: center;
+    overflow: hidden;
+}
+
+.cardstories_master_seat .cardstories_master_name {
+    top: 30px;
+    left: 63px;
+    color: #4D4D4F;
 }
 
 .cardstories_master_seat.cardstories_master_seat_won .cardstories_master_name,
 .cardstories_master_seat.cardstories_master_seat_lost .cardstories_master_name {
+    color: #e5e5e5;
+    height: 20px;
+}
+
+.cardstories_master_seat .cardstories_master_status {
+    top: 47px;
+    left: 63px;
     color: #e5e5e5;
 }
 

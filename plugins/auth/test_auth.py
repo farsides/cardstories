@@ -53,9 +53,15 @@ class AuthTest(unittest.TestCase):
         ids = yield self.auth.get_players_ids(emails, create=True)
         self.assertEquals([1, 2, 3], ids)
         
+    @defer.inlineCallbacks
     def test03_get_name(self):
         name = yield self.auth.get_player_name(3)
         self.assertEquals("Player 3", name)
+        
+    @defer.inlineCallbacks
+    def test04_get_player_avatar_url(self):
+        avatar_url = yield self.auth.get_player_avatar_url('3')
+        self.assertEquals('/static/css/images/avatars/default/3.jpg', avatar_url)
 
 
 def Run():

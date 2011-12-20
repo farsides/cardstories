@@ -1,6 +1,7 @@
-#Tue Dec 13 14:40:05 ICT 2011
+#Sun Dec 18 16:19:51 ICT 2011
 eclipse.preferences.version=1
 encoding//cardstories/auth.py=utf-8
+encoding//plugins/chat/test_chat.py=utf-8
 encoding//plugins/djangoauth/test_djangoauth.py=utf-8
 encoding//tests/test_auth.py=utf-8
 encoding//tests/test_service.py=utf-8

@@ -26,7 +26,7 @@ on a recent installation of Ubuntu or Debian.
 
 First, install the following packages.
 
-$ sudo apt-get install python-twisted python-lxml python-django postfix python-simplejson
+$ sudo apt-get install python-twisted python-lxml python-django postfix python-imaging python-simplejson
 
 Note that Django must be version 1.2.5 or greater, otherwise things will break
 in interesting ways.  If your distribution is too old (or too new), instead of
@@ -35,10 +35,10 @@ python-django install python-pip and then use it to install Django:
 $ sudo apt-get install python-pip
 $ sudo pip install Django==1.2.5
 
-To run the tests, you will also need the Mock package 
-(http://www.voidspace.org.uk/python/mock/)
+You will also need the requests and Mock packages:
 
 $ sudo pip install mock==0.7.2
+$ sudo pip install requests==0.8.6
 
 Now, make sure you are at the root of the cardstories checkout.  At this point,
 create the default database structure for the website (an sqlite database will
@@ -53,6 +53,22 @@ is recommended when running the above syncdb command to chose
 /etc/hosts like the following:
 
 127.0.0.1 local.cardstories.org
+
+If for any reason you need to run the website dev server on a different host or
+port, these files that must be modified accordingly (and the cardstories web
+service restarted if it's already running):
+
+   * tests/djangoauth/djangoauth.xml
+   * tests/mail/mail.xml
+
+If the cardstories web service is not running on port 5000, make sure
+to change the CARDSTORIES_HOST parameter here, and restart the website server:
+
+   * website/settings.py
+
+Create the log folder: 
+
+    $ mkdir log/
 
 On one terminal window, run the cardstories web service.  Under default
 configuration, the following command assumes you have postfix configured
@@ -77,18 +93,6 @@ However, for local Facebook redirection to work (which you set up above in
 $ sudo website/manage.py runserver 0.0.0.0:80
 
 Now simply access http://local.cardstories.org/, and code away!
-
-If for any reason you need to run the website dev server on a different host or
-port, these files that must be modified accordingly, and the cardstories web
-service restarted:
-
-   * tests/djangoauth/djangoauth.xml
-   * tests/mail/mail.xml
-
-Finally, if the cardstories web service is not running on port 5000, make sure
-to change the CARDSTORIES_HOST parameter here, and restart the website server:
-
-   * website/settings.py
 
 
 ###########################

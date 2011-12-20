@@ -94,6 +94,7 @@ class CardstoriesAuthTest(unittest.TestCase):
         check_not_implemented_method("get_player_id", "email", create=True)
         check_not_implemented_method("get_player_name", "id")
         check_not_implemented_method("get_player_email", "id")
+        check_not_implemented_method("get_player_avatar_url", "id")
         
     def test02_get_several_at_once(self):
         '''Generic methods to retreive several objects at once'''
@@ -110,6 +111,7 @@ class CardstoriesAuthTest(unittest.TestCase):
         check_call_for_each("get_players_ids", "get_player_id")
         check_call_for_each("get_players_names", "get_player_name")
         check_call_for_each("get_players_emails", "get_player_email")
+        check_call_for_each("get_players_avatars_urls", "get_player_avatar_url")
         
             
 # Main ########################################################################

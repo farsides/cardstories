@@ -26,7 +26,7 @@ class CardstoriesGame(pollable):
 
     MIN_PICKED = 3 # there needs to be at least 3 cards to move to the voting phase
     MIN_VOTED = 2 # there needs to be at least 2 votes to complete the game
-    NCARDS = 41
+    NCARDS = 42
     NPLAYERS = 6
     CARDS_PER_PLAYER = 7
     DEFAULT_COUNTDOWN_DURATION = 60 # needs to be coordinated with the value on the UI
@@ -181,13 +181,13 @@ class CardstoriesGame(pollable):
         for player in rows:
             # player_id
             players_id_list.append(player[0])
-            
+
             # player_cards
             if player[0] == player_id or owner_id == player_id:
                 player_cards = [ ord(c) for c in player[1] ]
             else:
                 player_cards = None
-                
+
             # picked
             if player[2] != None:
                 if (state == 'complete' or player[0] == player_id or owner_id == player_id):
@@ -198,11 +198,11 @@ class CardstoriesGame(pollable):
                 picked = None
             if player[2] != None:
                 picked_count += 1
-                
+
             # self
             if player[0] == player_id:
                 myself = [ self.ord(player[2]), self.ord(player[3]), player_cards ]
-                
+
             # vote / winner_card
             if state == 'complete' or owner_id == player_id:
                 if player[0] == owner_id:
@@ -215,19 +215,19 @@ class CardstoriesGame(pollable):
                     vote = None
             if player[3] != None:
                 voted_count += 1
-                
+
             # win
             win = player[4]
-                
+
             # players
             players.append({ 'id': player[0], 'cards': player_cards, 'picked': picked, 'vote': vote, 'win': win })
-            
+
         ready = None
         if state == 'invitation':
             ready = picked_count >= self.MIN_PICKED
         elif state == 'vote':
             ready = voted_count >= self.MIN_VOTED
-        defer.returnValue([{ 'id': self.get_id(),
+        defer.returnValue([{'id': self.get_id(),
                             'modified': self.get_modified(),
                             'sentence': sentence,
                             'winner_card': winner_card,
@@ -380,7 +380,7 @@ class CardstoriesGame(pollable):
         else:
             winners = failed + guessed
         transaction.execute("UPDATE player2game SET win = 'y' WHERE "
-                            "  game_id = %d AND " % game_id + 
+                            "  game_id = %d AND " % game_id +
                             "  player_id IN ( %s ) " % ','.join([ str(id) for id in winners ]))
         transaction.execute("UPDATE games SET completed = datetime('now'), state = 'complete' WHERE id = %d" % game_id)
 
@@ -388,7 +388,6 @@ class CardstoriesGame(pollable):
     def complete(self, owner_id):
         self.clear_countdown()
         game, players_id_list = yield self.game(self.get_owner_id())
-        no_vote = filter(lambda player: player['vote'] == None and player['id'] != self.get_owner_id(), game['players'])
         yield self.service.db.runInteraction(self.completeInteraction, self.get_id(), owner_id)
         result = yield self.touch(type='complete')
         defer.returnValue(result)
@@ -413,5 +412,3 @@ class CardstoriesGame(pollable):
             return ord(c)
         else:
             return c
-
-

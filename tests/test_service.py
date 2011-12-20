@@ -679,32 +679,49 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
     @defer.inlineCallbacks
     def test12_player_info(self):
         player_id = 20
-        player_name_format = u"pl\xe1y\u1ebdr %d"
+        player_name = u"pl\xe1y\u1ebdr"
+        player_avatar_url = "http://example.com/test.jpg"
 
-        # Fake call to auth module (id => name translation)
+        # Fake calls to auth module
         default_get_player_name = self.service.auth.get_player_name
-        fake_get_player_name = Mock(return_value=player_name_format)
+        fake_get_player_name = Mock(return_value=player_name)
         self.service.auth.get_player_name = fake_get_player_name
+        
+        default_get_player_avatar_url = self.service.auth.get_player_avatar_url
+        fake_get_player_avatar_url = Mock(return_value=player_avatar_url)
+        self.service.auth.get_player_avatar_url = fake_get_player_avatar_url
 
         players_info = yield self.service.player_info({'type': 'player_info', 'player_id': [player_id]})
         fake_get_player_name.assert_called_once_with(player_id)
+        fake_get_player_avatar_url.assert_called_once_with(player_id)
         
-        self.assertEquals(players_info, [{'type': 'players_info', str(player_id): {'name': player_name_format}}])
+        self.assertEquals(players_info, [{ 'type': 'players_info',
+                                           str(player_id): {'name': player_name,
+                                                            'avatar_url': player_avatar_url}
+                                         }])
 
         self.service.auth.get_player_name = default_get_player_name
+        self.service.auth.get_player_avatar_url = default_get_player_avatar_url
 
     @defer.inlineCallbacks
     def test12_state(self):
         winner_card = 5
         sentence = 'SENTENCE'
         owner_id = 15
-        player_name_format = u"pl\xe1y\u1ebdr %d"
+        player_name = u"pl\xe1y\u1ebdr"
+        player_avatar_url = "http://example.com/test.jpg"
+        
+        players_info = [{'type': 'players_info', str(owner_id): {'name': player_name,
+                                                                 'avatar_url': player_avatar_url}}]
 
-        # Fake call to auth module (id => name translation)
-        def get_player_name(id):
-            return player_name_format % id
+        # Fake calls to auth module
         default_get_player_name = self.service.auth.get_player_name
-        self.service.auth.get_player_name = get_player_name
+        fake_get_player_name = Mock(return_value=player_name)
+        self.service.auth.get_player_name = fake_get_player_name
+        
+        default_get_player_avatar_url = self.service.auth.get_player_avatar_url
+        fake_get_player_avatar_url = Mock(return_value=player_avatar_url)
+        self.service.auth.get_player_avatar_url = fake_get_player_avatar_url
 
         game = yield self.service.create({ 'card': [winner_card],
                                            'sentence': [sentence],
@@ -743,7 +760,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         self.assertEquals(state[0]['type'], 'plugin')
         self.assertTrue(state[0]['info'])
 
-        def check_players_info(state, players_info):
+        def check_players_info(state):
             # Check presence of players_info
             state_types_list = [x['type'] for x in state if 'type' in x]
             self.assertIn('players_info', state_types_list)
@@ -751,7 +768,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
             # Check values of players_info
             state_players_info = [x for x in state if x['type'] == 'players_info']
             self.assertEquals(state_players_info, players_info)
-        check_players_info(state, [{str(owner_id): {'name': player_name_format % owner_id}, 'type': 'players_info'}])
+        check_players_info(state)
 
         #
         # type = ['lobby']
@@ -762,7 +779,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
                                            'player_id': [owner_id] })
         self.assertEquals(state[0]['type'], 'lobby')
         self.assertEquals(state[0]['games'][0][0], game['game_id'])
-        check_players_info(state, [{str(owner_id): {'name': player_name_format % owner_id}, 'type': 'players_info'}])
+        check_players_info(state)
         #
         # type = ['game','lobby','plugin']
         #
@@ -774,9 +791,10 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         self.assertEquals(state[0]['type'], 'game')
         self.assertEquals(state[1]['type'], 'lobby')
         self.assertEquals(state[2]['type'], 'plugin')
-        check_players_info(state, [{str(owner_id): {'name': player_name_format % owner_id}, 'type': 'players_info'}])
+        check_players_info(state)
 
         self.service.auth.get_player_name = default_get_player_name
+        self.service.auth.get_player_avatar_url = default_get_player_avatar_url
 
     @defer.inlineCallbacks
     def test13_set_countdown(self):
