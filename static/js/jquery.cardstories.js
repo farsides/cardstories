@@ -70,15 +70,24 @@
             return o.delay(delay, qname);
         },
 
-        ajax: function(o) {
+        ajax: function(options) {
             var $this = this;
-            var options = $.extend({
+            var request;
+            var defaults = {
+                async: true,
                 cache: false,
+                dataType: 'json',
                 error: function(xhr, status, error) {
-                    $this.xhr_error(options, status, error);
-                }
-            }, o);
-            return jQuery.ajax(options);
+                    // Pass the ajax request to the error handle in
+                    // order to be able to retry it.
+                    $this.xhr_error(request, status, error);
+                },
+                global: false,
+                timeout: 30000,
+                type: 'GET'
+            };
+            request = $.extend(defaults, options);
+            return jQuery.ajax(request);
         },
 
         reload: function(player_id, game_id, root) {
@@ -107,10 +116,12 @@
             return search;
         },
 
-        create: function(player_id, root) {
+        create: function(player_id, root, cb) {
+            var $this = this;
             this.poll_discard(root);
-            this.poll_plugin(player_id, undefined, root);
-            return this.create_pick_card(player_id, root);
+            this.poll_plugin(player_id, undefined, root, function() {
+                $this.create_pick_card(player_id, root).done(cb);
+            });
         },
 
         create_deck: function() {
@@ -697,13 +708,9 @@
                     };
                     var sentence = encodeURIComponent($('.cardstories_sentence', element).val());
                     $this.ajax({
-                        async: false,
-                        timeout: 30000,
                         url: $this.url + '?' + $.param(query, true),
                         type: 'POST',
                         data: 'sentence=' + sentence,
-                        dataType: 'json',
-                        global: false,
                         success: success
                     });
                 });
@@ -725,12 +732,7 @@
             var query = '?action=solo';
             query += '&player_id=' + player_id;
             $this.ajax({
-                async: false,
-                timeout: 30000,
                 url: $this.url + query,
-                type: 'GET',
-                dataType: 'json',
-                global: false,
                 success: success
             });
         },
@@ -786,14 +788,23 @@
                     var invites = $.map(tokenize_invitations(val), function(invite) {
                         return encodeURIComponent(invite);
                     });
-                    $this.send({
+                    var query = {
                         action: 'invite',
                         owner_id: owner_id,
                         game_id: game_id,
                         player_id: invites
-                    }, function() {
-                        $this.game(owner_id, game_id, root);
-                    });
+                    };
+                    // Use a synchronous request, because this is user-initiated,
+                    // so we can afford it since the user won't be surprised by
+                    // the browser blocking.
+                    var ajax_opts = {
+                        async: false
+                    };
+                    var callback = function() {
+                        $this.game(owner_id, game_id, root, ajax_opts);
+                    };
+                    $this.send(query, callback, ajax_opts);
+
                     toggle_feedback(true);
                     textarea.val('');
 
@@ -864,12 +875,8 @@
             request.modified = $(root).data('cardstories_modified');
 
             var poll = $this.ajax({
-                async: true,
                 timeout: $this.poll_timeout * 2,
                 url: $this.url + '?' + $.param(request, true),
-                type: 'GET',
-                dataType: 'json',
-                global: false,
                 success: success
             });
 
@@ -888,7 +895,7 @@
             }
         },
 
-        poll_plugin: function(player_id, game_id, root) {
+        poll_plugin: function(player_id, game_id, root, callback) {
             var $this = this;
 
             // Available plugin states.
@@ -934,6 +941,11 @@
                         }, function() {
                             $this.poll_plugin(player_id, game_id, root);
                         });
+
+                    }
+
+                    if (callback) {
+                        callback();
                     }
                 };
 
@@ -946,14 +958,11 @@
                 };
 
                 $this.ajax({
-                    async: false,
-                    timeout: 30000,
                     url: $this.url + '?' + $.param(request, true),
-                    type: 'GET',
-                    dataType: 'json',
-                    global: false,
                     success: success
                 });
+            } else if (callback) {
+                callback();
             }
         },
 
@@ -1017,11 +1026,7 @@
 
             $this.ajax({
                 async: false,
-                timeout: 30000,
                 url: $this.url + '?' + $.param(request, true),
-                type: 'GET',
-                dataType: 'json',
-                global: false,
                 success: success
             });
         },
@@ -3630,24 +3635,20 @@
             box.fadeIn('slow', cb);
         },
 
-        send: function(query, cb) {
+        send: function(query, cb, ajax_options) {
             var $this = this;
             var success = function(data, status) {
-                if('error' in data) {
+                if ('error' in data) {
                     $this.error(data.error);
-                } else if (cb !== undefined) {
+                } else if (cb) {
                     $this.setTimeout(cb, 30);
                 }
             };
-            $this.ajax({
-                async: false,
-                timeout: 30000,
+            var options = {
                 url: $this.url + '?' + $.param(query, true),
-                type: 'GET',
-                dataType: 'json',
-                global: false,
                 success: success
-            });
+            };
+            $this.ajax($.extend(options, ajax_options));
         },
 
         init_board_buttons: function(player_id, element, root) {
@@ -3659,7 +3660,7 @@
             });
         },
 
-        game: function(player_id, game_id, root) {
+        game: function(player_id, game_id, root, ajax_options) {
             var $this = this;
 
             var success = function(data, status) {
@@ -3707,15 +3708,12 @@
                 if (this.poll) {request.type.push(this.poll);}
             });
 
-            $this.ajax({
-                async: false,
-                timeout: 30000,
+            var options = {
                 url: $this.url + '?' + $.param(request, true),
-                type: 'GET',
-                dataType: 'json',
-                global: false,
                 success: success
-            });
+            };
+
+            $this.ajax($.extend(options, ajax_options));
         },
 
         preload_images_helper: function(root, cb) {
@@ -3949,14 +3947,8 @@
             };
 
             $this.ajax({
-                async: false,
-                timeout: 30000,
                 url: $this.url + '?' + $.param(request, true),
-                type: 'GET',
-                dataType: 'json',
-                global: false,
                 success: success,
-                error: $this.xhr_error
             });
 
             return deferred.promise();
@@ -4030,13 +4022,21 @@
 
         send_countdown_duration: function(duration, player_id, game_id, root) {
             var $this = this;
-            $this.send({
+            var query = {
                 action: 'set_countdown',
                 duration: duration,
                 game_id: game_id
-            }, function() {
-                $this.game(player_id, game_id, root);
-            });
+            };
+            // Use a synchronous request because this is a user-initated request,
+            // and users won't be surprised by the browser blocking while waiting
+            // for the response.
+            var ajax_opts = {
+                async: false
+            };
+            var callback = function() {
+                $this.game(player_id, game_id, root, ajax_opts);
+            };
+            $this.send(query, callback, ajax_opts);
         },
 
         start_countdown: function(end_ts, select_element) {
