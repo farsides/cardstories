@@ -4,7 +4,12 @@ var original_play_sound = $.cardstories_chat.play_sound;
 var cardstories_default_get_player_info_by_id = $.cardstories.get_player_info_by_id;
 
 function setup() {
-    $(selector).cardstories_chat();
+    var root = $(selector);
+    root.cardstories_chat();
+    var root_data = root.data('cardstories_chat');
+    // Move the initialized ts 5 seconds to the past, so that sounds play.
+    root_data.initialized_ts -= 5001;
+    root.data('cardstories_chat', root_data);
     $.cardstories_chat.send = original_send;
     $.cardstories_chat.play_sound = original_play_sound;
     $.cardstories_audio = {play: $.noop};
@@ -97,19 +102,21 @@ asyncTest("scroll", 3, function() {
 
 test("play_sound", 2, function() {
     var root = $(selector);
-    var ts = new Date().getTime()-5001;
     $.cardstories_audio.play = function(sound_id, _root) {
         equal(sound_id, 'ring', 'calls $.cardstories_audio.play with "ring" sound id');
         equal(_root, root, 'calls $.cardstories_audio.play with the root element');
     };
-    $.cardstories_chat.play_sound('ring', root, ts);
+    $.cardstories_chat.play_sound('ring', root);
 
     // Set the timestamp to now so that play_ring won't be called.
-    var ts = new Date().getTime();
+    var root_data = root.data('cardstories_chat');
+    root_data.initialized_ts = new Date().getTime() ;
+    root.data('cardstories_chat', root_data);
+
     $.cardstories_audio.play = function(sound_id, _root) {
         ok(false, 'should not call $.cardstories_audio.play with recent timestamp');
     };
-    $.cardstories_chat.play_sound('ring', root, ts);
+    $.cardstories_chat.play_sound('ring', root);
 });
 
 test("play ring sound on notification", 3, function() {
@@ -118,42 +125,50 @@ test("play ring sound on notification", 3, function() {
     var data = {
         messages: [{
             type: 'notification',
-            player_id: 'PLAYER_ID',
-            sentence: 'SENTENCE'
+            player_id: 22,
+            sentence: 'SENTENCE1'
+        }, {
+            type: 'notification',
+            player_id: 34,
+            sentence: 'SENTENCE2'
         }]
     };
-    var root_data = root.data('cardstories_chat');
-    root_data.initialized_ts = new Date().getTime() - 50001;
-    root.data('cardstories_chat', root_data);
 
-    $.cardstories_chat.play_sound = function(sound_id, _root, ts) {
+    var called_count = 0;
+    $.cardstories_chat.play_sound = function(sound_id, _root) {
         equal(sound_id, 'ring', 'calls $.cardstories_chat.play_sound "ring"');
         equal(_root, root, 'calls $.cardstories_chat.play_sound with the root');
-        equal(ts, root_data.initialized_ts, 'calls $.cardstories_chat.play_sound with the timestamp');
+        called_count++;
     };
 
     $.cardstories_chat.state(player_id, data, root); // play_ring is called
+    equal(called_count, 1, 'the ring is only played once, even though there are multiple "notification" in the batch');
 });
 
-test("play pop sound on normal chat", 1, function() {
+test("play pop sound on normal chat", 2, function() {
     var root = $(selector);
     var player_id = 'Player 1';
     var data = {
         messages: [{
             type: 'chat',
-            player_id: 'PLAYER_ID',
-            game_id: 'GAME_ID',
-            sentence: 'SENTENCE'
+            player_id: 12,
+            game_id: 101,
+            sentence: 'SENTENCE1'
+        }, {
+            type: 'chat',
+            player_id: 13,
+            game_id: 112,
+            sentence: 'SENTENCE2'
         }]
     };
-    var root_data = root.data('cardstories_chat');
-    root_data.initialized_ts = new Date().getTime() - 50001;
-    root.data('cardstories_chat', root_data);
 
-    $.cardstories_chat.play_sound = function(sound_id, _root, ts) {
+    var called_count = 0;
+    $.cardstories_chat.play_sound = function(sound_id, _root) {
         equal(sound_id, 'pop', 'calls $.cardstories_chat.play_sound "pop"');
+        called_count++;
     };
     $.cardstories_chat.state(player_id, data, root); // play_ring is called
+    equal(called_count, 1, 'the pop is only played once, even though there are multiple "chat" messages in the batch');
 });
 
 

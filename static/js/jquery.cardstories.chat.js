@@ -85,6 +85,8 @@
         state: function(player_id, data, root) {
             if (data.messages) {
                 var root_data = $(root).data('cardstories_chat');
+                var play_pop = false;
+                var play_ring = false;
                 for (var i=0; i < data.messages.length; i++) {
                     var message = data.messages[i];
                     var player_info = $.cardstories.get_player_info_by_id(message.player_id);
@@ -94,7 +96,7 @@
                             player_id: player_info.name,
                             sentence: message.sentence
                         }
-                        this.play_sound('pop', root, root_data.initialized_ts);
+                        play_pop = true;
                     } else if (message.type == 'notification') {
                         var l = window.location;
                         var href = l.protocol + '//' + l.host + l.pathname;
@@ -104,10 +106,16 @@
                             player_id: player_info.name,
                             sentence: message.sentence
                         }
-                        this.play_sound('ring', root, root_data.initialized_ts);
+                        play_ring = true;
                     }
                     var div = this.templates[message.type].supplant(tvars);
                     root_data.display.append(div);
+                }
+                if (play_pop) {
+                    this.play_sound('pop', root);
+                }
+                if (play_ring) {
+                    this.play_sound('ring', root);
                 }
                 this.scroll_to_bottom(root);
             }
@@ -121,12 +129,13 @@
         },
 
         // Plays a sound (depends on the audio plugin).
-        play_sound: function(sound_id, root, initialized_ts) {
+        play_sound: function(sound_id, root) {
             // Only play the sound for notifications that
             // happen at least 5 seconds after plugin initialization.
             // This is to prevent from flooding the player with rings
             // from old notifications on page refresh.
-            if (new Date().getTime() - initialized_ts > 5000) {
+            var root_data = $(root).data('cardstories_chat');
+            if (new Date().getTime() - root_data.initialized_ts > 5000) {
                 $.cardstories_audio.play(sound_id, root);
             }
         }
