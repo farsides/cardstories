@@ -98,7 +98,7 @@
         reload_link: function(player_id, game_id, root) {
             var params = {};
 
-            if(game_id !== undefined && game_id !== '') {
+            if (game_id) {
                 params.game_id = game_id;
             }
 
@@ -168,11 +168,11 @@
                             .removeClass('selected')
                             .addClass('old');
                     }
-                    if (cb !== undefined) {
+                    if (cb) {
                         cb();
                     }
                 });
-            } else if (cb !== undefined) {
+            } else if (cb) {
                 cb();
             }
         },
@@ -212,7 +212,7 @@
                     height: big_height,
                     fontSize: big_fontsize
                 }, duration, function() {
-                    if (cb !== undefined) {
+                    if (cb) {
                         cb();
                     }
                 });
@@ -235,7 +235,7 @@
                         fontSize: big_fontsize
                     });
 
-                    if (cb !== undefined) {
+                    if (cb) {
                         cb();
                     }
                 });
@@ -559,7 +559,7 @@
             });
 
             // If defined, run the callback (used in the tests).
-            if (cb !== undefined) { cb('before_animation'); }
+            if (cb) { cb('before_animation'); }
 
             // Animate towards the final state.
             var q = $({});
@@ -581,7 +581,7 @@
                 });
             });
             // If set, run the callback at the end of the queue.
-            if (cb !== undefined) {
+            if (cb) {
                 q.queue('chain', function(next) {cb('after_animation');});
             }
             q.dequeue('chain');
@@ -649,7 +649,7 @@
                 }, duration, function() {next();});
             });
             // If set, run the callback at the end of the queue.
-            if (cb !== undefined) {
+            if (cb) {
                 q.queue('chain', function(next) {cb();});
             }
             q.dequeue('chain');
@@ -745,7 +745,7 @@
 
             var text = $.cookie('CARDSTORIES_INVITATIONS');
             var textarea = $('.cardstories_advertise_input textarea', box);
-            if (text !== undefined && text !== null) {
+            if (text) {
                 textarea.val(text);
             }
             textarea.placeholder();
@@ -866,7 +866,7 @@
                 } else {
                     if('timeout' in answer) {
                         $this.poll(root, request, cb);
-                    } else if (cb !== undefined) {
+                    } else if (cb) {
                         cb();
                     }
                 }
@@ -907,7 +907,7 @@
             // Only enter the loop if there are applicable plugin polls.
             if (type.length) {
                 var success = function(data, status) {
-                    if('error' in data) {
+                    if ('error' in data) {
                         $this.error(data.error);
                     } else {
                         // Save greatest modification time.
@@ -917,7 +917,7 @@
                                 modified = data[i].modified;
                             }
                         }
-                        if (modified !== undefined && modified > 0) {
+                        if (modified && modified > 0) {
                             $(root).data('cardstories_modified', modified);
                         }
 
@@ -981,7 +981,7 @@
                             modified = data[i].modified;
                         }
                     }
-                    if (modified !== undefined && modified > 0) {
+                    if (modified && modified > 0) {
                         $(root).data('cardstories_modified', modified);
                     }
 
@@ -1109,8 +1109,8 @@
                 if ($.query.get('anonymous')) {
                     deferred = this.invitation_anonymous(player_id, game, root);
                 } else {
-                    if(game.self !== null && game.self !== undefined) {
-                        if(game.self[0] === null) {
+                    if (game.self) {
+                        if (game.self[0] === null) {
                             deferred = this.invitation_pick(player_id, game, root);
                         } else {
                             deferred = this.invitation_pick_wait(player_id, game, root);
@@ -1705,7 +1705,7 @@
                 $this.animate_progress_bar(2, element, next);
             });
 
-            if (cb !== undefined) {
+            if (cb) {
                 q.queue('stage2', function(next) {cb();});
             }
 
@@ -1851,7 +1851,7 @@
             });
 
             q.queue('chain', function(next) {
-                if (cb !== undefined) {
+                if (cb) {
                     cb();
                 }
             });
@@ -2021,7 +2021,7 @@
             });
 
             q.queue('chain', function(next) {
-                if (cb !== undefined) {
+                if (cb) {
                     cb();
                 }
             });
@@ -2115,7 +2115,7 @@
                     var link = $(this);
                     var card = cards[index];
                     var card_file = meta.nocard;
-                    if(index < cards.length && card !== null && card.value !== null) {
+                    if (index < cards.length && card !== null && card.value !== null) {
                         card_file = meta.card.supplant({'card': card.value});
                     }
                     var label = card && card.label ? card.label : '';
@@ -2124,18 +2124,18 @@
                     link.css({zIndex: zindex});
                     var background = $('.cardstories_card_background', link);
                     var has_bg = meta.card_bg && meta.card_bg.length > 0;
-                    if(has_bg) {
+                    if (has_bg) {
                         background.attr('src', meta.card_bg);
-                    } else if(background.attr('src') !== undefined) {
+                    } else if (background.attr('src') !== undefined) {
                         background.removeAttr('src');
                     }
                     background.css({zIndex: links.length - index});
                     var foreground = $('.cardstories_card_foreground', link);
                     foreground.attr('src', card_file).css({zIndex: 2 * (links.length - index)});
-                    if(card) {
+                    if (card) {
                         link.toggleClass('cardstories_card_inactive', card.inactive !== undefined);
                     }
-                    if(select_callback !== undefined && card && card.inactive === undefined) {
+                    if (select_callback && card && card.inactive === undefined) {
                         link.metadata({type: "attr", name: "data"}).card = card.value;
                         link.unbind('click').click(function() {
                             if(!$('a.cardstories_card', element).hasClass('cardstories_card_selected')) {
@@ -2324,11 +2324,11 @@
             var $this = this;
             var state = $(root).data('cardstories_state');
             var deferred;
-            if(game.owner) {
+            if (game.owner) {
                 deferred = this.vote_owner(player_id, game, root);
             } else {
-                if(game.self !== null && game.self !== undefined) {
-                    if(game.self[1] === null) {
+                if (game.self) {
+                    if (game.self[1] === null) {
                         if (state && state.dom === 'invitation_pick_wait') {
                             deferred = this.invitation_pick_wait_to_vote_voter(player_id, state.game, game, root);
                         } else {
@@ -3100,7 +3100,7 @@
                 back.animate({'width': width, 'height': height, 'left': left}, 250, next);
             });
 
-            if (cb !== undefined) {
+            if (cb) {
                 q.queue('chain', function(next) {cb();});
             }
 
@@ -3196,7 +3196,7 @@
                 // Pause for effect.
                 $this.delay(q, 250, cardq);
 
-                if (i === last && cb !== undefined) {
+                if (i === last && cb) {
                     q.queue(cardq, function(next) {cb();});
                 }
 
@@ -3229,7 +3229,7 @@
                     left: card.position().left + (card.width() / 2)
                 }, 500, function() {
                     card.hide();
-                    if (i === last && cb !== undefined) {
+                    if (i === last && cb) {
                         cb();
                     }
                 });
@@ -3311,7 +3311,7 @@
                         slot.addClass('selected');
                         slot.css('z-index', 1);
                         slot.css(large_pos);
-                    } else if (ok !== undefined) {
+                    } else if (ok) {
                         slot.addClass('live');
                         slot.unbind('click').click(function() {
                             if(!slot.hasClass('selected')) {
@@ -3345,7 +3345,7 @@
                     }
                 }
 
-                if (i === last && cb !== undefined) {
+                if (i === last && cb) {
                     q.queue(cardq, function(next) { cb(); });
                 }
 
@@ -3569,7 +3569,7 @@
             });
 
             q.queue('chain', function(next) {
-                if (cb !== undefined) {
+                if (cb) {
                     cb();
                 }
             });
@@ -3674,7 +3674,7 @@
                             modified = data[i].modified;
                         }
                     }
-                    if (modified !== undefined && modified > 0) {
+                    if (modified && modified > 0) {
                         $(root).data('cardstories_modified', modified);
                     }
 
@@ -3985,7 +3985,7 @@
 
         display_modal: function(modal, overlay, cb, cb_on_close) {
             if (modal.is(':visible')) {
-                if (cb !== undefined) {
+                if (cb) {
                     cb();
                 }
                 return;
@@ -3996,7 +3996,7 @@
             button.one('click', function() {
                 if (!$(this).hasClass('cardstories_button_disabled')) {
                     $this.close_modal(modal, overlay, function() {
-                        if (cb_on_close === true && cb !== undefined) {
+                        if (cb_on_close && cb) {
                             cb();
                         }
                     });
@@ -4005,7 +4005,7 @@
 
             overlay.show();
             this.animate_scale(false, 5, 500, modal, function () {
-                if (cb_on_close !== true && cb !== undefined) {
+                if (!cb_on_close && cb) {
                     cb();
                 }
             });
@@ -4014,7 +4014,7 @@
         close_modal: function(modal, overlay, cb) {
             this.animate_scale(true, 5, 500, modal, function() {
                 overlay.hide();
-                if (cb !== undefined) {
+                if (cb) {
                     cb();
                 }
             });
@@ -4133,7 +4133,7 @@
         },
 
         login: function(game_id, login_url, root) {
-            if(login_url !== undefined && login_url !== null && login_url !== '') {
+            if (login_url) {
                 var href = login_url;
                 if (game_id) {
                     href += '?game_id=' + game_id;
@@ -4151,7 +4151,7 @@
             $(root).data('cardstories_modified', 0);
 
             this.credits(root);
-            if(player_id === undefined || player_id === null || player_id === '') {
+            if (!player_id) {
                 player_id = $.cookie('CARDSTORIES_ID');
             }
 
@@ -4161,7 +4161,7 @@
             });
 
             $this.preload_images_helper(root, function() {
-                if(player_id === undefined || player_id === null || player_id === '') {
+                if (!player_id) {
                     $this.login(game_id, login_url, root);
                 } else {
                     // Get player_info of the player
@@ -4175,7 +4175,7 @@
         },
 
         game_or_create: function(player_id, game_id, root) {
-            if (game_id === undefined || game_id === null || game_id === '') {
+            if (!game_id) {
                 this.create(player_id, root);
             } else {
                 this.game(player_id, game_id, root);

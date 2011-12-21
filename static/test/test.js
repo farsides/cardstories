@@ -485,7 +485,7 @@ asyncTest("animate_sprite", 3, function() {
     equal(movie.css('display'), 'none', 'movie starts hidden');
 
     // IE does not use 'background-position', but 'background-position-x'.
-    if (movie.css('background-position') !== undefined) {
+    if (movie.css('background-position')) {
         equal(movie.css('background-position'), '0% 0%', 'movie starts at 0% background position');
     } else {
         equal(movie.css('background-position-x'), 'left', 'movie starts at 0% background position');
@@ -493,7 +493,7 @@ asyncTest("animate_sprite", 3, function() {
 
     $.cardstories.animate_sprite = cardstories_default_animate_sprite;
     $.cardstories.animate_sprite(movie, frames, frames, false, function() {
-        if (movie.css('background-position') !== undefined) {
+        if (movie.css('background-position')) {
             notEqual(movie.css('background-position'), '0% 0%', 'movie is no longer at 0% background position');
         } else {
             notEqual(movie.css('background-position-x'), 'left', 'movie is no longer at 0% background position');
@@ -1366,7 +1366,7 @@ asyncTest("invitation_pick", 11, function() {
     };
 
     $.cardstories.display_modal = function(modal, overlay, cb, cb_on_close) {
-        if (cb !== undefined) {
+        if (cb) {
             cb();
         }
     };
@@ -1735,7 +1735,7 @@ asyncTest("vote_voter", 30, function() {
     };
 
     $.cardstories.display_modal = function(modal, overlay, cb, cb_on_close) {
-        if (cb !== undefined) {cb();}
+        if (cb) {cb();}
     };
 
     var root = $('#qunit-fixture .cardstories');
