@@ -56,8 +56,10 @@ function setup() {
     // that they don't interfere with the tests.
     $.cookie('CARDSTORIES_ID', null, {path: '/'});
     $.cookie('CARDSTORIES_ID', null, {path: '/static'});
+    $.cookie('CARDSTORIES_ID', null, {path: '/static/'});
     $.cookie('CARDSTORIES_INVITATIONS', null, {path: '/'});
     $.cookie('CARDSTORIES_INVITATIONS', null, {path: '/static'});
+    $.cookie('CARDSTORIES_INVITATIONS', null, {path: '/static/'});
     // Stub out some functions.
     $.cardstories.setTimeout = function(cb, delay) { return window.setTimeout(cb, 0); };
     $.cardstories.delay = function(o, delay, qname) { return; };
