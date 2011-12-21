@@ -112,7 +112,7 @@ class Avatar(object):
         if request_response.status_code == 200 and \
             request_response.headers['Content-Type'].startswith('image/'): # got an avatar
                 orig_avatar_path = self.get_path(size="orig") 
-                with open(orig_avatar_path, 'w') as f:
+                with open(orig_avatar_path, 'wb') as f:
                     f.write(request_response.content)
                 self.generate_all_sizes(orig_avatar_path)
         else:
