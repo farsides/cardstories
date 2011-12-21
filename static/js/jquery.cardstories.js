@@ -4123,9 +4123,7 @@
             $(".cardstories_emailform", element).submit(function() {
                 var player_id = encodeURIComponent($('.cardstories_email', element).val());
                 $.cookie('CARDSTORIES_ID', player_id);
-                $.when($this.update_player_info_from_ws(player_id)).done(function() {
-                    $this.game_or_create(player_id, game_id, root, 0);
-                });
+                $this.reload(player_id, game_id, root);
                 return true;
             });
 
