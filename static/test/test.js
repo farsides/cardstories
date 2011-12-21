@@ -52,6 +52,13 @@ QUnit.begin = function() {
 };
 
 function setup() {
+    // Delete the cookies that might be set under the /static or root path so
+    // that they don't interfere with the tests.
+    $.cookie('CARDSTORIES_ID', null, {path: '/'});
+    $.cookie('CARDSTORIES_ID', null, {path: '/static'});
+    $.cookie('CARDSTORIES_INVITATIONS', null, {path: '/'});
+    $.cookie('CARDSTORIES_INVITATIONS', null, {path: '/static'});
+    // Stub out some functions.
     $.cardstories.setTimeout = function(cb, delay) { return window.setTimeout(cb, 0); };
     $.cardstories.delay = function(o, delay, qname) { return; };
     $.cardstories.ajax = function(o) { throw o; };
