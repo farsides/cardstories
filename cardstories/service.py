@@ -90,7 +90,7 @@ class CardstoriesService(service.Service):
             db.commit()
         c.close()
         db.close()
-        self.db = adbapi.ConnectionPool("sqlite3", database=database, cp_noisy=True)
+        self.db = adbapi.ConnectionPool("sqlite3", database=database, cp_noisy=True, check_same_thread=False)
         self.notify({'type': 'start'})
 
     @defer.inlineCallbacks

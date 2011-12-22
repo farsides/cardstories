@@ -50,7 +50,7 @@ class Plugin(Auth):
                 )
             db.commit()
             db.close()
-        self.db = adbapi.ConnectionPool("sqlite3", database=self.database, cp_noisy=True)
+        self.db = adbapi.ConnectionPool("sqlite3", database=self.database, cp_noisy=True, check_same_thread=False)
         log.msg('plugin auth initialized with ' + self.database)
 
     def name(self):
