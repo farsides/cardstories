@@ -2445,6 +2445,29 @@ test("complete player didn't vote", 14, function() {
     equal($('.cardstories_results p', element).css('display'), 'none', 'result explanation is not visible');
 });
 
+test("canceled", 4, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var player_id = 113;
+    var game = {some: 'GAME'};
+    var element = $('.cardstories_notifications', root);
+    var modal = $('.cardstories_game_canceled', element);
+
+    $.cardstories.canceled(player_id, game, root);
+
+    equal(modal.css('display'), 'block', 'the canceled notification is shown');
+
+    var cardstories_reload = $.cardstories.reload;
+    $.cardstories.reload = function(_player_id, _game, _root) {
+        equal(_player_id, player_id);
+        ok(_game === undefined);
+        equal(_root, root);
+        $.cardstories.reload = cardstories_reload;
+    };
+
+    // Click on the 'Create new game' link.
+    modal.find('a').click();
+});
+
 test("play_again_finish_state author", 4, function() {
     var player_id = 0;
     var game_author = {

@@ -3611,6 +3611,23 @@
             box.fadeIn('slow', cb);
         },
 
+        canceled: function(player_id, game, root) {
+            var $this = this;
+            var element = $('.cardstories_notifications', root);
+            this.set_active(root, element, null, 'notification');
+            this.init_board_buttons(player_id, element, root);
+            var modal = $('.cardstories_game_canceled', element);
+            var overlay = $('.cardstories_modal_overlay', element);
+
+            $('a', modal).unbind('click').click(function() {
+                $this.close_modal(modal, overlay, function() {
+                    $this.reload(player_id, undefined, root);
+                });
+            });
+
+            this.display_modal(modal, overlay);
+        },
+
         send: function(query, cb, ajax_options) {
             var $this = this;
             var success = function(data, status) {

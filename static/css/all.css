@@ -2417,6 +2417,30 @@
     width: 988px;
 }
 
+/* Notifications */
+.cardstories_notifications .cardstories_game_canceled {
+    left: 230px;
+    top: 120px;
+    height: 100px;
+    width: 320px;
+    padding-top: 3em;
+}
+
+.cardstories_notifications .cardstories_game_canceled .cardstories_modal_h2 {
+  font-size: 1.2em;
+}
+
+.cardstories_notifications .cardstories_game_canceled .cardstories_modal_h2 {
+  margin-bottom: 0.5em;
+}
+
+.cardstories_notifications .cardstories_game_canceled .cardstories_modal_button span {
+  font-size: 0.8em;
+}
+
+/* Notifications */
+
+
 /* Dimensions and initial state of all pages */
 
 .cardstories .cardstories_subscribe, 
@@ -2430,6 +2454,7 @@
 .cardstories .cardstories_vote > div,
 .cardstories .cardstories_complete,
 .cardstories .cardstories_game,
+.cardstories .cardstories_notifications,
 .cardstories .cardstories_lobby,
 .cardstories .cardstories_extras { 
      display: none;
