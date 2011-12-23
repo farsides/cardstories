@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2011 Dachary <loic@dachary.org>
+# Copyright (C) 2011 Chris McCormick <chris@mccormickit.com>
 #
 # This software's license gives you freedom; you can copy, convey,
 # propagate, redistribute and/or modify this program under the terms of
@@ -21,14 +21,13 @@ export COVERAGE=$(shell which coverage || which python-coverage)
 all:
 
 check:
-	echo "Deactivated solo mode tests (solo mode not used anymore)"
-
-deactivated:
 	${COVERAGE} -e
-	PYTHONPATH=../.. ${COVERAGE} -x test_solo.py
-	${COVERAGE} -m -a -r solo.py
+	PYTHONPATH=../.. ${COVERAGE} -x test_bot.py
+	PYTHONPATH=../.. ${COVERAGE} -x test_buildwordsscores.py
+	${COVERAGE} -m -a -r bot.py buildwordsscores.py
 
 clean:
+	rm -f fixture2/bot/cards_words_scores.json
 	rm -fr .coverage _trial_temp*
 	rm -f *,cover
 	rm -f *.pyc

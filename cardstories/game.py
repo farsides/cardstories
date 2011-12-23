@@ -98,18 +98,19 @@ class CardstoriesGame(pollable):
             else:
                 yield self.cancel()
                 result = self.STATE_CHANGE_CANCEL
+        elif game['state'] == 'complete':
+            # FIXME This should never be reached, but it is currently. (bug #715)
+            result = self.STATE_CHANGE_TO_COMPLETE
         else:
-            raise UserWarning('unexpected state %s' % game.state)
+            raise UserWarning('unexpected state %s' % game['state'])
         defer.returnValue(result)
 
     @defer.inlineCallbacks
     def cancel(self):
         yield self.service.db.runOperation("UPDATE games SET state = 'canceled' WHERE id = ?", [ self.get_id() ])
         yield self.cancelInvitations()
-        yield self.service.db.runOperation("DELETE FROM player2game WHERE game_id = ?", [ self.get_id() ])
         self.destroy() # notify before altering the in core representation
         self.invited = []
-        self.players = []
         defer.returnValue({})
 
     def leaveInteraction(self, transaction, game_id, player_id):
@@ -380,7 +381,7 @@ class CardstoriesGame(pollable):
         else:
             winners = failed + guessed
         transaction.execute("UPDATE player2game SET win = 'y' WHERE "
-                            "  game_id = %d AND " % game_id +
+                            "  game_id = %d AND " % game_id + 
                             "  player_id IN ( %s ) " % ','.join([ str(id) for id in winners ]))
         transaction.execute("UPDATE games SET completed = datetime('now'), state = 'complete' WHERE id = %d" % game_id)
 

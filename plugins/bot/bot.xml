@@ -1,0 +1,14 @@
+<bot cards_words_scores_filename="cards_words_scores.json">
+    
+    <!-- Artificial delay before performing each type of action, in seconds -->
+    <delay type="join" base="15" random="0" />
+    <delay type="pick" base="2"  random="20" />
+    <delay type="vote" base="10" random="15" />
+    
+    <!-- id of each of the bots (should be created as normal accounts) -->
+    <botinstance player_id="2" />
+    <botinstance player_id="3" />
+    <botinstance player_id="4" />
+    <botinstance player_id="5" />
+    <botinstance player_id="6" />
+</bot>

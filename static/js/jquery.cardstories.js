@@ -719,24 +719,6 @@
             text.val('').placeholder({ onSubmit: submit });
         },
 
-        solo: function(player_id, root) {
-            this.poll_discard(root);
-            var $this = this;
-            var success = function(data, status) {
-                if('error' in data) {
-                    $this.error(data.error);
-                } else {
-                    $this.setTimeout(function() { $this.reload(player_id, data.game_id, root); }, 30);
-                }
-            };
-            var query = '?action=solo';
-            query += '&player_id=' + player_id;
-            $this.ajax({
-                url: $this.url + query,
-                success: success
-            });
-        },
-
         advertise: function(owner_id, game_id, element, root) {
             var $this = this;
             var box = $('.cardstories_advertise', element);
@@ -1076,9 +1058,6 @@
             $('.cardstories_start_story', element).click(function() {
                 $this.create(player_id, root);
               });
-            $('.cardstories_solo', element).click(function() {
-                $this.solo(player_id, root);
-              });
             this.lobby_games(player_id, lobby, element, root);
         },
 
@@ -1092,9 +1071,6 @@
             });
             $('.cardstories_start_story', element).click(function() {
                 $this.create(player_id, root);
-            });
-            $('.cardstories_solo', element).click(function() {
-                $this.solo(player_id, root);
             });
             this.lobby_games(player_id, lobby, element, root);
         },
