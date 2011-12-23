@@ -584,7 +584,7 @@ class CardstoriesGameTest(unittest.TestCase):
         self.game.service = self.service
         game_info, players_game_info = yield self.game.game(owner_id)
         self.assertEquals(game_info['state'], u'canceled')
-        self.assertEquals(game_info['players'], [])
+        self.assertEquals([ player['id'] for player in game_info['players']], [owner_id] + players)
 
     @defer.inlineCallbacks
     def test13_state_change(self):
@@ -821,7 +821,7 @@ class CardstoriesGameTest(unittest.TestCase):
         yield self.game.create(winner_card, sentence, owner_id)
 
         # Three players joing the game.
-        for player_id in ( player1_id, player2_id, player3_id ):
+        for player_id in (player1_id, player2_id, player3_id):
             yield self.game.participate(player_id)
 
         # Two players pick cards.
@@ -853,7 +853,7 @@ class CardstoriesGameTest(unittest.TestCase):
         yield self.game.create(winner_card, sentence, owner_id)
 
         # Three players joing the game.
-        for player_id in ( player1_id, player2_id, player3_id ):
+        for player_id in (player1_id, player2_id, player3_id):
             yield self.game.participate(player_id)
 
         # The players pick cards.
