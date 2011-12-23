@@ -200,12 +200,19 @@ $ PYTHONPATH=.:etc/cardstories twistd --nodaemon cardstories \
 	--plugins-logdir log \
 	--plugins 'auth chat' \
 	--plugins-pre-process 'auth chat' \
-	--plugins-post-process auth
 
 To check if the webservice replies, run the following (requires curl). The
 following must return the {"win": {}, "games": [], "modified": 0} string:
 
 $ curl --silent 'http://localhost:5000/resource?action=lobby&my=true&player_id=TEST&in_progress=yes'
+
+
+#############
+Extra plugins
+#############
+
+* Bot plugin:
+    - See ./plugins/bot/README.txt for installation instructions
 
 
 ######################
