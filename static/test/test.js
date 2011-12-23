@@ -2895,7 +2895,7 @@ test("poll_discard", 1, function() {
     $.cardstories.poll_discard(root);
 });
 
-test("lobby_in_progress", 8, function() {
+test("lobby_in_progress", 7, function() {
     var player_id = 10;
     var game1 = 100;
     var sentence1 = 'sentence1';
@@ -2921,14 +2921,9 @@ test("lobby_in_progress", 8, function() {
     $('.cardstories_start_story', element).click();
     equal($('#qunit-fixture .cardstories_lobby .cardstories_in_progress.cardstories_active').length, 0, 'in_progress not active');
     equal($('#qunit-fixture .cardstories_create .cardstories_pick_card.cardstories_active').length, 1, 'pick_card active');
-    // solo mode
-    $.cardstories.ajax = function(options) {
-        equal(options.url, $.cardstories.url + '?action=solo&player_id=' + player_id);
-    };
-    $('.cardstories_solo', element).click();
 });
 
-test("lobby_finished", 8, function() {
+test("lobby_finished", 7, function() {
     var player_id = 10;
     var game1 = 100;
     var sentence1 = 'sentence1';
@@ -2955,11 +2950,6 @@ test("lobby_finished", 8, function() {
     $('.cardstories_start_story', element).click();
     equal($('#qunit-fixture .cardstories_lobby .cardstories_finished.cardstories_active').length, 0, 'finished not active');
     equal($('#qunit-fixture .cardstories_create .cardstories_pick_card.cardstories_active').length, 1, 'pick_card active');
-    // solo mode
-    $.cardstories.ajax = function(options) {
-        equal(options.url, $.cardstories.url + '?action=solo&player_id=' + player_id);
-    };
-    $('.cardstories_solo', element).click();
   });
 
 test("poll", 10, function() {
@@ -3337,61 +3327,6 @@ test("credits", 4, function() {
     $('.cardstories_credits_close', long).click();
     equal(long.is(':visible'), false, 'credits not visible');
   });
-
-asyncTest("solo", 3, function() {
-    var root = $('#qunit-fixture .cardstories');
-    var player_id = 15;
-    var game_id = 7;
-
-    $.cardstories.ajax = function(options) {
-        equal(options.url, $.cardstories.url + '?action=solo&player_id=' + player_id);
-
-        var game = {
-            'game_id': game_id
-        };
-        options.success(game);
-    };
-
-    $.cardstories.reload = function(player_id2, game_id2, root2) {
-        equal(player_id2, player_id);
-        equal(game_id2, game_id);
-        start();
-    };
-
-    $.cardstories.solo(player_id, root);
-});
-
-test("solo on error", 1, function() {
-    var root = $('#qunit-fixture .cardstories');
-    var player_id = 15;
-
-    $.cardstories.ajax = function(options) {
-        var data = {error: 'error on solo'};
-        options.success(data);
-    };
-
-    $.cardstories.error = function(err) {
-        equal(err, 'error on solo', 'calls $.cardstories.error');
-    };
-
-    $.cardstories.solo(player_id, root);
-});
-
-test("poll on error", 1, function() {
-    var root = $('#qunit-fixture .cardstories');
-    root.data('polling', false);
-
-    $.cardstories.ajax = function(options) {
-        var data = {error: 'error on poll'};
-        options.success(data);
-    };
-
-    $.cardstories.error = function(err) {
-        equal(err, 'error on poll', 'calls $.cardstories.error');
-    };
-
-    $.cardstories.poll(root, {type: 'game'});
-});
 
 test("trigger_keypress, trigger_keydown helpers", 4, function() {
     var key_code = 101;
