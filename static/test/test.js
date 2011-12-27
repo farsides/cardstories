@@ -325,7 +325,6 @@ test("get_master_info", 2, function() {
     var game = {'owner_id': 1};
     var player_info = {'name': 'Bogus master name'};
 
-    var get_player_info_by_id_orig = $.cardstories.get_player_info_by_id;
     $.cardstories.get_player_info_by_id = function(player_id) {
         equal(player_id, game.owner_id);
         return player_info;
@@ -333,8 +332,6 @@ test("get_master_info", 2, function() {
 
     var result = $.cardstories.get_master_info(game);
     equal(result.name, player_info.name);
-
-    $.cardstories.get_player_info_by_id = get_player_info_by_id_orig;
 });
 
 test("update_player_info_from_ws", 2, function() {
@@ -531,6 +528,10 @@ test("subscribe", 5, function() {
 });
 
 test("widget subscribe", 3, function() {
+    $.cardstories.get_player_info_by_id = function(player_id) {
+        ok(false, "Should not call WS to get player info before login");
+    }
+    
     equal($.cookie('CARDSTORIES_ID'), null);
     equal($('#qunit-fixture .cardstories_subscribe.cardstories_active').length, 0);
     $('#qunit-fixture .cardstories').cardstories(undefined, undefined);

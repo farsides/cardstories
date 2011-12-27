@@ -1628,18 +1628,8 @@
             // Hide the dock, we don't need it anymore.
             hand.hide();
 
-            // What seat are we in?
-            var seatno=0;
-            for (var i=0; i < game.players.length; i++) {
-                if (game.owner_id != game.players[i]['id']) {
-                    seatno++;
-                    if (player_id == game.players[i]['id']) {
-                        break;
-                    }
-                }
-            }
-
-            var hand2dock_sprite = $('.cardstories_player_hand2dock_' + seatno, element);
+            var seat_nb = $this.get_player_seat_nb(player_id, game);
+            var hand2dock_sprite = $('.cardstories_player_hand2dock_' + seat_nb, element);
             var overlay = $('.cardstories_modal_overlay', element);
             q.queue('stage2', function(next) {
                 hand2dock_sprite.show();
@@ -1649,7 +1639,7 @@
             });
 
             // Move card back and change seat status.
-            var pick_sprite = $('.cardstories_player_pick_' + seatno, element);
+            var pick_sprite = $('.cardstories_player_pick_' + seat_nb, element);
             var pick_card =  $('.cardstories_card', pick_sprite);
             q.queue('stage2', function(next) {
                 pick_sprite.show();
@@ -1667,7 +1657,7 @@
 
             q.queue('stage2', function(next) {
                 // Set player status
-                var slot = $('.cardstories_player_seat_' + seatno, element);
+                var slot = $('.cardstories_player_seat_' + seat_nb, element);
                 $('.cardstories_player_status', slot).html('has picked a card!');
 
                 // Set last state of the sprite.
@@ -1840,7 +1830,7 @@
             var last = game.players.length - 1;
             var q = $({});
             var delay_next = false;
-            for (var i=0, seatno=0; i < game.players.length; i++) {
+            for (var i=0, seat_nb=0; i < game.players.length; i++) {
                 var playerq = 'player' + i;
 
                 // Delay this player, but only if there was at least one change
@@ -1852,22 +1842,22 @@
 
                 // Skip the owner.
                 if (game.players[i]['id'] != game.owner_id) {
-                    seatno++;
+                    seat_nb++;
 
                     // Joining animation.
-                    var seat = $('.cardstories_player_seat.cardstories_player_seat_' + seatno, element);
+                    var seat = $('.cardstories_player_seat.cardstories_player_seat_' + seat_nb, element);
                     if (!seat.hasClass('cardstories_noop_join')) {
                         seat.addClass('cardstories_noop_join');
                         delay_next = true;
-                        q.queue(playerq, (function(seat, seatno) {return function(next) {
-                            var join_sprite = $('.cardstories_player_join_' + seatno, element);
+                        q.queue(playerq, (function(seat, seat_nb) {return function(next) {
+                            var join_sprite = $('.cardstories_player_join_' + seat_nb, element);
                             $this.animate_sprite(join_sprite, 18, 18, false, function() {
-                                $('.cardstories_player_arms_' + seatno, element).show();
-                                $('.cardstories_player_pick_' + seatno, element).show();
+                                $('.cardstories_player_arms_' + seat_nb, element).show();
+                                $('.cardstories_player_pick_' + seat_nb, element).show();
                                 join_sprite.hide();
                                 next();
                             });
-                        };})(seat, seatno));
+                        };})(seat, seat_nb));
                     }
                 }
 
@@ -1916,6 +1906,22 @@
             card.animate(card_pos, 500, cb);
         },
 
+        get_player_seat_nb: function(player_id, game) {
+            // What's the number (position) of the player seat on this game?
+            
+            var seat_nb=0;
+            for (var i=0; i < game.players.length; i++) {
+                if (game.owner_id != game.players[i]['id']) {
+                    seat_nb++;
+                    if (player_id == game.players[i]['id']) {
+                        break;
+                    }
+                }
+            }
+            
+            return seat_nb;
+        },
+        
         invitation_pick_dock_helper: function(player_id, game, card_specs, element, cb) {
             var $this = this;
             var container = $('.cardstories_card_backs', element);
@@ -1941,19 +1947,9 @@
             });
             container.hide();
 
-            // What seat are we in?
-            var seatno=0;
-            for (var i=0; i < game.players.length; i++) {
-                if (game.owner_id != game.players[i]['id']) {
-                    seatno++;
-                    if (player_id == game.players[i]['id']) {
-                        break;
-                    }
-                }
-            }
-
-            var hand2dock_sprite = $('.cardstories_player_hand2dock_' + seatno, element);
-            var pick_sprite = $('.cardstories_player_pick_' + seatno, element);
+            var seat_nb = $this.get_player_seat_nb(player_id, game);
+            var hand2dock_sprite = $('.cardstories_player_hand2dock_' + seat_nb, element);
+            var pick_sprite = $('.cardstories_player_pick_' + seat_nb, element);
 
             var q = $({});
 
@@ -2187,12 +2183,12 @@
             var players = game.players;
             var snippets = $('.cardstories_snippets', root);
             var seat_snippet = $('.cardstories_player_seat', snippets);
-            for (var i=0, seatno=0; i < players.length; i++) {
+            for (var i=0, seat_nb=0; i < players.length; i++) {
                 if (players[i]['id'] != game.owner_id) {
-                    seatno++;
+                    seat_nb++;
 
                     // Only initialize the seat once.
-                    var seat = $('.cardstories_player_seat.cardstories_player_seat_' + seatno, element);
+                    var seat = $('.cardstories_player_seat.cardstories_player_seat_' + seat_nb, element);
                     if (seat.children().length == 0) {
                         seat_snippet.clone().children().appendTo(seat);
                         var player_info = $this.get_player_info_by_id(players[i]['id']);
@@ -2221,17 +2217,17 @@
             var q = $({});
             var delay_next = false;
 
-            for (var i=0, seatno=0; i < players.length; i++) {
+            for (var i=0, seat_nb=0; i < players.length; i++) {
                 var playerq = 'player' + i;
 
                 // Skip the owner.
                 if (players[i]['id'] !== game.owner_id) {
-                    seatno++;
-                    var seat = $('.cardstories_player_seat.cardstories_player_seat_' + seatno, element);
+                    seat_nb++;
+                    var seat = $('.cardstories_player_seat.cardstories_player_seat_' + seat_nb, element);
                     var status = $('.cardstories_player_status', seat);
 
-                    $('.cardstories_player_arms_' + seatno, element).show();
-                    $('.cardstories_player_pick_' + seatno, element).show();
+                    $('.cardstories_player_arms_' + seat_nb, element).show();
+                    $('.cardstories_player_pick_' + seat_nb, element).show();
 
                     // Delay this player, but only if there was at least one change
                     // displayed for the previous ones.
@@ -2245,7 +2241,7 @@
                     if (players[i]['picked'] !== null) {
                         if (!seat.hasClass('cardstories_noop_picked')) {
                             seat.addClass('cardstories_noop_picked');
-                            var card_img = $('.cardstories_player_pick_' + seatno, element).find('img');
+                            var card_img = $('.cardstories_player_pick_' + seat_nb, element).find('img');
                             if (players[i]['id'] == player_id) {
                                 var self_card = $('.cardstories_player_self_picked_card', element);
                                 var foreground = $('.cardstories_card_foreground', self_card);
@@ -2258,20 +2254,20 @@
                                 self_card.show();
 
                                 // Set pick_sprite to final state.
-                                var pick_sprite = $('.cardstories_player_pick_' + seatno, element);
+                                var pick_sprite = $('.cardstories_player_pick_' + seat_nb, element);
                                 var x = -(6 * pick_sprite.width());
                                 pick_sprite.css({'background-position': x + 'px 0px'});
                             } else {
                                 delay_next = true;
-                                q.queue(playerq, (function(seat, seatno, card_img) { return function(next) {
-                                    var pick_sprite = $('.cardstories_player_pick_' + seatno, element);
+                                q.queue(playerq, (function(seat, seat_nb, card_img) { return function(next) {
+                                    var pick_sprite = $('.cardstories_player_pick_' + seat_nb, element);
                                     $this.animate_sprite(pick_sprite, 18, 7, false, function() {
                                         pick_sprite.find('.cardstories_card').show();
                                         card_img.show();
                                         seat.addClass('cardstories_player_seat_waiting');
                                         next();
                                     });
-                                };})(seat, seatno, card_img));
+                                };})(seat, seat_nb, card_img));
                             }
                             status.html('is waiting for other players<br />...');
                         }
@@ -2378,7 +2374,7 @@
                 });
             }
 
-            $.each(active_seats, function(i, seatno) {
+            $.each(active_seats, function(i, seat_nb) {
                 // Insert an artificial delay between players, for
                 // aesthetical reasons.
                 if (i > 0) {
@@ -2386,8 +2382,8 @@
                 }
 
                 q.queue('chain', function(next) {
-                    $('.cardstories_player_pick_' + seatno, element).addClass('cardstories_no_background');
-                    var return_sprite = $('.cardstories_player_return_' + seatno, element);
+                    $('.cardstories_player_pick_' + seat_nb, element).addClass('cardstories_no_background');
+                    var return_sprite = $('.cardstories_player_return_' + seat_nb, element);
                     var is_last_seat = i === active_seats.length - 1;
                     $this.animate_sprite(return_sprite, 18, 18, false, function() {
                         return_sprite.hide();
@@ -2893,11 +2889,11 @@
 
             // Construct picked card => seat number translation.
             var card2seat = {};
-            for(var i=0, seatno=0; i < game.players.length; i++) {
+            for(var i=0, seat_nb=0; i < game.players.length; i++) {
                 if (game.players[i]['id'] != game.owner_id) {
-                    seatno++;
+                    seat_nb++;
                     var picked = game.players[i]['picked'];
-                    card2seat[picked] = seatno;
+                    card2seat[picked] = seat_nb;
                 }
             }
 
@@ -2989,25 +2985,25 @@
             var players = game.players;
             var snippets = $('.cardstories_snippets', root);
             var seat_snippet = $('.cardstories_player_seat', snippets);
-            for (var i=0, seatno=0; i < players.length; i++) {
+            for (var i=0, seat_nb=0; i < players.length; i++) {
                 if (players[i]['id'] != game.owner_id) {
-                    seatno++;
+                    seat_nb++;
 
                     // Only initialize the seat once.
-                    var seat = $('.cardstories_player_seat.cardstories_player_seat_' + seatno, element);
+                    var seat = $('.cardstories_player_seat.cardstories_player_seat_' + seat_nb, element);
                     if (seat.children().length == 0) {
                         // Active player seat.
                         seat_snippet.clone().children().appendTo(seat);
                         var player_info = $this.get_player_info_by_id(players[i]['id']);
                         $this.display_player_info(player_info, seat);
                         seat.show();
-                        $('.cardstories_player_arms_' + seatno, element).show();
+                        $('.cardstories_player_arms_' + seat_nb, element).show();
 
                         // Only show hand cards during setup phase.
                         if (setup) {
                             // If we're a player, show the card we picked.
                             // Otherwise, just show the regular card.
-                            var card = $('.cardstories_card_' + seatno, element);
+                            var card = $('.cardstories_card_' + seat_nb, element);
                             if (players[i]['id'] == player_id) {
                                 var card_self = $('.cardstories_player_self_picked_card', element);
                                 var foreground = $('.cardstories_card_foreground', card_self);
@@ -3397,12 +3393,12 @@
             var snippets = $('.cardstories_snippets', root);
             var seat_snippet = $('.cardstories_player_seat', snippets);
             var seatcard_snippet = $('.cardstories_card_slot', snippets);
-            for (var i=0, seatno=0; i < players.length; i++) {
+            for (var i=0, seat_nb=0; i < players.length; i++) {
                 if (players[i]['id'] != game.owner_id) {
-                    seatno++;
+                    seat_nb++;
 
                     // Only initialize the seat once.
-                    var seat = $('.cardstories_player_seat.cardstories_player_seat_' + seatno, element);
+                    var seat = $('.cardstories_player_seat.cardstories_player_seat_' + seat_nb, element);
                     if (seat.children().length == 0) {
                         // Active player seat.
                         seat_snippet.clone().children().appendTo(seat);
@@ -3410,11 +3406,11 @@
                         var player_info = $this.get_player_info_by_id(players[i]['id']);
                         $this.display_player_info(player_info, seat);
                         seat.show();
-                        $('.cardstories_player_arms_' + seatno, element).show();
+                        $('.cardstories_player_arms_' + seat_nb, element).show();
 
                         // Active player card, if picked.
                         if (players[i]['picked']) {
-                            var seatcard = $('.cardstories_player_seat_card_' + seatno, element);
+                            var seatcard = $('.cardstories_player_seat_card_' + seat_nb, element);
 
                             // Populate it.
                             seatcard_snippet.clone().children().appendTo(seatcard);
@@ -3429,7 +3425,7 @@
 
                         // Show envelope if player voted.
                         if (players[i]['vote']) {
-                            $('.cardstories_envelope_' + seatno, element).show();
+                            $('.cardstories_envelope_' + seat_nb, element).show();
                         }
                     }
                 }
@@ -3442,12 +3438,12 @@
 
             // Construct picked card => slot number translation.
             var card2seat = {};
-            for(var i=0, seatno=0; i < players.length; i++) {
+            for(var i=0, seat_nb=0; i < players.length; i++) {
                 var picked = players[i]['picked'];
                 if (players[i]['id'] != game.owner_id) {
-                    seatno++;
+                    seat_nb++;
                     if (picked) {
-                        card2seat[picked] = seatno;
+                        card2seat[picked] = seat_nb;
                     }
                 } else {
                     card2seat[picked] = 6;
@@ -4153,6 +4149,8 @@
 
             $this.preload_images_helper(root, function() {
                 if (!player_id) {
+                    // This should only happen when CS is used in the standalone mode
+                    // In which case authentication is handled internally
                     $this.login(game_id, login_url, root);
                 } else {
                     // Get player_info of the player
