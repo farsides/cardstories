@@ -6,12 +6,34 @@ Installation instructions
 
 Install the required dependencies:
 
-    $ sudo apt-get install python-nltk
+    $ sudo apt-get install python-yaml python-numpy
+    $ sudo pip install nltk
+
+Download the maxent_treebank_pos_tagger:
+
+    $ python
+
+    Python 2.6.6 (r266:84292, Dec 26 2010, 22:31:48) 
+    [GCC 4.4.5] on linux2
+    Type "help", "copyright", "credits" or "license" for more information.
+    >>> import nltk
+    >>> nltk.download()
+    NLTK Downloader
+    ---------------------------------------------------------------------------
+        d) Download   l) List    u) Update   c) Config   h) Help   q) Quit
+    ---------------------------------------------------------------------------
+    Downloader> d
+
+    Download which package (l=list; x=cancel)?
+      Identifier> maxent_treebank_pos_tagger
+        Downloading package 'maxent_treebank_pos_tagger' to
+            /var/www/nltk_data...
+          Unzipping taggers/maxent_treebank_pos_tagger.zip.
     
 Create five "normal" player accounts, one for each of the bots, and edit the configuration 
 file with their player_ids:
 
-    $ gvim ./plugins/bot/bot.xml
+    $ gvim ./tests/bot/bot.xml
     
 Bot avatar images are available in /static/css/images/avatars/bots 
     
