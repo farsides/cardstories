@@ -391,6 +391,7 @@ class CardstoriesGame(pollable):
         game, players_id_list = yield self.game(self.get_owner_id())
         yield self.service.db.runInteraction(self.completeInteraction, self.get_id(), owner_id)
         result = yield self.touch(type='complete')
+        self.destroy()
         defer.returnValue(result)
 
     def cancelInvitations(self):

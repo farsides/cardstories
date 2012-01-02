@@ -323,10 +323,6 @@ class CardstoriesService(service.Service):
         owner_id = int(args['owner_id'][0])
         game_id = self.required_game_id(args)
         d = self.game_method(game_id, 'complete', owner_id)
-        def success(value):
-            self.games[game_id].destroy()
-            return value
-        d.addCallback(success)
         return d
 
     def game(self, args):

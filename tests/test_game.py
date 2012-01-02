@@ -820,7 +820,7 @@ class CardstoriesGameTest(unittest.TestCase):
         player3_id = 55
         yield self.game.create(winner_card, sentence, owner_id)
 
-        # Three players joing the game.
+        # Three players joining the game.
         for player_id in (player1_id, player2_id, player3_id):
             yield self.game.participate(player_id)
 
@@ -852,7 +852,7 @@ class CardstoriesGameTest(unittest.TestCase):
         player3_id = 15
         yield self.game.create(winner_card, sentence, owner_id)
 
-        # Three players joing the game.
+        # Three players joining the game.
         for player_id in (player1_id, player2_id, player3_id):
             yield self.game.participate(player_id)
 
@@ -868,23 +868,59 @@ class CardstoriesGameTest(unittest.TestCase):
         yield self.game.vote(player1_id, 25)
         yield self.game.vote(player2_id, 24)
 
+        # Save reference to the db since the complete method will delete the
+        # service object from the game.
+        db = self.game.service.db
+
         # Move the game to the complete state and simulate a race condition
         # where the third player votes after the results have already been
         # calculated.
         yield self.game.complete(owner_id)
 
         # The third player can't vote anymore.
-        raises_UserWarning = False
+        raises_exception = False
         try:
             yield self.game.vote(player3_id, 25)
-        except UserWarning:
-            raises_UserWarning = True
         except:
-            pass
-        self.assertTrue(raises_UserWarning)
+            raises_exception = True
+        self.assertTrue(raises_exception)
 
-        vote = yield self.game.service.db.runQuery("SELECT vote FROM player2game WHERE game_id = ? AND player_id = ?", [ self.game.get_id(), player3_id ])
+        vote = yield db.runQuery("SELECT vote FROM player2game WHERE game_id = ? AND player_id = ?", [ self.game.get_id(), player3_id ])
         self.assertEquals(None, vote[0][0])
+
+    @defer.inlineCallbacks
+    def test22_game_is_destroy_upon_complete(self):
+        winner_card = 25
+        sentence = 'SENTENCE'
+        owner_id = 12
+        player1_id = 13
+        player2_id = 14
+        yield self.game.create(winner_card, sentence, owner_id)
+
+        # The players join the game.
+        yield self.game.participate(player1_id)
+        yield self.game.participate(player2_id)
+        # The players pick cards.
+        yield self.game.pick(player1_id, 1)
+        yield self.game.pick(player2_id, 2)
+        # Move the game to the 'vote' state.
+        yield self.game.voting(owner_id)
+        # The players vote.
+        yield self.game.vote(player1_id, 25)
+        yield self.game.vote(player2_id, 24)
+
+        # Mock out the game.destroy() method.
+        orig_destroy = CardstoriesGame.destroy
+        def fake_destroy(self):
+            self.destroy_called = True
+            orig_destroy(self)
+        CardstoriesGame.destroy = fake_destroy
+
+        # Complete the game, which should in turn call game.destroy().
+        yield self.game.complete(owner_id)
+        CardstoriesGame.destroy = orig_destroy
+        self.assertTrue(self.game.destroy_called)
+        # Clean up the mock.
 
 
 def Run():
