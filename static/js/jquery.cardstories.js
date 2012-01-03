@@ -2435,14 +2435,36 @@
 
             // Send game when user clicks ok.
             var ok = function(card_index, card_value) {
+                var cb = function() {
+                    $this.game(player_id, game.id, root);
+                };
+                var success = function(data, status) {
+                    // TODO: This is a VERY hackish way of doing this,
+                    // but due to the way UserWarnings work at the moment,
+                    // this is the best we can do.
+                    // See: http://tickets.farsides.com/issues/732 for how
+                    // I think we should handle UserWarnings and other errors
+                    // from the service.
+                    if ('error' in data) {
+                        if (data.error.match(/game_id=.* does not exist/)) {
+                            $this.error('Ooops, it looks like the game has already finished.');
+                            $this.setTimeout(cb, 30);
+                        } else {
+                            $this.error(data.error);
+                        }
+                    } else {
+                        $this.setTimeout(cb, 30);
+                    }
+                };
+
                 $this.animate_progress_bar(4, element, function() {
                     $this.send({
                         action: 'vote',
                         player_id: player_id,
                         game_id: game.id,
-                        card: card_value
-                    }, function() {
-                        $this.game(player_id, game.id, root);
+                        card: card_value,
+                    }, cb, {
+                        success: success
                     });
                 });
             };

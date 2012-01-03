@@ -1796,6 +1796,64 @@ asyncTest("vote_voter", 30, function() {
    });
 });
 
+asyncTest("vote_voter", 5, function() {
+    var player_id = 1;
+    var player2_id = 1;
+    var owner_id = 2;
+    var game_id = 109;
+    var winner = 30;
+    var picked = 31;
+    var voted = 33;
+    var board = [30, picked, 32, voted];
+    var sentence = 'SENTENCE';
+    var game = {
+        'id': game_id,
+        'board': board,
+        'owner_id': owner_id,
+        'player_id': player_id,
+        'self': [picked, null, [11, 12, 13, 14, 15, 16]],
+        'sentence': sentence,
+        'players': [ { 'id': owner_id, 'vote': null, 'win': 'n', 'picked': null, 'cards': [] },
+                     { 'id': player_id, 'vote': null, 'win': 'n', 'picked': picked, 'cards': [] },
+                     { 'id': player2_id, 'vote': null, 'win': 'n', 'picked': null, 'cards': [] } ]
+    };
+
+    $.cardstories.ajax = function(options) {
+        options.success({error: 'game_id=109 does not exist'});
+    };
+
+    $.cardstories.poll_ignore = function(_request) {
+        equal(_request.game_id, game_id, 'poll_ignore request game_id');
+    };
+
+    $.cardstories.display_modal = function(modal, overlay, cb, cb_on_close) {
+        if (cb) {cb();}
+    };
+
+    $.cardstories.error = function(errmsg) {
+        ok(errmsg.match(/game has already finished/));
+    };
+
+    var orig_game = $.cardstories.game;
+    $.cardstories.game = function(_player_id, _game_id, _root) {
+        equal(_player_id, player_id, 'game is called with player_id');
+        equal(_game_id, game_id, 'game is called with game_id');
+        equal(_root, root, 'game is called with root');
+        // Clean up.
+        $.cardstories.game = orig_game;
+        start();
+    };
+
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_vote .cardstories_voter', root);
+
+    $.cardstories.vote(player_id, game, root).done(function() {
+        // Select 4th card, and confirm.
+        $('.cardstories_card_slot_4', element).click();
+        $('.cardstories_card_confirm_ok a', element).click();
+   });
+});
+
 test("vote_voter_wait", 31, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_vote .cardstories_voter_wait');
