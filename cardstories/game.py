@@ -98,9 +98,6 @@ class CardstoriesGame(pollable):
             else:
                 yield self.cancel()
                 result = self.STATE_CHANGE_CANCEL
-        elif game['state'] == 'complete':
-            # FIXME This should never be reached, but it is currently. (bug #715)
-            result = self.STATE_CHANGE_TO_COMPLETE
         else:
             raise UserWarning('unexpected state %s' % game['state'])
         defer.returnValue(result)
