@@ -36,8 +36,8 @@ class CardstoriesGameTest(unittest.TestCase):
 
     def setUp(self):
         self.database = 'test.sqlite'
-        #if os.path.exists(self.database):
-            #os.unlink(self.database)
+        if os.path.exists(self.database):
+            os.unlink(self.database)
         self.service = CardstoriesService({'db': self.database})
         self.service.startService()
         self.db = sqlite3.connect(self.database)
@@ -46,7 +46,7 @@ class CardstoriesGameTest(unittest.TestCase):
     def tearDown(self):
         self.game.destroy()
         self.db.close()
-        #os.unlink(self.database)
+        os.unlink(self.database)
         return self.service.stopService()
 
     @defer.inlineCallbacks

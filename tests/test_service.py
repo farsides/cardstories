@@ -99,8 +99,8 @@ class CardstoriesServiceTestInit(unittest.TestCase):
     @defer.inlineCallbacks
     def test01_load(self):
         database = 'test.sqlite'
-        #if os.path.exists(database):
-            #os.unlink(database)
+        if os.path.exists(database):
+            os.unlink(database)
 
         service = CardstoriesService({'db': database})
         self.assertFalse(os.path.exists(database))
@@ -128,15 +128,15 @@ class CardstoriesServiceTestBase(unittest.TestCase):
 
     def setUp(self):
         self.database = 'test.sqlite'
-        #if os.path.exists(self.database):
-            #os.unlink(self.database)
+        if os.path.exists(self.database):
+            os.unlink(self.database)
         self.service = CardstoriesService({'db': self.database})
         self.service.startService()
         self.db = sqlite3.connect(self.database)
 
     def tearDown(self):
         self.db.close()
-        #os.unlink(self.database)
+        os.unlink(self.database)
         return self.service.stopService()
 
 class CardstoriesServiceTestHandle(CardstoriesServiceTestBase):
