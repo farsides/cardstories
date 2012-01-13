@@ -21,6 +21,7 @@ import random
 from twisted.internet import defer, reactor
 
 from cardstories.poll import pollable
+from cardstories.exceptions import CardstoriesWarning
 
 class CardstoriesGame(pollable):
 
@@ -99,7 +100,7 @@ class CardstoriesGame(pollable):
                 yield self.cancel()
                 result = self.STATE_CHANGE_CANCEL
         else:
-            raise UserWarning('unexpected state %s' % game['state'])
+            raise Exception, "Unexpected state: '%s'" % game['state']
         defer.returnValue(result)
 
     @defer.inlineCallbacks
@@ -155,9 +156,10 @@ class CardstoriesGame(pollable):
     @defer.inlineCallbacks
     def game(self, player_id):
         db = self.service.db
-        rows = yield db.runQuery("SELECT owner_id, sentence, cards, board, state FROM games WHERE id = ?", [self.get_id()])
+        game_id = self.get_id()
+        rows = yield db.runQuery("SELECT owner_id, sentence, cards, board, state FROM games WHERE id = ?", [ game_id ])
         if not rows:
-            raise UserWarning("Game doesn't exist: %s" % self.get_id())
+            raise CardstoriesWarning('GAME_DOES_NOT_EXIST', {'game_id': game_id, 'player_id': player_id})
         (owner_id, sentence, cards, board, state) = rows[0]
         if owner_id == player_id:
             cards = [ ord(c) for c in cards ]
@@ -169,7 +171,7 @@ class CardstoriesGame(pollable):
             board = None
         else:
             board = [ ord(c) for c in board ]
-        rows = yield db.runQuery("SELECT player_id, cards, picked, vote, win FROM player2game WHERE game_id = ? ORDER BY serial", [ self.get_id() ])
+        rows = yield db.runQuery("SELECT player_id, cards, picked, vote, win FROM player2game WHERE game_id = ? ORDER BY serial", [ game_id ])
         picked_count = 0
         voted_count = 0
         players = []
@@ -225,7 +227,7 @@ class CardstoriesGame(pollable):
             ready = picked_count >= self.MIN_PICKED
         elif state == 'vote':
             ready = voted_count >= self.MIN_VOTED
-        defer.returnValue([{'id': self.get_id(),
+        defer.returnValue([{'id': game_id,
                             'modified': self.get_modified(),
                             'sentence': sentence,
                             'winner_card': winner_card,
@@ -244,7 +246,7 @@ class CardstoriesGame(pollable):
     def participateInteraction(self, transaction, game_id, player_id):
         transaction.execute("SELECT players, cards FROM games WHERE id = %d" % game_id)
         (players, cards) = transaction.fetchall()[0]
-        no_room = UserWarning('player %d cannot join game %d because the %d players limit is reached' % (player_id, game_id, self.NPLAYERS))
+        no_room = CardstoriesWarning('GAME_FULL', {'game_id': game_id, 'player_id': player_id, 'max_players': self.NPLAYERS})
         if players >= self.NPLAYERS:
             raise no_room
         transaction.execute("UPDATE games SET cards = ?, players = players + 1 WHERE id = %d AND players = %d" % (game_id, players), [ cards[self.CARDS_PER_PLAYER:] ])
@@ -332,7 +334,7 @@ class CardstoriesGame(pollable):
         if state == 'invitation':
             transaction.execute("UPDATE player2game SET picked = ? WHERE game_id = ? AND player_id = ?", [ chr(card), game_id, player_id ])
         else:
-            raise UserWarning("Cannot pick a card because the game is in '%s' state." % state)
+            raise CardstoriesWarning('WRONG_STATE_FOR_PICKING', {'game_id': game_id, 'player_id': player_id, 'state': state})
 
     @defer.inlineCallbacks
     def pick(self, player_id, card):
@@ -349,7 +351,7 @@ class CardstoriesGame(pollable):
         if state == 'vote':
             transaction.execute("UPDATE player2game SET vote = ? WHERE game_id = ? AND player_id = ?", [ chr(vote), game_id, player_id ])
         else:
-            raise UserWarning("Cannot vote because the game is in '%s' state" % state)
+            raise CardstoriesWarning('WRONG_STATE_FOR_VOTING', {'game_id': game_id, 'player_id': player_id, 'state': state})
 
     @defer.inlineCallbacks
     def vote(self, player_id, vote):

@@ -24,6 +24,7 @@ from twisted.internet import reactor, defer
 from twisted.enterprise import adbapi
 
 from cardstories.game import CardstoriesGame
+from cardstories.exceptions import CardstoriesWarning, CardstoriesException
 
 #from OpenSSL import SSL
 
@@ -64,7 +65,7 @@ class CardstoriesService(service.Service):
 
     def notify(self, result):
         if hasattr(self, 'notify_running'):
-            raise UserWarning, 'recursive call to notify'
+            raise CardstoriesException, 'recursive call to notify'
         self.notify_running = True
         listeners = self.listeners
         self.listeners = []
@@ -345,7 +346,7 @@ class CardstoriesService(service.Service):
 
     def game_method(self, game_id, action, *args, **kwargs):
         if not self.games.has_key(game_id):
-            raise UserWarning, 'game_id=%s does not exist' % str(game_id)
+            raise CardstoriesWarning('GAME_NOT_LOADED',  {'game_id': game_id})
         return getattr(self.games[game_id], action)(*args, **kwargs)
 
     def participate(self, args):
@@ -446,32 +447,35 @@ class CardstoriesService(service.Service):
             if action in self.ACTIONS:
                 d = getattr(self, action)(args)
                 def error(reason):
-                    if reason.type is UserWarning:
-                        return {'error': reason.getErrorMessage()}
+                    error = reason.value
+                    if reason.type is CardstoriesWarning:
+                        return {'error': {'code': error.code, 'data': error.data}}
                     else:
-                        return reason
+                        return {'error': {'code': 'PANIC', 'data': error.args[0]}}
                 d.addErrback(error)
                 return d
             else:
-                raise UserWarning('action ' + action + ' is not among the allowed actions ' + ','.join(self.ACTIONS))
-        except UserWarning, e:
+                raise CardstoriesException, 'Unknown action: %s' % action
+        except CardstoriesWarning as e:
             failure.Failure().printTraceback()
-            return defer.succeed({'error': e.args[0]})
+            return defer.succeed({'error': {'code': e.code, 'data': e.data}})
+        except Exception as e:
+            failure.Failure().printTraceback()
+            return defer.succeed({'error': {'code': 'PANIC', 'data': e.args[0]}})
 
     @staticmethod
-    def required(args, method, *keys):
+    def required(args, action, *keys):
         for key in keys:
             if not args.has_key(key):
-                raise UserWarning, '%s must be given a %s value' % (method, key)
+                raise CardstoriesException, "Action '%s' requires argument '%s', but it was missing." % (action, key)
         return True
 
     @staticmethod
     def required_game_id(args):
-        if not args.has_key('game_id'):
-            raise UserWarning, '%s must be given a game_id value' % args['action'][0]
+        CardstoriesService.required(args, args['action'][0], 'game_id')
         game_id = int(args['game_id'][0])
         if game_id <= 0:
-            raise UserWarning, 'game_id=%s must be an integer > 0' % args['game_id']
+            raise CardstoriesException, 'game_id cannot be negative: %d' % args['game_id']
         return game_id
 
 #class SSLContextFactory:

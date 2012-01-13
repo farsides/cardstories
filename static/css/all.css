@@ -2418,7 +2418,7 @@
 }
 
 /* Notifications */
-.cardstories_notifications .cardstories_game_canceled {
+.cardstories_notifications .cardstories_modal {
     left: 230px;
     top: 120px;
     height: 100px;
@@ -2426,16 +2426,21 @@
     padding-top: 3em;
 }
 
-.cardstories_notifications .cardstories_game_canceled .cardstories_modal_h2 {
+.cardstories_notifications .cardstories_modal .cardstories_modal_h2 {
   font-size: 1.2em;
 }
 
-.cardstories_notifications .cardstories_game_canceled .cardstories_modal_h2 {
+.cardstories_notifications .cardstories_modal .cardstories_modal_h2 {
   margin-bottom: 0.5em;
 }
 
-.cardstories_notifications .cardstories_game_canceled .cardstories_modal_button span {
+.cardstories_notifications .cardstories_modal .cardstories_modal_button span {
   font-size: 0.8em;
+}
+
+.cardstories_notifications .cardstories_picked_too_late {
+    left: 210px;
+    width: 360px;
 }
 
 /* Notifications */

@@ -27,6 +27,7 @@ from twisted.internet import defer
 
 from cardstories.game import CardstoriesGame
 from cardstories.service import CardstoriesService
+from cardstories.exceptions import CardstoriesWarning
 
 from twisted.internet import base
 base.DelayedCall.debug = True
@@ -35,8 +36,8 @@ class CardstoriesGameTest(unittest.TestCase):
 
     def setUp(self):
         self.database = 'test.sqlite'
-        if os.path.exists(self.database):
-            os.unlink(self.database)
+        #if os.path.exists(self.database):
+            #os.unlink(self.database)
         self.service = CardstoriesService({'db': self.database})
         self.service.startService()
         self.db = sqlite3.connect(self.database)
@@ -45,7 +46,7 @@ class CardstoriesGameTest(unittest.TestCase):
     def tearDown(self):
         self.game.destroy()
         self.db.close()
-        os.unlink(self.database)
+        #os.unlink(self.database)
         return self.service.stopService()
 
     @defer.inlineCallbacks
@@ -120,6 +121,26 @@ class CardstoriesGameTest(unittest.TestCase):
         self.assertEquals([owner_id, player_id, invited], self.game.players)
         self.assertEquals([], self.game.invited)
         self.assertEquals([owner_id, player_id, invited], self.game.get_players())
+        #
+        # assert exception is raised when game is full
+        #
+        player_id = 30
+        while len(self.game.players) < self.game.NPLAYERS:
+            yield self.game.participate(player_id)
+            player_id += 1
+        # The game is full, trying to add another player should raise an exception.
+        raises_CardstoriesException = False
+        error_code = None
+        error_data = {}
+        try:
+            yield self.game.participate(player_id)
+        except CardstoriesWarning as e:
+            raises_CardstoriesException = True
+            error_code = e.code
+            error_data = e.data
+        self.assertTrue(raises_CardstoriesException)
+        self.assertEquals('GAME_FULL', error_code)
+        self.assertEquals(self.game.NPLAYERS, error_data['max_players'])
 
     @defer.inlineCallbacks
     def test03_player2game(self):
@@ -678,16 +699,17 @@ class CardstoriesGameTest(unittest.TestCase):
         self.assertEqual(result, None)
 
     @defer.inlineCallbacks
-    def test17_nonexistant_game(self):
-        raises_UserWarning = False
+    def test17_nonexistent_game(self):
+        raises_CardstoriesException = False
+        error_code = None
         try:
             self.game.id = 12332123
             yield self.game.game(None)
-        except UserWarning:
-            raises_UserWarning = True
-        except:
-            pass
-        self.assertTrue(raises_UserWarning)
+        except CardstoriesWarning as e:
+            raises_CardstoriesException = True
+            error_code = e.code
+        self.assertTrue(raises_CardstoriesException)
+        self.assertEqual('GAME_DOES_NOT_EXIST', error_code)
 
     @defer.inlineCallbacks
     def test18_complete_and_game_race(self):
@@ -833,14 +855,18 @@ class CardstoriesGameTest(unittest.TestCase):
         yield self.game.voting(owner_id)
 
         # The third player can't pick a card anymore.
-        raises_UserWarning = False
+        raises_CardstoriesException = False
+        error_code = None
+        error_data = {}
         try:
             yield self.game.pick(player3_id, 3)
-        except UserWarning:
-            raises_UserWarning = True
-        except:
-            pass
-        self.assertTrue(raises_UserWarning)
+        except CardstoriesWarning as e:
+            raises_CardstoriesException = True
+            error_code = e.code
+            error_data = e.data
+        self.assertTrue(raises_CardstoriesException)
+        self.assertEqual('WRONG_STATE_FOR_PICKING', error_code)
+        self.assertEqual('vote', error_data['state'])
 
     @defer.inlineCallbacks
     def test21_vote_only_in_vote_state(self):
@@ -861,6 +887,20 @@ class CardstoriesGameTest(unittest.TestCase):
         yield self.game.pick(player2_id, 2)
         yield self.game.pick(player3_id, 3)
 
+        # Try to vote now (not in the 'vote' state yet!).
+        raises_CardstoriesException = False
+        error_code = None
+        error_data = {}
+        try:
+            yield self.game.vote(player1_id, 25)
+        except CardstoriesWarning as e:
+            raises_CardstoriesException = True
+            error_code = e.code
+            error_data = e.data
+        self.assertTrue(raises_CardstoriesException)
+        self.assertEqual('WRONG_STATE_FOR_VOTING', error_code)
+        self.assertEqual('invitation', error_data['state'])
+
         # Move the game to the 'vote' state.
         yield self.game.voting(owner_id)
 
@@ -878,6 +918,10 @@ class CardstoriesGameTest(unittest.TestCase):
         yield self.game.complete(owner_id)
 
         # The third player can't vote anymore.
+        # The exception here isn't the CardstoriesWarning, because the code
+        # fails prior to that (since the game has been destroyed),
+        # and the user error response is generated by the service, not the game.
+        # So the only important thing to assert here is that trying to vote fails.
         raises_exception = False
         try:
             yield self.game.vote(player3_id, 25)

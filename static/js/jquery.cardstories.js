@@ -44,7 +44,32 @@
             }
         },
 
-        error: function(error) { alert(error); },
+        panic: function(error) {
+            var message = 'An unexpected error occured:\n';
+            message += JSON.stringify(error);
+            this.log(message);
+            this.window.alert(message);
+        },
+
+        show_warning: function(modal_selector, root, cb) {
+            var $this = this;
+            var element = $('.cardstories_notifications', root);
+            this.set_active('notification', element, root);
+            this.init_board_buttons(element, root);
+            // Get the correct modal dialog.
+            var modal = $(modal_selector, element);
+            var overlay = $('.cardstories_modal_overlay', element);
+
+            $('a', modal).unbind('click').click(function() {
+                $this.close_modal(modal, overlay, function() {
+                    if (cb) {
+                        cb();
+                    }
+                });
+            });
+
+            this.display_modal(modal, overlay);
+        },
 
         xhr_error: function(ajax_request, status, error) {
             var $this = this;
@@ -54,7 +79,7 @@
                 // "abort" type errors aren't real errors, since they are caused
                 // by aborting the ajax request inside poll_discard, so just ignore them.
                 if (error !== 'abort') {
-                    $this.error(error);
+                    $this.panic(error);
                 }
             } else {
                 // Retry after 100 miliseconds.
@@ -90,21 +115,22 @@
             return jQuery.ajax(request);
         },
 
-        reload: function(player_id, game_id, root) {
-            var search = this.reload_link(player_id, game_id, root);
+        reload: function(game_id, root) {
+            var search = this.reload_link(game_id, root);
             $.cardstories.location.search = search;
         },
 
-        reload_link: function(player_id, game_id, root) {
+        reload_link: function(game_id, root) {
             var params = {};
 
             if (game_id) {
                 params.game_id = game_id;
             }
 
-            // Only keep the player_id in the URL if it already there (ie when
+            // Only add the player_id to the URL if it already is there (ie when
             // it has been filled manually by the player)
-            if($.query.get('player_id')) {
+            var player_id = $.query.get('player_id');
+            if (player_id) {
                 params.player_id = player_id;
             }
 
@@ -255,10 +281,10 @@
         create_pick_card: function(player_id, root) {
             var $this = this;
             var element = $('.cardstories_create .cardstories_pick_card', root);
-            this.set_active(root, element, null, 'create_pick_card');
+            this.set_active('create_pick_card', element, root);
             this.display_progress_bar('owner', 1, element, root);
             this.display_master_info($this.get_player_info_by_id(player_id), element);
-            this.init_board_buttons(player_id, element, root);
+            this.init_board_buttons(element, root);
             var deck = $this.create_deck();
             var cards = $.map(deck, function(card, index) {
                 return { 'value':card };
@@ -658,10 +684,10 @@
         create_write_sentence: function(player_id, card, root) {
             var $this = this;
             var element = $('.cardstories_create .cardstories_write_sentence', root);
-            this.set_active(root, element, null, 'create_write_sentence');
+            this.set_active('create_write_sentence', element, root);
             this.display_progress_bar('owner', 2, element, root);
             this.display_master_info($this.get_player_info_by_id(player_id), element);
-            this.init_board_buttons(player_id, element, root);
+            this.init_board_buttons(element, root);
             $('.cardstories_card', element).attr('class', 'cardstories_card cardstories_card' + card + ' {card:' + card + '}');
             this.create_write_sentence_animate_start(card, element, root);
             var text = $('textarea.cardstories_sentence', element);
@@ -690,12 +716,12 @@
                 }
 
                 var success = function(data, status) {
-                    if('error' in data) {
-                        $this.error(data.error);
+                    if ('error' in data) {
+                        $this.panic(data.error);
                     } else {
                         var root = $(element).parents('.cardstories_root');
                         $this.animate_progress_bar(3, element, function() {
-                            $this.reload(player_id, data.game_id, root);
+                            $this.reload(data.game_id, root);
                         });
                     }
                 };
@@ -776,16 +802,13 @@
                         game_id: game_id,
                         player_id: invites
                     };
-                    // Use a synchronous request, because this is user-initiated,
-                    // so we can afford it since the user won't be surprised by
-                    // the browser blocking.
-                    var ajax_opts = {
-                        async: false
-                    };
                     var callback = function() {
                         $this.game(owner_id, game_id, root, ajax_opts);
                     };
-                    $this.send(query, callback, ajax_opts);
+                    // Use a synchronous request; because this is user-initiated,
+                    // we can afford it since the user won't be surprised by
+                    // the browser blocking.
+                    $this.send(query, callback, {async: false});
 
                     toggle_feedback(true);
                     textarea.val('');
@@ -843,10 +866,10 @@
             $(root).data('polling', true);
             var success = function(answer, status) {
                 $(root).data('polling', false);
-                if('error' in answer) {
-                    $this.error(answer.error);
+                if ('error' in answer) {
+                    $this.panic(answer.error);
                 } else {
-                    if('timeout' in answer) {
+                    if ('timeout' in answer) {
                         $this.poll(root, request, cb);
                     } else if (cb) {
                         cb();
@@ -890,7 +913,7 @@
             if (type.length) {
                 var success = function(data, status) {
                     if ('error' in data) {
-                        $this.error(data.error);
+                        $this.panic(data.error);
                     } else {
                         // Save greatest modification time.
                         var modified = 0;
@@ -953,8 +976,8 @@
             var $this = this;
 
             var success = function(data, status) {
-                if('error' in data) {
-                    $this.error(data.error);
+                if ('error' in data) {
+                    $this.panic(data.error);
                 } else {
                     // Save greatest modification time.
                     var modified = 0;
@@ -1036,7 +1059,7 @@
             $('.cardstories_games tbody', element).html(rows.join('\n'));
             $('.cardstories_lobby_sentence', element).click(function() {
                 var game_id = $(this).metadata({type: "attr", name: "data"}).game_id;
-                $this.reload(player_id, game_id, root);
+                $this.reload(game_id, root);
               });
             if(rows.length > 0) {
               var pagesize = parseInt($('.pagesize option:selected', element).val(), 10);
@@ -1051,7 +1074,7 @@
         lobby_in_progress: function(player_id, lobby, root) {
             var $this = this;
             var element = $('.cardstories_lobby .cardstories_in_progress', root);
-            this.set_active(root, element, null, 'in_progress');
+            this.set_active('in_progress', element, root);
             $('.cardstories_tab_finished', element).click(function() {
                 $this.refresh_lobby(player_id, false, true, root);
               });
@@ -1065,7 +1088,7 @@
         lobby_finished: function(player_id, lobby, root) {
             var $this = this;
             var element = $('.cardstories_lobby .cardstories_finished', root);
-            this.set_active(root, element, null, 'finished');
+            this.set_active('finished', element, root);
             $('.cardstories_tab_in_progress', element).click(function() {
                 $this.refresh_lobby(player_id, true, true, root);
             });
@@ -1114,10 +1137,10 @@
         invitation_owner: function(player_id, game, root) {
             var $this = this;
             var element = $('.cardstories_invitation .cardstories_owner', root);
-            this.set_active(root, element, game, 'invitation_owner');
+            this.set_active('invitation_owner', element, root, game);
             this.display_progress_bar('owner', 3, element, root);
             this.display_master_info($this.get_master_info(game), element);
-            this.init_board_buttons(player_id, element, root);
+            this.init_board_buttons(element, root);
             $('.cardstories_sentence', element).text(game.sentence);
             var picked_card = $('.cardstories_picked_card', element);
             var src = picked_card.metadata({type: 'attr', name: 'data'}).card.supplant({card: game.winner_card});
@@ -1360,7 +1383,7 @@
 
             // Keep track of players who haven't picked a card yet
             var players_not_ready = 0;
-            for(i=0; i<game.players.length; i++) {
+            for(var i=0; i<game.players.length; i++) {
                 if(game.players[i]['picked'] === null) {
                     players_not_ready += 1;
                 }
@@ -1446,22 +1469,31 @@
         invitation_pick: function(player_id, game, root) {
             var $this = this;
             var element = $('.cardstories_invitation .cardstories_pick', root);
-            this.set_active(root, element, game, 'invitation_pick');
+            this.set_active('invitation_pick', element, root, game);
             this.display_progress_bar('player', 1, element, root);
             this.display_master_info($this.get_master_info(game), element);
-            this.init_board_buttons(player_id, element, root);
+            this.init_board_buttons(element, root);
 
-            // Send game when the user clicks ok.
+            // Send picked card when the user clicks ok.
             var ok = function(card_value, card_index) {
+                var query = {
+                    action: 'pick',
+                    player_id: player_id,
+                    game_id: game.id,
+                    card: card_value
+                };
+                var callback = function() {
+                    $this.game(player_id, game.id, root);
+                };
+                var onerror = function(error) {
+                    if (error.code === 'WRONG_STATE_FOR_PICKING' && error.data.state === 'vote') {
+                        $this.show_warning('.cardstories_picked_too_late', root, callback);
+                    } else {
+                        $this.panic(error);
+                    }
+                };
                 $this.invitation_pick_confirm_helper(player_id, game, card_index, card_value, element, function() {
-                    $this.send({
-                        action: 'pick',
-                        player_id: player_id,
-                        game_id: game.id,
-                        card: card_value
-                    }, function() {
-                        $this.game(player_id, game.id, root);
-                    });
+                    $this.send(query, callback, {onerror: onerror});
                 });
             };
 
@@ -2005,13 +2037,13 @@
             var $this = this;
             var element = $('.cardstories_invitation .cardstories_pick_wait', root);
             var deferred = $.Deferred();
-            this.set_active(root, element, game, 'invitation_pick_wait');
+            this.set_active('invitation_pick_wait', element, root, game);
             element.show(); // Because it was hidden in invitation_pick_card_box_helper.
             $('.cardstories_sentence', element).text(game.sentence);
 
             this.display_progress_bar('player', 2, element, root);
             this.display_master_info($this.get_master_info(game), element);
-            this.init_board_buttons(player_id, element, root);
+            this.init_board_buttons(element, root);
             this.invitation_display_board(player_id, game, element, root, true);
 
             var modal = $('.cardstories_modal', element);
@@ -2148,17 +2180,28 @@
         invitation_participate: function(player_id, game, root) {
             var $this = this;
             var element = $('.cardstories_invitation .cardstories_participate', root);
-            var send = function() {
-                $this.send({
-                    action: 'participate',
-                    player_id: player_id,
-                    game_id: game.id
-                }, function() {
-                    $this.game(player_id, game.id, root);
-                });
+            var query = {
+                action: 'participate',
+                player_id: player_id,
+                game_id: game.id
             };
-            if(this.confirm_participate) {
-                this.set_active(root, element, game, 'invitation_participate');
+            var callback = function() {
+                $this.game(player_id, game.id, root);
+            };
+            var onerror = function(error) {
+                if (error.code === 'GAME_FULL') {
+                    $this.show_warning('.cardstories_game_full', root, function() {
+                        $this.reload(undefined, root);
+                    });
+                } else {
+                    $this.panic(error);
+                }
+            };
+            var send = function() {
+                $this.send(query, callback, {onerror: onerror});
+            };
+            if (this.confirm_participate) {
+                this.set_active('invitation_participate', element, root, game);
                 $('.cardstories_sentence', element).text(game.sentence);
                 $('input[type=submit]', element).click(send);
             } else {
@@ -2170,7 +2213,7 @@
         invitation_anonymous: function(player_id, game, root) {
             var $this = this;
             var element = $('.cardstories_invitation .cardstories_invitation_anonymous', root);
-            this.set_active(root, element, game, 'invitation_anonymous');
+            this.set_active('invitation_anonymous', element, root, game);
             this.display_progress_bar('player', 1, element, root);
             this.display_master_info($this.get_master_info(game), element);
             this.invitation_display_board(player_id, game, element, root, true);
@@ -2427,45 +2470,35 @@
         vote_voter: function(player_id, game, root) {
             var $this = this;
             var element = $('.cardstories_vote .cardstories_voter', root);
-            this.set_active(root, element, game, 'vote_voter');
+            this.set_active('vote_voter', element, root, game);
             $('.cardstories_sentence', element).text(game.sentence);
             this.display_progress_bar('player', 3, element, root);
             this.display_master_info($this.get_master_info(game), element);
-            this.init_board_buttons(player_id, element, root);
+            this.init_board_buttons(element, root);
 
             // Send game when user clicks ok.
             var ok = function(card_index, card_value) {
-                var cb = function() {
+                var query = {
+                    action: 'vote',
+                    player_id: player_id,
+                    game_id: game.id,
+                    card: card_value
+                };
+                var callback = function() {
                     $this.game(player_id, game.id, root);
                 };
-                var success = function(data, status) {
-                    // TODO: This is a VERY hackish way of doing this,
-                    // but due to the way UserWarnings work at the moment,
-                    // this is the best we can do.
-                    // See: http://tickets.farsides.com/issues/732 for how
-                    // I think we should handle UserWarnings and other errors
-                    // from the service.
-                    if ('error' in data) {
-                        if (data.error.match(/game_id=.* does not exist/)) {
-                            $this.error('Ooops, it looks like the game has already finished.');
-                            $this.setTimeout(cb, 30);
-                        } else {
-                            $this.error(data.error);
-                        }
+                var onerror = function(error) {
+                    // If game has already completed in the meantime, it has been
+                    // destroyed on the service, and the service will return a
+                    // GAME_NOT_LOADED error.
+                    if (error.code === 'GAME_NOT_LOADED') {
+                        $this.show_warning('.cardstories_voted_too_late', root, callback);
                     } else {
-                        $this.setTimeout(cb, 30);
+                        $this.panic(error);
                     }
                 };
-
                 $this.animate_progress_bar(4, element, function() {
-                    $this.send({
-                        action: 'vote',
-                        player_id: player_id,
-                        game_id: game.id,
-                        card: card_value,
-                    }, cb, {
-                        success: success
-                    });
+                    $this.send(query, callback, {onerror: onerror});
                 });
             };
 
@@ -2537,11 +2570,11 @@
         vote_voter_wait: function(player_id, game, root) {
             var $this = this;
             var element = $('.cardstories_vote .cardstories_voter_wait', root);
-            this.set_active(root, element, game, 'vote_voter_wait');
+            this.set_active('vote_voter_wait', element, root, game);
             $('.cardstories_sentence', element).text(game.sentence);
             this.display_progress_bar('player', 4, element, root);
             this.display_master_info($this.get_master_info(game), element);
-            this.init_board_buttons(player_id, element, root);
+            this.init_board_buttons(element, root);
 
             // Update board state.
             this.vote_display_board(false, player_id, game, element, root);
@@ -2749,11 +2782,11 @@
         vote_anonymous: function(player_id, game, root) {
             var $this = this;
             var element = $('.cardstories_vote .cardstories_anonymous', root);
-            this.set_active(root, element, game, 'vote_anonymous');
+            this.set_active('vote_anonymous', element, root, game);
             $('.cardstories_sentence', element).text(game.sentence);
             this.display_progress_bar('player', 4, element, root);
             this.display_master_info($this.get_master_info(game), element);
-            this.init_board_buttons(player_id, element, root);
+            this.init_board_buttons(element, root);
 
             // Update board state.
             this.vote_display_board(false, player_id, game, element, root);
@@ -2789,10 +2822,10 @@
         vote_owner: function(player_id, game, root) {
             var $this = this;
             var element = $('.cardstories_vote .cardstories_owner', root);
-            this.set_active(root, element, game, 'vote_owner');
+            this.set_active('vote_owner', element, root, game);
             this.display_progress_bar('owner', 5, element, root);
             this.display_master_info($this.get_master_info(game), element);
-            this.init_board_buttons(player_id, element, root);
+            this.init_board_buttons(element, root);
             $('.cardstories_sentence', element).text(game.sentence);
             var announce = $('.cardstories_results_announce', element);
 
@@ -2878,14 +2911,14 @@
 
             // Keep track of players who haven't voted yet
             var players_not_ready = 0;
-            for(i=0; i<game.players.length; i++) {
-                if(game.players[i]['vote'] === null) {
+            for (var i=0; i<game.players.length; i++) {
+                if (game.players[i]['vote'] === null) {
                     players_not_ready += 1;
                 }
             }
 
             // If some players haven't picked a card, ask the GM to confirm
-            if(players_not_ready > 1) { // The GM doesn't vote
+            if (players_not_ready > 1) { // The GM doesn't vote
                 this.display_modal(modal, overlay);
 
                 $('.cardstories_results_confirm_no', modal).unbind('click').click(function() {
@@ -3361,9 +3394,9 @@
         complete_complete: function(player_id, game, root) {
             var $this = this;
             var element = $('.cardstories_complete', root);
-            this.set_active(root, element, game, 'complete');
+            this.set_active('complete', element, root, game);
             this.display_master_info($this.get_master_info(game), element);
-            this.init_board_buttons(player_id, element, root);
+            this.init_board_buttons(element, root);
             $('.cardstories_sentence', element).text(game.sentence);
 
             // Display owner's card.
@@ -3373,7 +3406,7 @@
 
             // Enable play again button.
             $('.cardstories_play_again', element).unbind('click').click(function() {
-                $this.reload(player_id, undefined, root);
+                $this.reload(undefined, root);
             });
 
             // Set progress bar and master seat class.
@@ -3631,43 +3664,42 @@
 
         canceled: function(player_id, game, root) {
             var $this = this;
-            var element = $('.cardstories_notifications', root);
-            this.set_active(root, element, null, 'notification');
-            this.init_board_buttons(player_id, element, root);
-            var modal = $('.cardstories_game_canceled', element);
-            var overlay = $('.cardstories_modal_overlay', element);
-
-            $('a', modal).unbind('click').click(function() {
-                $this.close_modal(modal, overlay, function() {
-                    $this.reload(player_id, undefined, root);
-                });
+            $this.show_warning('.cardstories_game_canceled', root, function() {
+                $this.reload(undefined, root);
             });
-
-            this.display_modal(modal, overlay);
         },
 
-        send: function(query, cb, ajax_options) {
+        // send accepts two additional options in the "opts" argument:
+        // - async: if set to false, the request will be synchronous (default true).
+        // - onerror: An error handler that will be passed the error object,
+        //            if the service returns an error (default $.cardstories.panic)
+        send: function(query, callback, opts) {
+            opts = opts || {};
             var $this = this;
+            var onerror = opts.onerror || $this.panic;
             var success = function(data, status) {
                 if ('error' in data) {
-                    $this.error(data.error);
-                } else if (cb) {
-                    $this.setTimeout(cb, 30);
+                    onerror(data.error);
+                } else {
+                    $this.setTimeout(callback, 30);
                 }
             };
+            // Use an asynchronous request unless async is set to 'false' in 'opts'.
+            var async = opts.async !== false;
             var options = {
                 url: $this.url + '?' + $.param(query, true),
-                success: success
+                success: success,
+                async: async
             };
-            $this.ajax($.extend(options, ajax_options));
+            $this.ajax(options);
         },
 
-        init_board_buttons: function(player_id, element, root) {
+        init_board_buttons: function(element, root) {
             var $this = this;
 
             // Start a new game
             $('.cardstories_new_story', element).unbind('click').click(function() {
-                $this.reload(player_id, undefined, root);
+                $this.reload(undefined, root);
             });
         },
 
@@ -3675,8 +3707,15 @@
             var $this = this;
 
             var success = function(data, status) {
-                if('error' in data) {
-                    $this.error(data.error);
+                if ('error' in data) {
+                    var error = data.error;
+                    if (error.code === 'GAME_DOES_NOT_EXIST') {
+                        $this.show_warning('.cardstories_game_doesnt_exist', root, function() {
+                            $this.reload(undefined, root);
+                        });
+                    } else {
+                        $this.panic(error);
+                    }
                 } else {
                     // Save greatest modification time.
                     var modified = 0;
@@ -3870,7 +3909,7 @@
             $('.cardstories_active', root).removeClass('cardstories_active');
         },
 
-        set_active: function(root, element, game, dom) {
+        set_active: function(dom, element, root, game) {
             var trigger = false;
             if (!$(element).hasClass('cardstories_active')) {
                 trigger = true;
@@ -3946,7 +3985,7 @@
 
             var success = function(data, status) {
                 if('error' in data) {
-                    $this.error(data.error);
+                    $this.panic(data.error);
                 } else {
                     $this.update_players_info(data);
                     deferred.resolve();
@@ -4039,15 +4078,15 @@
                 duration: duration,
                 game_id: game_id
             };
-            // Use a synchronous request because this is a user-initated request,
-            // and users won't be surprised by the browser blocking while waiting
-            // for the response.
             var ajax_opts = {
                 async: false
             };
             var callback = function() {
                 $this.game(player_id, game_id, root, ajax_opts);
             };
+            // Use a synchronous request because this is a user-initated request,
+            // and users won't be surprised by the browser blocking while waiting
+            // for the response.
             $this.send(query, callback, ajax_opts);
         },
 
@@ -4131,11 +4170,11 @@
         email: function(game_id, root) {
             var $this = this;
             var element = $('.cardstories_subscribe', root);
-            this.set_active(root, element, null, 'email');
+            this.set_active('email', element, root);
             $(".cardstories_emailform", element).submit(function() {
                 var player_id = encodeURIComponent($('.cardstories_email', element).val());
                 $.cookie('CARDSTORIES_ID', player_id);
-                $this.reload(player_id, game_id, root);
+                $this.reload(game_id, root);
                 return true;
             });
 
@@ -4231,7 +4270,7 @@
     };
 
     $(window).bind("beforeunload", function() {
-        $.cardstories.error = $.cardstories.noop;
+        $.cardstories.panic = $.cardstories.noop;
     });
 
     // Default jQuery animation interval is 13ms. Increase it to 33ms (30 fps)

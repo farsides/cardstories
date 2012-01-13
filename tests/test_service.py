@@ -29,6 +29,7 @@ from twisted.internet import defer
 
 from cardstories.service import CardstoriesService
 from cardstories.poll import pollable
+from cardstories.exceptions import CardstoriesWarning, CardstoriesException
 
 from twisted.internet import base
 base.DelayedCall.debug = True
@@ -52,7 +53,7 @@ class CardstoriesServiceTestNotify(unittest.TestCase):
         def recurse(result):
             try:
                 service.notify(False)
-            except UserWarning, e:
+            except CardstoriesException, e:
                 self.failUnlessSubstring('recurs', e.args[0])
                 service.recursed = True
             return result
@@ -65,7 +66,7 @@ class CardstoriesServiceTestNotify(unittest.TestCase):
         d = service.listen()
         def fail(result):
             service.raised = True
-            raise UserWarning, 'raise exception'
+            raise CardstoriesException, 'raise exception'
         d.addCallback(fail)
         service.notify(True)
         self.assertTrue(service.raised)
@@ -96,8 +97,8 @@ class CardstoriesServiceTestInit(unittest.TestCase):
     @defer.inlineCallbacks
     def test01_load(self):
         database = 'test.sqlite'
-        if os.path.exists(database):
-            os.unlink(database)
+        #if os.path.exists(database):
+            #os.unlink(database)
 
         service = CardstoriesService({'db': database})
         self.assertFalse(os.path.exists(database))
@@ -125,15 +126,15 @@ class CardstoriesServiceTestBase(unittest.TestCase):
 
     def setUp(self):
         self.database = 'test.sqlite'
-        if os.path.exists(self.database):
-            os.unlink(self.database)
+        #if os.path.exists(self.database):
+            #os.unlink(self.database)
         self.service = CardstoriesService({'db': self.database})
         self.service.startService()
         self.db = sqlite3.connect(self.database)
 
     def tearDown(self):
         self.db.close()
-        os.unlink(self.database)
+        #os.unlink(self.database)
         return self.service.stopService()
 
 class CardstoriesServiceTestHandle(CardstoriesServiceTestBase):
@@ -141,15 +142,16 @@ class CardstoriesServiceTestHandle(CardstoriesServiceTestBase):
     def test01_required(self):
         self.assertTrue(CardstoriesService.required({ 'key1': ['a'],
                                                       'key2': ['b'] }, 'method', 'key1'))
-        
-        self.failUnlessRaises(UserWarning, CardstoriesService.required, { }, 'method', 'key1')
+
+        self.failUnlessRaises(CardstoriesException, CardstoriesService.required, { }, 'method', 'key1')
 
     @defer.inlineCallbacks
     def test02_handle(self):
         for action in self.service.ACTIONS:
             result = yield self.service.handle(None, { 'action': [action] })
-            self.failUnlessSubstring(action, result['error'])
-            self.failUnlessSubstring('must be given', result['error'])
+            self.assertEquals('PANIC', result['error']['code'])
+            self.failUnlessSubstring(action, result['error']['data'])
+            self.failUnlessSubstring('requires argument', result['error']['data'])
 
 class CardstoriesServiceTest(CardstoriesServiceTestBase):
 
@@ -189,9 +191,9 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         caught = False
         try:
             self.service.game_method(game_id, 'participate', {'game_id': [game_id]})
-        except UserWarning, e:
+        except CardstoriesWarning, e:
             caught = True
-            self.failUnlessSubstring('does not exist', e.args[0])
+            self.assertEquals('GAME_NOT_LOADED', e.code)
         self.assertTrue(caught)
         #
         # route to the game function
@@ -248,7 +250,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
                                       'game_id': [game['game_id']],
                                       'owner_id': [owner_id] })
         self.assertFalse(self.service.games.has_key(game['game_id']))
-            
+
     @defer.inlineCallbacks
     def test04_game(self):
         winner_card = 5
@@ -257,18 +259,21 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         game = yield self.service.create({ 'card': [winner_card],
                                            'sentence': [sentence],
                                            'owner_id': [owner_id]})
-        game_info, players_id_list = yield self.service.game({ 'game_id': [game['game_id']] })
+        game_info, players_id_list = yield self.service.game({ 'action': 'game',
+                                                               'game_id': [game['game_id']] })
         self.assertEquals(game['game_id'], game_info['id'])
         self.assertEquals(game_info['winner_card'], None)
         self.assertIn(owner_id, players_id_list)
-        game_info, players_id_list = yield self.service.game({ 'game_id': [game['game_id']],
-                                              'player_id': [owner_id] })
+        game_info, players_id_list = yield self.service.game({ 'action': 'game',
+                                                               'game_id': [game['game_id']],
+                                                               'player_id': [owner_id] })
         self.assertEquals(game['game_id'], game_info['id'])
         self.assertEquals(game_info['winner_card'], winner_card)
-        # if there is no in core representation of the game, 
+        # if there is no in core representation of the game,
         # a temporary one is created
         self.service.games[game_info['id']].destroy()
-        game_info, players_id_list = yield self.service.game({ 'game_id': [game['game_id']] })
+        game_info, players_id_list = yield self.service.game({ 'action': 'game',
+                                                               'game_id': [game['game_id']] })
         self.assertEquals(game['game_id'], game_info['id'])
 
     @defer.inlineCallbacks
@@ -468,7 +473,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
             self.assertTrue(event['type'], 'delete')
             self.assertTrue(event['game'].get_id(), game.get_id())
             game.destroyed = True
-        self.service.listen().addCallback(destroy)            
+        self.service.listen().addCallback(destroy)
         game.destroy()
         self.assertTrue(game.destroyed)
         #
@@ -485,9 +490,9 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         caught = False
         try:
             self.service.poll({'modified':[0]})
-        except UserWarning, e:
+        except CardstoriesException, e:
             caught = True
-            self.failUnlessSubstring('poll must be given', e.args[0])
+            self.failUnlessSubstring("Action 'poll' requires argument", e.args[0])
         self.assertTrue(caught)
         #
         # poll player
