@@ -180,8 +180,11 @@ class CardstoriesService(service.Service):
         for player_id in players_id_list:
             if player_id not in players_info:
                 info = {}
-                info['name'] = yield self.auth.get_player_name(player_id)
-                info['avatar_url'] = yield self.auth.get_player_avatar_url(player_id)
+                try:
+                    info['name'] = yield self.auth.get_player_name(player_id)
+                    info['avatar_url'] = yield self.auth.get_player_avatar_url(player_id)
+                except Exception as e:
+                    raise CardstoriesException('Failed fetching player data (player_id=%s): %s' % (player_id, e))
                 players_info[str(player_id)] = info
 
         defer.returnValue(players_info)

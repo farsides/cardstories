@@ -19,6 +19,7 @@
 #
 import sys
 import os
+import re
 sys.path.insert(0, os.path.abspath("..")) # so that for M-x pdb works
 import sqlite3
 
@@ -26,6 +27,7 @@ from mock import Mock
 
 from twisted.trial import unittest, runner, reporter
 from twisted.internet import defer
+import twisted.web.error
 
 from cardstories.service import CardstoriesService
 from cardstories.poll import pollable
@@ -800,6 +802,26 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
 
         self.service.auth.get_player_name = default_get_player_name
         self.service.auth.get_player_avatar_url = default_get_player_avatar_url
+
+    @defer.inlineCallbacks
+    def test12_player_info_on_error(self):
+        player_id = 12
+
+        # Fake calls to auth module
+        default_get_player_name = self.service.auth.get_player_name
+        def fake_get_player_name(self):
+            raise twisted.web.error.Error('404', 'NOT FOUND')
+        self.service.auth.get_player_name = fake_get_player_name
+
+        errmsg = None
+        try:
+            yield self.service.player_info({'type': 'player_info', 'player_id': [player_id]})
+        except Exception as e:
+            errmsg = e.message
+
+        self.assertTrue(re.match('Failed fetching player data (player_id=%d)' % player_id, errmsg))
+
+        self.service.auth.get_player_name = default_get_player_name
 
     @defer.inlineCallbacks
     def test13_set_countdown(self):
