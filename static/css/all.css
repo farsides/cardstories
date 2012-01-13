@@ -848,12 +848,13 @@
     top: 30px;
     left: 63px;
     color: #4D4D4F;
+    line-height: 17px;
 }
 
 .cardstories_master_seat.cardstories_master_seat_won .cardstories_master_name,
 .cardstories_master_seat.cardstories_master_seat_lost .cardstories_master_name {
     color: #e5e5e5;
-    height: 20px;
+    height: 17px;
 }
 
 .cardstories_master_seat .cardstories_master_status {
