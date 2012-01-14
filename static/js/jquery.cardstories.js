@@ -46,8 +46,12 @@
 
         panic: function(error) {
             var message = 'An unexpected error occured:\n';
-            message += JSON.stringify(error);
-            this.log(message);
+            if (error.code && error.code === 'PANIC') {
+                message += error.data;
+            } else {
+                message += JSON.stringify(error);
+            }
+            this.log(error);
             this.window.alert(message);
         },
 

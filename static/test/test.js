@@ -77,18 +77,36 @@ function setup() {
 
 module("cardstories", {setup: setup});
 
-test("panic", 2, function() {
-    var alert = window.alert;
+test("panic", 9, function() {
+    // When passed a string:
     $.cardstories.window.alert = function(err) {
         ok(err.match('an error occurred'), 'calls window.alert on error');
     };
-    var log = $.cardstories.log;
     $.cardstories.log = function(err) {
-        ok(err.match('an error occurred'), 'calls $.cardstories.log on error');
+        equal(err, 'an error occurred', 'calls $.cardstories.log on error');
     };
     $.cardstories.panic('an error occurred');
-    $.cardstories.window.alert = alert;
-    $.cardstories.log = log;
+    // When passed a PANIC type error:
+    var panic_error = {code: 'PANIC', data: 'an error occurred'};
+    $.cardstories.window.alert = function(err) {
+        ok(!err.match('PANIC'), 'hides redundant information from the user');
+        ok(err.match('an error occurred'), 'calls window.alert on error');
+    };
+    $.cardstories.log = function(err) {
+        equal(err, panic_error, 'calls $.cardstories.log on error');
+    };
+    $.cardstories.panic(panic_error);
+    // When passed another type of error:
+    var other_error = {code: 'KABOOM', data: {game_id: 11, details: 'an error occurred'}};
+    $.cardstories.window.alert = function(err) {
+        ok(err.match('KABOOM'), 'calls window.alert on error');
+        ok(err.match('an error occurred'), 'calls window.alert on error');
+        ok(err.match('"game_id":11'), 'calls window.alert on error');
+    };
+    $.cardstories.log = function(err) {
+        equal(err, other_error, 'calls $.cardstories.log on error');
+    };
+    $.cardstories.panic(other_error);
 });
 
 asyncTest("show_warning", 3, function() {
