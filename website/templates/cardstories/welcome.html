@@ -8,7 +8,6 @@
 {% endblock %}
 
 {% block content %}
-  <div id="fb-root"></div>
   <div id="header">
     <div class="frame">
       <div class="holder">
@@ -19,8 +18,8 @@
               <div class="txt01">I will tell you my story through my card.<br />Try to guess which card I used!</div>
               <div class="txt02">Your card is this one...<br />WAIT! This one...<br />Or maybe...</div>
               <div class="txt03">You'll never find it!</div>
-            </div>  
-          </div>  
+            </div>
+          </div>
           <div class="like">
             <div class="fb-connect"><a href="https://www.facebook.com/dialog/oauth?client_id={{ fb_app_id }}&redirect_uri={{ fb_redirect_uri }}&scope={% fb_perms %}"><img src="/static/css/images/btn-facebook.png" alt="Connect with Facebook" /></a></div>
             <div><g:plusone size="medium" href="http://cardstories.org"></g:plusone></div>
