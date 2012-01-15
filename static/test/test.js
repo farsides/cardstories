@@ -64,10 +64,8 @@ function setup() {
     $.cardstories.ajax = function() { throw 'Please rebind "ajax"'; };
     $.cardstories.reload = function() { throw 'Please rebind "reload"'; };
     $.cardstories.poll_ignore = function() { throw 'Please rebind "poll_ignore"'; };
-    $.cardstories.confirm_participate = true; // TODO: shoule be cardstories_default_confirm_participate;
     $.cardstories.animate_sprite = function(movie, fps, frames, rewind, cb) { movie.show(); cb(); };
     $.cardstories.preload_images_helper = function(root, cb) { cb(); };
-    $.cardstories.images_to_preload = ['card01.png', 'card02.png', 'card03.png'];
     $.cardstories.update_player_info_from_ws = function(player_id) {};
     $.cardstories.get_player_info_by_id = function(player_id) {
         return {'name': 'Player ' + player_id,
@@ -862,6 +860,8 @@ asyncTest("preload_images", 3, function() {
     // Make sure progress bar is visible to be able to measure them reliably.
     progress_fill.parents().andSelf().show();
     equal(progress_fill.width(), 0, 'progress is at zero width initially');
+
+    $.cardstories.images_to_preload = ['card01.jpg', 'card02.jpg', 'card03.jpg'];
 
     var cb = function() {
         progress_fill.parents().andSelf().show();
@@ -1789,34 +1789,6 @@ asyncTest("invitation_participate game full", 4, function() {
 
     $.cardstories.confirm_participate = false;
     $.cardstories.invitation_participate(player_id, game, root);
-});
-
-asyncTest("widget invitation", 4, function() {
-    var player_id = 15;
-    var game_id = 101;
-    var sentence = 'SENTENCE';
-    var modified = 4444;
-    var root = $('#qunit-fixture .cardstories');
-
-    $.cardstories.ajax = function(options) {
-        equal(options.url, $.cardstories.url + '?action=state&type=game&modified=0&game_id=' + game_id + '&player_id=' + player_id);
-        var game = {
-            'game_id': game_id,
-            'state': 'invitation',
-            'modified': modified,
-            'sentence': sentence,
-            'type': 'game'
-        };
-        options.success([game]);
-        window.setTimeout(function() {
-            equal($('.cardstories_invitation .cardstories_active', root).length, 1);
-            equal($('.cardstories_participate .cardstories_sentence', root).text(), sentence);
-            start();
-        }, 30);
-    };
-
-    equal($('#qunit-fixture .cardstories_invitation .cardstories_active').length, 0);
-    $('#qunit-fixture .cardstories').cardstories(player_id, game_id);
 });
 
 asyncTest("vote_voter", 30, function() {
