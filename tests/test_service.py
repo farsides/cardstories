@@ -819,7 +819,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         except Exception as e:
             errmsg = e.message
 
-        self.assertTrue(re.match('Failed fetching player data (player_id=%d)' % player_id, errmsg))
+        self.assertTrue(bool(re.match('Failed fetching player data \\(player_id=%d\\)' % player_id, errmsg)))
 
         self.service.auth.get_player_name = default_get_player_name
 
