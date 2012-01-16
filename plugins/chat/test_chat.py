@@ -328,6 +328,22 @@ class ChatTest(unittest.TestCase):
         self.assertEquals(state['messages'][0]['player_id'], player_id)
         self.assertEquals(state['messages'][0]['sentence'], '&lt;script&gt;alert("haha!")&lt;/script&gt;')
 
+    @defer.inlineCallbacks
+    def test11_link_url(self):
+        # new instance of the chat plugin to test
+        chat_instance = Plugin(self.service, [])
+        # create a message event request
+        player_id = 201
+        url_sentence = 'For searching the web I use google.com, it\'s great!'
+        now = int(runtime.seconds() * 1000)
+        request = Request(action = ['message'], player_id = [player_id], sentence=[url_sentence])
+        # run the request
+        result = yield chat_instance.preprocess(True, request)
+        # check to make sure our message is returned with a link for the url
+        state, players_id_list = yield chat_instance.state({"modified": [now - 1]})
+        self.assertEquals(state['messages'][0]['player_id'], player_id)
+        self.assertEquals(state['messages'][0]['sentence'], 'For searching the web I use <a target="_blank" href="http://google.com">google.com</a>, it\'s great!')
+
 
 def Run():
     loader = runner.TestLoader()

@@ -160,7 +160,11 @@
 
 .cardstories .cardstories_chat_box .cardstories_chat_message > a {
     text-decoration: none;
-    color: inherit;
+    color: black;
+}
+
+.cardstories .cardstories_chat_box .cardstories_chat_message > a:hover {
+    text-decoration: underline;
 }
 
 .cardstories .cardstories_chat_box .cardstories_chat_message .cardstories_join_button {
