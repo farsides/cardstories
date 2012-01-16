@@ -105,7 +105,7 @@ def get_words_scores(raw_text):
     # Compute frequency distribution and sort words by rank
     # Only use words with a minimal size to ensure meaningfulness
     fdist = nltk.FreqDist(normalized_list)
-    words_scores = dict([[w, fdist[w]] for w in set(normalized_list) if len(w) >= 4])
+    words_scores = dict([[w, fdist[w]] for w in set(normalized_list) if len(w) >= 3])
 
     return words_scores
 

@@ -77,8 +77,8 @@ MEDIA_URL = '/static/'
 
 # Avatars' subpaths, relative to the MEDIA_ROOT folder
 # (default avatars and users' avatars cache storage URLs)
-AVATARS_DEFAULT_SUBPATH = 'css/images/avatars/default/' 
-AVATARS_CACHE_SUBPATH = 'css/images/avatars/cache/' 
+AVATARS_DEFAULT_SUBPATH = 'css/images/avatars/default/'
+AVATARS_CACHE_SUBPATH = 'css/images/avatars/cache/'
 
 # URL prefix for admin media -- CSS, JavaScript and images. Make sure to use a
 # trailing slash.

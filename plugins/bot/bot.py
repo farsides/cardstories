@@ -32,27 +32,28 @@ from twisted.python import log
 from cardstories.game import CardstoriesGame
 from plugins.bot import buildwordsscores
 
-        
+
 # Functions ###############################################################
 
 def get_delay(delay_dict):
     """Returns a delay, based on a base (minimum) time, plus an additional random part.
     delay_dict = {'base': <seconds>, 'random': <seconds> }"""
-    
+
     return delay_dict['base'] + random.random() * delay_dict['random']
 
 def call_later(delay_dict, *args, **kwargs):
     """Implements reactor.callLater with a delay with a random part (see get_delay)"""
-    
+
     delay = get_delay(delay_dict)
     reactor.callLater(delay, *args, **kwargs)
-    
+
 
 # Classes #################################################################
 
 class Plugin(object):
     """
-    The chat plugin implements the backend for the in-game chat system.
+    Bots who join games when there isn't enough players, and try to take a good guess
+    at the cards, using data from previous games.
     
     """
     def __init__(self, service, plugins):
@@ -66,7 +67,7 @@ class Plugin(object):
 
         # Load bots logic
         brain = NLWordMatcherBrain(self)
-        
+
         # Load configuration and instantiate bots
         self.settings = objectify.parse(open(os.path.join(self.confdir, 'bot.xml'))).getroot()
         self.delays = {}
@@ -78,7 +79,7 @@ class Plugin(object):
             elif node.tag == "botinstance":
                 bot = Bot(self, brain, int(node.get('player_id')))
                 self.bots.append(bot)
-        
+
     def name(self):
         """
         Method required by all plugins to inspect the plugin's name.
@@ -107,58 +108,58 @@ class Plugin(object):
         """
         A new game has been created - start monitoring it to check later on if it needs players 
         """
-        
-        call_later(self.delays['join'], self.check_need_player, game.id)      
-        
+
+        call_later(self.delays['join'], self.check_need_player, game.id)
+
         return defer.succeed(True)
-    
+
     @defer.inlineCallbacks
     def get_players_from_game_id(self, game_id):
         """Get the players currently playing the game game_id"""
-        
+
         result = yield self.service.handle([], {'action': ['state'],
                                                'type': ['game'],
                                                'modified': [0],
                                                'game_id': [game_id]})
         game = result[0]
         players_ids = [ x['id'] for x in game['players'] ]
-        
+
         defer.returnValue(players_ids)
-           
+
     @defer.inlineCallbacks
     def check_need_player(self, game_id):
         """Check newly created games regularly. 
         Make bots join it if there isn't enough players"""
-        
+
         players_ids = yield self.get_players_from_game_id(game_id)
-        
+
         # Does the game still need players?
         if len(players_ids) < CardstoriesGame.NPLAYERS:
             for bot in self.bots:
                 if bot.player_id not in players_ids:
                     yield bot.join(game_id)
                     break # Only add one bot every delay
-            
-            call_later(self.delays['join'], self.check_need_player, game_id)      
-                    
+
+            call_later(self.delays['join'], self.check_need_player, game_id)
+
         defer.returnValue(True)
-        
+
     @defer.inlineCallbacks
     def voting(self, game):
         """A game entered the voting phase - notify bots who are playing it"""
-        
+
         players_ids = yield self.get_players_from_game_id(game.id)
-        
+
         for bot in self.bots:
             if bot.player_id in players_ids:
                 call_later(self.delays['vote'], bot.vote, game.id)
-        
+
         defer.returnValue(True)
-        
+
 
 class Bot(object):
     """Implements a single bot, which connects to games and play"""
-    
+
     def __init__(self, plugin, brain, player_id):
         self.plugin = plugin
         self.brain = brain
@@ -167,119 +168,136 @@ class Bot(object):
     @defer.inlineCallbacks
     def get_game_by_id(self, game_id):
         """Get the current game state for a given game_id"""
-        
+
         result = yield self.plugin.service.handle([], {'action': ['state'],
                                                        'type': ['game'],
                                                        'modified': [0],
                                                        'player_id': [self.player_id],
-                                                       'game_id': [game_id]})        
-        game = result[0]        
-        
-        defer.returnValue(game)
-       
+                                                       'game_id': [game_id]})
+        game = result[0]
+        player_ids = [ x['id'] for x in game['players'] ]
+
+        defer.returnValue([game, player_ids])
+
     @defer.inlineCallbacks
     def join(self, game_id):
         """Join a game and start playing"""
-        
-        log.msg("Bot %d joins game %d" % (self.player_id, game_id))
 
-        yield self.plugin.service.handle([], {'action': ['participate'],
-                                              'player_id': [self.player_id],
-                                              'game_id': [game_id]})
-        
-        call_later(self.plugin.delays['pick'], self.pick, game_id)
-        
-        defer.returnValue(True)
+        game, player_ids = yield self.get_game_by_id(game_id)
+
+        if game['state'] != 'invitation':
+            log.msg("Bot %d tried to join game %d, but game wasn't accepting new players" % (self.player_id, game['id']))
+            defer.returnValue(False)
+        else:
+            yield self.plugin.service.handle([], {'action': ['participate'],
+                                                  'player_id': [self.player_id],
+                                                  'game_id': [game_id]})
+            log.msg("Bot %d joined game %d" % (self.player_id, game_id))
+
+            call_later(self.plugin.delays['pick'], self.pick, game_id)
+
+            defer.returnValue(True)
 
     @defer.inlineCallbacks
     def pick(self, game_id):
         """Pick a card during the first phase of the game"""
-        
-        game = yield self.get_game_by_id(game_id)
-        my_cards = game['self'][2]
-        
-        picked_card = yield self.brain.choose_card_to_pick(game['sentence'], my_cards)
-        
-        yield self.plugin.service.handle([], {'action': ['pick'],
-                                              'player_id': [self.player_id],
-                                              'card': [picked_card],
-                                              'game_id': [game_id]})
-        
-        log.msg("Bot %d picked card %d on game %d" % (self.player_id, picked_card, game['id']))
-        
-        defer.returnValue(True)
- 
+
+        game, player_ids = yield self.get_game_by_id(game_id)
+
+        # Check the game hasn't gone to vote without us
+        if game['state'] != 'invitation' or self.player_id not in player_ids:
+            log.msg("Bot %d didn't get enough time to pick on game %d" % (self.player_id, game['id']))
+            defer.returnValue(False)
+        else:
+            my_cards = game['self'][2]
+
+            picked_card = yield self.brain.choose_card_to_pick(game['sentence'], my_cards)
+
+            yield self.plugin.service.handle([], {'action': ['pick'],
+                                                  'player_id': [self.player_id],
+                                                  'card': [picked_card],
+                                                  'game_id': [game_id]})
+
+            log.msg("Bot %d picked card %d on game %d" % (self.player_id, picked_card, game['id']))
+
+            defer.returnValue(True)
+
     @defer.inlineCallbacks
     def vote(self, game_id):
         """Vote for a card during the second phase of the game"""
-        
-        game = yield self.get_game_by_id(game_id)
+
+        game, player_ids = yield self.get_game_by_id(game_id)
         board = game['board']
-        
-        # Don't try to pick the card we chose
-        my_card = game['self'][0]
-        board_without_my_card = [x for x in board if x != my_card]
-        
-        voted_card = yield self.brain.choose_card_to_vote(game['sentence'], board_without_my_card)
-        
-        yield self.plugin.service.handle([], {'action': ['vote'],
-                                       'player_id': [self.player_id],
-                                       'card': [voted_card],
-                                       'game_id': [game['id']]})
-        
-        log.msg("Bot %d voted for card %d on game %d" % (self.player_id, voted_card, game['id']))
-        
-        defer.returnValue(True)
-               
-        
+
+        # Check the game hasn't gone to vote without us
+        if game['state'] != 'vote' or self.player_id not in player_ids:
+            log.msg("Bot %d didn't get enough time to vote on game %d" % (self.player_id, game['id']))
+            defer.returnValue(False)
+        else:
+            # Don't try to pick the card we chose
+            my_card = game['self'][0]
+            board_without_my_card = [x for x in board if x != my_card]
+
+            voted_card = yield self.brain.choose_card_to_vote(game['sentence'], board_without_my_card)
+
+            yield self.plugin.service.handle([], {'action': ['vote'],
+                                           'player_id': [self.player_id],
+                                           'card': [voted_card],
+                                           'game_id': [game['id']]})
+
+            log.msg("Bot %d voted for card %d on game %d" % (self.player_id, voted_card, game['id']))
+
+            defer.returnValue(True)
+
+
 class Brain(object):
     """Object able to make informed decisions about cards to pick/vote"""
-    
+
     def __init__(self, plugin):
         self.plugin = plugin
-        
+
     @defer.inlineCallbacks
     def choose_card_to_pick(self, sentence, cards):
         """Among a set of cards, choose one to pick for the first phase of the game"""
-        
+
         ranked_cards = yield self.sort_cards_by_ranking_for_sentence(sentence, cards)
         card = ranked_cards[0][0] # best choice
-        
-        defer.returnValue(card)
-        
-    @defer.inlineCallbacks
-    def choose_card_to_vote(self, sentence, cards):
-        """Among a set of cards, choose one to vote for in the second phase of the game""" 
-        
-        ranked_cards = yield self.sort_cards_by_ranking_for_sentence(sentence, cards)
-        card = self.weighted_card_choice(ranked_cards)
-        
+
         defer.returnValue(card)
 
-               
+    @defer.inlineCallbacks
+    def choose_card_to_vote(self, sentence, cards):
+        """Among a set of cards, choose one to vote for in the second phase of the game"""
+
+        ranked_cards = yield self.sort_cards_by_ranking_for_sentence(sentence, cards)
+        card = self.weighted_card_choice(ranked_cards)
+
+        defer.returnValue(card)
+
+
     @defer.inlineCallbacks
     def sort_cards_by_ranking_for_sentence(self, sentence, cards):
         """Builds a list of the cards, ranked by decreasing order of pertinence for sentence"""
-        
+
         all_cards_scores = yield self.get_all_cards_scores_for_sentence(sentence)
-        
+
         available_cards_scores = (x for x in all_cards_scores.iteritems() if x[0] in cards)
         ranked_cards = sorted(available_cards_scores, key=operator.itemgetter(1), reverse=True)
-        
+
         log.msg("Bot brain computed scores for cards %s on sentence '%s' (card_id, score): %s" % \
                                     (cards, sentence.strip().encode('utf-8'), repr(ranked_cards)))
-        
+
         defer.returnValue(ranked_cards)
-    
-    def get_all_cards_scores_for_sentence(self, sentence): 
+
+    def get_all_cards_scores_for_sentence(self, sentence):
         """Builds a dictionary of scores for all cards. The score for each represents
         how well the card matches the sentence (the higher, the better).
         Format: { <card_id>: <score>, ... }
         
         To subclass."""
-        
+
         raise NotImplementedError
-    
+
     def weighted_card_choice(self, ranked_cards):
         """Random choice of a card in the list, weighted by score"""
 
@@ -294,31 +312,31 @@ class Brain(object):
         for card_id in xrange(1, CardstoriesGame.NCARDS + 1):
             cards_scores[card_id] = 0
         return cards_scores
-       
-        
+
+
 class NLWordMatcherBrain(Brain):
     """Score cards by matching each word of the story individually 
     to sentences used to describe the cards in previously completed stories
     
     Natural language version - use predefined word lists, compiled using natural language techniques
     See buildwordsscores.py"""
-   
+
     def get_all_cards_scores_for_sentence(self, sentence):
-        
-        sentence_token_list = nltk.word_tokenize(sentence) 
+
+        sentence_token_list = nltk.word_tokenize(sentence)
         sentence_word_list = buildwordsscores.normalize_word_list(sentence_token_list)
-        
+
         cards_words_scores_filename = self.plugin.settings.get('cards_words_scores_filename')
         cards_words_scores_path = os.path.join(self.plugin.confdir, cards_words_scores_filename)
         with open(cards_words_scores_path) as f:
             card_word_list = json.load(f)
-        
+
         all_cards_scores = self.create_zero_cards_scores_dict()
         for sentence_word in sentence_word_list:
             for card, card_words in card_word_list.iteritems():
                 if sentence_word in card_words:
                     all_cards_scores[int(card)] += card_words[sentence_word]
-        
+
         return all_cards_scores
-            
+
 

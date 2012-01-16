@@ -122,13 +122,13 @@ def register(request):
             u = User.objects.create_user(username, username, password)
             u.first_name = name
             u.save()
-            
+
             # Always call authenticate() before login().
             auth_user = authenticate(username=username, password=password)
             auth_login(request, auth_user)
 
             GravatarAvatar(auth_user).update()
-            
+
             # The user was just created.
             request.session['create'] = True
 
@@ -156,9 +156,9 @@ def login(request):
             # At this point, the user has already been authenticated by form
             # validation (which simplifies user feedback on login errors).
             auth_login(request, form.auth_user)
-            
+
             GravatarAvatar(form.auth_user).update()
-            
+
             # Redirect maintaining game_id, if set.
             url = '%s%s' % (reverse(welcome), get_gameid_query(request))
             return redirect(url);
@@ -202,7 +202,7 @@ def facebook(request):
                     auth_login(request, user)
 
                     FacebookAvatar(user).update()
-                    
+
                     # Signal that the user was created
                     request.session['create'] = True
 
@@ -278,11 +278,11 @@ def get_player_email(request, userid):
     Returns a user's email (= username) based on supplied id, if found.
     Returns 404 if not found.
     """
-    
+
     # Only the webservice should be able to retreive a player's email
     if request.META['REMOTE_ADDR'] != settings.WEBSERVICE_IP:
         return HttpResponseForbidden()
-    
+
     try:
         user = User.objects.get(id=userid)
         return HttpResponse(user.username, mimetype="text/plain")
@@ -296,12 +296,12 @@ def get_player_avatar_url(request, userid):
     """
     try:
         user = User.objects.get(id=userid)
-        
+
         avatar = Avatar(user)
         if not avatar.in_cache():
             avatar = GravatarAvatar(user)
             avatar.update()
-        
+
         return HttpResponse(avatar.get_url(), mimetype="text/plain")
     except User.DoesNotExist:
         return HttpResponseNotFound()
