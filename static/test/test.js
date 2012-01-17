@@ -107,16 +107,29 @@ test("panic", 9, function() {
     $.cardstories.panic(other_error);
 });
 
-asyncTest("show_warning", 3, function() {
+asyncTest("show_warning", 7, function() {
+    var player_id = 74;
+    var game_id = 1023;
     var root = $('#qunit-fixture .cardstories');
     var modal_selector = '.cardstories_game_full';
     var modal = $(modal_selector, '.cardstories_notifications');
     equal(modal.css('display'), 'none', 'modal warning is hidden initially');
+
     var callback = function() {
         ok(true, 'callback gets called');
         start();
     };
-    $.cardstories.show_warning(modal_selector, root, callback);
+
+    $.cardstories.poll_discard = function(_root) {
+        equal(_root, root, 'poll_discard is called with the root');
+    };
+    $.cardstories.poll_plugin = function(_player_id, _game_id, _root) {
+        equal(_player_id, player_id, 'poll_plugin is called with player_id');
+        equal(_game_id, game_id, 'poll_plugin is called with game_id');
+        equal(_root, root, 'poll_plugin is called with root');
+    };
+
+    $.cardstories.show_warning(modal_selector, player_id, game_id, root, callback);
     equal(modal.css('display'), 'block', 'modal warning is visible');
     // Click the modal button to trigger callback.
     modal.find('a').click();
@@ -737,15 +750,19 @@ asyncTest("game", 4, function() {
     $.cardstories.update_players_info = update_players_info_orig;
 });
 
-test("game on game doesn't exist error", 4, function() {
+test("game on game doesn't exist error", 6, function() {
+    var player_id = 11;
+    var game_id = 111;
     var root = $('#qunit-fixture .cardstories');
 
     $.cardstories.ajax = function(options) {
         options.success({error: {code: 'GAME_DOES_NOT_EXIST', data: {game_id: 111}}});
     };
 
-    $.cardstories.show_warning = function(modal_selector, _root, cb) {
+    $.cardstories.show_warning = function(modal_selector, _player_id, _game_id, _root, cb) {
         equal(modal_selector, '.cardstories_game_doesnt_exist', 'displays the "game does not exist" dialog');
+        equal(_player_id, player_id, 'show_warning gets passed player_id');
+        equal(_game_id, game_id, 'show_warning gets passed game_id');
         equal(_root, root, 'show_warning gets passed the root');
         cb();
     };
@@ -755,7 +772,7 @@ test("game on game doesn't exist error", 4, function() {
         equal(_root, root, 'reload gets passed the root');
     };
 
-    $.cardstories.game(11, 111, root);
+    $.cardstories.game(player_id, game_id, root);
 });
 
 test("game on generic error", 1, function() {
@@ -1429,7 +1446,7 @@ asyncTest("invitation_pick", 11, function() {
     });
 });
 
-asyncTest("invitation_pick picked too late", 4, function() {
+asyncTest("invitation_pick picked too late", 7, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_invitation .cardstories_pick', root);
     var player_id = 2;
@@ -1454,7 +1471,10 @@ asyncTest("invitation_pick picked too late", 4, function() {
         start();
     };
 
-    $.cardstories.show_warning = function(modal_selector, root, cb) {
+    $.cardstories.show_warning = function(modal_selector, _player_id, _game_id, _root, cb) {
+        equal(_player_id, player_id, 'show_warning gets passed player_id');
+        equal(_game_id, game_id, 'show_warning gets passed game_id');
+        equal(_root, root, 'show_warning gets passed root');
         equal(modal_selector, '.cardstories_picked_too_late', 'shows the picked_too_late warning');
         cb();
     };
@@ -1765,7 +1785,7 @@ test("invitation_participate", 5, function() {
     $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
 });
 
-asyncTest("invitation_participate game full", 4, function() {
+asyncTest("invitation_participate game full", 6, function() {
     var player_id = 33;
     var game_id = 44;
     var game = {id: game_id};
@@ -1781,8 +1801,10 @@ asyncTest("invitation_participate game full", 4, function() {
         start();
     };
 
-    $.cardstories.show_warning = function(modal_selector, _root, cb) {
+    $.cardstories.show_warning = function(modal_selector, _player_id, _game_id, _root, cb) {
         equal(modal_selector, '.cardstories_game_full', 'the "game is full" dialog is shown');
+        equal(_player_id, player_id, 'show_warning gets passed the player_id');
+        equal(_game_id, game_id, 'show_warning gets passed the game_id');
         equal(_root, root, 'show_warning gets passed the root');
         cb();
     };
@@ -1876,7 +1898,7 @@ asyncTest("vote_voter", 30, function() {
     });
 });
 
-asyncTest("vote_voter vote too late", 5, function() {
+asyncTest("vote_voter vote too late", 8, function() {
     var player_id = 1;
     var player2_id = 1;
     var owner_id = 2;
@@ -1906,7 +1928,10 @@ asyncTest("vote_voter vote too late", 5, function() {
         equal(_request.game_id, game_id, 'poll_ignore request game_id');
     };
 
-    $.cardstories.show_warning = function(modal_selector, root, cb) {
+    $.cardstories.show_warning = function(modal_selector, _player_id, _game_id, _root, cb) {
+        equal(_player_id, player_id, 'show_warning is called with player_id');
+        equal(_game_id, game_id, 'show_warning is called with game_id');
+        equal(_root, root, 'show_warning is called with root');
         equal(modal_selector, '.cardstories_voted_too_late', 'shows the "voted too late" warning');
         cb();
     };

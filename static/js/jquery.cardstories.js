@@ -55,7 +55,7 @@
             this.window.alert(message);
         },
 
-        show_warning: function(modal_selector, root, cb) {
+        show_warning: function(modal_selector, player_id, game_id, root, cb) {
             var $this = this;
             var element = $('.cardstories_notifications', root);
             this.set_active('notification', element, root);
@@ -72,6 +72,8 @@
                 });
             });
 
+            this.poll_discard(root);
+            this.poll_plugin(player_id, game_id, root);
             this.display_modal(modal, overlay);
         },
 
@@ -1491,7 +1493,7 @@
                 };
                 var onerror = function(error) {
                     if (error.code === 'WRONG_STATE_FOR_PICKING' && error.data.state === 'vote') {
-                        $this.show_warning('.cardstories_picked_too_late', root, callback);
+                        $this.show_warning('.cardstories_picked_too_late', player_id, game.id, root, callback);
                     } else {
                         $this.panic(error);
                     }
@@ -2194,7 +2196,7 @@
             };
             var onerror = function(error) {
                 if (error.code === 'GAME_FULL') {
-                    $this.show_warning('.cardstories_game_full', root, function() {
+                    $this.show_warning('.cardstories_game_full', player_id, game.id, root, function() {
                         $this.reload(undefined, root);
                     });
                 } else {
@@ -2496,7 +2498,7 @@
                     // destroyed on the service, and the service will return a
                     // GAME_NOT_LOADED error.
                     if (error.code === 'GAME_NOT_LOADED') {
-                        $this.show_warning('.cardstories_voted_too_late', root, callback);
+                        $this.show_warning('.cardstories_voted_too_late', player_id, game.id, root, callback);
                     } else {
                         $this.panic(error);
                     }
@@ -3668,7 +3670,7 @@
 
         canceled: function(player_id, game, root) {
             var $this = this;
-            $this.show_warning('.cardstories_game_canceled', root, function() {
+            $this.show_warning('.cardstories_game_canceled', player_id, game.id, root, function() {
                 $this.reload(undefined, root);
             });
         },
@@ -3714,7 +3716,7 @@
                 if ('error' in data) {
                     var error = data.error;
                     if (error.code === 'GAME_DOES_NOT_EXIST') {
-                        $this.show_warning('.cardstories_game_doesnt_exist', root, function() {
+                        $this.show_warning('.cardstories_game_doesnt_exist', player_id, game_id, root, function() {
                             $this.reload(undefined, root);
                         });
                     } else {
