@@ -100,7 +100,7 @@
                     } else if (message.type == 'notification') {
                         var l = window.location;
                         var href = l.protocol + '//' + l.host + l.pathname;
-                        href += $.cardstories.reload_link(player_id, message.game_id);
+                        href += $.cardstories.reload_link(message.game_id, root);
                         tvars = {
                             href: href,
                             player_id: player_info.name,
