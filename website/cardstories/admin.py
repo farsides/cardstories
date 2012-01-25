@@ -22,15 +22,18 @@ from django.contrib import admin
 from django.contrib.auth.models import User
 from django.contrib.auth.admin import UserAdmin
 
-from models import UserProfile
+from models import UserProfile, UserCard
 
 class UserProfileInline(admin.StackedInline):
     model = UserProfile
     max_num = 1
     can_delete = False
 
+class UserCardInline(admin.StackedInline):
+    model = UserCard
+
 class MyUserAdmin(UserAdmin):
-    inlines = [UserProfileInline]
+    inlines = [UserProfileInline, UserCardInline]
 
 # Unregister the old user admin, and register the new one.
 admin.site.unregister(User)
