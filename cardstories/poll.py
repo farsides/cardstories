@@ -78,7 +78,7 @@ class pollable:
             return reason
         d.addCallbacks(success, error)
         return d
-        
+
     def poll(self, args):
         d = self.wait(args)
         def timeout():

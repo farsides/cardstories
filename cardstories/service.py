@@ -166,16 +166,19 @@ class CardstoriesService(service.Service):
             else:
                 deferreds.append(self.games[game_id].poll(args))
 
-        if 'multigame' in args['type']:
+        if 'tabs' in args['type']:
             game_deferreds = []
             for game_id_str in args['game_ids']:
                 game_id = int(game_id_str)
                 if self.games.has_key(game_id):
                     game_deferreds.append(self.games[game_id].poll(args))
-                    d = defer.DeferredList(game_deferreds, fireOnOneCallback=True)
-                    # Make the multigame poll always return the arguments.
-                    d.addCallback(lambda x: args)
-                    deferreds.append(d)
+            def callback(result):
+                # Make the tabs poll always return just the arguments with updated timestamp.
+                args['modified'] = result[0]['modified']
+                return args
+            d = defer.DeferredList(game_deferreds, fireOnOneCallback=True)
+            d.addCallback(callback)
+            deferreds.append(d)
 
         if 'lobby' in args['type']:
             deferreds.append(self.poll_player(args))
@@ -230,15 +233,19 @@ class CardstoriesService(service.Service):
             states.append(game)
             yield self.update_players_info(players_info, players_id_list)
 
-        if 'multigame' in args['type']:
-            multigame = {'type': 'multigame', 'games': {}}
+        if 'tabs' in args['type']:
+            tabs = {'type': 'tabs', 'games': {}}
             player_id = args.get('player_id')
+            max_modified = 0
             for game_id in args['game_ids']:
                 game_args = {'action': 'game', 'game_id': [game_id]}
                 if player_id: game_args['player_id'] = player_id
                 game, players_id_list = yield self.game(game_args)
-                multigame['games'][game_id] = game
-            states.append(multigame)
+                tabs['games'][game_id] = game
+                if game['modified'] > max_modified:
+                    max_modified = game['modified']
+            tabs['modified'] = max_modified
+            states.append(tabs)
 
         if 'lobby' in args['type']:
             lobby, players_id_list = yield self.lobby({'action': 'lobby',

@@ -535,7 +535,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         self.assertTrue(game.ok)
 
         #
-        # multigame poll
+        # tabs poll
         #
         card = 7
         sentence = 'SENTENCE'
@@ -547,15 +547,18 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
                                                  'sentence': [sentence],
                                                  'owner_id': [owner_id]})
             game_ids.append(result['game_id'])
-
         games = map(lambda gid: self.service.games[gid], game_ids)
+        max_modified = games[2].modified
+
         # Touch first game.
         d = self.service.poll({'action': ['poll'],
-                               'type': ['multigame'],
-                               'modified': [games[0].modified],
+                               'type': ['tabs'],
+                               'modified': [max_modified],
                                'game_ids': game_ids})
+
         def check1(result):
-            #self.assertEquals(game_ids, result['game_ids'])
+            self.assertEquals(game_ids, result['game_ids'])
+            self.assertEquals(games[0].modified, result['modified'][0])
             games[0].ok = True
             return result
         d.addCallback(check1)
@@ -563,20 +566,19 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         self.assertTrue(games[0].ok)
 
         # Touch third game.
+        max_modified = games[0].modified # first game has just been touched, so it's the last one modified.
         d = self.service.poll({'action': ['poll'],
-                               'type': ['multigame'],
-                               'modified': [111111111111111111111110L],
+                               'type': ['tabs'],
+                               'modified': [max_modified],
                                'game_ids': game_ids})
         def check3(result):
             self.assertEquals(game_ids, result['game_ids'])
+            self.assertEquals(games[2].modified, result['modified'][0])
             games[2].ok = True
             return result
         d.addCallback(check3)
         yield games[2].touch()
         self.assertTrue(games[2].ok)
-
-        # Clean up.
-        for game in games: yield game.destroy()
 
         #
         # poll plugins
@@ -796,7 +798,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         self.assertEquals(state[0]['type'], 'game')
 
         #
-        # type = ['multigame']
+        # type = ['tabs']
         #
         # Create two games.
         winner_card1 = 18
@@ -813,10 +815,15 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
                                             'owner_id': [player_id]})
         game_id1 = game1['game_id']
         game_id2 = game2['game_id']
-        multistate = yield self.service.state({ 'type': ['multigame'],
+
+        modified1 = self.service.games[game_id1].modified
+        modified2 = self.service.games[game_id2].modified
+        max_modified = max(modified1, modified2)
+        multistate = yield self.service.state({ 'type': ['tabs'],
                                                 'modified': [0],
                                                 'game_ids': [game_id1, game_id2],
                                                 'player_id': [player_id] })
+        self.assertEquals(multistate[0]['modified'], max_modified)
         state1 = multistate[0]['games'][game_id1]
         self.assertEquals(state1['id'], game_id1)
         self.assertEquals(state1['winner_card'], None)
