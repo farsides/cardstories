@@ -533,6 +533,51 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         d.addCallback(check)
         yield game.touch()
         self.assertTrue(game.ok)
+
+        #
+        # multigame poll
+        #
+        card = 7
+        sentence = 'SENTENCE'
+        owner_id = 17
+        # Create three games.
+        game_ids = []
+        for i in range(3):
+            result = yield self.service.create({ 'card': [card],
+                                                 'sentence': [sentence],
+                                                 'owner_id': [owner_id]})
+            game_ids.append(result['game_id'])
+
+        games = map(lambda gid: self.service.games[gid], game_ids)
+        # Touch first game.
+        d = self.service.poll({'action': ['poll'],
+                               'type': ['multigame'],
+                               'modified': [games[0].modified],
+                               'game_ids': game_ids})
+        def check1(result):
+            #self.assertEquals(game_ids, result['game_ids'])
+            games[0].ok = True
+            return result
+        d.addCallback(check1)
+        yield games[0].touch()
+        self.assertTrue(games[0].ok)
+
+        # Touch third game.
+        d = self.service.poll({'action': ['poll'],
+                               'type': ['multigame'],
+                               'modified': [111111111111111111111110L],
+                               'game_ids': game_ids})
+        def check3(result):
+            self.assertEquals(game_ids, result['game_ids'])
+            games[2].ok = True
+            return result
+        d.addCallback(check3)
+        yield games[2].touch()
+        self.assertTrue(games[2].ok)
+
+        # Clean up.
+        for game in games: yield game.destroy()
+
         #
         # poll plugins
         #
@@ -749,6 +794,35 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         self.assertEquals(game['game_id'], state[0]['id'])
         self.assertEquals(state[0]['winner_card'], winner_card)
         self.assertEquals(state[0]['type'], 'game')
+
+        #
+        # type = ['multigame']
+        #
+        # Create two games.
+        winner_card1 = 18
+        winner_card2 = 19
+        sentence1 = 'SENTENCE1'
+        sentence2 = 'SENTENCE2'
+        player_id = 100
+        owner_id1 = 101
+        game1 = yield self.service.create({ 'card': [winner_card1],
+                                            'sentence': [sentence1],
+                                            'owner_id': [owner_id1]})
+        game2 = yield self.service.create({ 'card': [winner_card2],
+                                            'sentence': [sentence2],
+                                            'owner_id': [player_id]})
+        game_id1 = game1['game_id']
+        game_id2 = game2['game_id']
+        multistate = yield self.service.state({ 'type': ['multigame'],
+                                                'modified': [0],
+                                                'game_ids': [game_id1, game_id2],
+                                                'player_id': [player_id] })
+        state1 = multistate[0]['games'][game_id1]
+        self.assertEquals(state1['id'], game_id1)
+        self.assertEquals(state1['winner_card'], None)
+        state2 = multistate[0]['games'][game_id2]
+        self.assertEquals(state2['id'], game_id2)
+        self.assertEquals(state2['winner_card'], winner_card2)
 
         #
         # type = ['plugin']

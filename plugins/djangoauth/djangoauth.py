@@ -98,7 +98,6 @@ class Plugin(Auth):
 
         sessionid = request.getCookie('sessionid')
         cookie_player_id = yield self.getPage("http://%s/get_loggedin_player_id/%s/" % (self.host, str(sessionid)))
-        requested_player_id = requested_player_id
 
         if requested_player_id != cookie_player_id:
             raise AuthenticationError(requested_player_id, cookie_player_id)
