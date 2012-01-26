@@ -1,5 +1,9 @@
+# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2011 Loic Dachary <loic@dachary.org>
+#
+# Authors:
+#          Loic Dachary <loic@dachary.org>
 #
 # This software's license gives you freedom; you can copy, convey,
 # propagate, redistribute and/or modify this program under the terms of
@@ -20,7 +24,7 @@ from twisted.python import runtime
 from twisted.internet import reactor, defer
 from copy import deepcopy
 
-class pollable:
+class Pollable:
 
     def __init__(self, timeout):
         self.timeout = timeout
@@ -30,7 +34,7 @@ class pollable:
     def __del__(self):
         self.destroy()
 
-    def get_modified(self):
+    def get_modified(self, args=None):
         return self.modified
 
     def set_modified(self, modified):
@@ -78,7 +82,7 @@ class pollable:
             return reason
         d.addCallbacks(success, error)
         return d
-        
+
     def poll(self, args):
         d = self.wait(args)
         def timeout():

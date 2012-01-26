@@ -18,8 +18,8 @@
 #
 from cardstories import poll
 
-class Plugin(poll.pollable):
-    
+class Plugin(poll.Pollable):
+
     def __init__(self, service, plugins):
         self.service = service
 

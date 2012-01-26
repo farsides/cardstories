@@ -1,6 +1,13 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2011 Chris McCormick <chris@mccormick.cx>
+# Copyright (C) 2011-2012 Farsides <contact@farsides.com>
+#
+# Authors:
+#          Chris McCormick <chris@mccormick.cx>
+#          Matjaz Gregoric <mtyaka@gmail.com>
+#          Xavier Antoviaque <xavier@antoviaque.org>
+#          Adolfo R. Brandes <arbrandes@gmail.com>
+#          Côme Bernigaud <come.bernigaud@laposte.net>
 #
 # This software's license gives you freedom; you can copy, convey,
 # propagate, redistribute and/or modify this program under the terms of
@@ -21,6 +28,7 @@ import sys, os, shutil
 sys.path.insert(0, os.path.abspath("../..")) # so that for M-x pdb works
 import sqlite3
 from time import sleep, strftime
+from mock import Mock
 
 from twisted.python import runtime
 from twisted.trial import unittest, runner, reporter
@@ -31,7 +39,7 @@ from plugins.chat.chat import Plugin
 
 # fake a request object holding the arguments we specify
 class Request:
-    
+
     def __init__(self, **kwargs):
         self.args = kwargs
 
@@ -61,7 +69,7 @@ class ChatTest(unittest.TestCase):
     def tearDown(self):
         # kill the service we started before the test
         return self.service.stopService()
-    
+
     @defer.inlineCallbacks
     def complete_game(self):
         self.winner_card = winner_card = 5
@@ -83,7 +91,7 @@ class ChatTest(unittest.TestCase):
                                       'player_id': [player_id],
                                       'game_id': [game['game_id']],
                                       'card': [card] })
-        
+
         yield self.service.voting({ 'action': ['voting'],
                                     'game_id': [game['game_id']],
                                     'owner_id': [owner_id] })
@@ -103,7 +111,7 @@ class ChatTest(unittest.TestCase):
                                       'owner_id': [owner_id] })
         self.assertFalse(self.service.games.has_key(game['game_id']))
         defer.returnValue(True)
-    
+
     @defer.inlineCallbacks
     def test00_preprocess_noop(self):
         # create a new instance of the plugin and make sure it's the right type
@@ -142,8 +150,8 @@ class ChatTest(unittest.TestCase):
             self.assertEquals(len(lines), 1)
             self.assertIn(sentence, lines[0])
             self.assertIn('player_%d' % player_id, lines[0])
-    
-    
+
+
     @defer.inlineCallbacks
     def test02_check_added_message_after_now(self):
         # new instance of the chat plugin to test
@@ -158,10 +166,9 @@ class ChatTest(unittest.TestCase):
         # check to make sure no message is returned if we ask for now or later
         state, players_id_list = yield chat_instance.state({"modified": [now + 1]})
         self.assertTrue(state.has_key('messages'))
-        print state['messages']
         self.assertEquals(len(state['messages']), 0)
         self.assertEquals(players_id_list, [])
-    
+
     @defer.inlineCallbacks
     def test03_check_added_message_before_now(self):
         # new instance of the chat plugin to test
@@ -226,7 +233,7 @@ class ChatTest(unittest.TestCase):
             self.assertEquals(state['messages'][i]['player_id'], player_ids[i + 1])
             self.assertEquals(state['messages'][i]['sentence'], sentences[i + 1])
         self.assertEquals(players_id_list, player_ids[-2:])
-    
+
     @defer.inlineCallbacks
     def test06_touch_state(self):
         player_id = 200
@@ -238,7 +245,10 @@ class ChatTest(unittest.TestCase):
         # flag to signify whether the callback has run
         self.called = False
         # service to poll instance waiting for chat
-        d = self.service.poll({'action': ['poll'], 'type': ['chat'], 'modified': [chat_instance.get_modified()]})
+        d = self.service.poll({'action': ['poll'],
+                               'player_id': [player_id],
+                               'type': ['chat'],
+                               'modified': [chat_instance.get_modified()]})
         # callback which runs once the chat plugin calls touch()
         def check(event):
             self.called = True
@@ -258,7 +268,7 @@ class ChatTest(unittest.TestCase):
         chat_instance = Plugin(self.service, [])
 
         self.count = 0
-        def build_message(self, message): 
+        def build_message(self, message):
             """
             message == {'type': 'notification',
                         'game_id': GAME_ID,
@@ -336,13 +346,28 @@ class ChatTest(unittest.TestCase):
         player_id = 201
         url_sentence = 'For searching the web I use google.com, it\'s great!'
         now = int(runtime.seconds() * 1000)
-        request = Request(action = ['message'], player_id = [player_id], sentence=[url_sentence])
+        request = Request(action=['message'], player_id=[player_id], sentence=[url_sentence])
         # run the request
         result = yield chat_instance.preprocess(True, request)
         # check to make sure our message is returned with a link for the url
         state, players_id_list = yield chat_instance.state({"modified": [now - 1]})
         self.assertEquals(state['messages'][0]['player_id'], player_id)
         self.assertEquals(state['messages'][0]['sentence'], 'For searching the web I use <a target="_blank" href="http://google.com">google.com</a>, it\'s great!')
+
+    def test12_poll(self):
+        chat_instance = Plugin(self.service, [])
+        args = { 'player_id': [13],
+                 'modified': [10000000000000000] }
+        mock = Mock()
+
+        chat_instance.listen().addCallback(mock)
+        poll = chat_instance.poll(args)
+        mock.assert_called_once_with({'player_id': 13, 'type': 'poll_start'})
+
+        mock.reset_mock()
+        chat_instance.listen().addCallback(mock)
+        poll.callback(args)
+        mock.assert_called_once_with({'player_id': 13, 'type': 'poll_end'})
 
 
 def Run():

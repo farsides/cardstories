@@ -33,7 +33,7 @@ class PollableTest(unittest.TestCase):
     @defer.inlineCallbacks
     def test00_poll(self):
         timeout = 100
-        p = poll.pollable(timeout)
+        p = poll.Pollable(timeout)
         # if the pollable has been recently modified, the 
         # deferred is triggered immediately
         self.assertEquals([], p.pollers)
@@ -84,7 +84,7 @@ class PollableTest(unittest.TestCase):
     @defer.inlineCallbacks
     def test01_touch(self):
         timeout = 100
-        p = poll.pollable(timeout)
+        p = poll.Pollable(timeout)
         p.modified -= 1000
         d = p.poll({ 'modified': [p.modified] })
         d1 = p.poll({ 'modified': [p.modified] })
@@ -116,7 +116,7 @@ class PollableTest(unittest.TestCase):
 
     def test02_destroy(self):
         timeout = 100
-        p = poll.pollable(timeout)
+        p = poll.Pollable(timeout)
         p.modified -= 1000
         d = p.poll({ 'modified': [p.modified] })
         def check(result):
@@ -128,7 +128,7 @@ class PollableTest(unittest.TestCase):
 
     def test03_accessors(self):
         modified = 100
-        p = poll.pollable(2000)
+        p = poll.Pollable(2000)
         p.set_modified(modified)
         self.assertEquals(modified, p.get_modified())
 

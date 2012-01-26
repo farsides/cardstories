@@ -29,15 +29,15 @@ from twisted.trial import unittest, runner, reporter
 from twisted.internet import defer
 import twisted.web.error
 
-from cardstories.service import CardstoriesService
-from cardstories.poll import pollable
+from cardstories.service import CardstoriesService, CardstoriesServiceConnector
+from cardstories.poll import Pollable
 from cardstories.exceptions import CardstoriesWarning, CardstoriesException
 
 from twisted.internet import base
 base.DelayedCall.debug = True
 
 class CardstoriesServiceTestNotify(unittest.TestCase):
-    
+
     def test00_notify(self):
         service = CardstoriesService({})
         d = service.listen()
@@ -167,6 +167,8 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         self.inited = False
         def accept(event):
             self.assertEquals(event['details']['type'], 'init')
+            self.assertEquals(event['details']['previous_game_id'], None)
+            self.assertEquals(event['details']['server_starting'], False)
             self.inited = True
         self.service.listen().addCallback(accept)
         result = yield self.service.create({ 'card': [card],
@@ -182,6 +184,46 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         self.assertEquals(chr(card), rows[0][5])
         self.assertEquals(self.service.games[result['game_id']].get_id(), result['game_id'])
         c.close()
+
+    @defer.inlineCallbacks
+    def test01_create_notify_previous_game_id(self):
+        card = 5
+        str_sentence = 'SENTENCE'
+        owner_id = 15
+        self.inited = False
+        previous_game_id = 30
+        def accept(event):
+            self.assertEquals(event['details']['type'], 'init')
+            self.assertEquals(event['details']['previous_game_id'], previous_game_id)
+            self.inited = True
+        self.service.listen().addCallback(accept)
+        result = yield self.service.create({ 'card': [card],
+                                             'sentence': [str_sentence],
+                                             'owner_id': [owner_id],
+                                             'previous_game_id': [previous_game_id]})
+        self.assertTrue(self.inited, 'init event called')
+
+    @defer.inlineCallbacks
+    def test01_create_notify_server_starting(self):
+        card = 5
+        str_sentence = 'SENTENCE'
+        owner_id = 15
+        self.inited = False
+        result = yield self.service.create({ 'card': [card],
+                                             'sentence': [str_sentence],
+                                             'owner_id': [owner_id]})
+
+        service2 = CardstoriesService({'db': self.database})
+
+        def accept(event):
+            self.assertEquals(event['details']['type'], 'init')
+            self.assertEquals(event['details']['server_starting'], True)
+            self.inited = True
+        service2.listen().addCallback(accept)
+
+        service2.startService()
+        service2.stopService()
+        self.assertTrue(self.inited, 'init event called')
 
     def test02_game_method(self):
         game_id = 100
@@ -208,7 +250,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         self.service.games[game_id] = Game()
         self.service.game_method(game_id, 'participate', {'game_id': [game_id] })
         self.assertTrue(self.service.games[game_id].participated)
-        
+
     @defer.inlineCallbacks
     def test03_complete(self):
         winner_card = 5
@@ -229,7 +271,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
                                       'player_id': [player_id],
                                       'game_id': [game['game_id']],
                                       'card': [card] })
-        
+
         yield self.service.voting({ 'action': ['voting'],
                                     'game_id': [game['game_id']],
                                     'owner_id': [owner_id] })
@@ -292,17 +334,17 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         sentence4 = 'SENTENCE4'
         c = self.db.cursor()
         # in progress
-        c.execute("INSERT INTO games ( id, owner_id, sentence, state, created ) VALUES ( %d, %d, '%s', 'invitation', '2011-02-01' )" % (game1, player2, sentence1)) 
+        c.execute("INSERT INTO games ( id, owner_id, sentence, state, created ) VALUES ( %d, %d, '%s', 'invitation', '2011-02-01' )" % (game1, player2, sentence1))
         c.execute("INSERT INTO invitations ( player_id, game_id ) VALUES ( %d, %d )" % (player1, game1))
         c.execute("INSERT INTO player2game ( player_id, game_id ) VALUES ( %d, %d )" % (player2, game1))
 
-        c.execute("INSERT INTO games ( id, owner_id, sentence, state, created ) VALUES ( %d, %d, '%s', 'invitation', '2011-05-01' )" % (game2, player1, sentence2)) 
+        c.execute("INSERT INTO games ( id, owner_id, sentence, state, created ) VALUES ( %d, %d, '%s', 'invitation', '2011-05-01' )" % (game2, player1, sentence2))
         c.execute("INSERT INTO player2game ( player_id, game_id, win ) VALUES ( %d, %d, 'n' )" % (player1, game2))
         # complete
-        c.execute("INSERT INTO games ( id, owner_id, sentence, state, created ) VALUES ( %d, %d, '%s', 'complete', '2011-03-01' )" % (game3, player1, sentence3)) 
+        c.execute("INSERT INTO games ( id, owner_id, sentence, state, created ) VALUES ( %d, %d, '%s', 'complete', '2011-03-01' )" % (game3, player1, sentence3))
         c.execute("INSERT INTO player2game ( player_id, game_id, win ) VALUES ( %d, %d, 'y' )" % (player1, game3))
 
-        c.execute("INSERT INTO games ( id, owner_id, sentence, state, created ) VALUES ( %d, %d, '%s', 'complete', '2011-06-01' )" % (game4, player2, sentence4)) 
+        c.execute("INSERT INTO games ( id, owner_id, sentence, state, created ) VALUES ( %d, %d, '%s', 'complete', '2011-06-01' )" % (game4, player2, sentence4))
         self.db.commit()
         self.service.load(c)
         c.close()
@@ -536,9 +578,9 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         #
         # poll plugins
         #
-        class Plugin(pollable):
+        class Plugin(Pollable):
             def __init__(self):
-                pollable.__init__(self, 200000000)
+                Pollable.__init__(self, 200000000)
             def name(self):
                 return 'plugin'
         plugin = Plugin()
@@ -568,7 +610,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
             yield self.service.participate({ 'action': ['participate'],
                                              'player_id': [player_id],
                                              'game_id': [game['game_id']] })
-            
+
         invited = 'test@example.com'
         invited_id = 20
         # Fake call to auth module (id => name translation)
@@ -577,7 +619,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
             self.assertEquals(create, True)
             return [invited_id]
         self.service.auth.get_players_ids = get_players_ids
-        
+
         yield self.service.invite({ 'action': ['invite'],
                                     'game_id': [game['game_id']],
                                     'invited_email': [invited],
@@ -602,7 +644,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
             yield self.service.participate({ 'action': ['participate'],
                                              'player_id': [player_id],
                                              'game_id': [game['game_id']] })
-        
+
         gameId = game['game_id']
         yield self.service.invite({ 'action': ['invite'],
                                     'game_id': [gameId],
@@ -649,7 +691,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
                                       'player_id': [player_id],
                                       'game_id': [result['game_id']],
                                       'card': [card] })
-        
+
         yield self.service.voting({ 'action': ['voting'],
                                     'game_id': [result['game_id']],
                                     'owner_id': [owner_id] })
@@ -693,7 +735,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         default_get_player_name = self.service.auth.get_player_name
         fake_get_player_name = Mock(return_value=player_name)
         self.service.auth.get_player_name = fake_get_player_name
-        
+
         default_get_player_avatar_url = self.service.auth.get_player_avatar_url
         fake_get_player_avatar_url = Mock(return_value=player_avatar_url)
         self.service.auth.get_player_avatar_url = fake_get_player_avatar_url
@@ -701,7 +743,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         players_info = yield self.service.player_info({'type': 'player_info', 'player_id': [player_id]})
         fake_get_player_name.assert_called_once_with(player_id)
         fake_get_player_avatar_url.assert_called_once_with(player_id)
-        
+
         self.assertEquals(players_info, [{ 'type': 'players_info',
                                            str(player_id): {'name': player_name,
                                                             'avatar_url': player_avatar_url}
@@ -717,7 +759,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         owner_id = 15
         player_name = u"pl\xe1y\u1ebdr"
         player_avatar_url = "http://example.com/test.jpg"
-        
+
         players_info = [{'type': 'players_info', str(owner_id): {'name': player_name,
                                                                  'avatar_url': player_avatar_url}}]
 
@@ -725,7 +767,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         default_get_player_name = self.service.auth.get_player_name
         fake_get_player_name = Mock(return_value=player_name)
         self.service.auth.get_player_name = fake_get_player_name
-        
+
         default_get_player_avatar_url = self.service.auth.get_player_avatar_url
         fake_get_player_avatar_url = Mock(return_value=player_avatar_url)
         self.service.auth.get_player_avatar_url = fake_get_player_avatar_url
@@ -753,9 +795,9 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         #
         # type = ['plugin']
         #
-        class Plugin(pollable):
+        class Plugin(Pollable):
             def __init__(self):
-                pollable.__init__(self, 200000000000)
+                Pollable.__init__(self, 200000000000)
             def state(self, args):
                 return [{'info': True}, [owner_id]]
             def name(self):
@@ -856,6 +898,55 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         self.assertTrue(type(result['modified'][0]) is long)
 
 
+class CardstoriesConnectorTest(CardstoriesServiceTestBase):
+
+    @defer.inlineCallbacks
+    def create_game(self):
+        # Fake auth module
+        self.service.auth = Mock()
+
+        self.card = 5
+        self.sentence = u'SENTENCE'
+        self.owner_id = 15
+        result = yield self.service.create({ 'card': [self.card],
+                                             'sentence': [self.sentence],
+                                             'owner_id': [self.owner_id]})
+        game_id = result['game_id']
+        defer.returnValue(game_id)
+
+    @defer.inlineCallbacks
+    def test01_get_game_by_id(self):
+        game_id = yield self.create_game()
+
+        connector = CardstoriesServiceConnector(self.service)
+        game, players_ids = yield connector.get_game_by_id(game_id, self.owner_id)
+        self.assertEqual(game['id'], game_id)
+        self.assertEqual(players_ids, [self.owner_id])
+
+    @defer.inlineCallbacks
+    def test02_get_players_by_game_id(self):
+        game_id = yield self.create_game()
+
+        connector = CardstoriesServiceConnector(self.service)
+        players_ids = yield connector.get_players_by_game_id(game_id)
+        self.assertEqual(players_ids, [self.owner_id])
+
+    def test03_get_game_id_from_args(self):
+        connector = CardstoriesServiceConnector(self.service)
+
+        game_id = connector.get_game_id_from_args({})
+        self.assertEqual(game_id, None)
+
+        game_id = connector.get_game_id_from_args({'game_id': ['undefined']})
+        self.assertEqual(game_id, None)
+
+        game_id = connector.get_game_id_from_args({'game_id': ['3']})
+        self.assertEqual(game_id, 3)
+
+        game_id = connector.get_game_id_from_args({'game_id': [4]})
+        self.assertEqual(game_id, 4)
+
+
 def Run():
     loader = runner.TestLoader()
 #    loader.methodPrefix = "test12_"
@@ -864,6 +955,7 @@ def Run():
     suite.addTest(loader.loadClass(CardstoriesServiceTestInit))
     suite.addTest(loader.loadClass(CardstoriesServiceTest))
     suite.addTest(loader.loadClass(CardstoriesServiceTestHandle))
+    suite.addTest(loader.loadClass(CardstoriesConnectorTest))
     return runner.TrialRunner(
         reporter.VerboseTextReporter,
         tracebackFormat='default',

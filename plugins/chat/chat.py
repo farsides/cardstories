@@ -1,5 +1,13 @@
+# -*- coding: utf-8 -*-
 #
-# Copyright (C) 2011 Chris McCormick <chris@mccormickit.com>
+# Copyright (C) 2011-2012 Farsides <contact@farsides.com>
+#
+# Authors:
+#          Chris McCormick <chris@mccormick.cx>
+#          Matjaz Gregoric <mtyaka@gmail.com>
+#          Xavier Antoviaque <xavier@antoviaque.org>
+#          Adolfo R. Brandes <arbrandes@gmail.com>
+#          Côme Bernigaud <come.bernigaud@laposte.net>
 #
 # This software's license gives you freedom; you can copy, convey,
 # propagate, redistribute and/or modify this program under the terms of
@@ -23,17 +31,20 @@ from twisted.internet import defer, reactor
 
 from django.utils.html import urlize
 
-from cardstories.poll import pollable
+from cardstories.poll import Pollable
+from cardstories.helpers import Observable
 
 # How long we retain old messages for in milliseconds
 MESSAGE_EXPIRE_TIME = 3600000
 
-class Plugin(pollable):
+class Plugin(Pollable, Observable):
     """
     The chat plugin implements the backend for the in-game chat system.
     
     """
     def __init__(self, service, plugins):
+        self.observers = []
+
         # Register a function to listen to the game events. 
         self.service = service
         self.service.listen().addCallback(self.self_notify)
@@ -47,7 +58,7 @@ class Plugin(pollable):
         self.logdir = os.path.join(self.service.settings['plugins-logdir'], self.name())
 
         # Initialize the pollable using the recommended timeout.
-        pollable.__init__(self, self.service.settings.get('poll-timeout', 300))
+        Pollable.__init__(self, self.service.settings.get('poll-timeout', 30))
 
     def name(self):
         """
@@ -147,9 +158,9 @@ class Plugin(pollable):
             sentence = request.args['sentence'][0].decode('utf8')
             # Escape HTML characters.
             sentence = cgi.escape(sentence)
-            
+
             # Make links from urls
-            sentence = urlize(sentence,None)
+            sentence = urlize(sentence, None)
             # Add target=_blank to links, so that they does not open in the same window/tab
             sentence = sentence.replace('<a ', '<a target="_blank" ')
 
@@ -173,7 +184,7 @@ class Plugin(pollable):
         last update. This will automatically get called by the server when the
         state changes.
         """
-        
+
         messages = []
         players_id_list = []
 
@@ -184,3 +195,24 @@ class Plugin(pollable):
 
         return defer.succeed([{"messages": messages},
                               players_id_list])
+
+    def poll(self, args):
+        """
+        Keep track of players who start and end chat polls
+        """
+
+        d = Pollable.poll(self, args)
+
+        player_id = args['player_id'][0]
+        self.notify({'type': 'poll_start',
+                     'player_id': player_id})
+
+        def on_poll_end(return_value):
+            self.notify({'type': 'poll_end',
+                         'player_id': player_id})
+            return return_value
+        d.addCallbacks(on_poll_end, on_poll_end)
+
+        return d
+
+

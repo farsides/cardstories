@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2011 Farsides <contact@farsides.com>
+# Copyright (C) 2011-2012 Farsides <contact@farsides.com>
 #
 # Authors:
 #          Xavier Antoviaque <xavier@antoviaque.org>
@@ -120,7 +120,7 @@ class BotTest(unittest.TestCase):
             yield bots[i].pick(game_id)
             self.assertFalse(mock_reactor.called)
 
-            game, player_ids = yield bots[i].get_game_by_id(game_id)
+            game, player_ids = yield bots[i].get_game_by_id(game_id, player_id=bots[i].player_id)
             self.assertIsInstance(game['players'][i + 1]['picked'], int)
             self.assertEqual(game['players'][i + 1]['vote'], None)
 
@@ -142,7 +142,7 @@ class BotTest(unittest.TestCase):
             yield bots[i].vote(game_id)
             self.assertFalse(mock_reactor.called)
 
-            game, player_ids = yield bots[i].get_game_by_id(game_id)
+            game, player_ids = yield bots[i].get_game_by_id(game_id, player_id=bots[i].player_id)
             self.assertIsInstance(game['players'][i + 1]['picked'], int)
             self.assertEqual(game['players'][i + 1]['vote'], '')
 

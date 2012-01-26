@@ -1,5 +1,9 @@
+# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2011 Loic Dachary <loic@dachary.org>
+#
+# Authors:
+#          Loic Dachary <loic@dachary.org>
 #
 # This software's license gives you freedom; you can copy, convey,
 # propagate, redistribute and/or modify this program under the terms of
@@ -32,7 +36,7 @@ class CardstoriesPlugins:
             module = imp.load_source("cardstories_plugin", self.path(plugin))
             o = getattr(module, 'Plugin')(service, self.plugins)
             self.plugins.append(o)
-            if isinstance(o, poll.pollable):
+            if isinstance(o, poll.Pollable):
                 service.pollable_plugins.append(o)
             if isinstance(o, auth.Auth):
                 service.auth = o

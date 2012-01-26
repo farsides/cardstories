@@ -1,5 +1,12 @@
+# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2011 Loic Dachary <loic@dachary.org>
+# Copyright (C) 2011-2012 Farsides <contact@farsides.com>
+#
+# Authors:
+#          Loic Dachary <loic@dachary.org>
+#          Xavier Antoviaque <xavier@antoviaque.org>
+#          Matjaz Gregoric <mtyaka@gmail.com>
 #
 # This software's license gives you freedom; you can copy, convey,
 # propagate, redistribute and/or modify this program under the terms of
@@ -20,10 +27,10 @@ import random
 
 from twisted.internet import defer, reactor
 
-from cardstories.poll import pollable
+from cardstories.poll import Pollable
 from cardstories.exceptions import CardstoriesWarning
 
-class CardstoriesGame(pollable):
+class CardstoriesGame(Pollable):
 
     MIN_PICKED = 3 # there needs to be at least 3 cards to move to the voting phase
     MIN_VOTED = 2 # there needs to be at least 2 votes to complete the game
@@ -39,12 +46,12 @@ class CardstoriesGame(pollable):
         self.owner_id = None
         self.players = []
         self.invited = []
-        pollable.__init__(self, self.settings.get('poll-timeout', 300))
+        Pollable.__init__(self, self.settings.get('poll-timeout', 30))
 
     def touch(self, *args, **kwargs):
         self.update_timer()
         kwargs['game_id'] = [self.id]
-        return pollable.touch(self, kwargs)
+        return Pollable.touch(self, kwargs)
 
     def destroy(self):
         self.clear_countdown()
@@ -52,7 +59,7 @@ class CardstoriesGame(pollable):
             self.timer.cancel()
         if hasattr(self, 'service'):
             del self.service
-        return pollable.destroy(self)
+        return Pollable.destroy(self)
 
     def get_id(self):
         return self.id
@@ -380,7 +387,7 @@ class CardstoriesGame(pollable):
         else:
             winners = failed + guessed
         transaction.execute("UPDATE player2game SET win = 'y' WHERE "
-                            "  game_id = %d AND " % game_id + 
+                            "  game_id = %d AND " % game_id +
                             "  player_id IN ( %s ) " % ','.join([ str(id) for id in winners ]))
         transaction.execute("UPDATE games SET completed = datetime('now'), state = 'complete' WHERE id = %d" % game_id)
 
