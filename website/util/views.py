@@ -33,8 +33,9 @@ def proxy(request, cardstories_host='localhost:5000'):
     uri = r"http://%s%s%s" % (cardstories_host, request.path, get)
     connection = httplib2.Http()
 
-    headers = {'Content-type': request.META['CONTENT_TYPE'],
-               'Cookie': request.META['HTTP_COOKIE']}
+    headers = {'Content-type': request.META['CONTENT_TYPE']}
+    if 'HTTP_COOKIE' in request.META: # Don't break auth plugin
+        headers['Cookie'] = request.META['HTTP_COOKIE']
 
     if request.method == 'GET':
         response, content = connection.request(uri, request.method,
