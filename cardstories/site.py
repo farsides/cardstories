@@ -1,5 +1,11 @@
+# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2011 Loic Dachary <loic@dachary.org>
+# Copyright (C) 2011 Farsides <contact@farsides.com>
+#
+# Authors:
+#          Loic Dachary <loic@dachary.org>
+#          Adolfo R. Brandes <arbrandes@gmail.com>
 #
 # This software's license gives you freedom; you can copy, convey,
 # propagate, redistribute and/or modify this program under the terms of
@@ -22,7 +28,7 @@ from twisted.internet import defer
 from twisted.python import urlpath, log
 
 class CardstoriesSite(server.Site):
-    
+
     def __init__(self, resource, settings, plugins, **kwargs):
         self.plugins = plugins
         name2plugin = {}
@@ -35,7 +41,7 @@ class CardstoriesSite(server.Site):
         for plugin in settings.get('plugins-post-process', '').split():
             self.postprocess.append(name2plugin[plugin])
         server.Site.__init__(self, resource, **kwargs)
-    
+
 class CardstoriesResource(resource.Resource):
 
     def __init__(self, service):
@@ -65,7 +71,7 @@ class CardstoriesResource(resource.Resource):
             if not request._disconnected:
                 body = reason.getTraceback()
                 request.setResponseCode(http.INTERNAL_SERVER_ERROR)
-                request.setHeader('content-type',"text/html")
+                request.setHeader('content-type', "text/html")
                 request.setHeader('content-length', str(len(body)))
                 request.write(body)
                 request.finish()
