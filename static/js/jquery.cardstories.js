@@ -1,19 +1,31 @@
 //
-//     Copyright (C) 2011 Loic Dachary <loic@dachary.org>
+//  Copyright (C) 2011 Loic Dachary <loic@dachary.org>
+//  Copyright (C) 2011-2012 Farsides <contact@farsides.com>
 //
-//     This program is free software: you can redistribute it and/or modify
-//     it under the terms of the GNU General Public License as published by
-//     the Free Software Foundation, either version 3 of the License, or
-//     (at your option) any later version.
+//  Authors:
+//          Loic Dachary <loic@dachary.org>
+//          Adolfo R. Brandes <arbrandes@gmail.com>
+//          Matjaz Gregoric <mtyaka@gmail.com>
+//          Xavier Antoviaque <xavier@antoviaque.org>
+//          Rogério Hilbert Lima <rogerhil@gmail.com>
+//          Chris McCormick <chris@mccormick.cx>
 //
-//     This program is distributed in the hope that it will be useful,
-//     but WITHOUT ANY WARRANTY; without even the implied warranty of
-//     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//     GNU General Public License for more details.
+//  This software's license gives you freedom; you can copy, convey,
+//  propagate, redistribute and/or modify this program under the terms of
+//  the GNU Affero General Public License (AGPL) as published by the Free
+//  Software Foundation (FSF), either version 3 of the License, or (at your
+//  option) any later version of the AGPL published by the FSF.
 //
-//     You should have received a copy of the GNU General Public License
-//     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//  This program is distributed in the hope that it will be useful, but
+//  WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero
+//  General Public License for more details.
 //
+//  You should have received a copy of the GNU Affero General Public License
+//  along with this program in a file in the toplevel directory called
+//  "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
+//
+
 (function($) {
 
     $.cardstories = {
@@ -118,32 +130,62 @@
             request = $.extend(defaults, options);
             return jQuery.ajax(request);
         },
-
-        reload: function(game_id, root) {
-            var search = this.reload_link(game_id, root);
+        
+        reload: function(game_id, options) {
+            var search = this.reload_link(game_id, options);
             $.cardstories.location.search = search;
         },
 
-        reload_link: function(game_id, root) {
+        reload_link: function(game_id, options) {
+            var $this = this;
             var params = {};
+            
+            // Options
+            var default_options = {'force_create': false,
+                                   'previous_game_id': undefined}
+            if(options){
+                options = $.extend(default_options, options); 
+            } else {
+                options = default_options;
+            }
 
-            if (game_id) {
+            // game_id
+            if(game_id) {
                 params.game_id = game_id;
             }
 
-            // Only add the player_id to the URL if it already is there (ie when
+            // player_id - Only add the player_id to the URL if it already is there (ie when
             // it has been filled manually by the player)
             var player_id = $.query.get('player_id');
-            if (player_id) {
+            if(player_id) {
                 params.player_id = player_id;
+            }
+            
+            // force_create - Allows to explicitely request the creation
+            // of a new game, rather than letting the game chose a game to join
+            if(options.force_create) {
+                params.create = 1;
+            }
+            
+            // previous_game_id - Allow to link a game being created to a previous game
+            if(options.previous_game_id) {
+                params.previous_game_id = options.previous_game_id;
             }
 
             var search = '';
-            if (params.game_id || params.player_id) {
+            if($this.get_hash_length(params) > 0) {
                 search += '?' + $.param(params);
             }
-
             return search;
+        },
+
+        // Gives the number of items in a associative array
+        get_hash_length: function(hash) {
+            var count = 0;
+            $.each(hash, function(element) {
+                count++;
+            });
+            return count;
         },
 
         create: function(player_id, root, cb) {
@@ -725,7 +767,7 @@
                     } else {
                         var root = $(element).parents('.cardstories_root');
                         $this.animate_progress_bar(3, element, function() {
-                            $this.reload(data.game_id, root);
+                            $this.reload(data.game_id);
                         });
                     }
                 };
@@ -736,6 +778,14 @@
                         owner_id: player_id,
                         card: card
                     };
+                    
+                    // If this is a continuation of a series of games, the WS needs to know
+                    // the id of the previous game
+                    var previous_game_id = $.query.get('previous_game_id');
+                    if (previous_game_id) {
+                        query.previous_game_id = previous_game_id;
+                    }
+                    
                     var sentence = encodeURIComponent($('.cardstories_sentence', element).val());
                     $this.ajax({
                         url: $this.url + '?' + $.param(query, true),
@@ -836,8 +886,8 @@
             this.display_modal(box, overlay);
         },
 
-        poll_timeout: 300 * 1000, // must be identical to the --poll-timeout value
-                                  // server side
+        poll_timeout: 30 * 1000, // must be identical to the --poll-timeout value
+                                 // server side
 
         poll: function(root, request, cb) {
             var $this = this;
@@ -859,7 +909,9 @@
 
             // Add plugin polls.
             $.each(this.plugins, function(i) {
-                if (this.poll) {request.type.push(this.poll);}
+                if (this.poll && $.inArray(this.poll, request.type) === -1 ) {
+                    request.type.push(this.poll);
+                }
             });
 
             // Bail out if no poll types are set.
@@ -1063,7 +1115,7 @@
             $('.cardstories_games tbody', element).html(rows.join('\n'));
             $('.cardstories_lobby_sentence', element).click(function() {
                 var game_id = $(this).metadata({type: "attr", name: "data"}).game_id;
-                $this.reload(game_id, root);
+                $this.reload(game_id);
               });
             if(rows.length > 0) {
               var pagesize = parseInt($('.pagesize option:selected', element).val(), 10);
@@ -2195,7 +2247,7 @@
             var onerror = function(error) {
                 if (error.code === 'GAME_FULL') {
                     $this.show_warning('.cardstories_game_full', root, function() {
-                        $this.reload(undefined, root);
+                        $this.reload(undefined);
                     });
                 } else {
                     $this.panic(error);
@@ -3408,11 +3460,6 @@
             var src = picked_card.metadata({type: 'attr', name: 'data'}).card.supplant({card: game.winner_card});
             picked_card.find('.cardstories_card_foreground').attr('src', src);
 
-            // Enable play again button.
-            $('.cardstories_play_again', element).unbind('click').click(function() {
-                $this.reload(undefined, root);
-            });
-
             // Set progress bar and master seat class.
             var master_seat = $('.cardstories_master_seat', element);
             if (game.owner) {
@@ -3440,6 +3487,11 @@
                 // Show results box.
                 q.queue('chain', function(next) {
                     $this.complete_display_results(player_id, game, element, next);
+                });
+
+                // Show next game box/button
+                q.queue('chain', function(next) {
+                    $this.complete_display_next_game(player_id, game, element, root, next);
                 });
 
                 q.dequeue('chain');
@@ -3665,11 +3717,45 @@
 
             box.fadeIn('slow', cb);
         },
+        
+        complete_display_next_game: function(player_id, game, element, root, cb) {
+            var $this = this;
+            var box = $('.cardstories_next_game', element);
+            
+            // Show who is going to create the next game
+            var next_owner_id = $.cardstories_table.get_next_owner_id(player_id, game.id, root);
+            if(next_owner_id === player_id) {
+                $('.cardstories_next_game_author', element).css('display', 'block');
+            } else {
+                var next_owner_info = $this.get_player_info_by_id(next_owner_id);
+                $('.cardstories_next_author_name', element).html(next_owner_info.name);
+                
+                $('.cardstories_next_game_player', element).css('display', 'block');
+            }
+            
+            // Enable "continue" button
+            $('.cardstories_play_again', element).unbind('click').click(function() {
+                var play_again_button = $(this);
+                play_again_button.fadeOut();
+                
+                // Ask the table plugin to switch to the next game as soon as possible
+                var is_ready = $.cardstories_table.load_next_game_when_ready(player_id, game.id, root);
+                
+                if(!is_ready) {
+                    // Waiting message while the next author is creating the story
+                    var modal = $('.cardstories_modal', element);
+                    var overlay = $('.cardstories_modal_overlay', element);
+                    $this.display_modal(modal, overlay);
+                }
+            });
+
+            box.fadeIn('fast', cb);
+        },
 
         canceled: function(player_id, game, root) {
             var $this = this;
             $this.show_warning('.cardstories_game_canceled', root, function() {
-                $this.reload(undefined, root);
+                $this.reload(undefined);
             });
         },
 
@@ -3703,7 +3789,7 @@
 
             // Start a new game
             $('.cardstories_new_story', element).unbind('click').click(function() {
-                $this.reload(undefined, root);
+                $this.reload(undefined, {'force_create': true});
             });
         },
 
@@ -3715,7 +3801,7 @@
                     var error = data.error;
                     if (error.code === 'GAME_DOES_NOT_EXIST') {
                         $this.show_warning('.cardstories_game_doesnt_exist', root, function() {
-                            $this.reload(undefined, root);
+                            $this.reload(undefined);
                         });
                     } else {
                         $this.panic(error);
@@ -4178,7 +4264,7 @@
             $(".cardstories_emailform", element).submit(function() {
                 var player_id = encodeURIComponent($('.cardstories_email', element).val());
                 $.cookie('CARDSTORIES_ID', player_id);
-                $this.reload(game_id, root);
+                $this.reload(game_id);
                 return true;
             });
 
