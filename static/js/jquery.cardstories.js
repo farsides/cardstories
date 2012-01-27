@@ -891,6 +891,15 @@
         poll_timeout: 30 * 1000, // must be identical to the --poll-timeout value
                                  // server side
 
+        add_plugin_polls: function(request, root) {
+            $.each(this.plugins, function(i) {
+                if (this.poll && $.inArray(this.poll, request.type) === -1 ) {
+                    request.type.push(this.name);
+                }
+            });
+            return request;
+        },
+
         poll: function(root, request, cb) {
             var $this = this;
 
@@ -910,11 +919,7 @@
             }
 
             // Add plugin polls.
-            $.each(this.plugins, function(i) {
-                if (this.poll && $.inArray(this.poll, request.type) === -1 ) {
-                    request.type.push(this.poll);
-                }
-            });
+            request = this.add_plugin_polls(request, root);
 
             // Bail out if no poll types are set.
             if (!request.type.length) {
@@ -964,7 +969,7 @@
             // Available plugin states.
             var type = [];
             $.each(this.plugins, function(i) {
-                if (this.poll) {type.push(this.poll);}
+                if (this.poll) {type.push(this.name);}
             });
 
             // Only enter the loop if there are applicable plugin polls.
@@ -1083,9 +1088,7 @@
             };
 
             // Add plugin polls.
-            $.each(this.plugins, function(i) {
-                if (this.poll) {request.type.push(this.poll);}
-            });
+            request = this.add_plugin_polls(request, root);
 
             $this.ajax({
                 async: false,
@@ -3846,9 +3849,7 @@
             };
 
             // Add plugin polls.
-            $.each(this.plugins, function(i) {
-                if (this.poll) {request.type.push(this.poll);}
-            });
+            request = this.add_plugin_polls(request, root);
 
             var options = {
                 url: $this.url + '?' + $.param(request, true),

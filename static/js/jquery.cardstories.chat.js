@@ -26,7 +26,7 @@
 
         name: 'chat',
 
-        poll: 'chat',
+        poll: true,
 
         templates: {'chat': '<div class="cardstories_chat_message"><strong>{player_id}:</strong> {sentence}</div>',
                     'notification': '<div class="cardstories_chat_message"><a href="{href}"><strong>{player_id}</strong> created the game <strong>"{sentence}"</strong> <span class="cardstories_join_button">Join game</span></a></div>'},

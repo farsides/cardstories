@@ -344,7 +344,8 @@ class CardstoriesGameTest(unittest.TestCase):
         # invitation state, owner point of view
         game_info, players_id_list = yield self.game.game(owner_id)
         self.assertTrue(game_info['ready'])
-        self.assertTrue(type(game_info['countdown_finish']) is long)
+        # Assert modified is numeric; concrete type depends on architecture/implementation.
+        self.assertTrue(isinstance(game_info['countdown_finish'], (int, long)))
         now_ms = time.time() * 1000
         self.assertTrue(game_info['countdown_finish'] > now_ms)
         self.assertEquals(players_id_list, [owner_id, player1, player2])
@@ -387,7 +388,7 @@ class CardstoriesGameTest(unittest.TestCase):
         game_info['board'].sort()
         player1_cards = game_info['players'][1]['cards']
         countdown_finish = game_info['countdown_finish']
-        self.assertTrue(type(countdown_finish) is long)
+        self.assertTrue(isinstance(countdown_finish, (int, long)))
         now_ms = time.time() * 1000
         self.assertTrue(countdown_finish > now_ms)
         self.assertEquals({'board': [winner_card, card1, card2],
@@ -815,7 +816,7 @@ class CardstoriesGameTest(unittest.TestCase):
 
         self.game.start_countdown()
         self.assertTrue(self.game.is_countdown_active())
-        self.assertTrue(type(self.game.get_countdown_finish()) is long)
+        self.assertTrue(isinstance(self.game.get_countdown_finish(), (int, long)))
         now_ms = time.time() * 1000
         self.assertTrue(self.game.get_countdown_finish() > now_ms)
 

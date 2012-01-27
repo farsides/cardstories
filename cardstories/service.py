@@ -24,7 +24,7 @@
 # along with this program in a file in the toplevel directory called
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
-import os
+import os, traceback
 
 from twisted.python import failure, runtime
 from twisted.application import service
@@ -113,7 +113,7 @@ class CardstoriesServiceConnector(object):
 class CardstoriesService(service.Service, Observable):
 
     ACTIONS_GAME = ('participate', 'voting', 'pick', 'vote', 'complete', 'invite', 'set_countdown')
-    ACTIONS = ACTIONS_GAME + ('create', 'poll', 'state', 'player_info')
+    ACTIONS = ACTIONS_GAME + ('create', 'poll', 'state', 'player_info', 'remove_tab')
 
     def __init__(self, settings):
         self.settings = settings
@@ -186,6 +186,15 @@ class CardstoriesService(service.Service, Observable):
         c.execute(
             "CREATE UNIQUE INDEX invitations_idx ON invitations (player_id, game_id); "
             )
+        c.execute(
+            "CREATE TABLE tabs ( "
+            "  player_id INTEGER, "
+            "  game_id INTEGER, "
+            "  created DATETIME "
+            "); ")
+        c.execute(
+            "CREATE UNIQUE INDEX tabs_idx ON tabs (player_id, game_id); "
+            )
 
     def load(self, c):
         c.execute("SELECT id, sentence FROM games WHERE state != 'complete' AND state != 'canceled'")
@@ -198,7 +207,10 @@ class CardstoriesService(service.Service, Observable):
             # Note that the db is not accessible during that stage
             self.game_init(game, sentence, server_starting=True)
 
-    def poll(self, args):
+    # The optional d parameter is only used while testing the 'tabs' type poll
+    # and is expected to be a deferred object. It is passed on to poll_tabs -
+    # read the comment there for more information.
+    def poll(self, args, d=None):
         self.required(args, 'poll', 'type', 'modified')
         deferreds = []
 
@@ -209,24 +221,13 @@ class CardstoriesService(service.Service, Observable):
                 # it has been completed. The client doesn't seem to be aware of this yet,
                 # so just return the poll immediately to let the client know the state
                 # has changed.
-                return defer.succeed({ 'game_id': [game_id],
-                                       'modified': [int(runtime.seconds() * 1000)] })
+                return defer.succeed({'game_id': [game_id],
+                                      'modified': [int(runtime.seconds() * 1000)]})
             else:
                 deferreds.append(self.games[game_id].poll(args))
 
         if 'tabs' in args['type']:
-            game_deferreds = []
-            for game_id_str in args['game_ids']:
-                game_id = int(game_id_str)
-                if self.games.has_key(game_id):
-                    game_deferreds.append(self.games[game_id].poll(args))
-            def callback(result):
-                # Make the tabs poll always return just the arguments with updated timestamp.
-                args['modified'] = result[0]['modified']
-                return args
-            d = defer.DeferredList(game_deferreds, fireOnOneCallback=True)
-            d.addCallback(callback)
-            deferreds.append(d)
+            deferreds.append(self.poll_tabs(args, d))
 
         if 'lobby' in args['type']:
             deferreds.append(self.poll_player(args))
@@ -236,6 +237,64 @@ class CardstoriesService(service.Service, Observable):
                 deferreds.append(plugin.poll(args))
         d = defer.DeferredList(deferreds, fireOnOneCallback=True)
         d.addCallback(lambda x: x[0])
+        return d
+
+    # Gets the games that should be monitored as tabs by the current user,
+    # and returns a deferred list of polled games.
+    # The second parameter is an optional deferred object that will be fired
+    # once the game_ids have been fetched, which is really useful when testing,
+    # but shouldn't be needed otherwise.
+    def poll_tabs(self, args, d=None):
+        outer_deferred = self.get_tab_game_ids(args)
+        def outer_callback(result):
+            game_deferreds = []
+            for game_id in result:
+                if self.games.has_key(game_id):
+                    game_deferreds.append(self.games[game_id].poll(args))
+            def inner_callback(result):
+                # Make the tabs poll always return just the arguments with updated timestamp.
+                args['modified'] = result[0]['modified']
+                return args
+            inner_deferred = defer.DeferredList(game_deferreds, fireOnOneCallback=True)
+            inner_deferred.addCallback(inner_callback)
+            if d:
+                d.callback(True)
+            return inner_deferred
+        outer_deferred.addCallback(outer_callback)
+        return outer_deferred
+
+    def tabsInteraction(self, transaction, player_id, game_id):
+        transaction.execute('SELECT game_id from tabs WHERE player_id = ? ORDER BY created ASC', [player_id])
+        rows = transaction.fetchall()
+        game_ids = [row[0] for row in rows]
+        if game_id and game_id not in game_ids:
+            sql = "INSERT INTO tabs (player_id, game_id, created) VALUES (?, ?, datetime('now'))"
+            transaction.execute(sql, [player_id ,game_id])
+            game_ids.append(game_id)
+        return game_ids
+
+    @defer.inlineCallbacks
+    def get_tab_game_ids(self, args):
+        player_id = args.has_key('player_id') and args['player_id'][0]
+        game_id = args.has_key('game_id') and args['game_id'][0]
+        try:
+            game_id = int(game_id)
+        except:
+            game_id = None
+        if player_id:
+            game_ids = yield self.db.runInteraction(self.tabsInteraction, player_id, game_id)
+        else:
+            game_ids = []
+        defer.returnValue(game_ids)
+
+    def remove_tab(self, args):
+        self.required(args, 'remove_tab', 'player_id')
+        game_id = self.required_game_id(args)
+        player_id = int(args['player_id'][0])
+        d = self.db.runQuery('DELETE FROM tabs WHERE player_id = ? AND game_id = ?', [ player_id, game_id ])
+        def success(result):
+            return {'type': 'remove_tab'}
+        d.addCallback(success)
         return d
 
     @defer.inlineCallbacks
@@ -282,14 +341,15 @@ class CardstoriesService(service.Service, Observable):
             yield self.update_players_info(players_info, players_id_list)
 
         if 'tabs' in args['type']:
-            tabs = {'type': 'tabs', 'games': {}}
+            game_ids = yield self.get_tab_game_ids(args)
+            tabs = {'type': 'tabs', 'games': []}
             player_id = args.get('player_id')
             max_modified = 0
-            for game_id in args['game_ids']:
+            for game_id in game_ids:
                 game_args = {'action': 'game', 'game_id': [game_id]}
                 if player_id: game_args['player_id'] = player_id
                 game, players_id_list = yield self.game(game_args)
-                tabs['games'][game_id] = game
+                tabs['games'].append(game)
                 if game['modified'] > max_modified:
                     max_modified = game['modified']
             tabs['modified'] = max_modified
@@ -549,7 +609,10 @@ class CardstoriesService(service.Service, Observable):
                     if reason.type is CardstoriesWarning:
                         return {'error': {'code': error.code, 'data': error.data}}
                     else:
-                        return {'error': {'code': 'PANIC', 'data': error.args[0]}}
+                        tb = error.args[0]
+                        tb += '\n\n'
+                        tb += ''.join(traceback.format_tb(reason.getTracebackObject()))
+                        return {'error': {'code': 'PANIC', 'data': tb}}
                 d.addErrback(error)
                 return d
             else:
@@ -559,7 +622,8 @@ class CardstoriesService(service.Service, Observable):
             return defer.succeed({'error': {'code': e.code, 'data': e.data}})
         except Exception as e:
             failure.Failure().printTraceback()
-            return defer.succeed({'error': {'code': 'PANIC', 'data': e.args[0]}})
+            tb = traceback.format_exc()
+            return defer.succeed({'error': {'code': 'PANIC', 'data': tb}})
 
     @staticmethod
     def required(args, action, *keys):

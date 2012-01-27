@@ -560,9 +560,9 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         card = 5
         sentence = 'SENTENCE'
         owner_id = 15
-        result = yield self.service.create({ 'card': [card],
-                                             'sentence': [sentence],
-                                             'owner_id': [owner_id]})
+        result = yield self.service.create({'card': [card],
+                                            'sentence': [sentence],
+                                            'owner_id': [owner_id]})
         game = self.service.games[result['game_id']]
         d = self.service.poll({'action': ['poll'],
                                'type': ['game'],
@@ -582,43 +582,67 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         card = 7
         sentence = 'SENTENCE'
         owner_id = 17
-        # Create three games.
+        # Create three games and associate them with the owner in the tabs table.
         game_ids = []
         for i in range(3):
-            result = yield self.service.create({ 'card': [card],
-                                                 'sentence': [sentence],
-                                                 'owner_id': [owner_id]})
-            game_ids.append(result['game_id'])
+            result = yield self.service.create({'card': [card],
+                                                'sentence': [sentence],
+                                                'owner_id': [owner_id]})
+            game_id = result['game_id']
+            game_ids.append(game_id)
+            sql = "INSERT INTO tabs (player_id, game_id, created) VALUES (%d, %d, datetime('now'))"
+            c = self.db.cursor()
+            c.execute(sql % (owner_id, game_id))
+            self.db.commit()
+
         games = map(lambda gid: self.service.games[gid], game_ids)
         max_modified = games[2].modified
 
         # Touch first game.
+        # Pass a deferred helper object to poll, so that we will be able to
+        # block the test while game_ids of games that should be loaded into
+        # tabs are fetched from the DB. If we didn't block, the test would
+        # get into the teardown phase before the games actually start being
+        # polled, which causes hard to debug test failures.
+        ready = defer.Deferred()
         d = self.service.poll({'action': ['poll'],
                                'type': ['tabs'],
                                'modified': [max_modified],
-                               'game_ids': game_ids})
+                               'player_id': [owner_id],
+                               'game_id': [game_ids[0]]},
+                              ready)
+
+        # Wait until the deferred is ready.
+        yield ready
 
         def check1(result):
-            self.assertEquals(game_ids, result['game_ids'])
             self.assertEquals(games[0].modified, result['modified'][0])
             games[0].ok = True
             return result
         d.addCallback(check1)
+        yield self.service.get_tab_game_ids({'player_id': [owner_id]})
         yield games[0].touch()
         self.assertTrue(games[0].ok)
 
         # Touch third game.
         max_modified = games[0].modified # first game has just been touched, so it's the last one modified.
+        ready = defer.Deferred()
         d = self.service.poll({'action': ['poll'],
                                'type': ['tabs'],
                                'modified': [max_modified],
-                               'game_ids': game_ids})
+                               'player_id': [owner_id],
+                               'game_id': [game_ids[2]]},
+                              ready)
+
+        # Wait until the deferred is ready.
+        yield ready
+
         def check3(result):
-            self.assertEquals(game_ids, result['game_ids'])
             self.assertEquals(games[2].modified, result['modified'][0])
             games[2].ok = True
             return result
         d.addCallback(check3)
+        yield self.service.get_tab_game_ids({'player_id': [owner_id]})
         yield games[2].touch()
         self.assertTrue(games[2].ok)
 
@@ -800,6 +824,52 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         self.service.auth.get_player_avatar_url = default_get_player_avatar_url
 
     @defer.inlineCallbacks
+    def test12_remove_tab(self):
+        player_id = 21
+        game_id1 = 121
+        game_id2 = 122
+        # Associate two games with the player in the tabs table.
+        sql = "INSERT INTO tabs (player_id, game_id, created) VALUES (%d, %d, datetime('now'))"
+        c = self.db.cursor()
+        c.execute(sql % (player_id, game_id1))
+        c.execute(sql % (player_id, game_id2))
+        self.db.commit()
+
+        # Helper function to get player's tabs from the DB.
+        def get_player_tabs():
+            c = self.db.cursor()
+            c.execute("SELECT game_id FROM tabs WHERE player_id = ?", [player_id])
+            game_ids = c.fetchall()
+            return game_ids
+
+        self.assertEqual(len(get_player_tabs()), 2)
+
+        yield self.service.remove_tab({'action': ['remove_tab'],
+                                       'player_id': [player_id],
+                                       'game_id': [game_id1]})
+
+        game_ids = get_player_tabs()
+        self.assertEqual(len(game_ids), 1)
+        self.assertEqual(game_ids[0][0], game_id2)
+
+        # Trying to delete the same game again shouldn't do any harm.
+        yield self.service.remove_tab({'action': ['remove_tab'],
+                                       'player_id': [player_id],
+                                       'game_id': [game_id1]})
+
+        game_ids = get_player_tabs()
+        self.assertEqual(len(game_ids), 1)
+        self.assertEqual(game_ids[0][0], game_id2)
+
+        # Delete the second game, too.
+        # Trying to delete the same game again shouldn't do any harm.
+        yield self.service.remove_tab({'action': ['remove_tab'],
+                                       'player_id': [player_id],
+                                       'game_id': [game_id2]})
+
+        self.assertEqual(len(get_player_tabs()), 0)
+
+    @defer.inlineCallbacks
     def test12_state(self):
         winner_card = 5
         sentence = 'SENTENCE'
@@ -857,21 +927,39 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
                                             'owner_id': [player_id]})
         game_id1 = game1['game_id']
         game_id2 = game2['game_id']
+        # Associate the first game with the player, and pass the ID of
+        # the second one as 'game_id' to the state call - the state function
+        # should automatically associate the second game with player's tabs,
+        # and return states of both.
+        sql = "INSERT INTO tabs (player_id, game_id, created) VALUES (%d, %d, datetime('now'))"
+        c = self.db.cursor()
+        c.execute(sql % (player_id, game_id1))
+        self.db.commit()
 
         modified1 = self.service.games[game_id1].modified
         modified2 = self.service.games[game_id2].modified
         max_modified = max(modified1, modified2)
-        multistate = yield self.service.state({ 'type': ['tabs'],
-                                                'modified': [0],
-                                                'game_ids': [game_id1, game_id2],
-                                                'player_id': [player_id] })
+        multistate = yield self.service.state({'type': ['tabs'],
+                                               'modified': [0],
+                                               'game_id': [game_id2],
+                                               'player_id': [player_id]})
+
         self.assertEquals(multistate[0]['modified'], max_modified)
-        state1 = multistate[0]['games'][game_id1]
+        self.assertEquals(len(multistate[0]['games']), 2)
+        state1 = multistate[0]['games'][0]
         self.assertEquals(state1['id'], game_id1)
         self.assertEquals(state1['winner_card'], None)
-        state2 = multistate[0]['games'][game_id2]
+        state2 = multistate[0]['games'][1]
         self.assertEquals(state2['id'], game_id2)
         self.assertEquals(state2['winner_card'], winner_card2)
+        # Look into the database to assert that the second game has been associated
+        # with the player in the 'tabs' table.
+        c = self.db.cursor()
+        c.execute('SELECT game_id from tabs where player_id = ? ORDER BY created ASC', [player_id])
+        games = c.fetchall()
+        self.assertEquals(len(games), 2)
+        self.assertEquals(games[0][0], game_id1)
+        self.assertEquals(games[1][0], game_id2)
 
         #
         # type = ['plugin']
@@ -976,7 +1064,8 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
                                            'action': ['poll'],
                                            'type': ['game'],
                                            'modified': [1231] })
-        self.assertTrue(type(result['modified'][0]) is long)
+        # Assert modified is numeric; concrete type depends on architecture/implementation.
+        self.assertTrue(isinstance(result['modified'][0], (int, long)))
 
 
 class CardstoriesConnectorTest(CardstoriesServiceTestBase):

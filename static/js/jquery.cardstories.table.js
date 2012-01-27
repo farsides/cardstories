@@ -26,7 +26,7 @@
 
         name: 'table',
 
-        poll: 'table',
+        poll: true,
 
         init: function(player_id, game_id, root) {
             var $this = this;
