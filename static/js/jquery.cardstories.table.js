@@ -30,15 +30,15 @@
 
         init: function(player_id, game_id, root) {
             var $this = this;
-            
+
             // Table data storage
             $this.init_game2table(game_id, root);
-            
+
             // If game creation or a specific game aren't explicitly
             // requested, try to join an active table/game
             if(player_id && !$.query.get('create') && !game_id) {
                 var table = $this.get_table_from_game_id(game_id, root);
-                
+
                 table.ready_for_next_game = true;
                 $this.force_state_update(player_id, game_id, root);
             }
@@ -52,7 +52,7 @@
             if(!game_id) {
                 game_id = 0;
             }
-            
+
             // Keep track of games table information
             var game2table = {};
             game2table[game_id] = { next_game_id: null,
@@ -60,7 +60,7 @@
                                     ready_for_next_game: false };
             $(root).data('cardstories_table', { 'game2table': game2table });
         },
-        
+
         // Retreive table data
         get_table_from_game_id: function(game_id, root) {
             var game2table = $(root).data('cardstories_table').game2table;
@@ -69,7 +69,7 @@
                 game_id = 0;
             }
             var table = game2table[game_id];
-            
+
             return table;
         },
 
@@ -77,7 +77,7 @@
         // to get the state updated immediately (useful when polls aren't running)
         force_state_update: function(player_id, game_id, root) {
             var $this = this;
-            
+
             var query = {
                 action: 'state',
                 type: 'table',
@@ -85,7 +85,7 @@
                 game_id: game_id,
                 player_id: player_id,
             }
-            
+
             var success = function(data, status) {
                 if ('error' in data) {
                     $.cardstories.panic(data.error);
@@ -93,7 +93,7 @@
                     $this.state(player_id, data, root);
                 }
             };
-            
+
             $.cardstories.ajax({
                 url: $.cardstories.url + '?' + $.param(query, true),
                 success: success
@@ -106,10 +106,10 @@
             var $this = this;
             var game_id = data.game_id;
             var table = $this.get_table_from_game_id(game_id, root);
-            
+
             table.next_game_id = data.next_game_id;
             table.next_owner_id = data.next_owner_id;
-            
+
             $this.check_next_game(player_id, game_id, root);
         },
 
@@ -118,7 +118,7 @@
         check_next_game: function(player_id, game_id, root) {
             var $this = this;
             var table = $this.get_table_from_game_id(game_id, root);
-            
+
             if(table.ready_for_next_game) {
                 // It's the player's turn to create a game
                 if(player_id === table.next_owner_id) {
@@ -128,7 +128,7 @@
                     }
                     $.cardstories.reload(undefined, options);
                     return true;
-                    
+
                 // Next game is ready to be joined
                 } else if(table.next_game_id && table.next_game_id !== game_id) {
                     $.cardstories.reload(table.next_game_id);
@@ -137,23 +137,23 @@
             }
             return false;
         },
-        
+
         // Reload to the next game as soon it is created
         load_next_game_when_ready: function(player_id, game_id, root) {
             var $this = this;
             var table = $this.get_table_from_game_id(game_id, root);
-            
+
             table.ready_for_next_game = true;
             var is_ready = $this.check_next_game(player_id, game_id, root);
-            
+
             return is_ready;
         },
-        
+
         // Returns the player_id of the player who should create the next game
         get_next_owner_id: function(player_id, game_id, root) {
             var $this = this;
             var table = $this.get_table_from_game_id(game_id, root);
- 
+
             return table.next_owner_id;
         }
     };

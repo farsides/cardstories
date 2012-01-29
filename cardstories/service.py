@@ -202,7 +202,7 @@ class CardstoriesService(service.Service, Observable):
             game = CardstoriesGame(self, id)
             game.load(c)
 
-            # Notify listeners of the game, but also inform them that this is done 
+            # Notify listeners of the game, but also inform them that this is done
             # during startup, for example to allow plugins to ignore such "reloaded" games
             # Note that the db is not accessible during that stage
             self.game_init(game, sentence, server_starting=True)

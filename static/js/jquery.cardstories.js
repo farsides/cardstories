@@ -132,7 +132,7 @@
             request = $.extend(defaults, options);
             return jQuery.ajax(request);
         },
-        
+
         reload: function(game_id, options) {
             var search = this.reload_link(game_id, options);
             $.cardstories.location.search = search;
@@ -141,7 +141,7 @@
         reload_link: function(game_id, options) {
             var $this = this;
             var params = {};
-            
+
             // Options
             var default_options = {'force_create': false,
                                    'previous_game_id': undefined}
@@ -162,13 +162,13 @@
             if(player_id) {
                 params.player_id = player_id;
             }
-            
+
             // force_create - Allows to explicitely request the creation
             // of a new game, rather than letting the game chose a game to join
             if(options.force_create) {
                 params.create = 1;
             }
-            
+
             // previous_game_id - Allow to link a game being created to a previous game
             if(options.previous_game_id) {
                 params.previous_game_id = options.previous_game_id;
@@ -780,14 +780,14 @@
                         owner_id: player_id,
                         card: card
                     };
-                    
+
                     // If this is a continuation of a series of games, the WS needs to know
                     // the id of the previous game
                     var previous_game_id = $.query.get('previous_game_id');
                     if (previous_game_id) {
                         query.previous_game_id = previous_game_id;
                     }
-                    
+
                     var sentence = encodeURIComponent($('.cardstories_sentence', element).val());
                     $this.ajax({
                         url: $this.url + '?' + $.param(query, true),
@@ -2001,7 +2001,7 @@
 
         get_player_seat_nb: function(player_id, game) {
             // What's the number (position) of the player seat on this game?
-            
+
             var seat_nb=0;
             for (var i=0; i < game.players.length; i++) {
                 if (game.owner_id != game.players[i]['id']) {
@@ -2011,10 +2011,10 @@
                     }
                 }
             }
-            
+
             return seat_nb;
         },
-        
+
         invitation_pick_dock_helper: function(player_id, game, card_specs, element, cb) {
             var $this = this;
             var container = $('.cardstories_card_backs', element);
@@ -3722,11 +3722,11 @@
 
             box.fadeIn('slow', cb);
         },
-        
+
         complete_display_next_game: function(player_id, game, element, root, cb) {
             var $this = this;
             var box = $('.cardstories_next_game', element);
-            
+
             // Show who is going to create the next game
             var next_owner_id = $.cardstories_table.get_next_owner_id(player_id, game.id, root);
             if(next_owner_id === player_id) {
@@ -3734,18 +3734,18 @@
             } else {
                 var next_owner_info = $this.get_player_info_by_id(next_owner_id);
                 $('.cardstories_next_author_name', element).html(next_owner_info.name);
-                
+
                 $('.cardstories_next_game_player', element).css('display', 'block');
             }
-            
+
             // Enable "continue" button
             $('.cardstories_play_again', element).unbind('click').click(function() {
                 var play_again_button = $(this);
                 play_again_button.fadeOut();
-                
+
                 // Ask the table plugin to switch to the next game as soon as possible
                 var is_ready = $.cardstories_table.load_next_game_when_ready(player_id, game.id, root);
-                
+
                 if(!is_ready) {
                     // Waiting message while the next author is creating the story
                     var modal = $('.cardstories_modal', element);

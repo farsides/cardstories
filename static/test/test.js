@@ -2645,10 +2645,10 @@ test("next_game_as_author", 2, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var next_game_dom = $('.cardstories_next_game', element);
-    var play_again_button = $('.cardstories_play_again', next_game_dom);    
+    var play_again_button = $('.cardstories_play_again', next_game_dom);
     $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player_id; },
                            'load_next_game_when_ready': function(player_id, game_id, root) { return true; } };
-    
+
     orig_display_modal = $.cardstories.display_modal;
     $.cardstories.display_modal = function(modal, overlay) {
         ok(false, 'modal should not appear when ready');
@@ -2658,7 +2658,7 @@ test("next_game_as_author", 2, function() {
     equal($('.cardstories_next_game_author', next_game_dom).css('display'), 'block');
     equal($('.cardstories_next_game_player', next_game_dom).css('display'), 'none');
     play_again_button.click();
-    
+
     $.cardstories.display_modal = orig_display_modal;
 });
 
@@ -2676,10 +2676,10 @@ test("next_game_as_player", 4, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var next_game_dom = $('.cardstories_next_game', element);
-    var play_again_button = $('.cardstories_play_again', next_game_dom);    
+    var play_again_button = $('.cardstories_play_again', next_game_dom);
     $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player_id+1; },
                            'load_next_game_when_ready': function(player_id, game_id, root) { return false; } };
-    
+
     orig_display_modal = $.cardstories.display_modal;
     $.cardstories.display_modal = function(modal, overlay) {
         equal(modal.attr('class'), 'cardstories_modal');
@@ -2690,7 +2690,7 @@ test("next_game_as_player", 4, function() {
     equal($('.cardstories_next_game_author', next_game_dom).css('display'), 'none');
     equal($('.cardstories_next_game_player', next_game_dom).css('display'), 'block');
     play_again_button.click();
-    
+
     $.cardstories.display_modal = orig_display_modal;
 });
 
@@ -2854,7 +2854,7 @@ test("lobby_games", 18, function() {
     equal($('.cardstories_lobby_sentence', first).text(), sentence1);
     equal($('.cardstories_lobby_sentence', first).metadata({type: "attr", name: "data"}).game_id, game1);
     $.cardstories.ajax = function(options) {
-        //XXX Commented out as the lobby code is deactivated, and scheduled to be removed from the codebase 
+        //XXX Commented out as the lobby code is deactivated, and scheduled to be removed from the codebase
         //equal(options.url, $.cardstories.url + '?action=state&type=game&modified=0&game_id=' + game1 + '&player_id=' + player_id);
     };
     $('.cardstories_lobby_sentence', first).click();
@@ -2864,7 +2864,7 @@ test("lobby_games", 18, function() {
     equal($('.cardstories_lobby_sentence', second).text(), sentence2);
     equal($('.cardstories_lobby_sentence', second).metadata({type: "attr", name: "data"}).game_id, game2);
     $.cardstories.ajax = function(options) {
-        //XXX Commented out as the lobby code is deactivated, and scheduled to be removed from the codebase 
+        //XXX Commented out as the lobby code is deactivated, and scheduled to be removed from the codebase
         //equal(options.url, $.cardstories.url + '?action=state&type=game&modified=0&game_id=' + game2 + '&player_id=' + player_id);
     };
     $('.cardstories_lobby_sentence', second).click();
