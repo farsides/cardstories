@@ -1,5 +1,13 @@
+# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2011 Loic Dachary <loic@dachary.org>
+# Copyright (C) 2011-2012 Farsides <contact@farsides.com>
+#
+# Authors:
+#          Loic Dachary <loic@dachary.org>
+#          Matjaz Gregoric <mtyaka@gmail.com>
+#          Xavier Antoviaque <xavier@antoviaque.org>
+#          Adolfo R. Brandes <arbrandes@gmail.com>
 #
 # This software's license gives you freedom; you can copy, convey,
 # propagate, redistribute and/or modify this program under the terms of
@@ -22,30 +30,87 @@ from twisted.python import failure, runtime
 from twisted.application import service
 from twisted.internet import reactor, defer
 from twisted.enterprise import adbapi
+from twisted.python import log
 
 from cardstories.game import CardstoriesGame
+from cardstories.helpers import Observable
 from cardstories.exceptions import CardstoriesWarning, CardstoriesException
 
 #from OpenSSL import SSL
 
 import sqlite3
 
-from cardstories.poll import pollable
+from cardstories.poll import Pollable
 from cardstories.auth import Auth
 
-class CardstoriesPlayer(pollable):
+
+class CardstoriesPlayer(Pollable):
 
     def __init__(self, service, id):
         self.service = service
         self.settings = service.settings
         self.id = id
-        pollable.__init__(self, self.settings.get('poll-timeout', 300))
+        Pollable.__init__(self, self.settings.get('poll-timeout', 30))
 
     def touch(self, args):
         args['player_id'] = [self.id]
-        return pollable.touch(self, args)
+        return Pollable.touch(self, args)
 
-class CardstoriesService(service.Service):
+
+class CardstoriesServiceConnector(object):
+    """
+    Standard methods for plugins who wish to make requests to the service
+    """
+
+    def __init__(self, service):
+        self.service = service
+
+    @defer.inlineCallbacks
+    def get_game_by_id(self, game_id, player_id=None):
+        """
+        Returns the current game state corresponding to the provided game_id
+        If player_id is provided, the request will be processed as if the corresponding
+        player had requested it
+        """
+
+        args = {'action': ['state'],
+                'type': ['game'],
+                'modified': [0],
+                'game_id': [game_id]}
+        if player_id:
+            args['player_id'] = [player_id]
+
+        game, players_ids = yield self.service.handle([], args)
+        players_ids = [ int(x['id']) for x in game['players'] ]
+
+        defer.returnValue([game, players_ids])
+
+    @defer.inlineCallbacks
+    def get_players_by_game_id(self, game_id):
+        """
+        Get the players currently playing the game game_id
+        """
+
+        game, players_ids = yield self.get_game_by_id(game_id)
+
+        defer.returnValue(players_ids)
+
+    def get_game_id_from_args(self, args):
+        """
+        Retreives the integer value of the current game, based on the arguments provided
+        for the call to the webservice
+        Consistently return None if no game_id is provided.
+        """
+
+        if 'game_id' in args and args['game_id'][0] and args['game_id'][0] != 'undefined':
+            game_id = int(args['game_id'][0])
+        else:
+            game_id = None
+
+        return game_id
+
+
+class CardstoriesService(service.Service, Observable):
 
     ACTIONS_GAME = ('participate', 'voting', 'pick', 'vote', 'complete', 'invite', 'set_countdown')
     ACTIONS = ACTIONS_GAME + ('create', 'poll', 'state', 'player_info')
@@ -54,30 +119,9 @@ class CardstoriesService(service.Service):
         self.settings = settings
         self.games = {}
         self.players = {}
-        self.listeners = []
+        self.observers = []
         self.pollable_plugins = []
         self.auth = Auth() # to be overriden by an auth plugin (contains unimplemented interfaces)
-
-    def listen(self):
-        d = defer.Deferred()
-        self.listeners.append(d)
-        return d
-
-    def notify(self, result):
-        if hasattr(self, 'notify_running'):
-            raise CardstoriesException, 'recursive call to notify'
-        self.notify_running = True
-        listeners = self.listeners
-        self.listeners = []
-        def error(reason):
-            reason.printTraceback()
-            return True
-        d = defer.DeferredList(listeners)
-        for listener in listeners:
-            listener.addErrback(error)
-            listener.callback(result)
-        del self.notify_running
-        return d
 
     def startService(self):
         database = self.settings['db']
@@ -148,7 +192,11 @@ class CardstoriesService(service.Service):
         for (id, sentence) in c.fetchall():
             game = CardstoriesGame(self, id)
             game.load(c)
-            self.game_init(game, sentence)
+
+            # Notify listeners of the game, but also inform them that this is done 
+            # during startup, for example to allow plugins to ignore such "reloaded" games
+            # Note that the db is not accessible during that stage
+            self.game_init(game, sentence, server_starting=True)
 
     def poll(self, args):
         self.required(args, 'poll', 'type', 'modified')
@@ -260,7 +308,7 @@ class CardstoriesService(service.Service):
             if plugin.name() in args['type']:
                 state, players_id_list = yield plugin.state(args)
                 state['type'] = plugin.name()
-                state['modified'] = plugin.get_modified()
+                state['modified'] = plugin.get_modified(args=args)
                 states.append(state)
                 yield self.update_players_info(players_info, players_id_list)
 
@@ -287,7 +335,9 @@ class CardstoriesService(service.Service):
                     if player.get_modified() < game.get_modified():
                         player.set_modified(game.get_modified())
             self.players[player_id] = player
-            poll_timeout = self.settings.get('poll-timeout', 300)
+
+            poll_timeout = self.settings.get('poll-timeout', 30)
+
             @defer.inlineCallbacks
             def timeout():
                 now = int(runtime.seconds() * 1000)
@@ -312,11 +362,14 @@ class CardstoriesService(service.Service):
             yield self.notify({'type': 'delete', 'game': self.games[game_id], 'details': args})
             del self.games[game_id]
             defer.returnValue(False)
+
         if not self.games.has_key(game_id):
             defer.returnValue(False)
+
         game = self.games[game_id]
         modified = game.get_modified()
         yield self.notify({'type': 'change', 'game': game, 'details': args})
+
         for player_id in game.get_players():
             if self.players.has_key(player_id):
                 yield self.players[player_id].touch(args)
@@ -329,29 +382,39 @@ class CardstoriesService(service.Service):
         d.addCallback(self.game_notify, game_id)
         defer.returnValue(True)
 
-    def game_init(self, game, sentence):
+    @defer.inlineCallbacks
+    def game_init(self, game, sentence, previous_game_id=None, server_starting=False):
         self.games[game.get_id()] = game
         args = {
             'type': 'init',
             'modified': [0],
             'game_id': [game.get_id()],
-            'sentence': [sentence]}
-        d = game.wait(args)
-        d.addCallback(self.game_notify, game.get_id())
+            'sentence': [sentence],
+            'previous_game_id': previous_game_id,
+            'server_starting': server_starting}
 
+        args = yield game.wait(args)
+        yield self.game_notify(args, game.get_id())
+
+    @defer.inlineCallbacks
     def create(self, args):
         self.required(args, 'create', 'card', 'sentence', 'owner_id')
         card = int(args['card'][0])
         sentence = args['sentence'][0].decode('utf-8')
         owner_id = int(args['owner_id'][0])
 
+        # Keep track of consecutive games
+        if 'previous_game_id' in args:
+            previous_game_id = args['previous_game_id'][0]
+        else:
+            previous_game_id = None
+
         game = CardstoriesGame(self)
-        d = game.create(card, sentence, owner_id)
-        def success(game_id):
-            self.game_init(game, sentence)
-            return {'game_id': game_id}
-        d.addCallback(success)
-        return d
+        game_id = yield game.create(card, sentence, owner_id)
+
+        yield self.game_init(game, sentence, previous_game_id=previous_game_id)
+
+        defer.returnValue({'game_id': game_id})
 
     def complete(self, args):
         self.required(args, 'complete', 'owner_id')
@@ -380,7 +443,7 @@ class CardstoriesService(service.Service):
 
     def game_method(self, game_id, action, *args, **kwargs):
         if not self.games.has_key(game_id):
-            raise CardstoriesWarning('GAME_NOT_LOADED',  {'game_id': game_id})
+            raise CardstoriesWarning('GAME_NOT_LOADED', {'game_id': game_id})
         return getattr(self.games[game_id], action)(*args, **kwargs)
 
     def participate(self, args):
@@ -482,6 +545,7 @@ class CardstoriesService(service.Service):
                 d = getattr(self, action)(args)
                 def error(reason):
                     error = reason.value
+                    log.msg(reason)
                     if reason.type is CardstoriesWarning:
                         return {'error': {'code': error.code, 'data': error.data}}
                     else:

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2011 Farsides <contact@farsides.com>
+# Copyright (C) 2011-2012 Farsides <contact@farsides.com>
 #
 # Authors:
 #          Xavier Antoviaque <xavier@antoviaque.org>

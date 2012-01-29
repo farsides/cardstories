@@ -1,9 +1,12 @@
+# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2011 Farsides <contact@farsides.com>
 #
 # Authors:
-#          Loic Dachary <loic@dachary.org>
 #          Adolfo R. Brandes <arbrandes@gmail.com>
+#          Xavier Antoviaque <xavier@antoviaque.org>
+#          Matjaz Gregoric <mtyaka@gmail.com>
+#          Loic Dachary <loic@dachary.org>
 #
 # This software's license gives you freedom; you can copy, convey,
 # propagate, redistribute and/or modify this program under the terms of

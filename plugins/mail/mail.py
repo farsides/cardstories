@@ -1,5 +1,13 @@
+# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2011 Loic Dachary <loic@dachary.org>
+# Copyright (C) 2011 Farsides <contact@farsides.com>
+#
+# Authors:
+#          Loic Dachary <loic@dachary.org>
+#          Adolfo R. Brandes <arbrandes@gmail.com>
+#          Matjaz Gregoric <mtyaka@gmail.com>
+#          Xavier Antoviaque <xavier@antoviaque.org>
 #
 # This software's license gives you freedom; you can copy, convey,
 # propagate, redistribute and/or modify this program under the terms of
@@ -109,14 +117,14 @@ class Plugin:
                         { 'game_id': game.get_id(),
                           'owner_email': owner_email
                           })
-    
+
     @defer.inlineCallbacks
     def voting(self, game, details):
         recipients = game.get_players()
         recipients.remove(game.get_owner_id())
         yield self.send("Cardstories - you can vote.", recipients, self.templates['voting'],
                         { 'game_id': game.get_id() })
-    
+
     @defer.inlineCallbacks
     def complete(self, game, details):
         (owner_email,) = yield self.service.auth.get_players_emails([ game.get_owner_id() ])

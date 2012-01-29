@@ -1,5 +1,9 @@
+# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2011 Loic Dachary <loic@dachary.org>
+#
+# Authors:
+#          Loic Dachary <loic@dachary.org>
 #
 # This software's license gives you freedom; you can copy, convey,
 # propagate, redistribute and/or modify this program under the terms of
@@ -29,7 +33,7 @@ from cardstories.service import CardstoriesService
 from plugins.example import example
 
 class Request:
-    
+
     def __init__(self, **kwargs):
         self.args = kwargs
 
@@ -100,7 +104,7 @@ class ExampleTest(unittest.TestCase):
                                       'player_id': [player_id],
                                       'game_id': [self.game_id],
                                       'card': [card] })
-        
+
         yield send('voting', { 'action': ['voting'],
                                     'game_id': [self.game_id],
                                     'owner_id': [self.owner_id] })
@@ -120,7 +124,7 @@ class ExampleTest(unittest.TestCase):
                                       'owner_id': [self.owner_id] })
         self.assertFalse(self.service.games.has_key(self.game_id))
         defer.returnValue(True)
-            
+
     def test00_init(self):
         plugin = example.Plugin(self.service, [ AnotherPlugin() ])
         self.assertEqual(plugin.service, self.service)

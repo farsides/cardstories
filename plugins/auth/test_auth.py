@@ -1,5 +1,13 @@
+# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2011 Loic Dachary <loic@dachary.org>
+# Copyright (C) 2011-2012 Farsides <contact@farsides.com>
+#
+# Authors:
+#          Loic Dachary <loic@dachary.org>
+#          Xavier Antoviaque <xavier@antoviaque.org>
+#          Adolfo R. Brandes <arbrandes@gmail.com>
+#          Matjaz Gregoric <mtyaka@gmail.com>
 #
 # This software's license gives you freedom; you can copy, convey,
 # propagate, redistribute and/or modify this program under the terms of
@@ -52,12 +60,12 @@ class AuthTest(unittest.TestCase):
         emails = [u'owner@foo.com', u'player1@foo.com', u'player']
         ids = yield self.auth.get_players_ids(emails, create=True)
         self.assertEquals([1, 2, 3], ids)
-        
+
     @defer.inlineCallbacks
     def test03_get_name(self):
         name = yield self.auth.get_player_name(3)
         self.assertEquals("Player 3", name)
-        
+
     @defer.inlineCallbacks
     def test04_get_player_avatar_url(self):
         avatar_url = yield self.auth.get_player_avatar_url('3')

@@ -1,5 +1,8 @@
 #
-# Copyright (C) 2011 Loic Dachary <loic@dachary.org>
+# Copyright (C) 2012 Farsides <contact@farsides.com>
+#
+# Authors:
+#          Xavier Antoviaque <xavier@antoviaque.org>
 #
 # This software's license gives you freedom; you can copy, convey,
 # propagate, redistribute and/or modify this program under the terms of
@@ -16,12 +19,17 @@
 # along with this program in a file in the toplevel directory called
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
-from cardstories import poll
+export COVERAGE=$(shell which coverage || which python-coverage)
 
-class Plugin(poll.Pollable):
+all:
 
-    def __init__(self, service, plugins):
-        self.service = service
+check:
+	${COVERAGE} -e
+	PYTHONPATH=../.. ${COVERAGE} -x test_activity.py
+	${COVERAGE} -m -a -r activity.py
 
-    def name(self):
-        return 'plugin_two'
+clean:
+	rm -fr .coverage _trial_temp*
+	rm -f *,cover
+	rm -f *.pyc
+

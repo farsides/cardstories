@@ -5,13 +5,13 @@ Copyright holder Farsides SARL France contact@farsides.com xavier@antoviaque.org
 
    Xavier Antoviaque <xavier@antoviaque.org>
    tartarugafeliz <contact@tartarugafeliz.com>
-   David Blanchard <david@farsides.com> da <da@da-portable-ubuntu.(none)>
-
+   David Blanchard <david@farsides.com>
    Chris McCormick <chris@mccormick.cx>
    Lincoln de Sousa <lincoln@comum.org>
    Matjaz Gregoric <mtyaka@gmail.com>
-   Rogério Hilbert <rogerhil@gmail.com> Rogério Hilbert Lima <rogerhil@gmail.com>
+   Rogério Hilbert Lima <rogerhil@gmail.com>
    Adolfo R. Brandes <arbrandes@gmail.com>
+   Côme Bernigaud <come.bernigaud@laposte.net>
 
 Copyright holder Loic Dachary <loic@dachary.org>
    Loic Dachary <loic@dachary.org> Loic Dachary <loic@bet.dachary.org>

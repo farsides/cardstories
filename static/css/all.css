@@ -2363,7 +2363,7 @@
     position: absolute;
     width: 436px;
     left: 169px;
-    bottom: 215px;
+    bottom: 285px;
     font-size: 10px;
     text-align: center;
 }
@@ -2386,18 +2386,50 @@
     color: #D8280F;
 }
 
-.cardstories .cardstories_complete .cardstories_results .cardstories_play_again {
+.cardstories .cardstories_complete .cardstories_results .cardstories_play_again a > span {
+    top: 0.36em !important;
+}
+
+.cardstories .cardstories_complete .cardstories_next_game {
+    display: none;
+    position: absolute;
+    width: 436px;
+    left: 169px;
+    bottom: 210px;
+    font-size: 10px;
+    text-align: center;
+}
+
+.cardstories .cardstories_complete .cardstories_next_game > p {
+    display: none;
+    width: 24em;
+    margin: 0.25em auto;
+    font-size: 1.2em; 
+    font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
+}
+
+.cardstories .cardstories_complete .cardstories_next_game .cardstories_play_again {
     position: relative;
     margin: 0 auto;
-    font-size: 1.6em; 
+    font-size: 2em;
+    font-weight: bold;
+    letter-spacing: 2px; 
     width: 7em;
     height: 1.8em;
     color: white;
     font-family: "Licon";
 }
 
-.cardstories .cardstories_complete .cardstories_results .cardstories_play_again a > span {
-    top: 0.36em !important;
+.cardstories .cardstories_complete .cardstories_modal {
+    left: 230px;
+    top: 200px;
+    height: 100px;
+    width: 320px;
+    padding-top: 0.5em;
+}
+
+.cardstories .cardstories_complete .cardstories_modal_h2 {
+    margin: 0.5em 2em;
 }
 
 /* state complete, owner point of view */

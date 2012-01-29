@@ -1,5 +1,12 @@
+# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2011 Loic Dachary <loic@dachary.org>
+# Copyright (C) 2011 Farsides <contact@farsides.com>
+#
+# Authors:
+#          Loic Dachary <loic@dachary.org>
+#          Adolfo R. Brandes <arbrandes@gmail.com>
+#          Xavier Antoviaque <xavier@antoviaque.org>
 #
 # This software's license gives you freedom; you can copy, convey,
 # propagate, redistribute and/or modify this program under the terms of
@@ -29,7 +36,7 @@ from cardstories.service import CardstoriesService
 from plugins.mail import mail
 
 class Request:
-    
+
     def __init__(self, **kwargs):
         self.args = kwargs
 
@@ -78,7 +85,7 @@ class MailTest(unittest.TestCase):
                                       'player_id': [player_id],
                                       'game_id': [self.game_id],
                                       'card': [card] })
-        
+
         yield self.service.voting({ 'action': ['voting'],
                                     'game_id': [self.game_id],
                                     'owner_id': [self.owner_id] })
@@ -98,7 +105,7 @@ class MailTest(unittest.TestCase):
                                       'owner_id': [self.owner_id] })
         self.assertFalse(self.service.games.has_key(self.game_id))
         defer.returnValue(True)
-            
+
     def test00_init(self):
         plugin = mail.Plugin(self.service, [ ])
         self.assertEquals(plugin.name(), 'mail')
@@ -109,7 +116,7 @@ class MailTest(unittest.TestCase):
     @defer.inlineCallbacks
     def test01_invite(self):
         plugin = mail.Plugin(self.service, [ ])
-        
+
         def get_player_email(player_id):
             if player_id == self.player1:
                 email = self.player1_email
@@ -119,13 +126,13 @@ class MailTest(unittest.TestCase):
                 email = self.owner_email
             return defer.succeed(email)
         self.service.auth.get_player_email = get_player_email
-        
+
         def get_player_id(email, create=False):
-            return defer.succeed(self.player1) 
+            return defer.succeed(self.player1)
         self.service.auth.get_player_id = get_player_id
-        
+
         self.count = 0
-        
+
         def sendmail(host, sender, recipients, email):
             self.count += 1
             self.assertSubstring('game_id=%d' % self.game_id, email)
@@ -153,10 +160,10 @@ class MailTest(unittest.TestCase):
                 self.assertSubstring('owner_email=%s' % self.owner_name, email)
             return defer.succeed(True)
         plugin.sendmail = sendmail
-        
+
         yield self.complete_game()
         self.assertEqual(self.count, 7)
-        
+
     @defer.inlineCallbacks
     def test02_send_nothing(self):
         self.service.auth.get_players_emails = Mock(return_value=['not_an_email'])

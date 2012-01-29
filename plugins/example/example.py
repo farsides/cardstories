@@ -1,5 +1,9 @@
+# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2011 Loic Dachary <loic@dachary.org>
+#
+# Authors:
+#          Loic Dachary <loic@dachary.org>
 #
 # This software's license gives you freedom; you can copy, convey,
 # propagate, redistribute and/or modify this program under the terms of
@@ -20,7 +24,7 @@ import os
 from twisted.python import runtime
 from twisted.internet import defer, reactor
 
-from cardstories.poll import pollable
+from cardstories.poll import Pollable
 
 #
 # The plugin must be a single file (such as this example) that can be
@@ -47,7 +51,7 @@ from cardstories.poll import pollable
 # The API of the CardstoriesGame and CardstoriesServices are not documented.
 # The code from other plugins should be used for inspiration.
 #
-class Plugin(pollable):
+class Plugin(Pollable):
     #
     # Instantiated when the plugin is loaded.
     # service is an instance of CardstoriesService as found
@@ -102,7 +106,7 @@ class Plugin(pollable):
         # initialize the pollable using the service parameters. There is
         # no reason to improve or change these parameters.
         #
-        pollable.__init__(self, self.service.settings.get('poll-timeout', 300))
+        Pollable.__init__(self, self.service.settings.get('poll-timeout', 30))
 
     #
     # Must return a string that is the name of the plugin. It 
@@ -325,7 +329,7 @@ class Plugin(pollable):
             # When this is done, the result argument will be transparently 
             # returned to the user.
             # 
-            del request.args['action'] 
+            del request.args['action']
             #
             # The same request object will be given to the next plugin in
             # the callback queue. It will therefore see each value with a

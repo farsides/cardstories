@@ -1,5 +1,12 @@
+# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2011 Loic Dachary <loic@dachary.org>
+# Copyright (C) 2011-2012 Farsides <contact@farsides.com>
+#
+# Authors:
+#          Loic Dachary <loic@dachary.org>
+#          Xavier Antoviaque <xavier@antoviaque.org>
+#          Matjaz Gregoric <mtyaka@gmail.com>
 #
 # This software's license gives you freedom; you can copy, convey,
 # propagate, redistribute and/or modify this program under the terms of
@@ -42,8 +49,8 @@ class Options(usage.Options):
          ["ssl-port", "s", None, "Port on which to listen for SSL", int],
          ["ssl-pem", "P", "/etc/cardstories/cert.pem", "certificate path name", str],
          ["db", "d", "/var/lib/cardstories/cardstories.sqlite", "sqlite3 game database path", str],
-         ["poll-timeout", "", 300, "Number of seconds before a long poll timesout", int],
-         ["game-timeout", "", (24 * 60 * 60), "Number of seconds before a game in progress timesout", int],
+         ["poll-timeout", "", 30, "Number of seconds before a long poll timeout - see http://tools.ietf.org/html/draft-loreto-http-bidirectional-07#section-5.5", int],
+         ["game-timeout", "", (7 * 24 * 60 * 60), "Number of seconds before a game in progress timesout", int],
          ["static", "", "/usr/share/cardstories", "directory where /static files will be fetched", str],
          ["plugins-libdir", "", "/var/lib/cardstories/plugins", "plugins storage directory", str],
          ["plugins-confdir", "", "/etc/cardstories/plugins", "plugins configuration directory", str],

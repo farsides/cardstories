@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright (C) 2011 Farsides <contact@farsides.com>
+# Copyright (C) 2011-2012 Farsides <contact@farsides.com>
 #
 # Authors:
 #          Xavier Antoviaque <xavier@antoviaque.org>
@@ -30,6 +30,7 @@ from twisted.internet import defer, reactor
 from twisted.python import log
 
 from cardstories.game import CardstoriesGame
+from cardstories.service import CardstoriesServiceConnector
 from plugins.bot import buildwordsscores
 
 
@@ -50,7 +51,7 @@ def call_later(delay_dict, *args, **kwargs):
 
 # Classes #################################################################
 
-class Plugin(object):
+class Plugin(CardstoriesServiceConnector):
     """
     Bots who join games when there isn't enough players, and try to take a good guess
     at the cards, using data from previous games.
@@ -114,27 +115,14 @@ class Plugin(object):
         return defer.succeed(True)
 
     @defer.inlineCallbacks
-    def get_players_from_game_id(self, game_id):
-        """Get the players currently playing the game game_id"""
-
-        result = yield self.service.handle([], {'action': ['state'],
-                                               'type': ['game'],
-                                               'modified': [0],
-                                               'game_id': [game_id]})
-        game = result[0]
-        players_ids = [ x['id'] for x in game['players'] ]
-
-        defer.returnValue(players_ids)
-
-    @defer.inlineCallbacks
     def check_need_player(self, game_id):
         """Check newly created games regularly. 
         Make bots join it if there isn't enough players"""
 
-        players_ids = yield self.get_players_from_game_id(game_id)
+        game, players_ids = yield self.get_game_by_id(game_id)
 
         # Does the game still need players?
-        if len(players_ids) < CardstoriesGame.NPLAYERS:
+        if game['state'] == 'invitation' and len(players_ids) < CardstoriesGame.NPLAYERS:
             for bot in self.bots:
                 if bot.player_id not in players_ids:
                     yield bot.join(game_id)
@@ -148,7 +136,7 @@ class Plugin(object):
     def voting(self, game):
         """A game entered the voting phase - notify bots who are playing it"""
 
-        players_ids = yield self.get_players_from_game_id(game.id)
+        players_ids = yield self.get_players_by_game_id(game.id)
 
         for bot in self.bots:
             if bot.player_id in players_ids:
@@ -157,33 +145,20 @@ class Plugin(object):
         defer.returnValue(True)
 
 
-class Bot(object):
+class Bot(CardstoriesServiceConnector):
     """Implements a single bot, which connects to games and play"""
 
     def __init__(self, plugin, brain, player_id):
         self.plugin = plugin
+        self.service = self.plugin.service
         self.brain = brain
         self.player_id = player_id
-
-    @defer.inlineCallbacks
-    def get_game_by_id(self, game_id):
-        """Get the current game state for a given game_id"""
-
-        result = yield self.plugin.service.handle([], {'action': ['state'],
-                                                       'type': ['game'],
-                                                       'modified': [0],
-                                                       'player_id': [self.player_id],
-                                                       'game_id': [game_id]})
-        game = result[0]
-        player_ids = [ x['id'] for x in game['players'] ]
-
-        defer.returnValue([game, player_ids])
 
     @defer.inlineCallbacks
     def join(self, game_id):
         """Join a game and start playing"""
 
-        game, player_ids = yield self.get_game_by_id(game_id)
+        game, players_ids = yield self.get_game_by_id(game_id, player_id=self.player_id)
 
         if game['state'] != 'invitation':
             log.msg("Bot %d tried to join game %d, but game wasn't accepting new players" % (self.player_id, game['id']))
@@ -202,10 +177,10 @@ class Bot(object):
     def pick(self, game_id):
         """Pick a card during the first phase of the game"""
 
-        game, player_ids = yield self.get_game_by_id(game_id)
+        game, players_ids = yield self.get_game_by_id(game_id, player_id=self.player_id)
 
         # Check the game hasn't gone to vote without us
-        if game['state'] != 'invitation' or self.player_id not in player_ids:
+        if game['state'] != 'invitation' or self.player_id not in players_ids:
             log.msg("Bot %d didn't get enough time to pick on game %d" % (self.player_id, game['id']))
             defer.returnValue(False)
         else:
@@ -226,11 +201,11 @@ class Bot(object):
     def vote(self, game_id):
         """Vote for a card during the second phase of the game"""
 
-        game, player_ids = yield self.get_game_by_id(game_id)
+        game, players_ids = yield self.get_game_by_id(game_id, player_id=self.player_id)
         board = game['board']
 
         # Check the game hasn't gone to vote without us
-        if game['state'] != 'vote' or self.player_id not in player_ids:
+        if game['state'] != 'vote' or self.player_id not in players_ids:
             log.msg("Bot %d didn't get enough time to vote on game %d" % (self.player_id, game['id']))
             defer.returnValue(False)
         else:

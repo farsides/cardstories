@@ -1,5 +1,13 @@
+# -*- coding: utf-8 -*-
 #
 # Copyright (C) 2011 Loic Dachary <loic@dachary.org>
+# Copyright (C) 2011 Farsides <contact@farsides.com>
+#
+# Authors:
+#          Loic Dachary <loic@dachary.org>
+#          Xavier Antoviaque <xavier@antoviaque.org>
+#          Matjaz Gregoric <mtyaka@gmail.com>
+#          Adolfo R. Brandes <arbrandes@gmail.com>
 #
 # This software's license gives you freedom; you can copy, convey,
 # propagate, redistribute and/or modify this program under the terms of
@@ -30,7 +38,7 @@ class Plugin(Auth):
 
     def __init__(self, service, plugins):
         self.nb_local_avatars = 6
-        
+
         dirname = os.path.join(service.settings['plugins-libdir'], self.name())
         self.database = os.path.join(dirname, 'auth.sqlite')
         exists = os.path.exists(self.database)
@@ -41,9 +49,9 @@ class Plugin(Auth):
             db = sqlite3.connect(self.database)
             c = db.cursor()
             c.execute(
-                "CREATE TABLE players ( " 
+                "CREATE TABLE players ( "
                 "  id INTEGER PRIMARY KEY, "
-                "  name VARCHAR(255) " 
+                "  name VARCHAR(255) "
                 "); ")
             c.execute(
                 "CREATE INDEX players_idx ON players (name); "
@@ -59,7 +67,7 @@ class Plugin(Auth):
     def create_player_from_email(self, transaction, email):
         transaction.execute("INSERT INTO players (name) VALUES (?)", [ email ])
         return transaction.lastrowid
-        
+
     @defer.inlineCallbacks
     def get_player_id(self, email, create=False):
         row = yield self.db.runQuery("SELECT id FROM players WHERE name = ?", [ email ])
@@ -76,10 +84,10 @@ class Plugin(Auth):
 
     def get_player_avatar_url(self, id):
         '''Allow to use offline by chosing one of the available local avatar images'''
-        
+
         avatar_id = int(id) % self.nb_local_avatars
         avatar_url = '/static/css/images/avatars/default/%d.jpg' % avatar_id
-        
+
         return avatar_url
 
     def authenticate(self, request, requested_player_id):

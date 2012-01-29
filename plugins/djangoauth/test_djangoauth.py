@@ -3,8 +3,10 @@
 # Copyright (C) 2011 Farsides <contact@farsides.com>
 #
 # Authors:
-#          Loic Dachary <loic@dachary.org>
 #          Adolfo R. Brandes <arbrandes@gmail.com>
+#          Xavier Antoviaque <xavier@antoviaque.org>
+#          Matjaz Gregoric <mtyaka@gmail.com>
+#          Loic Dachary <loic@dachary.org>
 #
 # This software's license gives you freedom; you can copy, convey,
 # propagate, redistribute and/or modify this program under the terms of
@@ -100,7 +102,7 @@ class DjangoAuthTest(unittest.TestCase):
         rand = ''.join(random.choice('abcdefghijklmnopqrstuvwxyz') for i in xrange(10))
         player_email = u'%s@email.com' % rand
         player_id = 1
- 
+
         # First, create the owner and log him in so that we can get a sessionid
         # from the cookie.
         from django.test.client import Client
@@ -118,7 +120,7 @@ class DjangoAuthTest(unittest.TestCase):
                 self.sessionid = sessionid
             def getCookie(self, key):
                 return self.sessionid
-        
+
         # Successful authentication
         authorized_request = request()
         result = yield self.auth.authenticate(authorized_request, player_id)
