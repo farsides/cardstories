@@ -17,6 +17,9 @@
 
 $.fx.off = true;
 
+// Mock out the audio plugin.
+$.cardstories_audio = {};
+
 var cardstories_default_setTimeout = $.cardstories.setTimeout;
 var cardstories_default_delay = $.cardstories.delay;
 var cardstories_default_ajax = $.cardstories.ajax;
@@ -71,6 +74,7 @@ function setup() {
         return {'name': 'Player ' + player_id,
                 'avatar_url': '/static/css/images/avatars/default/' + player_id % 6 + '.jpg'};
     };
+    $.cardstories_audio.play = function(name, root) {};
 }
 
 module("cardstories", {setup: setup});
@@ -919,7 +923,7 @@ test("invitation_owner_slots_helper", 15, function() {
     });
 });
 
-asyncTest("invitation_owner_join_helper", 41, function() {
+asyncTest("invitation_owner_join_helper", 44, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_invitation .cardstories_owner', root);
     var player1 = 1;
@@ -955,6 +959,11 @@ asyncTest("invitation_owner_join_helper", 41, function() {
         ok(true, 'counting animate_sprite');
         movie.show();
         cb();
+    };
+    var orig_play = $.cardstories_audio.play;
+    // Count how often $.cardstories_audio.play is called.
+    $.cardstories_audio.play = function(name, root) {
+        equal(name, 'join');
     };
 
     $.cardstories.display_modal($('.cardstories_info', element), $('.cardstories_modal_overlay', element));

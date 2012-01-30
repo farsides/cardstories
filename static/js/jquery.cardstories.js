@@ -893,7 +893,7 @@
 
         add_plugin_polls: function(request, root) {
             $.each(this.plugins, function(i) {
-                if (this.poll && $.inArray(this.poll, request.type) === -1 ) {
+                if (this.poll && $.inArray(this.name, request.type) === -1 ) {
                     request.type.push(this.name);
                 }
             });
@@ -1365,6 +1365,9 @@
                                 next();
                             });
                         };})(slot, slotno));
+
+                        // Play a sound
+                        $.cardstories_audio.play('join', root);
 
                         // Artificial delay between joining and picking.
                         $this.delay(q, 300, playerq);

@@ -576,75 +576,6 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         yield game.touch()
         self.assertTrue(game.ok)
 
-        #
-        # tabs poll
-        #
-        card = 7
-        sentence = 'SENTENCE'
-        owner_id = 17
-        # Create three games and associate them with the owner in the tabs table.
-        game_ids = []
-        for i in range(3):
-            result = yield self.service.create({'card': [card],
-                                                'sentence': [sentence],
-                                                'owner_id': [owner_id]})
-            game_id = result['game_id']
-            game_ids.append(game_id)
-            sql = "INSERT INTO tabs (player_id, game_id, created) VALUES (%d, %d, datetime('now'))"
-            c = self.db.cursor()
-            c.execute(sql % (owner_id, game_id))
-            self.db.commit()
-
-        games = map(lambda gid: self.service.games[gid], game_ids)
-        max_modified = games[2].modified
-
-        # Touch first game.
-        # Pass a deferred helper object to poll, so that we will be able to
-        # block the test while game_ids of games that should be loaded into
-        # tabs are fetched from the DB. If we didn't block, the test would
-        # get into the teardown phase before the games actually start being
-        # polled, which causes hard to debug test failures.
-        ready = defer.Deferred()
-        d = self.service.poll({'action': ['poll'],
-                               'type': ['tabs'],
-                               'modified': [max_modified],
-                               'player_id': [owner_id],
-                               'game_id': [game_ids[0]]},
-                              ready)
-
-        # Wait until the deferred is ready.
-        yield ready
-
-        def check1(result):
-            self.assertEquals(games[0].modified, result['modified'][0])
-            games[0].ok = True
-            return result
-        d.addCallback(check1)
-        yield self.service.get_tab_game_ids({'player_id': [owner_id]})
-        yield games[0].touch()
-        self.assertTrue(games[0].ok)
-
-        # Touch third game.
-        max_modified = games[0].modified # first game has just been touched, so it's the last one modified.
-        ready = defer.Deferred()
-        d = self.service.poll({'action': ['poll'],
-                               'type': ['tabs'],
-                               'modified': [max_modified],
-                               'player_id': [owner_id],
-                               'game_id': [game_ids[2]]},
-                              ready)
-
-        # Wait until the deferred is ready.
-        yield ready
-
-        def check3(result):
-            self.assertEquals(games[2].modified, result['modified'][0])
-            games[2].ok = True
-            return result
-        d.addCallback(check3)
-        yield self.service.get_tab_game_ids({'player_id': [owner_id]})
-        yield games[2].touch()
-        self.assertTrue(games[2].ok)
 
         #
         # poll plugins
@@ -666,6 +597,67 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         d.addCallback(check)
         yield plugin.touch({'type': ['plugin']})
         self.assertTrue(plugin.ok)
+
+    @defer.inlineCallbacks
+    def test08_poll_tabs(self):
+        card = 7
+        sentence = 'SENTENCE'
+        owner_id = 17
+        # Create three games and associate them with the owner in the tabs table.
+        game_ids = []
+        for i in range(3):
+            result = yield self.service.create({'card': [card],
+                                                'sentence': [sentence],
+                                                'owner_id': [owner_id]})
+            game_id = result['game_id']
+            game_ids.append(game_id)
+
+        # Stub out the get_tab_game_ids to return the tree games created above.
+        def fake_get_tab_game_ids(args):
+            d = defer.Deferred()
+            d.callback(game_ids)
+            return d
+        self.service.get_tab_game_ids = fake_get_tab_game_ids
+
+        games = map(lambda gid: self.service.games[gid], game_ids)
+        max_modified = games[2].modified
+
+        # Will be triggered when the test has finished.
+        test_finish = defer.Deferred()
+
+        # Touch first game.
+        d = self.service.poll({'action': ['poll'],
+                               'type': ['tabs'],
+                               'modified': [max_modified],
+                               'player_id': [owner_id],
+                               'game_id': [game_ids[0]]})
+
+        def check1(result):
+            self.assertEquals(games[0].modified, result['modified'][0])
+            games[0].ok = True
+            return result
+
+        d.addCallback(check1)
+        games[0].touch()
+        self.assertTrue(games[0].ok)
+
+        # Touch third game.
+        max_modified = games[0].modified # first game has just been touched, so it's the last one modified.
+        ready = defer.Deferred()
+        d = self.service.poll({'action': ['poll'],
+                               'type': ['tabs'],
+                               'modified': [max_modified],
+                               'player_id': [owner_id],
+                               'game_id': [game_ids[2]]})
+
+        def check3(result):
+            self.assertEquals(games[2].modified, result['modified'][0])
+            games[2].ok = True
+            return result
+        d.addCallback(check3)
+        yield games[2].touch()
+        self.assertTrue(games[2].ok)
+
 
     @defer.inlineCallbacks
     def test09_cancel(self):

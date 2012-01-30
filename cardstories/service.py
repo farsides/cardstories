@@ -207,10 +207,7 @@ class CardstoriesService(service.Service, Observable):
             # Note that the db is not accessible during that stage
             self.game_init(game, sentence, server_starting=True)
 
-    # The optional d parameter is only used while testing the 'tabs' type poll
-    # and is expected to be a deferred object. It is passed on to poll_tabs -
-    # read the comment there for more information.
-    def poll(self, args, d=None):
+    def poll(self, args):
         self.required(args, 'poll', 'type', 'modified')
         deferreds = []
 
@@ -227,7 +224,7 @@ class CardstoriesService(service.Service, Observable):
                 deferreds.append(self.games[game_id].poll(args))
 
         if 'tabs' in args['type']:
-            deferreds.append(self.poll_tabs(args, d))
+            deferreds.append(self.poll_tabs(args))
 
         if 'lobby' in args['type']:
             deferreds.append(self.poll_player(args))
@@ -239,12 +236,15 @@ class CardstoriesService(service.Service, Observable):
         d.addCallback(lambda x: x[0])
         return d
 
-    # Gets the games that should be monitored as tabs by the current user,
-    # and returns a deferred list of polled games.
-    # The second parameter is an optional deferred object that will be fired
-    # once the game_ids have been fetched, which is really useful when testing,
-    # but shouldn't be needed otherwise.
-    def poll_tabs(self, args, d=None):
+    def poll_tabs(self, args):
+        """
+        Gets the games that should be monitored as tabs by the current user,
+        and returns a deferred list of polled games.
+        """
+        # We need to nest one deferred inside another, because we are dealing with
+        # two async operations: fetching game ids from the DB, and waiting in a poll.
+        # The outer callback fires when the game ids are fetched from the DB, while the
+        # inner one fires when one of the polled games has been modified, causing poll to return.
         outer_deferred = self.get_tab_game_ids(args)
         def outer_callback(result):
             game_deferreds = []
@@ -257,8 +257,6 @@ class CardstoriesService(service.Service, Observable):
                 return args
             inner_deferred = defer.DeferredList(game_deferreds, fireOnOneCallback=True)
             inner_deferred.addCallback(inner_callback)
-            if d:
-                d.callback(True)
             return inner_deferred
         outer_deferred.addCallback(outer_callback)
         return outer_deferred
@@ -275,7 +273,14 @@ class CardstoriesService(service.Service, Observable):
 
     @defer.inlineCallbacks
     def get_tab_game_ids(self, args):
-        player_id = args.has_key('player_id') and args['player_id'][0]
+        """
+        Expects 'player_id' and optionally a 'game_id' in the args.
+        If there is a 'game_id' in the args and that game_id is not yet associated
+        with the player in the tabs table, it associates the game_id with player_id in
+        the table.
+        Returns a list of game_ids associated with the player in the tabs table.
+        """
+        player_id = args['player_id'][0]
         game_id = args.has_key('game_id') and args['game_id'][0]
         try:
             game_id = int(game_id)
@@ -288,6 +293,11 @@ class CardstoriesService(service.Service, Observable):
         defer.returnValue(game_ids)
 
     def remove_tab(self, args):
+        """
+        Processes requests to remove game from player's list of tabs.
+        Expects 'player_id' and 'game_id' to be present in the args.
+        Removes association between player and game from the tabs table.
+        """
         self.required(args, 'remove_tab', 'player_id')
         game_id = self.required_game_id(args)
         player_id = int(args['player_id'][0])
