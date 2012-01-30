@@ -8,7 +8,7 @@ function setup() {
 
 module("cardstories_tabs", {setup: setup});
 
-test("state", 23, function() {
+test("state", 25, function() {
     var root = $(selector);
     var element = $('.cardstories_tabs', root);
     var player_id = 899;
@@ -34,10 +34,11 @@ test("state", 23, function() {
 
     $.cardstories_tabs.state(player_id, {games: games}, root);
     tabs = element.find('.cardstories_tab');
-    equal(tabs.length, 3, 'Three tabs are created');
+    equal(tabs.length, 4, 'Four tabs are created (3 games + new game)');
     ok(tabs.eq(0).text().match('SENTENCE1'));
     ok(tabs.eq(1).text().match('SENTENCE2'));
     ok(tabs.eq(2).text().match('SENTENCE3'));
+    ok(tabs.eq(3).attr('class').match('cardstories_tab cardstories_new'));
 
     // Call state again without the second game.
     games = [
@@ -47,12 +48,13 @@ test("state", 23, function() {
 
     $.cardstories_tabs.state(player_id, {games: games}, root);
     tabs = element.find('.cardstories_tab');
-    equal(tabs.length, 2, 'Two tabs are created');
+    equal(tabs.length, 3, 'Three tabs are created');
     ok(tabs.eq(0).text().match('SENTENCE1'));
     ok(tabs.eq(1).text().match('SENTENCE3'));
+    ok(tabs.eq(2).attr('class').match('cardstories_tab cardstories_new'));
 });
 
-test("Tabs are links to games", 2, function() {
+test("Tabs are links to games", 3, function() {
     var root = $(selector);
     var element = $('.cardstories_tabs', root);
     var player_id = 102;
@@ -67,8 +69,10 @@ test("Tabs are links to games", 2, function() {
     $.cardstories_tabs.state(player_id, {games: games}, root);
 
     var tab = $('.cardstories_tab', element);
-    equal(tab.length, 1, 'There is one tab');
-    ok(tab.find('a.cardstories_tab_title').attr('href').match('game_id=' + tab_game_id), 'tab contains link to game');
+    equal(tab.length, 2, 'There are two tabs');
+    var tabs = tab.find('a.cardstories_tab_title');
+    ok(tabs.eq(0).attr('href').match('game_id=' + tab_game_id), 'tab contains link to game');
+    equal(tabs.eq(1).attr('href'), '?create=1', 'tab contains link to create a new game');
 });
 
 test("closing a tab", 5, function() {
@@ -83,7 +87,7 @@ test("closing a tab", 5, function() {
     root.cardstories_tabs(player_id, game_id);
 
     $.cardstories_tabs.state(player_id, {games: games}, root);
-    equal($('.cardstories_tab', element).length, 1, 'There is one tab');
+    equal($('.cardstories_tab', element).length, 2, 'There are two tabs');
 
     // Click the close button.
     // The tab should be removed from the DOM and the 'remove_tab' call
@@ -94,7 +98,7 @@ test("closing a tab", 5, function() {
         equal(query.game_id, games[0].id, 'game_id is passed to the service');
     };
     $('.cardstories_tab_close', element).click();
-    equal($('.cardstories_tab', element).length, 0, 'There are no tabs anymore');
+    equal($('.cardstories_tab', element).length, 1, 'There is one tab');
 });
 
 test("dynamic tab for new game", 3, function() {
@@ -111,9 +115,9 @@ test("dynamic tab for new game", 3, function() {
     root.cardstories_tabs(player_id, game_id);
 
     $.cardstories_tabs.state(player_id, {games: games}, root);
-    // There is one tab for game 1001, and one created dynamically for the new game.
+    // There is one tab for game 1001, and one created dynamically for the new game
     var tabs = $('.cardstories_tab', element);
-    equal(tabs.length, 2, 'A fake tab for new game has been created');
+    equal(tabs.length, 3, 'A fake tab for new game has been created');
     equal(tabs.eq(0).find('.cardstories_tab_title').text(), other_game_title);
     ok(tabs.eq(1).find('.cardstories_tab_title').text().match(/new game/i));
 });
@@ -193,3 +197,4 @@ test("requires_action player", 6, function() {
     ok(does_require_action({state: 'complete',
                             self: [31, 33, 'y']}));
 });
+

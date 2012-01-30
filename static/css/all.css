@@ -69,6 +69,20 @@
     background: transparent url('images/background_plain.png') repeat-x left top;
 }
 
+/* Social plugins - Position the like & +1 on the left to give space for the tabs */
+
+.frame .row .like {
+    position:absolute;
+    top:30px;
+    left: 20px;
+    margin:0;
+    padding:0;
+    list-style:none;
+    width:200px;
+}
+
+/* Chat */
+
 .cardstories .cardstories_chat {
     position: absolute;
     margin: 0;
@@ -207,6 +221,134 @@
     width: 130px;
     height: 59px;
 }
+
+
+/* Tabs - http://css-tricks.com/better-tabs-with-round-out-borders/ */
+
+.cardstories .cardstories_tabs {
+    position: absolute;
+    top: 0px;
+    left: 218px;
+    margin-top: -26px;
+	text-align: center;
+    list-style: none;
+    padding: 0;
+    line-height: 24px;
+    height: 26px;
+    overflow: hidden;
+    max-width: 740px;
+    font-size: 12px;
+    font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
+}
+
+.cardstories .cardstories_tabs li {
+    border: 1px solid #094647;
+    background: #617482;
+    background: -o-linear-gradient(top, #617482 50%, #2d353b 100%);
+    background: -ms-linear-gradient(top, #617482 50%, #2d353b 100%);
+    background: -moz-linear-gradient(top, #617482 50%, #2d353b 100%);
+    background: -webkit-linear-gradient(top, #617482 50%, #2d353b 100%);
+    background: linear-gradient(top, #617482 50%, #2d353b 100%);
+    display: inline-block;
+    position: relative;
+    z-index: 0;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    box-shadow: 0 3px 3px rgba(0, 0, 0, 0.4), inset 0 1px 0 #90a6b7;
+    margin: 0 1px;
+    padding: 0 5px 0 10px;
+}
+
+.cardstories .cardstories_tabs li.cardstories_new {
+    padding: 0 5px;
+}
+
+.cardstories .cardstories_tabs li.cardstories_new a {
+    position: relative;
+    top: 4px;
+}
+
+.cardstories .cardstories_tabs li .cardstories_tab_close {
+    position: relative;
+    top: 4px;
+    left: 3px;
+    cursor: pointer;
+}
+
+.cardstories .cardstories_tabs a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.cardstories .cardstories_tabs li.cardstories_selected {
+    background: #80929b;
+    z-index: 2;
+    border-bottom-color: #80929b;
+    box-shadow: 0 3px 3px rgba(0, 0, 0, 0.4), inset 0 1px 0 #bed6e3;
+}
+
+.cardstories .cardstories_tabs li.cardstories_ready {
+    background: #00aaad;
+    background: -o-linear-gradient(top, #00aaad 50%, #0a5f61 100%);
+    background: -ms-linear-gradient(top, #00aaad 50%, #0a5f61 100%);
+    background: -moz-linear-gradient(top, #00aaad 50%, #0a5f61 100%);
+    background: -webkit-linear-gradient(top, #00aaad 50%, #0a5f61 100%);
+    background: linear-gradient(top, #00aaad 50%, #0a5f61 100%);
+    box-shadow: 0 3px 3px rgba(0, 0, 0, 0.4), inset 0 1px 0 #6dedef;
+}
+
+.cardstories .cardstories_tabs:before {
+    position: absolute;
+    content: " ";
+    width: 100%;
+    bottom: 0;
+    left: 0;
+    border-bottom: 1px solid #094647;
+    z-index: 1;
+}
+
+.cardstories .cardstories_tabs li:before,
+.cardstories .cardstories_tabs li:after {
+    border: 1px solid #094647;
+    position: absolute;
+    bottom: -1px;
+    width: 5px;
+    height: 5px;
+    content: " ";
+}
+
+.cardstories .cardstories_tabs li:before {
+    left: -6px;
+    border-bottom-right-radius: 6px;
+    border-width: 0 1px 1px 0;
+    box-shadow: 2px 2px 0 #2d353b;
+}
+
+.cardstories .cardstories_tabs li:after {
+    right: -6px;
+    border-bottom-left-radius: 6px;
+    border-width: 0 0 1px 1px;
+    box-shadow: -2px 2px 0 #2d353b;
+}
+
+.cardstories .cardstories_tabs li.cardstories_selected:before {
+    box-shadow: 2px 2px 0 #80929b;
+}
+
+.cardstories .cardstories_tabs li.cardstories_selected:after {
+    box-shadow: -2px 2px 0 #80929b;
+}
+
+.cardstories .cardstories_tabs li.cardstories_ready:before {
+    box-shadow: 2px 2px 0 #0a5f61;
+}
+
+.cardstories .cardstories_tabs li.cardstories_ready:after {
+    box-shadow: -2px 2px 0 #0a5f61;
+}
+
+
+/* Progress */
 
 .cardstories .cardstories_progress .cardstories_step_1,
 .cardstories .cardstories_progress .cardstories_step_2,
@@ -715,33 +857,6 @@
     left: 0px;
     width: 216px;
     height: 700px;
-}
-
-.cardstories .cardstories_new_story {
-    display: block;
-    position: absolute;
-    background: transparent url('images/new_story.png') no-repeat left top;
-    width: 242px;
-    height: 63px;
-    top: 0px;
-    left: 400px;
-    margin-top: -63px;
-}
-
-.cardstories .cardstories_new_story .cardstories_img_button {
-    width: 115px;
-    height: 30px;
-    position: absolute;
-    top: 17px;
-    left: 118px;
-}
-
-.cardstories .cardstories_new_story .cardstories_img_button div {
-    position: absolute;
-    top: 7px;
-    left: 10px;
-    color: white;
-    font-family: Licon;
 }
 
 .cardstories .cardstories_deck { 

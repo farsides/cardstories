@@ -25,7 +25,9 @@
 
         poll: true,
 
-        tab_template: '<span class="cardstories_tab"><span class="cardstories_tab_status"></span> <a class="cardstories_tab_title"></a> <a class="cardstories_tab_close"></a>',
+        tab_template: '<li class="cardstories_tab"><a class="cardstories_tab_title"></a><a class="cardstories_tab_close"><img src="/static/css/images/tab_close.png" /></a></li>',
+        
+        new_game_tab_template: '<li class="cardstories_tab cardstories_new"><a class="cardstories_tab_title"><img src="/static/css/images/tab_new.png" /></a></li>',
 
         init: function(player_id, current_game_id, root) {
             // Don't initialize twice.
@@ -69,35 +71,33 @@
                 var close_btn = $('.cardstories_tab_close', tab);
                 var is_current = game.id === 'new' || game.id === current_game_id;
 
-                title.text(game.sentence);
+                title.text(game.sentence.substring(0, 15));
 
                 if (!is_current) {
                     title.attr('href', $.cardstories.reload_link(game.id));
-                    // TODO: The button will probably be an image.
-                    close_btn.html('&#10005;'); // a cross.
                     close_btn.click(function() {
                         $this.remove_tab(tab, player_id, game.id);
                     });
 
-                    // TODO: The status will need to be redone, it will probably be implemented
-                    // with a class and an associated color.
                     if ($this.requires_action(player_id, game, root)) {
-                        status.text('*');
-                    } else {
-                        status.text('');
+                        tab.addClass('cardstories_ready');
                     }
+                } else {
+                    tab.addClass('cardstories_selected');
+                    close_btn.click(function() {
+                        $this.remove_tab(tab, player_id, current_game_id);
+                        $.cardstories.reload();
+                    });
                 }
-
-                // TODO: Remove, this is purely temorary!
-                tab.css({
-                    padding: '6px',
-                    margin: '3px',
-                    backgroundColor: is_current ? 'transparent' : '#ddd',
-                    cursor: 'pointer'
-                });
 
                 element.append(tab);
             });
+            
+            // Add the tab to create a new game
+            var new_game_tab = $($this.new_game_tab_template);
+            new_game_link = $.cardstories.reload_link(undefined, {'force_create': true});
+            $('a', new_game_tab).attr('href', new_game_link);
+            element.append(new_game_tab);
         },
 
         // Removes the tab from the page, and issues an ajax call to remove

@@ -825,19 +825,6 @@ test("automatic game creation", 2, function() {
     $.cardstories.bootstrap(player_id, game_id, null, true, root);
 });
 
-test("create new game button", 2, function() {
-    var root = $('#qunit-fixture .cardstories');
-    var player_id = 1;
-
-    $.cardstories.reload = function(_game_id, options) {
-        equal(_game_id, undefined);
-        ok(options.force_create);
-    };
-
-    $.cardstories.bootstrap(player_id, null, null, false, root);
-    $('.cardstories .cardstories_create .cardstories_pick_card .cardstories_new_story a').click();
-});
-
 test("preload_images_helper", 3, function() {
     var root = $('#qunit-fixture .cardstories');
     var preloaded_images_div = $('.cardstories_preloaded_images', root);
