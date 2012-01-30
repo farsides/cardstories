@@ -82,7 +82,7 @@ $ PYTHONPATH=.:etc/cardstories twistd --nodaemon cardstories \
 	--plugins-libdir /tmp \
 	--plugins-logdir log/ \
 	--plugins-confdir tests \
-	--plugins 'djangoauth chat mail' \
+	--plugins 'djangoauth chat activity tables mail' \
 	--plugins-pre-process 'djangoauth chat'
 
 On a second terminal window, still from the root of the checkout, run the
@@ -199,7 +199,7 @@ $ PYTHONPATH=.:etc/cardstories twistd --nodaemon cardstories \
 	--plugins-confdir tests \
 	--plugins-logdir log \
 	--plugins 'auth chat' \
-	--plugins-pre-process 'auth chat' \
+	--plugins-pre-process 'auth chat activity' \
 
 To check if the webservice replies, run the following (requires curl). The
 following must return the {"win": {}, "games": [], "modified": 0} string:
@@ -226,6 +226,17 @@ $ v=1.0.5 ; python setup.py sdist --dist-dir .. ; mv ../cardstories-$v.tar.gz ..
 To create the Debian GNU/Linux package use:
 
 $ dpkg-buildpackage -S -uc -us
+
+
+##########
+Migrations
+##########
+
+When upgrading, if there has been alteration to the database schema, migration files
+will be added to the migrations/ folder. Just run them, in numerical order, using
+a command like:
+
+    $ sqlite3 /tmp/cardstories.org.sqlite < migrations/001_add_tabs_table.sql
 
 
 ######################
