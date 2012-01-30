@@ -893,7 +893,7 @@
 
         add_plugin_polls: function(request, root) {
             $.each(this.plugins, function(i) {
-                if (this.poll && $.inArray(this.poll, request.type) === -1 ) {
+                if (this.poll && $.inArray(this.name, request.type) === -1 ) {
                     request.type.push(this.name);
                 }
             });
