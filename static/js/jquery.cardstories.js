@@ -1366,6 +1366,9 @@
                             });
                         };})(slot, slotno));
 
+                        // Play a sound
+                        $.cardstories_audio.play('join', root);
+
                         // Artificial delay between joining and picking.
                         $this.delay(q, 300, playerq);
                     }
