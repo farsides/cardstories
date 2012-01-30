@@ -51,11 +51,20 @@ class Plugin(Auth):
             c.execute(
                 "CREATE TABLE players ( "
                 "  id INTEGER PRIMARY KEY, "
-                "  name VARCHAR(255) "
+                "  name VARCHAR(255), "
+                "  score BIGINTEGER, "
+                "  levelups INTEGER "
                 "); ")
             c.execute(
                 "CREATE INDEX players_idx ON players (name); "
                 )
+            c.execute(
+                "CREATE TABLE player_cards ( "
+                "  id INTEGER PRIMARY KEY, "
+                "  player_id INTEGER, "
+                "  card INTEGER, "
+                "  UNIQUE (\"player_id\", \"card\") "
+                "); ")
             db.commit()
             db.close()
         self.db = adbapi.ConnectionPool("sqlite3", database=self.database, cp_noisy=True, check_same_thread=False)
