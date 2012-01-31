@@ -1,8 +1,11 @@
+$.fx.off = true;
+
 var selector = '#cardstories_tabs_example';
 var orig_requires_action = $.cardstories_tabs.requires_action;
 
 function setup() {
     $.cardstories.send = function() { throw 'Please rebind $.cardstories.send'; };
+    $.cardstories.reload = function() { throw 'Please rebind $.cardstories.reload'; };
     $.cardstories_tabs.requires_action = orig_requires_action;
 }
 
@@ -75,7 +78,7 @@ test("Tabs are links to games", 3, function() {
     equal(tabs.eq(1).attr('href'), '?create=1', 'tab contains link to create a new game');
 });
 
-test("closing a tab", 5, function() {
+test("closing an unfocused tab", 5, function() {
     var root = $(selector);
     var element = $('.cardstories_tabs', root);
     var player_id = 111;
@@ -96,10 +99,148 @@ test("closing a tab", 5, function() {
         equal(query.action, 'remove_tab', 'remove_tab call is issued');
         equal(query.player_id, player_id, 'player_id is passed to the service');
         equal(query.game_id, games[0].id, 'game_id is passed to the service');
+        return $.Deferred().resolve();
     };
     $('.cardstories_tab_close', element).click();
     equal($('.cardstories_tab', element).length, 1, 'There is one tab');
 });
+
+test("closing the currently focused tab with tabs to the right", 6, function() {
+    var root = $(selector);
+    var element = $('.cardstories_tabs', root);
+    var player_id = 111;
+    var game_id = 3;
+    var games = [
+        {id: 1, sentence: 'SENTENCE1'},
+        {id: 2, sentence: 'SENTENCE2'},
+        {id: 3, sentence: 'SENTENCE3'},
+        {id: 4, sentence: 'SENTENCE4'},
+        {id: 5, sentence: 'SENTENCE5'}
+    ];
+
+    $.cardstories.send = function(query) {
+        equal(query.action, 'remove_tab', 'remove_tab call is issued');
+        equal(query.player_id, player_id, 'player_id is passed to the service');
+        ok(query.game_id, 'game_id is passed to the service');
+        return $.Deferred().resolve();
+    };
+
+    root.cardstories_tabs(player_id, game_id);
+
+    // When there are tabs to right and left of current tab,
+    // it will load the first on one the right.
+    $.cardstories_tabs.state(player_id, {games: games}, root);
+    equal($('.cardstories_tab', element).length, 6, 'There are six tabs (5 games + 1 new game)');
+
+    // Click the close button.
+    // The tab should be removed from the DOM, the 'remove_tab' call
+    // issued to the service, and game nr. 4 loaded.
+    $.cardstories.reload = function(game_id) {
+        equal(game_id, 4, 'game nr. 4 is loaded');
+    };
+    var tab3 = $('.cardstories_tab', element).eq(2);
+    tab3.find('.cardstories_tab_close').click();
+    equal($('.cardstories_tab', element).length, 5, 'There are five tabs');
+});
+
+test("closing the currently focused tab with tabs to the left", 6, function() {
+    var root = $(selector);
+    var element = $('.cardstories_tabs', root);
+    var player_id = 111;
+    var game_id = 3;
+    var games = [
+        {id: 1, sentence: 'SENTENCE1'},
+        {id: 2, sentence: 'SENTENCE2'},
+        {id: 3, sentence: 'SENTENCE3'}
+    ];
+
+    $.cardstories.send = function(query) {
+        equal(query.action, 'remove_tab', 'remove_tab call is issued');
+        equal(query.player_id, player_id, 'player_id is passed to the service');
+        ok(query.game_id, 'game_id is passed to the service');
+        return $.Deferred().resolve();
+    };
+
+    root.cardstories_tabs(player_id, game_id);
+
+    // When there are tabs to left, but no tabs to the right of current tab,
+    // it will load the first on one the left.
+    $.cardstories_tabs.state(player_id, {games: games}, root);
+    equal($('.cardstories_tab', element).length, 4, 'There are four tabs (3 games + 1 new game)');
+
+    // Click the close button.
+    // The tab should be removed from the DOM, the 'remove_tab' call
+    // issued to the service, and game nr. 2 loaded.
+    $.cardstories.reload = function(game_id) {
+        equal(game_id, 2, 'game nr. 2 is loaded');
+    };
+    var tab3 = $('.cardstories_tab', element).eq(2);
+    tab3.find('.cardstories_tab_close').click();
+    equal($('.cardstories_tab', element).length, 3, 'There are three tabs');
+});
+
+test("closing the currently focused tab with no other tabs", 6, function() {
+    var root = $(selector);
+    var element = $('.cardstories_tabs', root);
+    var player_id = 111;
+    var game_id = 1;
+    var games = [
+        {id: 1, sentence: 'SENTENCE1'}
+    ];
+
+    $.cardstories.send = function(query) {
+        equal(query.action, 'remove_tab', 'remove_tab call is issued');
+        equal(query.player_id, player_id, 'player_id is passed to the service');
+        ok(query.game_id, 'game_id is passed to the service');
+        return $.Deferred().resolve();
+    };
+
+    root.cardstories_tabs(player_id, game_id);
+
+    // When there are tabs to left, but no tabs to the right of current tab,
+    // it will load the first on one the left.
+    $.cardstories_tabs.state(player_id, {games: games}, root);
+    equal($('.cardstories_tab', element).length, 2, 'There are two tabs (1 game + 1 new game)');
+
+    // Click the close button.
+    // The tab should be removed from the DOM, the 'remove_tab' call
+    // issued to the service, and 'New game' tab loaded.
+    $.cardstories.reload = function(game_id) {
+        strictEqual(game_id, undefined, 'New game tab is loaded');
+    };
+    var tab = $('.cardstories_tab', element);
+    tab.find('.cardstories_tab_close').click();
+    equal($('.cardstories_tab', element).length, 1, 'There is only one tab left (the + button)');
+});
+
+test("closing the currently focused when it is the 'New game' tab", 3, function() {
+    var root = $(selector);
+    var element = $('.cardstories_tabs', root);
+    var player_id = 111;
+    var game_id = undefined;
+    var games = [];
+
+    $.cardstories.send = function(query) {
+        ok(false, 'send is not called; this should never happen');
+    };
+
+    root.cardstories_tabs(player_id, game_id);
+
+    // When there are tabs to left, but no tabs to the right of current tab,
+    // it will load the first on one the left.
+    $.cardstories_tabs.state(player_id, {games: games}, root);
+    equal($('.cardstories_tab', element).length, 2, 'There are two tabs (1 new game + 1 new game button)');
+
+    // Click the close button.
+    // The tab should be removed from the DOM, and 'New game' tab loaded.
+    $.cardstories.reload = function(game_id) {
+        strictEqual(game_id, undefined, 'New game tab is loaded');
+    };
+    var tab = $('.cardstories_tab', element);
+    tab.find('.cardstories_tab_close').click();
+    equal($('.cardstories_tab', element).length, 1, 'There is only one tab left (the + button)');
+});
+
 
 test("dynamic tab for new game", 3, function() {
     var root = $(selector);

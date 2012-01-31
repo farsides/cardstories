@@ -3789,7 +3789,7 @@
                 success: success,
                 async: async
             };
-            $this.ajax(options);
+            return $this.ajax(options);
         },
 
         init_board_buttons: function(element, root) {

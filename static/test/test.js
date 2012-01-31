@@ -584,7 +584,7 @@ test("login_url", 1, function() {
     $.cardstories.location = location;
 });
 
-asyncTest("send", 3, function() {
+asyncTest("send", 4, function() {
     var player_id = 15;
     var game_id = 101;
     var onerror_called = false;
@@ -595,6 +595,7 @@ asyncTest("send", 3, function() {
         equal(options.async, false);
         options.success({error: 'OOPS'}); // Should trigger passed-in onerror callback.
         options.success({}, 'status');
+        return 'result of $.cardstories.ajax';
     };
 
     var query = {
@@ -610,7 +611,8 @@ asyncTest("send", 3, function() {
         onerror: onerror
     };
 
-    $.cardstories.send(query, callback, opts);
+    var result = $.cardstories.send(query, callback, opts);
+    equal(result, 'result of $.cardstories.ajax', 'passes on the promise object as returned from $.cardstories.ajax');
 });
 
 test("send_game on error", 1, function() {
@@ -868,7 +870,7 @@ asyncTest("preload_images", 3, function() {
     progress_fill.parents().andSelf().show();
     equal(progress_fill.width(), 0, 'progress is at zero width initially');
 
-    $.cardstories.images_to_preload = ['card01.jpg', 'card02.jpg', 'card03.jpg'];
+    $.cardstories.images_to_preload = ['card01.png', 'card02.png', 'card03.png'];
 
     var cb = function() {
         progress_fill.parents().andSelf().show();

@@ -26,7 +26,7 @@
         poll: true,
 
         tab_template: '<li class="cardstories_tab"><a class="cardstories_tab_title"></a><a class="cardstories_tab_close"><img src="/static/css/images/tab_close.png" /></a></li>',
-        
+
         new_game_tab_template: '<li class="cardstories_tab cardstories_new"><a class="cardstories_tab_title"><img src="/static/css/images/tab_new.png" /></a></li>',
 
         init: function(player_id, current_game_id, root) {
@@ -72,8 +72,14 @@
                 var is_current = game.id === 'new' || game.id === current_game_id;
 
                 title.text(game.sentence.substring(0, 15));
+                tab.data('game_id', game.id);
 
-                if (!is_current) {
+                if (is_current) {
+                    tab.addClass('cardstories_selected');
+                    close_btn.click(function() {
+                        $this.remove_current_tab(tab, player_id, current_game_id);
+                    });
+                } else {
                     title.attr('href', $.cardstories.reload_link(game.id));
                     close_btn.click(function() {
                         $this.remove_tab(tab, player_id, game.id);
@@ -82,32 +88,65 @@
                     if ($this.requires_action(player_id, game, root)) {
                         tab.addClass('cardstories_ready');
                     }
-                } else {
-                    tab.addClass('cardstories_selected');
-                    close_btn.click(function() {
-                        $this.remove_tab(tab, player_id, current_game_id);
-                        $.cardstories.reload();
-                    });
                 }
 
                 element.append(tab);
             });
-            
+
             // Add the tab to create a new game
             var new_game_tab = $($this.new_game_tab_template);
-            new_game_link = $.cardstories.reload_link(undefined, {'force_create': true});
+            var new_game_link = $.cardstories.reload_link(undefined, {'force_create': true});
             $('a', new_game_tab).attr('href', new_game_link);
             element.append(new_game_tab);
         },
 
+        // Removes the current tab from the page and loads game from one of the other
+        // open tabs. If this is the last opened tab, it opens a 'New game' tab instead.
+        remove_current_tab: function(tab, player_id, game_id) {
+            // After removing this tab, do one of the following:
+            //  - If there are tabs on the right side of this tab,
+            //    load the first one on the right.
+            //  - If there are tabs on the left, load the first on on the left.
+            //  - Load a 'New game' tab.
+
+            // ID of game to open after closing this tab. game_id of undefined
+            // means create a new game.
+            var next_game_id;
+            var next_tab = tab.next('.cardstories_tab:not(.cardstories_new)');
+            var prev_tab = tab.prev('.cardstories_tab:not(.cardstories_new)');
+            if (next_tab.length) {
+                next_game_id = next_tab.data('game_id');
+            } else if (prev_tab.length) {
+                next_game_id = prev_tab.data('game_id');
+            }
+
+            this.remove_tab(tab, player_id, game_id, function() {
+                $.cardstories.reload(next_game_id);
+            });
+        },
+
         // Removes the tab from the page, and issues an ajax call to remove
         // the tab on the webservice.
-        remove_tab: function(tab, player_id, game_id) {
-            tab.remove(); // remove the tab from the DOM.
-            $.cardstories.send({
-                action: 'remove_tab',
-                game_id: game_id,
-                player_id: player_id
+        remove_tab: function(tab, player_id, game_id, cb) {
+            var promise;
+            if (game_id) {
+                promise = $.cardstories.send({
+                    action: 'remove_tab',
+                    game_id: game_id,
+                    player_id: player_id
+                });
+            } else {
+                promise = $.Deferred().resolve();
+            }
+
+            // remove the tab from the DOM.
+            tab.fadeOut(function() {
+                tab.remove();
+                promise.done(function() {
+                    if (cb) {
+                        cb();
+                    }
+                });
             });
         },
 
