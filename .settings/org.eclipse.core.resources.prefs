@@ -1,5 +1,6 @@
-#Sun Jan 22 18:19:10 CET 2012
+#Wed Feb 01 15:15:53 WET 2012
 eclipse.preferences.version=1
+encoding//bin/cardstories_tracebacks.py=utf-8
 encoding//cardstories/auth.py=utf-8
 encoding//cardstories/exceptions.py=utf-8
 encoding//cardstories/game.py=utf-8
