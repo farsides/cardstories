@@ -25,6 +25,7 @@
 
 import os
 from twisted.internet import defer
+from twisted.python import log
 
 from cardstories.poll import Pollable
 from cardstories.service import CardstoriesServiceConnector
@@ -119,9 +120,11 @@ class Plugin(Pollable, CardstoriesServiceConnector):
             # Register new table
             table = Table(self)
             self.tables.append(table)
+            log.msg('New table created for game %d' % game.id)
         else:
             # Register new game in existing table
             table = self.game2table[previous_game_id]
+            log.msg('Game %d added to existing table (game_ids = %s)' % (game.id, table.games_ids))
 
         self.game2table[game.id] = table
         table.register_new_game(game)
@@ -164,6 +167,7 @@ class Plugin(Pollable, CardstoriesServiceConnector):
             online_players, offline_players = yield table.get_online_players()
             if len(online_players) < 1:
                 self.delete_table(table)
+                log.msg('Table deleted (game_ids = %s)' % table.games_ids)
 
         defer.returnValue(True)
 

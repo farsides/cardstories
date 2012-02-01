@@ -25,6 +25,7 @@
 
 import os
 from twisted.internet import defer, reactor
+from twisted.python import log
 
 from cardstories.poll import Pollable
 from cardstories.helpers import Observable
@@ -87,6 +88,7 @@ class Plugin(Pollable, Observable):
         """
 
         if player_id not in self.online_players:
+            log.msg('Player %d connecting' % player_id)
             self.online_players[player_id] = { 'active_polls': 1 }
             self.notify({'type': 'player_connecting',
                          'player_id': player_id})
@@ -108,6 +110,7 @@ class Plugin(Pollable, Observable):
                 del self.online_players[player_id]
 
             if player_id not in self.online_players:
+                log.msg('Player %d disconnecting' % player_id)
                 self.notify({'type': 'player_disconnecting',
                              'player_id': player_id})
 
