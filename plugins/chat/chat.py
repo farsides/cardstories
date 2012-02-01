@@ -149,7 +149,7 @@ class Plugin(Pollable, Observable):
                     'sentence': 'Hello, computer?'}
 
         """
-        if request.args['action'][0] == 'message':
+        if 'action' in request.args and request.args['action'][0] == 'message':
             # Remove the message action so it does not flow through.
             del request.args['action']
 
