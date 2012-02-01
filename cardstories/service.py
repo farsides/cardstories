@@ -267,7 +267,7 @@ class CardstoriesService(service.Service, Observable):
         game_ids = [row[0] for row in rows]
         if game_id and game_id not in game_ids:
             sql = "INSERT INTO tabs (player_id, game_id, created) VALUES (?, ?, datetime('now'))"
-            transaction.execute(sql, [player_id ,game_id])
+            transaction.execute(sql, [player_id, game_id])
             game_ids.append(game_id)
         return game_ids
 

@@ -2428,7 +2428,8 @@ test("complete owner lost easy", 9, function() {
                      { 'id': player1, 'vote': 30, 'win': 'y', 'picked': 31, 'cards': [] },
                      { 'id': player2, 'vote': 30, 'win': 'y', 'picked': 32, 'cards': [] } ]
     };
-    $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player1; } };
+    $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player1; },
+                           'on_next_owner_change': function(player_id, game_id, root, cb) {} };
 
     $.cardstories.complete(owner_id, game, root);
     var box = $('.cardstories_results', element);
@@ -2460,7 +2461,8 @@ test("complete owner lost hard", 9, function() {
                      { 'id': player1, 'vote': 32, 'win': 'y', 'picked': 31, 'cards': [] },
                      { 'id': player2, 'vote': 31, 'win': 'y', 'picked': 32, 'cards': [] } ]
     };
-    $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player1; } };
+    $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player1; },
+                           'on_next_owner_change': function(player_id, game_id, root, cb) {} };
 
     $.cardstories.complete(owner_id, game, root);
     var box = $('.cardstories_results', element);
@@ -2492,7 +2494,8 @@ test("complete owner won", 9, function() {
                      { 'id': player1, 'vote': 30, 'win': 'y', 'picked': 31, 'cards': [] },
                      { 'id': player2, 'vote': 31, 'win': 'n', 'picked': 32, 'cards': [] } ]
     };
-    $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player1; } };
+    $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player1; },
+                           'on_next_owner_change': function(player_id, game_id, root, cb) {} };
 
     $.cardstories.complete(owner_id, game, root);
     var box = $('.cardstories_results', element);
@@ -2528,7 +2531,8 @@ test("complete", 34, function() {
                      { 'id': player3, 'vote': 31, 'win': 'n', 'picked': 33, 'cards': [] },
                      { 'id': player4, 'vote': null, 'win': 'n', 'picked': 34, 'cards': [] } ]
     };
-    $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player1; } };
+    $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player1; },
+                           'on_next_owner_change': function(player_id, game_id, root, cb) {} };
 
     equal($('#qunit-fixture .cardstories_complete.cardstories_active').length, 0);
     $.cardstories.complete(owner_id, game, root);
@@ -2589,7 +2593,8 @@ test("complete player didn't vote", 13, function() {
                      { 'id': player3, 'vote': 31, 'win': 'n', 'picked': 33, 'cards': [] },
                      { 'id': player4, 'vote': null, 'win': 'n', 'picked': 34, 'cards': [] } ] // Didn't vote.
     };
-    $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player1; } };
+    $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player1; },
+                           'on_next_owner_change': function(player_id, game_id, root, cb) {} };
 
     $.cardstories.complete(player4, game, root);
 
@@ -2645,7 +2650,8 @@ test("next_game_as_author", 2, function() {
     var next_game_dom = $('.cardstories_next_game', element);
     var play_again_button = $('.cardstories_play_again', next_game_dom);
     $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player_id; },
-                           'load_next_game_when_ready': function(player_id, game_id, root) { return true; } };
+                           'load_next_game_when_ready': function(ready, player_id, game_id, root) { return true; },
+                           'on_next_owner_change': function(player_id, game_id, root, cb) {} };
 
     orig_display_modal = $.cardstories.display_modal;
     $.cardstories.display_modal = function(modal, overlay) {
@@ -2676,7 +2682,8 @@ test("next_game_as_player", 4, function() {
     var next_game_dom = $('.cardstories_next_game', element);
     var play_again_button = $('.cardstories_play_again', next_game_dom);
     $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player_id+1; },
-                           'load_next_game_when_ready': function(player_id, game_id, root) { return false; } };
+                           'load_next_game_when_ready': function(ready, player_id, game_id, root) { return false; },
+                           'on_next_owner_change': function(player_id, game_id, root, cb) {} };
 
     orig_display_modal = $.cardstories.display_modal;
     $.cardstories.display_modal = function(modal, overlay) {
@@ -2690,6 +2697,57 @@ test("next_game_as_player", 4, function() {
     play_again_button.click();
 
     $.cardstories.display_modal = orig_display_modal;
+});
+
+test("on_next_owner_change", 9, function() {
+    var player_id = 0;
+    var game_author = {
+        'id': 7,
+        'owner': true,
+        'owner_id': player_id,
+        'state': 'fake_state',
+        'winner_card': 15,
+        'board': [],
+        'players': [{ 'id': player_id, 'vote': null, 'win': 'y', 'picked': 30, 'cards': [] }]
+    };
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_complete', root);
+    var next_game_dom = $('.cardstories_next_game', element);
+    var play_again_button = $('.cardstories_play_again', next_game_dom);
+    var owner_change_cb = null;
+    $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player_id+1; },
+                           'load_next_game_when_ready': function(ready, player_id, game_id, root) { return false; },
+                           'on_next_owner_change': function(player_id, game_id, root, cb) { owner_change_cb = cb; } };
+
+    // First next_owner
+    orig_display_modal = $.cardstories.display_modal;
+    $.cardstories.display_modal = function(modal, overlay) {
+        equal(modal.attr('class'), 'cardstories_modal');
+        equal(overlay.attr('class'), 'cardstories_modal_overlay');
+    }
+
+    $.cardstories.complete(player_id, game_author, root);
+    equal($('.cardstories_next_game_author', next_game_dom).css('display'), 'none');
+    equal($('.cardstories_next_game_player', next_game_dom).css('display'), 'block');
+    play_again_button.click();
+    
+    // Next owner change to current player
+    $.cardstories_table.load_next_game_when_ready = function(ready_for_next_game, player_id, game_id, root) {
+        equal(ready_for_next_game, false);
+    }
+    $.cardstories_table.get_next_owner_id = function(player_id, game_id, root) { return player_id; };
+    orig_close_modal = $.cardstories.close_modal;
+    $.cardstories.close_modal = function(modal, overlay) {
+        equal(modal.attr('class'), 'cardstories_modal');
+        equal(overlay.attr('class'), 'cardstories_modal_overlay');
+    }
+    owner_change_cb(player_id);
+    
+    equal($('.cardstories_next_game_author', next_game_dom).css('display'), 'block');
+    equal($('.cardstories_next_game_player', next_game_dom).css('display'), 'none');
+
+    $.cardstories.display_modal = orig_display_modal;
+    $.cardstories.close_modal = orig_close_modal;
 });
 
 test("advertise", 11, function() {

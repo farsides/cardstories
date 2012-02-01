@@ -118,7 +118,7 @@ test("state_next_as_author", 8, function() {
         equal(options.force_create, true);
     };
     
-    $.cardstories_table.load_next_game_when_ready(player_id, game_id, root);
+    $.cardstories_table.load_next_game_when_ready(true, player_id, game_id, root);
     equal($(root).data('cardstories_table').game2table[game_id].ready_for_next_game, true);
     
     equal($.cardstories_table.get_next_owner_id(player_id, game_id, root), player_id);
@@ -134,7 +134,7 @@ test("state_next_as_player", 6, function() {
     
     // Ready before receiving next game data - wait
     equal($(root).data('cardstories_table').game2table[game1].ready_for_next_game, false);
-    $.cardstories_table.load_next_game_when_ready(player1, game1, root);
+    $.cardstories_table.load_next_game_when_ready(true, player1, game1, root);
     equal($(root).data('cardstories_table').game2table[game1].ready_for_next_game, true);
     
     // Reload as soon as next game_id is received in state info
@@ -152,5 +152,35 @@ test("state_next_as_player", 6, function() {
     equal($(root).data('cardstories_table').game2table[game1].next_owner_id, player2);
     
     equal($.cardstories_table.get_next_owner_id(player1, game1, root), player2);
+});
+
+test("on_next_owner_change", 4, function() {
+    var root = $(selector);
+    var player1 = 10;
+    var player2 = 12
+    var game1 = 15;
+    var game2 = 17;
+    init_table(player1, game1, root);
+
+    var data = {type: 'table', 
+            player_id: player1, 
+            game_id: game1,
+            next_game_id: null,
+            next_owner_id: player2};
+    $.cardstories_table.state(player1, data, root);
+    equal($(root).data('cardstories_table').game2table[game1].next_owner_id, player2);
+    equal($(root).data('cardstories_table').game2table[game1].reset_callback, null);
+
+    $.cardstories_table.on_next_owner_change(player1, game1, root, function(next_owner_id) {
+        equal(next_owner_id, player1);
+    })
+    
+    var data = {type: 'table', 
+            player_id: player1, 
+            game_id: game1,
+            next_game_id: null,
+            next_owner_id: player1};
+    $.cardstories_table.state(player1, data, root);
+    equal($(root).data('cardstories_table').game2table[game1].next_owner_id, player1);
 });
 

@@ -57,7 +57,8 @@
             var game2table = {};
             game2table[game_id] = { next_game_id: null,
                                     next_owner_id: null,
-                                    ready_for_next_game: false };
+                                    ready_for_next_game: false,
+                                    reset_callback: null};
             $(root).data('cardstories_table', { 'game2table': game2table });
         },
 
@@ -106,9 +107,19 @@
             var $this = this;
             var game_id = data.game_id;
             var table = $this.get_table_from_game_id(game_id, root);
+            var reset_needed = false;
+            
+            // Check if we need to warn about a owner change
+            if(table.next_owner_id && table.next_owner_id !== data.next_owner_id) {
+                reset_needed = true;
+            }
 
             table.next_game_id = data.next_game_id;
             table.next_owner_id = data.next_owner_id;
+
+            if(reset_needed && table.reset_callback) {
+                table.reset_callback(data.next_owner_id);
+            }
 
             $this.check_next_game(player_id, game_id, root);
         },
@@ -138,15 +149,23 @@
             return false;
         },
 
-        // Reload to the next game as soon it is created
-        load_next_game_when_ready: function(player_id, game_id, root) {
+        // Reload to the next game as soon it is created if ready_for_next_game is true
+        load_next_game_when_ready: function(ready_for_next_game, player_id, game_id, root) {
             var $this = this;
             var table = $this.get_table_from_game_id(game_id, root);
 
-            table.ready_for_next_game = true;
+            table.ready_for_next_game = ready_for_next_game;
             var is_ready = $this.check_next_game(player_id, game_id, root);
 
             return is_ready;
+        },
+
+        // Allows to register a callback, to be warned of next owner changes
+        on_next_owner_change: function(player_id, game_id, root, reset_callback) {
+            var $this = this;
+            var table = $this.get_table_from_game_id(game_id, root);
+
+            table.reset_callback = reset_callback;
         },
 
         // Returns the player_id of the player who should create the next game
