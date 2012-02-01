@@ -158,7 +158,7 @@ class Plugin(Pollable, CardstoriesServiceConnector):
         Delete empty tables to avoid memory leak
         """
 
-        for table in self.tables:
+        for table in self.tables[:]: # self.tables can be altered
             yield table.on_player_disconnecting(player_id)
 
             online_players, offline_players = yield table.get_online_players()

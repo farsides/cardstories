@@ -218,7 +218,7 @@ class TableTest(unittest.TestCase):
         modified = self.check_poll(poll, returned=True)
 
         # All players quit - deletes the table
-        self.mock_activity_instance.is_player_online.return_value = True
+        self.mock_activity_instance.is_player_online.return_value = False
         yield self.table_instance.on_activity_notification({'type': 'player_disconnecting',
                                                             'player_id': player1})
         yield self.table_instance.on_activity_notification({'type': 'player_disconnecting',
@@ -294,6 +294,34 @@ class TableTest(unittest.TestCase):
         yield self.service.handle([], {'action': ['complete'],
                                        'game_id': [game_id],
                                        'owner_id': [game['owner_id']]})
+
+    @defer.inlineCallbacks
+    def test03_disconnect_with_two_tables(self):
+        """
+        Bug #797 - ValueError: list.remove(x): x not in list (table.py, delete_table)
+        """
+
+        player_id = 12
+        self.mock_activity_instance.is_player_online.return_value = True
+
+        # Create two tables
+        self.assertEqual(len(self.table_instance.tables), 0)
+        response = yield self.service.handle([], {'action': ['create'],
+                                                  'owner_id': [player_id],
+                                                  'card': [1],
+                                                  'sentence': ['sentence']})
+        response = yield self.service.handle([], {'action': ['create'],
+                                                  'owner_id': [player_id],
+                                                  'card': [1],
+                                                  'sentence': ['sentence']})
+        self.assertEqual(len(self.table_instance.tables), 2)
+
+        # Players quits - deletes the two tables simulteanously
+        self.mock_activity_instance.is_player_online.return_value = False
+        yield self.table_instance.on_activity_notification({'type': 'player_disconnecting',
+                                                            'player_id': player_id})
+        self.assertEqual(len(self.table_instance.tables), 0)
+
 
 def Run():
     loader = runner.TestLoader()
