@@ -149,11 +149,20 @@ class CardstoriesServiceTestHandle(CardstoriesServiceTestBase):
 
     @defer.inlineCallbacks
     def test02_handle(self):
+        # Make sure log.err() is called, but don't let it fail the tests
+        from cardstories import service
+        orig_service_log = service.log
+        service.log = Mock()
+
         for action in self.service.ACTIONS:
             result = yield self.service.handle(None, { 'action': [action] })
             self.assertEquals('PANIC', result['error']['code'])
             self.failUnlessSubstring(action, result['error']['data'])
             self.failUnlessSubstring('requires argument', result['error']['data'])
+            self.assertEqual(service.log.err.call_count, 1)
+            service.log.reset_mock()
+
+        service.log = orig_service_log
 
 class CardstoriesServiceTest(CardstoriesServiceTestBase):
 

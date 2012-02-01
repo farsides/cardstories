@@ -615,7 +615,7 @@ class CardstoriesService(service.Service, Observable):
                 d = getattr(self, action)(args)
                 def error(reason):
                     error = reason.value
-                    log.msg(reason)
+                    log.err(reason)
                     if reason.type is CardstoriesWarning:
                         return {'error': {'code': error.code, 'data': error.data}}
                     else:
@@ -628,10 +628,10 @@ class CardstoriesService(service.Service, Observable):
             else:
                 raise CardstoriesException, 'Unknown action: %s' % action
         except CardstoriesWarning as e:
-            failure.Failure().printTraceback()
+            log.err(e)
             return defer.succeed({'error': {'code': e.code, 'data': e.data}})
         except Exception as e:
-            failure.Failure().printTraceback()
+            log.err(e)
             tb = traceback.format_exc()
             return defer.succeed({'error': {'code': 'PANIC', 'data': tb}})
 
