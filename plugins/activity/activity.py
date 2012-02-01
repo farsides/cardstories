@@ -104,9 +104,10 @@ class Plugin(Pollable, Observable):
         self.online_players[player_id]['active_polls'] -= 1
 
         def on_poll_resume_timeout():
-            if player_id not in self.online_players or self.online_players[player_id]['active_polls'] <= 0:
+            if player_id in self.online_players and self.online_players[player_id]['active_polls'] <= 0:
                 del self.online_players[player_id]
 
+            if player_id not in self.online_players:
                 self.notify({'type': 'player_disconnecting',
                              'player_id': player_id})
 
