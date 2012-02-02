@@ -160,7 +160,7 @@
             var previous_state = tab_states[game.id];
             var new_state = game.state;
             tab_states[game.id] = new_state;
-
+            
             if (previous_state && previous_state !== new_state) { // the state has changed
                 if (new_state === 'complete') { // the results have been announced
                     requires = true;
@@ -168,9 +168,7 @@
             }
             if (game.owner) {
                 if (new_state === 'invitation') {
-                    if (game.players.length === 1) { // no player joined yet
-                        requires = true;
-                    } else if (game.ready) { // game can be moved to the voting phase
+                    if (game.ready) { // game can be moved to the voting phase
                         requires = true;
                     }
                 } else if (new_state === 'vote') {

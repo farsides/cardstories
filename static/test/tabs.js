@@ -280,8 +280,8 @@ test("requires_action author", 7, function() {
 
     // Doesn't require action if game is in the complete state.
     ok(!does_require_action({state: 'complete'}));
-    // Requires action if in invitation state and there are no players (just the GM).
-    ok(does_require_action({state: 'invitation',
+    // Doesn't require action if in invitation state and there are no players
+    ok(!does_require_action({state: 'invitation',
                             players: [{player_id: 'the owner'}],
                             ready: false}));
     // Doesn't require action if in invitation state and there are players, but game is not ready yet.
