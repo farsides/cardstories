@@ -131,18 +131,19 @@
             var table = $this.get_table_from_game_id(game_id, root);
 
             if(table.ready_for_next_game) {
+                // Next game is ready to be joined
+                if(table.next_game_id && table.next_game_id !== game_id) {
+                    $.cardstories.reload(table.next_game_id);
+                    return true;
+                }
+            
                 // It's the player's turn to create a game
-                if(player_id === table.next_owner_id) {
+                else if(player_id === table.next_owner_id) {
                     var options = { 'force_create': true };
                     if(game_id) {
                         options.previous_game_id = game_id;
                     }
                     $.cardstories.reload(undefined, options);
-                    return true;
-
-                // Next game is ready to be joined
-                } else if(table.next_game_id && table.next_game_id !== game_id) {
-                    $.cardstories.reload(table.next_game_id);
                     return true;
                 }
             }
