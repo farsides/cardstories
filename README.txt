@@ -26,7 +26,8 @@ on a recent installation of Ubuntu or Debian.
 
 First, install the following packages.
 
-$ sudo apt-get install python-twisted python-lxml python-django postfix python-imaging python-simplejson
+$ sudo apt-get install python-twisted python-lxml python-django postfix \
+  python-imaging python-simplejson
 
 Note that Django must be version 1.2.5 or greater, otherwise things will break
 in interesting ways.  If your distribution is too old (or too new), instead of
@@ -35,16 +36,18 @@ python-django install python-pip and then use it to install Django:
 $ sudo apt-get install python-pip
 $ sudo pip install Django==1.2.5
 
-You will also need the requests and Mock packages:
+You will also need the following exta packages:
 
 $ sudo pip install mock==0.7.2
 $ sudo pip install requests==0.8.6
+$ sudo pip install South==0.7.3
 
 Now, make sure you are at the root of the cardstories checkout.  At this point,
 create the default database structure for the website (an sqlite database will
 be automatically created at /tmp/cardstories.website):
 
 $ website/manage.py syncdb
+$ website/manage.py migrate
 
 Note that for local Facebook development, you must also add an entry to
 /etc/hosts that matches the domain name in your Django site configuration.  It
@@ -232,11 +235,48 @@ $ dpkg-buildpackage -S -uc -us
 Migrations
 ##########
 
-When upgrading, if there has been alteration to the database schema, migration files
-will be added to the migrations/ folder. Just run them, in numerical order, using
-a command like:
+A) Upgrading the webservice DB
+==============================
+
+When upgrading, if there has been alteration to the webservice database schema, 
+migration files will be added to the migrations/ folder. Just run them, in numerical 
+order, using a command like:
 
     $ sqlite3 /tmp/cardstories.org.sqlite < migrations/001_add_tabs_table.sql
+
+
+B) Upgrading Django's DB (v2.2+)
+================================
+
+You will also need to make sure there hasn't been any DB alteration in django - run
+the following commands to ensure you're up to date:
+
+    $ ./website/manage.py syncdb
+    $ ./website/manage.py migrate
+
+B') Upgrading Django's DB (from before v2.2)
+============================================
+
+Prior to version 2.2, django wasn't using south to handle migrations. So if you have 
+a database from before 2.2, run the following commands to avoid having south trying
+to recreate the database from scratch (if you ran syncdb on the 2.1 version, make 
+sure you drop the cardstories_usercard table, as the migration will attempt to 
+create it)
+
+    $ ./website/manage.py syncdb
+    $ ./website/manage.py migrate cardstories 0001 --fake
+
+
+B) Developers - Automatically generating Django migrations
+==========================================================
+
+For the webservice, you will have to create the SQL migration files manually in the
+migrations/ folder, but for django south will take care of it automatically for you,
+based on alterations you make to the models.py file. Simply run the following
+command:
+
+    $ ./website/manage.py schemamigration cardstories --auto 
+    $ ./website/manage.py migrate cardstories
 
 
 ######################
