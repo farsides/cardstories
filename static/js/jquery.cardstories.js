@@ -2239,11 +2239,8 @@
             return deferred;
         },
 
-        confirm_participate: false,
-
         invitation_participate: function(player_id, game, root) {
             var $this = this;
-            var element = $('.cardstories_invitation .cardstories_participate', root);
             var query = {
                 action: 'participate',
                 player_id: player_id,
@@ -2261,16 +2258,8 @@
                     $this.panic(error);
                 }
             };
-            var send = function() {
-                $this.send(query, callback, {onerror: onerror});
-            };
-            if (this.confirm_participate) {
-                this.set_active('invitation_participate', element, root, game);
-                $('.cardstories_sentence', element).text(game.sentence);
-                $('input[type=submit]', element).click(send);
-            } else {
-                send();
-            }
+            $this.send(query, callback, {onerror: onerror});
+
             return $.Deferred().resolve();
         },
 

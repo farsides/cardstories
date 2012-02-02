@@ -1750,7 +1750,7 @@ test("invitation_display_board", 24, function() {
     notEqual($('.cardstories_player_seat_2 .cardstories_player_status', element).html(), '', 'self status is set');
 });
 
-test("invitation_participate", 5, function() {
+test("invitation_participate", 1, function() {
     var player_id = 15;
     var game_id = 101;
     var card = 1;
@@ -1761,24 +1761,14 @@ test("invitation_participate", 5, function() {
         'sentence': sentence
     };
 
-    $.cardstories.ajax = function(options) {
-        equal(options.url, $.cardstories.url + '?action=participate&player_id=' + player_id + '&game_id=' + game_id);
-    };
-
     $.cardstories.poll_ignore = function(_request) {
         ok(false, 'Poll should NOT be called');
     };
 
-    equal($('#qunit-fixture .cardstories_invitation .cardstories_participate.cardstories_active').length, 0);
+    $.cardstories.ajax = function(options) {
+        equal(options.url, $.cardstories.url + '?action=participate&player_id=' + player_id + '&game_id=' + game_id);
+    };
 
-    $.cardstories.confirm_participate = true;
-    // Invitation_participate should reject the deferred.
-    $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories')).done(function() {
-        equal($('#qunit-fixture .cardstories_invitation .cardstories_participate.cardstories_active').length, 1);
-        equal($('#qunit-fixture .cardstories_participate .cardstories_sentence').text(), sentence);
-        $('#qunit-fixture .cardstories_participate .cardstories_submit').click();
-    });
-    $.cardstories.confirm_participate = false;
     $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
 });
 
@@ -1805,7 +1795,6 @@ asyncTest("invitation_participate game full", 5, function() {
         cb();
     };
 
-    $.cardstories.confirm_participate = false;
     $.cardstories.invitation_participate(player_id, game, root);
 });
 
