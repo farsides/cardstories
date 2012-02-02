@@ -85,7 +85,7 @@ $ PYTHONPATH=.:etc/cardstories twistd --nodaemon cardstories \
 	--plugins-libdir /tmp \
 	--plugins-logdir log/ \
 	--plugins-confdir tests \
-	--plugins 'djangoauth chat activity tables mail' \
+	--plugins 'djangoauth chat activity table mail' \
 	--plugins-pre-process 'djangoauth chat'
 
 On a second terminal window, still from the root of the checkout, run the
