@@ -25,7 +25,7 @@ var cardstories_default_delay = $.cardstories.delay;
 var cardstories_default_ajax = $.cardstories.ajax;
 var cardstories_default_reload = $.cardstories.reload;
 var cardstories_default_animate_sprite = $.cardstories.animate_sprite;
-var cardstories_default_preload_images_helper = $.cardstories.preload_images_helper;
+var cardstories_default_preload_images = $.cardstories.preload_images;
 var cardstories_default_update_player_info_from_ws = $.cardstories.update_player_info_from_ws;
 var cardstories_default_get_player_info_by_id = $.cardstories.get_player_info_by_id;
 
@@ -68,7 +68,7 @@ function setup() {
     $.cardstories.reload = function() { throw 'Please rebind "reload"'; };
     $.cardstories.poll_ignore = function() { throw 'Please rebind "poll_ignore"'; };
     $.cardstories.animate_sprite = function(movie, fps, frames, rewind, cb) { movie.show(); cb(); };
-    $.cardstories.preload_images_helper = function(root, cb) { cb(); };
+    $.cardstories.preload_images = function(root, cb) { cb(); };
     $.cardstories.update_player_info_from_ws = function(player_id) {};
     $.cardstories.get_player_info_by_id = function(player_id) {
         return {'name': 'Player ' + player_id,
@@ -125,12 +125,12 @@ asyncTest("show_warning", 7, function() {
     };
 
     $.cardstories.poll_discard = function(_root) {
-        equal(_root, root, 'poll_discard is called with the root');
+        ok(_root.hasClass('cardstories'), 'poll_discard is called with the root');
     };
     $.cardstories.poll_plugin = function(_player_id, _game_id, _root) {
         equal(_player_id, player_id, 'poll_plugin is called with player_id');
         equal(_game_id, game_id, 'poll_plugin is called with game_id');
-        equal(_root, root, 'poll_plugin is called with root');
+        ok(_root.hasClass('cardstories'), 'poll_plugin is called with root');
     };
 
     $.cardstories.show_warning(modal_selector, player_id, game_id, root, callback);
@@ -202,22 +202,33 @@ test("ajax", 13, function() {
     jQuery.ajax = ajax;
 });
 
-test("reload", 3, function() {
-    var location = $.cardstories.location;
-    var reload_link = $.cardstories.reload_link;
+asyncTest("reload", 6, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var player_id = 15;
+    var game_id = 32;
+    var options = {some: 'options'};
+
     $.cardstories.reload = cardstories_default_reload;
-    $.cardstories.location = {search: ''};
-    $.cardstories.reload_link = function(game_id, root) {
-        equal(game_id, 101);
-        equal(root, 'the root');
-        return '?reload=link&';
+
+    $.cardstories.poll_discard = function(root) {
+        ok(true, 'poll_discard called');
     };
 
-    $.cardstories.reload(101, 'the root');
-    equal($.cardstories.location.search, '?reload=link&');
+    $.cardstories.game = function(_player_id, _game_id, _root) {
+        equal(_player_id, player_id, 'game gets passed player_id');
+        equal(_game_id, game_id, 'game gets passed game_id');
+        ok(_root.hasClass('cardstories'), 'game gets passed the root');
+    };
 
-    $.cardstories.location = location;
-    $.cardstories.reload_link = reload_link;
+    var garbage = '<div id="garbage">I am garbage</div>';
+    root.append(garbage);
+
+    ok($('#garbage', root).length, 'root contains some garbage')
+
+    $.cardstories.reload(player_id, game_id, options, root).done(function() {
+        ok(!$('#garbage', root).length, 'contents of root have been restored from a clean copy');
+        start();
+    });
 });
 
 asyncTest("xhr_error", 5, function() {
@@ -567,7 +578,7 @@ test("widget subscribe", 3, function() {
         ok(false, "Should not call WS to get player info before login");
     };
 
-    $.cardstories.reload=function(){};
+    $.cardstories.reload = function() {};
 
     equal($.cookie('CARDSTORIES_ID'), null);
     equal($('#qunit-fixture .cardstories_subscribe.cardstories_active').length, 0);
@@ -635,7 +646,7 @@ test("send_game on error", 1, function() {
     $.cardstories.send(query);
 });
 
-asyncTest("create", 17, function() {
+asyncTest("create", 19, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_create', root);
     var player_id = 15;
@@ -648,20 +659,20 @@ asyncTest("create", 17, function() {
         equal(options.url, $.cardstories.url + '?action=create&owner_id=' + player_id + '&card=' + card);
         equal(options.data, 'sentence=' + sentence);
 
-        var game = {
-            'game_id': game_id
-        };
+        var game = {game_id: game_id};
         options.success(game);
     };
 
-    $.cardstories.reload = function(game_id2, root2) {
-        equal(game_id2, game_id);
+    $.cardstories.reload = function(_player_id, _game_id, _options, _root) {
+        equal(_player_id, player_id, 'reload gets passes the player_id');
+        equal(_game_id, game_id, 'reload gets passed the game_id');
+        ok(_root.hasClass('cardstories'), 'reload gets passed the root');
         start();
     };
 
     var orig_create_write_sentence = $.cardstories.create_write_sentence;
-    $.cardstories.create_write_sentence = function(player_id, card_value, root) {
-        orig_create_write_sentence.call($.cardstories, player_id, card_value, root);
+    $.cardstories.create_write_sentence = function(player_id, previous_game_id, card_value, root) {
+        orig_create_write_sentence.call($.cardstories, player_id, previous_game_id, card_value, root);
         equal($('.cardstories_write_sentence.cardstories_active', element).length, 1, 'sentence active');
         var sentencel = $('.cardstories_write_sentence .cardstories_sentence', element);
         ok(sentencel.attr('placeholder') !== undefined, 'placeholder is set');
@@ -679,7 +690,7 @@ asyncTest("create", 17, function() {
     };
 
     equal($('.cardstories_pick_card.cardstories_active', element).length, 0, 'pick_card not active');
-    $.cardstories.create(player_id, root, function() {
+    $.cardstories.create(player_id, undefined, root, function() {
         equal($('.cardstories_modal_overlay', element).css('display'), 'block', 'modal overlay is on');
         var a = $('.cardstories_info', element).find('a').click();
         equal($('.cardstories_modal_overlay', element).css('display'), 'none', 'modal overlay is off');
@@ -708,13 +719,13 @@ asyncTest("create on error", 1, function() {
     var element = $('#qunit-fixture .cardstories_create');
 
     var orig_create_write_sentence = $.cardstories.create_write_sentence;
-    $.cardstories.create_write_sentence = function(player_id, card_value, root) {
-        orig_create_write_sentence.call($.cardstories, player_id, card_value, root);
+    $.cardstories.create_write_sentence = function(player_id, previous_game_id, card_value, root) {
+        orig_create_write_sentence.call($.cardstories, player_id, previous_game_id, card_value, root);
         $('.cardstories_write_sentence .cardstories_sentence', element).val('SENTENCE');
         $('.cardstories_write_sentence .cardstories_submit', element).submit();
     };
 
-    $.cardstories.create(player_id, $('#qunit-fixture .cardstories'), function() {
+    $.cardstories.create(player_id, $('#qunit-fixture .cardstories'), undefined, function() {
         var first_card = $('.cardstories_cards_hand .cardstories_card:nth(0)', element);
         first_card.click();
         $('.cardstories_card_confirm_ok', element).find('a').click();
@@ -756,7 +767,7 @@ asyncTest("game", 4, function() {
     $.cardstories.update_players_info = update_players_info_orig;
 });
 
-test("game on game doesn't exist error", 5, function() {
+test("game on game doesn't exist error", 8, function() {
     var player_id = 11;
     var game_id = 111;
     var root = $('#qunit-fixture .cardstories');
@@ -769,12 +780,15 @@ test("game on game doesn't exist error", 5, function() {
         equal(modal_selector, '.cardstories_game_doesnt_exist', 'displays the "game does not exist" dialog');
         equal(_player_id, player_id, 'show_warning gets passed player_id');
         equal(_game_id, game_id, 'show_warning gets passed game_id');
-        equal(_root, root, 'show_warning gets passed the root');
+        ok(_root.hasClass('cardstories'), 'show_warning gets passed the root');
         cb();
     };
 
-    $.cardstories.reload = function(game) {
-        strictEqual(game, undefined, 'reload gets passed undefined for game');
+    $.cardstories.reload = function(_player_id, _game_id, _options, _root) {
+        equal(_player_id, player_id, 'reload gets passed the player_id');
+        strictEqual(_game_id, undefined, 'reload gets passed undefined for game_id');
+        ok(_options.force_create, 'reload is called with the force_create option');
+        ok(_root.hasClass('cardstories'), 'reload gets passed the root');
     };
 
     $.cardstories.game(player_id, game_id, root);
@@ -799,12 +813,12 @@ test("image preloading fires on bootstrap", 2, function() {
     var game_id = 112;
 
     $.cardstories.update_player_info_from_ws = function() {};
-    $.cardstories.preload_images_helper = function(_root, callback) {
-        equal(_root, root);
-        ok(typeof callback === 'function', 'preload_images_helper gets called with a callback');
+    $.cardstories.preload_images = function(_root, callback) {
+        ok(_root.hasClass('cardstories'));
+        ok(typeof callback === 'function', 'preload_images gets called with a callback');
     };
 
-    $.cardstories.bootstrap(player_id, game_id, null, null, root);
+    $.cardstories.bootstrap(player_id, game_id, null, root);
 });
 
 test("automatic game creation", 2, function() {
@@ -831,35 +845,7 @@ test("automatic game creation", 2, function() {
     $.cardstories.bootstrap(player_id, game_id, null, true, root);
 });
 
-test("preload_images_helper", 3, function() {
-    var root = $('#qunit-fixture .cardstories');
-    var preloaded_images_div = $('.cardstories_preloaded_images', root);
-    var cb = function() {
-        ok(false, 'callback should not be called');
-    };
-
-    $.cardstories.preload_images_helper = cardstories_default_preload_images_helper;
-
-    $.cardstories.preload_images = function(_root, _cb) {
-        equal(_root, root, 'preload_images is called with the root');
-        equal(_cb, cb, 'preload_images is called with the callback');
-    };
-    $.cardstories.preload_images_helper(root, cb);
-
-    preloaded_images_div.addClass('cardstories_in_progress');
-    $.cardstories.preload_images = function(root, cb) {
-        ok(false, 'preload images should not be called');
-    };
-    $.cardstories.preload_images_helper(root, cb);
-
-    preloaded_images_div.removeClass('cardstories_in_progress').addClass('cardstories_loaded');
-    cb = function() {
-        ok(true, 'callback is called');
-    };
-    $.cardstories.preload_images_helper(root, cb);
-});
-
-asyncTest("preload_images", 3, function() {
+asyncTest("preload_images", 2, function() {
     var root = $('#qunit-fixture .cardstories');
     var preloaded_images_div = $('.cardstories_preloaded_images', root);
     var progress_bar = $('.cardstories_loading_bar', root);
@@ -875,10 +861,10 @@ asyncTest("preload_images", 3, function() {
     var cb = function() {
         progress_fill.parents().andSelf().show();
         equal(progress_fill.width(), progress_wrapper.width(), 'progress is at 100% width in the end');
-        ok(preloaded_images_div.hasClass('cardstories_loaded'), 'image holder is marked with the cardstories_loaded class');
         start();
     };
 
+    $.cardstories.preload_images = cardstories_default_preload_images;
     $.cardstories.preload_images(root, cb);
 });
 
@@ -1237,7 +1223,7 @@ asyncTest("invitation_owner", 9, function() {
         equal(val, countdown_duration_val);
         equal(_owner_id, owner_id);
         equal(_game_id, game_id);
-        equal(_root, root);
+        ok(_root.hasClass('cardstories'));
     };
     $('.cardstories_countdown_select', element).val(countdown_duration_val).change();
 
@@ -1471,7 +1457,7 @@ asyncTest("invitation_pick picked too late", 7, function() {
     $.cardstories.show_warning = function(modal_selector, _player_id, _game_id, _root, cb) {
         equal(_player_id, player_id, 'show_warning gets passed player_id');
         equal(_game_id, game_id, 'show_warning gets passed game_id');
-        equal(_root, root, 'show_warning gets passed root');
+        ok(_root.hasClass('cardstories'), 'show_warning gets passed the root');
         equal(modal_selector, '.cardstories_picked_too_late', 'shows the picked_too_late warning');
         cb();
     };
@@ -1479,7 +1465,7 @@ asyncTest("invitation_pick picked too late", 7, function() {
     $.cardstories.game = function(_player_id, _game_id, _root) {
         equal(_player_id, player_id, '$.cardstories.game gets passed player_id');
         equal(_game_id, game_id, '$.cardstories.game gets passed game_id');
-        equal(_root, root, '$.cardstories.game gets passed root');
+        ok(_root.hasClass('cardstories'), '$.cardstories.game gets passed root');
         start();
     };
 
@@ -1625,7 +1611,7 @@ asyncTest("invitation_pick_wait_to_vote_voter", 16, function() {
     $.cardstories.vote_voter = function(_player_id, _game, _root) {
         equal(_player_id, player_id, 'vote_voter called with player_id');
         equal(_game, game2, 'vote_voter called with game2');
-        equal(_root, root, 'vote_voter called with root');
+        ok(_root.hasClass('cardstories'), 'vote_voter called with root');
         return $.Deferred().resolve();
     };
 
@@ -1772,7 +1758,7 @@ test("invitation_participate", 1, function() {
     $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
 });
 
-asyncTest("invitation_participate game full", 5, function() {
+asyncTest("invitation_participate game full", 8, function() {
     var player_id = 33;
     var game_id = 44;
     var game = {id: game_id};
@@ -1782,8 +1768,11 @@ asyncTest("invitation_participate game full", 5, function() {
         options.success({error: {code: 'GAME_FULL', data: {game_id: game_id, player_id: player_id, max_players: 6}}});
     };
 
-    $.cardstories.reload = function(game, options) {
-        strictEqual(game, undefined, 'reload is called with undefined');
+    $.cardstories.reload = function(_player_id, _game_id, _options, _root) {
+        equal(_player_id, player_id, 'reload gets passed the player_id');
+        strictEqual(_game_id, undefined, 'reload is called with game_id set to undefined');
+        ok(_options.force_create, 'reload is called with force_create flag');
+        ok(_root.hasClass('cardstories'), 'reload gets passed the root');
         start();
     };
 
@@ -1791,7 +1780,7 @@ asyncTest("invitation_participate game full", 5, function() {
         equal(modal_selector, '.cardstories_game_full', 'the "game is full" dialog is shown');
         equal(_player_id, player_id, 'show_warning gets passed the player_id');
         equal(_game_id, game_id, 'show_warning gets passed the game_id');
-        equal(_root, root, 'show_warning gets passed the root');
+        ok(_root.hasClass('cardstories'), 'show_warning gets passed the root');
         cb();
     };
 
@@ -1916,7 +1905,7 @@ asyncTest("vote_voter vote too late", 8, function() {
     $.cardstories.show_warning = function(modal_selector, _player_id, _game_id, _root, cb) {
         equal(_player_id, player_id, 'show_warning is called with player_id');
         equal(_game_id, game_id, 'show_warning is called with game_id');
-        equal(_root, root, 'show_warning is called with root');
+        ok(_root.hasClass('cardstories'), 'show_warning is called with root');
         equal(modal_selector, '.cardstories_voted_too_late', 'shows the "voted too late" warning');
         cb();
     };
@@ -1931,7 +1920,7 @@ asyncTest("vote_voter vote too late", 8, function() {
     $.cardstories.game = function(_player_id, _game_id, _root) {
         equal(_player_id, player_id, 'game is called with player_id');
         equal(_game_id, game_id, 'game is called with game_id');
-        equal(_root, root, 'game is called with root');
+        ok(_root.hasClass('cardstories'), 'game is called with root');
         start();
     };
 
@@ -2340,7 +2329,7 @@ asyncTest("vote_owner", 16, function() {
         equal(val, countdown_duration_val);
         equal(_owner_id, owner_id);
         equal(_game_id, game_id);
-        equal(_root, root);
+        ok(_root.hasClass('cardstories'));
     };
     $('.cardstories_countdown_select', element).val(countdown_duration_val).change();
 
@@ -2604,7 +2593,7 @@ test("complete player didn't vote", 13, function() {
     $.cardstories_table = undefined;
 });
 
-test("canceled", 2, function() {
+test("canceled", 5, function() {
     var root = $('#qunit-fixture .cardstories');
     var player_id = 113;
     var game = {some: 'GAME'};
@@ -2615,8 +2604,11 @@ test("canceled", 2, function() {
 
     equal(modal.css('display'), 'block', 'the canceled notification is shown');
 
-    $.cardstories.reload = function(_game, _root) {
-        ok(_game === undefined);
+    $.cardstories.reload = function(_player_id, _game_id, _options, _root) {
+        equal(_player_id, player_id, 'reload gets passed the player_id');
+        strictEqual(_game_id, undefined, 'reload is called with game_id undefined');
+        ok(_options.force_create, 'reload is called with the force_create flag');
+        ok(_root.hasClass('cardstories'), 'reload gets passed the root');
     };
 
     // Click on the 'Create new game' link.
@@ -2886,7 +2878,7 @@ test("lobby_games", 18, function() {
     $.cardstories.lobby_games(player_id, games, element, root);
 
     $.cardstories.reload = function(game_id, root) {
-        $.cardstories.game_or_create(player_id, game_id, root);
+        $.cardstories.game_or_create(player_id, game_id, {}, root);
     };
     // list of games
     equal($('.cardstories_games tbody tr:nth(0)', element).css('display'), 'table-row', 'first row is visible');
@@ -2982,7 +2974,7 @@ asyncTest("create_pick_card_animate_fly_to_deck", 23, function() {
     var deck_cards = $('.cardstories_deck .cardstories_card', element);
     var board_cards = $('.cardstories_cards_hand .cardstories_card', element);
 
-    $.cardstories.create_pick_card(player_id, root).done(function() {
+    $.cardstories.create_pick_card(player_id, undefined, root).done(function() {
         var card_index = 3;
         board_cards.eq(card_index + 1).addClass('cardstories_card_selected');
 
@@ -3499,7 +3491,7 @@ test('send_countdown_duration', 8, function() {
     $.cardstories.game = function(_owner_id, _game_id, _root, opts) {
         equal(_owner_id, owner_id);
         equal(_game_id, game_id);
-        equal(_root, root);
+        ok(_root.hasClass('cardstories'));
         ok(opts.async === false);
     };
 

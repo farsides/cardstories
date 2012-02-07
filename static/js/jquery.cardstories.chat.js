@@ -28,16 +28,10 @@
 
         poll: true,
 
-        templates: {'chat': '<div class="cardstories_chat_message"><strong>{player_id}:</strong> {sentence}</div>',
-                    'notification': '<div class="cardstories_chat_message"><a href="{href}"><strong>{player_id}</strong> created the game <strong>"{sentence}"</strong> <span class="cardstories_join_button">Join game</span></a></div>'},
+        templates: {chat: '<div class="cardstories_chat_message"><strong>{player_id}:</strong> {sentence}</div>',
+                    notification: '<div class="cardstories_chat_message"><a href="{href}"><strong>{player_id}</strong> created the game <strong>"{sentence}"</strong> <span class="cardstories_join_button">Join game</span></a></div>'},
 
-        init: function(player_id, game_id, root) {
-
-            // Don't initialize twice.
-            if ($(root).data('cardstories_chat')) {
-                return;
-            }
-
+        load_game: function(player_id, game_id, options, root) {
             var $this = this;
             var display = $('.cardstories_chat_display', root);
             var input = $('.cardstories_chat_input', root);
@@ -85,12 +79,12 @@
         // Receives state data from the server. If there are messages, append
         // them to the display div.
         state: function(player_id, data, root) {
+            var $this = this;
             if (data.messages) {
                 var root_data = $(root).data('cardstories_chat');
                 var play_pop = false;
                 var play_ring = false;
-                for (var i=0; i < data.messages.length; i++) {
-                    var message = data.messages[i];
+                $.each(data.messages, function(_, message) {
                     var player_info = $.cardstories.get_player_info_by_id(message.player_id);
                     var tvars = {};
                     if (message.type == 'chat') {
@@ -99,10 +93,10 @@
                             sentence: message.sentence
                         }
                         play_pop = true;
-                    } else if (message.type == 'notification') {
+                    } else if (message.type === 'notification') {
                         var l = window.location;
                         var href = l.protocol + '//' + l.host + l.pathname;
-                        href += $.cardstories.reload_link(message.game_id, root);
+                        href += $.cardstories.reload_link(message.game_id, {});
                         tvars = {
                             href: href,
                             player_id: player_info.name,
@@ -110,16 +104,21 @@
                         }
                         play_ring = true;
                     }
-                    var div = this.templates[message.type].supplant(tvars);
+                    var div = $this.templates[message.type].supplant(tvars);
+                    div = $(div);
+                    div.find('a').unbind('click').click(function() {
+                        $.cardstories.reload(player_id, message.game_id, {}, root);
+                        return false;
+                    });
                     root_data.display.append(div);
-                }
+                });
                 if (play_pop) {
-                    this.play_sound('pop', root);
+                    $this.play_sound('pop', root);
                 }
                 if (play_ring) {
-                    this.play_sound('ring', root);
+                    $this.play_sound('ring', root);
                 }
-                this.scroll_to_bottom(root);
+                $this.scroll_to_bottom(root);
             }
         },
 
@@ -143,8 +142,7 @@
         }
     };
 
-    $.fn.cardstories_chat = function(player_id, game_id) {
-        $.cardstories_chat.init(player_id, game_id, this);
+    $.fn.cardstories_chat = function(player_id) {
         return this;
     };
 

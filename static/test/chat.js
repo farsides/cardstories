@@ -6,6 +6,9 @@ var cardstories_default_get_player_info_by_id = $.cardstories.get_player_info_by
 function setup() {
     var root = $(selector);
     root.cardstories_chat();
+    var player_id = 1011;
+    var game_id = 149;
+    $.cardstories_chat.load_game(player_id, game_id, {}, root);
     var root_data = root.data('cardstories_chat');
     // Move the initialized ts 5 seconds to the past, so that sounds play.
     root_data.initialized_ts -= 5001;
@@ -13,7 +16,7 @@ function setup() {
     $.cardstories_chat.send = original_send;
     $.cardstories_chat.play_sound = original_play_sound;
     $.cardstories_audio = {play: $.noop};
-    $.cardstories.get_player_info_by_id = function(player_id) { return {'name': "Player " + player_id } };
+    $.cardstories.get_player_info_by_id = function(player_id) { return {name: "Player " + player_id}; };
 }
 
 module("cardstories_chat", {setup: setup});

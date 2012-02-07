@@ -27,20 +27,21 @@
 
         tab_template: '<li class="cardstories_tab"><a class="cardstories_tab_title"></a><a class="cardstories_tab_close"><img src="/static/css/images/tab_close.png" /></a></li>',
 
-        new_game_tab_template: '<li class="cardstories_tab cardstories_new"><a class="cardstories_tab_title"><img src="/static/css/images/tab_new.png" /></a></li>',
+        new_game_tab_template: '<li class="cardstories_new"><a class="cardstories_tab_title" title="Create a new game!"><img src="/static/css/images/tab_new.png" /></a></li>',
 
-        init: function(player_id, current_game_id, root) {
-            // Don't initialize twice.
-            if ($(root).data('cardstories_tabs')) {
-                return;
-            }
-            var element = $('.cardstories_tabs', root);
+        init: function(player_id, game_id, root) {
             // Save data for later use.
             $(root).data('cardstories_tabs', {
-                element: element,
                 tab_states: {},
-                current_game_id: current_game_id
+                element: null,        // These two will be
+                current_game_id: null // popuplated by 'load_game'.
             });
+        },
+
+        load_game: function(player_id, game_id, options, root) {
+            var data = $(root).data('cardstories_tabs');
+            data.current_game_id = game_id;
+            data.element = $('.cardstories_tabs', root);
         },
 
         // When called, the currently rendered tabs are wiped out, and re-rendered from the
@@ -77,10 +78,14 @@
                 if (is_current) {
                     tab.addClass('cardstories_selected');
                     close_btn.click(function() {
-                        $this.remove_current_tab(tab, player_id, current_game_id);
+                        $this.remove_current_tab(tab, player_id, current_game_id, root);
                     });
                 } else {
-                    title.attr('href', $.cardstories.reload_link(game.id));
+                    title.attr('href', $.cardstories.reload_link(game.id, {}));
+                    title.click(function() {
+                        $.cardstories.reload(player_id, game.id, {}, root);
+                        return false;
+                    });
                     close_btn.click(function() {
                         $this.remove_tab(tab, player_id, game.id);
                     });
@@ -95,14 +100,19 @@
 
             // Add the tab to create a new game
             var new_game_tab = $($this.new_game_tab_template);
-            var new_game_link = $.cardstories.reload_link(undefined, {'force_create': true});
-            $('a', new_game_tab).attr('href', new_game_link);
+            var new_game_link = new_game_tab.find('a');
+            var new_game_href = $.cardstories.reload_link(undefined, {force_create: true});
+            new_game_link.attr('href', new_game_href);
+            new_game_link.bind('click', function() {
+                $.cardstories.reload(player_id, undefined, {force_create: true}, root);
+                return false;
+            });
             element.append(new_game_tab);
         },
 
         // Removes the current tab from the page and loads game from one of the other
         // open tabs. If this is the last opened tab, it opens a 'New game' tab instead.
-        remove_current_tab: function(tab, player_id, game_id) {
+        remove_current_tab: function(tab, player_id, game_id, root) {
             // After removing this tab, do one of the following:
             //  - If there are tabs on the right side of this tab,
             //    load the first one on the right.
@@ -112,8 +122,8 @@
             // ID of game to open after closing this tab. game_id of undefined
             // means create a new game.
             var next_game_id;
-            var next_tab = tab.next('.cardstories_tab:not(.cardstories_new)');
-            var prev_tab = tab.prev('.cardstories_tab:not(.cardstories_new)');
+            var next_tab = tab.next('.cardstories_tab');
+            var prev_tab = tab.prev('.cardstories_tab');
             if (next_tab.length) {
                 next_game_id = next_tab.data('game_id');
             } else if (prev_tab.length) {
@@ -121,7 +131,7 @@
             }
 
             this.remove_tab(tab, player_id, game_id, function() {
-                $.cardstories.reload(next_game_id);
+                $.cardstories.reload(player_id, next_game_id, {force_create: !next_game_id}, root);
             });
         },
 
@@ -191,8 +201,8 @@
         }
     };
 
-    $.fn.cardstories_tabs = function(player_id, game_id) {
-        $.cardstories_tabs.init(player_id, game_id, this);
+    $.fn.cardstories_tabs = function(player_id) {
+        $.cardstories_tabs.init(player_id, null, this);
         return this;
     };
 

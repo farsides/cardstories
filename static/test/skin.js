@@ -75,9 +75,9 @@
         } else if (skin === 'finished') {
             $.cardstories.lobby_finished(1, lobby, root);
         } else if (skin === 'create_pick_card') {
-            $.cardstories.create_pick_card(0, root);
+            $.cardstories.create_pick_card(0, undefined, root);
         } else if (skin === 'create_write_sentence') {
-            $.cardstories.create_write_sentence(0, 5, root);
+            $.cardstories.create_write_sentence(0, 5, undefined, root);
         } else if (skin === 'invitation_owner') {
             game = {
                 'id': 100,

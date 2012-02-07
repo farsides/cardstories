@@ -44,6 +44,11 @@
             }
         },
 
+        load_game: function(player_id, game_id, options, root) {
+            // Table data storage
+            this.init_game2table(game_id, root);
+        },
+
         // Keep tables referenced by game_id on the root, to allow to store
         // table state between state() poll updates
         init_game2table: function(game_id, root) {
@@ -59,7 +64,7 @@
                                     next_owner_id: null,
                                     ready_for_next_game: false,
                                     reset_callback: null};
-            $(root).data('cardstories_table', { 'game2table': game2table });
+            $(root).data('cardstories_table', {game2table: game2table});
         },
 
         // Retreive table data
@@ -108,7 +113,7 @@
             var game_id = data.game_id;
             var table = $this.get_table_from_game_id(game_id, root);
             var reset_needed = false;
-            
+
             // Check if we need to warn about a owner change
             if(table.next_owner_id && table.next_owner_id !== data.next_owner_id) {
                 reset_needed = true;
@@ -133,17 +138,17 @@
             if(table.ready_for_next_game) {
                 // Next game is ready to be joined
                 if(table.next_game_id && table.next_game_id !== game_id) {
-                    $.cardstories.reload(table.next_game_id);
+                    $.cardstories.reload(player_id, table.next_game_id, {}, root);
                     return true;
                 }
-            
+
                 // It's the player's turn to create a game
                 else if(player_id === table.next_owner_id) {
-                    var options = { 'force_create': true };
+                    var options = {force_create: true};
                     if(game_id) {
                         options.previous_game_id = game_id;
                     }
-                    $.cardstories.reload(undefined, options);
+                    $.cardstories.reload(player_id, undefined, options, root);
                     return true;
                 }
             }
