@@ -4324,7 +4324,7 @@
             root = $(root);
             root.addClass('cardstories_root');
             root.data('polling', false);
-            root.data('dom_clone', root.children().html());
+            root.data('dom_clone', root.html());
 
             if (!player_id) {
                 player_id = parseInt($.cookie('CARDSTORIES_ID'), 10);
