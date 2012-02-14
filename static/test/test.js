@@ -807,6 +807,15 @@ test("game on generic error", 1, function() {
     $.cardstories.game(11, 111, 'the root');
 });
 
+test("player's id from cookie gets parsed as integer", 1, function() {
+    var root = $('#qunit-fixture .cardstories');
+    $.cookie('CARDSTORIES_ID', 13);
+    $.cardstories.load_game = function(player_id, game_id, options, root) {
+        strictEqual(player_id, 13, 'player id is an integer');
+    };
+    $.cardstories.bootstrap(null, null, null, root);
+});
+
 test("image preloading fires on bootstrap", 2, function() {
     var root = $('#qunit-fixture .cardstories');
     var player_id = 1;

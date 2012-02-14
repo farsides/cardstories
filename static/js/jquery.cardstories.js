@@ -3720,7 +3720,7 @@
 
             // Show who is going to create the next game
             var next_owner_id = $.cardstories_table.get_next_owner_id(player_id, game.id, root);
-            if(next_owner_id === player_id) {
+            if (next_owner_id == player_id) {
                 $('.cardstories_next_game_author', element).css('display', 'block');
             } else {
                 var next_owner_info = $this.get_player_info_by_id(next_owner_id);
@@ -4327,7 +4327,7 @@
             root.data('dom_clone', root.children().html());
 
             if (!player_id) {
-                player_id = $.cookie('CARDSTORIES_ID');
+                player_id = parseInt($.cookie('CARDSTORIES_ID'), 10);
             }
 
             // Bootstrap plugins.
