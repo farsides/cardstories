@@ -127,6 +127,12 @@ static/css/contactable:
  Dual licensed under the MIT (http://www.opensource.org/licenses/mit-license.php) 
  and GPL (http://www.opensource.org/licenses/gpl-license.php) licenses.
 
+static/js/jquery.history:
+
+ Copyright (c) 2011, Benjamin Arthur Lupton
+ Licensed under the New BSD License
+  http://opensource.org/licenses/BSD-3-Clause
+
 static/js/jquery.validate:
 
  Copyright (c) 2006 - 2008 JÃ¶rn Zaefferer
@@ -147,7 +153,7 @@ static/audio/pop.mp3:
    http://creativecommons.org/licenses/by/3.0/
 
 static/audio/join.mp3:
- 
+
  Copyright (c) 2012 McKinney Sound
  Licensed under the Creative Commons CC-BY 3.0
    http://creativecommons.org/licenses/by/3.0/

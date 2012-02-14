@@ -37,6 +37,8 @@
 
         window: window,
 
+        history: window.History,
+
         location: location,
 
         plugins: {},
@@ -133,8 +135,10 @@
             return jQuery.ajax(request);
         },
 
-        // Loads another game without reloading the browser.
-        reload: function(player_id, game_id, options, root) {
+        // Event handler for History.js' statechange event, which is basically the same
+        // as HTML5 popstate event. It is fired when calling history.pushState(), or when
+        // the user clicks the back/forward buttons.
+        onstatechange: function(root) {
             root = $(root);
             // Discard any running poll.
             this.poll_discard(root);
@@ -143,12 +147,21 @@
             root.empty();
             root.append(dom_clone);
             // Re-init cardstories.
-            var deferred = this.load_game(player_id, game_id, options, root);
+            var data = this.history.getState().data;
+            var deferred = this.load_game(data.player_id, data.game_id, data.options, root);
             return deferred;
         },
 
+        // Loads another game without reloading the browser.
+        reload: function(player_id, game_id, options, root) {
+            var reload_link = this.reload_link(game_id, options);
+            var data = {player_id: player_id, game_id: game_id, options: options};
+            // Will fire the 'statechange' event, which will be handled by our 'onstatechange'
+            // handler above, which will load the game.
+            this.history.pushState(data, null, reload_link);
+        },
+
         reload_link: function(game_id, options) {
-            var $this = this;
             var params = {};
 
             // Options
@@ -4325,6 +4338,10 @@
             root.addClass('cardstories_root');
             root.data('polling', false);
             root.data('dom_clone', root.html());
+
+            $($this.window).bind('statechange', function() {
+                $this.onstatechange(root);
+            });
 
             if (!player_id) {
                 player_id = parseInt($.cookie('CARDSTORIES_ID'), 10);

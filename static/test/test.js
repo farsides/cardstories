@@ -61,6 +61,14 @@ function setup() {
     }
     deleteCookie('CARDSTORIES_ID');
     deleteCookie('CARDSTORIES_INVITATIONS');
+
+    // Mock out History.js.
+    var mock_history = {
+        pushState: function() { throw 'Please rebind "pushState"'; },
+        getState: function() { throw 'Please rebind "getState"'; }
+    };
+    $.cardstories.history = mock_history;
+
     // Stub out some functions.
     $.cardstories.setTimeout = function(cb, delay) { return window.setTimeout(cb, 0); };
     $.cardstories.delay = function(o, delay, qname) { return; };
@@ -202,13 +210,30 @@ test("ajax", 13, function() {
     jQuery.ajax = ajax;
 });
 
-asyncTest("reload", 6, function() {
+asyncTest("reload", 4, function() {
     var root = $('#qunit-fixture .cardstories');
     var player_id = 15;
     var game_id = 32;
-    var options = {some: 'options'};
+    var reload_link = '?the&link';
+    var options = 'OPTIONS';
+
+    $.cardstories.reload_link = function() { return reload_link; };
+    $.cardstories.history.pushState = function(state, title, url) {
+        equal(state.game_id, game_id, 'pushState gets passed the game_id');
+        equal(state.player_id, player_id, 'pushState gets passed the player_id');
+        equal(state.options, options, 'pushState gets passed the options');
+        equal(url, reload_link, 'pushState gets passed the relad_link');
+        start();
+    };
 
     $.cardstories.reload = cardstories_default_reload;
+    $.cardstories.reload(player_id, game_id, options, root);
+});
+
+asyncTest("onstatechange", 6, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var player_id = 15;
+    var game_id = 32;
 
     $.cardstories.poll_discard = function(root) {
         ok(true, 'poll_discard called');
@@ -220,12 +245,20 @@ asyncTest("reload", 6, function() {
         ok(_root.hasClass('cardstories'), 'game gets passed the root');
     };
 
+    $.cardstories.history.getState = function() {
+        return {data: {
+            game_id: game_id,
+            player_id: player_id,
+            options: {}
+        }};
+    };
+
     var garbage = '<div id="garbage">I am garbage</div>';
     root.append(garbage);
 
-    ok($('#garbage', root).length, 'root contains some garbage')
+    ok($('#garbage', root).length, 'root contains some garbage');
 
-    $.cardstories.reload(player_id, game_id, options, root).done(function() {
+    $.cardstories.onstatechange(root).done(function() {
         ok(!$('#garbage', root).length, 'contents of root have been restored from a clean copy');
         start();
     });
