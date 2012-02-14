@@ -114,7 +114,10 @@
             // See: http://tickets.farsides.com/issues/821
             // TODO: Remove when Chrome bug is fixed and this isn't needed anymore.
             if (window.chrome) {
-                $('.cardstories_deck', root).hide().show();
+                var deck = $('.cardstories_deck', root);
+                var cards = $('.cardstories_deck_cards', deck);
+                deck.css('background-image', deck.css('background-image'));
+                cards.css('background-image', cards.css('background-image'));
             }
         },
 
