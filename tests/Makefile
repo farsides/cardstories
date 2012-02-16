@@ -23,6 +23,7 @@ all:
 
 check:
 	${COVERAGE} -e
+	PYTHONPATH=.. ${COVERAGE} -x test_helpers.py
 	PYTHONPATH=.. ${COVERAGE} -x test_service.py
 	PYTHONPATH=.. ${COVERAGE} -x test_site.py
 	PYTHONPATH=.. ${COVERAGE} -x test_tap.py

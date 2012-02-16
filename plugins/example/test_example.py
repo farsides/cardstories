@@ -144,7 +144,7 @@ class ExampleTest(unittest.TestCase):
         yield self.complete_game(lambda action, args: getattr(self.service, action)(args))
         yield self.service.stopService()
         self.assertEqual(self.events, ['START',
-                                       'CHANGE init',
+                                       'CHANGE create',
                                        'CHANGE invite',
                                        'CHANGE participate',
                                        'CHANGE pick',
@@ -155,6 +155,22 @@ class ExampleTest(unittest.TestCase):
                                        'CHANGE vote',
                                        'CHANGE complete',
                                        'DELETE',
+                                       'STOP'])
+
+        # 'load' event
+        self.events = []
+        self.service.listen().addCallback(accept)
+        self.service.startService()
+        game = yield send('create', { 'card': [1],
+                                   'sentence': ['SENTENCE'],
+                                   'owner_id': [2]})
+        yield self.service.stopService()
+        self.service.startService()
+        self.assertEqual(self.events, ['START',
+                                       'CHANGE create',
+                                       'STOP',
+                                       'START',
+                                       'CHANGE load',
                                        'STOP'])
 
     def test02_transparent_transform(self):

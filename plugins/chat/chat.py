@@ -75,7 +75,7 @@ class Plugin(Pollable):
         d = defer.succeed(True)
         if changes != None and changes['type'] == 'change':
             details = changes['details']
-            if details['type'] == 'init':
+            if details['type'] == 'create' or details['type'] == 'load':
                 d = self.init(changes['game'], details)
         self.service.listen().addCallback(self.self_notify)
         return d

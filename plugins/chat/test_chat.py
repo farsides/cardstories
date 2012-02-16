@@ -314,7 +314,7 @@ class ChatTest(unittest.TestCase):
             owner_id = 303
         unicode_sentence = u"我不明白 šal čez želodec"
         changes = {'type': 'change',
-                   'details': {'type': 'init',
+                   'details': {'type': 'load',
                                'sentence': [unicode_sentence]},
                    'game': FakeGame()}
         result = yield chat_instance.self_notify(changes)
