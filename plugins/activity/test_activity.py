@@ -131,6 +131,8 @@ class ActivityTest(unittest.TestCase):
         self.activity_instance.on_chat_notification({'type': 'poll_end', 'player_id': player_id})
         self.assertEqual(on_event_mock.call_count, 0)
         self.activity_reactor.call_now()
+        # Second call should not have any effect (several delayed call can happen concurrently)
+        self.activity_reactor.call_now()
 
         on_event_mock.assert_called_once_with({'type': 'player_disconnecting', 'player_id': player_id})
         yield self.check_online_players({})
