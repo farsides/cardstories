@@ -72,13 +72,7 @@ class ActivityTest(unittest.TestCase):
         self.activity_reactor = FakeReactor()
         activity.reactor = self.activity_reactor
 
-        # Fake a chat plugin on which the activity plugin should listen to
-        self.mock_chat_instance = Mock()
-        self.mock_chat_instance.name.return_value = 'chat'
-        self.activity_instance = activity.Plugin(self.service, [self.mock_chat_instance])
-
-        self.mock_chat_instance.listen.assert_called_once_with()
-        self.mock_chat_instance.reset_mock()
+        self.activity_instance = activity.Plugin(self.service, [])
 
     def tearDown(self):
         activity.reactor = self.default_reactor
@@ -109,7 +103,7 @@ class ActivityTest(unittest.TestCase):
         # Player going online
         on_event_mock = Mock()
         self.activity_instance.listen().addCallback(on_event_mock)
-        self.activity_instance.on_chat_notification({'type': 'poll_start', 'player_id': player_id})
+        self.activity_instance.on_service_notification({'type': 'poll_start', 'player_id': player_id})
 
         on_event_mock.assert_called_once_with({'type': 'player_connecting', 'player_id': player_id})
         on_event_mock.reset_mock()
@@ -118,18 +112,20 @@ class ActivityTest(unittest.TestCase):
         yield self.check_online_players({player_id: {'active_polls': 1} })
 
         # Player dropping poll
-        self.activity_instance.on_chat_notification({'type': 'poll_end', 'player_id': player_id})
+        self.activity_instance.on_service_notification({'type': 'poll_end', 'player_id': player_id})
         self.assertEqual(on_event_mock.call_count, 0)
         yield self.check_online_players({player_id: {'active_polls': 0} })
 
         # Player starting another poll quickly enough
-        self.activity_instance.on_chat_notification({'type': 'poll_start', 'player_id': player_id})
+        self.activity_instance.on_service_notification({'type': 'poll_start', 'player_id': player_id})
         self.assertEqual(on_event_mock.call_count, 0)
         yield self.check_online_players({player_id: {'active_polls': 1} })
 
         # Player dropping poll again, this time for good (going offline)
-        self.activity_instance.on_chat_notification({'type': 'poll_end', 'player_id': player_id})
+        self.activity_instance.on_service_notification({'type': 'poll_end', 'player_id': player_id})
         self.assertEqual(on_event_mock.call_count, 0)
+        self.activity_reactor.call_now()
+        # Second call should not have any effect (several delayed call can happen concurrently)
         self.activity_reactor.call_now()
 
         on_event_mock.assert_called_once_with({'type': 'player_disconnecting', 'player_id': player_id})

@@ -37,14 +37,12 @@ from cardstories.helpers import Observable
 # How long we retain old messages for in milliseconds
 MESSAGE_EXPIRE_TIME = 3600000
 
-class Plugin(Pollable, Observable):
+class Plugin(Pollable):
     """
     The chat plugin implements the backend for the in-game chat system.
     
     """
     def __init__(self, service, plugins):
-        self.observers = []
-
         # Register a function to listen to the game events. 
         self.service = service
         self.service.listen().addCallback(self.self_notify)
@@ -195,24 +193,5 @@ class Plugin(Pollable, Observable):
 
         return defer.succeed([{"messages": messages},
                               players_id_list])
-
-    def poll(self, args):
-        """
-        Keep track of players who start and end chat polls
-        """
-
-        d = Pollable.poll(self, args)
-
-        player_id = args['player_id'][0]
-        self.notify({'type': 'poll_start',
-                     'player_id': player_id})
-
-        def on_poll_end(return_value):
-            self.notify({'type': 'poll_end',
-                         'player_id': player_id})
-            return return_value
-        d.addCallbacks(on_poll_end, on_poll_end)
-
-        return d
 
 

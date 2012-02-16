@@ -1068,6 +1068,31 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         # Assert modified is numeric; concrete type depends on architecture/implementation.
         self.assertTrue(isinstance(result['modified'][0], (int, long)))
 
+    def test15_poll_notification(self):
+        args = { 'type': ['tabs'],
+                 'action': ['poll'],
+                 'player_id': [13],
+                 'game_id': [20],
+                 'modified': [10000000000000000] }
+
+        # Fake poll controlled from the test
+        poll = defer.Deferred()
+        mock_poll_tabs = Mock()
+        mock_poll_tabs.return_value = poll
+        orig_service_poll_tabs = self.service.poll_tabs
+        self.service.poll_tabs = mock_poll_tabs
+
+        mock_listener = Mock()
+        self.service.listen().addCallback(mock_listener)
+        self.service.poll(args)
+        mock_listener.assert_called_once_with({'player_id': 13, 'type': 'poll_start'})
+
+        mock_listener.reset_mock()
+        self.service.listen().addCallback(mock_listener)
+        poll.callback(args)
+        mock_listener.assert_called_once_with({'player_id': 13, 'type': 'poll_end'})
+
+        self.service.poll_tabs = orig_service_poll_tabs
 
 class CardstoriesConnectorTest(CardstoriesServiceTestBase):
 

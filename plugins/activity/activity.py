@@ -43,13 +43,7 @@ class Plugin(Pollable, Observable):
         self.observers = []
         self.online_players = {}
 
-        # Depends on the chat plugin (monitors active polls on the chat)
-        for plugin in plugins:
-            if plugin.name() == 'chat':
-                self.chat_plugin = plugin
-        assert self.chat_plugin
-
-        self.chat_plugin.listen().addCallback(self.on_chat_notification)
+        self.service.listen().addCallback(self.on_service_notification)
 
         # Implement the path conventions
         self.confdir = os.path.join(self.service.settings['plugins-confdir'], self.name())
@@ -65,25 +59,25 @@ class Plugin(Pollable, Observable):
         """
         return 'activity'
 
-    def on_chat_notification(self, changes):
+    def on_service_notification(self, changes):
         """
-        Listen to chat notifications to know when polls are started/ended
+        Listen to service notifications to know when polls are started/ended
         """
 
         d = defer.succeed(True)
 
         if changes != None and changes['type'] == 'poll_start':
-            self.on_chat_poll_start(int(changes['player_id']))
+            self.on_any_poll_start(int(changes['player_id']))
 
         if changes != None and changes['type'] == 'poll_end':
-            self.on_chat_poll_end(int(changes['player_id']))
+            self.on_any_poll_end(int(changes['player_id']))
 
-        self.chat_plugin.listen().addCallback(self.on_chat_notification)
+        self.service.listen().addCallback(self.on_service_notification)
         return d
 
-    def on_chat_poll_start(self, player_id):
+    def on_any_poll_start(self, player_id):
         """
-        Called when a new chat poll is initiated by a player.
+        Called when a new poll is initiated by a player.
         Mark the player as being online.
         """
 
@@ -96,9 +90,9 @@ class Plugin(Pollable, Observable):
             self.online_players[player_id]['active_polls'] += 1
 
 
-    def on_chat_poll_end(self, player_id):
+    def on_any_poll_end(self, player_id):
         """
-        Called when a chat poll is dropped. 
+        Called when a poll is dropped. 
         Mark the player as being offline if he doesn't have another active poll 
         and doesn't start a new one quickly after (need to give time to reconnect)
         """

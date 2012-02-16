@@ -85,6 +85,47 @@ test("init_find_game", 4, function() {
     equal(game2table[0].ready_for_next_game, true);
 });
 
+test("init_find_game_as_author_already_created", 5, function() {
+    var root = $(selector);
+    var player_id = 1;
+    var game_id = 15;
+
+    $.query.get = function(param_name) {
+        if(param_name == 'create') { return false; };
+    };
+    $.cardstories.ajax = function(options) {
+        // Should request a game to join
+        var query = {
+                action: 'state',
+                type: 'table',
+                modified: 0,
+                game_id: undefined,
+                player_id: player_id,
+        }
+
+        equal(options.url, $.cardstories.url + '?' + $.param(query, true));
+
+        // Author of a game joins again after having created the game
+        var data = {type: 'table',
+                    player_id: player_id,
+                    game_id: null,
+                    next_game_id: game_id,
+                    next_owner_id: player_id};
+        options.success(data);
+    };
+    // Should be redirected to the game he created (and not to game creation)
+    $.cardstories.reload = function(_player_id, _game_id, _options, _root) {
+        equal(_player_id, player_id);
+        equal(_game_id, game_id);
+    };
+
+    root.cardstories_table(player_id, undefined, root);
+
+    var game2table = root.data('cardstories_table').game2table;
+    equal(get_keys(game2table).length, 1);
+    equal(game2table[0].ready_for_next_game, true);
+});
+
 // Init the table plugin without triggering reload
 init_table = function(player_id, game_id, root) {
     $.query.get = function(param_name) {
