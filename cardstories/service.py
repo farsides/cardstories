@@ -196,16 +196,16 @@ class CardstoriesService(service.Service, Observable):
             "CREATE UNIQUE INDEX tabs_idx ON tabs (player_id, game_id); "
             )
         c.execute(
-            "CREATE TABLE players ( " 
+            "CREATE TABLE players ( "
             "  id INTEGER PRIMARY KEY, "
-            "  score BIGINTEGER, " 
-            "  levelups INTEGER " 
+            "  score BIGINTEGER, "
+            "  levelups INTEGER "
             "); ")
         c.execute(
-            "CREATE TABLE player_cards ( " 
+            "CREATE TABLE player_cards ( "
             "  id INTEGER PRIMARY KEY, "
-            "  player_id INTEGER, " 
-            "  card INTEGER, " 
+            "  player_id INTEGER, "
+            "  card INTEGER, "
             "  UNIQUE (\"player_id\", \"card\") "
             "); ")
 
@@ -245,8 +245,25 @@ class CardstoriesService(service.Service, Observable):
         for plugin in self.pollable_plugins:
             if plugin.name() in args['type']:
                 deferreds.append(plugin.poll(args))
+
         d = defer.DeferredList(deferreds, fireOnOneCallback=True)
         d.addCallback(lambda x: x[0])
+
+        # Allow listeners to monitor when polls are started or ended
+        if deferreds:
+            if 'player_id' in args:
+                player_id = args['player_id'][0]
+            else:
+                player_id = None
+            self.notify({'type': 'poll_start',
+                         'player_id': player_id})
+
+            def on_poll_end(return_value):
+                self.notify({'type': 'poll_end',
+                             'player_id': player_id})
+                return return_value
+            d.addCallback(on_poll_end)
+
         return d
 
     def poll_tabs(self, args):

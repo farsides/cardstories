@@ -354,21 +354,6 @@ class ChatTest(unittest.TestCase):
         self.assertEquals(state['messages'][0]['player_id'], player_id)
         self.assertEquals(state['messages'][0]['sentence'], 'For searching the web I use <a target="_blank" href="http://google.com">google.com</a>, it\'s great!')
 
-    def test12_poll(self):
-        chat_instance = Plugin(self.service, [])
-        args = { 'player_id': [13],
-                 'modified': [10000000000000000] }
-        mock = Mock()
-
-        chat_instance.listen().addCallback(mock)
-        poll = chat_instance.poll(args)
-        mock.assert_called_once_with({'player_id': 13, 'type': 'poll_start'})
-
-        mock.reset_mock()
-        chat_instance.listen().addCallback(mock)
-        poll.callback(args)
-        mock.assert_called_once_with({'player_id': 13, 'type': 'poll_end'})
-
 
 def Run():
     loader = runner.TestLoader()
