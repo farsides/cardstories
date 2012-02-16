@@ -33,29 +33,6 @@ class UserProfile(models.Model):
     # Facebook user id.
     facebook_id = models.BigIntegerField(null=True, blank=True)
 
-    # Player score
-    score = models.BigIntegerField(null=True, blank=True)
-
-    # Number of times a player leveled up.
-    levelups = models.IntegerField(null=True, blank=True)
-
-
-class UserCard(models.Model):
-    """
-    Card a user can earn when leveling up.
-
-    """
-
-    # The user the card belongs to.
-    user = models.ForeignKey(User)
-
-    # The card earned by the user.
-    card = models.IntegerField()
-
-    class Meta:
-        # A user cannot have the same card twice.
-        unique_together = (("user", "card"),)
-
 
 def create_user_profile(sender, instance, created, **kwargs):
     """
