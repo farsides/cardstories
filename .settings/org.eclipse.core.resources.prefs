@@ -1,4 +1,4 @@
-#Wed Feb 01 15:15:53 WET 2012
+#Thu Feb 16 15:38:09 EST 2012
 eclipse.preferences.version=1
 encoding//bin/cardstories_tracebacks.py=utf-8
 encoding//cardstories/auth.py=utf-8
@@ -29,4 +29,5 @@ encoding//plugins/mail/test_mail.py=utf-8
 encoding//plugins/table/table.py=utf-8
 encoding//plugins/table/test_table.py=utf-8
 encoding//tests/test_auth.py=utf-8
+encoding//tests/test_helpers.py=utf-8
 encoding//tests/test_service.py=utf-8

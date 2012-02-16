@@ -29,7 +29,35 @@ from cardstories.exceptions import CardstoriesException
 
 # Classes ####################################################################
 
-class Observable(object):
+class Lockable(object):
+    """
+    Allow the object to check that some portions of its code are not executed
+    concurrently.
+    """
+
+    def lock(self, lock_type='default'):
+        """
+        Tries to acquire a lock, optionally of a specific type.
+        If a lock is already in place, the lock fails
+        """
+
+        if not hasattr(self, 'notify_running'):
+            self.notify_running = []
+
+        if lock_type in self.notify_running:
+            raise CardstoriesException, 'Lock failed - type %s already in use' % lock_type
+
+        self.notify_running.append(lock_type)
+
+    def unlock(self, lock_type='default'):
+        """
+        Remove the lock of the specified type
+        """
+
+        self.notify_running.remove(lock_type)
+
+
+class Observable(Lockable):
 
     def listen(self):
         d = defer.Deferred()
@@ -37,9 +65,10 @@ class Observable(object):
         return d
 
     def notify(self, result):
-        if hasattr(self, 'notify_running'):
-            raise CardstoriesException, 'recursive call to notify'
-        self.notify_running = True
+        # Only allow one type of notification to be
+        # called at a time, to prevent recursive calls
+        self.lock(result['type'])
+
         observers = self.observers
         self.observers = []
         def error(reason):
@@ -49,6 +78,7 @@ class Observable(object):
         for listener in observers:
             listener.addErrback(error)
             listener.callback(result)
-        del self.notify_running
+
+        self.unlock(result['type'])
         return d
 
