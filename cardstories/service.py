@@ -215,10 +215,10 @@ class CardstoriesService(service.Service, Observable):
             game = CardstoriesGame(self, id)
             game.load(c)
 
-            # Notify listeners of the game, but also inform them that this is done
-            # during startup, for example to allow plugins to ignore such "reloaded" games
+            # Notify listeners of the game, but use the 'load' notification to signal
+            # that the game is being loaded, not created
             # Note that the db is not accessible during that stage
-            self.game_init(game, sentence, server_starting=True)
+            self.game_init(game, sentence, init_type='load')
 
     def poll(self, args):
         self.required(args, 'poll', 'type', 'modified')
@@ -483,15 +483,14 @@ class CardstoriesService(service.Service, Observable):
         defer.returnValue(True)
 
     @defer.inlineCallbacks
-    def game_init(self, game, sentence, previous_game_id=None, server_starting=False):
+    def game_init(self, game, sentence, init_type='create', previous_game_id=None):
         self.games[game.get_id()] = game
         args = {
-            'type': 'init',
+            'type': init_type,
             'modified': [0],
             'game_id': [game.get_id()],
             'sentence': [sentence],
-            'previous_game_id': previous_game_id,
-            'server_starting': server_starting}
+            'previous_game_id': previous_game_id}
 
         args = yield game.wait(args)
         yield self.game_notify(args, game.get_id())

@@ -46,7 +46,7 @@ class CardstoriesServiceTestNotify(unittest.TestCase):
             service.checked = True
             return result
         d.addCallback(check)
-        service.notify(True)
+        service.notify({'type': 'test'})
         self.assertTrue(service.checked)
 
     def test01_notify_recursive(self):
@@ -54,13 +54,13 @@ class CardstoriesServiceTestNotify(unittest.TestCase):
         d = service.listen()
         def recurse(result):
             try:
-                service.notify(False)
+                service.notify({'type': 'test-lock-fail'})
             except CardstoriesException, e:
-                self.failUnlessSubstring('recurs', e.args[0])
+                self.failUnlessSubstring('test-lock-fail', e.args[0])
                 service.recursed = True
             return result
         d.addCallback(recurse)
-        service.notify(True)
+        service.notify({'type': 'test-lock-fail'})
         self.assertTrue(service.recursed)
 
     def test02_notify_ignore_exception(self):
@@ -70,7 +70,7 @@ class CardstoriesServiceTestNotify(unittest.TestCase):
             service.raised = True
             raise CardstoriesException, 'raise exception'
         d.addCallback(fail)
-        service.notify(True)
+        service.notify({'type': 'test'})
         self.assertTrue(service.raised)
 
 class CardstoriesServiceTestInit(unittest.TestCase):
@@ -175,9 +175,8 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         owner_id = 15
         self.inited = False
         def accept(event):
-            self.assertEquals(event['details']['type'], 'init')
+            self.assertEquals(event['details']['type'], 'create')
             self.assertEquals(event['details']['previous_game_id'], None)
-            self.assertEquals(event['details']['server_starting'], False)
             self.inited = True
         self.service.listen().addCallback(accept)
         result = yield self.service.create({ 'card': [card],
@@ -202,7 +201,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         self.inited = False
         previous_game_id = 30
         def accept(event):
-            self.assertEquals(event['details']['type'], 'init')
+            self.assertEquals(event['details']['type'], 'create')
             self.assertEquals(event['details']['previous_game_id'], previous_game_id)
             self.inited = True
         self.service.listen().addCallback(accept)
@@ -213,11 +212,11 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         self.assertTrue(self.inited, 'init event called')
 
     @defer.inlineCallbacks
-    def test01_create_notify_server_starting(self):
+    def test01_load_notify(self):
         card = 5
         str_sentence = 'SENTENCE'
         owner_id = 15
-        self.inited = False
+        self.loaded = False
         result = yield self.service.create({ 'card': [card],
                                              'sentence': [str_sentence],
                                              'owner_id': [owner_id]})
@@ -225,14 +224,13 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         service2 = CardstoriesService({'db': self.database})
 
         def accept(event):
-            self.assertEquals(event['details']['type'], 'init')
-            self.assertEquals(event['details']['server_starting'], True)
-            self.inited = True
+            self.assertEquals(event['details']['type'], 'load')
+            self.loaded = True
         service2.listen().addCallback(accept)
 
         service2.startService()
         service2.stopService()
-        self.assertTrue(self.inited, 'init event called')
+        self.assertTrue(self.loaded, 'load event called')
 
     def test02_game_method(self):
         game_id = 100

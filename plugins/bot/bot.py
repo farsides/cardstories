@@ -98,7 +98,7 @@ class Plugin(CardstoriesServiceConnector):
         d = defer.succeed(True)
         if changes != None and changes['type'] == 'change':
             details = changes['details']
-            if details['type'] == 'init':
+            if details['type'] == 'create':
                 d = self.creating(changes['game'])
             elif details['type'] == 'voting':
                 d = self.voting(changes['game'])

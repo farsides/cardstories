@@ -211,7 +211,13 @@ class Plugin(Pollable):
             # Received once, when the game is created and before
             # any player is connected to it.
             #
-            if details['type'] == 'init':
+            if details['type'] == 'create':
+                pass
+            # 
+            # Received once, when the game is loaded during server
+            # startup
+            #
+            if details['type'] == 'load':
                 pass
             #
             # Received each time the author invites players.

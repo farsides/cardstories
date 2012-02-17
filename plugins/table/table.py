@@ -87,7 +87,7 @@ class Plugin(Pollable, CardstoriesServiceConnector):
 
         if changes != None and changes['type'] == 'change':
             details = changes['details']
-            if details['type'] == 'init':
+            if details['type'] == 'create':
                 d = self.on_new_game(changes['game'], details)
 
         self.service.listen().addCallback(self.on_service_notification)
@@ -105,14 +105,6 @@ class Plugin(Pollable, CardstoriesServiceConnector):
 
         previous_game_id = None
         previous_game = None
-
-        # Let the clients looking for an available table know about this game,
-        # but don't interfere if the clients already got one to join
-        # (Also don't try to check table availability during startup as db is not yet available)
-        if not details['server_starting']:
-            touch_polls = yield not self.get_available_table()
-        else:
-            touch_polls = False
 
         if 'previous_game_id' in details \
                 and details['previous_game_id'] \
@@ -136,6 +128,9 @@ class Plugin(Pollable, CardstoriesServiceConnector):
         self.game2table[game.id] = table
         table.register_new_game(game)
 
+        # Let the clients looking for an available table know about this game,
+        # but don't interfere if the clients already got one to join
+        touch_polls = yield not self.get_available_table()
         if touch_polls:
             self.touch({})
 
