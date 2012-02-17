@@ -44,16 +44,6 @@ cardstories javascript client license:
 
     /usr/share/common-licenses/GPL-3
 
-static/tablesorter:
-
- Copyright (c) 2007 Christian Bach
-
-License:
-
- * Dual licensed under the MIT and GPL licenses:
- * http://www.opensource.org/licenses/mit-license.php
- * http://www.gnu.org/licenses/gpl.html
-
 static/js/jquery.cookie.js:
 
  Copyright (c) 2006 Klaus Hartl (stilbuero.de)

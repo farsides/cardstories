@@ -26,39 +26,6 @@
 
     $.cardstories.skin = function(skin, root) {
         $(root).addClass('cardstories_root');
-        var lobby = {'games': [[100, 'sentence100', 'invitation', 0],
-                               [101, 'sentence101', 'vote', 1],
-                               [102, 'sentence102', 'invitation', 0],
-                               [102, 'sentence102', 'invitation', 0],
-                               [102, 'sentence102', 'invitation', 0],
-                               [102, 'sentence102', 'invitation', 0],
-                               [102, 'sentence102', 'invitation', 0],
-                               [102, 'sentence102', 'invitation', 0],
-                               [102, 'sentence102', 'invitation', 0],
-                               [102, 'sentence102', 'invitation', 0],
-                               [102, 'sentence102', 'invitation', 0],
-                               [102, 'sentence102', 'invitation', 0],
-                               [102, 'sentence102', 'invitation', 0],
-                               [102, 'sentence102', 'invitation', 0],
-                               [102, 'sentence102', 'invitation', 0],
-                               [102, 'sentence102', 'invitation', 0],
-                               [102, 'sentence102', 'invitation', 0],
-                               [102, 'sentence102', 'invitation', 0],
-                               [102, 'sentence102', 'invitation', 0],
-                               [102, 'sentence102', 'invitation', 0],
-                               [102, 'sentence102', 'invitation', 0],
-                               [102, 'sentence102', 'invitation', 0],
-                               [102, 'sentence102', 'invitation', 0],
-                               [102, 'sentence102', 'invitation', 0],
-                               [102, 'sentence102', 'invitation', 0],
-                               [102, 'sentence102', 'invitation', 0],
-                               [102, 'sentence102', 'invitation', 0]
-                              ],
-                     'win': {100: 'n', 101: 'y' }
-                    };
-        var lobby_one = {'games': [[100, 'sentence100', 'invitation', 0],
-                                   [101, 'sentence101', 'vote', 1] ],
-                         'win': {100: 'n', 101: 'y' }};
         var game;
         var old_game;
 
@@ -68,13 +35,7 @@
                     'avatar_url': '/static/css/images/avatars/default/' + player_id % 6 + '.jpg' };
         };
 
-        if (skin === 'in_progress') {
-            $.cardstories.lobby_in_progress(1, lobby, root);
-        } else if (skin === 'in_progress_one') {
-            $.cardstories.lobby_in_progress(1, lobby_one, root);
-        } else if (skin === 'finished') {
-            $.cardstories.lobby_finished(1, lobby, root);
-        } else if (skin === 'create_pick_card') {
+        if (skin === 'create_pick_card') {
             $.cardstories.create_pick_card(0, undefined, root);
         } else if (skin === 'create_write_sentence') {
             $.cardstories.create_write_sentence(0, 5, undefined, root);

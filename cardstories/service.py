@@ -44,19 +44,6 @@ from cardstories.poll import Pollable
 from cardstories.auth import Auth
 
 
-class CardstoriesPlayer(Pollable):
-
-    def __init__(self, service, id):
-        self.service = service
-        self.settings = service.settings
-        self.id = id
-        Pollable.__init__(self, self.settings.get('poll-timeout', 30))
-
-    def touch(self, args):
-        args['player_id'] = [self.id]
-        return Pollable.touch(self, args)
-
-
 class CardstoriesServiceConnector(object):
     """
     Standard methods for plugins who wish to make requests to the service
@@ -239,9 +226,6 @@ class CardstoriesService(service.Service, Observable):
         if 'tabs' in args['type']:
             deferreds.append(self.poll_tabs(args))
 
-        if 'lobby' in args['type']:
-            deferreds.append(self.poll_player(args))
-
         for plugin in self.pollable_plugins:
             if plugin.name() in args['type']:
                 deferreds.append(plugin.poll(args))
@@ -395,15 +379,6 @@ class CardstoriesService(service.Service, Observable):
             tabs['modified'] = max_modified
             states.append(tabs)
 
-        if 'lobby' in args['type']:
-            lobby, players_id_list = yield self.lobby({'action': 'lobby',
-                                      'in_progress': args['in_progress'],
-                                      'my': args.get('my', ['true']),
-                                      'player_id': args['player_id']})
-            lobby['type'] = 'lobby'
-            states.append(lobby)
-            yield self.update_players_info(players_info, players_id_list)
-
         for plugin in self.pollable_plugins:
             if plugin.name() in args['type']:
                 state, players_id_list = yield plugin.state(args)
@@ -414,47 +389,6 @@ class CardstoriesService(service.Service, Observable):
 
         states.append(players_info)
         defer.returnValue(states)
-
-    def poll_player(self, args):
-        player_id = int(args['player_id'][0])
-        player = self.get_or_create_player(player_id)
-        return player.poll(args)
-
-    def get_or_create_player(self, player_id):
-        if not self.players.has_key(player_id):
-            player = CardstoriesPlayer(self, player_id)
-            player.access_time = int(runtime.seconds() * 1000)
-            #
-            # modified time is set to the most recent
-            # modification time of a game in which the player is
-            # involved
-            #
-            player.set_modified(0)
-            for game in self.games.values():
-                if player_id in game.get_players():
-                    if player.get_modified() < game.get_modified():
-                        player.set_modified(game.get_modified())
-            self.players[player_id] = player
-
-            poll_timeout = self.settings.get('poll-timeout', 30)
-
-            @defer.inlineCallbacks
-            def timeout():
-                now = int(runtime.seconds() * 1000)
-                if not self.players.has_key(player_id):
-                    defer.returnValue(False)
-                player = self.players[player_id]
-                if now - player.access_time > (poll_timeout * 2 * 1000):
-                    yield player.touch({'delete': [now]})
-                    del self.players[player_id]
-                else:
-                    player.timer = reactor.callLater(poll_timeout, timeout)
-                defer.returnValue(True)
-            timeout()
-        else:
-            player = self.players[player_id]
-            player.access_time = int(runtime.seconds() * 1000)
-        return player
 
     @defer.inlineCallbacks
     def game_notify(self, args, game_id):
@@ -597,43 +531,6 @@ class CardstoriesService(service.Service, Observable):
         duration = int(args['duration'][0])
         game_id = self.required_game_id(args)
         return self.game_method(game_id, args['action'][0], duration)
-
-    @defer.inlineCallbacks
-    def lobby(self, args):
-        self.required(args, 'lobby', 'player_id', 'in_progress')
-
-        player_id = args['player_id'][0]
-        players_info = [player_id] # Only the current player is referenced by lobby
-
-        if args['in_progress'][0] == 'true':
-            complete = 'state != "complete" AND state != "canceled"'
-        else:
-            complete = 'state = "complete"'
-        order = " ORDER BY created DESC"
-
-        if args.has_key('my') and args['my'][0] == 'true':
-            modified = self.get_or_create_player(player_id).get_modified()
-            sql = ""
-            sql += " SELECT id, sentence, state, owner_id = player_id, created FROM games, player2game WHERE player2game.player_id = ? AND " + complete + " AND games.id = player2game.game_id"
-            sql += " UNION "
-            sql += " SELECT id, sentence, state, owner_id = player_id, created FROM games, invitations WHERE invitations.player_id = ? AND " + complete + " AND games.id = invitations.game_id"
-            sql += order
-            games = yield self.db.runQuery(sql, [ player_id, player_id ])
-        else:
-            modified = 0
-            sql = "SELECT id, sentence, state, owner_id = ?, created FROM games WHERE " + complete
-            sql += order
-            games = yield self.db.runQuery(sql, [ player_id ])
-
-        sql = "SELECT id, win FROM games, player2game WHERE player2game.player_id = ? AND " + complete + " AND games.id = player2game.game_id"
-        rows = yield self.db.runQuery(sql, [ player_id ])
-        wins = {}
-        for row in rows:
-            wins[row[0]] = row[1]
-        defer.returnValue([{'modified': modified,
-                           'games': games,
-                           'win': wins},
-                           players_info])
 
     def handle(self, result, args):
         if not args.has_key('action'):

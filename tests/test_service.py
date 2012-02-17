@@ -328,159 +328,6 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         self.assertEquals(game['game_id'], game_info['id'])
 
     @defer.inlineCallbacks
-    def test05_lobby(self):
-        player1 = 10
-        player2 = 11
-        game1 = 100
-        sentence1 = 'SENTENCE1'
-        game2 = 101
-        sentence2 = 'SENTENCE2'
-        game3 = 102
-        sentence3 = 'SENTENCE3'
-        game4 = 103
-        sentence4 = 'SENTENCE4'
-        c = self.db.cursor()
-        # in progress
-        c.execute("INSERT INTO games ( id, owner_id, sentence, state, created ) VALUES ( %d, %d, '%s', 'invitation', '2011-02-01' )" % (game1, player2, sentence1))
-        c.execute("INSERT INTO invitations ( player_id, game_id ) VALUES ( %d, %d )" % (player1, game1))
-        c.execute("INSERT INTO player2game ( player_id, game_id ) VALUES ( %d, %d )" % (player2, game1))
-
-        c.execute("INSERT INTO games ( id, owner_id, sentence, state, created ) VALUES ( %d, %d, '%s', 'invitation', '2011-05-01' )" % (game2, player1, sentence2))
-        c.execute("INSERT INTO player2game ( player_id, game_id, win ) VALUES ( %d, %d, 'n' )" % (player1, game2))
-        # complete
-        c.execute("INSERT INTO games ( id, owner_id, sentence, state, created ) VALUES ( %d, %d, '%s', 'complete', '2011-03-01' )" % (game3, player1, sentence3))
-        c.execute("INSERT INTO player2game ( player_id, game_id, win ) VALUES ( %d, %d, 'y' )" % (player1, game3))
-
-        c.execute("INSERT INTO games ( id, owner_id, sentence, state, created ) VALUES ( %d, %d, '%s', 'complete', '2011-06-01' )" % (game4, player2, sentence4))
-        self.db.commit()
-        self.service.load(c)
-        c.close()
-        self.service.games[game1].modified = 111
-        self.service.games[game2].modified = 222
-        #
-        # Show all games, in progress, with wins from player2.
-        #
-        result = yield self.service.lobby({ 'in_progress': ['true'],
-                                            'player_id': [player2] })
-        # game2 shows before game1 because it is created before
-        self.assertEquals(result, [{
-                #         player2 does not participate in game2
-                'games': [(game2, u'SENTENCE2', u'invitation', 0, u'2011-05-01'),
-                #         player2 participates in game1 and is the author
-                          (game1, u'SENTENCE1', u'invitation', 1, u'2011-02-01')],
-                #         player2 did not yet win game1
-                'win': {game1: u'n'},
-                'modified': 0
-                },
-                [player2]])
-
-        #
-        # Show player2 games, in progress, with wins from player2.
-        #
-        result = yield self.service.lobby({ 'in_progress': ['true'],
-                                            'player_id': [player2],
-                                            'my': ['true'] })
-        self.assertEquals(result, [{
-                #         player2 participates in game1 and is the author
-                'games': [(game1, u'SENTENCE1', u'invitation', 1, u'2011-02-01')],
-                #         player2 does not participate in game2 therefore it is not shown
-                #         player2 did not yet win game1
-                'win': {game1: u'n'},
-                'modified': self.service.games[game1].modified
-                },
-                [player2]])
-
-        #
-        # Show all games, complete, with wins from player1.
-        #
-        result = yield self.service.lobby({ 'in_progress': ['false'],
-                                            'player_id': [player1] })
-        # game4 shows before game3 because it is created before
-        self.assertEquals(result, [{
-                #         player1 did not participate in game3
-                'games': [(game4, u'SENTENCE4', u'complete', 0, u'2011-06-01'),
-                #         player1 participated in game3 and was the author
-                          (game3, u'SENTENCE3', u'complete', 1, u'2011-03-01')],
-                #         player1 won game3
-                'win': {game3: u'y'},
-                'modified': 0
-                },
-                [player1]])
-
-        #
-        # Show player1 games, complete, with wins from player1.
-        #
-        result = yield self.service.lobby({ 'in_progress': ['false'],
-                                            'player_id': [player1],
-                                            'my': ['true']})
-        self.assertEquals(result, [{
-                #         player1 participated in game3 and was the author
-                'games': [(game3, u'SENTENCE3', u'complete', 1, u'2011-03-01')],
-                #         player1 did not participate in game3
-                #         player1 won game3
-                'win': {game3: u'y'},
-                #         player1 is in game2 and the modified field is 
-                #         global to all games in progress, not just the ones 
-                #         returned by the lobby request
-                'modified': self.service.games[game2].modified
-                },
-                [player1]])
-
-        #
-        # Show player1 games, in progress, with wins from player1.
-        #
-        result = yield self.service.lobby({ 'in_progress': ['true'],
-                                            'player_id': [player1],
-                                            'my': ['true']})
-        self.assertEquals(result, [{
-                #         player1 participates in game2 and was the author
-                'games': [(game2, u'SENTENCE2', u'invitation', 1, u'2011-05-01'),
-                #         player1 was invited to game1
-                          (game1, u'SENTENCE1', u'invitation', 0, u'2011-02-01')],
-                #         player1 won game3
-                'win': {game2: u'n'},
-                'modified': self.service.games[game2].modified
-                },
-                [player1]])
-
-    @defer.inlineCallbacks
-    def test06_get_or_create_player(self):
-        # create a player that did not exist
-        self.assertEquals({}, self.service.players)
-        player_id = 1
-        player = self.service.get_or_create_player(player_id)
-        self.assertTrue(self.service.players.has_key(player_id))
-        player.timer.cancel()
-        # retrieve the same player
-        self.assertEquals(player, self.service.get_or_create_player(player_id))
-        # create a player and timeout too early : timer is rescheduled
-        player_id = 2
-        player = self.service.get_or_create_player(player_id)
-        timer1 = player.timer
-        func = player.timer.func
-        func()
-        self.assertNotEqual(timer1, player.timer)
-        timer1.cancel()
-        self.assertTrue(player.timer.active())
-        # player timeout 
-        def check(result):
-            player.deleted = True
-            self.assertTrue(result.has_key('delete'))
-            return result
-        d = player.poll({ 'modified': [player.modified + 100] })
-        d.addCallback(check)
-        player.access_time = 0 # pretend the player has not been accessed for a long time
-        func = player.timer.func
-        player.timer.cancel()
-        result = yield func()
-        self.assertTrue(result)
-        self.assertTrue(player.deleted)
-        self.assertFalse(self.service.players.has_key(player_id))
-        # timeout on a deleted player does nothing
-        result = yield func()
-        self.assertFalse(result)
-
-    @defer.inlineCallbacks
     def test07_game_notify(self):
         #
         # notify player called as a side effect of game.touch
@@ -492,30 +339,13 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
                                              'sentence': [sentence],
                                              'owner_id': [owner_id]})
         game = self.service.games[result['game_id']]
-        player = self.service.get_or_create_player(owner_id)
-        player.modified -= 10
-        before_modified = player.modified
-        d = self.service.poll_player({ 'modified': [player.modified],
-                                       'player_id': [owner_id] })
-        def check(result):
-            #
-            # the modified time is from the player pollable, not
-            # from the game pollable. 
-            #
-            self.assertTrue(result['modified'][0] > before_modified)
-            self.assertEquals(result['modified'], [player.modified])
-            self.assertEquals(result['player_id'], [owner_id])
-            self.assertEquals(result['game_id'], [game.id])
-            game.checked = True
-            return result
-        d.addCallback(check)
+
         def change(event):
             self.assertTrue(event['type'], 'change')
             self.assertTrue(event['game'].get_id(), game.get_id())
             game.changed = True
         self.service.listen().addCallback(change)
         yield game.touch() # calls game_notify indirectly
-        self.assertTrue(game.checked)
         self.assertTrue(game.changed)
         #
         # Event notification when a game is destroyed
@@ -545,22 +375,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
             caught = True
             self.failUnlessSubstring("Action 'poll' requires argument", e.args[0])
         self.assertTrue(caught)
-        #
-        # poll player
-        #
-        player_id = 10
-        player = self.service.get_or_create_player(player_id)
-        d = self.service.poll({'action': ['poll'],
-                               'type': ['lobby'],
-                               'modified': [player.modified],
-                               'player_id': [player_id]})
-        def check(result):
-            self.assertTrue(result['ok'])
-            player.ok = True
-            return result
-        d.addCallback(check)
-        yield player.touch({'ok': True})
-        self.assertTrue(player.ok)
+
         #
         # poll game
         #
@@ -988,25 +803,14 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         check_players_info(state)
 
         #
-        # type = ['lobby']
+        # type = ['game','tabs','plugin']
         #
-        state = yield self.service.state({ 'type': ['lobby'],
-                                           'modified': [0],
-                                           'in_progress': ['true'],
-                                           'player_id': [owner_id] })
-        self.assertEquals(state[0]['type'], 'lobby')
-        self.assertEquals(state[0]['games'][0][0], game['game_id'])
-        check_players_info(state)
-        #
-        # type = ['game','lobby','plugin']
-        #
-        state = yield self.service.state({ 'type': ['game', 'lobby', 'plugin'],
+        state = yield self.service.state({ 'type': ['game', 'tabs', 'plugin'],
                                            'modified': [0],
                                            'game_id': [game['game_id']],
-                                           'in_progress': ['true'],
                                            'player_id': [owner_id] })
         self.assertEquals(state[0]['type'], 'game')
-        self.assertEquals(state[1]['type'], 'lobby')
+        self.assertEquals(state[1]['type'], 'tabs')
         self.assertEquals(state[2]['type'], 'plugin')
         check_players_info(state)
 
