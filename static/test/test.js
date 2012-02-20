@@ -87,36 +87,30 @@ function setup() {
 
 module("cardstories", {setup: setup});
 
-test("panic", 9, function() {
-    // When passed a string:
-    $.cardstories.window.alert = function(err) {
-        ok(err.match('an error occurred'), 'calls window.alert on error');
-    };
+test("panic", 5, function() {
+    var player_id = 74;
+    var game_id = 1023;
+    var root = $('#qunit-fixture .cardstories');
+    var error = {code: 'KABOOM', data: {game_id: 11, details: 'an error occurred'}};
+    var modal_selector = '.cardstories_panic';
+    var modal = $('.cardstories_notifications .cardstories_panic', root);
+
     $.cardstories.log = function(err) {
-        equal(err, 'an error occurred', 'calls $.cardstories.log on error');
+        equal(err, error, 'calls $.cardstories.log on error');
     };
-    $.cardstories.panic('an error occurred');
-    // When passed a PANIC type error:
-    var panic_error = {code: 'PANIC', data: 'an error occurred'};
-    $.cardstories.window.alert = function(err) {
-        ok(!err.match('PANIC'), 'hides redundant information from the user');
-        ok(err.match('an error occurred'), 'calls window.alert on error');
+
+    $.cardstories.location = {
+        reload: function() { ok(true, 'reload gets called'); }
     };
-    $.cardstories.log = function(err) {
-        equal(err, panic_error, 'calls $.cardstories.log on error');
+
+    $.cardstories.show_warning = function(_modal_selector, _player_id, _game_id, _root, _cb) {
+        equal(_modal_selector, modal_selector, 'show_warning gets passed .cardstories_panic');
+        equal(_player_id, player_id, 'show_warning gets passed the player_id');
+        equal(_game_id, game_id, 'show_warning gets passed the game_id');
+        _cb(); // Execute the callback to trigger reload.
     };
-    $.cardstories.panic(panic_error);
-    // When passed another type of error:
-    var other_error = {code: 'KABOOM', data: {game_id: 11, details: 'an error occurred'}};
-    $.cardstories.window.alert = function(err) {
-        ok(err.match('KABOOM'), 'calls window.alert on error');
-        ok(err.match('an error occurred'), 'calls window.alert on error');
-        ok(err.match('"game_id":11'), 'calls window.alert on error');
-    };
-    $.cardstories.log = function(err) {
-        equal(err, other_error, 'calls $.cardstories.log on error');
-    };
-    $.cardstories.panic(other_error);
+
+    $.cardstories.panic(error, player_id, game_id, root);
 });
 
 asyncTest("show_warning", 7, function() {
@@ -629,6 +623,7 @@ test("login_url", 1, function() {
 });
 
 asyncTest("send", 4, function() {
+    var root = $('#qunit-fixture .cardstories');
     var player_id = 15;
     var game_id = 101;
     var onerror_called = false;
@@ -655,7 +650,7 @@ asyncTest("send", 4, function() {
         onerror: onerror
     };
 
-    var result = $.cardstories.send(query, callback, opts);
+    var result = $.cardstories.send(query, callback, player_id, game_id, root, opts);
     equal(result, 'result of $.cardstories.ajax', 'passes on the promise object as returned from $.cardstories.ajax');
 });
 
@@ -2783,7 +2778,7 @@ test("advertise", 11, function() {
     var submit_button = $('.cardstories_send_invitation', advertise_dialog);
     var feedback = $('.cardstories_advertise_feedback', advertise_dialog);
 
-    $.cardstories.ajax = function(options) {
+    $.cardstories.ajax = function(options, _player_id, _game_id, _root) {
         equal(options.url, $.cardstories.url + '?action=invite&owner_id=' + owner_id + '&game_id=' + game_id + '&player_id=player1&player_id=player2');
         ok(options.async === false);
     };
@@ -2831,7 +2826,7 @@ test("advertise invitation email separators", 3, function() {
     var submit_button = $('.cardstories_send_invitation', advertise);
     var feedback = $('.cardstories_advertise_feedback', advertise);
 
-    $.cardstories.ajax = function(options) {
+    $.cardstories.ajax = function(options, _player_id, _game_id, _root) {
         equal(options.url, $.cardstories.url + '?action=invite&owner_id=' + owner_id + '&game_id=' + game_id + '&player_id=player1&player_id=player2');
     };
 
@@ -3071,33 +3066,33 @@ test("poll", 10, function() {
     };
 
     root.data('cardstories_modified', modified);
-    ok(!$.cardstories.poll(root, request), 'lack of metadata inhibits poll');
+    ok(!$.cardstories.poll(request, player_id, game_id, root), 'lack of metadata inhibits poll');
 
     // successfull poll calls callback
     var pollcb = function(options) {
         ok(true, 'callback called');
     };
     var poll_ajax = function(options) {
-        ok(!$.cardstories.poll(root, request), 'poll ignored if another one was still running');
+        ok(!$.cardstories.poll(request, player_id, game_id, root), 'poll ignored if another one was still running');
         equal(options.url, $.cardstories.url + '?player_id=' + player_id + '&game_id=' + game_id + '&type=game&action=poll&modified=' + modified, 'url 2');
         options.success(request);
     };
     $.cardstories.ajax = poll_ajax;
     $(root).data('polling', false);
-    ok($.cardstories.poll(root, request, pollcb), 'poll normal');
+    ok($.cardstories.poll(request, player_id, game_id, root, pollcb), 'poll normal');
 
     // if poll() timesout, a new poll() request is sent
-    var poll_again = function(options) {
+    var poll_again = function(options, _player_id, _game_id, _root) {
         equal(options.url, $.cardstories.url + '?player_id=' + player_id + '&game_id=' + game_id + '&type=game&action=poll&modified=' + modified, 'url 3');
     };
 
-    $.cardstories.ajax = function(options) {
+    $.cardstories.ajax = function(options, _player_id, _game_id, _root) {
         equal(options.url, $.cardstories.url + '?player_id=' + player_id + '&game_id=' + game_id + '&type=game&action=poll&modified=' + modified, 'url 4');
         $.cardstories.ajax = poll_again;
         options.success({'timeout': [modified+1111]});
     };
 
-    ok($.cardstories.poll(root, request), 'poll timeout');
+    ok($.cardstories.poll(request, player_id, game_id, root), 'poll timeout');
 
     $(root).data('polling', undefined);
 });
@@ -3330,13 +3325,13 @@ test("create_deck", 29, function() {
     }
 });
 
-test('send_countdown_duration', 8, function() {
+test("send_countdown_duration", 8, function() {
     var duration = '3600';
     var owner_id = 'OWNER';
     var game_id = 101;
     var root = $('#qunit-fixture .cardstories');
 
-    $.cardstories.send = function(query, callback, opts) {
+    $.cardstories.send = function(query, callback, _player_id, _game_id, _root, opts) {
         equal(query.action, 'set_countdown');
         equal(query.duration, duration);
         equal(query.game_id, game_id);

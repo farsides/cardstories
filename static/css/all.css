@@ -2380,7 +2380,7 @@
     top: 120px;
     height: 100px;
     width: 320px;
-    padding-top: 3em;
+    padding: 3em 2em 1em;
 }
 
 .cardstories_notifications .cardstories_modal .cardstories_modal_h2 {
@@ -2398,6 +2398,12 @@
 .cardstories_notifications .cardstories_picked_too_late {
     left: 210px;
     width: 360px;
+}
+
+.cardstories_notifications .cardstories_panic {
+    left: 190px;
+    height: 140px;
+    width: 380px;
 }
 
 /* Notifications */

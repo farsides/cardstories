@@ -58,15 +58,18 @@
             }
         },
 
-        panic: function(error) {
+        panic: function(error, player_id, game_id, root) {
+            var $this = this;
             var message = 'An unexpected error occured:\n';
             if (error.code && error.code === 'PANIC') {
                 message += error.data;
             } else {
                 message += JSON.stringify(error);
             }
-            this.log(error);
-            this.window.alert(message);
+            $this.log(error);
+            $this.show_warning('.cardstories_panic', player_id, game_id, root, function() {
+                $this.location.reload();
+            });
         },
 
         show_warning: function(modal_selector, player_id, game_id, root, cb) {
@@ -91,7 +94,7 @@
             this.display_modal(modal, overlay);
         },
 
-        xhr_error: function(ajax_request, status, error) {
+        xhr_error: function(ajax_request, status, error, player_id, game_id, root) {
             var $this = this;
             $this.log('XHR ERROR: ' + status + ' ' + error);
 
@@ -104,7 +107,7 @@
             } else {
                 // Retry after 100 miliseconds.
                 $this.setTimeout(function() {
-                    $this.ajax(ajax_request);
+                    $this.ajax(ajax_request, player_id, game_id, root);
                 }, 100);
             }
         },
@@ -115,7 +118,7 @@
             return o.delay(delay, qname);
         },
 
-        ajax: function(options) {
+        ajax: function(options, player_id, game_id, root) {
             var $this = this;
             var request;
             var defaults = {
@@ -125,7 +128,7 @@
                 error: function(xhr, status, error) {
                     // Pass the ajax request to the error handle in
                     // order to be able to retry it.
-                    $this.xhr_error(request, status, error);
+                    $this.xhr_error(request, status, error, player_id, game_id, root);
                 },
                 global: false,
                 timeout: 30000,
@@ -776,7 +779,7 @@
 
                 var success = function(data, status) {
                     if ('error' in data) {
-                        $this.panic(data.error);
+                        $this.panic(data.error, player_id, undefined, root);
                     } else {
                         $this.animate_progress_bar(3, element, function() {
                             $this.reload(player_id, data.game_id, {}, root);
@@ -803,7 +806,7 @@
                         type: 'POST',
                         data: 'sentence=' + sentence,
                         success: success
-                    });
+                    }, player_id, undefined, root);
                 });
                 return true;
             };
@@ -873,7 +876,7 @@
                     // Use a synchronous request; because this is user-initiated,
                     // we can afford it since the user won't be surprised by
                     // the browser blocking.
-                    $this.send(query, callback, {async: false});
+                    $this.send(query, callback, owner_id, game_id, root, {async: false});
 
                     toggle_feedback(true);
                     textarea.val('');
@@ -909,7 +912,7 @@
             return request;
         },
 
-        poll: function(root, request, cb) {
+        poll: function(request, player_id, game_id, root, cb) {
             var $this = this;
 
             request.action = 'poll';
@@ -939,10 +942,10 @@
             var success = function(answer, status) {
                 $(root).data('polling', false);
                 if ('error' in answer) {
-                    $this.panic(answer.error);
+                    $this.panic(answer.error, player_id, game_id, root);
                 } else {
                     if ('timeout' in answer) {
-                        $this.poll(root, request, cb);
+                        $this.poll(request, player_id, game_id, root, cb);
                     } else if (cb) {
                         cb();
                     }
@@ -955,7 +958,7 @@
                 timeout: $this.poll_timeout * 2,
                 url: $this.url + '?' + $.param(request, true),
                 success: success
-            });
+            }, player_id, game_id, root);
 
             // Save poll for discarding, when necessary.
             $(root).data('poll', poll);
@@ -985,7 +988,7 @@
             if (type.length) {
                 var success = function(data, status) {
                     if ('error' in data) {
-                        $this.panic(data.error);
+                        $this.panic(data.error, player_id, game_id, root);
                     } else {
                         // Save greatest modification time.
                         var modified = 0;
@@ -1012,10 +1015,10 @@
 
                         // Start a poll (the function will take care of including
                         // the plugin types).
-                        $this.poll(root, {
+                        $this.poll({
                             'player_id': player_id,
                             'game_id': game_id
-                        }, function() {
+                        }, player_id, game_id, root, function() {
                             $this.poll_plugin(player_id, game_id, root);
                         });
 
@@ -1037,7 +1040,7 @@
                 $this.ajax({
                     url: $this.url + '?' + $.param(request, true),
                     success: success
-                });
+                }, player_id, game_id, root);
             } else if (callback) {
                 callback();
             }
@@ -1067,11 +1070,11 @@
             }
 
             if (!inhibit_poll) {
-                $this.poll(root, {
+                $this.poll({
                     'type': ['game'],
                     'game_id': game.id,
                     'player_id': player_id
-                }, function() {
+                }, player_id, game.id, root, function() {
                     $this.game_or_create(player_id, game.id, {}, root);
                 });
             }
@@ -1408,7 +1411,7 @@
                     game_id: game.id
                 }, function() {
                     $this.game(player_id, game.id, root);
-                });
+                }, player_id, game.id, root);
             });
 
             q.dequeue('chain');
@@ -1437,11 +1440,11 @@
                     if (error.code === 'WRONG_STATE_FOR_PICKING' && error.data.state === 'vote') {
                         $this.show_warning('.cardstories_picked_too_late', player_id, game.id, root, callback);
                     } else {
-                        $this.panic(error);
+                        $this.panic(error, player_id, game.id, root);
                     }
                 };
                 $this.invitation_pick_confirm_helper(player_id, game, card_index, card_value, element, function() {
-                    $this.send(query, callback, {onerror: onerror});
+                    $this.send(query, callback, player_id, game.id, root, {onerror: onerror});
                 });
             };
 
@@ -2139,10 +2142,10 @@
                         $this.reload(player_id, undefined, {force_create: true}, root);
                     });
                 } else {
-                    $this.panic(error);
+                    $this.panic(error, player_id, game.id, root);
                 }
             };
-            $this.send(query, callback, {onerror: onerror});
+            $this.send(query, callback, player_id, game.id, root, {onerror: onerror});
 
             return $.Deferred().resolve();
         },
@@ -2294,11 +2297,11 @@
                 }
             }
 
-            $this.poll(root, {
+            $this.poll({
                 'type': ['game'],
                 'game_id': game.id,
                 'player_id': player_id
-            }, function() {
+            }, player_id, game.id, root, function() {
                 $this.game_or_create(player_id, game.id, {}, root);
             });
 
@@ -2431,11 +2434,11 @@
                     if (error.code === 'GAME_NOT_LOADED') {
                         $this.show_warning('.cardstories_voted_too_late', player_id, game.id, root, callback);
                     } else {
-                        $this.panic(error);
+                        $this.panic(error, player_id, game.id, root);
                     }
                 };
                 $this.animate_progress_bar(4, element, function() {
-                    $this.send(query, callback, {onerror: onerror});
+                    $this.send(query, callback, player_id, game.id, root, {onerror: onerror});
                 });
             };
 
@@ -2955,7 +2958,7 @@
                             game_id: game.id
                         }, function() {
                             $this.game(player_id, game.id, root);
-                        });
+                        }, player_id, game.id, root);
                     });
                 }
 
@@ -3657,7 +3660,7 @@
         // - async: if set to false, the request will be synchronous (default true).
         // - onerror: An error handler that will be passed the error object,
         //            if the service returns an error (default $.cardstories.panic)
-        send: function(query, callback, opts) {
+        send: function(query, callback, player_id, game_id, root, opts) {
             opts = opts || {};
             var $this = this;
             var onerror = opts.onerror || $this.panic;
@@ -3675,7 +3678,7 @@
                 success: success,
                 async: async
             };
-            return $this.ajax(options);
+            return $this.ajax(options, player_id, game_id, root);
         },
 
         init_board_buttons: function(player_id, element, root) {
@@ -3698,7 +3701,7 @@
                             $this.reload(player_id, undefined, {force_create: true}, root);
                         });
                     } else {
-                        $this.panic(error);
+                        $this.panic(error, player_id, game_id, root);
                     }
                 } else {
                     // Save greatest modification time.
@@ -3745,7 +3748,7 @@
                 success: success
             };
 
-            $this.ajax($.extend(options, ajax_options));
+            $this.ajax($.extend(options, ajax_options), player_id, game_id, root);
         },
 
         preload_images: function(root, cb) {
@@ -3948,13 +3951,13 @@
             return this.players_info[player_id];
         },
 
-        update_player_info_from_ws: function(player_id) {
+        update_player_info_from_ws: function(player_id, game_id, root) {
             var $this = this;
             var deferred = $.Deferred();
 
             var success = function(data, status) {
                 if('error' in data) {
-                    $this.panic(data.error);
+                    $this.panic(data.error, player_id, game_id, root);
                 } else {
                     $this.update_players_info(data);
                     deferred.resolve();
@@ -3969,7 +3972,7 @@
             $this.ajax({
                 url: $this.url + '?' + $.param(request, true),
                 success: success,
-            });
+            }, player_id, game_id, root);
 
             return deferred.promise();
         },
@@ -4056,7 +4059,7 @@
             // Use a synchronous request because this is a user-initated request,
             // and users won't be surprised by the browser blocking while waiting
             // for the response.
-            $this.send(query, callback, ajax_opts);
+            $this.send(query, callback, player_id, game_id, root, ajax_opts);
         },
 
         start_countdown: function(end_ts, select_element) {
@@ -4200,7 +4203,7 @@
             // Get player_info of the player
             // Guarantees that we'll always have this information available,
             // even when displaying a page without info from the server
-            var deferred = $.when($this.update_player_info_from_ws(player_id)).done(function() {
+            var deferred = $.when($this.update_player_info_from_ws(player_id, game_id, root)).done(function() {
                 $this.game_or_create(player_id, game_id, options, root);
             });
 

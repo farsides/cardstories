@@ -25,6 +25,9 @@
     }
 
     $.cardstories.skin = function(skin, root) {
+        // Stub out poll_plugin to not try to poll non-existing games.
+        $.cardstories.poll_plugin = function() {};
+
         $(root).addClass('cardstories_root');
         var game;
         var old_game;
@@ -302,6 +305,8 @@
         } else if (skin === 'credits') {
             $.cardstories.credits(root);
             $('.cardstories_credits_short', root).click();
+        } else if (skin === 'panic') {
+            $.cardstories.panic({code: 'PANIC', data: {game_id: 34, tb: 'Help!\nThe wheel fell off.'}});
         } else if (skin === 'game_does_not_exist') {
             stub_service({error: {code: 'GAME_DOES_NOT_EXIST', data: {game_id: 123}}});
             $.cardstories.game(12, 123, root);
