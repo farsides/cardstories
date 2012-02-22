@@ -75,6 +75,8 @@ class CardstoriesGameTest(unittest.TestCase):
         self.assertEquals(chr(card), rows[0][0])
         self.assertEquals(self.game.get_players(), [owner_id])
         self.assertEquals(self.game.get_owner_id(), owner_id)
+        c.execute("SELECT player_id FROM players WHERE player_id = %s" % owner_id)
+        self.assertEquals(c.fetchone()[0], owner_id)
         #
         # load an existing game
         #
@@ -108,6 +110,8 @@ class CardstoriesGameTest(unittest.TestCase):
         self.assertEquals(cards_length - self.game.CARDS_PER_PLAYER, c.fetchone()[0])
         c.execute("SELECT LENGTH(cards) FROM player2game WHERE game_id = %d AND player_id = %d" % (game_id, player_id))
         self.assertEquals(self.game.CARDS_PER_PLAYER, c.fetchone()[0])
+        c.execute("SELECT player_id FROM players WHERE player_id = %s" % player_id)
+        self.assertEquals(c.fetchone()[0], player_id)
         c.close()
         #
         # assert the difference for when an invited player participates
@@ -267,6 +271,12 @@ class CardstoriesGameTest(unittest.TestCase):
         self.assertEqual(u'n', c.fetchone()[0])
         self.assertEqual((u'n', None), c.fetchone())
         self.assertEqual(c.fetchone(), None)
+        c.execute("SELECT score FROM players WHERE player_id = %s" % owner_id)
+        self.assertEqual(c.fetchone()[0], self.game.POINTS_GM_WON + self.game.POINTS_P_FAILED)
+        c.execute("SELECT score FROM players WHERE player_id = %s" % winner_id)
+        self.assertEqual(c.fetchone()[0], self.game.POINTS_P_WON)
+        c.execute("SELECT score FROM players WHERE player_id = %s" % loser_id)
+        self.assertEqual(c.fetchone()[0], self.game.POINTS_P_LOST)
         c.close()
             
     @defer.inlineCallbacks

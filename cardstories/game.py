@@ -38,6 +38,12 @@ class CardstoriesGame(Pollable):
     NPLAYERS = 6
     CARDS_PER_PLAYER = 7
     DEFAULT_COUNTDOWN_DURATION = 60 # needs to be coordinated with the value on the UI
+    POINTS_GM_WON = 10
+    POINTS_GM_LOST = 5
+    POINTS_GM_FAILED = 2
+    POINTS_P_WON = 5
+    POINTS_P_LOST = 1
+    POINTS_P_FAILED = 2
 
     def __init__(self, service, id=None):
         self.service = service
@@ -142,6 +148,12 @@ class CardstoriesGame(Pollable):
             deleted += count
         defer.returnValue(deleted)
 
+    def playerInteraction(self, transaction, player_id):
+        transaction.execute("SELECT player_id, score, levelups from players WHERE player_id = ?", [player_id])
+        rows = transaction.fetchall()
+        if not rows:
+            transaction.execute("INSERT INTO players (player_id, score, levelups) VALUES (?, ?, ?)", [player_id, 0, 0])
+
     def createInteraction(self, transaction, card, sentence, owner_id):
         cards = [ chr(x) for x in range(1, self.NCARDS + 1) ]
         cards.remove(card)
@@ -155,6 +167,7 @@ class CardstoriesGame(Pollable):
     def create(self, card, sentence, owner_id):
         self.owner_id = owner_id
         game_id = yield self.service.db.runInteraction(self.createInteraction, chr(card), sentence, self.owner_id)
+        yield self.service.db.runInteraction(self.playerInteraction, self.owner_id)
         self.id = game_id
         self.players.append(self.owner_id)
         self.update_timer()
@@ -265,6 +278,7 @@ class CardstoriesGame(Pollable):
     @defer.inlineCallbacks
     def participate(self, player_id):
         yield self.service.db.runInteraction(self.participateInteraction, self.get_id(), player_id)
+        yield self.service.db.runInteraction(self.playerInteraction, player_id)
         if player_id in self.invited:
             self.invited.remove(player_id)
         self.players.append(player_id)
@@ -372,24 +386,56 @@ class CardstoriesGame(Pollable):
     def completeInteraction(self, transaction, game_id, owner_id):
         transaction.execute("SELECT cards FROM player2game WHERE game_id = %d AND player_id = %d" % (game_id, owner_id))
         winner_card = transaction.fetchone()[0]
-        transaction.execute("SELECT vote, player_id FROM player2game WHERE game_id = %d AND player_id != %d AND vote IS NOT NULL" % (game_id, owner_id))
+        transaction.execute("SELECT vote, picked, player_id FROM player2game WHERE game_id = %d AND player_id != %d AND vote IS NOT NULL" % (game_id, owner_id))
         players_count = 0
         guessed = []
         failed = []
-        for (vote, player_id) in transaction.fetchall():
+        score = {}
+        player2vote = {}
+        pick2player = {}
+        for (vote, picked, player_id) in transaction.fetchall():
             players_count += 1
+            player2vote[player_id] = vote
+            pick2player[picked] = player_id
             if vote == winner_card:
                 guessed.append(player_id)
             else:
                 failed.append(player_id)
+
         if len(guessed) > 0 and len(guessed) < players_count:
             winners = guessed + [ owner_id ]
+            score[owner_id] = self.POINTS_GM_WON
+            for player_id in guessed:
+                score[player_id] = self.POINTS_P_WON
+            for player_id in failed:
+                score[owner_id] += self.POINTS_GM_FAILED
+                score[player_id] = self.POINTS_P_LOST
         else:
             winners = failed + guessed
+            score[owner_id] = self.POINTS_GM_LOST
+            for player_id in winners:
+                score[player_id] = self.POINTS_P_WON
+
+        # Also distribute points to players who fooled other players.
+        for player_id in failed:
+            vote = player2vote[player_id]
+            try:
+                candidate = pick2player[vote]
+                try:
+                    score[candidate] += self.POINTS_P_FAILED
+                except KeyError:
+                    score[candidate] = self.POINTS_P_FAILED
+            except KeyError:
+                pass
+
         transaction.execute("UPDATE player2game SET win = 'y' WHERE "
                             "  game_id = %d AND " % game_id +
                             "  player_id IN ( %s ) " % ','.join([ str(id) for id in winners ]))
         transaction.execute("UPDATE games SET completed = datetime('now'), state = 'complete' WHERE id = %d" % game_id)
+
+        # Update scores in the database.
+        for player_id in score.keys():
+            transaction.execute("UPDATE players SET score = score + %d WHERE player_id = %s" % (score[player_id], player_id))
 
     @defer.inlineCallbacks
     def complete(self, owner_id):

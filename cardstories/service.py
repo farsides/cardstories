@@ -184,10 +184,13 @@ class CardstoriesService(service.Service, Observable):
             )
         c.execute(
             "CREATE TABLE players ( "
-            "  id INTEGER PRIMARY KEY, "
+            "  player_id INTEGER, "
             "  score BIGINTEGER, "
             "  levelups INTEGER "
             "); ")
+        c.execute(
+            "CREATE UNIQUE INDEX players_idx ON players (player_id); "
+            )
         c.execute(
             "CREATE TABLE player_cards ( "
             "  id INTEGER PRIMARY KEY, "
