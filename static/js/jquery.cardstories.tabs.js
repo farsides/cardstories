@@ -27,7 +27,7 @@
 
         tab_template: '<li class="cardstories_tab"><a class="cardstories_tab_title"></a><a class="cardstories_tab_close"><img src="/static/css/images/tab_close.png" /></a></li>',
 
-        new_game_tab_template: '<li class="cardstories_new"><a class="cardstories_tab_title" title="Create a new game!"><img src="/static/css/images/tab_new.png" /></a></li>',
+        new_game_tab_template: '<li class="cardstories_new_game"><a class="cardstories_tab_title" title="Create a new game!"><img src="/static/css/images/tab_new.png" /></a></li>',
 
         init: function(player_id, game_id, root) {
             // Save data for later use.
@@ -58,21 +58,19 @@
             // Wipe out the tabs.
             element.empty();
 
-            // If current game_id is undefined (the player is creating a new game),
-            // add a dynamically created "New game" tab.
-            if (!current_game_id) {
-                games.push({id: 'new', sentence: 'New game'});
-            }
-
             // And repaint them.
             $.each(games, function(i, game) {
                 var tab = $($this.tab_template);
                 var title = $('.cardstories_tab_title', tab);
                 var status = $('.cardstories_tab_status', tab);
                 var close_btn = $('.cardstories_tab_close', tab);
-                var is_current = game.id === 'new' || game.id === current_game_id;
+                var is_current = game.id === current_game_id;
 
-                title.text(game.sentence.substring(0, 15));
+                if (game.state === 'new') {
+                    title.text('New game');
+                } else {
+                    title.text(game.sentence.substring(0, 15));
+                }
                 tab.data('game_id', game.id);
 
                 if (is_current) {
@@ -142,23 +140,18 @@
             }
 
             this.remove_tab(tab, player_id, game_id, function() {
-                $.cardstories.reload(player_id, next_game_id, {force_create: !next_game_id}, root);
+                $.cardstories.reload(player_id, next_game_id, {}, root);
             });
         },
 
         // Removes the tab from the page, and issues an ajax call to remove
         // the tab on the webservice.
         remove_tab: function(tab, player_id, game_id, cb) {
-            var promise;
-            if (game_id) {
-                promise = $.cardstories.send({
-                    action: 'remove_tab',
-                    game_id: game_id,
-                    player_id: player_id
-                });
-            } else {
-                promise = $.Deferred().resolve();
-            }
+            var promise = $.cardstories.send({
+                action: 'remove_tab',
+                game_id: game_id,
+                player_id: player_id
+            });
 
             // remove the tab from the DOM.
             tab.fadeOut(function() {
@@ -181,7 +174,7 @@
             var previous_state = tab_states[game.id];
             var new_state = game.state;
             tab_states[game.id] = new_state;
-            
+
             if (previous_state && previous_state !== new_state) { // the state has changed
                 if (new_state === 'complete') { // the results have been announced
                     requires = true;

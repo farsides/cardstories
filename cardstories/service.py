@@ -99,7 +99,8 @@ class CardstoriesServiceConnector(object):
 
 class CardstoriesService(service.Service, Observable):
 
-    ACTIONS_GAME = ('participate', 'voting', 'pick', 'vote', 'complete', 'invite', 'set_countdown')
+    ACTIONS_GAME = ('set_card', 'set_sentence', 'participate', 'voting', 'pick', 'vote',
+                    'complete', 'invite', 'set_countdown')
     ACTIONS = ACTIONS_GAME + ('create', 'poll', 'state', 'player_info', 'remove_tab')
 
     def __init__(self, settings):
@@ -145,7 +146,7 @@ class CardstoriesService(service.Service, Observable):
             "  sentence TEXT, "
             "  cards VARCHAR(%d), " % CardstoriesGame.NCARDS +
             "  board VARCHAR(%d), " % CardstoriesGame.NPLAYERS +
-            "  state VARCHAR(8) DEFAULT 'invitation', " + # invitation, vote, complete
+            "  state VARCHAR(8) DEFAULT 'create', " + # create, invitation, vote, complete
             "  created DATETIME, "
             "  completed DATETIME"
             "); ")
@@ -426,7 +427,7 @@ class CardstoriesService(service.Service, Observable):
             'type': init_type,
             'modified': [0],
             'game_id': [game.get_id()],
-            'sentence': [sentence],
+            'sentence': sentence,
             'previous_game_id': previous_game_id}
 
         args = yield game.wait(args)
@@ -434,9 +435,7 @@ class CardstoriesService(service.Service, Observable):
 
     @defer.inlineCallbacks
     def create(self, args):
-        self.required(args, 'create', 'card', 'sentence', 'owner_id')
-        card = int(args['card'][0])
-        sentence = args['sentence'][0].decode('utf-8')
+        self.required(args, 'create', 'owner_id')
         owner_id = int(args['owner_id'][0])
 
         # Keep track of consecutive games
@@ -446,9 +445,9 @@ class CardstoriesService(service.Service, Observable):
             previous_game_id = None
 
         game = CardstoriesGame(self)
-        game_id = yield game.create(card, sentence, owner_id)
+        game_id = yield game.create(owner_id)
 
-        yield self.game_init(game, sentence, previous_game_id=previous_game_id)
+        yield self.game_init(game, '', previous_game_id=previous_game_id)
 
         defer.returnValue({'game_id': game_id})
 
@@ -481,6 +480,20 @@ class CardstoriesService(service.Service, Observable):
         if not self.games.has_key(game_id):
             raise CardstoriesWarning('GAME_NOT_LOADED', {'game_id': game_id})
         return getattr(self.games[game_id], action)(*args, **kwargs)
+
+    def set_card(self, args):
+        self.required(args, 'set_card', 'player_id', 'card')
+        player_id = int(args['player_id'][0])
+        card = int(args['card'][0])
+        game_id = self.required_game_id(args)
+        return self.game_method(game_id, args['action'][0], player_id, card)
+
+    def set_sentence(self, args):
+        self.required(args, 'set_sentence', 'player_id', 'sentence')
+        player_id = int(args['player_id'][0])
+        game_id = self.required_game_id(args)
+        sentence = args['sentence'][0].decode('utf-8')
+        return self.game_method(game_id, args['action'][0], player_id, sentence)
 
     def participate(self, args):
         self.required(args, 'participate', 'player_id')

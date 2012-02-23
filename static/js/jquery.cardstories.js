@@ -126,7 +126,7 @@
                 cache: false,
                 dataType: 'json',
                 error: function(xhr, status, error) {
-                    // Pass the ajax request to the error handle in
+                    // Pass the ajax request to the error handler in
                     // order to be able to retry it.
                     $this.xhr_error(request, status, error, player_id, game_id, root);
                 },
@@ -204,12 +204,50 @@
             return search;
         },
 
-        create: function(player_id, previous_game_id, root, cb) {
+        create_new_game: function(player_id, previous_game_id, root) {
             var $this = this;
+            $this.poll_discard(root);
+            var query = {
+                action: 'create',
+                owner_id: player_id
+            };
+            if (previous_game_id) {
+                query.previous_game_id = previous_game_id
+            }
+            var success = function(data) {
+                if ('error' in data) {
+                    $this.panic(data.error, player_id, undefined, root);
+                } else {
+                    $this.reload(player_id, data.game_id, {}, root);
+                }
+            };
+            var ajax_options = {
+                url: $this.url + '?' + $.param(query, true),
+                type: 'POST',
+                async: false,
+                success: success
+            };
+            $this.ajax(ajax_options, player_id, undefined, root);
+        },
+
+        create: function(player_id, game, root) {
             this.poll_discard(root);
-            this.poll_plugin(player_id, undefined, root, function() {
-                $this.create_pick_card(player_id, previous_game_id, root).done(cb);
-            });
+            this.poll_plugin(player_id, game.id, root);
+            if (game.owner) {
+                if (game.winner_card) {
+                    this.create_write_sentence(player_id, game.id, game.winner_card, root);
+                } else {
+                    this.create_pick_card(player_id, game.id, root);
+                }
+            } else {
+                this.create_wait(player_id, game.id, root);
+            }
+        },
+
+        create_wait: function(player_id, game, root) {
+            // TODO: Make a pretty notification dialog, start the game poll,
+            //       or do some other fancy stuff.
+            this.window.alert("The author hasn't finished creating this story yet.");
         },
 
         create_deck: function() {
@@ -340,7 +378,7 @@
             });
         },
 
-        create_pick_card: function(player_id, previous_game_id, root) {
+        create_pick_card: function(player_id, game_id, root) {
             var $this = this;
             var element = $('.cardstories_create .cardstories_pick_card', root);
             this.set_active('create_pick_card', element, root);
@@ -349,7 +387,7 @@
             this.init_board_buttons(player_id, element, root);
             var deck = $this.create_deck();
             var cards = $.map(deck, function(card, index) {
-                return { 'value':card };
+                return {value: card};
             });
 
             var deferred = $.Deferred();
@@ -358,7 +396,7 @@
 
             // Deal the cards
             q.queue('chain', function(next) {
-                $this.create_pick_card_animate(cards, element, root, function() {next();});
+                $this.create_pick_card_animate(cards, element, root, next);
             });
 
             // Set up the dock for card selection, and show the modal box.  The
@@ -368,17 +406,25 @@
                     // The selected card will be needed later in the 'chain' queue.
                     card_value = _card_value;
                     card_index = _card_index;
-                    next();
+                    var query = {
+                        action: 'set_card',
+                        player_id: player_id,
+                        game_id: game_id,
+                        card: card_value
+                    };
+                    $this.send(query, next, player_id, game_id, root);
                 };
 
-                $this.select_cards('create_pick_card', cards, ok, element, root, true).done(function() {
+                $this.select_cards('create_pick_card', cards, ok, element, root).done(function() {
                     // Hide the cards in the back.
                     $('.cardstories_deck .cardstories_card', element).hide();
 
                     // Delay the appearance of the modal box artificially, since
                     // jqDock doesn't provide a hook for when expansion finishes.
                     $this.setTimeout(function() {
-                        $this.display_modal($('.cardstories_info', element), $('.cardstories_modal_overlay', element), function() {
+                        var modal = $('.cardstories_info', element);
+                        var overlay = $('.cardstories_modal_overlay', element);
+                        $this.display_modal(modal, overlay, function() {
                             deferred.resolve();
                         });
                     }, 250);
@@ -398,7 +444,7 @@
 
             // Finally, initialize the next state.
             q.queue('chain', function(next) {
-                $this.create_write_sentence(player_id, previous_game_id, card_value, root);
+                $this.create_write_sentence(player_id, game_id, card_value, root);
             });
 
             q.dequeue('chain');
@@ -659,7 +705,7 @@
                 card_imgs.animate({
                     width: final_width,
                     height: final_height
-                }, animation_duration, function() {next();});
+                }, animation_duration, next);
             });
             q.queue('chain', function(next) {
                 card_shadow.fadeIn('fast');
@@ -687,8 +733,11 @@
             var final_sentence_box = $('.cardstories_sentence_box', final_element);
 
             // Calculate final position and dimensions.
-            final_container.show();
-            final_element.show();
+            // Temporarily show destination elements by adding the cardstories_active class.
+            // Using jQuery's show/hide doesn't work here, because it leaves the elements
+            // with inline styles set to display:none and therefore invisible.
+            final_container.addClass('cardstories_active');
+            final_element.addClass('cardstories_active');
             var card_top = final_card_template.position().top;
             var card_left = final_card_template.position().left;
             var card_width = final_card_template.width();
@@ -697,8 +746,8 @@
             var sentence_left = final_sentence_box.position().left;
             var sentence_width = final_sentence_box.width();
             var sentence_height = final_sentence_box.height();
-            final_element.hide();
-            final_container.hide();
+            final_element.removeClass('cardstories_active');
+            final_container.removeClass('cardstories_active');
 
             // Animate!
             var text = $('.cardstories_sentence', write_box).val();
@@ -718,7 +767,7 @@
                     left: sentence_box.position().left + 30,
                     width: sentence_width,
                     height: sentence_height
-                }, 200, function() {next();});
+                }, 200, next);
             });
             q.queue('chain', function(next) {
                 card_shadow.hide();
@@ -734,7 +783,7 @@
                 card_img.animate({
                     width: card_width,
                     height: card_height
-                }, duration, function() {next();});
+                }, duration, next);
             });
             // If set, run the callback at the end of the queue.
             if (cb) {
@@ -743,7 +792,7 @@
             q.dequeue('chain');
         },
 
-        create_write_sentence: function(player_id, previous_game_id, card, root) {
+        create_write_sentence: function(player_id, game_id, card, root) {
             var $this = this;
             var element = $('.cardstories_create .cardstories_write_sentence', root);
             this.set_active('create_write_sentence', element, root);
@@ -777,36 +826,29 @@
                     return false;
                 }
 
-                var success = function(data, status) {
-                    if ('error' in data) {
-                        $this.panic(data.error, player_id, undefined, root);
-                    } else {
-                        $this.animate_progress_bar(3, element, function() {
-                            $this.reload(player_id, data.game_id, {}, root);
-                        });
-                    }
-                };
-
                 $this.create_write_sentence_animate_end(card, element, root, function() {
-                    var query = {
-                        action: 'create',
-                        owner_id: player_id,
-                        card: card
-                    };
-
-                    // If this is a continuation of a series of games, the WS needs to know
-                    // the id of the previous game
-                    if (previous_game_id) {
-                        query.previous_game_id = previous_game_id;
-                    }
-
-                    var sentence = encodeURIComponent($('.cardstories_sentence', element).val());
-                    $this.ajax({
-                        url: $this.url + '?' + $.param(query, true),
-                        type: 'POST',
-                        data: 'sentence=' + sentence,
-                        success: success
-                    }, player_id, undefined, root);
+                    $this.animate_progress_bar(3, element, function() {
+                        var success = function(data, status) {
+                            if ('error' in data) {
+                                $this.panic(data.error, player_id, game_id, root);
+                            } else {
+                                $this.game(player_id, game_id, root, {async: false});
+                            }
+                        };
+                        var query = {
+                            action: 'set_sentence',
+                            game_id: game_id,
+                            player_id: player_id
+                        };
+                        var sentence = encodeURIComponent($('.cardstories_sentence', element).val());
+                        $this.ajax({
+                            url: $this.url + '?' + $.param(query, true),
+                            type: 'POST',
+                            async: false,
+                            data: 'sentence=' + sentence,
+                            success: success
+                        }, player_id, game_id, root);
+                    });
                 });
                 return true;
             };
@@ -1050,7 +1092,7 @@
             var $this = this;
             var deferred;
             var inhibit_poll = false;
-            if(game.owner) {
+            if (game.owner) {
                 deferred = this.invitation_owner(player_id, game, root);
             } else {
                 if ($.query.get('anonymous')) {
@@ -1070,12 +1112,13 @@
             }
 
             if (!inhibit_poll) {
+                $this.poll_discard(root);
                 $this.poll({
                     'type': ['game'],
                     'game_id': game.id,
                     'player_id': player_id
                 }, player_id, game.id, root, function() {
-                    $this.game_or_create(player_id, game.id, {}, root);
+                    $this.game(player_id, game.id, root);
                 });
             }
 
@@ -1114,12 +1157,12 @@
 
             // Display the modal.
             q.queue('chain', function(next) {
-                $this.invitation_owner_modal_helper($('.cardstories_info', element), $('.cardstories_modal_overlay', element), function() {next();});
+                $this.invitation_owner_modal_helper($('.cardstories_info', element), $('.cardstories_modal_overlay', element), next);
             });
 
             // Then the invite friend buttons.
             q.queue('chain', function(next) {
-                $this.invitation_owner_slots_helper($('.cardstories_player_invite', element), player_id, game.id, element, root, function() {next();});
+                $this.invitation_owner_slots_helper($('.cardstories_player_invite', element), player_id, game.id, element, root, next);
             });
 
             // Show players joining and picking cards.
@@ -1488,7 +1531,7 @@
                 // Set up the dock itself and continue immediately, so the
                 // player can see others joining while he picks his cards.
                 q.queue('chain', function(next) {
-                    $this.select_cards('invitation_pick', card_specs, ok, element, root, true).done(function() {
+                    $this.select_cards('invitation_pick', card_specs, ok, element, root).done(function() {
                         deferred.resolve();
                     });
                     next();
@@ -2008,7 +2051,7 @@
             return deferred;
         },
 
-        select_cards: function(id, cards, ok, element, root, start_collapsed) {
+        select_cards: function(id, cards, ok, element, root) {
             var $this = this;
             var confirm = $('.cardstories_card_confirm', element);
             if (confirm.children().length == 0) {
@@ -2031,18 +2074,18 @@
                 });
             };
             var hand = $('.cardstories_cards_hand', element);
-            return this.display_or_select_cards(id, cards, confirm_callback, hand, root, start_collapsed);
+            return this.display_or_select_cards(id, cards, confirm_callback, hand, root, true);
         },
 
         display_or_select_cards: function(id, cards, select_callback, element, root, start_collapsed) {
-            id += '_saved_element';
+            var elem_id = id + '_saved_element';
             var $root = $(root);
             var saved_elements = $root.data('cardstories_saved_elements') || {};
-            if (saved_elements[id] === undefined) {
-                saved_elements[id] = element.html();
+            if (saved_elements[elem_id] === undefined) {
+                saved_elements[elem_id] = element.html();
                 $root.data('cardstories_saved_elements', saved_elements);
             } else {
-                element.html(saved_elements[id]);
+                element.html(saved_elements[elem_id]);
             }
             var meta = element.metadata({type: "attr", name: "data"});
             var active_card = meta.active;
@@ -2097,12 +2140,16 @@
                                 link.addClass('cardstories_card_selected');
                                 link.css({zIndex: 200});
                                 var nudge = function() {
-                                    link.removeClass('cardstories_card_selected');
-                                    link.css({zIndex: zindex});
-                                    if(has_bg) {
-                                        background.attr('src', meta.card_bg);
-                                    } else {
-                                        background.removeAttr('src');
+                                    // In 'create_pick_card', we don't want the dock restored,
+                                    // so omit these steps.
+                                    if (id !== 'create_pick_card') {
+                                        link.removeClass('cardstories_card_selected');
+                                        link.css({zIndex: zindex});
+                                        if (has_bg) {
+                                            background.attr('src', meta.card_bg);
+                                        } else {
+                                            background.removeAttr('src');
+                                        }
                                     }
                                     dock.jqDock('nudge');
                                 };
@@ -2302,7 +2349,7 @@
                 'game_id': game.id,
                 'player_id': player_id
             }, player_id, game.id, root, function() {
-                $this.game_or_create(player_id, game.id, {}, root);
+                $this.game(player_id, game.id, root);
             });
 
             return deferred;
@@ -3663,7 +3710,12 @@
         send: function(query, callback, player_id, game_id, root, opts) {
             opts = opts || {};
             var $this = this;
-            var onerror = opts.onerror || $this.panic;
+            var onerror = opts.onerror;
+            if (!onerror) {
+                onerror = function(err) {
+                    $this.panic(err, player_id, game_id, root);
+                };
+            }
             var success = function(data, status) {
                 if ('error' in data) {
                     onerror(data.error);
@@ -4167,7 +4219,7 @@
 
         game_or_create: function(player_id, game_id, options, root) {
             if (!game_id) {
-                this.create(player_id, options.previous_game_id, root);
+                this.create_new_game(player_id, options.previous_game_id, root);
             } else {
                 this.game(player_id, game_id, root);
             }

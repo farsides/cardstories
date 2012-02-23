@@ -186,7 +186,7 @@ test("closing the currently focused tab with tabs to the left", 7, function() {
     equal($('.cardstories_tab', element).length, 2, 'There are two tabs left');
 });
 
-test("closing the currently focused tab when it is the only tab", 8, function() {
+test("closing the currently focused tab when it is the only tab", 7, function() {
     var root = $(selector);
     var element = $('.cardstories_tabs', root);
     var player_id = 111;
@@ -218,64 +218,10 @@ test("closing the currently focused tab when it is the only tab", 8, function() 
     $.cardstories.reload = function(_player_id, _game_id, _options, _root) {
         equal(_player_id, player_id, 'reload gets passed the player_id');
         strictEqual(_game_id, undefined, 'New game tab is loaded');
-        ok(_options.force_create, 'reload is called with the force_create flag');
     };
     var tab = $('.cardstories_tab', element).last();
     tab.find('.cardstories_tab_close').click();
     equal($('.cardstories_tab', element).length, 0, 'There are no tabs left');
-});
-
-test("closing the currently focused when it is the 'New game' tab", 5, function() {
-    var root = $(selector);
-    var element = $('.cardstories_tabs', root);
-    var player_id = 111;
-    var game_id = undefined;
-    var games = [];
-
-    $.cardstories.send = function(query) {
-        ok(false, 'send is not called; this should never happen');
-    };
-
-    root.cardstories_tabs(player_id);
-    $.cardstories_tabs.load_game(player_id, game_id, {}, root);
-
-    // When there are tabs to left, but no tabs to the right of current tab,
-    // it will load the first on one the left.
-    $.cardstories_tabs.state(player_id, {games: games}, root);
-    equal($('.cardstories_tab', element).length, 1, 'There is one tab');
-
-    // Click the close button.
-    // The tab should be removed from the DOM, and 'New game' tab loaded.
-    $.cardstories.reload = function(_player_id, _game_id, _options, _root) {
-        equal(_player_id, player_id, 'reload gets passed the player_id');
-        strictEqual(_game_id, undefined, 'New game tab is loaded');
-        ok(_options.force_create, 'reload is called with the force_create flag');
-    };
-    var tab = $('.cardstories_tab', element);
-    tab.find('.cardstories_tab_close').click();
-    equal($('.cardstories_tab', element).length, 0, 'There are no more tabs left');
-});
-
-test("dynamic tab for new game", 3, function() {
-    var root = $(selector);
-    var element = $('.cardstories_tabs', root);
-    var player_id = 121;
-    var game_id = undefined; // game_id is undefined when creating a new game.
-    var other_game_id = 1001;
-    var other_game_title = 'The Other Game';
-    var games = [
-        {id: other_game_id, sentence: other_game_title}
-    ];
-
-    root.cardstories_tabs(player_id);
-    $.cardstories_tabs.load_game(player_id, game_id, {}, root);
-
-    $.cardstories_tabs.state(player_id, {games: games}, root);
-    // There is one tab for game 1001, and one created dynamically for the new game
-    var tabs = $('.cardstories_tab', element);
-    equal(tabs.length, 2, 'A fake tab for new game has been created');
-    equal(tabs.eq(0).find('.cardstories_tab_title').text(), other_game_title);
-    ok(tabs.eq(1).find('.cardstories_tab_title').text().match(/new game/i));
 });
 
 test("requires_action author", 7, function() {

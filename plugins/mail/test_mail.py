@@ -65,10 +65,16 @@ class MailTest(unittest.TestCase):
         self.player2_email = 'player2@example.com'
         self.winner_card = winner_card = 5
         sentence = 'SENTENCE'
-        game = yield self.service.create({ 'card': [winner_card],
-                                           'sentence': [sentence],
-                                           'owner_id': [self.owner_id]})
+        game = yield self.service.create({'owner_id': [self.owner_id]})
         self.game_id = game['game_id']
+        yield self.service.set_card({ 'action': ['set_card'],
+                                      'card': [winner_card],
+                                      'game_id': [self.game_id],
+                                      'player_id': [self.owner_id] })
+        yield self.service.set_sentence({ 'action': ['set_sentence'],
+                                          'sentence': [sentence],
+                                          'game_id': [self.game_id],
+                                          'player_id': [self.owner_id] })
         yield self.service.invite({ 'action': ['invite'],
                                     'game_id': [self.game_id],
                                     'invited_email': [self.player1_email],

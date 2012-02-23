@@ -259,11 +259,11 @@
     padding: 0 5px 0 10px;
 }
 
-.cardstories .cardstories_tabs li.cardstories_new {
+.cardstories .cardstories_tabs li.cardstories_new_game {
     padding: 0 5px;
 }
 
-.cardstories .cardstories_tabs li.cardstories_new a {
+.cardstories .cardstories_tabs li.cardstories_new_game a {
     position: relative;
     top: 4px;
 }
@@ -1307,7 +1307,7 @@
     display: block;
 }
 
-.cardstories .cardstories_create .cardstories_info { 
+.cardstories .cardstories_create .cardstories_info {
     left: 230px;
     top: 90px;
     height: 132px;
@@ -2411,11 +2411,11 @@
 
 /* Dimensions and initial state of all pages */
 
-.cardstories .cardstories_subscribe, 
+.cardstories .cardstories_subscribe,
 .cardstories .cardstories_in_progress,
 .cardstories .cardstories_finished,
 .cardstories .cardstories_create,
-.cardstories .cardstories_create > div, 
+.cardstories .cardstories_create > div,
 .cardstories .cardstories_invitation,
 .cardstories .cardstories_invitation > div,
 .cardstories .cardstories_vote,

@@ -75,41 +75,53 @@ class ChatTest(unittest.TestCase):
         self.winner_card = winner_card = 5
         sentence = 'SENTENCE'
         owner_id = 15
-        game = yield self.service.create({ 'card': [winner_card],
-                                           'sentence': [sentence],
-                                           'owner_id': [owner_id]})
+        result = yield self.service.create({'card': [winner_card],
+                                            'sentence': [sentence],
+                                            'owner_id': [owner_id]})
+        game_id = result['game_id']
+
+        yield self.service.set_card({'action': ['set_card'],
+                                     'card': [winner_card],
+                                     'player_id': [owner_id],
+                                     'game_id': [game_id]})
+
+        yield self.service.set_sentence({'action': ['set_sentence'],
+                                         'sentence': [sentence],
+                                         'player_id': [owner_id],
+                                         'game_id': [game_id]})
+
         self.player1 = 16
         for player_id in (self.player1, 17):
             yield self.service.participate({ 'action': ['participate'],
                                              'player_id': [player_id],
-                                             'game_id': [game['game_id']] })
+                                             'game_id': [game_id] })
             player = yield self.service.player2game({ 'action': ['player2game'],
                                                       'player_id': [player_id],
-                                                      'game_id': [game['game_id']] })
+                                                      'game_id': [game_id] })
             card = player['cards'][0]
             yield self.service.pick({ 'action': ['pick'],
                                       'player_id': [player_id],
-                                      'game_id': [game['game_id']],
+                                      'game_id': [game_id],
                                       'card': [card] })
 
         yield self.service.voting({ 'action': ['voting'],
-                                    'game_id': [game['game_id']],
+                                    'game_id': [game_id],
                                     'owner_id': [owner_id] })
         winner_id = self.player1
         yield self.service.vote({ 'action': ['vote'],
-                                  'game_id': [game['game_id']],
+                                  'game_id': [game_id],
                                   'player_id': [winner_id],
                                   'card': [winner_card] })
         loser_id = 17
         yield self.service.vote({ 'action': ['vote'],
-                                  'game_id': [game['game_id']],
+                                  'game_id': [game_id],
                                   'player_id': [loser_id],
                                   'card': [120] })
-        self.assertTrue(self.service.games.has_key(game['game_id']))
+        self.assertTrue(self.service.games.has_key(game_id))
         yield self.service.complete({ 'action': ['complete'],
-                                      'game_id': [game['game_id']],
+                                      'game_id': [game_id],
                                       'owner_id': [owner_id] })
-        self.assertFalse(self.service.games.has_key(game['game_id']))
+        self.assertFalse(self.service.games.has_key(game_id))
         defer.returnValue(True)
 
     @defer.inlineCallbacks
@@ -315,7 +327,7 @@ class ChatTest(unittest.TestCase):
         unicode_sentence = u"我不明白 šal čez želodec"
         changes = {'type': 'change',
                    'details': {'type': 'load',
-                               'sentence': [unicode_sentence]},
+                               'sentence': unicode_sentence},
                    'game': FakeGame()}
         result = yield chat_instance.self_notify(changes)
         with open(os.path.join(self.test_logdir, 'chat', '%s.log' % strftime('%Y-%m-%d'))) as f:

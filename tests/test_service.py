@@ -168,35 +168,57 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
 
     @defer.inlineCallbacks
     def test01_create(self):
+        owner_id = 15
         card = 5
         str_sentence = 'SENTENCE \xc3\xa9' # str containing unicode because that is what happens when
                                            # twisted web decodes %c3%a9
         utf8_sentence = u'SENTENCE \xe9'
-        owner_id = 15
-        self.inited = False
+
+        self.create_touch = False
         def accept(event):
             self.assertEquals(event['details']['type'], 'create')
             self.assertEquals(event['details']['previous_game_id'], None)
-            self.inited = True
+            self.create_touch = True
         self.service.listen().addCallback(accept)
-        result = yield self.service.create({ 'card': [card],
-                                             'sentence': [str_sentence],
-                                             'owner_id': [owner_id]})
-        self.assertTrue(self.inited, 'init event called')
+        result = yield self.service.create({'owner_id': [owner_id]})
+        self.assertTrue(self.create_touch, 'create event called')
+
+        game_id = result['game_id']
+
+        self.set_card_touch = False
+        def accept(event):
+            self.assertEquals(event['details']['type'], 'set_card')
+            self.set_card_touch = True
+        self.service.listen().addCallback(accept)
+        result = yield self.service.set_card({'action': ['set_card'],
+                                              'card': [card],
+                                              'game_id': [game_id],
+                                              'player_id': [owner_id]})
+        self.assertTrue(self.set_card_touch, 'set_card event called')
+
+        self.set_sentence_touch = False
+        def accept(event):
+            self.assertEquals(event['details']['type'], 'set_sentence')
+            self.set_sentence_touch = True
+        self.service.listen().addCallback(accept)
+        result = yield self.service.set_sentence({'action': ['set_sentence'],
+                                                  'sentence': [str_sentence],
+                                                  'game_id': [game_id],
+                                                  'player_id': [owner_id]})
+        self.assertTrue(self.set_card_touch, 'set_sentence event called')
+
         c = self.db.cursor()
         c.execute("SELECT * FROM games")
         rows = c.fetchall()
         self.assertEquals(1, len(rows))
-        self.assertEquals(result['game_id'], rows[0][0])
+        self.assertEquals(game_id, rows[0][0])
         self.assertEquals(utf8_sentence, rows[0][3])
         self.assertEquals(chr(card), rows[0][5])
-        self.assertEquals(self.service.games[result['game_id']].get_id(), result['game_id'])
+        self.assertEquals(self.service.games[game_id].get_id(), game_id)
         c.close()
 
     @defer.inlineCallbacks
     def test01_create_notify_previous_game_id(self):
-        card = 5
-        str_sentence = 'SENTENCE'
         owner_id = 15
         self.inited = False
         previous_game_id = 30
@@ -205,10 +227,8 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
             self.assertEquals(event['details']['previous_game_id'], previous_game_id)
             self.inited = True
         self.service.listen().addCallback(accept)
-        result = yield self.service.create({ 'card': [card],
-                                             'sentence': [str_sentence],
-                                             'owner_id': [owner_id],
-                                             'previous_game_id': [previous_game_id]})
+        result = yield self.service.create({'owner_id': [owner_id],
+                                            'previous_game_id': [previous_game_id]})
         self.assertTrue(self.inited, 'init event called')
 
     @defer.inlineCallbacks
@@ -217,9 +237,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         str_sentence = 'SENTENCE'
         owner_id = 15
         self.loaded = False
-        result = yield self.service.create({ 'card': [card],
-                                             'sentence': [str_sentence],
-                                             'owner_id': [owner_id]})
+        result = yield self.service.create({'owner_id': [owner_id]})
 
         service2 = CardstoriesService({'db': self.database})
 
@@ -263,69 +281,80 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         winner_card = 5
         sentence = 'SENTENCE'
         owner_id = 15
-        game = yield self.service.create({ 'card': [winner_card],
-                                           'sentence': [sentence],
-                                           'owner_id': [owner_id]})
+        game = yield self.service.create({'owner_id': [owner_id]})
+        game_id = game['game_id']
+
+        yield self.service.set_card({'action': ['set_card'],
+                                     'card': [winner_card],
+                                     'game_id': [game_id],
+                                     'player_id': [owner_id]})
+        yield self.service.set_sentence({'action': ['set_sentence'],
+                                         'sentence': [sentence],
+                                         'game_id': [game_id],
+                                         'player_id': [owner_id]})
+
         for player_id in (16, 17):
             yield self.service.participate({ 'action': ['participate'],
                                              'player_id': [player_id],
-                                             'game_id': [game['game_id']] })
+                                             'game_id': [game_id] })
             player = yield self.service.player2game({ 'action': ['player2game'],
                                                       'player_id': [player_id],
-                                                      'game_id': [game['game_id']] })
+                                                      'game_id': [game_id] })
             card = player['cards'][0]
             yield self.service.pick({ 'action': ['pick'],
                                       'player_id': [player_id],
-                                      'game_id': [game['game_id']],
+                                      'game_id': [game_id],
                                       'card': [card] })
 
         yield self.service.voting({ 'action': ['voting'],
-                                    'game_id': [game['game_id']],
+                                    'game_id': [game_id],
                                     'owner_id': [owner_id] })
 
         c = self.db.cursor()
-        c.execute("SELECT board FROM games WHERE id = %d" % game['game_id'])
+        c.execute("SELECT board FROM games WHERE id = %d" % game_id)
         board = c.fetchone()[0]
         winner_id = 16
         yield self.service.vote({ 'action': ['vote'],
-                                  'game_id': [game['game_id']],
+                                  'game_id': [game_id],
                                   'player_id': [winner_id],
                                   'card': [winner_card] })
         loser_id = 17
         yield self.service.vote({ 'action': ['vote'],
-                                  'game_id': [game['game_id']],
+                                  'game_id': [game_id],
                                   'player_id': [loser_id],
                                   'card': [120] })
-        self.assertTrue(self.service.games.has_key(game['game_id']))
+        self.assertTrue(self.service.games.has_key(game_id))
         yield self.service.complete({ 'action': ['complete'],
-                                      'game_id': [game['game_id']],
+                                      'game_id': [game_id],
                                       'owner_id': [owner_id] })
-        self.assertFalse(self.service.games.has_key(game['game_id']))
+        self.assertFalse(self.service.games.has_key(game_id))
 
     @defer.inlineCallbacks
     def test04_game(self):
         winner_card = 5
-        sentence = 'SENTENCE'
         owner_id = 15
-        game = yield self.service.create({ 'card': [winner_card],
-                                           'sentence': [sentence],
-                                           'owner_id': [owner_id]})
-        game_info, players_id_list = yield self.service.game({ 'action': 'game',
-                                                               'game_id': [game['game_id']] })
-        self.assertEquals(game['game_id'], game_info['id'])
+        game = yield self.service.create({'owner_id': [owner_id]})
+        game_id = game['game_id']
+        yield self.service.set_card({'action': ['set_card'],
+                                     'card': [winner_card],
+                                     'game_id': [game_id],
+                                     'player_id': [owner_id]})
+        game_info, players_id_list = yield self.service.game({'action': 'game',
+                                                              'game_id': [game_id]})
+        self.assertEquals(game_id, game_info['id'])
         self.assertEquals(game_info['winner_card'], None)
         self.assertIn(owner_id, players_id_list)
         game_info, players_id_list = yield self.service.game({ 'action': 'game',
-                                                               'game_id': [game['game_id']],
+                                                               'game_id': [game_id],
                                                                'player_id': [owner_id] })
-        self.assertEquals(game['game_id'], game_info['id'])
+        self.assertEquals(game_id, game_info['id'])
         self.assertEquals(game_info['winner_card'], winner_card)
         # if there is no in core representation of the game,
         # a temporary one is created
         self.service.games[game_info['id']].destroy()
         game_info, players_id_list = yield self.service.game({ 'action': 'game',
-                                                               'game_id': [game['game_id']] })
-        self.assertEquals(game['game_id'], game_info['id'])
+                                                               'game_id': [game_id] })
+        self.assertEquals(game_id, game_info['id'])
 
     @defer.inlineCallbacks
     def test07_game_notify(self):
@@ -335,9 +364,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         card = 5
         sentence = 'SENTENCE'
         owner_id = 15
-        result = yield self.service.create({ 'card': [card],
-                                             'sentence': [sentence],
-                                             'owner_id': [owner_id]})
+        result = yield self.service.create({'owner_id': [owner_id]})
         game = self.service.games[result['game_id']]
 
         def change(event):
@@ -382,9 +409,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         card = 5
         sentence = 'SENTENCE'
         owner_id = 15
-        result = yield self.service.create({'card': [card],
-                                            'sentence': [sentence],
-                                            'owner_id': [owner_id]})
+        result = yield self.service.create({'owner_id': [owner_id]})
         game = self.service.games[result['game_id']]
         d = self.service.poll({'action': ['poll'],
                                'type': ['game'],
@@ -428,9 +453,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         # Create three games and associate them with the owner in the tabs table.
         game_ids = []
         for i in range(3):
-            result = yield self.service.create({'card': [card],
-                                                'sentence': [sentence],
-                                                'owner_id': [owner_id]})
+            result = yield self.service.create({'owner_id': [owner_id]})
             game_id = result['game_id']
             game_ids.append(game_id)
 
@@ -486,10 +509,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         card = 5
         sentence = 'SENTENCE'
         owner_id = 15
-        game = yield self.service.create({ 'action': ['create'],
-                                           'card': [card],
-                                           'sentence': [sentence],
-                                           'owner_id': [owner_id]})
+        game = yield self.service.create({'owner_id': [owner_id]})
         players = [ 16, 17 ]
         for player_id in players:
             yield self.service.participate({ 'action': ['participate'],
@@ -520,10 +540,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         sentence = 'SENTENCE'
         owner_id = 15
         player_id = 18
-        game = yield self.service.create({ 'action': ['create'],
-                                           'card': [card],
-                                           'sentence': [sentence],
-                                           'owner_id': [owner_id]})
+        game = yield self.service.create({'owner_id': [owner_id]})
         players = [ 16, 17 ]
         for player_id in players:
             yield self.service.participate({ 'action': ['participate'],
@@ -561,41 +578,49 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         winner_card = 5
         sentence = 'SENTENCE'
         owner_id = 15
-        result = yield self.service.create({ 'card': [winner_card],
-                                           'sentence': [sentence],
-                                           'owner_id': [owner_id]})
+        game = yield self.service.create({'owner_id': [owner_id]})
+        game_id = game['game_id']
+        yield self.service.set_card({'action': ['set_card'],
+                                     'card': [winner_card],
+                                     'game_id': [game_id],
+                                     'player_id': [owner_id]})
+        yield self.service.set_sentence({'action': ['set_sentence'],
+                                         'sentence': [sentence],
+                                         'game_id': [game_id],
+                                         'player_id': [owner_id]})
+
         for player_id in (16, 17):
             yield self.service.participate({ 'action': ['participate'],
                                              'player_id': [player_id],
-                                             'game_id': [result['game_id']] })
+                                             'game_id': [game_id] })
             player = yield self.service.player2game({ 'action': ['player2game'],
                                                       'player_id': [player_id],
-                                                      'game_id': [result['game_id']] })
+                                                      'game_id': [game_id] })
             card = player['cards'][0]
             yield self.service.pick({ 'action': ['pick'],
                                       'player_id': [player_id],
-                                      'game_id': [result['game_id']],
+                                      'game_id': [game_id],
                                       'card': [card] })
 
         yield self.service.voting({ 'action': ['voting'],
-                                    'game_id': [result['game_id']],
+                                    'game_id': [game_id],
                                     'owner_id': [owner_id] })
 
         c = self.db.cursor()
-        c.execute("SELECT board FROM games WHERE id = %d" % result['game_id'])
+        c.execute("SELECT board FROM games WHERE id = %d" % game_id)
         board = c.fetchone()[0]
         winner_id = 16
         yield self.service.vote({ 'action': ['vote'],
-                                  'game_id': [result['game_id']],
+                                  'game_id': [game_id],
                                   'player_id': [winner_id],
                                   'card': [winner_card] })
         loser_id = 17
         yield self.service.vote({ 'action': ['vote'],
-                                  'game_id': [result['game_id']],
+                                  'game_id': [game_id],
                                   'player_id': [loser_id],
                                   'card': [120] })
-        self.assertTrue(self.service.games.has_key(result['game_id']))
-        game = self.service.games[result['game_id']]
+        self.assertTrue(self.service.games.has_key(game_id))
+        game = self.service.games[game_id]
         d = self.service.poll({'action': ['poll'],
                                'type': ['game'],
                                'modified': [game.modified],
@@ -605,9 +630,9 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
             return result
         d.addCallback(check)
         yield self.service.complete({ 'action': ['complete'],
-                                      'game_id': [result['game_id']],
+                                      'game_id': [game_id],
                                       'owner_id': [owner_id] })
-        self.assertFalse(self.service.games.has_key(result['game_id']))
+        self.assertFalse(self.service.games.has_key(game_id))
         yield d
 
     @defer.inlineCallbacks
@@ -703,23 +728,31 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         fake_get_player_avatar_url = Mock(return_value=player_avatar_url)
         self.service.auth.get_player_avatar_url = fake_get_player_avatar_url
 
-        game = yield self.service.create({ 'card': [winner_card],
-                                           'sentence': [sentence],
-                                           'owner_id': [owner_id]})
+        game = yield self.service.create({'owner_id': [owner_id]})
+        game_id = game['game_id']
+
+        yield self.service.set_card({'action': ['set_card'],
+                                     'card': [winner_card],
+                                     'game_id': [game_id],
+                                     'player_id': [owner_id]})
+        yield self.service.set_sentence({'action': ['set_sentence'],
+                                         'sentence': [sentence],
+                                         'game_id': [game_id],
+                                         'player_id': [owner_id]})
 
         #
         # type = ['game']
-        # 
+        #
         state = yield self.service.state({ 'type': ['game'],
                                            'modified': [0],
-                                           'game_id': [game['game_id']] })
-        self.assertEquals(game['game_id'], state[0]['id'])
+                                           'game_id': [game_id] })
+        self.assertEquals(game_id, state[0]['id'])
         self.assertEquals(state[0]['winner_card'], None)
         state = yield self.service.state({ 'type': ['game'],
                                            'modified': [0],
-                                           'game_id': [game['game_id']],
+                                           'game_id': [game_id],
                                            'player_id': [owner_id] })
-        self.assertEquals(game['game_id'], state[0]['id'])
+        self.assertEquals(game_id, state[0]['id'])
         self.assertEquals(state[0]['winner_card'], winner_card)
         self.assertEquals(state[0]['type'], 'game')
 
@@ -733,14 +766,29 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         sentence2 = 'SENTENCE2'
         player_id = 100
         owner_id1 = 101
-        game1 = yield self.service.create({ 'card': [winner_card1],
-                                            'sentence': [sentence1],
-                                            'owner_id': [owner_id1]})
-        game2 = yield self.service.create({ 'card': [winner_card2],
-                                            'sentence': [sentence2],
-                                            'owner_id': [player_id]})
+
+        game1 = yield self.service.create({'owner_id': [owner_id1]})
         game_id1 = game1['game_id']
+        yield self.service.set_card({'action': ['set_card'],
+                                     'card': [winner_card1],
+                                     'game_id': [game_id1],
+                                     'player_id': [owner_id1]})
+        yield self.service.set_sentence({'action': ['set_sentence'],
+                                         'sentence': [sentence1],
+                                         'game_id': [game_id1],
+                                         'player_id': [owner_id1]})
+
+        game2 = yield self.service.create({'owner_id': [player_id]})
         game_id2 = game2['game_id']
+        yield self.service.set_card({'action': ['set_card'],
+                                     'card': [winner_card2],
+                                     'game_id': [game_id2],
+                                     'player_id': [player_id]})
+        yield self.service.set_sentence({'action': ['set_sentence'],
+                                         'sentence': [sentence2],
+                                         'game_id': [game_id2],
+                                         'player_id': [player_id]})
+
         # Associate the first game with the player, and pass the ID of
         # the second one as 'game_id' to the state call - the state function
         # should automatically associate the second game with player's tabs,
@@ -807,7 +855,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         #
         state = yield self.service.state({ 'type': ['game', 'tabs', 'plugin'],
                                            'modified': [0],
-                                           'game_id': [game['game_id']],
+                                           'game_id': [game_id],
                                            'player_id': [owner_id] })
         self.assertEquals(state[0]['type'], 'game')
         self.assertEquals(state[1]['type'], 'tabs')
@@ -842,25 +890,26 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         card = 7
         sentence = 'SENTENCE'
         owner_id = 52
-        game = yield self.service.create({ 'action': ['create'],
-                                           'card': [card],
-                                           'sentence': [sentence],
-                                           'owner_id': [owner_id]})
+        result = yield self.service.create({'owner_id': [owner_id]})
+        game_id = result['game_id']
+        yield self.service.set_card({'action': ['set_card'],
+                                     'card': [card],
+                                     'game_id': [game_id],
+                                     'player_id': [owner_id]})
+        yield self.service.set_sentence({'action': ['set_sentence'],
+                                         'sentence': [sentence],
+                                         'game_id': [game_id],
+                                         'player_id': [owner_id]})
+        yield self.service.set_countdown({'action': ['set_countdown'],
+                                          'duration': ['3600'],
+                                          'game_id': [game_id]})
 
-        gameId = game['game_id']
-        yield self.service.set_countdown({ 'action': ['set_countdown'],
-                                           'duration': ['3600'],
-                                           'game_id': [game['game_id']] })
-
-        game = self.service.games[game['game_id']]
+        game = self.service.games[game_id]
         self.assertEquals(3600, game.get_countdown_duration())
 
     @defer.inlineCallbacks
     def test14_poll_destroyed_game(self):
-        game = yield self.service.create({ 'action': ['create'],
-                                           'card': [12],
-                                           'sentence': ['THE SENTENCE'],
-                                           'owner_id': [22] })
+        game = yield self.service.create({'owner_id': [22] })
         game_id = game['game_id']
         self.service.games[game_id].destroy()
         result = yield self.service.poll({ 'game_id': [game_id],
@@ -896,6 +945,41 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
 
         self.service.poll_tabs = orig_service_poll_tabs
 
+    @defer.inlineCallbacks
+    def test16_set_card(self):
+        card = 7
+        owner_id = 52
+        game = yield self.service.create({'owner_id': [owner_id]})
+        game_id = game['game_id']
+
+        yield self.service.set_card({'action': ['set_card'],
+                                     'card': [card],
+                                     'player_id': [owner_id],
+                                     'game_id': [game_id] })
+
+        state, player_id_list = yield self.service.games[game_id].game(owner_id)
+        self.assertEquals(card, state['winner_card'])
+
+    @defer.inlineCallbacks
+    def test16_set_sentence(self):
+        card = 8
+        owner_id = 51
+        sentence = 'THE SENTENCE'
+        game = yield self.service.create({'owner_id': [owner_id]})
+        game_id = game['game_id']
+
+        yield self.service.set_card({'action': ['set_card'],
+                                     'card': [card],
+                                     'player_id': [owner_id],
+                                     'game_id': [game_id] })
+        yield self.service.set_sentence({'action': ['set_sentence'],
+                                         'sentence': [sentence],
+                                         'player_id': [owner_id],
+                                         'game_id': [game_id] })
+
+        state, player_id_list = yield self.service.games[game_id].game(owner_id)
+        self.assertEquals(sentence, state['sentence'])
+
 class CardstoriesConnectorTest(CardstoriesServiceTestBase):
 
     @defer.inlineCallbacks
@@ -906,9 +990,7 @@ class CardstoriesConnectorTest(CardstoriesServiceTestBase):
         self.card = 5
         self.sentence = u'SENTENCE'
         self.owner_id = 15
-        result = yield self.service.create({ 'card': [self.card],
-                                             'sentence': [self.sentence],
-                                             'owner_id': [self.owner_id]})
+        result = yield self.service.create({'owner_id': [self.owner_id]})
         game_id = result['game_id']
         defer.returnValue(game_id)
 

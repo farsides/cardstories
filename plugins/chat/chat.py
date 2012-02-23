@@ -75,7 +75,7 @@ class Plugin(Pollable):
         d = defer.succeed(True)
         if changes != None and changes['type'] == 'change':
             details = changes['details']
-            if details['type'] == 'create' or details['type'] == 'load':
+            if details['type'] == 'set_sentence' or (details['type'] == 'load' and details['sentence']):
                 d = self.init(changes['game'], details)
         self.service.listen().addCallback(self.self_notify)
         return d
@@ -128,7 +128,7 @@ class Plugin(Pollable):
         message = {'type': 'notification',
                    'game_id': game.id,
                    'player_id': game.owner_id,
-                   'sentence': details['sentence'][0]}
+                   'sentence': details['sentence']}
         self.build_message(message);
 
         # Notify pollers.

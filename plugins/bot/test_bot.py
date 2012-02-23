@@ -24,6 +24,7 @@
 # Imports ##################################################################
 
 import sys, os
+sys.path.insert(0, os.path.abspath("../..")) # so that for M-x pdb works
 from mock import Mock
 
 from twisted.trial import unittest, runner, reporter
@@ -57,14 +58,22 @@ class BotTest(unittest.TestCase):
 
     @defer.inlineCallbacks
     def game_create(self):
+        """Creates the game, sets the card, and sets the sentence in one step."""
         self.winner_card = winner_card = 5
         sentence = 'SENTENCE'
         self.owner_id = 15
-        game = yield self.service.create({ 'card': [winner_card],
-                                           'sentence': [sentence],
-                                           'owner_id': [self.owner_id]})
+        result = yield self.service.create({'owner_id': [self.owner_id]})
+        game_id = result['game_id']
+        yield self.service.set_card({'action': ['set_card'],
+                                     'card': [winner_card],
+                                     'player_id': [self.owner_id],
+                                     'game_id': [game_id]})
+        yield self.service.set_sentence({'action': ['set_sentence'],
+                                         'sentence': [sentence],
+                                         'player_id': [self.owner_id],
+                                         'game_id': [game_id]})
 
-        defer.returnValue(game)
+        defer.returnValue(result)
 
     @defer.inlineCallbacks
     def game_to_vote(self, game_id):

@@ -98,16 +98,16 @@ class Plugin(CardstoriesServiceConnector):
         d = defer.succeed(True)
         if changes != None and changes['type'] == 'change':
             details = changes['details']
-            if details['type'] == 'create':
-                d = self.creating(changes['game'])
+            if details['type'] == 'set_sentence':
+                d = self.joining(changes['game'])
             elif details['type'] == 'voting':
                 d = self.voting(changes['game'])
         self.service.listen().addCallback(self.self_notify)
         return d
 
-    def creating(self, game):
+    def joining(self, game):
         """
-        A new game has been created - start monitoring it to check later on if it needs players 
+        A new game has been created - start monitoring it to check later on if it needs players.
         """
 
         call_later(self.delays['join'], self.check_need_player, game.id)

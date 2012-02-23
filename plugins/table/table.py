@@ -87,7 +87,7 @@ class Plugin(Pollable, CardstoriesServiceConnector):
 
         if changes != None and changes['type'] == 'change':
             details = changes['details']
-            if details['type'] == 'create':
+            if details['type'] == 'set_sentence':
                 d = self.on_new_game(changes['game'], details)
 
         self.service.listen().addCallback(self.on_service_notification)

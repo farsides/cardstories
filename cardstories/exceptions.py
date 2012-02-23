@@ -27,16 +27,11 @@ from warnings import warn
 class CardstoriesWarning(UserWarning):
     """
     Used for exceptions on the service that are expected to happen
-    occassionally. The client will do its best to solve the situation
+    occasionally. The client will do its best to solve the situation
     appropriately based on the error code and additional data.
     """
 
-    ERROR_CODES = ('GAME_NOT_LOADED', 'GAME_DOES_NOT_EXIST', 'GAME_FULL',
-                   'WRONG_STATE_FOR_PICKING', 'WRONG_STATE_FOR_VOTING')
-
     def __init__(self, code, data={}):
-        if code not in self.ERROR_CODES:
-            warn('Unknown exception code: %s' % code)
         self.code = code
         self.data = data
 

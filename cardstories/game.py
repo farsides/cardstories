@@ -97,7 +97,10 @@ class CardstoriesGame(Pollable):
     @defer.inlineCallbacks
     def state_change(self):
         game, players_id_list = yield self.game(self.get_owner_id())
-        if game['state'] == 'invitation':
+        if game['state'] == 'create':
+            yield self.cancel()
+            result = self.STATE_CHANGE_CANCEL
+        elif game['state'] == 'invitation':
             if game['ready']:
                 yield self.voting({ 'owner_id': [self.get_owner_id()],
                                     'game_id': [self.get_id()] })
@@ -154,24 +157,59 @@ class CardstoriesGame(Pollable):
         if not rows:
             transaction.execute("INSERT INTO players (player_id, score, levelups) VALUES (?, ?, ?)", [player_id, 0, 0])
 
-    def createInteraction(self, transaction, card, sentence, owner_id):
-        cards = [ chr(x) for x in range(1, self.NCARDS + 1) ]
-        cards.remove(card)
-        random.shuffle(cards)
-        transaction.execute("INSERT INTO games (sentence, cards, board, owner_id, created) VALUES (?, ?, ?, ?, datetime('now'))", [sentence, ''.join(cards), card, owner_id])
+    def createInteraction(self, transaction, owner_id):
+        transaction.execute("INSERT INTO games (owner_id, cards, board, created) VALUES (?, '', '', datetime('now'))", [owner_id])
         game_id = transaction.lastrowid
-        transaction.execute("INSERT INTO player2game (game_id, player_id, cards, picked) VALUES (?, ?, ?, ?)", [ game_id, owner_id, card, card ])
+        transaction.execute("INSERT INTO player2game (game_id, player_id, cards) VALUES (?, ?, '')", [ game_id, owner_id ])
         return game_id
 
     @defer.inlineCallbacks
-    def create(self, card, sentence, owner_id):
+    def create(self, owner_id):
         self.owner_id = owner_id
-        game_id = yield self.service.db.runInteraction(self.createInteraction, chr(card), sentence, self.owner_id)
+        game_id = yield self.service.db.runInteraction(self.createInteraction, self.owner_id)
         yield self.service.db.runInteraction(self.playerInteraction, self.owner_id)
         self.id = game_id
         self.players.append(self.owner_id)
         self.update_timer()
         defer.returnValue(game_id)
+
+    def setCardInteraction(self, transaction, game_id, player_id, card):
+        transaction.execute("SELECT state, owner_id FROM games WHERE id = ?", [ game_id ])
+        state, owner_id = transaction.fetchone()
+        if player_id != owner_id:
+            raise Exception, 'Only game owner can set the card.'
+        if state != 'create':
+            raise CardstoriesWarning('WRONG_STATE_FOR_SETTING_CARD', {'game_id': game_id, 'state': state})
+        transaction.execute("UPDATE player2game SET picked = ?, cards = ? WHERE game_id = ? AND player_id = ?", [ card, card, game_id, player_id ])
+        cards = [ chr(x) for x in range(1, self.NCARDS + 1) ]
+        cards.remove(card)
+        random.shuffle(cards)
+        transaction.execute("UPDATE games SET cards = ?, board = ? WHERE id = ?", [ ''.join(cards), card, game_id ])
+
+    @defer.inlineCallbacks
+    def set_card(self, player_id, card):
+        yield self.service.db.runInteraction(self.setCardInteraction, self.get_id(), player_id, chr(card))
+        result = yield self.touch(type='set_card', player_id=player_id, card=card)
+        defer.returnValue(result)
+
+    def setSentenceInteraction(self, transaction, player_id, game_id, sentence):
+        transaction.execute("SELECT state, owner_id FROM games WHERE id = ?", [ game_id ])
+        state, owner_id = transaction.fetchone()
+        if owner_id != player_id:
+            raise Exception, "Only game owner can set the sentence."
+        if state != 'create':
+            raise CardstoriesWarning('WRONG_STATE_FOR_SETTING_SENTENCE', {'game_id': game_id, 'state': state})
+        transaction.execute("SELECT cards FROM player2game WHERE game_id = %d AND player_id = %d" % (game_id, player_id))
+        card = transaction.fetchone()[0]
+        if not card:
+            raise CardstoriesWarning('CARD_NOT_SET', {'game_id': game_id })
+        transaction.execute("UPDATE games SET sentence = ?, state = 'invitation' WHERE id = ?", [ sentence, game_id ])
+
+    @defer.inlineCallbacks
+    def set_sentence(self, player_id, sentence):
+        yield self.service.db.runInteraction(self.setSentenceInteraction, player_id, self.id, sentence)
+        result = yield self.touch(type='set_sentence', sentence=sentence)
+        defer.returnValue(result)
 
     @defer.inlineCallbacks
     def game(self, player_id):
@@ -236,8 +274,8 @@ class CardstoriesGame(Pollable):
 
             # vote / winner_card
             if state == 'complete' or owner_id == player_id:
-                if player[0] == owner_id:
-                    winner_card = ord(player[1][0])
+                if player[0] == owner_id and player[2]:
+                    winner_card = ord(player[2])
                 vote = self.ord(player[3])
             else:
                 if player[3] != None:
@@ -375,8 +413,8 @@ class CardstoriesGame(Pollable):
         defer.returnValue(result)
 
     def pickInteraction(self, transaction, game_id, player_id, card):
-        transaction.execute("SELECT state FROM games WHERE id = ?", [ game_id ])
-        state = transaction.fetchone()[0]
+        transaction.execute("SELECT state, owner_id FROM games WHERE id = ?", [ game_id ])
+        state, owner_id = transaction.fetchone()
         if state == 'invitation':
             transaction.execute("UPDATE player2game SET picked = ? WHERE game_id = ? AND player_id = ?", [ chr(card), game_id, player_id ])
         else:

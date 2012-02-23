@@ -207,13 +207,24 @@ class Plugin(Pollable):
             self.event = 'CHANGE ' + event['details']['type']
             event['game'] # CardstoriesGame instance
             details = event['details'] # description of the event
-            # 
+            #
             # Received once, when the game is created and before
-            # any player is connected to it.
+            # the game master chose the card or wrote the sentence.
             #
             if details['type'] == 'create':
                 pass
-            # 
+            #
+            # Received once, when the game master sets the card.
+            #
+            if details['type'] == 'set_card':
+                pass
+            #
+            # Received once, when the game master writes the sentence,
+            # moving the game into 'invitation' state.
+            #
+            if details['type'] == 'set_sentence':
+                pass
+            #
             # Received once, when the game is loaded during server
             # startup
             #
@@ -356,15 +367,28 @@ class Plugin(Pollable):
             args = request.args
             self.preprocessed = args
             #
-            # create a new game. The sentence is an utf-8 encode string
-            # that needs to be decoded as follows: 
+            # create a new game.
+            #
+            if args['action'][0] == 'create':
+                args['owner_id'][0] # the player who creates the game
+            #
+            # set the card (game master only)
+            #
+            elif args['action'][0] == 'set_card':
+                args['card'][0] # the numerical identifier of the chosen card
+                args['game_id'][0] # the identifier of the game
+                args['player_id'][0] # the game master
+            #
+            # set the sentence (game master only)
+            # The sentence is an utf-8 encode string
+            # that needs to be decoded as follows:
             #
             # sentence = args['sentence'][0].decode('utf-8')
             #
-            if args['action'][0] == 'create':
-                args['card'][0] # the numerical identifier of the chosen card
-                args['sentence'][0] # the sentence describing the card
-                args['owner_id'][0] # the player who creates the game
+            elif args['action'][0] == 'set_card':
+                args['sentence'][0] # the sentence describing the chosen card
+                args['game_id'][0] # the identifier of the game
+                args['player_id'][0] # the game master
             #
             # invite players to participate in the game
             #

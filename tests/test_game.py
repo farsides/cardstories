@@ -50,14 +50,22 @@ class CardstoriesGameTest(unittest.TestCase):
         return self.service.stopService()
 
     @defer.inlineCallbacks
+    def create_game(self, owner_id, card, sentence):
+        """Helper function that creates the game, sets the card,
+        and sets the sentenc in one stap.
+        Returns the created game's id."""
+        game_id = yield self.game.create(owner_id)
+        yield self.game.set_card(owner_id, card)
+        yield self.game.set_sentence(owner_id, sentence)
+        defer.returnValue(game_id)
+
+    @defer.inlineCallbacks
     def test01_create(self):
         #
         # create a game from scratch
         #
-        card = 5
-        sentence = u'SENTENCE \xe9'
         owner_id = 15
-        game_id = yield self.game.create(card, sentence, owner_id);
+        game_id = yield self.game.create(owner_id);
         c = self.db.cursor()
         c.execute("SELECT * FROM games")
         rows = c.fetchall()
@@ -66,13 +74,14 @@ class CardstoriesGameTest(unittest.TestCase):
         self.assertEquals(owner_id, rows[0][1])
         one_player = 1
         self.assertEquals(one_player, rows[0][2])
-        self.assertEquals(sentence, rows[0][3])
-        self.assertFalse(chr(card) in rows[0][4])
-        self.assertEquals(chr(card), rows[0][5])
+        self.assertEquals(None, rows[0][3])
+        self.assertEquals('', rows[0][4])
+        self.assertEquals('', rows[0][5])
+        self.assertEquals('create', rows[0][6])
         c.execute("SELECT cards FROM player2game WHERE game_id = %d AND player_id = %d" % (game_id, owner_id))
         rows = c.fetchall()
         self.assertEquals(1, len(rows))
-        self.assertEquals(chr(card), rows[0][0])
+        self.assertEquals('', rows[0][0])
         self.assertEquals(self.game.get_players(), [owner_id])
         self.assertEquals(self.game.get_owner_id(), owner_id)
         c.execute("SELECT player_id FROM players WHERE player_id = %s" % owner_id)
@@ -88,11 +97,135 @@ class CardstoriesGameTest(unittest.TestCase):
         c.close()
 
     @defer.inlineCallbacks
+    def test01_set_card(self):
+        card = 5
+        owner_id = 25
+        game_id = yield self.game.create(owner_id);
+        yield self.game.set_card(owner_id, card)
+        c = self.db.cursor()
+        c.execute("SELECT * FROM games")
+        rows = c.fetchall()
+        self.assertEquals(1, len(rows))
+        self.assertEquals('create', rows[0][6])
+        one_player = 1
+        self.assertEquals(one_player, rows[0][2])
+        self.assertNotEquals('', rows[0][4])
+        self.assertFalse(chr(card) in rows[0][4])
+        self.assertEquals(chr(card), rows[0][5])
+        c.execute("SELECT cards FROM player2game WHERE game_id = %d AND player_id = %d" % (game_id, owner_id))
+        rows = c.fetchall()
+        self.assertEquals(1, len(rows))
+        self.assertEquals(chr(card), rows[0][0])
+        c.close()
+
+    @defer.inlineCallbacks
+    def test01_set_card_security(self):
+        card = 5
+        owner_id = 25
+        other_player_id = 26
+        game_id = yield self.game.create(owner_id);
+        #
+        # Only owner can set the card.
+        #
+        self.raised = False
+        try:
+            yield self.game.set_card(other_player_id, card)
+        except Exception:
+            self.raised = True
+        self.assertTrue(self.raised)
+
+        c = self.db.cursor()
+        c.execute("SELECT * FROM games")
+        rows = c.fetchall()
+        self.assertEquals(1, len(rows))
+        self.assertEquals('create', rows[0][6])
+        one_player = 1
+        self.assertEquals(one_player, rows[0][2])
+        self.assertEquals('', rows[0][4])
+        self.assertEquals('', rows[0][5])
+        c.execute("SELECT cards FROM player2game WHERE game_id = %d AND player_id = %d" % (game_id, owner_id))
+        rows = c.fetchall()
+        self.assertEquals(1, len(rows))
+        self.assertEquals('', rows[0][0])
+        c.close()
+
+    @defer.inlineCallbacks
+    def test01_set_sentence(self):
+        card = 5
+        sentence = u'SENTENCE \xe9'
+        owner_id = 35
+        game_id = yield self.game.create(owner_id);
+        yield self.game.set_card(owner_id, card)
+        yield self.game.set_sentence(owner_id, sentence)
+        c = self.db.cursor()
+        c.execute("SELECT * FROM games")
+        rows = c.fetchall()
+        self.assertEquals(1, len(rows))
+        one_player = 1
+        self.assertEquals(one_player, rows[0][2])
+        self.assertEquals(sentence, rows[0][3])
+        c.close()
+
+    @defer.inlineCallbacks
+    def test01_set_sentence_security(self):
+        card = 5
+        sentence = u'SENTENCE \xe9'
+        owner_id = 35
+        other_player_id = 36
+        game_id = yield self.game.create(owner_id);
+        #
+        # Cannot set sentence before the card.
+        #
+        self.raised = False
+        try:
+            yield self.game.set_sentence(owner_id, sentence)
+        except Exception:
+            self.raised = True
+        self.assertTrue(self.raised)
+
+        yield self.game.set_card(owner_id, card)
+        #
+        # Only owner can set the sentence.
+        #
+        self.raised = False
+        try:
+            yield self.game.set_sentence(other_player_id, sentence)
+        except Exception:
+            self.raised = True
+        self.assertTrue(self.raised)
+
+        c = self.db.cursor()
+        c.execute("SELECT * FROM games")
+        rows = c.fetchall()
+        self.assertEquals(1, len(rows))
+        self.assertEquals(None, rows[0][3])
+
+        #
+        # Cannot only set sentence in 'create' state.
+        #
+        # Set the sentence, moving the game into 'invitation' state.
+        yield self.game.set_sentence(owner_id, sentence)
+        self.raised = False
+        try:
+            other_sentence = 'OTHER SENTENCE'
+            yield self.game.set_sentence(owner_id, other_sentence)
+        except Exception:
+            self.raised = True
+        self.assertTrue(self.raised)
+
+
+        c = self.db.cursor()
+        c.execute("SELECT * FROM games")
+        rows = c.fetchall()
+        self.assertEquals(sentence, rows[0][3])
+        c.close()
+
+    @defer.inlineCallbacks
     def test02_participate(self):
         card = 5
         sentence = 'SENTENCE'
         owner_id = 15
-        game_id = yield self.game.create(card, sentence, owner_id)
+        game_id = yield self.create_game(owner_id, card, sentence)
         #
         # assert what happens when a player participates
         #
@@ -151,7 +284,7 @@ class CardstoriesGameTest(unittest.TestCase):
         card = 5
         sentence = 'SENTENCE'
         owner_id = 15
-        game_id = yield self.game.create(card, sentence, owner_id)
+        game_id = yield self.create_game(owner_id, card, sentence)
         player_id = 23
         yield self.game.participate(player_id)
         player = yield self.game.player2game(player_id)
@@ -164,7 +297,7 @@ class CardstoriesGameTest(unittest.TestCase):
         card = 5
         sentence = 'SENTENCE'
         owner_id = 15
-        game_id = yield self.game.create(card, sentence, owner_id)
+        game_id = yield self.create_game(owner_id, card, sentence)
         player2card = {}
         for player_id in (16, 17):
             yield self.game.participate(player_id)
@@ -186,7 +319,7 @@ class CardstoriesGameTest(unittest.TestCase):
         card = 5
         sentence = 'SENTENCE'
         owner_id = 15
-        game_id = yield self.game.create(card, sentence, owner_id)
+        game_id = yield self.create_game(owner_id, card, sentence)
         cards = [card]
         pick_players = [ 16, 17 ]
         players = pick_players + [ 18 ]
@@ -219,7 +352,7 @@ class CardstoriesGameTest(unittest.TestCase):
         card = 5
         sentence = 'SENTENCE'
         owner_id = 15
-        game_id = yield self.game.create(card, sentence, owner_id)
+        game_id = yield self.create_game(owner_id, card, sentence)
         for player_id in (16, 17):
             yield self.game.participate(player_id)
             player = yield self.game.player2game(player_id)
@@ -244,7 +377,7 @@ class CardstoriesGameTest(unittest.TestCase):
         winner_card = 5
         sentence = 'SENTENCE'
         owner_id = 15
-        game_id = yield self.game.create(winner_card, sentence, owner_id)
+        game_id = yield self.create_game(owner_id, winner_card, sentence)
         voting_players = [ 16, 17 ]
         players = voting_players + [ 18 ]
         for player_id in players:
@@ -284,7 +417,7 @@ class CardstoriesGameTest(unittest.TestCase):
         winner_card = 5
         sentence = 'SENTENCE'
         owner_id = 15
-        game_id = yield self.game.create(winner_card, sentence, owner_id)
+        game_id = yield self.create_game(owner_id, winner_card, sentence)
         # move to invitation state
         player1 = 16
         card1 = 20
@@ -424,7 +557,7 @@ class CardstoriesGameTest(unittest.TestCase):
         winner_card = 5
         sentence = 'SENTENCE'
         owner_id = 15
-        game_id = yield self.game.create(winner_card, sentence, owner_id)
+        game_id = yield self.create_game(owner_id, winner_card, sentence)
         # move to invitation state
         player1 = 16
         card1 = 20
@@ -463,7 +596,7 @@ class CardstoriesGameTest(unittest.TestCase):
         winner_card = 5
         sentence = 'SENTENCE'
         owner_id = 15
-        game_id = yield self.game.create(winner_card, sentence, owner_id)
+        game_id = yield self.create_game(owner_id, winner_card, sentence)
         # move to invitation state
         player1 = 16
         card1 = 20
@@ -515,7 +648,7 @@ class CardstoriesGameTest(unittest.TestCase):
         sentence = 'SENTENCE'
         owner_id = 15
         invited = [20, 21]
-        game_id = yield self.game.create(winner_card, sentence, owner_id)
+        game_id = yield self.create_game(owner_id, winner_card, sentence)
         self.assertEquals([owner_id], self.game.get_players())
         
         self.checked = False
@@ -558,10 +691,8 @@ class CardstoriesGameTest(unittest.TestCase):
 
     @defer.inlineCallbacks
     def test10_touch(self):
-        winner_card = 5
-        sentence = 'SENTENCE'
         owner_id = 15
-        game_id = yield self.game.create(winner_card, sentence, owner_id)
+        game_id = yield self.game.create(owner_id)
         result = yield self.game.touch()
         self.assertEquals([game_id], result['game_id'])
         self.assertEquals(self.game.modified, result['modified'][0])
@@ -571,7 +702,7 @@ class CardstoriesGameTest(unittest.TestCase):
         card = 5
         sentence = 'SENTENCE'
         owner_id = 15
-        game_id = yield self.game.create(card, sentence, owner_id)
+        game_id = yield self.create_game(owner_id, card, sentence)
         cards = [card]
         players = [ 16, 17 ]
         for player_id in players:
@@ -592,7 +723,7 @@ class CardstoriesGameTest(unittest.TestCase):
         card = 5
         sentence = 'SENTENCE'
         owner_id = 15
-        game_id = yield self.game.create(card, sentence, owner_id)
+        game_id = yield self.create_game(owner_id, card, sentence)
         cards = [card]
         players = [ 16, 17 ]
         for player_id in players:
@@ -622,14 +753,14 @@ class CardstoriesGameTest(unittest.TestCase):
         winner_card = 5
         sentence = 'SENTENCE'
         owner_id = 15
-        game_id = yield self.game.create(winner_card, sentence, owner_id)
+        game_id = yield self.create_game(owner_id, winner_card, sentence)
         players = [ 16, 17 ]
         for player_id in players:
             yield self.game.participate(player_id)
             player = yield self.game.player2game(player_id)
             card = player['cards'][0]
             yield self.game.pick(player_id, card)
-        
+
         result = yield self.game.state_change()
         self.assertEquals(result, CardstoriesGame.STATE_CHANGE_TO_VOTE)
 
@@ -649,11 +780,18 @@ class CardstoriesGameTest(unittest.TestCase):
         c.close()
 
     @defer.inlineCallbacks
+    def test14_state_change_cancel_create(self):
+        owner_id = 15
+        game_id = yield self.game.create(owner_id)
+        result = yield self.game.state_change()
+        self.assertEquals(result, CardstoriesGame.STATE_CHANGE_CANCEL)
+
+    @defer.inlineCallbacks
     def test14_state_change_cancel_invitation(self):
         winner_card = 5
         sentence = 'SENTENCE'
         owner_id = 15
-        game_id = yield self.game.create(winner_card, sentence, owner_id)
+        game_id = yield self.create_game(owner_id, winner_card, sentence)
         cards = [winner_card]
         pick_players = [ 16 ]
         players = pick_players + [ 18 ]
@@ -672,7 +810,7 @@ class CardstoriesGameTest(unittest.TestCase):
         winner_card = 5
         sentence = 'SENTENCE'
         owner_id = 15
-        game_id = yield self.game.create(winner_card, sentence, owner_id)
+        game_id = yield self.create_game(owner_id, winner_card, sentence)
         voting_players = [ 16 ]
         players = voting_players + [ 17, 18 ]
         for player_id in players:
@@ -698,7 +836,7 @@ class CardstoriesGameTest(unittest.TestCase):
         sentence = 'SENTENCE'
         owner_id = 15
         self.game.settings['game-timeout'] = 0.01
-        game_id = yield self.game.create(winner_card, sentence, owner_id)
+        game_id = yield self.create_game(owner_id, winner_card, sentence)
         d = self.game.poll({'modified': [self.game.get_modified()]})
         def check(result):
             self.assertEqual(self.game.get_players(), [owner_id])
@@ -726,7 +864,7 @@ class CardstoriesGameTest(unittest.TestCase):
         winner_card = 5
         sentence = 'SENTENCE'
         owner_id = 15
-        game_id = yield self.game.create(winner_card, sentence, owner_id)
+        game_id = yield self.create_game(owner_id, winner_card, sentence)
         voting_players = [ 16, 17 ]
         players = voting_players + [ 18 ]
         for player_id in players:
@@ -812,7 +950,17 @@ class CardstoriesGameTest(unittest.TestCase):
         winner_card = 5
         sentence = 'SENTENCE'
         owner_id = 15
-        yield self.game.create(winner_card, sentence, owner_id)
+        yield self.game.create(owner_id)
+        self.assertEqual(self.game.get_countdown_duration(), self.game.DEFAULT_COUNTDOWN_DURATION)
+        self.assertFalse(self.game.is_countdown_active())
+        self.assertEqual(self.game.get_countdown_finish(), None)
+
+        yield self.game.set_card(owner_id, winner_card)
+        self.assertEqual(self.game.get_countdown_duration(), self.game.DEFAULT_COUNTDOWN_DURATION)
+        self.assertFalse(self.game.is_countdown_active())
+        self.assertEqual(self.game.get_countdown_finish(), None)
+
+        yield self.game.set_sentence(owner_id, sentence)
         self.assertEqual(self.game.get_countdown_duration(), self.game.DEFAULT_COUNTDOWN_DURATION)
         self.assertFalse(self.game.is_countdown_active())
         self.assertEqual(self.game.get_countdown_finish(), None)
@@ -850,7 +998,7 @@ class CardstoriesGameTest(unittest.TestCase):
         player1_id = 53
         player2_id = 54
         player3_id = 55
-        yield self.game.create(winner_card, sentence, owner_id)
+        yield self.create_game(owner_id, winner_card, sentence)
 
         # Three players joining the game.
         for player_id in (player1_id, player2_id, player3_id):
@@ -886,7 +1034,7 @@ class CardstoriesGameTest(unittest.TestCase):
         player1_id = 13
         player2_id = 14
         player3_id = 15
-        yield self.game.create(winner_card, sentence, owner_id)
+        yield self.create_game(owner_id, winner_card, sentence)
 
         # Three players joining the game.
         for player_id in (player1_id, player2_id, player3_id):
@@ -949,7 +1097,7 @@ class CardstoriesGameTest(unittest.TestCase):
         owner_id = 12
         player1_id = 13
         player2_id = 14
-        yield self.game.create(winner_card, sentence, owner_id)
+        yield self.create_game(owner_id, winner_card, sentence)
 
         # The players join the game.
         yield self.game.participate(player1_id)

@@ -130,10 +130,17 @@ class TableTest(unittest.TestCase):
 
         # Create first game
         response = yield self.service.handle([], {'action': ['create'],
-                                                  'owner_id': [player1],
-                                                  'card': [1],
-                                                  'sentence': ['sentence']})
+                                                  'owner_id': [player1]})
         game_id = response['game_id']
+        # Set card and sentence to move it into 'invitation' state
+        yield self.service.handle([], {'action': ['set_card'],
+                                       'card': [1],
+                                       'player_id': [player1],
+                                       'game_id': [game_id]})
+        yield self.service.handle([], {'action': ['set_sentence'],
+                                       'sentence': ['SENTENCE'],
+                                       'player_id': [player1],
+                                       'game_id': [game_id]})
 
         # Poll must return to inform players waiting for an available table
         modified = self.check_poll(poll, returned=True)
@@ -162,7 +169,7 @@ class TableTest(unittest.TestCase):
         self.assertEqual(modified, self.table_instance.get_modified({'game_id': [game_id]}))
 
         # Complete first game
-        yield self.complete_game(game_id, player2, player3)
+        yield self.complete_game(game_id, player1, player2, player3)
         state = yield self.table_instance.state({'type': ['table'],
                                                  'game_id': [game_id],
                                                  'player_id': [player1]})
@@ -252,7 +259,17 @@ class TableTest(unittest.TestCase):
             return False
 
     @defer.inlineCallbacks
-    def complete_game(self, game_id, player1, player2):
+    def complete_game(self, game_id, owner, player1, player2):
+        # Set card
+        yield self.service.handle([], {'action': ['set_card'],
+                                       'card': [1],
+                                       'game_id': [game_id],
+                                       'player_id': [owner]})
+        # Set sentence
+        yield self.service.handle([], {'action': ['set_sentence'],
+                                       'sentence': ['SENTENCE'],
+                                       'game_id': [game_id],
+                                       'player_id': [owner]})
         # Join
         yield self.service.handle([], {'action': ['participate'],
                                        'game_id': [game_id],
@@ -306,14 +323,31 @@ class TableTest(unittest.TestCase):
 
         # Create two tables
         self.assertEqual(len(self.table_instance.tables), 0)
+
         response = yield self.service.handle([], {'action': ['create'],
-                                                  'owner_id': [player_id],
-                                                  'card': [1],
-                                                  'sentence': ['sentence']})
+                                                  'owner_id': [player_id],})
+        game1_id = response['game_id']
+        yield self.service.handle([], {'action': ['set_card'],
+                                       'card': [1],
+                                       'player_id': [player_id],
+                                       'game_id': [game1_id]})
+        yield self.service.handle([], {'action': ['set_sentence'],
+                                       'sentence': ['sentence'],
+                                       'player_id': [player_id],
+                                       'game_id': [game1_id]})
+
         response = yield self.service.handle([], {'action': ['create'],
-                                                  'owner_id': [player_id],
-                                                  'card': [1],
-                                                  'sentence': ['sentence']})
+                                       'owner_id': [player_id],})
+        game2_id = response['game_id']
+        yield self.service.handle([], {'action': ['set_card'],
+                                       'card': [1],
+                                       'player_id': [player_id],
+                                       'game_id': [game2_id]})
+        yield self.service.handle([], {'action': ['set_sentence'],
+                                       'sentence': ['sentence'],
+                                       'player_id': [player_id],
+                                       'game_id': [game2_id]})
+
         self.assertEqual(len(self.table_instance.tables), 2)
 
         # Players quits - deletes the two tables simulteanously

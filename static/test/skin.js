@@ -39,9 +39,11 @@
         };
 
         if (skin === 'create_pick_card') {
-            $.cardstories.create_pick_card(0, undefined, root);
+            $.cardstories.create_pick_card(0, 100, root);
         } else if (skin === 'create_write_sentence') {
-            $.cardstories.create_write_sentence(0, 5, undefined, root);
+            $.cardstories.create_write_sentence(0, 105, 5, root);
+        } else if (skin === 'create_wait') {
+            $.cardstories.create_wait(0, 100, root);
         } else if (skin === 'invitation_owner') {
             game = {
                 'id': 100,

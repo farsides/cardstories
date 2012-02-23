@@ -674,19 +674,15 @@ test("send_game on error", 1, function() {
     $.cardstories.send(query);
 });
 
-asyncTest("create", 19, function() {
+asyncTest("create_new_game", 5, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_create', root);
     var player_id = 15;
-    var game_id = 7;
-    var card;
-    var sentence = 'SENTENCE';
+    var game_id = 83;
 
     $.cardstories.ajax = function(options) {
         equal(options.type, 'POST');
-        equal(options.url, $.cardstories.url + '?action=create&owner_id=' + player_id + '&card=' + card);
-        equal(options.data, 'sentence=' + sentence);
-
+        equal(options.url, $.cardstories.url + '?action=create&owner_id=' + player_id);
         var game = {game_id: game_id};
         options.success(game);
     };
@@ -698,40 +694,10 @@ asyncTest("create", 19, function() {
         start();
     };
 
-    var orig_create_write_sentence = $.cardstories.create_write_sentence;
-    $.cardstories.create_write_sentence = function(player_id, previous_game_id, card_value, root) {
-        orig_create_write_sentence.call($.cardstories, player_id, previous_game_id, card_value, root);
-        equal($('.cardstories_write_sentence.cardstories_active', element).length, 1, 'sentence active');
-        var sentencel = $('.cardstories_write_sentence .cardstories_sentence', element);
-        ok(sentencel.attr('placeholder') !== undefined, 'placeholder is set');
-        equal(sentencel.attr('placeholder'), $('.cardstories_sentence', element).val());
-        equal($('#cardstories_char_left_counter', element).html(), "80", 'char_left_counter initial');
-        var submit = $('.cardstories_write_sentence .cardstories_submit', element);
-        equal(submit.css('display'), 'none', 'OK button is initially hidden');
-        sentencel.val('o').change();
-        equal(submit.css('display'), 'none', 'OK button is hidden if text is too short');
-        sentencel.val(sentence).change();
-        sentencel.blur();
-        equal($('#cardstories_char_left_counter', element).html(), (80-sentence.length).toString(), 'char_left_counter initial');
-        ok(submit.css('display') !== 'none', 'OK button is visible if valid text has been set');
-        submit.closest('form').submit();
-    };
-
-    equal($('.cardstories_pick_card.cardstories_active', element).length, 0, 'pick_card not active');
-    $.cardstories.create(player_id, undefined, root, function() {
-        equal($('.cardstories_modal_overlay', element).css('display'), 'block', 'modal overlay is on');
-        var a = $('.cardstories_info', element).find('a').click();
-        equal($('.cardstories_modal_overlay', element).css('display'), 'none', 'modal overlay is off');
-        equal($('.cardstories_pick_card.cardstories_active', element).length, 1, 'pick_card active');
-        equal($('.cardstories_write_sentence.cardstories_active', element).length, 0, 'sentence not active');
-        var first_card = $('.cardstories_cards_hand .cardstories_card:nth(0)', element);
-        card = first_card.metadata({type: "attr", name: "data"}).card;
-        first_card.click();
-        $('.cardstories_card_confirm_ok', element).find('a').click();
-    });
+    $.cardstories.create_new_game(player_id, undefined, root);
 });
 
-asyncTest("create on error", 1, function() {
+asyncTest("create_new_game on error", 1, function() {
     var player_id = 15;
 
     $.cardstories.ajax = function(options) {
@@ -740,24 +706,158 @@ asyncTest("create on error", 1, function() {
     };
 
     $.cardstories.panic = function(err) {
-        equal(err, 'error on create', 'calls $.cardstories.error');
+        equal(err, 'error on create', 'calls $.cardstories.panic');
         start();
     };
 
     var element = $('#qunit-fixture .cardstories_create');
 
-    var orig_create_write_sentence = $.cardstories.create_write_sentence;
-    $.cardstories.create_write_sentence = function(player_id, previous_game_id, card_value, root) {
-        orig_create_write_sentence.call($.cardstories, player_id, previous_game_id, card_value, root);
-        $('.cardstories_write_sentence .cardstories_sentence', element).val('SENTENCE');
-        $('.cardstories_write_sentence .cardstories_submit', element).submit();
+    $.cardstories.create_new_game(player_id, $('#qunit-fixture .cardstories'), undefined);
+});
+
+
+test("create owner no card yet", 2, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var owner_id = 75;
+    var game_id = 111;
+    var game = {
+        id: game_id,
+        owner_id: owner_id,
+        owner: true
     };
 
-    $.cardstories.create(player_id, $('#qunit-fixture .cardstories'), undefined, function() {
+    $.cardstories.create_pick_card = function(_player_id, _game_id, _root) {
+        equal(_player_id, owner_id, 'create_pick_card gets passed the owner_id');
+        equal(_game_id, game_id, 'create_pick_card gets passed the game_id');
+    };
+
+    $.cardstories.create(owner_id, game, root);
+});
+
+test("create owner has card", 3, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var owner_id = 75;
+    var game_id = 111;
+    var winner_card = 32;
+    var game = {
+        id: game_id,
+        owner_id: owner_id,
+        winner_card: winner_card,
+        owner: true
+    };
+
+    $.cardstories.create_write_sentence = function(_player_id, _game_id, _winner_card, _root) {
+        equal(_player_id, owner_id, 'create_pick_card gets passed the owner_id');
+        equal(_game_id, game_id, 'create_pick_card gets passed the game_id');
+        equal(_winner_card, winner_card, 'create_pick_card gets passed the winner_card');
+    };
+
+    $.cardstories.create(owner_id, game, root);
+});
+
+asyncTest("create_pick_card", 10, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var owner_id = 75;
+    var game_id = 111;
+    var game = {
+        id: game_id,
+        owner_id: owner_id,
+        owner: true
+    };
+    var winner_card;
+
+    $.cardstories.create_write_sentence = function(_player_id, _game_id, _winner_card, _root) {
+        equal(_player_id, owner_id, 'create_pick_card gets passed the owner_id');
+        equal(_game_id, game_id, 'create_pick_card gets passed the game_id');
+        equal(_winner_card, winner_card, 'create_pick_card gets passed the winner_card');
+    };
+
+    $.cardstories.send = function(query, cb, player_id, _game_id, _root) {
+        equal(query.card, winner_card, 'the chosen card is sent to the service');
+        equal(player_id, owner_id, 'the owner_id is sent to the service');
+        equal(_game_id, game_id, 'the game id is sent to the service');
+        cb();
+    };
+
+    var element = $('.cardstories_create .cardstories_pick_card', root);
+    $.cardstories.create_pick_card(owner_id, game_id, root).done(function() {
+        var overlay = $('.cardstories_modal_overlay', element);
+        equal(overlay.css('display'), 'block', 'modal overlay is on');
+        var a = $('.cardstories_info', element).find('a').click();
+        equal(overlay.css('display'), 'none', 'modal overlay is off');
+        ok(element.hasClass('cardstories_active'), 'element active');
+        equal($('.cardstories_write_sentence.cardstories_active', element).length, 0, 'sentence not active');
         var first_card = $('.cardstories_cards_hand .cardstories_card:nth(0)', element);
+        winner_card = first_card.metadata({type: "attr", name: "data"}).card;
         first_card.click();
         $('.cardstories_card_confirm_ok', element).find('a').click();
+        start();
     });
+});
+
+test("create_write_sentence", 11, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var owner_id = 75;
+    var game_id = 111;
+    var card = 14;
+    var sentence = 'THE SENTENCE';
+    var element = $('.cardstories_create .cardstories_write_sentence', root);
+
+    $.cardstories.game = function(player_id, _game_id, _root) {
+        equal(player_id, owner_id, 'game gets called with owner_id');
+        equal(_game_id, game_id, 'game gets called with game_id');
+    };
+
+    $.cardstories.ajax = function(query, player_id, _game_id, _root) {
+        equal(query.data, 'sentence=' + encodeURIComponent(sentence), 'the sentence is sent to the service');
+        query.success({id: game_id});
+    };
+
+    $.cardstories.create_write_sentence(owner_id, game_id, card, root);
+    ok(element.hasClass('cardstories_active'), 'element active');
+    var sentencel = $('.cardstories_sentence', element);
+    ok(sentencel.attr('placeholder') !== undefined, 'placeholder is set');
+    equal(sentencel.attr('placeholder'), $('.cardstories_sentence', element).val());
+    equal($('#cardstories_char_left_counter', element).html(), "80", 'char_left_counter initial');
+    var submit = $('.cardstories_submit', element);
+    equal(submit.css('display'), 'none', 'OK button is initially hidden');
+    sentencel.val('o').change();
+    equal(submit.css('display'), 'none', 'OK button is hidden if text is too short');
+    sentencel.val(sentence).change();
+    sentencel.blur();
+    var counter = $('#cardstories_char_left_counter', element).html();
+    equal(counter, (80-sentence.length).toString(), 'char_left_counter initial');
+    ok(submit.css('display') !== 'none', 'OK button is visible if valid text has been set');
+    submit.closest('form').submit();
+});
+
+test("create not owner", 4, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var owner_id = 77;
+    var player_id = 15;
+    var game_id = 215;
+    var game = {
+        id: game_id,
+        owner_id: owner_id,
+        owner: false
+    };
+
+    $.cardstories.poll_discard = function(_root) {
+        ok(true, 'poll_discard gets called');
+    };
+
+    $.cardstories.poll_plugin = function(_player_id, _game_id, _root) {
+        equal(_player_id, player_id, 'poll_plugin gets passed the player_id');
+        equal(_game_id, game_id, 'poll_plugin gets passed the game_id');
+    };
+
+    $.cardstories.window = {
+        alert: function(msg) {
+            ok(msg.match(/finished creating this story/));
+        }
+    }
+
+    $.cardstories.create(player_id, game, root);
 });
 
 asyncTest("game", 4, function() {
@@ -864,8 +964,8 @@ test("automatic game creation", 2, function() {
     var game_id = 112;
 
     // If no game id is provided, create must be called directly.
-    $.cardstories.create = function(player_id, root) {
-        ok(true, 'create called');
+    $.cardstories.create_new_game = function(player_id, root) {
+        ok(true, 'create_new_game called');
     };
     $.cardstories.game = function(player_id, game_id, root) {
         ok(false, 'game called');
@@ -873,8 +973,8 @@ test("automatic game creation", 2, function() {
     $.cardstories.bootstrap(player_id, null, null, false, root);
 
     // However, if game_id is set, create must not be called.
-    $.cardstories.create = function(player_id, root) {
-        ok(false, 'create called');
+    $.cardstories.create_new_game = function(player_id, root) {
+        ok(false, 'create_new_game called');
     };
     $.cardstories.game = function(player_id, game_id, root) {
         ok(true, 'game called');
@@ -3109,26 +3209,21 @@ var stabilize = function(e, x, y) {
 asyncTest("display_or_select_cards move", 2, function() {
     var root = $('#qunit-fixture .cardstories');
     root.addClass('cardstories_root');
-    $('.cardstories_create .cardstories_pick_card .cardstories_cards', root).show();
-    $.cardstories.set_active('invitation_pick', $('.cardstories_create .cardstories_pick_card', root), root);
-    var element = $('.cardstories_create .cardstories_pick_card .cardstories_cards_hand', root);
+    var element = $('.cardstories_create .cardstories_pick_card', root);
+    $('.cardstories_cards', element).show();
+    $.cardstories.set_active('create_pick_card', element, root);
+    var cards_hand_element = $('.cardstories_cards_hand', element);
+    var first_card = $('.cardstories_card:nth(1)', cards_hand_element);
     var onReady = function(is_ready) {
-        var first = $('.cardstories_card:nth(1)', element);
-        var offset = $(first).offset();
-        var height = stabilize(first, offset.left, offset.top);
-        var width = $(first).width();
-        ok(stabilize(first, offset.left + width / 2, offset.top) > height, 'card is enlarged when moving toward the center');
-        equal(stabilize(first, offset.left, offset.top), height, 'card is resized to the same size when the mouse goes back to the original position');
+        var offset = first_card.offset();
+        var height = stabilize(first_card, offset.left, offset.top);
+        var width = first_card.width();
+        ok(stabilize(first_card, offset.left + width / 2, offset.top) > height, 'card is enlarged when moving toward the center');
+        equal(stabilize(first_card, offset.left, offset.top), height, 'card is resized to the same size when the mouse goes back to the original position');
         start();
     };
-    $.cardstories.
-        display_or_select_cards('move',
-                                [{'value':1},{'value':2},{'value':3},{'value':4},{'value':5},{'value':6}],
-                                function() {},
-                                element,
-                                root
-                               ).
-        done(onReady);
+    var cards = [{value: 1}, {value: 2}, {value: 3}, {value: 4}, {value: 5}, {value: 6}];
+    $.cardstories. display_or_select_cards('move', cards, $.noop, cards_hand_element, root).done(onReady);
 });
 
 asyncTest("display_or_select_cards select", 8, function() {

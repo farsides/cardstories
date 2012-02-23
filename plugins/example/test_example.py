@@ -84,10 +84,16 @@ class ExampleTest(unittest.TestCase):
         self.player2 = 1002
         self.owner_id = 1003
         self.sentence = sentence = 'SENTENCE'
-        game = yield send('create', { 'card': [winner_card],
-                                           'sentence': [sentence],
-                                           'owner_id': [self.owner_id]})
+        game = yield send('create', {'owner_id': [self.owner_id]})
         self.game_id = game['game_id']
+        yield send('set_card', { 'action': ['set_card'],
+                                 'card': [winner_card],
+                                 'player_id': [self.owner_id],
+                                 'game_id': [self.game_id] })
+        yield send('set_sentence', { 'action': ['set_sentence'],
+                                     'sentence': [sentence],
+                                     'player_id': [self.owner_id],
+                                     'game_id': [self.game_id] })
         yield send('invite', { 'action': ['invite'],
                                     'game_id': [self.game_id],
                                     'player_id': [self.player1],
@@ -145,6 +151,8 @@ class ExampleTest(unittest.TestCase):
         yield self.service.stopService()
         self.assertEqual(self.events, ['START',
                                        'CHANGE create',
+                                       'CHANGE set_card',
+                                       'CHANGE set_sentence',
                                        'CHANGE invite',
                                        'CHANGE participate',
                                        'CHANGE pick',
@@ -157,21 +165,15 @@ class ExampleTest(unittest.TestCase):
                                        'DELETE',
                                        'STOP'])
 
-        # 'load' event
-        self.events = []
-        self.service.listen().addCallback(accept)
+        # Test for the load event.
         self.service.startService()
-        game = yield send('create', { 'card': [1],
-                                   'sentence': ['SENTENCE'],
-                                   'owner_id': [2]})
+        yield self.service.create({'owner_id': [2]})
         yield self.service.stopService()
+
+        self.events = []
         self.service.startService()
-        self.assertEqual(self.events, ['START',
-                                       'CHANGE create',
-                                       'STOP',
-                                       'START',
-                                       'CHANGE load',
-                                       'STOP'])
+        yield self.service.stopService()
+        self.assertTrue('CHANGE load' in self.events)
 
     def test02_transparent_transform(self):
         self.site = CardstoriesSite(CardstoriesTree(self.service),
@@ -218,10 +220,29 @@ class ExampleTest(unittest.TestCase):
         count = 0
         self.assertEquals(self.collected[count],
                           [{'action': ['create'],
-                            'card': [self.winner_card],
-                            'owner_id': [self.owner_id],
-                            'sentence': [self.sentence]},
+                            'owner_id': [self.owner_id]},
                            {'game_id': self.game_id}]);
+        count += 1
+        del self.collected[count][1]['modified']
+        self.assertEquals(self.collected[count],
+                          [{'action': ['set_card'],
+                            'card': [self.winner_card],
+                            'player_id': [self.owner_id],
+                            'game_id': [self.game_id]},
+                           {'type': 'set_card',
+                            'card': self.winner_card,
+                            'player_id': self.owner_id,
+                            'game_id': [self.game_id]}]);
+        count += 1
+        del self.collected[count][1]['modified']
+        self.assertEquals(self.collected[count],
+                          [{'action': ['set_sentence'],
+                            'sentence': [self.sentence],
+                            'player_id': [self.owner_id],
+                            'game_id': [self.game_id]},
+                           {'type': 'set_sentence',
+                            'sentence': self.sentence,
+                            'game_id': [self.game_id]}]);
         count += 1
         del self.collected[count][1]['modified']
         self.assertEquals(self.collected[count],

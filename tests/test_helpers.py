@@ -24,6 +24,8 @@
 # Imports #####################################################################
 
 import sys
+import os
+sys.path.insert(0, os.path.abspath("..")) # so that for M-x pdb works
 
 from twisted.trial import unittest, runner, reporter
 
