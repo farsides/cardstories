@@ -191,7 +191,18 @@ class CardstoriesGame(Pollable):
             board = None
         else:
             board = [ ord(c) for c in board ]
-        rows = yield db.runQuery("SELECT player_id, cards, picked, vote, win FROM player2game WHERE game_id = ? ORDER BY serial", [ game_id ])
+        sql = ("SELECT "
+               "player2game.player_id, "
+               "player2game.cards, "
+               "player2game.picked, "
+               "player2game.vote, "
+               "player2game.win, "
+               "players.score, "
+               "players.levelups "
+               "FROM player2game LEFT JOIN players "
+               "ON player2game.player_id = players.player_id "
+               "WHERE game_id = ? ORDER BY serial")
+        rows = yield db.runQuery(sql, [ game_id ])
         picked_count = 0
         voted_count = 0
         players = []
@@ -239,8 +250,22 @@ class CardstoriesGame(Pollable):
             # win
             win = player[4]
 
+            # score and level
+            if player[0] == player_id:
+                score = player[5]
+                levelups = player[6]
+            else:
+                score = None
+                levelups = None
+
             # players
-            players.append({ 'id': player[0], 'cards': player_cards, 'picked': picked, 'vote': vote, 'win': win })
+            players.append({'id': player[0],
+                            'cards': player_cards,
+                            'picked': picked,
+                            'vote': vote,
+                            'win': win,
+                            'score': score,
+                            'levelups': levelups})
 
         ready = None
         if state == 'invitation':

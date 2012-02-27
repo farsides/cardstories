@@ -308,9 +308,9 @@ class CardstoriesGameTest(unittest.TestCase):
                            'countdown_finish': None,
                            'owner': False,
                            'owner_id': owner_id,
-                           'players': [{'id': owner_id, 'vote': None, 'win': u'n', 'picked': '', 'cards': None},
-                                       {'id': player1, 'vote': None, 'win': u'n', 'picked': None, 'cards': None},
-                                       {'id': player2, 'vote': None, 'win': u'n', 'picked': None, 'cards': None}],
+                           'players': [{'id': owner_id, 'vote': None, 'win': u'n', 'picked': '', 'cards': None, 'score': None, 'levelups': None},
+                                       {'id': player1, 'vote': None, 'win': u'n', 'picked': None, 'cards': None, 'score': None, 'levelups': None},
+                                       {'id': player2, 'vote': None, 'win': u'n', 'picked': None, 'cards': None, 'score': None, 'levelups': None}],
                            'self': None,
                            'sentence': u'SENTENCE',
                            'winner_card': None,
@@ -408,9 +408,9 @@ class CardstoriesGameTest(unittest.TestCase):
                            'countdown_finish': countdown_finish,
                            'owner': False,
                            'owner_id': owner_id,
-                           'players': [{'id': owner_id, 'vote': None, 'win': u'n', 'picked': '', 'cards': None},
-                                       {'id': player1, 'vote': '', 'win': u'n', 'picked': card1, 'cards': player1_cards},
-                                       {'id': player2, 'vote': '', 'win': u'n', 'picked': '', 'cards': None}],
+                           'players': [{'id': owner_id, 'vote': None, 'win': u'n', 'picked': '', 'cards': None, 'score': None, 'levelups': None},
+                                       {'id': player1, 'vote': '', 'win': u'n', 'picked': card1, 'cards': player1_cards, 'score': 0, 'levelups': 0},
+                                       {'id': player2, 'vote': '', 'win': u'n', 'picked': '', 'cards': None, 'score': None, 'levelups': None}],
                            'self': [card1, card2, player1_cards],
                            'sentence': u'SENTENCE',
                            'winner_card': None,
@@ -418,7 +418,6 @@ class CardstoriesGameTest(unittest.TestCase):
                            'invited': None,
                            'modified': self.game.modified}, game_info)
         self.assertEquals(players_id_list, [owner_id, player1, player2])
-        # move to complete state
 
     @defer.inlineCallbacks
     def test08_game_player_order(self):
@@ -449,9 +448,9 @@ class CardstoriesGameTest(unittest.TestCase):
                            'countdown_finish': None,
                            'owner': False,
                            'owner_id': owner_id,
-                           'players': [{'id': owner_id, 'vote': None, 'win': u'n', 'picked': '', 'cards': None},
-                                       {'id': player2, 'vote': None, 'win': u'n', 'picked': None, 'cards': None},
-                                       {'id': player1, 'vote': None, 'win': u'n', 'picked': None, 'cards': None}],
+                           'players': [{'id': owner_id, 'vote': None, 'win': u'n', 'picked': '', 'cards': None, 'score': None, 'levelups': None},
+                                       {'id': player2, 'vote': None, 'win': u'n', 'picked': None, 'cards': None, 'score': None, 'levelups': None},
+                                       {'id': player1, 'vote': None, 'win': u'n', 'picked': None, 'cards': None, 'score': None, 'levelups': None}],
                            'self': None,
                            'sentence': u'SENTENCE',
                            'winner_card': None,
