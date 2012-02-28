@@ -225,7 +225,7 @@ class CardstoriesGame(Pollable):
         else:
             cards = None
             invited = None
-        if owner_id != player_id and state == 'invitation':
+        if owner_id != player_id and state in ('create', 'invitation'):
             board = None
         else:
             board = [ ord(c) for c in board ]

@@ -417,8 +417,28 @@ class CardstoriesGameTest(unittest.TestCase):
         winner_card = 5
         sentence = 'SENTENCE'
         owner_id = 15
-        game_id = yield self.create_game(owner_id, winner_card, sentence)
+        game_id = yield self.game.create(owner_id)
+        yield self.game.set_card(owner_id, winner_card)
+
+        game_info, players_id_list = yield self.game.game(None)
+        self.assertEquals({'board': None,
+                           'cards': None,
+                           'id': game_id,
+                           'ready': None,
+                           'countdown_finish': None,
+                           'owner': False,
+                           'owner_id': owner_id,
+                           'players': [{'id': owner_id, 'vote': None, 'win': u'n', 'picked': '', 'cards': None, 'score': None, 'levelups': None}],
+                           'self': None,
+                           'sentence': None,
+                           'winner_card': None,
+                           'state': u'create',
+                           'invited': None,
+                           'modified': self.game.modified}, game_info)
+        self.assertEquals(players_id_list, [owner_id])
+
         # move to invitation state
+        yield self.game.set_sentence(owner_id, sentence)
         player1 = 16
         card1 = 20
         player2 = 17
