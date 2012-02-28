@@ -11,7 +11,7 @@ function setup() {
 
 module("cardstories_tabs", {setup: setup});
 
-test("state", 23, function() {
+test("state", 31, function() {
     var root = $(selector);
     var element = $('.cardstories_tabs', root);
     var player_id = 899;
@@ -25,35 +25,39 @@ test("state", 23, function() {
     var games = [
         {id: 101, sentence: 'SENTENCE1', state: 'invitation'},
         {id: 102, sentence: 'SENTENCE2', state: 'vote'},
-        {id: 103, sentence: 'SENTENCE3', state: 'pick'}
+        {id: 103, sentence: null, state: 'create'},
+        {id: 104, sentence: 'SENTENCE4', state: 'pick'}
     ];
     var tabs;
 
     $.cardstories_tabs.requires_action = function(_player_id, game, _root) {
         equal(_player_id, player_id, 'requires_action gets passed player_id');
-        equal(game.sentence.substring(0, 8), 'SENTENCE');
+        ok(game.state, 'requires_action gets passed the game');
         equal(_root.attr('id'), 'cardstories_tabs_example', 'requires_action gets passed the root')
         return false;
     };
 
     $.cardstories_tabs.state(player_id, {games: games}, root);
     tabs = element.find('.cardstories_tab');
-    equal(tabs.length, 3, 'Three tabs are created');
+    equal(tabs.length, 4, 'Four tabs are created');
     ok(tabs.eq(0).text().match('SENTENCE1'));
     ok(tabs.eq(1).text().match('SENTENCE2'));
-    ok(tabs.eq(2).text().match('SENTENCE3'));
+    ok(tabs.eq(2).text().match('New game')); // For game in 'create' state, 'New game' is shown.
+    ok(tabs.eq(3).text().match('SENTENCE4'));
 
     // Call state again without the second game.
     games = [
         {id: 101, sentence: 'SENTENCE1', state: 'invitation'},
-        {id: 103, sentence: 'SENTENCE3', state: 'pick'}
+        {id: 103, sentence: null, state: 'create'},
+        {id: 104, sentence: 'SENTENCE4', state: 'pick'}
     ];
 
     $.cardstories_tabs.state(player_id, {games: games}, root);
     tabs = element.find('.cardstories_tab');
-    equal(tabs.length, 2, 'Two tabs are created');
+    equal(tabs.length, 3, 'Three tabs are created');
     ok(tabs.eq(0).text().match('SENTENCE1'));
-    ok(tabs.eq(1).text().match('SENTENCE3'));
+    ok(tabs.eq(1).text().match('New game'));
+    ok(tabs.eq(2).text().match('SENTENCE4'));
 });
 
 test("Tabs are links to games", 2, function() {
