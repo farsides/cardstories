@@ -69,7 +69,6 @@
                 if (game.state === 'create') {
                     title.text('New game');
                 } else {
-                    console.log("WOT", game.state);
                     title.text(game.sentence.substring(0, 15));
                 }
                 tab.data('game_id', game.id);
