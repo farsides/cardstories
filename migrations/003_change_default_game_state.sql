@@ -39,6 +39,10 @@ INSERT INTO games
   SELECT id, owner_id, players, sentence, cards, board, state, created, completed
   FROM games_backup_1;
 
+/* This should take care of games that were created under new code,
+   but before this migration was run. */
+UPDATE games SET state = 'create' WHERE sentence IS NULL;
+
 DROP TABLE games_backup_1;
 
 COMMIT;
