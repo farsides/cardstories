@@ -831,7 +831,7 @@ test("create_write_sentence", 11, function() {
     submit.closest('form').submit();
 });
 
-test("create not owner", 4, function() {
+test("create not owner, not participating", 2, function() {
     var root = $('#qunit-fixture .cardstories');
     var owner_id = 77;
     var player_id = 15;
@@ -842,20 +842,45 @@ test("create not owner", 4, function() {
         owner: false
     };
 
+    $.cardstories.player_participate = function(_player_id, _game, _root) {
+        equal(_player_id, player_id, 'participate gets called with the player_id');
+        equal(_game.id, game_id, 'participate gets called with the game');
+    }
+
+    $.cardstories.create(player_id, game, root);
+});
+
+asyncTest("create not owner, already participating", 4, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_invitation .cardstories_pick', root);
+    var owner_id = 77;
+    var player_id = 15;
+    var game_id = 215;
+    var game = {
+        id: game_id,
+        owner_id: owner_id,
+        owner: false,
+        sentence: 'THE Sentence',
+        self: [null, null, []],
+        players: [
+            { 'id': owner_id, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0},
+            { 'id': player_id, 'vote': null, 'win': 'n', 'picked': 4, 'cards': [], 'score': 0, 'levelups': 0}
+        ]
+    };
+
     $.cardstories.poll_discard = function(_root) {
         ok(true, 'poll_discard gets called');
     };
 
-    $.cardstories.poll_plugin = function(_player_id, _game_id, _root) {
+    $.cardstories.poll = function(query, _player_id, _game_id, _root, cb) {
         equal(_player_id, player_id, 'poll_plugin gets passed the player_id');
         equal(_game_id, game_id, 'poll_plugin gets passed the game_id');
     };
 
-    $.cardstories.window = {
-        alert: function(msg) {
-            ok(msg.match(/finished creating this story/));
-        }
-    }
+    $.cardstories.replay_create_game = function(game, element, root) {
+        equal(game.id, game_id, 'replay_create_game gets passed the game');
+        start();
+    };
 
     $.cardstories.create(player_id, game, root);
 });
@@ -1371,20 +1396,129 @@ asyncTest("invitation_owner", 9, function() {
     $('.cardstories_go_vote_confirm_yes', element).click();
 });
 
-asyncTest("invitation_replay_master", 21, function() {
+asyncTest("replay_create_game card not set", 14, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_invitation .cardstories_pick', root);
+    var deck = $('.cardstories_deck', element);
+    var player1 = 25;
+    var player2 = 26;
+    var player3 = 27;
+    var owner = player1;
+    var game = {
+        owner_id: owner,
+        winner_card: null,
+        sentence: null,
+        ready: false,
+        players: [
+            { 'id': player1, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
+            { 'id': player2, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
+            { 'id': player3, 'vote': null, 'win': 'n', 'picked': 3, 'cards': [], 'score': 0, 'levelups': 0 }
+        ]
+    };
+
+    element.show().parents().show();
+
+    var start_left = $('.cardstories_deck_cover', deck).show().position().left;
+
+    var modal = $('.cardstories_wait_for_card', element);
+    ok(modal.is(':hidden'), 'wait_for_card dialog starts invisible');
+    $.cardstories.replay_create_game(game, element, root, function() {
+        ok(modal.is(':visible'), 'wait_for_card dialog is visible');
+        $('.cardstories_card', deck).each(function(i) {
+            var card = $(this);
+            ok(card.is(':visible'), 'card ' + i + ' is visible');
+            notEqual(card.position().left, start_left, 'card ' + i + ' was moved away from start position.');
+        });
+        start();
+    });
+});
+
+asyncTest("replay_create_game card set, sentence not set", 21, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_invitation .cardstories_pick', root);
     var deck = $('.cardstories_deck', element);
     var meta = $('.cardstories_master_hand', element).metadata({type: "attr", name: "data"});
+    var player1 = 25;
+    var player2 = 26;
+    var player3 = 27;
+    var owner = player1;
+    var game = {
+        owner_id: owner,
+        winner_card: '',
+        sentence: null,
+        ready: false,
+        players: [
+            { 'id': player1, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
+            { 'id': player2, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
+            { 'id': player3, 'vote': null, 'win': 'n', 'picked': 3, 'cards': [], 'score': 0, 'levelups': 0 }
+        ]
+    };
 
     element.show().parents().show();
 
     // Get start pos.
     var start_left = $('.cardstories_deck_cover', deck).show().position().left;
 
+    var modal = $('.cardstories_wait_for_sentence', element);
+    ok(modal.is(':hidden'), 'wait_for_sentence dialog starts invisible');
+
+    $.cardstories.replay_create_game(game, element, root, function() {
+        ok(modal.is(':visible'), 'wait_for_sentence dialog is visible');
+        $('.cardstories_card', deck).each(function(i) {
+            var card = $(this);
+            if (i === meta.active) {
+                ok(card.is(':visible'), 'Selected card ' + i + ' is visible');
+                notEqual(card.position().left, start_left, 'Selected card ' + i + ' was moved from start position.');
+            } else {
+                ok(card.is(':hidden'), 'Unselected card ' + i + ' is hidden');
+                equal(card.show().position().left, start_left, 'Unselected card ' + i + ' ends at start position.');
+            }
+        });
+        $('.cardstories_master_hand .cardstories_card_foreground', element).each(function(i) {
+            var card = $(this);
+            ok(card.is(':hidden'), 'Docked card ' + i + ' is hidden');
+        });
+        ok($('.cardstories_sentence_box', element).is(':hidden'), 'Story is NOT visible');
+        start();
+    });
+});
+
+asyncTest("replay_create_game card set and sentence both set", 23, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_invitation .cardstories_pick', root);
+    var deck = $('.cardstories_deck', element);
+    var meta = $('.cardstories_master_hand', element).metadata({type: "attr", name: "data"});
+    var player1 = 25;
+    var player2 = 26;
+    var player3 = 27;
+    var owner = player1;
+    var game = {
+        owner_id: owner,
+        winner_card: '',
+        sentence: 'Hey, this is the sentence.',
+        ready: false,
+        players: [
+            { 'id': player1, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
+            { 'id': player2, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
+            { 'id': player3, 'vote': null, 'win': 'n', 'picked': 3, 'cards': [], 'score': 0, 'levelups': 0 }
+        ]
+    };
+
+    element.show().parents().show();
+
+    // Get start pos.
+    var start_left = $('.cardstories_deck_cover', deck).show().position().left;
+
+    var wait_for_sentence_modal = $('.cardstories_wait_for_sentence', element);
+    var wait_for_card_modal = $('.cardstories_wait_for_card', element);
+
     ok($('.cardstories_sentence_box', element).is(':hidden'), 'Story starts hidden');
     ok($('.cardstories_modal_overlay', element).is(':visible'), 'Modal overlay starts on');
-    $.cardstories.invitation_replay_master(element, root, function() {
+
+    $.cardstories.replay_create_game(game, element, root, function() {
+        ok(wait_for_card_modal.is(':hidden'), 'wait_for_card dialog is invisible');
+        ok(wait_for_sentence_modal.is(':hidden'), 'wait_for_sentence dialog is invisible');
+
         $('.cardstories_card', deck).each(function(i) {
             var card = $(this);
             if (i === meta.active) {
@@ -1429,7 +1563,7 @@ asyncTest("invitation_pick_deal_helper", 38, function() {
     };
 
     element.show().parents().show();
-    $.cardstories.invitation_display_board(player1, state1, element, root);
+    $.cardstories.create_invitation_display_board(player1, state1, element, root);
 
     for (var i=1; i<=5; i++) {
         ok($('.cardstories_player_join_' + i, element).is(':hidden'), 'movie ' + i + ' starts hidden');
@@ -1457,7 +1591,7 @@ asyncTest("invitation_pick_deal_helper", 38, function() {
 
         // Call it again: animate_sprite should only be called again when
         // necessary and the number of expected assertions should reflect this.
-        $.cardstories.invitation_display_board(player1, state2, element, root);
+        $.cardstories.create_invitation_display_board(player1, state2, element, root);
         $.cardstories.invitation_pick_deal_helper(state2, element, function() {
             for (i=1; i<=3; i++) {
                 ok($('.cardstories_player_arms_' + i, element).is(':visible'), 'arm ' + i + ' is visible');
@@ -1824,7 +1958,7 @@ test("invitation_anonymous", 1, function() {
     $.query = _query;
 });
 
-test("invitation_display_board", 24, function() {
+test("create_invitation_display_board", 24, function() {
     var root = $('#qunit-fixture .cardstories');
     var owner_id = 0;
     var player1 = 1;
@@ -1848,7 +1982,7 @@ test("invitation_display_board", 24, function() {
 
     // Anonymous view
     var element = $('.cardstories_invitation .cardstories_invitation_anonymous', root);
-    $.cardstories.invitation_display_board(null, game, element, root);
+    $.cardstories.create_invitation_display_board(null, game, element, root);
     equal($('.cardstories_sentence', element).first().text(), sentence);
     var i;
     for(i = 1; i <= 4; i++) {
@@ -1858,7 +1992,7 @@ test("invitation_display_board", 24, function() {
 
     // Player view
     element = $('.cardstories_invitation .cardstories_pick', root);
-    $.cardstories.invitation_display_board(player2, game, element, root, false);
+    $.cardstories.create_invitation_display_board(player2, game, element, root, true);
     notEqual($('.cardstories_player_seat_1', element).css('display'), 'none', 'Seat 1 is visible');
     notEqual($('.cardstories_player_seat_2', element).css('display'), 'none', 'Seat 2 is visible');
     notEqual($('.cardstories_player_seat_3', element).css('display'), 'none', 'Seat 3 is visible');
@@ -1873,7 +2007,7 @@ test("invitation_display_board", 24, function() {
     notEqual($('.cardstories_player_seat_2 .cardstories_player_status', element).html(), '', 'self status is set');
 });
 
-test("invitation_participate", 1, function() {
+test("player_participate", 1, function() {
     var player_id = 15;
     var game_id = 101;
     var card = 1;
@@ -1895,7 +2029,7 @@ test("invitation_participate", 1, function() {
     $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
 });
 
-asyncTest("invitation_participate game full", 8, function() {
+asyncTest("player_participate game full", 8, function() {
     var player_id = 33;
     var game_id = 44;
     var game = {id: game_id};
@@ -1921,7 +2055,7 @@ asyncTest("invitation_participate game full", 8, function() {
         cb();
     };
 
-    $.cardstories.invitation_participate(player_id, game, root);
+    $.cardstories.player_participate(player_id, game, root);
 });
 
 asyncTest("vote_voter", 30, function() {

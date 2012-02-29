@@ -150,6 +150,74 @@ class CardstoriesGameTest(unittest.TestCase):
         c.close()
 
     @defer.inlineCallbacks
+    def test01_set_card_deal_cards(self):
+        the_card = 5
+        the_sentence = 'SENTENCE!'
+        owner = 12
+        player1 = 25
+        player2 = 26
+        player3 = 27
+        player4 = 28
+        # Create the game.
+        game_id = yield self.game.create(owner)
+
+        # Let players 1 & 2 join the game before the card is set.
+        yield self.game.participate(player1)
+        yield self.game.participate(player2)
+
+        # Their cards will not be set yet (will be empty) at this point.
+        for player in [player1, player2]:
+            game_info, player_ids = yield self.game.game(player)
+            self.assertEquals(game_info['self'][2], [])
+
+        # Set the card.
+        yield self.game.set_card(owner, the_card)
+
+        def check_cards_set(player):
+            game_info, player_ids = yield self.game.game(player)
+            cards = game_info['self'][2]
+            self.assertEquals(len(cards), CardstoriesGame.CARDS_PER_PLAYER)
+            self.assertTrue(the_card not in cards)
+
+        # Player 1 & 2 should have their cards set now.
+        # The cards should not include the chosen card.
+        for player in [player1, player2]:
+            check_cards_set(player)
+
+        # Let player 3 join now, his cards should be set upon joining.
+        yield self.game.participate(player3)
+        check_cards_set(player3)
+
+        # Set the sentence, the game will move into 'invitation' state.
+        yield self.game.set_sentence(owner, the_sentence)
+        game_info, player_ids = yield self.game.game(owner)
+        self.assertEquals(game_info['state'], 'invitation')
+
+        # Let player 4 join now. His cards should be set upon joining, too.
+        yield self.game.participate(player4)
+        check_cards_set(player4)
+
+        # Make a sanity check on player's cards - they should all be unique
+        # among each other.
+        all_cards = []
+        for player in [player1, player2, player3, player4]:
+            game_info, player_ids = yield self.game.game(player)
+            cards = game_info['self'][2]
+            all_cards.extend(cards)
+        all_cards = set(all_cards)
+        self.assertEquals(len(all_cards), 4 * CardstoriesGame.CARDS_PER_PLAYER)
+
+        # Also, none of the players' cards should be made available on the game.
+        c = self.db.cursor()
+        c.execute("SELECT cards FROM games WHERE id = ?", [ game_id ])
+        row = c.fetchone()
+        c.close()
+        game_cards = row[0]
+        for card in all_cards:
+            self.assertTrue(chr(card) not in game_cards)
+
+
+    @defer.inlineCallbacks
     def test01_set_sentence(self):
         card = 5
         sentence = u'SENTENCE \xe9'
@@ -505,7 +573,28 @@ class CardstoriesGameTest(unittest.TestCase):
         winner_card = 5
         sentence = 'SENTENCE'
         owner_id = 15
+
+        # Create the game
         game_id = yield self.game.create(owner_id)
+
+        game_info, players_id_list = yield self.game.game(None)
+        self.assertEquals({'board': None,
+                           'cards': None,
+                           'id': game_id,
+                           'ready': None,
+                           'countdown_finish': None,
+                           'owner': False,
+                           'owner_id': owner_id,
+                           'players': [{'id': owner_id, 'vote': None, 'win': u'n', 'picked': None, 'cards': None, 'score': None, 'levelups': None}],
+                           'self': None,
+                           'sentence': None,
+                           'winner_card': None,
+                           'state': u'create',
+                           'invited': None,
+                           'modified': self.game.modified}, game_info)
+        self.assertEquals(players_id_list, [owner_id])
+
+        # Set the card
         yield self.game.set_card(owner_id, winner_card)
 
         game_info, players_id_list = yield self.game.game(None)
@@ -529,13 +618,13 @@ class CardstoriesGameTest(unittest.TestCase):
                                         'level_prev': None}],
                            'self': None,
                            'sentence': None,
-                           'winner_card': None,
+                           'winner_card': '',
                            'state': u'create',
                            'invited': None,
                            'modified': self.game.modified}, game_info)
         self.assertEquals(players_id_list, [owner_id])
 
-        # move to invitation state
+        # Set the sentence/move to invitation state
         yield self.game.set_sentence(owner_id, sentence)
         player1 = 16
         card1 = 20
@@ -594,7 +683,7 @@ class CardstoriesGameTest(unittest.TestCase):
                                         'level_prev': None}],
                            'self': None,
                            'sentence': u'SENTENCE',
-                           'winner_card': None,
+                           'winner_card': '',
                            'state': u'invitation',
                            'invited': None,
                            'modified': self.game.modified}, game_info)
@@ -724,7 +813,7 @@ class CardstoriesGameTest(unittest.TestCase):
                                         'level_prev': None}],
                            'self': [card1, card2, player1_cards],
                            'sentence': u'SENTENCE',
-                           'winner_card': None,
+                           'winner_card': '',
                            'state': u'vote',
                            'invited': None,
                            'modified': self.game.modified}, game_info)
@@ -794,7 +883,7 @@ class CardstoriesGameTest(unittest.TestCase):
                                         'level_prev': None}],
                            'self': None,
                            'sentence': u'SENTENCE',
-                           'winner_card': None,
+                           'winner_card': '',
                            'state': u'invitation',
                            'invited': None,
                            'modified': self.game.modified}, game_info)

@@ -25,7 +25,8 @@
     }
 
     $.cardstories.skin = function(skin, root) {
-        // Stub out poll_plugin to not try to poll non-existing games.
+        // Stub out poll to not try to poll non-existing games.
+        $.cardstories.poll = function() {};
         $.cardstories.poll_plugin = function() {};
 
         $(root).addClass('cardstories_root');
@@ -40,10 +41,38 @@
 
         if (skin === 'create_pick_card') {
             $.cardstories.create_pick_card(0, 100, root);
+        } else if (skin === 'create_wait_for_card') {
+            game = {
+                'id': 101,
+                'owner_id': 1,
+                'winner_card': null,
+                'sentence': null,
+                'self': [null, null, []],
+                'players': [
+                    { 'id': 1, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
+                    { 'id': 2, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
+                    { 'id': 3, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 }
+                ]
+            };
+            $.cardstories.create(3, game, root);
         } else if (skin === 'create_write_sentence') {
             $.cardstories.create_write_sentence(0, 105, 5, root);
-        } else if (skin === 'create_wait') {
-            $.cardstories.create_wait(0, 100, root);
+        } else if (skin === 'create_wait_for_sentence') {
+            game = {
+                'id': 101,
+                'owner_id': 1,
+                'winner_card': '',
+                'sentence': null,
+                'self': [null, null, []],
+                'players': [
+                    { 'id': 1, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
+                    { 'id': 2, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
+                    { 'id': 3, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
+                    { 'id': 4, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
+                    { 'id': 5, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 }
+                ]
+            };
+            $.cardstories.create(2, game, root);
         } else if (skin === 'invitation_owner') {
             game = {
                 'id': 100,

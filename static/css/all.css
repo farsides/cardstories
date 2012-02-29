@@ -1876,6 +1876,14 @@
     width: 361px;
 }
 
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_wait_for_card,
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_wait_for_sentence {
+    left: 210px;
+    top: 100px;
+    height: 80px;
+    width: 341px;
+}
+
 .cardstories .cardstories_invitation .cardstories_pick .cardstories_info .cardstories_modal_h2 { 
     margin-top: 1em;
     margin-bottom: 0.5em;

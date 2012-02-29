@@ -231,23 +231,51 @@
         },
 
         create: function(player_id, game, root) {
-            this.poll_discard(root);
-            this.poll_plugin(player_id, game.id, root);
+            var $this = this;
+            var inhibit_poll = false;
+
             if (game.owner) {
+                // TODO: Game poll will need to be allowed for the GM if he will want to
+                //       see players joining, but create_write_sentence and create_pick_card
+                //       will need to be made idempotent before we can do that.
+                inhibit_poll = true;
+                $this.poll_discard(root);
+                $this.poll_plugin(player_id, game.id, root);
                 if (game.winner_card) {
-                    this.create_write_sentence(player_id, game.id, game.winner_card, root);
+                    $this.create_write_sentence(player_id, game.id, game.winner_card, root);
                 } else {
-                    this.create_pick_card(player_id, game.id, root);
+                    $this.create_pick_card(player_id, game.id, root);
                 }
             } else {
-                this.create_wait(player_id, game.id, root);
+                if (game.self) {
+                    $this.create_wait_for_story(player_id, game, root);
+                } else {
+                    inhibit_poll = true;
+                    $this.player_participate(player_id, game, root);
+                }
+            }
+
+            if (!inhibit_poll) {
+                $this.poll_discard(root);
+                $this.poll({
+                    type: ['game'],
+                    game_id: game.id,
+                    player_id: player_id
+                }, player_id, game.id, root, function() {
+                    $this.game(player_id, game.id, root);
+                });
             }
         },
 
-        create_wait: function(player_id, game, root) {
-            // TODO: Make a pretty notification dialog, start the game poll,
-            //       or do some other fancy stuff.
-            this.window.alert("The author hasn't finished creating this story yet.");
+        create_wait_for_story: function(player_id, game, root) {
+            var element = $('.cardstories_invitation .cardstories_pick', root);
+            this.set_active('invitation_pick', element, root, game);
+            this.display_progress_bar('player', 1, element, root);
+            this.display_master_info(this.get_master_info(game), element);
+            this.init_board_buttons(player_id, element, root);
+
+            this.create_invitation_display_board(player_id, game, element, root, false);
+            this.replay_create_game(game, element, root);
         },
 
         create_deck: function() {
@@ -828,6 +856,10 @@
 
                 $this.create_write_sentence_animate_end(card, element, root, function() {
                     $this.animate_progress_bar(3, element, function() {
+                        // Discard any polls, otherwise sometimes there are double
+                        // 'new game' notifications in the chat.
+                        $this.poll_discard(root);
+
                         var success = function(data, status) {
                             if ('error' in data) {
                                 $this.panic(data.error, player_id, game_id, root);
@@ -1106,7 +1138,7 @@
                         }
                     } else {
                         inhibit_poll = true;
-                        deferred = this.invitation_participate(player_id, game, root);
+                        deferred = this.player_participate(player_id, game, root);
                     }
                 }
             }
@@ -1492,7 +1524,7 @@
             };
 
             // Display the board.
-            this.invitation_display_board(player_id, game, element, root, true);
+            this.create_invitation_display_board(player_id, game, element, root, false);
 
             var deferred = $.Deferred();
             var resolve = false;
@@ -1504,7 +1536,7 @@
 
                 // Show a replay of the author picking a card and writing a sentence.
                 q.queue('chain', function(next) {
-                    $this.invitation_replay_master(element, root, next);
+                    $this.replay_create_game(game, element, root, next);
                 });
 
                 // Show players being dealt cards.
@@ -1542,7 +1574,7 @@
 
             // Once the player's set up, update board status as players join.
             q.queue('chain', function(next) {
-                $this.invitation_display_board(player_id, game, element, root, false);
+                $this.create_invitation_display_board(player_id, game, element, root, true);
                 $this.invitation_pick_deal_helper(game, element, next);
             });
 
@@ -1704,7 +1736,7 @@
             q.dequeue('stage1');
         },
 
-        invitation_replay_master: function(element, root, cb) {
+        replay_create_game: function(game, element, root, cb) {
             var $this = this;
             var deck = $('.cardstories_deck', element);
             var cards = $('.cardstories_card', deck);
@@ -1712,6 +1744,10 @@
             var meta = hand.metadata({type: "attr", name: "data"});
             var dock = $('.cardstories_master_cards', hand);
             var deck_cover = $('.cardstories_deck_cover', deck);
+            var wait_for_card_modal = $('.cardstories_wait_for_card', element);
+            var wait_for_sentence_modal = $('.cardstories_wait_for_sentence', element);
+            var overlay = $('.cardstories_modal_overlay', element);
+
             deck_cover.show();
             var final_pos = {
                 width: deck_cover.width(),
@@ -1724,123 +1760,167 @@
             var q = $({});
 
             // Start by dealing cards.
-            q.queue('chain', function(next) {
-                $this.create_pick_card_animate_fly_to_board(cards, element, root, next);
-            });
+            // Make sure to only run the deal animation once.
+            if (!element.hasClass('cardstories_deal_noop')) {
+                element.addClass('cardstories_deal_noop');
 
-            // Dockify the cards, using the jqDock "trick" to get cards to overlap:
-            // http://www.wizzud.com/jqDock/examples/example.php?f=jigsaw
-            // Only expand the dock after it's been set up.
-            q.queue('chain', function(next) {
-                var active_card = $('img', dock).eq(meta.active);
-                var count = dock.children().length;
-                var options = {
-                    size: meta.size,
-                    distance: meta.distance,
-                    setLabel: function(t, i, el) {
-                        $('<img class="cardstories_card_foreground" src="' + t + '" alt="">')
-                            .css({zIndex: count - i})
-                            .appendTo($(el).parent().css({zIndex: 2 * (count - i)}));
-                        return false;
-                    },
-                    onReady: function(ready) {
-                        active_card.jqDock('expand');
-                        // jqDock doesn't provide a hook for when expansion
-                        // finishes, so use a timeout to call next().
-                        $this.setTimeout(next, 500);
-                    }
-                };
-                dock.jqDock(options);
-            });
-
-            // Reposition selected card.
-            var original_pos;
-            q.queue('chain', function(next) {
-                var docked_cards = $('.cardstories_card', hand);
-
-                // Substitute docked cards with absolute positioned ones.
-                cards.each(function(i) {
-                    var card = $(this);
-                    var docked_card = docked_cards.find('.cardstories_card_foreground').eq(i);
-                    card.css({
-                        width: docked_card.width(),
-                        height: docked_card.height(),
-                        top: card.position().top - docked_card.height() + final_pos.height,
-                        left: docked_card.offset().left - deck.offset().left,
-                        zIndex: docked_card.css('z-index')
-                    });
-
-                    // Bring selected card to front.
-                    if (i === meta.active) {
-                        card.css({zIndex: 20});
-                    }
-
-                    // Hide docked version.
-                    docked_card.hide();
+                // Start by dealing cards.
+                q.queue('chain', function(next) {
+                    $this.create_pick_card_animate_fly_to_board(cards, element, root, next);
                 });
 
-                // Center and enlarge selected card, saving original pos.
-                var c = cards.eq(meta.active);
-                original_pos = {
-                    width: c.width(),
-                    height: c.height(),
-                    top: c.position().top,
-                    left: c.position().left
-                };
-                var l = c.position().left - ((meta.w - c.width())/2);
-                c.animate({
-                    width: meta.w,
-                    height: meta.h,
-                    top: meta.t,
-                    left: l
-                }, 500, next);
-            });
+                // Dockify the cards, using the jqDock "trick" to get cards to overlap:
+                // http://www.wizzud.com/jqDock/examples/example.php?f=jigsaw
+                // Only expand the dock after it's been set up.
+                q.queue('chain', function(next) {
+                    var active_card = $('img', dock).eq(meta.active);
+                    var count = dock.children().length;
+                    var options = {
+                        size: meta.size,
+                        distance: meta.distance,
+                        setLabel: function(t, i, el) {
+                            $('<img class="cardstories_card_foreground" src="' + t + '" alt="">')
+                                .css({zIndex: count - i})
+                                .appendTo($(el).parent().css({zIndex: 2 * (count - i)}));
+                            return false;
+                        },
+                        onReady: function(ready) {
+                            active_card.jqDock('expand');
+                            // jqDock doesn't provide a hook for when expansion
+                            // finishes, so use a timeout to call next().
+                            $this.setTimeout(function() {
+                                if (game.winner_card === null) {
+                                    $this.display_modal(wait_for_card_modal, overlay);
+                                }
+                                next();
+                            }, 500);
+                        }
+                    };
+                    dock.jqDock(options);
+                });
+            }
 
-            // Animate other cards back to deck.
-            q.queue('chain', function(next) {
-                var last = cards.length - 1;
-                if (last == meta.active) {
-                    last -= 1;
+            // Animate chosen card (raise it up), and move other cards back to the deck.
+            // Only run the animation if the card has already been set,
+            // and the animation hasn't yet been run.
+            if (game.winner_card !== null && !element.hasClass('cardstories_choose_noop')) {
+                element.addClass('cardstories_choose_noop');
+
+                // If the wait_for_card modal is displayed, close it first.
+                if (wait_for_card_modal.is(':visible')) {
+                    q.queue('chain', function(next) {
+                        $this.close_modal(wait_for_card_modal, overlay, next);
+                    });
                 }
-                cards.each(function(i) {
-                    // Skip selected one.
-                    if (i !== meta.active) {
-                        var card = $(this);
 
-                        // The first card should start flying immediately,
-                        // but each subsequent card should be delayed.
-                        if (i !== 0) {
-                            $this.delay(q, 100, 'cardq');
+                // Reposition selected card.
+                var original_pos;
+                q.queue('chain', function(next) {
+                    var docked_cards = $('.cardstories_card', hand);
+
+                    // Substitute docked cards with absolute positioned ones.
+                    cards.each(function(i) {
+                        var card = $(this);
+                        var docked_card = docked_cards.find('.cardstories_card_foreground').eq(i);
+                        card.css({
+                            width: docked_card.width(),
+                            height: docked_card.height(),
+                            top: card.position().top - docked_card.height() + final_pos.height,
+                            left: docked_card.offset().left - deck.offset().left,
+                            zIndex: docked_card.css('z-index')
+                        });
+
+                        // Bring selected card to front.
+                        if (i === meta.active) {
+                            card.css({zIndex: 20});
                         }
 
-                        q.queue('cardq', function(inner_next) {
-                            card.animate(final_pos, 500, function() {
-                                card.hide();
-                                if (i === last) {
-                                    next();
-                                }
-                            });
-                            inner_next();
-                        });
+                        // Hide docked version.
+                        docked_card.hide();
+                    });
+
+                    // Center and enlarge selected card, saving original pos.
+                    var c = cards.eq(meta.active);
+                    original_pos = {
+                        width: c.width(),
+                        height: c.height(),
+                        top: c.position().top,
+                        left: c.position().left
+                    };
+                    var l = c.position().left - ((meta.w - c.width())/2);
+                    c.animate({
+                        width: meta.w,
+                        height: meta.h,
+                        top: meta.t,
+                        left: l
+                    }, 500, next);
+                });
+
+                // Animate other cards back to deck.
+                q.queue('chain', function(next) {
+                    var last = cards.length - 1;
+                    if (last == meta.active) {
+                        last -= 1;
                     }
+                    cards.each(function(i) {
+                        // Skip selected one.
+                        if (i !== meta.active) {
+                            var card = $(this);
+
+                            // The first card should start flying immediately,
+                            // but each subsequent card should be delayed.
+                            if (i !== 0) {
+                                $this.delay(q, 100, 'cardq');
+                            }
+
+                            q.queue('cardq', function(inner_next) {
+                                card.animate(final_pos, 500, function() {
+                                    card.hide();
+                                    if (i === last) {
+                                        next();
+                                    }
+                                });
+                                inner_next();
+                            });
+                        }
+                    });
+
+                    q.dequeue('cardq');
                 });
 
-                q.dequeue('cardq');
-            });
-
-            // Move selected card back down.
-            q.queue('chain', function(next) {
-                var card = cards.eq(meta.active);
-                card.animate(original_pos, 500, next);
-            });
-
-            // Show story.
-            q.queue('chain', function(next) {
-                $('.cardstories_sentence_box', element).fadeIn('normal', function() {
-                    $(this).show(); // A workaround for http://bugs.jquery.com/ticket/8892
-                    next();
+                // Move selected card back down.
+                q.queue('chain', function(next) {
+                    var card = cards.eq(meta.active);
+                    card.animate(original_pos, 500, next);
                 });
-            });
+
+                // Display the wait_for_sentence modal, but only if the sentence hasn't
+                // yet been set.
+                if (game.sentence === null) {
+                    q.queue('chain', function(next) {
+                        $this.display_modal(wait_for_sentence_modal, overlay, next);
+                    });
+                }
+            }
+
+            // Show the story.
+            // But only do it if the story has already been set.
+            if (game.sentence !== null) {
+                // If the wait_for_sentence modal is visible, hide it first.
+                if (wait_for_sentence_modal.is(':visible')) {
+                    q.queue('chain', function(next) {
+                        $this.close_modal(wait_for_sentence_modal, overlay, next);
+                    });
+                }
+
+                // Show story.
+                q.queue('chain', function(next) {
+                    $('.cardstories_sentence_box', element).fadeIn('normal', function() {
+                        $(this).show(); // A workaround for http://bugs.jquery.com/ticket/8892
+                        next();
+                    });
+                });
+            }
 
             q.queue('chain', function(next) {
                 if (cb) {
@@ -2038,7 +2118,7 @@
             this.display_progress_bar('player', 2, element, root);
             this.display_master_info($this.get_master_info(game), element);
             this.init_board_buttons(player_id, element, root);
-            this.invitation_display_board(player_id, game, element, root, true);
+            this.create_invitation_display_board(player_id, game, element, root, false);
 
             var modal = $('.cardstories_modal', element);
             var overlay = $('.cardstories_modal_overlay', element);
@@ -2173,7 +2253,7 @@
             return deferred;
         },
 
-        invitation_participate: function(player_id, game, root) {
+        player_participate: function(player_id, game, root) {
             var $this = this;
             var query = {
                 action: 'participate',
@@ -2203,11 +2283,11 @@
             this.set_active('invitation_anonymous', element, root, game);
             this.display_progress_bar('player', 1, element, root);
             this.display_master_info($this.get_master_info(game), element);
-            this.invitation_display_board(player_id, game, element, root, true);
+            this.create_invitation_display_board(player_id, game, element, root, false);
             return $.Deferred().resolve();
         },
 
-        invitation_display_board: function(player_id, game, element, root, setup) {
+        create_invitation_display_board: function(player_id, game, element, root, set_status) {
             $('.cardstories_sentence', element).text(game.sentence);
             var $this = this;
             var players = game.players;
@@ -2230,7 +2310,7 @@
                     // Differentiate between player status.
                     if (players[i]['id'] == player_id) {
                         seat.addClass('cardstories_player_seat_self');
-                        if (setup !== true) {
+                        if (set_status) {
                             status.html('is picking a card<br />...');
                         }
                     } else {

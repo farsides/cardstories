@@ -185,10 +185,21 @@ class CardstoriesGame(Pollable):
         if state != 'create':
             raise CardstoriesWarning('WRONG_STATE_FOR_SETTING_CARD', {'game_id': game_id, 'state': state})
         transaction.execute("UPDATE player2game SET picked = ?, cards = ? WHERE game_id = ? AND player_id = ?", [ card, card, game_id, player_id ])
+        # Generate a random set of cards (without the chosen card).
         cards = [ chr(x) for x in range(1, self.NCARDS + 1) ]
         cards.remove(card)
         random.shuffle(cards)
-        transaction.execute("UPDATE games SET cards = ?, board = ? WHERE id = ?", [ ''.join(cards), card, game_id ])
+        cards = ''.join(cards)
+        # Update cards for all the players who have already joined the game.
+        transaction.execute("SELECT player_id from player2game WHERE game_id = ? AND player_id != ?", [ game_id, owner_id])
+        rows = transaction.fetchall()
+        for row in rows:
+            player_cards = cards[:self.CARDS_PER_PLAYER]
+            cards = cards[self.CARDS_PER_PLAYER:]
+            transaction.execute("UPDATE player2game SET cards = ? WHERE game_id = ? AND player_id = ?", [ player_cards, game_id, row[0] ])
+        # Finally, update the available cards on the game, left after dealing
+        # each player his set.
+        transaction.execute("UPDATE games SET cards = ?, board = ? WHERE id = ?", [ cards, card, game_id ])
 
     @defer.inlineCallbacks
     def set_card(self, player_id, card):
@@ -311,6 +322,8 @@ class CardstoriesGame(Pollable):
                     winner_card = ord(player[2])
                 vote = self.ord(player[3])
             else:
+                if player[0] == owner_id and player[2]:
+                    winner_card = ''
                 if player[3] != None:
                     vote = ''
                 else:

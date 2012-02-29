@@ -335,6 +335,12 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         owner_id = 15
         game = yield self.service.create({'owner_id': [owner_id]})
         game_id = game['game_id']
+
+        game_info, players_id_list = yield self.service.game({'action': 'game',
+                                                              'game_id': [game_id]})
+        self.assertEquals(game_id, game_info['id'])
+        self.assertEquals(game_info['winner_card'], None)
+
         yield self.service.set_card({'action': ['set_card'],
                                      'card': [winner_card],
                                      'game_id': [game_id],
@@ -342,7 +348,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         game_info, players_id_list = yield self.service.game({'action': 'game',
                                                               'game_id': [game_id]})
         self.assertEquals(game_id, game_info['id'])
-        self.assertEquals(game_info['winner_card'], None)
+        self.assertEquals(game_info['winner_card'], '')
         self.assertIn(owner_id, players_id_list)
         game_info, players_id_list = yield self.service.game({ 'action': 'game',
                                                                'game_id': [game_id],
@@ -747,7 +753,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
                                            'modified': [0],
                                            'game_id': [game_id] })
         self.assertEquals(game_id, state[0]['id'])
-        self.assertEquals(state[0]['winner_card'], None)
+        self.assertEquals(state[0]['winner_card'], '')
         state = yield self.service.state({ 'type': ['game'],
                                            'modified': [0],
                                            'game_id': [game_id],
@@ -810,7 +816,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         self.assertEquals(len(multistate[0]['games']), 2)
         state1 = multistate[0]['games'][0]
         self.assertEquals(state1['id'], game_id1)
-        self.assertEquals(state1['winner_card'], None)
+        self.assertEquals(state1['winner_card'], '')
         state2 = multistate[0]['games'][1]
         self.assertEquals(state2['id'], game_id2)
         self.assertEquals(state2['winner_card'], winner_card2)
