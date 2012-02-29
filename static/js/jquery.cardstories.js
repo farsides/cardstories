@@ -3565,9 +3565,21 @@
                 }
             }
 
+            // Supplant score
+            var score = 0;
+            for (i=0; i < game.players.length; i++) {
+                if (game.players[i].id == player_id) {
+                    score = game.players[i].score;
+                }
+            }
+            var score_el = $('.cardstories_results_score', element);
+            var html = score_el.html().supplant({'score': score});
+            score_el.html(html);
+
             var box;
             if (game.owner) {
                 box = $('.cardstories_results.author', element);
+                $('.cardstories_results_back', box).show();
                 if (!owner_lost) {
                     $('.cardstories_won_1', box).show();
                 } else if (!too_hard) {
@@ -3586,6 +3598,7 @@
                 }
 
                 box = $('.cardstories_results.player', element);
+                $('.cardstories_results_back', box).show();
                 if (player_voted) {
                     if (player_lost) {
                         $('.cardstories_lost_1', box).show();

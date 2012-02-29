@@ -872,48 +872,61 @@
           <div class="cardstories_envelope cardstories_envelope_4"></div>
           <div class="cardstories_envelope cardstories_envelope_5"></div>
           <div class="cardstories_results author">
-            <img class="cardstories_won_1" src="/static/css/images/author_won.png" alt="" />
-            <img class="cardstories_lost_1" src="/static/css/images/author_lost_1.png" alt="" />
-            <img class="cardstories_lost_2" src="/static/css/images/author_lost_2.png" alt="" />
-            <p class="cardstories_won_1">
-              You confused some people but not everyone.
-            </p>
-            <p class="cardstories_lost_1">
-              You created a story that was <strong>too easy</strong> to guess.
-              <strong>Everyone discovered your card.</strong>
-            </p>
-            <p class="cardstories_lost_2">
-              You created a story that was <strong>too hard</strong> to guess.
-              <strong>Nobody discovered your card.</strong>
-            </p>
+            <img class="cardstories_results_back" src="/static/css/images/complete_blue_box.png" alt="" />
+            <img class="cardstories_results_banner cardstories_won_1" src="/static/css/images/complete_you_win.png" alt="" />
+            <img class="cardstories_results_banner cardstories_lost_1" src="/static/css/images/complete_you_lose.png" alt="" />
+            <img class="cardstories_results_banner cardstories_lost_2" src="/static/css/images/complete_you_lose.png" alt="" />
+            <div class="cardstories_results_text">
+              <p class="cardstories_won_1">
+                You confused <strong>some people</strong><br/>
+                but not everyone.
+              </p>
+              <p class="cardstories_lost_1">
+                You created a story that was <strong>too easy</strong> to guess.
+                Everyone discovered your card.
+              </p>
+              <p class="cardstories_lost_2">
+                You created a story that was <strong>too hard</strong> to guess.
+                Nobody discovered your card.
+              </p>
+            </div>
+            <div class="cardstories_results_score_container">
+              <div class="cardstories_results_score_legend">GAME SCORE</div>
+              <div class="cardstories_results_score">{score}</div>
+            </div>
           </div>
           <div class="cardstories_results player">
-            <img class="cardstories_won_1" src="/static/css/images/player_won_1.png" alt="" />
-            <img class="cardstories_won_2" src="/static/css/images/player_won_2.png" alt="" />
-            <img class="cardstories_won_3" src="/static/css/images/player_won_2.png" alt="" />
-            <img class="cardstories_lost_1" src="/static/css/images/player_lost.png" alt="" />
-            <p class="cardstories_won_1">
-              <strong>You found the Card Story!</strong><br/>
-              The Game Master <strong>wins</strong> too, he wrote a story which was neither too easy nor too hard to guess.
-              He confused some people, but not everyone.
-            </p>
-            <p class="cardstories_won_2">
-              <strong>You found the Card Story!</strong><br/>
-              The Game Master <strong>loses</strong>,
-              since he wrote a story which was <strong>too easy</strong> to guess.
-              <strong>Everyone discovered his card.</strong>
-            </p>
-            <p class="cardstories_won_3">
-              <strong>You didn't find the Card Story,</strong> but the Game Master
-              <strong>loses</strong> since he wrote a story which was <strong>too hard</strong> to guess.
-              <strong>Nobody discovered his card.</strong>
-            </p>
-            <p class="cardstories_lost_1">
-              You didn't find the Card Story.<br/>
-              The Game Master wins, since he wrote a story that was
-              <strong>neither too easy nor too hard</strong> to guess.
-              He confused <strong>some people but not everyone.</strong>
-            </p>
+            <img class="cardstories_results_back" src="/static/css/images/complete_blue_box.png" alt="" />
+            <img class="cardstories_results_banner cardstories_won_1" src="/static/css/images/complete_you_win.png" alt="" />
+            <img class="cardstories_results_banner cardstories_won_2" src="/static/css/images/complete_you_win.png" alt="" />
+            <img class="cardstories_results_banner cardstories_won_3" src="/static/css/images/complete_you_win.png" alt="" />
+            <img class="cardstories_results_banner cardstories_lost_1" src="/static/css/images/complete_you_lose.png" alt="" />
+            <div class="cardstories_results_text">
+              <p class="cardstories_won_1">
+                <strong>You found the Card Story!</strong><br/>
+                The Game Master wins too, he wrote a story which was neither too easy nor too hard to guess.
+                He confused some people, but not everyone.
+              </p>
+              <p class="cardstories_won_2">
+                <strong>You found the Card Story!</strong><br/>
+                The Game Master loses, since he wrote a story which was too easy to guess.
+                Everyone discovered his card.
+              </p>
+              <p class="cardstories_won_3">
+                <strong>You didn't find the Card Story.</strong><br/>
+                The Game Master loses since he wrote a story which was too hard to guess.
+                Nobody discovered his card.
+              </p>
+              <p class="cardstories_lost_1">
+                <strong>You didn't find the Card Story.</strong><br/>
+                The Game Master wins, since he wrote a story that was neither too easy nor too hard to guess.
+                He confused some people but not everyone.
+              </p>
+            </div>
+            <div class="cardstories_results_score_container">
+              <div class="cardstories_results_score_legend">GAME SCORE</div>
+              <div class="cardstories_results_score">{score}</div>
+            </div>
           </div>
           <div class="cardstories_next_game">
             <div class="cardstories_img_button cardstories_play_again">

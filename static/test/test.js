@@ -2527,7 +2527,7 @@ test("complete owner won", 9, function() {
     $.cardstories_table = undefined;
 });
 
-test("complete", 34, function() {
+test("complete", 35, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var owner_id = 0;
@@ -2535,12 +2535,13 @@ test("complete", 34, function() {
     var player2 = 2;
     var player3 = 3;
     var player4 = 4;
+    var owner_score = 123;
     var game = {
         'owner': true,
         'owner_id': owner_id,
         'board': [],
         'winner_card': 30,
-        'players': [ { 'id': owner_id, 'vote': null, 'win': 'y', 'picked': 30, 'cards': [], 'score': 0, 'levelups': 0 },
+        'players': [ { 'id': owner_id, 'vote': null, 'win': 'y', 'picked': 30, 'cards': [], 'score': owner_score, 'levelups': 0 },
                      { 'id': player1, 'vote': 30, 'win': 'y', 'picked': 31, 'cards': [], 'score': 0, 'levelups': 0 },
                      { 'id': player2, 'vote': 34, 'win': 'n', 'picked': 32, 'cards': [], 'score': 0, 'levelups': 0 }, // Voted for the card of the non voting player
                      { 'id': player3, 'vote': 31, 'win': 'n', 'picked': 33, 'cards': [], 'score': 0, 'levelups': 0 },
@@ -2582,9 +2583,10 @@ test("complete", 34, function() {
     ok($('.cardstories_votes_5', element).children().length === 0, 'no votes for seat 5');
     ok($('.cardstories_votes_win', element).children().length === 1, '1 winning votes');
     equal($('.cardstories_results.author', element).css('display'), 'block', 'author results is visible');
-    equal($('.cardstories_results img.cardstories_won_1', element).css('display'), 'inline', 'won image is visible');
+    equal($('.cardstories_results img.cardstories_won_1', element).css('display'), 'block', 'won image is visible');
     equal($('.cardstories_results img.cardstories_lost_1', element).css('display'), 'none', 'lost image 1 is hidden');
     equal($('.cardstories_results img.cardstories_lost_2', element).css('display'), 'none', 'lost image 2 is hidden');
+    equal($('.cardstories_results.author .cardstories_results_score', element).html(), owner_score+'', 'author score is visible');
 
     $.cardstories_table = undefined;
 });
