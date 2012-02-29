@@ -256,6 +256,7 @@
         } else if (skin === 'complete') {
             game = {
                 'id': 100,
+                'owner': false,
                 'owner_id': 0,
                 'player_id': 1,
                 'ready': true,
@@ -263,27 +264,27 @@
                 'board': [30,31,32,33],
                 'self': [31, 30, [1,2,3,4,5,31]],
                 'winner_card': 30,
-                'players': [ { 'id': 0, 'vote': null, 'win': 'n', 'picked': 30, 'cards': []},
-                             { 'id': 1, 'vote': 32, 'win': 'y', 'picked': 31, 'cards': []},
-                             { 'id': 2, 'vote': null, 'win': 'n', 'picked': 32, 'cards': []},
-                             { 'id': 4, 'vote': 30, 'win': 'y', 'picked': 34, 'cards': []}]
+                'players': [ { 'id': 0, 'vote': null, 'win': 'n', 'picked': 30, 'cards': [], 'score': 12310, 'levelups': 0},
+                             { 'id': 1, 'vote': 32, 'win': 'n', 'picked': 31, 'cards': [], 'score': 12320, 'levelups': 0},
+                             { 'id': 2, 'vote': null, 'win': 'n', 'picked': 32, 'cards': [], 'score': 12330, 'levelups': 0},
+                             { 'id': 4, 'vote': 30, 'win': 'y', 'picked': 34, 'cards': [], 'score': 12340, 'levelups': 0}]
             };
             $.cardstories.complete_complete(1, game, root);
         } else if (skin === 'complete_owner') {
             game = {
                 'id': 100,
-                0: true,
+                'owner': true,
                 'owner_id': 0,
                 'ready': true,
                 'sentence': 'the game sentence',
                 'board': [30,31,32,33,34,35],
                 'winner_card': 30,
-                'players': [{ 'id': 0, 'vote': null, 'win': 'y', 'picked': 30, 'cards': []},
-                            { 'id': 1, 'vote': 32, 'win': 'n', 'picked': 31, 'cards': []},
-                            { 'id': 2, 'vote': 30, 'win': 'y', 'picked': 32, 'cards': []},
-                            { 'id': 3, 'vote': 35, 'win': 'n', 'picked': 33, 'cards': []},
-                            { 'id': 4, 'vote': 30, 'win': 'y', 'picked': 34, 'cards': []},
-                            { 'id': 5, 'vote': 30, 'win': 'y', 'picked': 35, 'cards': []}]
+                'players': [{ 'id': 0, 'vote': null, 'win': 'y', 'picked': 30, 'cards': [], 'score': 12310, 'levelups': 0},
+                            { 'id': 1, 'vote': 32, 'win': 'n', 'picked': 31, 'cards': [], 'score': 12320, 'levelups': 0},
+                            { 'id': 2, 'vote': 30, 'win': 'y', 'picked': 32, 'cards': [], 'score': 12330, 'levelups': 0},
+                            { 'id': 3, 'vote': 35, 'win': 'n', 'picked': 33, 'cards': [], 'score': 12340, 'levelups': 0},
+                            { 'id': 4, 'vote': 30, 'win': 'y', 'picked': 34, 'cards': [], 'score': 12350, 'levelups': 0},
+                            { 'id': 5, 'vote': 30, 'win': 'y', 'picked': 35, 'cards': [], 'score': 12360, 'levelups': 0}]
             };
             $.cardstories.complete_complete(0, game, root);
         } else if (skin === 'complete_anonymous') {
