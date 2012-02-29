@@ -3618,7 +3618,7 @@
         complete_display_next_game: function(player_id, game, element, root, cb) {
             var $this = this;
             var box = $('.cardstories_next_game', element);
-            var play_again_button = $('.cardstories_play_again', element);
+            var continue_button = $('.cardstories_complete_continue', element);
             var modal = $('.cardstories_modal', element);
             var overlay = $('.cardstories_modal_overlay', element);
 
@@ -3634,9 +3634,7 @@
             }
 
             // Enable "continue" button
-            play_again_button.unbind('click').click(function() {
-                play_again_button.fadeOut();
-
+            continue_button.unbind('click').click(function() {
                 // Ask the table plugin to switch to the next game as soon as possible
                 var is_ready = $.cardstories_table.load_next_game_when_ready(true, player_id, game.id, root);
                 if(!is_ready) {
@@ -3652,13 +3650,14 @@
                     // to avoid brutally switching to a new game creation without explanation
                     $.cardstories_table.load_next_game_when_ready(false, player_id, game.id, root);
                     $this.close_modal(modal, overlay);
-                    play_again_button.fadeIn();
+                    continue_button.fadeIn();
                 }
                 $('.cardstories_next_game_author', element).css('display', 'none');
                 $('.cardstories_next_game_player', element).css('display', 'none');
                 $this.complete_display_next_game(player_id, game, element, root);
             });
 
+            continue_button.fadeIn('fast');
             box.fadeIn('fast', cb);
         },
 

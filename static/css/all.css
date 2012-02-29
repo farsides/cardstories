@@ -2286,7 +2286,6 @@
     bottom: 12.0em;
     font-size: 10px;
     text-align: center;
-    z-index: 1;
 }
 
 .cardstories .cardstories_complete .cardstories_results .cardstories_results_banner {
@@ -2345,34 +2344,46 @@
     top: 0.36em !important;
 }
 
-.cardstories .cardstories_complete .cardstories_next_game {
+.cardstories .cardstories_complete .cardstories_complete_continue {
     display: none;
+}
+
+.cardstories .cardstories_complete .cardstories_complete_continue > div {
     position: absolute;
-    width: 436px;
-    left: 169px;
-    bottom: 210px;
+    background: transparent url('images/complete_continue.png') no-repeat left top;
+    width: 26.7em;
+    height: 11.0em;
+    top: 45.0em;
+    left: 49.0em;
     font-size: 10px;
     text-align: center;
 }
 
-.cardstories .cardstories_complete .cardstories_next_game > p {
+.cardstories .cardstories_complete .cardstories_next_game {
+    display: none;
+    position: absolute;
+    width: 39.5em;
+    height: 11.6em;
+    left: 11.4em;
+    bottom: 6.0em;
+    font-size: 10px;
+    text-align: center;
+}
+
+.cardstories .cardstories_complete .cardstories_next_game .cardstories_next_game_text {
+    position: absolute;
+    width: 100%;
+    top: 5.9em;
+    left: 0;
+}
+
+.cardstories .cardstories_complete .cardstories_next_game .cardstories_next_game_text > p {
     display: none;
     width: 24em;
+    color: #FFFFFF;
     margin: 0.25em auto;
     font-size: 1.2em; 
     font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
-}
-
-.cardstories .cardstories_complete .cardstories_next_game .cardstories_play_again {
-    position: relative;
-    margin: 0 auto;
-    font-size: 2em;
-    font-weight: bold;
-    letter-spacing: 2px; 
-    width: 7em;
-    height: 1.8em;
-    color: white;
-    font-family: "Licon";
 }
 
 .cardstories .cardstories_complete .cardstories_modal {

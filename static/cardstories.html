@@ -871,6 +871,34 @@
           <div class="cardstories_envelope cardstories_envelope_3"></div>
           <div class="cardstories_envelope cardstories_envelope_4"></div>
           <div class="cardstories_envelope cardstories_envelope_5"></div>
+          <div class="cardstories_sentence_box">
+            <div class="cardstories_sentence_bg_box">
+              <img class="cardstories_sentence_bg" src="/static/css/images/sentence_bubble_bg.png" />
+            </div>
+            <div class="cardstories_sentence"></div>
+            <div class="cardstories_sentence_footer"></div>
+          </div>
+          <div class="cardstories_master_seat owner">
+            <img class="cardstories_avatar" src="javascript:void(0)" />
+            <div class="cardstories_master_seat_box"></div>
+            <div class="cardstories_master_name">{name}</div>
+            <div class="cardstories_master_status"></div>
+          </div>
+          <div class="cardstories_card_template cardstories_picked_card" data="{card:'/static/css/images/card0{card}.png'}">
+            <img src="/static/css/images/card_bg.png" class="cardstories_card_background" />
+            <img src="/static/css/images/card020.png" class="cardstories_card_foreground" />
+          </div>
+          <div class="cardstories_next_game">
+            <img src="/static/css/images/complete_blue_box_small.png" alt="" />
+            <div class="cardstories_next_game_text">
+              <p class="cardstories_next_game_author">
+                You are the game master of the next game!<br />The other players are waiting for you to create it.
+              </p>
+              <p class="cardstories_next_game_player">
+                It's <span class="cardstories_next_author_name"></span>'s turn to create a story.
+              </p>
+            </div>
+          </div>
           <div class="cardstories_results author">
             <img class="cardstories_results_back" src="/static/css/images/complete_blue_box.png" alt="" />
             <img class="cardstories_results_banner cardstories_won_1" src="/static/css/images/complete_you_win.png" alt="" />
@@ -928,42 +956,13 @@
               <div class="cardstories_results_score">{score}</div>
             </div>
           </div>
-          <div class="cardstories_next_game">
-            <div class="cardstories_img_button cardstories_play_again">
-              <img class="cardstories_btn_on" alt="" src="/static/css/images/play_again_button_on.png" />
-              <img class="cardstories_btn_over" alt="" src="/static/css/images/play_again_button_over.png" />
-              <a href="javascript:void(0)"><span>CONTINUE</span></a>
-            </div>
-            <p class="cardstories_next_game_author">
-              You are the game master of the next game!<br />The other players are waiting for you to create it.
-            </p>
-            <p class="cardstories_next_game_player">
-              It's <span class="cardstories_next_author_name"></span>'s turn to create a story.
-            </p>
-          </div>
           <div class="cardstories_modal">
             <img alt="" src="/static/css/images/modal_background.png" />
             <p class="cardstories_modal_h1">PLEASE WAIT</p>
             <p class="cardstories_modal_h2">As soon as <span class="cardstories_next_author_name"></span> creates the next game, you will automatically join it.</p>
           </div>
           <div class="cardstories_modal_overlay"></div>
-          <div class="cardstories_sentence_box">
-            <div class="cardstories_sentence_bg_box">
-              <img class="cardstories_sentence_bg" src="/static/css/images/sentence_bubble_bg.png" />
-            </div>
-            <div class="cardstories_sentence"></div>
-            <div class="cardstories_sentence_footer"></div>
-          </div>
-            <div class="cardstories_master_seat owner">
-              <img class="cardstories_avatar" src="javascript:void(0)" />
-              <div class="cardstories_master_seat_box"></div>
-              <div class="cardstories_master_name">{name}</div>
-              <div class="cardstories_master_status"></div>
-            </div>
-          <div class="cardstories_card_template cardstories_picked_card" data="{card:'/static/css/images/card0{card}.png'}">
-            <img src="/static/css/images/card_bg.png" class="cardstories_card_background" />
-            <img src="/static/css/images/card020.png" class="cardstories_card_foreground" />
-          </div>
+          <a href="javascript:void(0)" class="cardstories_complete_continue"><div></div></a>
         </div>
       </div>
     </div>

@@ -2700,7 +2700,7 @@ test("next_game_as_player", 4, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var next_game_dom = $('.cardstories_next_game', element);
-    var play_again_button = $('.cardstories_play_again', next_game_dom);
+    var play_again_button = $('.cardstories_complete_continue', element);
     $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player_id+1; },
                            'load_next_game_when_ready': function(ready, player_id, game_id, root) { return false; },
                            'on_next_owner_change': function(player_id, game_id, root, cb) {} };
@@ -2733,7 +2733,7 @@ test("on_next_owner_change", 9, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var next_game_dom = $('.cardstories_next_game', element);
-    var play_again_button = $('.cardstories_play_again', next_game_dom);
+    var play_again_button = $('.cardstories_complete_continue', element);
     var owner_change_cb = null;
     $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player_id+1; },
                            'load_next_game_when_ready': function(ready, player_id, game_id, root) { return false; },
