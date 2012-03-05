@@ -187,6 +187,7 @@ class CardstoriesService(service.Service, Observable):
             "CREATE TABLE players ( "
             "  player_id INTEGER, "
             "  score BIGINTEGER, "
+            "  score_prev BIGINTEGER, "
             "  levelups INTEGER "
             "); ")
         c.execute(

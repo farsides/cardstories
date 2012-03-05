@@ -156,10 +156,10 @@ class CardstoriesGame(Pollable):
         defer.returnValue(deleted)
 
     def playerInteraction(self, transaction, player_id):
-        transaction.execute("SELECT player_id, score, levelups from players WHERE player_id = ?", [player_id])
+        transaction.execute("SELECT player_id, score, score_prev, levelups from players WHERE player_id = ?", [player_id])
         rows = transaction.fetchall()
         if not rows:
-            transaction.execute("INSERT INTO players (player_id, score, levelups) VALUES (?, ?, ?)", [player_id, 0, 0])
+            transaction.execute("INSERT INTO players (player_id, score, score_prev, levelups) VALUES (?, ?, ?, ?)", [player_id, 0, 0, 0])
 
     def createInteraction(self, transaction, owner_id):
         transaction.execute("INSERT INTO games (owner_id, cards, board, created) VALUES (?, '', '', datetime('now'))", [owner_id])
@@ -215,6 +215,34 @@ class CardstoriesGame(Pollable):
         result = yield self.touch(type='set_sentence', sentence=sentence)
         defer.returnValue(result)
 
+    def calculate_level(self, score):
+        # Players start with score 0 at level 1, and by convention only
+        # need one point to reach level 2.
+        if score == 0:
+            level = 1 
+            score_next = 1
+            score_left = 1
+
+        # Starting at level 2, levels are defined by a "points to the
+        # next level" formula, tunable using 3 constants.  Precisely
+        # due to this tunable nature, levels are not stored on the
+        # database, but calculated whenever a request is made.
+        else:
+            to_next = lambda l: int(ceil(self.LEVEL_A * l ** 3 + \
+                                         self.LEVEL_B * l ** 2 + \
+                                         self.LEVEL_C * l))
+            level = 2
+            remainder = score - 1
+            score_next = to_next(level)
+            while remainder >= score_next:
+                remainder -= score_next
+                level += 1
+                score_next = to_next(level)
+
+            score_left = score_next - remainder
+
+        return level, score_next, score_left
+
     @defer.inlineCallbacks
     def game(self, player_id):
         db = self.service.db
@@ -240,6 +268,7 @@ class CardstoriesGame(Pollable):
                "player2game.vote, "
                "player2game.win, "
                "players.score, "
+               "players.score_prev, "
                "players.levelups "
                "FROM player2game LEFT JOIN players "
                "ON player2game.player_id = players.player_id "
@@ -295,37 +324,16 @@ class CardstoriesGame(Pollable):
             # Set score and level, but only for the requesting player.
             if player[0] == player_id:
                 score = player[5]
-
-                # Players start with score 0 at level 1, and by convention only
-                # need one point to reach level 2.
-                if score == 0:
-                    level = 1 
-                    score_next = 1
-                    score_left = 1
-
-                # Starting at level 2, levels are defined by a "points to the
-                # next level" formula, tunable using 3 constants.  Precisely
-                # due to this tunable nature, levels are not stored on the
-                # database, but calculated whenever a request is made.
-                else:
-                    to_next = lambda l: int(ceil(self.LEVEL_A * l ** 3 + \
-                                                 self.LEVEL_B * l ** 2 + \
-                                                 self.LEVEL_C * l))
-                    level = 2
-                    remainder = score - 1
-                    score_next = to_next(level)
-                    while remainder >= score_next:
-                        remainder -= score_next
-                        level += 1
-                        score_next = to_next(level)
-
-                    score_left = score_next - remainder
-
+                score_prev = player[6]
+                level, score_next, score_left = self.calculate_level(score)
+                level_prev, _, _ = self.calculate_level(score_prev)
             else:
                 score = None
                 level = None
                 score_next = None
                 score_left = None
+                score_prev = None
+                level_prev = None
 
             # players
             players.append({'id': player[0],
@@ -336,7 +344,9 @@ class CardstoriesGame(Pollable):
                             'score': score,
                             'level': level,
                             'score_next': score_next,
-                            'score_left': score_left})
+                            'score_left': score_left,
+                            'score_prev': score_prev,
+                            'level_prev': level_prev})
 
         ready = None
         if state == 'invitation':
@@ -531,7 +541,7 @@ class CardstoriesGame(Pollable):
 
         # Update scores in the database.
         for player_id in score.keys():
-            transaction.execute("UPDATE players SET score = score + %d WHERE player_id = %s" % (score[player_id], player_id))
+            transaction.execute("UPDATE players SET score_prev = score, score = score + %d WHERE player_id = %s" % (score[player_id], player_id))
 
     @defer.inlineCallbacks
     def complete(self, owner_id):

@@ -427,6 +427,8 @@ class CardstoriesGameTest(unittest.TestCase):
         self.assertEquals(2, pinfo['level']);
         self.assertEquals(17, pinfo['score_next']);
         self.assertEquals(6, pinfo['score_left']);
+        self.assertEquals(0, pinfo['score_prev']);
+        self.assertEquals(1, pinfo['level_prev']);
 
         # Score, player1 point of view
         pinfo = game_infos['player1'][0]['players'][1]
@@ -435,6 +437,8 @@ class CardstoriesGameTest(unittest.TestCase):
         self.assertEquals(2, pinfo['level']);
         self.assertEquals(17, pinfo['score_next']);
         self.assertEquals(13, pinfo['score_left']);
+        self.assertEquals(0, pinfo['score_prev']);
+        self.assertEquals(1, pinfo['level_prev']);
 
         # Score, player2 point of view
         pinfo = game_infos['player2'][0]['players'][2]
@@ -443,6 +447,8 @@ class CardstoriesGameTest(unittest.TestCase):
         self.assertEquals(2, pinfo['level']);
         self.assertEquals(17, pinfo['score_next']);
         self.assertEquals(17, pinfo['score_left']);
+        self.assertEquals(0, pinfo['score_prev']);
+        self.assertEquals(1, pinfo['level_prev']);
 
         # Play another game to check the score difference.
         other_game = CardstoriesGame(self.service)
@@ -471,6 +477,8 @@ class CardstoriesGameTest(unittest.TestCase):
         self.assertEquals(3, pinfo['level']);
         self.assertEquals(38, pinfo['score_next']);
         self.assertEquals(32, pinfo['score_left']);
+        self.assertEquals(12, pinfo['score_prev']);
+        self.assertEquals(2, pinfo['level_prev']);
 
         # Score, player1 point of view
         pinfo = game_infos['player1'][0]['players'][1]
@@ -479,6 +487,8 @@ class CardstoriesGameTest(unittest.TestCase):
         self.assertEquals(2, pinfo['level']);
         self.assertEquals(17, pinfo['score_next']);
         self.assertEquals(12, pinfo['score_left']);
+        self.assertEquals(5, pinfo['score_prev']);
+        self.assertEquals(2, pinfo['level_prev']);
 
         # Score, player2 point of view
         pinfo = game_infos['player2'][0]['players'][2]
@@ -487,6 +497,8 @@ class CardstoriesGameTest(unittest.TestCase):
         self.assertEquals(2, pinfo['level']);
         self.assertEquals(17, pinfo['score_next']);
         self.assertEquals(12, pinfo['score_left']);
+        self.assertEquals(1, pinfo['score_prev']);
+        self.assertEquals(2, pinfo['level_prev']);
             
     @defer.inlineCallbacks
     def test08_game(self):
@@ -512,7 +524,9 @@ class CardstoriesGameTest(unittest.TestCase):
                                         'score': None,
                                         'level': None,
                                         'score_next': None,
-                                        'score_left': None}],
+                                        'score_left': None,
+                                        'score_prev': None,
+                                        'level_prev': None}],
                            'self': None,
                            'sentence': None,
                            'winner_card': None,
@@ -553,7 +567,9 @@ class CardstoriesGameTest(unittest.TestCase):
                                         'score': None,
                                         'level': None,
                                         'score_next': None,
-                                        'score_left': None},
+                                        'score_left': None,
+                                        'score_prev': None,
+                                        'level_prev': None},
                                        {'id': player1,
                                         'vote': None,
                                         'win': u'n',
@@ -562,7 +578,9 @@ class CardstoriesGameTest(unittest.TestCase):
                                         'score': None,
                                         'level': None,
                                         'score_next': None,
-                                        'score_left': None},
+                                        'score_left': None,
+                                        'score_prev': None,
+                                        'level_prev': None},
                                        {'id': player2,
                                         'vote': None,
                                         'win': u'n',
@@ -571,7 +589,9 @@ class CardstoriesGameTest(unittest.TestCase):
                                         'score': None,
                                         'level': None,
                                         'score_next': None,
-                                        'score_left': None}],
+                                        'score_left': None,
+                                        'score_prev': None,
+                                        'level_prev': None}],
                            'self': None,
                            'sentence': u'SENTENCE',
                            'winner_card': None,
@@ -677,7 +697,9 @@ class CardstoriesGameTest(unittest.TestCase):
                                         'score': None,
                                         'level': None,
                                         'score_next': None,
-                                        'score_left': None},
+                                        'score_left': None,
+                                        'score_prev': None,
+                                        'level_prev': None},
                                        {'id': player1,
                                         'vote': '',
                                         'win': u'n',
@@ -686,7 +708,9 @@ class CardstoriesGameTest(unittest.TestCase):
                                         'score': 0,
                                         'level': 1,
                                         'score_next': 1,
-                                        'score_left': 1},
+                                        'score_left': 1,
+                                        'score_prev': 0,
+                                        'level_prev': 1},
                                        {'id': player2,
                                         'vote': '',
                                         'win': u'n',
@@ -695,7 +719,9 @@ class CardstoriesGameTest(unittest.TestCase):
                                         'score': None,
                                         'level': None,
                                         'score_next': None,
-                                        'score_left': None}],
+                                        'score_left': None,
+                                        'score_prev': None,
+                                        'level_prev': None}],
                            'self': [card1, card2, player1_cards],
                            'sentence': u'SENTENCE',
                            'winner_card': None,
@@ -741,7 +767,9 @@ class CardstoriesGameTest(unittest.TestCase):
                                         'score': None,
                                         'level': None,
                                         'score_next': None,
-                                        'score_left': None},
+                                        'score_left': None,
+                                        'score_prev': None,
+                                        'level_prev': None},
                                        {'id': player2,
                                         'vote': None,
                                         'win': u'n',
@@ -750,7 +778,9 @@ class CardstoriesGameTest(unittest.TestCase):
                                         'score': None,
                                         'level': None,
                                         'score_next': None,
-                                        'score_left': None},
+                                        'score_left': None,
+                                        'score_prev': None,
+                                        'level_prev': None},
                                        {'id': player1,
                                         'vote': None,
                                         'win': u'n',
@@ -759,7 +789,9 @@ class CardstoriesGameTest(unittest.TestCase):
                                         'score': None,
                                         'level': None,
                                         'score_next': None,
-                                        'score_left': None}],
+                                        'score_left': None,
+                                        'score_prev': None,
+                                        'level_prev': None}],
                            'self': None,
                            'sentence': u'SENTENCE',
                            'winner_card': None,
