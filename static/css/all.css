@@ -2279,23 +2279,28 @@
 }
 
 .cardstories .cardstories_complete .cardstories_results {
-    display: none;
     position: absolute;
     width: 57.1em;
+    height: 30.3em;
     left: 10.4em;
     bottom: 12.0em;
     font-size: 10px;
     text-align: center;
+    display: none;
+    overflow: visible !important;
+}
+
+.cardstories .cardstories_complete .cardstories_results .cardstories_results_back {
+    width: 100%;
+    height: 100%;
 }
 
 .cardstories .cardstories_complete .cardstories_results .cardstories_results_banner {
     position: absolute;
-    top: -80px;
-    left: 30px;
-}
-
-.cardstories .cardstories_complete .cardstories_results > img {
-    margin: 0 auto;
+    top: -8.0em;
+    left: 3.0em;
+    width: 51.0em;
+    height: 18.7em;
     display: none;
 }
 
@@ -2308,13 +2313,13 @@
 }
 
 .cardstories .cardstories_complete .cardstories_results .cardstories_results_text > p {
-    display: none;
     width: 18em;
     margin: 0.25em auto;
     color: #FFFFFF;
     left: 12em;
     font-size: 1.2em; 
     font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
+    display: none;
 }
 
 .cardstories .cardstories_complete .cardstories_results .cardstories_lost_1,
@@ -2330,6 +2335,7 @@
     color: #E2D3BC;
     font-size: 7.4em;
     font-family: "Licon";
+    display: none;
 }
 
 .cardstories .cardstories_complete .cardstories_results .cardstories_results_score_container .cardstories_results_score_legend {
@@ -2346,6 +2352,7 @@
     left: 0;
     width: 100%;
     height: 80px;
+    display: none;
 }
 
 .cardstories .cardstories_complete .cardstories_results .cardstories_results_level_bar {

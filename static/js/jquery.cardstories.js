@@ -3592,6 +3592,8 @@
         },
 
         complete_display_results: function(player_id, game, element, cb) {
+            var $this = this;
+
             // Did the owner lose?
             var owner_lost = true;
             if (game.players[0]['win'] == 'y') {
@@ -3620,62 +3622,98 @@
                 }
             }
 
+            // Choose box.
             var box;
             if (game.owner) {
                 box = $('.cardstories_results.author', element);
-                $('.cardstories_results_back', box).show();
-                if (!owner_lost) {
-                    $('.cardstories_won_1', box).show();
-                } else if (!too_hard) {
-                    $('.cardstories_lost_1', box).show();
-                } else {
-                    $('.cardstories_lost_2', box).show();
-                }
             } else {
-                var player_voted = false;
-                var player_lost = true;
-                if (player.vote !== null) { player_voted = true; }
-                if (player.win === 'y') { player_lost = false; }
-
                 box = $('.cardstories_results.player', element);
-                $('.cardstories_results_back', box).show();
-                if (player_voted) {
-                    if (player_lost) {
-                        $('.cardstories_lost_1', box).show();
-                    } else if (!owner_lost) {
-                        $('.cardstories_won_1', box).show();
-                    } else if (!too_hard) {
-                        $('.cardstories_won_2', box).show();
-                    } else {
-                        $('.cardstories_won_3', box).show();
-                    }
+            }
+
+            // Choose explanation.
+            var explanation;
+            if (game.owner) {
+                if (!owner_lost) {
+                    explanation = $('.cardstories_won_1', box);
+                } else if (!too_hard) {
+                    explanation = $('.cardstories_lost_1', box);
+                } else {
+                    explanation = $('.cardstories_lost_2', box);
+                }
+            } else if (player.vote !== null) {
+                if (player.win !== 'y') {
+                    explanation = $('.cardstories_lost_1', box);
+                } else if (!owner_lost) {
+                    explanation = $('.cardstories_won_1', box);
+                } else if (!too_hard) {
+                    explanation = $('.cardstories_won_2', box);
+                } else {
+                    explanation = $('.cardstories_won_3', box);
                 }
             }
 
-            // Supplant score
-            var score_el = $('.cardstories_results_score', element);
-            var html = score_el.html().supplant({'score': player.score});
-            score_el.html(html);
-
-            // Set level
-            var bar_el = $('.cardstories_results_level_bar_front', box);
-            var to_next_percent = ((player.score_next - player.score_left) / player.score_next) * 100;
-            var bar_width = to_next_percent + '%';
-            bar_el.css({width: bar_width});
-            var star_el;
+            // Choose banner and star.
+            var banner;
+            var star;
             if (player.win === 'y') {
-                star_el = $('.cardstories_results_level_star_win', box);
+                banner = $('.cardstories_results_banner_win', box);
+                star = $('.cardstories_results_level_star_win', box);
             } else {
-                star_el = $('.cardstories_results_level_star_lose', box);
+                banner = $('.cardstories_results_banner_lose', box);
+                star = $('.cardstories_results_level_star_lose', box);
             }
-            star_el.show();
-            var level_el = $('.cardstories_results_level_legend', box);
-            html = level_el.html().supplant({'level_current': player.level,
-                                             'level_next': player.level + 1,
-                                             'score_left': player.score_left});
-            level_el.html(html);
+            star.show();
 
-            box.fadeIn('slow', cb);
+            // Only show banner if player voted.
+            if (game.owner || player.vote !== null) {
+                banner.show();
+            }
+
+            // Set score.
+            var score = $('.cardstories_results_score', box);
+            var html = score.html().supplant({'score': player.score});
+            score.html(html);
+
+            // Set level bar width.
+            var bar = $('.cardstories_results_level_bar_front', box);
+            var percent = ((player.score_next - player.score_left) / player.score_next) * 100;
+            var width = percent + '%';
+            bar.css({width: width});
+
+            // Set level legend.
+            var level = $('.cardstories_results_level_legend', box);
+            html = level.html().supplant({
+                'level_current': player.level,
+                'level_next': player.level + 1,
+                'score_left': player.score_left});
+            level.html(html);
+
+            // Animate stuff in, starting with the results box.
+            var q = $({});
+            q.queue('chain', function(next) {
+                $this.animate_scale(false, 5, 450, box, next);
+            });
+
+            // Then fade the explanation in (if the player voted).
+            if (game.owner || player.vote !== null) {
+                q.queue('chain', function(next) {
+                    explanation.fadeIn('fast', next);
+                });
+            }
+
+            // Show score and level
+            q.queue('chain', function(next) {
+                $('.cardstories_results_score_container', box).fadeIn('fast');
+                $('.cardstories_results_level_container', box).fadeIn('fast', next);
+            });
+
+            q.queue('chain', function(next) {
+                if (cb) {
+                    cb();
+                }
+            });
+
+            q.dequeue('chain');
         },
 
         complete_display_next_game: function(player_id, game, element, root, cb) {

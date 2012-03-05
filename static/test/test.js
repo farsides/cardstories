@@ -2528,7 +2528,7 @@ test("vote_owner_results_confirm_only_when_not_all_players_picked", 2, function(
     $.cardstories.vote_owner_results_confirm(player_id, game, element, root);
 });
 
-test("complete owner lost easy", 9, function() {
+test("complete owner lost easy", 8, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var owner_id = 0;
@@ -2552,16 +2552,15 @@ test("complete owner lost easy", 9, function() {
     notEqual(box.find('p.cardstories_lost_1').css('display'), 'none', 'lost 1 text is visible');
     equal(box.find('p.cardstories_lost_2').css('display'), 'none', 'lost 2 text is hidden');
     equal(box.find('p.cardstories_won_1').css('display'), 'none', 'won text is hidden');
-    notEqual(box.find('img.cardstories_lost_1').css('display'), 'none', 'lost 1 img is visible');
-    equal(box.find('img.cardstories_lost_2').css('display'), 'none', 'lost 2 img is hidden');
-    equal(box.find('img.cardstories_won_1').css('display'), 'none', 'won img is hidden');
+    notEqual(box.find('img.cardstories_results_banner_lose').css('display'), 'none', 'lost img is visible');
+    equal(box.find('img.cardstories_results_banner_win').css('display'), 'none', 'win img is hidden');
     ok($('.cardstories_master_seat', element).hasClass('cardstories_master_seat_lost'), 'the game master lost');
     equal($('.cardstories_master_seat .cardstories_master_status', element).html(), 'LOSES!', 'the game master lost');
 
     $.cardstories_table = undefined;
 });
 
-test("complete owner lost hard", 9, function() {
+test("complete owner lost hard", 8, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var owner_id = 0;
@@ -2585,16 +2584,15 @@ test("complete owner lost hard", 9, function() {
     equal(box.find('p.cardstories_lost_1').css('display'), 'none', 'lost 1 text is hidden');
     notEqual(box.find('p.cardstories_lost_2').css('display'), 'none', 'lost 2 text is visible');
     equal(box.find('p.cardstories_won_1').css('display'), 'none', 'won text is hidden');
-    equal(box.find('img.cardstories_lost_1').css('display'), 'none', 'lost 1 img is hidden');
-    notEqual(box.find('img.cardstories_lost_2').css('display'), 'none', 'lost 2 img is visible');
-    equal(box.find('img.cardstories_won_1').css('display'), 'none', 'won img is hidden');
+    notEqual(box.find('img.cardstories_results_banner_lose').css('display'), 'none', 'lost img is visible');
+    equal(box.find('img.cardstories_results_banner_win').css('display'), 'none', 'win img is hidden');
     ok($('.cardstories_master_seat', element).hasClass('cardstories_master_seat_lost'), 'the game master lost');
     equal($('.cardstories_master_seat .cardstories_master_status', element).html(), 'LOSES!', 'the game master lost');
 
     $.cardstories_table = undefined;
 });
 
-test("complete owner won", 9, function() {
+test("complete owner won", 8, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var owner_id = 0;
@@ -2618,16 +2616,15 @@ test("complete owner won", 9, function() {
     equal(box.find('p.cardstories_lost_1').css('display'), 'none', 'lost 1 text is hidden');
     equal(box.find('p.cardstories_lost_2').css('display'), 'none', 'lost 2 text is hidden');
     notEqual(box.find('p.cardstories_won').css('display'), 'none', 'won text is visible');
-    equal(box.find('img.cardstories_lost_1').css('display'), 'none', 'lost 1 img is hidden');
-    equal(box.find('img.cardstories_lost_2').css('display'), 'none', 'lost 2 img is hidden');
-    notEqual(box.find('img.cardstories_won').css('display'), 'none', 'won img is visible');
+    notEqual(box.find('img.cardstories_results_banner_win').css('display'), 'none', 'win img is visible');
+    equal(box.find('img.cardstories_results_banner_lose').css('display'), 'none', 'lost img is invisible');
     ok($('.cardstories_master_seat', element).hasClass('cardstories_master_seat_won'), 'the game master won');
     equal($('.cardstories_master_seat .cardstories_master_status', element).html(), 'WINS!', 'the game master won');
 
     $.cardstories_table = undefined;
 });
 
-test("complete", 41, function() {
+test("complete", 40, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var owner_id = 0;
@@ -2688,9 +2685,8 @@ test("complete", 41, function() {
     ok($('.cardstories_votes_5', element).children().length === 0, 'no votes for seat 5');
     ok($('.cardstories_votes_win', element).children().length === 1, '1 winning votes');
     equal($('.cardstories_results.author', element).css('display'), 'block', 'author results is visible');
-    equal($('.cardstories_results img.cardstories_won_1', element).css('display'), 'block', 'won image is visible');
-    equal($('.cardstories_results img.cardstories_lost_1', element).css('display'), 'none', 'lost image 1 is hidden');
-    equal($('.cardstories_results img.cardstories_lost_2', element).css('display'), 'none', 'lost image 2 is hidden');
+    notEqual($('.cardstories_results.author img.cardstories_results_banner_win').css('display'), 'none', 'win img is hidden');
+    equal($('.cardstories_results.author img.cardstories_results_banner_lose').css('display'), 'none', 'lost img is visible');
     equal($('.cardstories_results.author .cardstories_results_score', element).html(), owner_score+'', 'author score is visible');
     equal($('.cardstories_results.author .cardstories_results_level_bar_front', element).css('width'), '50%', 'bar width at 50%');
     equal($('.cardstories_results.author img.cardstories_results_level_star_win', element).css('display'), 'block', 'win star is visible');
@@ -2702,7 +2698,7 @@ test("complete", 41, function() {
     $.cardstories_table = undefined;
 });
 
-test("complete player didn't vote", 13, function() {
+test("complete player didn't vote", 11, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var owner_id = 0;
@@ -2734,10 +2730,8 @@ test("complete player didn't vote", 13, function() {
     ok(!$('.cardstories_player_seat_4', element).hasClass('cardstories_player_seat_lost'), 'seat 4 did not lose');
     ok(!$('.cardstories_player_seat_4', element).hasClass('cardstories_player_seat_won'), 'seat 4 did not win');
     ok($('.cardstories_master_seat', element).hasClass('cardstories_master_seat_won'), 'the game master won');
-    equal($('.cardstories_results img.cardstories_won_1', element).css('display'), 'none', 'result illustration is not visible');
-    equal($('.cardstories_results img.cardstories_won_2', element).css('display'), 'none', 'result illustration is not visible');
-    equal($('.cardstories_results img.cardstories_won_3', element).css('display'), 'none', 'result illustration is not visible');
-    equal($('.cardstories_results img.cardstories_lost_1', element).css('display'), 'none', 'result illustration is not visible');
+    equal($('.cardstories_results.player img.cardstories_results_banner_win').css('display'), 'none', 'win img is hidden');
+    equal($('.cardstories_results.player img.cardstories_results_banner_lose').css('display'), 'none', 'lost img is hidden');
     equal($('.cardstories_results p', element).css('display'), 'none', 'result explanation is not visible');
 
     $.cardstories_table = undefined;
