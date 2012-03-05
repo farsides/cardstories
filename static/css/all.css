@@ -2340,6 +2340,70 @@
     float: right;
 }
 
+.cardstories .cardstories_complete .cardstories_results .cardstories_results_level_container {
+    position: absolute;
+    top: 195px;
+    left: 0;
+    width: 100%;
+    height: 80px;
+}
+
+.cardstories .cardstories_complete .cardstories_results .cardstories_results_level_bar {
+    position: relative;
+    width: 359px;
+    height: 28px;
+    margin: 0 auto;
+    padding: 0;
+    background: transparent url('images/complete_level_bar_back.png') no-repeat left top;
+}
+
+.cardstories .cardstories_complete .cardstories_results .cardstories_results_level_bar_front {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    background: transparent url('images/complete_level_bar_front.png') no-repeat left top;
+}
+
+.cardstories .cardstories_complete .cardstories_results .cardstories_results_level_star_win,
+.cardstories .cardstories_complete .cardstories_results .cardstories_results_level_star_lose {
+    position: absolute;
+    width: 72px;
+    height: 69px;
+    top: -30px;
+    right: -36px;
+    display: none;
+}
+
+.cardstories .cardstories_complete .cardstories_results .cardstories_results_level_legend {
+    position: relative;
+    top: 8px;
+    width: 390px;
+    height: 46px;
+    margin: 0 auto;
+    color: #FFFFFF;
+    font-size: 24px; 
+    font-family: "Licon";
+    background: transparent url('images/complete_level_arrow.png') no-repeat center 6px;
+}
+
+.cardstories .cardstories_complete .cardstories_results .cardstories_results_level_current {
+    float: left;
+}
+
+.cardstories .cardstories_complete .cardstories_results .cardstories_results_level_next {
+    float: right;
+}
+
+.cardstories .cardstories_complete .cardstories_results .cardstories_results_level_left {
+    position: absolute;
+    bottom: 0;
+    left: 78px;
+    font-size: 17px; 
+    font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
+}
+
 .cardstories .cardstories_complete .cardstories_results .cardstories_play_again a > span {
     top: 0.36em !important;
 }

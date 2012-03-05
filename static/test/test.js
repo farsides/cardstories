@@ -1059,9 +1059,9 @@ asyncTest("invitation_owner_join_helper", 44, function() {
         'owner_id': player1,
         'ready': false,
         'countdown_finish': null,
-        'players': [ { 'id': player1, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player2, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player3, 'vote': null, 'win': 'n', 'picked': 3, 'cards': [], 'score': 0, 'levelups': 0 } ]
+        'players': [ { 'id': player1, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player2, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player3, 'vote': null, 'win': 'n', 'picked': 3, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null } ]
     };
 
     var countdown_finish = 60000;
@@ -1069,10 +1069,10 @@ asyncTest("invitation_owner_join_helper", 44, function() {
         'owner_id': player1,
         'ready': true,
         'countdown_finish': countdown_finish,
-        'players': [ { 'id': player1, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player2, 'vote': null, 'win': 'n', 'picked': 2, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player3, 'vote': null, 'win': 'n', 'picked': 3, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player4, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 } ]
+        'players': [ { 'id': player1, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player2, 'vote': null, 'win': 'n', 'picked': 2, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player3, 'vote': null, 'win': 'n', 'picked': 3, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player4, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null } ]
     };
 
     for (var i=1; i<=5; i++) {
@@ -1155,10 +1155,10 @@ asyncTest("invitation_owner_go_vote_confirm", 28, function() {
         owner_id: player1,
         winner_card: 7,
         ready: true,
-        players: [{ 'id': player1, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0},
-                  { 'id': player2, 'vote': null, 'win': 'n', 'picked': 4, 'cards': [], 'score': 0, 'levelups': 0},
-                  { 'id': player3, 'vote': null, 'win': 'n', 'picked': 6, 'cards': [], 'score': 0, 'levelups': 0},
-                  { 'id': player4, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0}]
+        players: [{ 'id': player1, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null},
+                  { 'id': player2, 'vote': null, 'win': 'n', 'picked': 4, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null},
+                  { 'id': player3, 'vote': null, 'win': 'n', 'picked': 6, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null},
+                  { 'id': player4, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null}]
     };
 
     $.cardstories.ajax = function(options) {
@@ -1241,10 +1241,10 @@ test("invitation_owner_confirm_only_when_not_all_players_picked", 2, function() 
         'owner_id': player1,
         'ready': true,
         'winner_card': card1,
-        'players': [ { 'id': player1, 'vote': null, 'win': 'n', 'picked': card1, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player2, 'vote': null, 'win': 'n', 'picked': card2, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player3, 'vote': null, 'win': 'n', 'picked': card3, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player4, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 } ],
+        'players': [ { 'id': player1, 'vote': null, 'win': 'n', 'picked': card1, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player2, 'vote': null, 'win': 'n', 'picked': card2, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player3, 'vote': null, 'win': 'n', 'picked': card3, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player4, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null } ],
         'invited': [ player2 ]
     };
 
@@ -1285,8 +1285,8 @@ test("invitation_owner_invite_more", 6, function() {
         'owner_id': player1,
         'ready': true,
         'winner_card': 10,
-        'players': [ { 'id': player1, 'vote': null, 'win': 'n', 'picked': card1, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player2, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 } ],
+        'players': [ { 'id': player1, 'vote': null, 'win': 'n', 'picked': card1, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player2, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null } ],
         'invited': [ player2 ]
     };
 
@@ -1331,10 +1331,10 @@ asyncTest("invitation_owner", 9, function() {
         'ready': true,
         'sentence': sentence,
         'winner_card': winner_card,
-        'players': [ { 'id': player1, 'vote': null, 'win': 'n', 'picked': card1, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player2, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player3, 'vote': null, 'win': 'n', 'picked': 9, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player4, 'vote': null, 'win': 'n', 'picked': 16, 'cards': [], 'score': 0, 'levelups': 0 } ],
+        'players': [ { 'id': player1, 'vote': null, 'win': 'n', 'picked': card1, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player2, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player3, 'vote': null, 'win': 'n', 'picked': 9, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player4, 'vote': null, 'win': 'n', 'picked': 16, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null } ],
         'invited': [ player2 ]
     };
 
@@ -1414,18 +1414,18 @@ asyncTest("invitation_pick_deal_helper", 38, function() {
     var state1 = {
         'owner_id': player1,
         'ready': false,
-        'players': [ { 'id': player1, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player2, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player3, 'vote': null, 'win': 'n', 'picked': 3, 'cards': [], 'score': 0, 'levelups': 0 } ]
+        'players': [ { 'id': player1, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player2, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player3, 'vote': null, 'win': 'n', 'picked': 3, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null } ]
     };
 
     var state2 = {
         'owner_id': player1,
         'ready': true,
-        'players': [ { 'id': player1, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player2, 'vote': null, 'win': 'n', 'picked': 2, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player3, 'vote': null, 'win': 'n', 'picked': 3, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player4, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 } ]
+        'players': [ { 'id': player1, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player2, 'vote': null, 'win': 'n', 'picked': 2, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player3, 'vote': null, 'win': 'n', 'picked': 3, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player4, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null } ]
     };
 
     element.show().parents().show();
@@ -1522,12 +1522,12 @@ asyncTest("invitation_pick", 11, function() {
         'owner': false,
         'owner_id': owner,
         'player_id': player_id,
-        'players': [{ 'id': owner, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0},
-                    { 'id': player1, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0},
-                    { 'id': player2, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0},
-                    { 'id': player3, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0},
-                    { 'id': player4, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0},
-                    { 'id': player5, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0}],
+        'players': [{ 'id': owner, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null},
+                    { 'id': player1, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null},
+                    { 'id': player2, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null},
+                    { 'id': player3, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null},
+                    { 'id': player4, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null},
+                    { 'id': player5, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null}],
         'sentence': sentence
     };
 
@@ -1577,10 +1577,10 @@ asyncTest("invitation_pick picked too late", 7, function() {
         'owner': false,
         'owner_id': 1,
         'player_id': player_id,
-        'players': [{ 'id': 1, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0},
-                    { 'id': 2, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0},
-                    { 'id': 3, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0},
-                    { 'id': 4, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0}],
+        'players': [{ 'id': 1, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null},
+                    { 'id': 2, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null},
+                    { 'id': 3, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null},
+                    { 'id': 4, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null}],
         'sentence': 'SENTENCE'
     };
 
@@ -1634,10 +1634,10 @@ asyncTest("invitation_pick_wait", 26, function() {
         'owner_id': owner_id,
         'player_id': player_id,
         'players': [
-            { 'id': owner_id, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
-            { 'id': player_id, 'vote': null, 'win': 'n', 'picked': picked, 'cards': [], 'score': 0, 'levelups': 0 },
-            { 'id': player2_id, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
-            { 'id': player3_id, 'vote': null, 'win': 'n', 'picked': '', 'cards': [], 'score': 0, 'levelups': 0 }
+            { 'id': owner_id, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+            { 'id': player_id, 'vote': null, 'win': 'n', 'picked': picked, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+            { 'id': player2_id, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+            { 'id': player3_id, 'vote': null, 'win': 'n', 'picked': '', 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null }
         ],
         'self': [picked, null, cards],
         'sentence': sentence
@@ -1716,10 +1716,10 @@ asyncTest("invitation_pick_wait_to_vote_voter", 16, function() {
         'owner_id': owner_id,
         'player_id': player_id,
         'players': [
-            { 'id': owner_id, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
-            { 'id': player_id, 'vote': null, 'win': 'n', 'picked': picked, 'cards': [], 'score': 0, 'levelups': 0 },
-            { 'id': player2_id, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
-            { 'id': player3_id, 'vote': null, 'win': 'n', 'picked': '', 'cards': [], 'score': 0, 'levelups': 0 }
+            { 'id': owner_id, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+            { 'id': player_id, 'vote': null, 'win': 'n', 'picked': picked, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+            { 'id': player2_id, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+            { 'id': player3_id, 'vote': null, 'win': 'n', 'picked': '', 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null }
         ],
         'self': [picked, null, cards],
         'sentence': sentence
@@ -1802,12 +1802,12 @@ test("invitation_anonymous", 1, function() {
     var game = {
         'id': game_id,
         'players': [
-            { 'id': owner, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
-            { 'id': 1, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
-            { 'id': 2, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
-            { 'id': 3, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
-            { 'id': 4, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
-            { 'id': 5, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 }
+            { 'id': owner, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+            { 'id': 1, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+            { 'id': 2, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+            { 'id': 3, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+            { 'id': 4, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+            { 'id': 5, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null }
         ],
         'owner_id': owner,
         'sentence': sentence
@@ -1838,11 +1838,11 @@ test("invitation_display_board", 24, function() {
         'owner_id': owner_id,
         'sentence': sentence,
         'players': [
-            { 'id': owner_id, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
-            { 'id': player1, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
-            { 'id': player2, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
-            { 'id': player3, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
-            { 'id': player4, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 }
+            { 'id': owner_id, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+            { 'id': player1, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+            { 'id': player2, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+            { 'id': player3, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+            { 'id': player4, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null }
         ]
     };
 
@@ -1942,10 +1942,10 @@ asyncTest("vote_voter", 30, function() {
         'player_id': player_id,
         'self': [picked, null, [11, 12, 13, 14, 15, 16]],
         'sentence': sentence,
-        'players': [ { 'id': owner_id, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player_id, 'vote': null, 'win': 'n', 'picked': picked, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player2_id, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player3_id, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 } ]
+        'players': [ { 'id': owner_id, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player_id, 'vote': null, 'win': 'n', 'picked': picked, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player2_id, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player3_id, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null } ]
     };
 
     $.cardstories.ajax = function(options) {
@@ -2026,9 +2026,9 @@ asyncTest("vote_voter vote too late", 8, function() {
         'player_id': player_id,
         'self': [picked, null, [11, 12, 13, 14, 15, 16]],
         'sentence': sentence,
-        'players': [ { 'id': owner_id, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player_id, 'vote': null, 'win': 'n', 'picked': picked, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player2_id, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0 } ]
+        'players': [ { 'id': owner_id, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player_id, 'vote': null, 'win': 'n', 'picked': picked, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player2_id, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null } ]
     };
 
     $.cardstories.ajax = function(options) {
@@ -2088,11 +2088,11 @@ test("vote_voter_wait", 31, function() {
         'board': board,
         'self': [picked, voted, hand],
         'sentence': sentence,
-        'players': [ { 'id': owner_id, 'vote': null, 'win': 'n', 'picked': '', 'cards': null, 'score': 0, 'levelups': 0 },
-                     { 'id': 1, 'vote': null, 'win': 'n', 'picked': '', 'cards': null, 'score': 0, 'levelups': 0 },
-                     { 'id': player_id, 'vote': voted, 'win': 'n', 'picked': picked, 'cards': hand, 'score': 0, 'levelups': 0},
-                     { 'id': 3, 'vote': '', 'win': 'n', 'picked': '', 'cards': null, 'score': 0, 'levelups': 0 },
-                     { 'id': 4, 'vote': null, 'win': 'n', 'picked': '', 'cards': null, 'score': 0, 'levelups': 0 } ]
+        'players': [ { 'id': owner_id, 'vote': null, 'win': 'n', 'picked': '', 'cards': null, 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': 1, 'vote': null, 'win': 'n', 'picked': '', 'cards': null, 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player_id, 'vote': voted, 'win': 'n', 'picked': picked, 'cards': hand, 'score': null, 'level': null, 'score_next': null, 'score_left': null},
+                     { 'id': 3, 'vote': '', 'win': 'n', 'picked': '', 'cards': null, 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': 4, 'vote': null, 'win': 'n', 'picked': '', 'cards': null, 'score': null, 'level': null, 'score_next': null, 'score_left': null } ]
     };
 
     $.cardstories.poll_ignore = function(_request) {
@@ -2157,12 +2157,12 @@ asyncTest("vote_voter_wait_to_complete", 31, function() {
         'self': [picked, voted, hand],
         'winner_card': null,
         'sentence': sentence,
-        'players': [{ 'id': owner_id, 'vote': null, 'win': 'n', 'picked': '', 'cards': null, 'score': 0, 'levelups': 0 },
-                    { 'id': 1, 'vote': '', 'win': 'n', 'picked': '', 'cards': null, 'score': 0, 'levelups': 0 },
-                    { 'id': player_id, 'vote': voted, 'win': 'n', 'picked': picked, 'cards': hand, 'score': 0, 'levelups': 0 },
-                    { 'id': 3, 'vote': '', 'win': 'n', 'picked': '', 'cards': null, 'score': 0, 'levelups': 0 },
-                    { 'id': 4, 'vote': null, 'win': 'n', 'picked': '', 'cards': null, 'score': 0, 'levelups': 0 },
-                    { 'id': 5, 'vote': '', 'win': 'n', 'picked': '', 'cards': null, 'score': 0, 'levelups': 0 }]
+        'players': [{ 'id': owner_id, 'vote': null, 'win': 'n', 'picked': '', 'cards': null, 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                    { 'id': 1, 'vote': '', 'win': 'n', 'picked': '', 'cards': null, 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                    { 'id': player_id, 'vote': voted, 'win': 'n', 'picked': picked, 'cards': hand, 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                    { 'id': 3, 'vote': '', 'win': 'n', 'picked': '', 'cards': null, 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                    { 'id': 4, 'vote': null, 'win': 'n', 'picked': '', 'cards': null, 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                    { 'id': 5, 'vote': '', 'win': 'n', 'picked': '', 'cards': null, 'score': null, 'level': null, 'score_next': null, 'score_left': null }]
     };
     var game2 = {
         'id': game_id,
@@ -2174,11 +2174,11 @@ asyncTest("vote_voter_wait_to_complete", 31, function() {
         'self': [picked, voted, hand],
         'winner_card': voted,
         'sentence': sentence,
-        'players': [{ 'id': owner_id, 'vote': null, 'win': 'y', 'picked': voted, 'cards': null, 'score': 0, 'levelups': 0 },
-                    { 'id': 1, 'vote': 34, 'win': 'n', 'picked': 31, 'cards': null, 'score': 0, 'levelups': 0 },
-                    { 'id': player_id, 'vote': voted, 'win': 'y', 'picked': picked, 'cards': hand, 'score': 0, 'levelups': 0 },
-                    { 'id': 3, 'vote': 35, 'win': 'n', 'picked': 33, 'cards': null, 'score': 0, 'levelups': 0 },
-                    { 'id': 5, 'vote': voted, 'win': 'y', 'picked': 35, 'cards': null, 'score': 0, 'levelups': 0 }]
+        'players': [{ 'id': owner_id, 'vote': null, 'win': 'y', 'picked': voted, 'cards': null, 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                    { 'id': 1, 'vote': 34, 'win': 'n', 'picked': 31, 'cards': null, 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                    { 'id': player_id, 'vote': voted, 'win': 'y', 'picked': picked, 'cards': hand, 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                    { 'id': 3, 'vote': 35, 'win': 'n', 'picked': 33, 'cards': null, 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                    { 'id': 5, 'vote': voted, 'win': 'y', 'picked': 35, 'cards': null, 'score': null, 'level': null, 'score_next': null, 'score_left': null }]
     };
 
     $.cardstories.poll_ignore = function(_request) {
@@ -2249,10 +2249,10 @@ test("vote_anonymous", 28, function() {
         'board': board,
         'self': null,
         'sentence': sentence,
-        'players': [ { 'id': owner_id, 'vote': null, 'win': 'n', 'picked': '', 'cards': null, 'score': 0, 'levelups': 0 },
-                     { 'id': 1, 'vote': null, 'win': 'n', 'picked': '', 'cards': null, 'score': 0, 'levelups': 0 },
-                     { 'id': 2, 'vote': '', 'win': 'n', 'picked': '', 'cards': null, 'score': 0, 'levelups': 0 },
-                     { 'id': 4, 'vote': null, 'win': 'n', 'picked': '', 'cards': null, 'score': 0, 'levelups': 0 } ]
+        'players': [ { 'id': owner_id, 'vote': null, 'win': 'n', 'picked': '', 'cards': null, 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': 1, 'vote': null, 'win': 'n', 'picked': '', 'cards': null, 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': 2, 'vote': '', 'win': 'n', 'picked': '', 'cards': null, 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': 4, 'vote': null, 'win': 'n', 'picked': '', 'cards': null, 'score': null, 'level': null, 'score_next': null, 'score_left': null } ]
     };
 
     $.cardstories.poll_ignore = function(_request) {
@@ -2310,10 +2310,10 @@ test("vote_shuffle_cards", 7, function() {
     var element = $('.cardstories_vote .cardstories_owner', root);
     var game = {
         'owner_id': 0,
-        'players': [ { 'id': 0, 'vote': null, 'win': null, 'picked': 1, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': 1, 'vote': null, 'win': null, 'picked': 2, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': 2, 'vote': null, 'win': null, 'picked': 3, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': 3, 'vote': null, 'win': null, 'picked': 4, 'cards': [], 'score': 0, 'levelups': 0 } ]
+        'players': [ { 'id': 0, 'vote': null, 'win': null, 'picked': 1, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': 1, 'vote': null, 'win': null, 'picked': 2, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': 2, 'vote': null, 'win': null, 'picked': 3, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': 3, 'vote': null, 'win': null, 'picked': 4, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null } ]
     };
 
     // Simulate set_active().
@@ -2353,10 +2353,10 @@ test("vote_display_board", 20, function() {
         'owner_id': 0,
         'board': [],
         'players': [
-            { 'id': owner_id, 'vote': null, 'win': null, 'picked': 1, 'cards': [], 'score': 0, 'levelups': 0 },
-            { 'id': player1, 'vote': null, 'win': null, 'picked': 2, 'cards': [], 'score': 0, 'levelups': 0 },
-            { 'id': player2, 'vote': null, 'win': null, 'picked': 3, 'cards': [], 'score': 0, 'levelups': 0 },
-            { 'id': player3, 'vote': 1, 'win': null, 'picked': 4, 'cards': [], 'score': 0, 'levelups': 0 } ]
+            { 'id': owner_id, 'vote': null, 'win': null, 'picked': 1, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+            { 'id': player1, 'vote': null, 'win': null, 'picked': 2, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+            { 'id': player2, 'vote': null, 'win': null, 'picked': 3, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+            { 'id': player3, 'vote': 1, 'win': null, 'picked': 4, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null } ]
     };
 
     $.cardstories.vote_display_board(true, owner_id, game, element, root);
@@ -2395,10 +2395,10 @@ test("vote_display_or_select_cards", 8, function() {
         'owner_id': owner_id,
         'board': board,
         'winner_card': 30,
-        'players': [ { 'id': owner_id, 'vote': null, 'win': null, 'picked': 30, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player1, 'vote': null, 'win': null, 'picked': 31, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player2, 'vote': null, 'win': null, 'picked': 32, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player3, 'vote': null, 'win': null, 'picked': 33, 'cards': [], 'score': 0, 'levelups': 0 } ]
+        'players': [ { 'id': owner_id, 'vote': null, 'win': null, 'picked': 30, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player1, 'vote': null, 'win': null, 'picked': 31, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player2, 'vote': null, 'win': null, 'picked': 32, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player3, 'vote': null, 'win': null, 'picked': 33, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null } ]
     };
 
     $.cardstories.vote_display_or_select_cards(true, game.winner_card, game, element, root, function() {
@@ -2429,9 +2429,9 @@ asyncTest("vote_owner", 16, function() {
         'countdown_finish': countdown_finish,
         'board': board,
         'winner_card': 30,
-        'players': [ { 'id': owner_id, 'vote': null, 'win': null, 'picked': 30, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player1, 'vote': 30, 'win': null, 'picked': 31, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player2, 'vote': 30, 'win': null, 'picked': 32, 'cards': [], 'score': 0, 'levelups': 0 } ]
+        'players': [ { 'id': owner_id, 'vote': null, 'win': null, 'picked': 30, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player1, 'vote': 30, 'win': null, 'picked': 31, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player2, 'vote': 30, 'win': null, 'picked': 32, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null } ]
     };
 
     $.cardstories.ajax = function(options) {
@@ -2499,10 +2499,10 @@ test("vote_owner_results_confirm_only_when_not_all_players_picked", 2, function(
         'owner_id': player1,
         'ready': true,
         'winner_card': card1,
-        'players': [ { 'id': player1, 'vote': null, 'win': 'n', 'picked': card1, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player2, 'vote': card1, 'win': 'n', 'picked': card2, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player3, 'vote': card2, 'win': 'n', 'picked': card3, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player4, 'vote': null, 'win': 'n', 'picked': card4, 'cards': [], 'score': 0, 'levelups': 0 } ],
+        'players': [ { 'id': player1, 'vote': null, 'win': 'n', 'picked': card1, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player2, 'vote': card1, 'win': 'n', 'picked': card2, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player3, 'vote': card2, 'win': 'n', 'picked': card3, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player4, 'vote': null, 'win': 'n', 'picked': card4, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null } ],
         'invited': [ player2 ]
     };
 
@@ -2539,9 +2539,9 @@ test("complete owner lost easy", 9, function() {
         'owner_id': owner_id,
         'board': [],
         'winner_card': 30,
-        'players': [ { 'id': owner_id, 'vote': null, 'win': 'n', 'picked': 30, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player1, 'vote': 30, 'win': 'y', 'picked': 31, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player2, 'vote': 30, 'win': 'y', 'picked': 32, 'cards': [], 'score': 0, 'levelups': 0 } ]
+        'players': [ { 'id': owner_id, 'vote': null, 'win': 'n', 'picked': 30, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player1, 'vote': 30, 'win': 'y', 'picked': 31, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player2, 'vote': 30, 'win': 'y', 'picked': 32, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null } ]
     };
     $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player1; },
                            'on_next_owner_change': function(player_id, game_id, root, cb) {} };
@@ -2572,9 +2572,9 @@ test("complete owner lost hard", 9, function() {
         'owner_id': owner_id,
         'board': [],
         'winner_card': 30,
-        'players': [ { 'id': owner_id, 'vote': null, 'win': 'n', 'picked': 30, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player1, 'vote': 32, 'win': 'y', 'picked': 31, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player2, 'vote': 31, 'win': 'y', 'picked': 32, 'cards': [], 'score': 0, 'levelups': 0 } ]
+        'players': [ { 'id': owner_id, 'vote': null, 'win': 'n', 'picked': 30, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player1, 'vote': 32, 'win': 'y', 'picked': 31, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player2, 'vote': 31, 'win': 'y', 'picked': 32, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null } ]
     };
     $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player1; },
                            'on_next_owner_change': function(player_id, game_id, root, cb) {} };
@@ -2605,9 +2605,9 @@ test("complete owner won", 9, function() {
         'owner_id': owner_id,
         'board': [],
         'winner_card': 30,
-        'players': [ { 'id': owner_id, 'vote': null, 'win': 'y', 'picked': 30, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player1, 'vote': 30, 'win': 'y', 'picked': 31, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player2, 'vote': 31, 'win': 'n', 'picked': 32, 'cards': [], 'score': 0, 'levelups': 0 } ]
+        'players': [ { 'id': owner_id, 'vote': null, 'win': 'y', 'picked': 30, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player1, 'vote': 30, 'win': 'y', 'picked': 31, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player2, 'vote': 31, 'win': 'n', 'picked': 32, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null } ]
     };
     $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player1; },
                            'on_next_owner_change': function(player_id, game_id, root, cb) {} };
@@ -2627,7 +2627,7 @@ test("complete owner won", 9, function() {
     $.cardstories_table = undefined;
 });
 
-test("complete", 35, function() {
+test("complete", 41, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var owner_id = 0;
@@ -2635,17 +2635,22 @@ test("complete", 35, function() {
     var player2 = 2;
     var player3 = 3;
     var player4 = 4;
-    var owner_score = 123;
+    var owner_score = 125;
+    var owner_level = 5;
+    var owner_level_next = 6;
+    var owner_score_next = 250;
+    var owner_score_left = 125;
+
     var game = {
         'owner': true,
         'owner_id': owner_id,
         'board': [],
         'winner_card': 30,
-        'players': [ { 'id': owner_id, 'vote': null, 'win': 'y', 'picked': 30, 'cards': [], 'score': owner_score, 'levelups': 0 },
-                     { 'id': player1, 'vote': 30, 'win': 'y', 'picked': 31, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player2, 'vote': 34, 'win': 'n', 'picked': 32, 'cards': [], 'score': 0, 'levelups': 0 }, // Voted for the card of the non voting player
-                     { 'id': player3, 'vote': 31, 'win': 'n', 'picked': 33, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player4, 'vote': null, 'win': 'n', 'picked': 34, 'cards': [], 'score': 0, 'levelups': 0 } ]
+        'players': [ { 'id': owner_id, 'vote': null, 'win': 'y', 'picked': 30, 'cards': [], 'score': owner_score, 'level': owner_level, 'score_next': owner_score_next, 'score_left': owner_score_left },
+                     { 'id': player1, 'vote': 30, 'win': 'y', 'picked': 31, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player2, 'vote': 34, 'win': 'n', 'picked': 32, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null }, // Voted for the card of the non voting player
+                     { 'id': player3, 'vote': 31, 'win': 'n', 'picked': 33, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player4, 'vote': null, 'win': 'n', 'picked': 34, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null } ]
     };
     $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player1; },
                            'on_next_owner_change': function(player_id, game_id, root, cb) {} };
@@ -2687,6 +2692,12 @@ test("complete", 35, function() {
     equal($('.cardstories_results img.cardstories_lost_1', element).css('display'), 'none', 'lost image 1 is hidden');
     equal($('.cardstories_results img.cardstories_lost_2', element).css('display'), 'none', 'lost image 2 is hidden');
     equal($('.cardstories_results.author .cardstories_results_score', element).html(), owner_score+'', 'author score is visible');
+    equal($('.cardstories_results.author .cardstories_results_level_bar_front', element).css('width'), '50%', 'bar width at 50%');
+    equal($('.cardstories_results.author img.cardstories_results_level_star_win', element).css('display'), 'block', 'win star is visible');
+    equal($('.cardstories_results.author img.cardstories_results_level_star_lose', element).css('display'), 'none', 'lose star is invisible');
+    equal($('.cardstories_results.author .cardstories_results_level_current', element).html(), 'LEVEL '+owner_level, 'author level is visible');
+    equal($('.cardstories_results.author .cardstories_results_level_next', element).html(), 'LEVEL '+owner_level_next, 'author next level is visible');
+    equal($('.cardstories_results.author .cardstories_results_level_left', element).html(), owner_score_left+' left', 'author level left is visible');
 
     $.cardstories_table = undefined;
 });
@@ -2704,11 +2715,11 @@ test("complete player didn't vote", 13, function() {
         'owner_id': owner_id,
         'board': [],
         'winner_card': 30,
-        'players': [ { 'id': owner_id, 'vote': null, 'win': 'y', 'picked': 30, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player1, 'vote': 30, 'win': 'y', 'picked': 31, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player2, 'vote': 34, 'win': 'n', 'picked': 32, 'cards': [], 'score': 0, 'levelups': 0 }, // Voted for the card of the non voting player.
-                     { 'id': player3, 'vote': 31, 'win': 'n', 'picked': 33, 'cards': [], 'score': 0, 'levelups': 0 },
-                     { 'id': player4, 'vote': null, 'win': 'n', 'picked': 34, 'cards': [], 'score': 0, 'levelups': 0 } ] // Didn't vote.
+        'players': [ { 'id': owner_id, 'vote': null, 'win': 'y', 'picked': 30, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player1, 'vote': 30, 'win': 'y', 'picked': 31, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player2, 'vote': 34, 'win': 'n', 'picked': 32, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null }, // Voted for the card of the non voting player.
+                     { 'id': player3, 'vote': 31, 'win': 'n', 'picked': 33, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player4, 'vote': null, 'win': 'n', 'picked': 34, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null } ] // Didn't vote.
     };
     $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player1; },
                            'on_next_owner_change': function(player_id, game_id, root, cb) {} };
@@ -2763,7 +2774,7 @@ test("next_game_as_author", 2, function() {
         'state': 'fake_state',
         'winner_card': 15,
         'board': [],
-        'players': [{ 'id': player_id, 'vote': null, 'win': 'y', 'picked': 30, 'cards': [], 'score': 0, 'levelups': 0 }]
+        'players': [{ 'id': player_id, 'vote': null, 'win': 'y', 'picked': 30, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null }]
     };
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
@@ -2795,7 +2806,7 @@ test("next_game_as_player", 4, function() {
         'state': 'fake_state',
         'winner_card': 15,
         'board': [],
-        'players': [{ 'id': player_id, 'vote': null, 'win': 'y', 'picked': 30, 'cards': [], 'score': 0, 'levelups': 0 }]
+        'players': [{ 'id': player_id, 'vote': null, 'win': 'y', 'picked': 30, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null }]
     };
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
@@ -2828,7 +2839,7 @@ test("on_next_owner_change", 9, function() {
         'state': 'fake_state',
         'winner_card': 15,
         'board': [],
-        'players': [{ 'id': player_id, 'vote': null, 'win': 'y', 'picked': 30, 'cards': [], 'score': 0, 'levelups': 0 }]
+        'players': [{ 'id': player_id, 'vote': null, 'win': 'y', 'picked': 30, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null }]
     };
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);

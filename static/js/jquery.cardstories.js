@@ -3612,16 +3612,13 @@
                 }
             }
 
-            // Supplant score
-            var score = 0;
+            // Get player data
+            var player;
             for (i=0; i < game.players.length; i++) {
                 if (game.players[i].id == player_id) {
-                    score = game.players[i].score;
+                    player = game.players[i];
                 }
             }
-            var score_el = $('.cardstories_results_score', element);
-            var html = score_el.html().supplant({'score': score});
-            score_el.html(html);
 
             var box;
             if (game.owner) {
@@ -3637,12 +3634,8 @@
             } else {
                 var player_voted = false;
                 var player_lost = true;
-                for (i=0; i < game.players.length; i++) {
-                    if (game.players[i]['id'] == player_id) {
-                        if (game.players[i]['vote'] !== null) { player_voted = true; }
-                        if (game.players[i]['win'] === 'y') { player_lost = false; }
-                    }
-                }
+                if (player.vote !== null) { player_voted = true; }
+                if (player.win === 'y') { player_lost = false; }
 
                 box = $('.cardstories_results.player', element);
                 $('.cardstories_results_back', box).show();
@@ -3658,6 +3651,29 @@
                     }
                 }
             }
+
+            // Supplant score
+            var score_el = $('.cardstories_results_score', element);
+            var html = score_el.html().supplant({'score': player.score});
+            score_el.html(html);
+
+            // Set level
+            var bar_el = $('.cardstories_results_level_bar_front', box);
+            var to_next_percent = ((player.score_next - player.score_left) / player.score_next) * 100;
+            var bar_width = to_next_percent + '%';
+            bar_el.css({width: bar_width});
+            var star_el;
+            if (player.win === 'y') {
+                star_el = $('.cardstories_results_level_star_win', box);
+            } else {
+                star_el = $('.cardstories_results_level_star_lose', box);
+            }
+            star_el.show();
+            var level_el = $('.cardstories_results_level_legend', box);
+            html = level_el.html().supplant({'level_current': player.level,
+                                             'level_next': player.level + 1,
+                                             'score_left': player.score_left});
+            level_el.html(html);
 
             box.fadeIn('slow', cb);
         },
