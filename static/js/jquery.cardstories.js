@@ -2749,7 +2749,7 @@
                     });
 
                     q.queue(cardq, function(next) {
-                        $this.complete_complete(player_id, game, root);
+                        return $this.complete_complete(player_id, game, root);
                     });
                 }
 
@@ -3369,13 +3369,16 @@
 
         complete: function(player_id, game, root) {
             var state = $(root).data('cardstories_state');
+            var deferred;
             if (state && state.dom === 'vote_voter_wait') {
-                this.vote_voter_wait_to_complete(player_id, state.game, game, root);
+                deferred = this.vote_voter_wait_to_complete(player_id, state.game, game, root);
             } else {
-                this.complete_complete(player_id, game, root);
+                deferred = this.complete_complete(player_id, game, root);
             }
             this.poll_discard(root);
             this.poll_plugin(player_id, game.id, root);
+
+            return deferred;
         },
 
         complete_complete: function(player_id, game, root) {
@@ -3401,6 +3404,8 @@
                 master_seat.addClass('player');
             }
 
+            var deferred = $.Deferred();
+
             // Display board
             this.complete_display_board(game, element, root);
 
@@ -3425,8 +3430,18 @@
                     $this.complete_display_next_game(player_id, game, element, root, next);
                 });
 
+                // Resolve deferred.
+                q.queue('chain', function(next) {
+                    deferred.resolve();
+                    next();
+                });
+
                 q.dequeue('chain');
+            } else {
+                deferred.resolve();
             }
+
+            return deferred;
         },
 
         complete_display_board: function(game, element, root) {
@@ -3669,9 +3684,9 @@
                 banner.show();
             }
 
-            // Set score.
+            // Set initial score.
             var score = $('.cardstories_results_score', box);
-            var html = score.html().supplant({'score': player.score});
+            var html = score.html().supplant({'score': player.score_prev});
             score.html(html);
 
             // Set level bar width.
@@ -3701,9 +3716,32 @@
                 });
             }
 
-            // Show score and level
+            // Show score
             q.queue('chain', function(next) {
-                $('.cardstories_results_score_container', box).fadeIn('fast');
+                $('.cardstories_results_score_container', box).fadeIn('fast', next);
+            });
+
+            // Fashionable delay
+            $this.delay(q, 400, 'chain');
+
+            // Animate score
+            q.queue('chain', function(next) {
+                var timeout = 30;
+                var tmp = player.score_prev;
+                function inc_score() {
+                    tmp++;
+                    if (tmp <= player.score) {
+                        score.html(tmp);
+                        $this.setTimeout(inc_score, timeout);
+                    } else {
+                        next();
+                    }
+                }
+                $this.setTimeout(inc_score, timeout);
+            });
+
+            // Show level
+            q.queue('chain', function(next) {
                 $('.cardstories_results_level_container', box).fadeIn('fast', next);
             });
 
