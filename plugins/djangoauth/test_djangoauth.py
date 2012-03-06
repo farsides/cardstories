@@ -67,12 +67,14 @@ class DjangoAuthTest(unittest.TestCase):
         from django.conf import settings
         from django.test.utils import setup_test_environment
         from django.db import connection
+        from south.management.commands import patch_for_test_db_setup
 
         # If DEBUG = True, django will sometimes take different code paths.
         settings.DEBUG = False
 
         self.django_db = settings.DATABASE_NAME
         setup_test_environment()
+        patch_for_test_db_setup()
         connection.creation.create_test_db(verbosity=0)
 
         # A fake cardstories service just to benefit from settings directories.
