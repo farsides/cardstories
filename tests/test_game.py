@@ -1431,6 +1431,33 @@ class CardstoriesGameTest(unittest.TestCase):
         self.assertTrue(self.game.destroy_called)
         # Clean up the mock.
 
+    @defer.inlineCallbacks
+    def test23_game_before_player_is_created(self):
+        winner_card = 25
+        sentence = 'SENTENCE'
+        owner_id = 12
+        player1_id = 13
+        player2_id = 14
+
+        # Mock out the game.playerInteraction() method.
+        orig_playerInteraction = CardstoriesGame.playerInteraction
+        def fake_playerInteraction(self, transaction, player_id):
+            pass
+        CardstoriesGame.playerInteraction = fake_playerInteraction
+
+        yield self.create_game(owner_id, winner_card, sentence)
+        yield self.game.participate(player1_id)
+        yield self.game.participate(player2_id)
+        yield self.game.pick(player1_id, 1)
+        yield self.game.pick(player2_id, 2)
+        yield self.game.voting(owner_id)
+        yield self.game.vote(player1_id, 25)
+        yield self.game.vote(player2_id, 24)
+        yield self.game.complete(owner_id)
+
+        # Clean up the mock.
+        CardstoriesGame.playerInteraction = orig_playerInteraction
+
 
 def Run():
     loader = runner.TestLoader()

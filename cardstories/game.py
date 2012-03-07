@@ -229,7 +229,7 @@ class CardstoriesGame(Pollable):
     def calculate_level(self, score):
         # Players start with score 0 at level 1, and by convention only
         # need one point to reach level 2.
-        if score == 0:
+        if not score or score < 0:
             level = 1 
             score_next = 1
             score_left = 1
