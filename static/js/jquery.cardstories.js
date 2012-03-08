@@ -241,16 +241,10 @@
             var inhibit_poll = false;
 
             if (game.owner) {
-                // TODO: Game poll will need to be allowed for the GM if he will want to
-                //       see players joining, but create_write_sentence and create_pick_card
-                //       will need to be made idempotent before we can do that.
-                inhibit_poll = true;
-                $this.poll_discard(root);
-                $this.poll_plugin(player_id, game.id, root);
                 if (game.winner_card) {
-                    $this.create_write_sentence(player_id, game.id, game.winner_card, root);
+                    $this.create_write_sentence(player_id, game, root);
                 } else {
-                    $this.create_pick_card(player_id, game.id, root);
+                    $this.create_pick_card(player_id, game, root);
                 }
             } else {
                 if (game.self) {
@@ -412,10 +406,10 @@
             });
         },
 
-        create_pick_card: function(player_id, game_id, root) {
+        create_pick_card: function(player_id, game, root) {
             var $this = this;
             var element = $('.cardstories_create .cardstories_pick_card', root);
-            this.set_active('create_pick_card', element, root);
+            this.set_active('create_pick_card', element, root, game);
             this.display_progress_bar('owner', 1, element, root);
             this.display_master_info($this.get_player_info_by_id(player_id), element);
             this.init_board_buttons(player_id, element, root);
@@ -426,45 +420,66 @@
 
             var deferred = $.Deferred();
             var q = $({});
+
+            $this.create_owner_join_helper(player_id, game, element, root);
+
             var card_value, card_index;
-
-            // Deal the cards
-            q.queue('chain', function(next) {
-                $this.create_pick_card_animate(cards, element, root, next);
-            });
-
-            // Set up the dock for card selection, and show the modal box.  The
-            // user won't be able to select a card until "OK" is clicked.
-            q.queue('chain', function(next) {
-                var ok = function(_card_value, _card_index) {
-                    // The selected card will be needed later in the 'chain' queue.
-                    card_value = _card_value;
-                    card_index = _card_index;
-                    var query = {
-                        action: 'set_card',
-                        player_id: player_id,
-                        game_id: game_id,
-                        card: card_value
-                    };
-                    $this.send(query, next, player_id, game_id, root);
-                };
-
-                $this.select_cards('create_pick_card', cards, ok, element, root).done(function() {
-                    // Hide the cards in the back.
-                    $('.cardstories_deck .cardstories_card', element).hide();
-
-                    // Delay the appearance of the modal box artificially, since
-                    // jqDock doesn't provide a hook for when expansion finishes.
-                    $this.setTimeout(function() {
-                        var modal = $('.cardstories_info', element);
-                        var overlay = $('.cardstories_modal_overlay', element);
-                        $this.display_modal(modal, overlay, function() {
-                            deferred.resolve();
-                        });
-                    }, 250);
+            // Only run the deal animations once.
+            if (!element.hasClass('cardstories_noop')) {
+                element.addClass('cardstories_noop');
+                // Deal the cards
+                q.queue('chain', function(next) {
+                    $this.create_pick_card_animate(cards, element, root, next);
                 });
 
-            });
+                // Set up the dock for card selection, and show the modal box. The
+                // user won't be able to select a card until "OK" is clicked.
+                q.queue('chain', function(next) {
+                    var ok = function(_card_value, _card_index) {
+                        // Stop the poll for the rest of the animation.
+                        $this.poll_discard(root);
+                        // The selected card will be needed later in the 'chain' queue.
+                        card_value = _card_value;
+                        card_index = _card_index;
+                        var query = {
+                            action: 'set_card',
+                            player_id: player_id,
+                            game_id: game.id,
+                            card: card_value
+                        };
+                        var callback = function() {
+                            $this.create_pick_card_to_write_sentence(player_id, game, element, card_index, card_value, root);
+                        };
+                        $this.send(query, callback, player_id, game.id, root);
+                    };
+
+                    $this.select_cards('create_pick_card', cards, ok, element, root).done(function() {
+                        // Hide the cards in the back.
+                        $('.cardstories_deck .cardstories_card', element).hide();
+
+                        // Delay the appearance of the modal box artificially, since
+                        // jqDock doesn't provide a hook for when expansion finishes.
+                        $this.setTimeout(function() {
+                            var modal = $('.cardstories_info', element);
+                            var overlay = $('.cardstories_modal_overlay', element);
+                            $this.display_modal(modal, overlay, function() {
+                                deferred.resolve();
+                            });
+                        }, 250);
+                    });
+                });
+            } else {
+                deferred.resolve();
+            }
+
+            q.dequeue('chain');
+
+            return deferred;
+        },
+
+        create_pick_card_to_write_sentence: function(player_id, game, element, card_index, card_value, root) {
+            var $this = this;
+            var q = $({});
 
             q.queue('chain', function(next) {
                 $this.create_pick_card_animate_fly_to_deck(card_index, element, next);
@@ -478,11 +493,101 @@
 
             // Finally, initialize the next state.
             q.queue('chain', function(next) {
-                $this.create_write_sentence(player_id, game_id, card_value, root);
+                $this.game(player_id, game.id, root);
             });
 
             q.dequeue('chain');
-            return deferred;
+        },
+
+        existing_players_show_helper: function(existing_players, game, element, root) {
+            var $this = this;
+            var players = game.players;
+            var snippets = $('.cardstories_snippets', root);
+            var slot_snippet = $('.cardstories_player_seat', snippets);
+            var slotno = 0;
+            $.each(players, function(i, player) {
+                // Skip the owner.
+                if (player.id !== game.owner_id) {
+                    slotno++;
+
+                    var is_new = $.grep(existing_players, function(p) {
+                        return p.id === player.id;
+                    }).length === 0;
+
+                    if (!is_new) {
+                        // Set up the player seat.
+                        var slot = $('.cardstories_player_seat.cardstories_player_seat_' + slotno, element);
+                        if (!slot.hasClass('cardstories_noop_join')) {
+                            slot.addClass('cardstories_noop_join');
+                            slot_snippet.clone().children().appendTo(slot);
+                            slot.addClass('cardstories_player_seat_joined');
+                            var player_info = $this.get_player_info_by_id(player.id);
+                            $this.display_player_info(player_info, slot);
+                            $('.cardstories_player_invite.cardstories_player_seat_' + slotno, element).hide();
+                            $('.cardstories_player_status', slot).html('joined the game!');
+                            slot.show();
+                        }
+                    }
+                }
+            });
+        },
+
+        create_owner_join_helper: function(player_id, game, element, root, cb) {
+            var $this = this;
+            var players = game.players;
+            var snippets = $('.cardstories_snippets', root);
+            var slot_snippet = $('.cardstories_player_seat', snippets);
+            var last = players.length - 1;
+            var q = $({});
+
+            var delay_next = false;
+            var play_sound = true;
+            var slotno = 0;
+            $.each(players, function(i, player) {
+                // Delay this player, but only if there was at least one change
+                // displayed for the previous ones.
+                if (delay_next) {
+                    $this.delay(q, 350, 'chain');
+                    delay_next = false;
+                }
+
+                // Skip the owner.
+                if (player.id !== game.owner_id) {
+                    slotno++;
+
+                    // Set up the player seat.
+                    var slot = $('.cardstories_player_seat.cardstories_player_seat_' + slotno, element);
+                    if (!slot.hasClass('cardstories_noop_join')) {
+                        q.queue('chain', function(next) {
+                            slot.addClass('cardstories_noop_join');
+                            delay_next = true;
+                            slot_snippet.clone().children().appendTo(slot);
+                            slot.addClass('cardstories_player_seat_joined');
+                            $('.cardstories_player_status', slot).html('joined the game!');
+                            var player_info = $this.get_player_info_by_id(player.id);
+                            $this.display_player_info(player_info, slot);
+                            // Play a sound, but only once per each batch of players.
+                            if (play_sound) {
+                                $.cardstories_audio.play('join', root);
+                                play_sound = false;
+                            }
+                            slot.fadeIn(function() {
+                                $(this).show(); // A workaround for http://bugs.jquery.com/ticket/8892
+                                next();
+                            });
+                        });
+                    }
+                }
+
+                if (i === last && cb) {
+                    q.queue('chain', function(next) {
+                        cb();
+                        next();
+                    });
+                }
+            });
+
+            q.dequeue('chain');
         },
 
         animate_center_picked_card: function(element, index, card, callback) {
@@ -826,71 +931,84 @@
             q.dequeue('chain');
         },
 
-        create_write_sentence: function(player_id, game_id, card, root) {
+        create_write_sentence: function(player_id, game, root) {
             var $this = this;
+            var state = $(root).data('cardstories_state');
+            var existing_players = state && state.game && state.game.players || [];
             var element = $('.cardstories_create .cardstories_write_sentence', root);
-            this.set_active('create_write_sentence', element, root);
+            var card = game.winner_card;
+            this.set_active('create_write_sentence', element, root, game);
             this.display_progress_bar('owner', 2, element, root);
             this.display_master_info($this.get_player_info_by_id(player_id), element);
             this.init_board_buttons(player_id, element, root);
             $('.cardstories_card', element).attr('class', 'cardstories_card cardstories_card' + card + ' {card:' + card + '}');
-            this.create_write_sentence_animate_start(card, element, root);
-            var text = $('textarea.cardstories_sentence', element);
-            var input = $('.cardstories_submit', element).hide();
 
-            // Show number of characters remaining
-            text.limit('80','#cardstories_char_left_counter');
+            // Immediately display seats for players who have already joined the game previously.
+            this.existing_players_show_helper(existing_players, game, element, root);
+            // Show players that are new this time (with animation and sound).
+            this.create_owner_join_helper(player_id, game, element, root);
 
-            var is_sentence_valid = function() {
-                var trimmedText = $.trim(text.val());
-                var placeholderValue = $.data(text[0], 'placeholderValue');
-                return trimmedText.length > 1 && trimmedText !== placeholderValue;
-            };
+            if (!element.hasClass('cardstories_noop')) {
+                element.addClass('cardstories_noop');
+                this.create_write_sentence_animate_start(card, element, root);
 
-            text.bind('keyup click change', function() {
-                if (is_sentence_valid()) {
-                    input.show();
-                } else {
-                    input.hide();
-                }
-            });
+                var text = $('textarea.cardstories_sentence', element);
+                var input = $('.cardstories_submit', element).hide();
 
-            var submit = function() {
-                if (!is_sentence_valid()) {
-                    return false;
-                }
+                // Show number of characters remaining
+                text.limit('80','#cardstories_char_left_counter');
 
-                $this.create_write_sentence_animate_end(card, element, root, function() {
-                    $this.animate_progress_bar(3, element, function() {
-                        // Discard any polls, otherwise sometimes there are double
-                        // 'new game' notifications in the chat.
-                        $this.poll_discard(root);
+                var is_sentence_valid = function() {
+                    var trimmedText = $.trim(text.val());
+                    var placeholderValue = $.data(text[0], 'placeholderValue');
+                    return trimmedText.length > 1 && trimmedText !== placeholderValue;
+                };
 
-                        var success = function(data, status) {
-                            if ('error' in data) {
-                                $this.panic(data.error, player_id, game_id, root);
-                            } else {
-                                $this.game(player_id, game_id, root, {async: false});
-                            }
-                        };
-                        var query = {
-                            action: 'set_sentence',
-                            game_id: game_id,
-                            player_id: player_id
-                        };
-                        var sentence = encodeURIComponent($('.cardstories_sentence', element).val());
-                        $this.ajax({
-                            url: $this.url + '?' + $.param(query, true),
-                            type: 'POST',
-                            async: false,
-                            data: 'sentence=' + sentence,
-                            success: success
-                        }, player_id, game_id, root);
-                    });
+                text.bind('keyup click change', function() {
+                    if (is_sentence_valid()) {
+                        input.show();
+                    } else {
+                        input.hide();
+                    }
                 });
-                return true;
-            };
-            text.val('').placeholder({ onSubmit: submit });
+
+                var submit = function() {
+                    if (!is_sentence_valid()) {
+                        return false;
+                    }
+
+                    $this.create_write_sentence_animate_end(card, element, root, function() {
+                        $this.animate_progress_bar(3, element, function() {
+                            // Discard any polls, otherwise sometimes there are double
+                            // 'new game' notifications in the chat.
+                            $this.poll_discard(root);
+
+                            var success = function(data, status) {
+                                if ('error' in data) {
+                                    $this.panic(data.error, player_id, game.id, root);
+                                } else {
+                                    $this.game(player_id, game.id, root, {async: false});
+                                }
+                            };
+                            var query = {
+                                action: 'set_sentence',
+                                game_id: game.id,
+                                player_id: player_id
+                            };
+                            var sentence = encodeURIComponent($('.cardstories_sentence', element).val());
+                            $this.ajax({
+                                url: $this.url + '?' + $.param(query, true),
+                                type: 'POST',
+                                async: false,
+                                data: 'sentence=' + sentence,
+                                success: success
+                            }, player_id, game.id, root);
+                        });
+                    });
+                    return true;
+                };
+                text.val('').placeholder({ onSubmit: submit });
+            }
         },
 
         advertise: function(owner_id, game_id, element, root) {
@@ -951,7 +1069,7 @@
                         player_id: invites
                     };
                     var callback = function() {
-                        $this.game(owner_id, game_id, root, ajax_opts);
+                        $this.game(owner_id, game_id, root);
                     };
                     // Use a synchronous request; because this is user-initiated,
                     // we can afford it since the user won't be surprised by
@@ -1165,6 +1283,8 @@
 
         invitation_owner: function(player_id, game, root) {
             var $this = this;
+            var state = $(root).data('cardstories_state');
+            var existing_players = state && state.game && state.game.players || [];
             var element = $('.cardstories_invitation .cardstories_owner', root);
             this.set_active('invitation_owner', element, root, game);
             this.display_progress_bar('owner', 3, element, root);
@@ -1175,6 +1295,9 @@
             var src = picked_card.metadata({type: 'attr', name: 'data'}).card.supplant({card: game.winner_card});
             picked_card.find('.cardstories_card_foreground').attr('src', src);
             var go_vote = $('.cardstories_go_vote', element);
+
+            // Immediately display seats for players who have already joined the game previously.
+            this.existing_players_show_helper(existing_players, game, element, root);
 
             // Bind countdown select.
             $('.cardstories_countdown_select', go_vote).unbind('change').change(function() {
@@ -1242,21 +1365,26 @@
                 } else {
                     slot.addClass('cardstories_noop');
 
-                    // Copy over the snippet first.
-                    slot_snippet.clone().children().appendTo(slot);
+                    // If the coresponding player seat is already visible (the player already joined),
+                    // don't show the invite slot.
+                    var seat = $('.cardstories_player_seat.cardstories_player_seat_' + (i + 1), element);
+                    if (!seat.is(':visible')) {
+                        // Copy over the snippet first.
+                        slot_snippet.clone().children().appendTo(slot);
 
-                    // Bind click behavior.
-                    slot.unbind('click').click(function() {
-                        $.cookie('CARDSTORIES_INVITATIONS', null);
-                        $this.advertise(player_id, game_id, element, root);
-                    });
+                        // Bind click behavior.
+                        slot.unbind('click').click(function() {
+                            $.cookie('CARDSTORIES_INVITATIONS', null);
+                            $this.advertise(player_id, game_id, element, root);
+                        });
 
-                    // Finally animate it in.
-                    $this.animate_scale(false, 5, 300, slot, function() {
-                        if (i === last) {
-                            cb();
-                        }
-                    });
+                        // Finally animate it in.
+                        $this.animate_scale(false, 5, 300, slot, function() {
+                            if (i === last) {
+                                cb();
+                            }
+                        });
+                    }
                 }
             });
         },
@@ -1270,8 +1398,12 @@
             var q = $({});
             var progress = $('.cardstories_progress', element);
             var go_vote = $('.cardstories_go_vote', element);
+
             var delay_next = false;
-            for (var i=0, slotno=0, picked=0; i < players.length; i++) {
+            var play_sound = true;
+            var slotno = 0;
+            var picked = 0;
+            $.each(players, function(i, player) {
                 var playerq = 'player' + i;
 
                 // Delay this player, but only if there was at least one change
@@ -1282,9 +1414,8 @@
                 }
 
                 // Skip the owner.
-                if (players[i]['id'] != game.owner_id) {
+                if (player.id != game.owner_id) {
                     slotno++;
-
                     // Animate the progress bar as soon as one player joins.
                     // Do it in parallel with the other animations.
                     if (!progress.hasClass('cardstories_noop')) {
@@ -1309,6 +1440,8 @@
                         });
                     }
 
+                    var pick_sprite = $('.cardstories_player_pick_' + slotno, element);
+
                     // Set up the player seat and joining animation.
                     var slot = $('.cardstories_player_seat.cardstories_player_seat_' + slotno, element);
                     if (!slot.hasClass('cardstories_noop_join')) {
@@ -1316,29 +1449,36 @@
                         delay_next = true;
                         slot_snippet.clone().children().appendTo(slot);
                         slot.addClass('cardstories_player_seat_joined');
-                        var player_info = $this.get_player_info_by_id(players[i]['id']);
+                        var player_info = $this.get_player_info_by_id(player.id);
                         $this.display_player_info(player_info, slot);
                         $('.cardstories_player_status', slot).html('joined the game!');
 
-                        // Queue the animation. Create a new closure to save
-                        // elements for later, when dequeueing happens.
-                        q.queue(playerq, (function(slot, slotno) {return function(next) {
-                            var join_sprite = $('.cardstories_player_join_' + slotno, element);
-                            $('.cardstories_player_invite.cardstories_player_seat_' + slotno, element).fadeOut();
-                            slot.show();
-                            $this.animate_sprite(join_sprite, 18, 18, false, function() {
-                                $('.cardstories_player_arms_' + slotno, element).show();
-                                $('.cardstories_player_pick_' + slotno, element).show();
-                                join_sprite.hide();
-                                next();
-                            });
-                        };})(slot, slotno));
-
-                        // Play a sound
-                        $.cardstories_audio.play('join', root);
+                        if (play_sound) {
+                            $.cardstories_audio.play('join', root);
+                            play_sound = false;
+                        }
 
                         // Artificial delay between joining and picking.
                         $this.delay(q, 300, playerq);
+                    }
+
+                    // Show the join sprite animation (cards being dealt, hands coming out).
+                    if (!slot.hasClass('cardstories_noop_sprite')) {
+                        slot.addClass('cardstories_noop_sprite');
+                        var invite_slot = $('.cardstories_player_invite.cardstories_player_seat_' + slotno, element);
+                        var join_sprite = $('.cardstories_player_join_' + slotno, element);
+                        var player_arms = $('.cardstories_player_arms_' + slotno, element);
+                        // Queue the animation.
+                        q.queue(playerq, function(next) {
+                            invite_slot.fadeOut();
+                            slot.show();
+                            $this.animate_sprite(join_sprite, 18, 18, false, function() {
+                                player_arms.show();
+                                pick_sprite.show();
+                                join_sprite.hide();
+                                next();
+                            });
+                        });
                     }
 
                     // If the player hasn't picked a card, show the "picking"
@@ -1346,30 +1486,29 @@
                     // same goes for the picked state: if a player has picked a
                     // card and the animation has been shown, don't do it
                     // again.
-                    if (players[i]['picked'] === null) {
+                    if (player.picked === null) {
                         if (!slot.hasClass('cardstories_noop_picking')) {
                             slot.addClass('cardstories_noop_picking');
                             delay_next = true;
-                            q.queue(playerq, (function(slot) {return function(next) {
+                            q.queue(playerq, function(next) {
                                 slot.removeClass('cardstories_player_seat_joined');
                                 slot.addClass('cardstories_player_seat_picking');
                                 $('.cardstories_player_status', slot).html('is picking a card<br />...');
                                 next();
-                            };})(slot));
+                            });
                         }
                     } else {
                         if (!slot.hasClass('cardstories_noop_picked')) {
                             slot.addClass('cardstories_noop_picked');
                             delay_next = true;
-                            q.queue(playerq, (function(slot, slotno) {return function(next) {
+                            q.queue(playerq, function(next) {
                                 slot.addClass('cardstories_player_seat_picked');
                                 $('.cardstories_player_status', slot).html('has picked a card!');
-                                var pick_sprite = $('.cardstories_player_pick_' + slotno, element);
                                 $this.animate_sprite(pick_sprite, 18, 7, false, function() {
                                     pick_sprite.find('.cardstories_card').show();
                                     next();
                                 });
-                            };})(slot, slotno));
+                            });
                         }
 
                         // Only visually enable the button after the second
@@ -1399,11 +1538,11 @@
                 }
 
                 // Queue the dequeueing of this player's queue. ;)
-                q.queue('chain', (function(playerq) {return function(next) {
+                q.queue('chain', function(next) {
                     q.dequeue(playerq);
                     next();
-                };})(playerq));
-            }
+                });
+            });
 
             q.dequeue('chain');
         },
@@ -4434,6 +4573,8 @@
 
             // Init modification time.
             $(root).data('cardstories_modified', 0);
+            // Erase any saved state.
+            $(root).data('cardstories_state', {});
 
             this.credits(root);
 

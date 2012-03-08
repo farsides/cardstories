@@ -740,7 +740,7 @@ asyncTest("create_new_game on error", 1, function() {
 });
 
 
-test("create owner no card yet", 2, function() {
+test("create owner no card yet", 5, function() {
     var root = $('#qunit-fixture .cardstories');
     var owner_id = 75;
     var game_id = 111;
@@ -750,15 +750,24 @@ test("create owner no card yet", 2, function() {
         owner: true
     };
 
-    $.cardstories.create_pick_card = function(_player_id, _game_id, _root) {
+    $.cardstories.poll_discard = function(_root) {
+        ok(true, 'poll_discard gets called');
+    };
+
+    $.cardstories.poll = function(query, _player_id, _game_id, _root, cb) {
+        equal(_player_id, owner_id, 'poll_plugin gets passed the player_id');
+        equal(_game_id, game_id, 'poll_plugin gets passed the game_id');
+    };
+
+    $.cardstories.create_pick_card = function(_player_id, _game, _root) {
         equal(_player_id, owner_id, 'create_pick_card gets passed the owner_id');
-        equal(_game_id, game_id, 'create_pick_card gets passed the game_id');
+        equal(_game.id, game.id, 'create_pick_card gets passed the game');
     };
 
     $.cardstories.create(owner_id, game, root);
 });
 
-test("create owner has card", 3, function() {
+test("create owner has card", 5, function() {
     var root = $('#qunit-fixture .cardstories');
     var owner_id = 75;
     var game_id = 111;
@@ -770,30 +779,43 @@ test("create owner has card", 3, function() {
         owner: true
     };
 
-    $.cardstories.create_write_sentence = function(_player_id, _game_id, _winner_card, _root) {
+    $.cardstories.poll_discard = function(_root) {
+        ok(true, 'poll_discard gets called');
+    };
+
+    $.cardstories.poll = function(query, _player_id, _game_id, _root, cb) {
+        equal(_player_id, owner_id, 'poll_plugin gets passed the player_id');
+        equal(_game_id, game_id, 'poll_plugin gets passed the game_id');
+    };
+
+    $.cardstories.create_write_sentence = function(_player_id, _game, _root) {
         equal(_player_id, owner_id, 'create_pick_card gets passed the owner_id');
-        equal(_game_id, game_id, 'create_pick_card gets passed the game_id');
-        equal(_winner_card, winner_card, 'create_pick_card gets passed the winner_card');
+        equal(_game.id, game.id, 'create_pick_card gets passed the game');
     };
 
     $.cardstories.create(owner_id, game, root);
 });
 
-asyncTest("create_pick_card", 10, function() {
+asyncTest("create_pick_card", 14, function() {
     var root = $('#qunit-fixture .cardstories');
     var owner_id = 75;
     var game_id = 111;
     var game = {
         id: game_id,
         owner_id: owner_id,
-        owner: true
+        owner: true,
+        players: [
+            {id: owner_id, vote: null, picked: null, win: 'n'},
+            {id: 22, vote: null, picked: null, win: 'n'},
+            {id: 23, vote: null, picked: null, win: 'n'},
+            {id: 24, vote: null, picked: null, win: 'n'}
+        ]
     };
     var winner_card;
 
-    $.cardstories.create_write_sentence = function(_player_id, _game_id, _winner_card, _root) {
+    $.cardstories.create_write_sentence = function(_player_id, _game, _root) {
         equal(_player_id, owner_id, 'create_pick_card gets passed the owner_id');
-        equal(_game_id, game_id, 'create_pick_card gets passed the game_id');
-        equal(_winner_card, winner_card, 'create_pick_card gets passed the winner_card');
+        equal(_game.id, game.id, 'create_pick_card gets passed the game');
     };
 
     $.cardstories.send = function(query, cb, player_id, _game_id, _root) {
@@ -803,8 +825,19 @@ asyncTest("create_pick_card", 10, function() {
         cb();
     };
 
+    $.cardstories.game = function(_player_id, _game_id, _root) {
+        equal(_player_id, owner_id, 'game gets passed the owner id');
+        equal(_game_id, game_id, 'game gets passed the game_id');
+        start();
+    };
+
     var element = $('.cardstories_create .cardstories_pick_card', root);
-    $.cardstories.create_pick_card(owner_id, game_id, root).done(function() {
+    $.cardstories.create_pick_card(owner_id, game, root).done(function() {
+        equal($('.cardstories_player_seat_1', element).css('display'), 'block', 'seat 1 is visible');
+        equal($('.cardstories_player_seat_2', element).css('display'), 'block', 'seat 2 is visible');
+        equal($('.cardstories_player_seat_3', element).css('display'), 'block', 'seat 3 is visible');
+        notEqual($('.cardstories_player_seat_4', element).css('display'), 'block', 'seat 4 is not visible');
+        notEqual($('.cardstories_player_seat_5', element).css('display'), 'block', 'seat 5 is not visible');
         var overlay = $('.cardstories_modal_overlay', element);
         equal(overlay.css('display'), 'block', 'modal overlay is on');
         var a = $('.cardstories_info', element).find('a').click();
@@ -815,7 +848,6 @@ asyncTest("create_pick_card", 10, function() {
         winner_card = first_card.metadata({type: "attr", name: "data"}).card;
         first_card.click();
         $('.cardstories_card_confirm_ok', element).find('a').click();
-        start();
     });
 });
 
@@ -827,6 +859,18 @@ test("create_write_sentence", 11, function() {
     var sentence = 'THE SENTENCE';
     var element = $('.cardstories_create .cardstories_write_sentence', root);
 
+    var game = {
+        id: game_id,
+        owner_id: owner_id,
+        winner_card: card,
+        sentence: null,
+        players: [
+            {id: owner_id, pick: card, vote: null, cards: []},
+            {id: 22, pick: null, vote: null, cards: []},
+            {id: 23, pick: null, vote: null, cards: []},
+        ]
+    };
+
     $.cardstories.game = function(player_id, _game_id, _root) {
         equal(player_id, owner_id, 'game gets called with owner_id');
         equal(_game_id, game_id, 'game gets called with game_id');
@@ -837,7 +881,7 @@ test("create_write_sentence", 11, function() {
         query.success({id: game_id});
     };
 
-    $.cardstories.create_write_sentence(owner_id, game_id, card, root);
+    $.cardstories.create_write_sentence(owner_id, game, root);
     ok(element.hasClass('cardstories_active'), 'element active');
     var sentencel = $('.cardstories_sentence', element);
     ok(sentencel.attr('placeholder') !== undefined, 'placeholder is set');
@@ -887,8 +931,8 @@ asyncTest("create not owner, already participating", 4, function() {
         sentence: 'THE Sentence',
         self: [null, null, []],
         players: [
-            { 'id': owner_id, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': 0, 'levelups': 0},
-            { 'id': player_id, 'vote': null, 'win': 'n', 'picked': 4, 'cards': [], 'score': 0, 'levelups': 0}
+            {id: owner_id, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0},
+            {id: player_id, vote: null, win: 'n', picked: 4, cards: [], score: 0, levelups: 0}
         ]
     };
 
@@ -907,6 +951,118 @@ asyncTest("create not owner, already participating", 4, function() {
     };
 
     $.cardstories.create(player_id, game, root);
+});
+
+test("existing_players_show_helper", 15, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_create .cardstories_write_sentence', root);
+
+    var owner =   {id: 101, pick: null, vote: null, cards: []};
+    var player1 = {id: 102, pick: null, vote: null, cards: []};
+    var player2 = {id: 103, pick: null, vote: null, cards: []};
+    var player3 = {id: 104, pick: null, vote: null, cards: []};
+    var player4 = {id: 105, pick: null, vote: null, cards: []};
+    var player5 = {id: 106, pick: null, vote: null, cards: []};
+
+    var existing_players = [owner, player1, player2, player3];
+    var game = {
+        id: 1002,
+        owner_id: owner.id,
+        owner: false,
+        self: [null, null, []],
+        players: [owner, player1, player2, player4, player5]
+    }
+
+    var seat1 = $('.cardstories_player_seat_1', element);
+    var seat2 = $('.cardstories_player_seat_2', element);
+    var seat3 = $('.cardstories_player_seat_3', element);
+    var seat4 = $('.cardstories_player_seat_4', element);
+    var seat5 = $('.cardstories_player_seat_5', element);
+
+    // None of the player seats should be visible initially.
+    notEqual(seat1.css('display'), 'block', 'player seat is not visible');
+    notEqual(seat2.css('display'), 'block', 'player seat is not visible');
+    notEqual(seat3.css('display'), 'block', 'player seat is not visible');
+    notEqual(seat4.css('display'), 'block', 'player seat is not visible');
+    notEqual(seat5.css('display'), 'block', 'player seat is not visible');
+
+    // Invoke the helper.
+    $.cardstories.existing_players_show_helper(existing_players, game, element, root);
+
+    // Now the interesection of existing players and current players should be shown.
+    // Seats for players 1 and 2 should be visible.
+    equal(seat1.css('display'), 'block', 'player seat is visible');
+    equal(seat2.css('display'), 'block', 'player seat is visible');
+    notEqual(seat3.css('display'), 'block', 'player seat is not visible');
+    notEqual(seat4.css('display'), 'block', 'player seat is not visible');
+    notEqual(seat5.css('display'), 'block', 'player seat is not visible');
+
+    // The two visible seats should be marked with the 'cardstories_noop_join' class.
+    ok(seat1.hasClass('cardstories_noop_join'), 'seat is marked as noop join');
+    ok(seat2.hasClass('cardstories_noop_join'), 'seat is marked as noop join');
+    ok(!seat3.hasClass('cardstories_noop_join'), 'seat is not marked as noop join');
+    ok(!seat4.hasClass('cardstories_noop_join'), 'seat is not marked as noop join');
+    ok(!seat5.hasClass('cardstories_noop_join'), 'seat is not marked as noop join');
+});
+
+asyncTest("create_owner_join_helper", 17, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_create .cardstories_write_sentence', root);
+
+    var owner =   {id: 101, pick: null, vote: null, cards: []};
+    var player1 = {id: 102, pick: null, vote: null, cards: []};
+    var player2 = {id: 103, pick: null, vote: null, cards: []};
+    var player3 = {id: 104, pick: null, vote: null, cards: []};
+    var player4 = {id: 105, pick: null, vote: null, cards: []};
+
+    var game1 = {
+        owner_id: owner.id,
+        owner: false,
+        players: [owner, player1, player2]
+    };
+    var game2 = {
+        owner_id: owner.id,
+        owner: false,
+        players: [owner, player1, player2, player3, player4]
+    };
+
+    var seat1 = $('.cardstories_player_seat_1', element);
+    var seat2 = $('.cardstories_player_seat_2', element);
+    var seat3 = $('.cardstories_player_seat_3', element);
+    var seat4 = $('.cardstories_player_seat_4', element);
+    var seat5 = $('.cardstories_player_seat_5', element);
+
+    // Count how often $.cardstories_audio.play is called.
+    $.cardstories_audio.play = function(name, root) {
+        equal(name, 'join');
+    };
+
+    // None of the player seats should be visible initially.
+    notEqual(seat1.css('display'), 'block', 'player seat is not visible');
+    notEqual(seat2.css('display'), 'block', 'player seat is not visible');
+    notEqual(seat3.css('display'), 'block', 'player seat is not visible');
+    notEqual(seat4.css('display'), 'block', 'player seat is not visible');
+    notEqual(seat5.css('display'), 'block', 'player seat is not visible');
+
+    $.cardstories.create_owner_join_helper(player1, game1, element, root, function() {
+        // Now the interesection of existing players and current players should be shown.
+        // Seats for players 1 and 2 should be visible, and the join audio should be played.
+        equal(seat1.css('display'), 'block', 'player seat is visible');
+        equal(seat2.css('display'), 'block', 'player seat is visible');
+        notEqual(seat3.css('display'), 'block', 'player seat is not visible');
+        notEqual(seat4.css('display'), 'block', 'player seat is not visible');
+        notEqual(seat5.css('display'), 'block', 'player seat is not visible');
+
+        // Call it again: seats 3 & 4 should be shown, and the join audio played again.
+        $.cardstories.create_owner_join_helper(player1, game2, element, root, function() {
+            equal(seat1.css('display'), 'block', 'player seat is visible');
+            equal(seat2.css('display'), 'block', 'player seat is visible');
+            equal(seat3.css('display'), 'block', 'player seat is visible');
+            equal(seat4.css('display'), 'block', 'player seat is visible');
+            notEqual(seat5.css('display'), 'block', 'player seat is not visible');
+            start();
+        });
+    });
 });
 
 asyncTest("game", 4, function() {
@@ -1007,6 +1163,24 @@ test("image preloading fires on bootstrap", 2, function() {
     $.cardstories.bootstrap(player_id, game_id, null, root);
 });
 
+test("load_game", 4, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var player_id = 11;
+    var game_id = 102;
+
+    root.data('cardstories_modified', 123123);
+    root.data('cardstories_state', {fake: 'state'});
+
+    $.cardstories.game_or_create = function(_player_id, _game_id, _options, _root) {
+        equal(_player_id, player_id, 'game_or_create is called with player_id');
+        equal(_game_id, game_id, 'game_or_create is called with game_id');
+        equal(root.data('cardstories_modified'), 0, 'saved modified value gets reset to zero');
+        deepEqual(root.data('cardstories_state'), {}, 'saved state is emptied');
+    };
+
+    $.cardstories.load_game(player_id, game_id, {}, root);
+});
+
 test("automatic game creation", 2, function() {
     var root = $('#qunit-fixture .cardstories');
     var player_id = 1;
@@ -1097,7 +1271,7 @@ test("invitation_owner_slots_helper", 15, function() {
     });
 });
 
-asyncTest("invitation_owner_join_helper", 44, function() {
+asyncTest("invitation_owner_join_helper", 43, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_invitation .cardstories_owner', root);
     var player1 = 1;
@@ -1105,23 +1279,27 @@ asyncTest("invitation_owner_join_helper", 44, function() {
     var player3 = 3;
     var player4 = 4;
     var state1 = {
-        'owner_id': player1,
-        'ready': false,
-        'countdown_finish': null,
-        'players': [ { 'id': player1, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
-                     { 'id': player2, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
-                     { 'id': player3, 'vote': null, 'win': 'n', 'picked': 3, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null } ]
+        owner_id: player1,
+        ready: false,
+        countdown_finish: null,
+        players: [
+            {id: player1, vote: null, win: 'n', picked: null, cards: [], score: null, level: null, score_next: null, score_left: null},
+            {id: player2, vote: null, win: 'n', picked: null, cards: [], score: null, level: null, score_next: null, score_left: null},
+            {id: player3, vote: null, win: 'n', picked: 3, cards: [], score: null, level: null, score_next: null, score_left: null}
+        ]
     };
 
     var countdown_finish = 60000;
     var state2 = {
-        'owner_id': player1,
-        'ready': true,
-        'countdown_finish': countdown_finish,
-        'players': [ { 'id': player1, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
-                     { 'id': player2, 'vote': null, 'win': 'n', 'picked': 2, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
-                     { 'id': player3, 'vote': null, 'win': 'n', 'picked': 3, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
-                     { 'id': player4, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null } ]
+        owner_id: player1,
+        ready: true,
+        countdown_finish: countdown_finish,
+        players: [
+            {id: player1, vote: null, win: 'n', picked: null, cards: [], score: null, level: null, score_next: null, score_left: null},
+            {id: player2, vote: null, win: 'n', picked: 2, cards: [], score: null, level: null, score_next: null, score_left: null},
+            {id: player3, vote: null, win: 'n', picked: 3, cards: [], score: null, level: null, score_next: null, score_left: null},
+            {id: player4, vote: null, win: 'n', picked: null, cards: [], score: null, level: null, score_next: null, score_left: null}
+        ]
     };
 
     for (var i=1; i<=5; i++) {
@@ -3153,7 +3331,7 @@ asyncTest("create_pick_card_animate", 30, function() {
 });
 
 asyncTest("create_pick_card_animate_fly_to_deck", 23, function() {
-    var player_id = 42;
+    var owner_id = 42;
     var root = $('#qunit-fixture .cardstories');
     var container = $('.cardstories_create', root);
     var element = $('.cardstories_pick_card', container);
@@ -3164,7 +3342,19 @@ asyncTest("create_pick_card_animate_fly_to_deck", 23, function() {
     var deck_cards = $('.cardstories_deck .cardstories_card', element);
     var board_cards = $('.cardstories_cards_hand .cardstories_card', element);
 
-    $.cardstories.create_pick_card(player_id, undefined, root).done(function() {
+    var game = {
+        owner_id: owner_id,
+        owner: true,
+        winner_card: 43,
+        sentence: null,
+        players: [
+            {id: owner_id, vote: null, pick: 43, cards: []},
+            {id: 22, vote: null, pick: null, cards: []},
+            {id: 23, vote: null, pick: null, cards: []}
+        ]
+    };
+
+    $.cardstories.create_pick_card(owner_id, game, root).done(function() {
         var card_index = 3;
         board_cards.eq(card_index + 1).addClass('cardstories_card_selected');
 
