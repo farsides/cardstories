@@ -258,6 +258,30 @@ asyncTest("onstatechange", 6, function() {
     });
 });
 
+asyncTest("onstatechange without player_id", 2, function() {
+    var root = $('#qunit-fixture .cardstories');
+
+    $.cardstories.game = function(_player_id, _game_id, _root) {
+        ok(false, 'game was not called');
+    };
+
+    $.cardstories.history.getState = function() {
+        return {data: {
+            game_id: undefined,
+            player_id: undefined,
+            options: {}
+        }};
+    };
+
+    var garbage = '<div id="garbage">I am garbage</div>';
+    root.append(garbage);
+    ok($('#garbage', root).length, 'root contains some garbage');
+    $.cardstories.onstatechange(root).done(function() {
+        ok($('#garbage', root).length, 'root still contains some garbage');
+        start();
+    });
+});
+
 asyncTest("xhr_error", 5, function() {
     // The log function is always called.
     $.cardstories.log = function(msg) { ok(msg.match('ERROR')); };

@@ -142,16 +142,22 @@
         // as HTML5 popstate event. It is fired when calling history.pushState(), or when
         // the user clicks the back/forward buttons.
         onstatechange: function(root) {
-            root = $(root);
-            // Discard any running poll.
-            this.poll_discard(root);
-            // Wipe out the DOM structure and re-create it from a clean copy.
-            var dom_clone = root.data('dom_clone');
-            root.empty();
-            root.append(dom_clone);
-            // Re-init cardstories.
+            var deferred;
             var data = this.history.getState().data;
-            var deferred = this.load_game(data.player_id, data.game_id, data.options, root);
+            if (data.player_id !== undefined) {
+                root = $(root);
+                // Discard any running poll.
+                this.poll_discard(root);
+                // Wipe out the DOM structure and re-create it from a clean copy.
+                var dom_clone = root.data('dom_clone');
+                root.empty();
+                root.append(dom_clone);
+                // Re-init cardstories.
+                deferred = this.load_game(data.player_id, data.game_id, data.options, root);
+            } else {
+                deferred = $.Deferred().resolve();
+            }
+
             return deferred;
         },
 
