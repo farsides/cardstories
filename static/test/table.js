@@ -64,6 +64,8 @@ test("init_game_id", 4, function() {
     equal($(root).data('cardstories_table').game2table[game_id].ready_for_next_game, false);
 });
 
+/* TODO: Re-activate, maybe move
+   -----
 test("init_find_game", 4, function() {
     var root = $(selector);
     var player_id = 1;
@@ -125,6 +127,7 @@ test("init_find_game_as_author_already_created", 5, function() {
     equal(get_keys(game2table).length, 1);
     equal(game2table[0].ready_for_next_game, true);
 });
+*/
 
 // Init the table plugin without triggering reload
 init_table = function(player_id, game_id, root) {

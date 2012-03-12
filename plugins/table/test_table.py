@@ -72,8 +72,7 @@ class TableTest(unittest.TestCase):
         self.service = CardstoriesService({'db': self.database,
                                            'plugins-confdir': 'CONFDIR',
                                            'plugins-libdir': 'LIBDIR',
-                                           'static': 'STATIC'
-                                           })
+                                           'static': 'STATIC'})
         self.service.auth = Mock()
         self.service.startService()
 
@@ -132,15 +131,6 @@ class TableTest(unittest.TestCase):
         response = yield self.service.handle([], {'action': ['create'],
                                                   'owner_id': [player1]})
         game_id = response['game_id']
-        # Set card and sentence to move it into 'invitation' state
-        yield self.service.handle([], {'action': ['set_card'],
-                                       'card': [1],
-                                       'player_id': [player1],
-                                       'game_id': [game_id]})
-        yield self.service.handle([], {'action': ['set_sentence'],
-                                       'sentence': ['SENTENCE'],
-                                       'player_id': [player1],
-                                       'game_id': [game_id]})
 
         # Poll must return to inform players waiting for an available table
         modified = self.check_poll(poll, returned=True)

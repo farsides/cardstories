@@ -87,7 +87,7 @@ class Plugin(Pollable, CardstoriesServiceConnector):
 
         if changes != None and changes['type'] == 'change':
             details = changes['details']
-            if details['type'] == 'set_sentence':
+            if details['type'] == 'create':
                 d = self.on_new_game(changes['game'], details)
 
         self.service.listen().addCallback(self.on_service_notification)
@@ -255,7 +255,7 @@ class Plugin(Pollable, CardstoriesServiceConnector):
 
         for table in self.tables:
             game = yield table.get_current_game()
-            if game['state'] == 'invitation':
+            if game['state'] in ['create', 'invitation']:
                 online_players, offline_players = yield table.get_online_players()
                 if len(online_players) > max_players \
                         and len(online_players) + len(offline_players) < CardstoriesGame.NPLAYERS:
@@ -340,9 +340,9 @@ class Table(Pollable, CardstoriesServiceConnector):
         # Player is asking from the current table game
         else:
             if self.next_owner_id is None:
-                # Only decide the next owner when a new game is needed, 
-                # to reduce the chances of picking a player who disconnects 
-                if table_game['state'] == 'complete' or table_game['state'] == 'canceled':
+                # Only decide the next owner when a new game is needed,
+                # to reduce the chances of picking a player who disconnects
+                if table_game['state'] in ['complete', 'canceled']:
                     yield self.update_next_owner_id()
 
             next_game_id = None
@@ -354,7 +354,7 @@ class Table(Pollable, CardstoriesServiceConnector):
         else:
             players_ids = []
 
-        defer.returnValue([{"game_id": player_game_id,
+        defer.returnValue([{'game_id': player_game_id,
                             'next_game_id': next_game_id,
                             'next_owner_id': next_owner_id},
                            players_ids])

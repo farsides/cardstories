@@ -36,12 +36,16 @@
 
             // If game creation or a specific game aren't explicitly
             // requested, try to join an active table/game
+            // TODO: This is disabled for now because it didn't play well with the
+            //       new loading mechanism. It should be put directly into $.cardstories.bootstrap
+            //       method instead.
+            /*
             if(player_id && !$.query.get('create') && !game_id) {
                 var table = $this.get_table_from_game_id(game_id, root);
-
                 table.ready_for_next_game = true;
                 $this.force_state_update(player_id, game_id, root);
             }
+            */
         },
 
         load_game: function(player_id, game_id, options, root) {
@@ -96,13 +100,16 @@
                 if ('error' in data) {
                     $.cardstories.panic(data.error);
                 } else {
-                    $this.state(player_id, data, root);
+                    // data = [table_state, players_info],
+                    // we don't care about players_info here.
+                    $this.state(player_id, data[0], root);
                 }
             };
 
             $.cardstories.ajax({
                 url: $.cardstories.url + '?' + $.param(query, true),
-                success: success
+                success: success,
+                async: false
             });
         },
 
@@ -113,7 +120,6 @@
             var game_id = data.game_id;
             var table = $this.get_table_from_game_id(game_id, root);
             var reset_needed = false;
-
             // Check if we need to warn about a owner change
             if(table.next_owner_id && table.next_owner_id !== data.next_owner_id) {
                 reset_needed = true;
@@ -134,7 +140,6 @@
         check_next_game: function(player_id, game_id, root) {
             var $this = this;
             var table = $this.get_table_from_game_id(game_id, root);
-
             if(table.ready_for_next_game) {
                 // Next game is ready to be joined
                 if(table.next_game_id && table.next_game_id !== game_id) {
