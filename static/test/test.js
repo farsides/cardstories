@@ -3032,7 +3032,9 @@ asyncTest("complete", 40, function() {
         notEqual($('.cardstories_results.author img.cardstories_results_banner_win').css('display'), 'none', 'win img is hidden');
         equal($('.cardstories_results.author img.cardstories_results_banner_lose').css('display'), 'none', 'lost img is visible');
         equal($('.cardstories_results.author .cardstories_results_score', element).html(), owner_score+'', 'author score is visible');
-        equal($('.cardstories_results.author .cardstories_results_level_bar_front', element).css('width'), '50%', 'bar width at 50%');
+        var level_bar = $('.cardstories_results.author .cardstories_results_level_bar_front', element);
+        level_bar.parents().andSelf().show();
+        ok(level_bar.width() > 0, 'bar width > 0');
         notEqual($('.cardstories_results.author img.cardstories_results_level_star_win', element).css('display'), 'none', 'win star is visible');
         equal($('.cardstories_results.author img.cardstories_results_level_star_lose', element).css('display'), 'none', 'lose star is invisible');
         equal($('.cardstories_results.author .cardstories_results_level_current', element).html(), 'LEVEL '+owner_level, 'author level is visible');
