@@ -106,17 +106,6 @@
                 return false;
             });
             element.append(new_game_tab);
-
-            // Workaround for Chrome 17 bug: http://code.google.com/p/chromium/issues/detail?id=111218
-            // Without this hack, the deck sometimes disappears, especially in Chrome 17 on OS X.
-            // See: http://tickets.farsides.com/issues/821
-            // TODO: Remove when Chrome bug is fixed and this isn't needed anymore.
-            if (window.chrome) {
-                var deck = $('.cardstories_deck', root);
-                var cards = $('.cardstories_deck_cards', deck);
-                deck.css('background-image', deck.css('background-image'));
-                cards.css('background-image', cards.css('background-image'));
-            }
         },
 
         // Removes the current tab from the page and loads game from one of the other
