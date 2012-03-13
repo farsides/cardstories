@@ -760,7 +760,8 @@
 }
 
 .cardstories .cardstories_player_seat .cardstories_player_name {
-    height: 28px;
+    line-height: 14px;
+    height: 28px; /* twice the line height */
     margin: 10px auto 10px auto;
 }
 
@@ -968,6 +969,7 @@
     left: 63px;
     color: #4D4D4F;
     line-height: 17px;
+    height: 34px; /* twice the line-height */
 }
 
 .cardstories_master_seat.cardstories_master_seat_won .cardstories_master_name,
