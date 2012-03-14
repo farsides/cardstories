@@ -29,23 +29,8 @@
         poll: true,
 
         init: function(player_id, game_id, root) {
-            var $this = this;
-
             // Table data storage
-            $this.init_game2table(game_id, root);
-
-            // If game creation or a specific game aren't explicitly
-            // requested, try to join an active table/game
-            // TODO: This is disabled for now because it didn't play well with the
-            //       new loading mechanism. It should be put directly into $.cardstories.bootstrap
-            //       method instead.
-            /*
-            if(player_id && !$.query.get('create') && !game_id) {
-                var table = $this.get_table_from_game_id(game_id, root);
-                table.ready_for_next_game = true;
-                $this.force_state_update(player_id, game_id, root);
-            }
-            */
+            this.init_game2table(game_id, root);
         },
 
         load_game: function(player_id, game_id, options, root) {
@@ -83,9 +68,11 @@
             return table;
         },
 
-        // Normally state() is called when a poll returns, but this allows
-        // to get the state updated immediately (useful when polls aren't running)
-        force_state_update: function(player_id, game_id, root) {
+        // Fetches table state for game game_id from the server.
+        // If game_id is undefined, the server returns state for an
+        // available table that the player can join.
+        // Invokes callback with the table state as returned from the server.
+        fetch_table_state: function(player_id, game_id, root, callback) {
             var $this = this;
 
             var query = {
@@ -102,7 +89,7 @@
                 } else {
                     // data = [table_state, players_info],
                     // we don't care about players_info here.
-                    $this.state(player_id, data[0], root);
+                    callback(data[0]);
                 }
             };
 
@@ -110,6 +97,23 @@
                 url: $.cardstories.url + '?' + $.param(query, true),
                 success: success,
                 async: false
+            }, player_id, game_id, root);
+        },
+
+        // Invokes callback with an available game_id that the player can join.
+        // If there are no available games, invokes callback with undefined.
+        get_available_game: function(player_id, root, callback) {
+            this.fetch_table_state(player_id, undefined, root, function(data) {
+                callback(data.next_game_id);
+            });
+        },
+
+        // Normally state() is called when a poll returns, but this allows
+        // to get the state updated immediately (useful when polls aren't running)
+        force_state_update: function(player_id, game_id, root) {
+            var $this = this;
+            $this.fetch_table_state(player_id, game_id, root, function(data) {
+                $this.state(player_id, data, root);
             });
         },
 

@@ -4619,10 +4619,18 @@
                     // In which case authentication is handled internally.
                     $this.login(game_id, login_url, root);
                 } else {
-                    $this.load_game(player_id, game_id, {}, root);
+                    // If game creation or a specific game aren't explicitly
+                    // requested, try to join an active table/game.
+                    if (!game_id && !$.query.get('create')) {
+                        $.cardstories_table.get_available_game(player_id, root, function(game_id) {
+                            var opts = game_id ? {} : {force_create: true};
+                            $this.reload(player_id, game_id, opts, root);
+                        });
+                    } else {
+                        $this.load_game(player_id, game_id, {}, root);
+                    }
                 }
             });
-
         }
     };
 

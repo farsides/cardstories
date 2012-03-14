@@ -19,6 +19,8 @@ $.fx.off = true;
 
 // Mock out the audio plugin.
 $.cardstories_audio = {};
+// And the table plugin.
+$.cardstories_table = {};
 
 var cardstories_default_setTimeout = $.cardstories.setTimeout;
 var cardstories_default_delay = $.cardstories.delay;
@@ -82,7 +84,10 @@ function setup() {
         return {'name': 'Player ' + player_id,
                 'avatar_url': '/static/css/images/avatars/default/' + player_id % 6 + '.jpg'};
     };
+    $.cardstories_audio = {};
     $.cardstories_audio.play = function(name, root) {};
+    $.cardstories_table = {};
+    $.cardstories_table.get_available_game = function(player_id, root, cb) { cb(); };
 }
 
 module("cardstories", {setup: setup});
@@ -1142,11 +1147,12 @@ test("game on generic error", 1, function() {
 
 test("player's id from cookie gets parsed as integer", 1, function() {
     var root = $('#qunit-fixture .cardstories');
+    var game_id = 13;
     $.cookie('CARDSTORIES_ID', 13);
     $.cardstories.load_game = function(player_id, game_id, options, root) {
         strictEqual(player_id, 13, 'player id is an integer');
     };
-    $.cardstories.bootstrap(null, null, null, root);
+    $.cardstories.bootstrap(null, game_id, null, root);
 });
 
 test("image preloading fires on bootstrap", 2, function() {
@@ -1181,28 +1187,79 @@ test("load_game", 4, function() {
     $.cardstories.load_game(player_id, game_id, {}, root);
 });
 
-test("automatic game creation", 2, function() {
+test("bootstrap", 11, function() {
     var root = $('#qunit-fixture .cardstories');
     var player_id = 1;
     var game_id = 112;
 
-    // If no game id is provided, create must be called directly.
-    $.cardstories.create_new_game = function(player_id, root) {
-        ok(true, 'create_new_game called');
+    // If no game id is provided, and 'create' is not part of the query,
+    // player is redirected to an available table/game.
+    $.cardstories_table.get_available_game = function(_player_id, _root, cb) {
+        equal(_player_id, player_id, 'get_avaiable_game is passed the player_id');
+        cb(game_id);
     };
-    $.cardstories.game = function(player_id, game_id, root) {
-        ok(false, 'game called');
+    $.cardstories.reload = function(_player_id, _game_id, _opts, _root) {
+        equal(_player_id, player_id, 'reload gets called with player_id');
+        equal(_game_id, game_id, 'reload gets called with game_id');
+        deepEqual(_opts, {}, 'reload gets called with empty options');
     };
-    $.cardstories.bootstrap(player_id, null, null, false, root);
+    $.cardstories.bootstrap(player_id, undefined, null, false, root);
 
-    // However, if game_id is set, create must not be called.
-    $.cardstories.create_new_game = function(player_id, root) {
-        ok(false, 'create_new_game called');
+    // If no available table/game exists, the player is redirected to
+    // create a new game.
+    $.cardstories_table.get_available_game = function(_player_id, _root, cb) {
+        equal(_player_id, player_id, 'get_avaiable_game is passed the player_id');
+        cb(undefined);
+    };
+    $.cardstories.reload = function(_player_id, _game_id, _opts, _root) {
+        equal(_player_id, player_id, 'reload gets called with player_id');
+        equal(_game_id, undefined, 'reload gets called with game_id=undefined');
+        ok(_opts.force_create, 'reload gets called with force_create');
     };
     $.cardstories.game = function(player_id, game_id, root) {
-        ok(true, 'game called');
+        ok(false, 'game is NOT called');
     };
-    $.cardstories.bootstrap(player_id, game_id, null, true, root);
+    $.cardstories.bootstrap(player_id, undefined, null, false, root);
+
+    // If game_id is passed explicitly to bootstrap, that game is loaded
+    // without any redirection.
+    $.cardstories_table.get_avaiable_game = function(_player_id, _root, cb) {
+        ok(false, 'get_available_game is NOT called');
+    };
+    $.cardstories.reload = function(_player_id, _game_id, _opts, _root) {
+        ok(false, 'reload is NOT called');
+    };
+    $.cardstories.create_new_game = function(_player_id, _prev_game_id, _root) {
+        ok(false, 'create_new_game is NOT called');
+    };
+    $.cardstories.game = function(_player_id, _game_id, _root, _ajax_opts) {
+        equal(_player_id, player_id, 'game is called with player_id');
+        equal(_game_id, game_id, 'game is called with game_id');
+    };
+    $.cardstories.bootstrap(player_id, game_id, null, root);
+
+    // If game_id is undefined and 'create' is present in the query,
+    // a new game is created without any redirection.
+    var original_query_get = $.query.get;
+    // Stub query to act as if 'create=1' was present in the query string.
+    $.query.get = function(name) {
+        if (name === 'create') { return '1'; }
+    };
+    $.cardstories_table.get_avaiable_game = function(_player_id, _root, cb) {
+        ok(false, 'get_available_game is NOT called');
+    };
+    $.cardstories.reload = function(_player_id, _game_id, _opts, _root) {
+        ok(false, 'reload is NOT called');
+    };
+    $.cardstories.create_new_game = function(_player_id, _prev_game_id, _root) {
+        equal(_player_id, player_id, 'create_new_game is called with player_id');
+    };
+    $.cardstories.game = function(_player_id, _game_id, _root, _ajax_opts) {
+        ok(false, 'game is NOT called');
+    };
+    $.cardstories.bootstrap(player_id, undefined, null, root);
+    // Unstub query.get.
+    $.query.get = original_query_get;
 });
 
 asyncTest("preload_images", 2, function() {
@@ -2893,7 +2950,6 @@ asyncTest("complete owner lost easy", 8, function() {
         ok($('.cardstories_master_seat', element).hasClass('cardstories_master_seat_lost'), 'the game master lost');
         equal($('.cardstories_master_seat .cardstories_master_status', element).html(), 'LOSES!', 'the game master lost');
 
-        $.cardstories_table = undefined;
         start();
     });
 });
