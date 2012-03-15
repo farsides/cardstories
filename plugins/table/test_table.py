@@ -134,6 +134,7 @@ class TableTest(unittest.TestCase):
 
         # Poll must return to inform players waiting for an available table
         modified = self.check_poll(poll, returned=True)
+
         state = yield self.table_instance.state({'type': ['table'],
                                                  'game_id': ['undefined'],
                                                  'player_id': [player2]})

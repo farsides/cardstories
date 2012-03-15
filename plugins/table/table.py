@@ -128,11 +128,7 @@ class Plugin(Pollable, CardstoriesServiceConnector):
         self.game2table[game.id] = table
         table.register_new_game(game)
 
-        # Let the clients looking for an available table know about this game,
-        # but don't interfere if the clients already got one to join
-        touch_polls = yield not self.get_available_table()
-        if touch_polls:
-            self.touch({})
+        self.touch({})
 
         defer.returnValue(True)
 
