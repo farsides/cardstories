@@ -911,10 +911,6 @@
             q.queue('chain', function(next) {
                 card_shadow.hide();
                 var duration = 500;
-                sentence_box.animate({
-                    top: sentence_top,
-                    left: sentence_left
-                }, duration);
                 card_template.animate({
                     top: card_top,
                     left: card_left
@@ -922,6 +918,10 @@
                 card_img.animate({
                     width: card_width,
                     height: card_height
+                }, duration);
+                sentence_box.animate({
+                    top: sentence_top,
+                    left: sentence_left
                 }, duration, next);
             });
             // If set, run the callback at the end of the queue.
@@ -1341,12 +1341,14 @@
             return deferred;
         },
 
-        invitation_owner_modal_helper: function(modal, overlay, cb) {
+        invitation_owner_modal_helper: function(modal, overlay, cb_open, cb_close) {
             if (modal.hasClass('cardstories_noop')) {
-                cb();
+                if (cb_open) {
+                    cb_open();
+                }
             } else {
                 modal.addClass('cardstories_noop');
-                this.display_modal(modal, overlay, cb);
+                this.display_modal(modal, overlay, cb_open, cb_close);
             }
         },
 
@@ -1696,7 +1698,7 @@
 
                 // Show the modal info box.
                 q.queue('chain', function(next) {
-                    $this.display_modal($('.cardstories_info', element), $('.cardstories_modal_overlay', element), next, true);
+                    $this.display_modal($('.cardstories_info', element), $('.cardstories_modal_overlay', element), null, next);
                 });
 
                 // Morph cards into dock.
@@ -2755,7 +2757,7 @@
                 // Show modal.
                 q.queue('chain', function(next) {
                     var overlay = $('.cardstories_modal_overlay', element);
-                    $this.display_modal(info, overlay, next, true);
+                    $this.display_modal(info, overlay, null, next);
                 });
 
                 // Flip the cards out.
@@ -4387,10 +4389,10 @@
             $('.cardstories_avatar', slot).attr('src', player_info.avatar_url);
         },
 
-        display_modal: function(modal, overlay, cb, cb_on_close) {
+        display_modal: function(modal, overlay, cb_open, cb_close) {
             if (modal.is(':visible')) {
-                if (cb) {
-                    cb();
+                if (cb_open) {
+                    cb_open();
                 }
                 return;
             }
@@ -4399,23 +4401,15 @@
             var button = $('.cardstories_modal_button', modal);
             button.one('click', function() {
                 if (!$(this).hasClass('cardstories_button_disabled')) {
-                    $this.close_modal(modal, overlay, function() {
-                        if (cb_on_close && cb) {
-                            cb();
-                        }
-                    });
+                    $this.close_modal(modal, overlay, cb_close);
                 }
             });
 
             overlay.show();
-            this.animate_scale(false, 5, 500, modal, function () {
-                if (!cb_on_close && cb) {
-                    cb();
-                }
-            });
+            this.animate_scale(false, 5, 500, modal, cb_open);
         },
 
-        close_modal: function(modal, overlay, cb) {
+        close_modal: function(modal, overlay, cb) {modal.find('a')
             this.animate_scale(true, 5, 500, modal, function() {
                 overlay.hide();
                 if (cb) {

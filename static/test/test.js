@@ -478,12 +478,17 @@ asyncTest("display_modal", 2, function() {
     var modal = $('.cardstories_info', element);
     var overlay = $('.cardstories_modal_overlay', element);
 
-    $.cardstories.display_modal(modal, overlay, function () {
+    var on_open = function() {
         equal(overlay.css('display'), 'block', 'modal overlay is on');
-        modal.find('a').click();
+        $('.cardstories_modal_button', modal).click();
+    };
+
+    var on_close = function() {
         equal(overlay.css('display'), 'none', 'modal overlay is off');
         start();
-    });
+    };
+
+    $.cardstories.display_modal(modal, overlay, on_open, on_close);
 });
 
 asyncTest("animate_progress_bar", 14, function() {
@@ -801,7 +806,7 @@ test("create owner has card", 5, function() {
     $.cardstories.create(owner_id, game, root);
 });
 
-asyncTest("create_pick_card", 14, function() {
+asyncTest("create_pick_card", 12, function() {
     var root = $('#qunit-fixture .cardstories');
     var owner_id = 75;
     var game_id = 111;
@@ -843,10 +848,7 @@ asyncTest("create_pick_card", 14, function() {
         equal($('.cardstories_player_seat_3', element).css('display'), 'block', 'seat 3 is visible');
         notEqual($('.cardstories_player_seat_4', element).css('display'), 'block', 'seat 4 is not visible');
         notEqual($('.cardstories_player_seat_5', element).css('display'), 'block', 'seat 5 is not visible');
-        var overlay = $('.cardstories_modal_overlay', element);
-        equal(overlay.css('display'), 'block', 'modal overlay is on');
         var a = $('.cardstories_info', element).find('a').click();
-        equal(overlay.css('display'), 'none', 'modal overlay is off');
         ok(element.hasClass('cardstories_active'), 'element active');
         equal($('.cardstories_write_sentence.cardstories_active', element).length, 0, 'sentence not active');
         var first_card = $('.cardstories_cards_hand .cardstories_card:nth(0)', element);
@@ -1285,21 +1287,27 @@ asyncTest("preload_images", 2, function() {
     $.cardstories.preload_images(root, cb);
 });
 
-test("invitation_owner_modal_helper", 4, function() {
+asyncTest("invitation_owner_modal_helper", 4, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_invitation .cardstories_owner', root);
     var modal = $('.cardstories_info', element);
     var overlay = $('.cardstories_modal_overlay', element);
 
-    equal(modal.css('display'), 'none', 'Modal starts hidden');
-    $.cardstories.invitation_owner_modal_helper(modal, overlay, function() {
+    var on_open = function() {
         equal(modal.css('display'), 'block', 'Modal is shown on first run');
         modal.find('a').click();
+    };
+
+    var on_close = function() {
         equal(modal.css('display'), 'none', 'Modal is closed');
         $.cardstories.invitation_owner_modal_helper(modal, overlay, function() {
             equal(modal.css('display'), 'none', 'Modal continues closed on second run.');
+            start();
         });
-    });
+    };
+
+    equal(modal.css('display'), 'none', 'Modal starts hidden');
+    $.cardstories.invitation_owner_modal_helper(modal, overlay, on_open, on_close);
 });
 
 test("invitation_owner_slots_helper", 15, function() {
@@ -1936,10 +1944,8 @@ asyncTest("invitation_pick", 11, function() {
         equal(_request.game_id, game_id, 'poll_ignore request game_id');
     };
 
-    $.cardstories.display_modal = function(modal, overlay, cb, cb_on_close) {
-        if (cb) {
-            cb();
-        }
+    $.cardstories.display_modal = function(modal, overlay, cb_open, cb_close) {
+        cb_close();
     };
 
     equal($('.cardstories_invitation .cardstories_pick.cardstories_active', root).length, 0);
@@ -1999,10 +2005,8 @@ asyncTest("invitation_pick picked too late", 7, function() {
         start();
     };
 
-    $.cardstories.display_modal = function(modal, overlay, cb, cb_on_close) {
-        if (cb) {
-            cb();
-        }
+    $.cardstories.display_modal = function(modal, overlay, cb_open, cb_close) {
+        cb_close();
     };
 
     $.cardstories.invitation(player_id, game, root).done(function() {
@@ -2350,8 +2354,8 @@ asyncTest("vote_voter", 30, function() {
         equal(_request.game_id, game_id, 'poll_ignore request game_id');
     };
 
-    $.cardstories.display_modal = function(modal, overlay, cb, cb_on_close) {
-        if (cb) {cb();}
+    $.cardstories.display_modal = function(modal, overlay, cb_open, cb_close) {
+        cb_close();
     };
 
     var root = $('#qunit-fixture .cardstories');
@@ -2440,8 +2444,8 @@ asyncTest("vote_voter vote too late", 8, function() {
         cb();
     };
 
-    $.cardstories.display_modal = function(modal, overlay, cb, cb_on_close) {
-        if (cb) {cb();}
+    $.cardstories.display_modal = function(modal, overlay, cb_open, cb_close) {
+        cb_close();
     };
 
     var root = $('#qunit-fixture .cardstories');
@@ -3525,15 +3529,15 @@ asyncTest("create_write_sentence_animate_end", 14, function() {
     var card_template = $('.cardstories_card_template', element);
     var card_img = $('img', card_template);
     var card_shadow = $('.cardstories_card_shadow', element);
-    var final_element = $('.cardstories_invitation .cardstories_owner', root);
+    var final_container = $('.cardstories_invitation', root);
+    var final_element = $('.cardstories_owner', final_container);
     var final_card_template = $('.cardstories_card_template', final_element);
     var write_box = $('.cardstories_write', element);
     var sentence_box = $('.cardstories_sentence_box', element);
     var final_sentence_box = $('.cardstories_sentence_box', final_element);
 
-    final_element.show().parents().show();
-    final_card_template.show();
-    final_sentence_box.show();
+    final_container.addClass('cardstories_active').parents().show();
+    final_element.addClass('cardstories_active');
     var final_card_top = final_card_template.position().top;
     var final_card_left = final_card_template.position().left;
     var final_card_width = final_card_template.width();
@@ -3542,8 +3546,10 @@ asyncTest("create_write_sentence_animate_end", 14, function() {
     var final_sentence_left = final_sentence_box.position().left;
     var final_sentence_width = final_sentence_box.width();
     var final_sentence_height = final_sentence_box.height();
+    final_element.removeClass('cardstories_active');
+    final_container.removeClass('cardstories_active');
 
-    element.show().parents().show();
+    element.addClass('cardstories_active').parents().show();
     ok(write_box.is(':visible'), 'write box is visible initially');
     ok(card_shadow.is(':visible'), 'card shadow is visible initially');
     ok(sentence_box.is(':hidden'), 'sentence box is invisible initially');
