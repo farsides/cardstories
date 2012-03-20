@@ -26,7 +26,7 @@ from django.conf import settings
 
 from website.util.helpers import mkdir_p
         
-import shutil, os.path
+import shutil, os
 from mock import Mock, patch
 
 
@@ -842,3 +842,43 @@ class CardstoriesTest(TestCase):
         avatar.set_to_default.assert_called_once_with()
         self.assertFalse(avatar.update_from_response.called)
         
+    def test_17append_mtime(self):
+        from django.template import Context, Template
+        from time import sleep
+
+        # First, check that input = output if file doesn't exist.
+        t = Template(
+                "{% load append_mtime %}"
+                "{% append_mtime '/bogus/file.css' %}")
+        rendered = t.render(Context())
+        self.assertEqual(rendered, '/bogus/file.css')
+
+        # Create a file for this test.
+        path = "css/test.css"
+        url = "%s%s" % (settings.MEDIA_URL, path)
+        full_path = os.path.abspath(os.path.join(settings.MEDIA_ROOT,
+                                                 path))
+        open(full_path, "w").close()
+
+        # Check that mtime is appended when file exists.
+        t = Template(
+                "{% load append_mtime %}"
+                "{% append_mtime '" + url + "' %}")
+        rendered1 = t.render(Context())
+        self.assertEqual(rendered1, "%s?%s" % (url, os.path.getmtime(full_path)))
+
+        # Check that mtime is updated if file is changed (but sleep a little so
+        # mtime actually changes!)
+        sleep(0.1)
+        open(full_path, "w").close()
+        rendered2 = t.render(Context())
+        self.assertNotEqual(rendered1, rendered2)
+        
+        # Check that mtime remains the same if file is unchanged.
+        sleep(0.1)
+        open(full_path, "r").close()
+        rendered3 = t.render(Context())
+        self.assertEqual(rendered2, rendered3)
+
+        # Clean up
+        os.remove(full_path)

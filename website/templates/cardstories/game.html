@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load facebook %}
+{% load append_mtime %}
 
 {% block title %}Card Stories (Card Game) - A Creative Game of Imagination{% endblock %}
 
@@ -14,20 +15,20 @@
   <script type="text/javascript" src="/static/js/jquery.limit-1.2.source.js"></script>
   <script type="text/javascript" src="/static/js/soundmanager2-nodebug-jsmin.js"></script>
   <script type="text/javascript" src="/static/js/jquery.history.js"></script>
-  <script type="text/javascript" src="/static/js/jquery.cardstories.js"></script>
-  <script type="text/javascript" src="/static/js/jquery.cardstories.table.js"></script>
-  <script type="text/javascript" src="/static/js/jquery.cardstories.tabs.js"></script>
-  <script type="text/javascript" src="/static/js/jquery.cardstories.audio.js"></script>
-  <script type="text/javascript" src="/static/js/jquery.cardstories.chat.js"></script>
+  <script type="text/javascript" src="{% append_mtime '/static/js/jquery.cardstories.js' %}"></script>
+  <script type="text/javascript" src="{% append_mtime '/static/js/jquery.cardstories.table.js' %}"></script>
+  <script type="text/javascript" src="{% append_mtime '/static/js/jquery.cardstories.tabs.js' %}"></script>
+  <script type="text/javascript" src="{% append_mtime '/static/js/jquery.cardstories.audio.js' %}"></script>
+  <script type="text/javascript" src="{% append_mtime '/static/js/jquery.cardstories.chat.js' %}"></script>
   <script type="text/javascript" src="/static/js/supplant.js"></script>
   <script type="text/javascript" src="/static/jscrollpane/jquery.jscrollpane.js"></script>
   <script type="text/javascript" src="/static/test/skin.js"></script>
 {% endblock %}
 
 {% block stylesheets %}{{ block.super }}
-  <link rel="stylesheet" href="/static/css/all.css" type="text/css" media="screen" />
-  <link rel="stylesheet" href="/static/css/images.css" type="text/css" media="screen" />
-  <link rel="stylesheet" href="/static/css/credits.css" type="text/css" media="screen" />
+  <link rel="stylesheet" href="{% append_mtime '/static/css/all.css' %}" type="text/css" media="screen" />
+  <link rel="stylesheet" href="{% append_mtime '/static/css/images.css' %}" type="text/css" media="screen" />
+  <link rel="stylesheet" href="{% append_mtime '/static/css/credits.css' %}" type="text/css" media="screen" />
 {% endblock %}
 
 {% block content %}
