@@ -21,7 +21,7 @@
 
 # Imports #####################################################################
 
-import os.path, md5, shutil
+import os.path, hashlib, shutil
 import requests
 from requests.exceptions import Timeout
 from PIL import Image
@@ -128,7 +128,7 @@ class GravatarAvatar(Avatar):
         """
     
         email_clean = self.user.email.strip().lower()
-        email_md5 = md5.new(email_clean).hexdigest()
+        email_md5 = hashlib.md5(email_clean).hexdigest()
         
         # Add a fake default URL to detect when the user has no gravatar image (gravatar will redirect to it)
         gravatar_url = "http://www.gravatar.com/avatar/%s?d=%s&s=255" % \

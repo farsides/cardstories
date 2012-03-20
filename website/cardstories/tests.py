@@ -779,12 +779,12 @@ class CardstoriesTest(TestCase):
         
         from website.cardstories.avatar import GravatarAvatar
         from django.contrib.auth.models import User
-        import md5, requests
+        import hashlib, requests
         
         player_id = 1
         user = User.objects.get(id=player_id)
         user.email = ' Test@Example.com '
-        email_hash = md5.new('test@example.com').hexdigest()
+        email_hash = hashlib.md5('test@example.com').hexdigest()
         avatar = GravatarAvatar(user)
         avatar.update_from_response = Mock()
         avatar.set_to_default = Mock()
