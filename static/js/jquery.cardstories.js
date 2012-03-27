@@ -3833,6 +3833,45 @@
             q.dequeue('chain');
         },
 
+        complete_close_results_box: function(box, element, cb) {
+            var $this = this;
+            var continue_btn = $('.cardstories_complete_continue > img', element);
+            var next_game = $('.cardstories_next_game', element);
+            var btn_meta = continue_btn.metadata({type: 'attr', name: 'data'});
+            // Save original dimensions and font size of the continue button, to be able
+            // to restore it later.
+            var btn_width = continue_btn.css('width');
+            var btn_height = continue_btn.css('height');
+            var btn_fontsize = continue_btn.css('font-size');
+            var animate_continue_btn = function() {
+                // Animate the button out.
+                $this.animate_scale(true, 5, 500, continue_btn, function() {
+                    // Restore continue button to its original dimensions and move it to
+                    // the center of the screen.
+                    continue_btn.css({
+                        width: btn_width,
+                        height: btn_height,
+                        'font-size': btn_fontsize,
+                        top: btn_meta.center_top,
+                        left: btn_meta.center_left
+                    });
+                    // Animate it back in.
+                    $this.animate_scale(false, 5, 500, continue_btn, cb);
+                });
+            };
+            // Fade box and next_game info panel out. A callback will be invoked twice
+            // (once for each element), so make sure to only call animate_continue_btn()
+            // after the last of the two fadeOut callbacks has fired.
+            var count = 0;
+            box.add(next_game).fadeOut('slow', function() {
+                $(this).hide(); // A workaround for http://bugs.jquery.com/ticket/8892
+                count++;
+                if (count === 2) {
+                    animate_continue_btn();
+                }
+            });
+        },
+
         complete_display_results: function(player_id, game, element, cb) {
             var $this = this;
 
@@ -3930,6 +3969,11 @@
                 'score_left': player.score_left});
             level.html(html);
 
+            // Bind clicks on the close button.
+            $('.cardstories_results_close', box).unbind('click').click(function() {
+                $this.complete_close_results_box(box, element);
+            });
+
             // Animate stuff in, starting with the results box.
             var q = $({});
             q.queue('chain', function(next) {
@@ -4023,8 +4067,16 @@
                 $this.complete_display_next_game(player_id, game, element, root);
             });
 
-            continue_button.fadeIn('fast');
-            box.fadeIn('fast', cb);
+            // The fadeIn callback is called once per element, so make sure to only
+            // fire the "cb" after the last fadeIn callback was called.
+            var count = 0;
+            continue_button.add(box).fadeIn('fast', function() {
+                $(this).show(); // A workaround for http://bugs.jquery.com/ticket/8892
+                count++;
+                if (cb && count == 2) {
+                    cb();
+                }
+            });
         },
 
         canceled: function(player_id, game, root) {

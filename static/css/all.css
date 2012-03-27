@@ -2305,6 +2305,17 @@
     height: 100%;
 }
 
+.cardstories .cardstories_complete .cardstories_results .cardstories_results_close {
+    cursor: pointer;
+    display: block;
+    height: 2.6em;
+    width: 2.6em;
+    position: absolute;
+    top: 2.7em;
+    right: 2.5em;
+    z-index: 1;
+}
+
 .cardstories .cardstories_complete .cardstories_results .cardstories_results_banner {
     position: absolute;
     top: -8.0em;
@@ -2429,9 +2440,8 @@
     display: none;
 }
 
-.cardstories .cardstories_complete .cardstories_complete_continue > div {
+.cardstories .cardstories_complete .cardstories_complete_continue > img {
     position: absolute;
-    background: transparent url('images/complete_continue.png') no-repeat left top;
     width: 26.7em;
     height: 11.0em;
     top: 45.0em;

@@ -1906,7 +1906,7 @@ asyncTest("invitation_pick", 11, function() {
     var element = $('.cardstories_invitation .cardstories_pick', root);
     var hand = $('.cardstories_cards_hand', element);
     var docked_cards = $('.cardstories_cards', hand);
-    var owner = 0;
+    var owner = 10;
     var player1 = 1;
     var player2 = 2;
     var player3 = 3;
@@ -2098,7 +2098,7 @@ asyncTest("invitation_pick_wait", 26, function() {
 });
 
 asyncTest("invitation_pick_wait_to_vote_voter", 16, function() {
-    var owner_id = 0;
+    var owner_id = 10;
     var player_id = 1;
     var player2_id = 2;
     var player3_id = 3;
@@ -2195,7 +2195,7 @@ test("invitation_anonymous", 1, function() {
         }
     };
 
-    var owner = 0;
+    var owner = 10;
     var game = {
         'id': game_id,
         'players': [
@@ -2223,7 +2223,7 @@ test("invitation_anonymous", 1, function() {
 
 test("create_invitation_display_board", 24, function() {
     var root = $('#qunit-fixture .cardstories');
-    var owner_id = 0;
+    var owner_id = 10;
     var player1 = 1;
     var player2 = 2;
     var player3 = 3;
@@ -2636,7 +2636,7 @@ test("vote_anonymous", 28, function() {
     var picked = 32;
     var board = [30, 31, 32, 33];
     var sentence = 'SENTENCE';
-    var owner_id = 0;
+    var owner_id = 10;
     var player_id = null;
     var game = {
         'id': game_id,
@@ -2742,12 +2742,12 @@ test("vote_shuffle_cards", 7, function() {
 test("vote_display_board", 20, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_vote .cardstories_owner', root);
-    var owner_id = 0;
+    var owner_id = 10;
     var player1 = 1;
     var player2 = 2;
     var player3 = 3;
     var game = {
-        'owner_id': 0,
+        'owner_id': owner_id,
         'board': [],
         'players': [
             { 'id': owner_id, 'vote': null, 'win': null, 'picked': 1, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
@@ -2783,7 +2783,7 @@ test("vote_display_board", 20, function() {
 test("vote_display_or_select_cards", 8, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_vote .cardstories_owner', root);
-    var owner_id = 0;
+    var owner_id = 10;
     var player1 = 1;
     var player2 = 2;
     var player3 = 3;
@@ -2810,7 +2810,7 @@ test("vote_display_or_select_cards", 8, function() {
 asyncTest("vote_owner", 16, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_vote .cardstories_owner', root);
-    var owner_id = 0;
+    var owner_id = 10;
     var player1 = 1;
     var player2 = 2;
     var sentence = 'SENTENCE';
@@ -2928,7 +2928,7 @@ test("vote_owner_results_confirm_only_when_not_all_players_picked", 2, function(
 asyncTest("complete owner lost easy", 8, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
-    var owner_id = 0;
+    var owner_id = 10;
     var player1 = 1;
     var player2 = 2;
     var game = {
@@ -2961,7 +2961,7 @@ asyncTest("complete owner lost easy", 8, function() {
 asyncTest("complete owner lost hard", 8, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
-    var owner_id = 0;
+    var owner_id = 10;
     var player1 = 1;
     var player2 = 2;
     var game = {
@@ -2995,7 +2995,7 @@ asyncTest("complete owner lost hard", 8, function() {
 asyncTest("complete owner won", 8, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
-    var owner_id = 0;
+    var owner_id = 10;
     var player1 = 1;
     var player2 = 2;
     var game = {
@@ -3029,7 +3029,7 @@ asyncTest("complete owner won", 8, function() {
 asyncTest("complete", 40, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
-    var owner_id = 0;
+    var owner_id = 10;
     var player1 = 1;
     var player2 = 2;
     var player3 = 3;
@@ -3109,7 +3109,7 @@ asyncTest("complete", 40, function() {
 asyncTest("complete player didn't vote", 11, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
-    var owner_id = 0;
+    var owner_id = 10;
     var player1 = 1;
     var player2 = 2;
     var player3 = 3;
@@ -3146,6 +3146,96 @@ asyncTest("complete player didn't vote", 11, function() {
     });
 });
 
+asyncTest("complete close results box author", 8, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_complete', root);
+    var owner_id = 10;
+    var player1 = 1;
+    var player2 = 2;
+    var game = {
+        owner: true,
+        owner_id: owner_id,
+        board: [],
+        winner_card: 30,
+        players: [ { 'id': owner_id, 'vote': null, 'win': 'y', 'picked': 30, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player1, 'vote': 30, 'win': 'y', 'picked': 31, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player2, 'vote': 31, 'win': 'n', 'picked': 32, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null } ]
+    };
+    $.cardstories_table = {
+        get_next_owner_id: function(player_id, game_id, root) { return player1; },
+        on_next_owner_change: function(player_id, game_id, root, cb) {}
+    };
+
+    $.cardstories.complete(owner_id, game, root).done(function() {
+        var box = $('.cardstories_results.author', element);
+        var close_btn = $('.cardstories_results_close', box);
+        var next_game = $('.cardstories_next_game', element);
+        var continue_btn = $('.cardstories_complete_continue > img', element);
+        notEqual(box.css('display'), 'none', 'box is visible');
+        notEqual(next_game.css('display'), 'none', 'next game info is visible');
+        notEqual(continue_btn.css('display'), 'none', 'continue button is visible');
+        // Make sure all parents of the continue button are visible, so that the
+        // measurements work properly.
+        continue_btn.parents().show();
+        var initial_top = continue_btn.position().top;
+        var initial_left = continue_btn.position().left;
+        // Click the close button.
+        close_btn.click();
+        equal(box.css('display'), 'none', 'box is NOT visible');
+        equal(next_game.css('display'), 'none', 'next game info is NOT visible');
+        notEqual(continue_btn.css('display'), 'none', 'continue button is still visible');
+        continue_btn.parents().show(); // Enable measurements again.
+        ok(continue_btn.position().top < initial_top, 'continue button is positioned higher, towards the center');
+        ok(continue_btn.position().left < initial_left, 'continue button is positioned more to the left, towards the center');
+        start();
+    });
+});
+
+asyncTest("complete close results box player", 8, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_complete', root);
+    var owner_id = 10;
+    var player1 = 1;
+    var player2 = 2;
+    var game = {
+        owner: false,
+        owner_id: owner_id,
+        board: [],
+        winner_card: 30,
+        players: [ { 'id': owner_id, 'vote': null, 'win': 'y', 'picked': 30, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player1, 'vote': 30, 'win': 'y', 'picked': 31, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
+                     { 'id': player2, 'vote': 31, 'win': 'n', 'picked': 32, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null } ]
+    };
+    $.cardstories_table = {
+        get_next_owner_id: function(player_id, game_id, root) { return player1; },
+        on_next_owner_change: function(player_id, game_id, root, cb) {}
+    };
+
+    $.cardstories.complete(player2, game, root).done(function() {
+        var box = $('.cardstories_results.player', element);
+        var close_btn = $('.cardstories_results_close', box);
+        var next_game = $('.cardstories_next_game', element);
+        var continue_btn = $('.cardstories_complete_continue > img', element);
+        notEqual(box.css('display'), 'none', 'box is visible');
+        notEqual(next_game.css('display'), 'none', 'next game info is visible');
+        notEqual(continue_btn.css('display'), 'none', 'continue button is visible');
+        // Make sure all parents of the continue button are visible, so that the
+        // measurements work properly.
+        continue_btn.parents().show();
+        var initial_top = continue_btn.position().top;
+        var initial_left = continue_btn.position().left;
+        // Click the close button.
+        close_btn.click();
+        equal(box.css('display'), 'none', 'box is NOT visible');
+        equal(next_game.css('display'), 'none', 'next game info is NOT visible');
+        notEqual(continue_btn.css('display'), 'none', 'continue button is still visible');
+        continue_btn.parents().show(); // Enable measurements again.
+        ok(continue_btn.position().top < initial_top, 'continue button is positioned higher, towards the center');
+        ok(continue_btn.position().left < initial_left, 'continue button is positioned more to the left, towards the center');
+        start();
+    });
+});
+
 test("canceled", 5, function() {
     var root = $('#qunit-fixture .cardstories');
     var player_id = 113;
@@ -3169,7 +3259,7 @@ test("canceled", 5, function() {
 });
 
 asyncTest("next_game_as_author", 2, function() {
-    var player_id = 0;
+    var player_id = 10;
     var game_author = {
         'id': 7,
         'owner': true,
@@ -3203,7 +3293,7 @@ asyncTest("next_game_as_author", 2, function() {
 });
 
 asyncTest("next_game_as_player", 4, function() {
-    var player_id = 0;
+    var player_id = 10;
     var game_author = {
         'id': 7,
         'owner': true,
@@ -3238,7 +3328,7 @@ asyncTest("next_game_as_player", 4, function() {
 });
 
 asyncTest("on_next_owner_change", 9, function() {
-    var player_id = 0;
+    var player_id = 10;
     var game_author = {
         'id': 7,
         'owner': true,
