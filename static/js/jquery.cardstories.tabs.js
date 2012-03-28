@@ -66,7 +66,7 @@
                 var close_btn = $('.cardstories_tab_close', tab);
                 var is_current = game.id === current_game_id;
 
-                if (game.state === 'create') {
+                if (!game.sentence) {
                     title.text('New game');
                 } else {
                     title.text(game.sentence.substring(0, 15));

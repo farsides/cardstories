@@ -11,7 +11,7 @@ function setup() {
 
 module("cardstories_tabs", {setup: setup});
 
-test("state", 31, function() {
+test("state", 39, function() {
     var root = $(selector);
     var element = $('.cardstories_tabs', root);
     var player_id = 899;
@@ -26,7 +26,9 @@ test("state", 31, function() {
         {id: 101, sentence: 'SENTENCE1', state: 'invitation'},
         {id: 102, sentence: 'SENTENCE2', state: 'vote'},
         {id: 103, sentence: null, state: 'create'},
-        {id: 104, sentence: 'SENTENCE4', state: 'pick'}
+        {id: 104, sentence: 'SENTENCE4', state: 'pick'},
+        {id: 105, sentence: null, state: 'canceled'},
+        {id: 106, sentence: 'SENTENCE6', state: 'canceled'}
     ];
     var tabs;
 
@@ -39,13 +41,15 @@ test("state", 31, function() {
 
     $.cardstories_tabs.state(player_id, {games: games}, root);
     tabs = element.find('.cardstories_tab');
-    equal(tabs.length, 4, 'Four tabs are created');
+    equal(tabs.length, 6, 'Six tabs are created');
     ok(tabs.eq(0).text().match('SENTENCE1'));
     ok(tabs.eq(1).text().match('SENTENCE2'));
     ok(tabs.eq(2).text().match('New game')); // For game in 'create' state, 'New game' is shown.
     ok(tabs.eq(3).text().match('SENTENCE4'));
+    ok(tabs.eq(4).text().match('New game')); // For game in 'canceled' state, without a sentence, 'New game' is shown.
+    ok(tabs.eq(5).text().match('SENTENCE6'));
 
-    // Call state again without the second game.
+    // Call state again without some of the games.
     games = [
         {id: 101, sentence: 'SENTENCE1', state: 'invitation'},
         {id: 103, sentence: null, state: 'create'},
