@@ -4042,7 +4042,7 @@
                     });
                 });
                 // Animate the level bar and level score at the same time.
-                var duration = 1000;
+                var duration = 2000;
                 q.queue('level', function(next) {
                     // Show the score.
                     level_score.show();
