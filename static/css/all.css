@@ -2452,6 +2452,7 @@
 }
 
 .cardstories .cardstories_complete .cardstories_complete_continue > img {
+    display: none;
     position: absolute;
     width: 26.7em;
     height: 11.0em;
@@ -2467,7 +2468,7 @@
     width: 39.5em;
     height: 11.6em;
     left: 11.4em;
-    bottom: 6.0em;
+    bottom: 60px;
     font-size: 10px;
     text-align: center;
 }

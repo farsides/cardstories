@@ -3147,7 +3147,7 @@ asyncTest("complete player didn't vote", 11, function() {
     });
 });
 
-asyncTest("complete close results box author", 8, function() {
+asyncTest("complete close results box author", 10, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var owner_id = 10;
@@ -3167,6 +3167,9 @@ asyncTest("complete close results box author", 8, function() {
         on_next_owner_change: function(player_id, game_id, root, cb) {}
     };
 
+    // Make sure the element's parents are visible to make the measurements work.
+    element.parents().show();
+
     $.cardstories.complete(owner_id, game, root).done(function() {
         var box = $('.cardstories_results.author', element);
         var close_btn = $('.cardstories_results_close', box);
@@ -3180,19 +3183,29 @@ asyncTest("complete close results box author", 8, function() {
         continue_btn.parents().show();
         var initial_top = continue_btn.position().top;
         var initial_left = continue_btn.position().left;
-        // Click the close button.
+
+        // Test that the close button is properly bound.
+        var orig_close_results_box = $.cardstories.complete_close_results_box;
+        $.cardstories.complete_close_results_box = function(_box, _element, cb) {
+            ok(_box.is('.cardstories_results.author'), 'close callback is called with the box');
+            ok(_element.is('.cardstories_complete'), 'close callback is called with the element');
+            $.cardstories.complete_close_results_box = orig_close_results_box;
+        };
         close_btn.click();
-        equal(box.css('display'), 'none', 'box is NOT visible');
-        equal(next_game.css('display'), 'none', 'next game info is NOT visible');
-        notEqual(continue_btn.css('display'), 'none', 'continue button is still visible');
-        continue_btn.parents().show(); // Enable measurements again.
-        ok(continue_btn.position().top < initial_top, 'continue button is positioned higher, towards the center');
-        ok(continue_btn.position().left < initial_left, 'continue button is positioned more to the left, towards the center');
-        start();
+
+        // Test that the close handler actually works.
+        $.cardstories.complete_close_results_box(box, element, function(){
+            equal(box.css('display'), 'none', 'box is NOT visible');
+            equal(next_game.css('display'), 'none', 'next game info is NOT visible');
+            notEqual(continue_btn.css('display'), 'none', 'continue button is still visible');
+            ok(continue_btn.position().top < initial_top, 'continue button is positioned higher, towards the center');
+            ok(continue_btn.position().left < initial_left, 'continue button is positioned more to the left, towards the center');
+            start();
+        });
     });
 });
 
-asyncTest("complete close results box player", 8, function() {
+asyncTest("complete close results box player", 10, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var owner_id = 10;
@@ -3212,6 +3225,9 @@ asyncTest("complete close results box player", 8, function() {
         on_next_owner_change: function(player_id, game_id, root, cb) {}
     };
 
+    // Make sure the element's parents are visible to make the measurements work.
+    element.parents().show();
+
     $.cardstories.complete(player2, game, root).done(function() {
         var box = $('.cardstories_results.player', element);
         var close_btn = $('.cardstories_results_close', box);
@@ -3225,15 +3241,25 @@ asyncTest("complete close results box player", 8, function() {
         continue_btn.parents().show();
         var initial_top = continue_btn.position().top;
         var initial_left = continue_btn.position().left;
-        // Click the close button.
+
+        // Test that the close button is properly bound.
+        var orig_close_results_box = $.cardstories.complete_close_results_box;
+        $.cardstories.complete_close_results_box = function(_box, _element, cb) {
+            ok(_box.is('.cardstories_results.player'), 'close callback is called with the box');
+            ok(_element.is('.cardstories_complete'), 'close callback is called with the element');
+            $.cardstories.complete_close_results_box = orig_close_results_box;
+        };
         close_btn.click();
-        equal(box.css('display'), 'none', 'box is NOT visible');
-        equal(next_game.css('display'), 'none', 'next game info is NOT visible');
-        notEqual(continue_btn.css('display'), 'none', 'continue button is still visible');
-        continue_btn.parents().show(); // Enable measurements again.
-        ok(continue_btn.position().top < initial_top, 'continue button is positioned higher, towards the center');
-        ok(continue_btn.position().left < initial_left, 'continue button is positioned more to the left, towards the center');
-        start();
+
+        // Test that the close handler actually works.
+        $.cardstories.complete_close_results_box(box, element, function(){
+            equal(box.css('display'), 'none', 'box is NOT visible');
+            equal(next_game.css('display'), 'none', 'next game info is NOT visible');
+            notEqual(continue_btn.css('display'), 'none', 'continue button is still visible');
+            ok(continue_btn.position().top < initial_top, 'continue button is positioned higher, towards the center');
+            ok(continue_btn.position().left < initial_left, 'continue button is positioned more to the left, towards the center');
+            start();
+        });
     });
 });
 

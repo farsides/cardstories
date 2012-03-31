@@ -4042,7 +4042,7 @@
                     });
                 });
                 // Animate the level bar and level score at the same time.
-                var duration = 2000;
+                var duration = 1800;
                 q.queue('level', function(next) {
                     // Show the score.
                     level_score.show();
@@ -4126,16 +4126,37 @@
                 $this.complete_display_next_game(player_id, game, element, root);
             });
 
-            // The fadeIn callback is called once per element, so make sure to only
-            // fire the "cb" after the last fadeIn callback was called.
-            var count = 0;
-            continue_button.add(box).fadeIn('fast', function() {
-                $(this).show(); // A workaround for http://bugs.jquery.com/ticket/8892
-                count++;
-                if (cb && count == 2) {
+            var q = $({});
+
+            // Pop in the continue button
+            q.queue('chain', function(next) {
+                var continue_img = continue_button.find('img');
+                continue_button.show();
+                $this.animate_scale(false, 5, 300, continue_img, next);
+            });
+
+            // Slide down the next game info box
+            q.queue('chain', function(next) {
+                var final_bottom = parseInt(box.css('bottom'));
+                // Set initial bottom so that the box is hidden behind the results box.
+                var initial_bottom = final_bottom + box.height();
+                // Animate it to a slightly lower position for a moment, for a nice
+                // "swinging" effect.
+                var min_bottom = 0.8 * final_bottom;
+                box.css('bottom', initial_bottom);
+                box.show();
+                box.animate({bottom: min_bottom}, 300, function() {
+                    box.animate({bottom: final_bottom}, 80, next);
+                });
+            });
+
+            q.queue('chain', function(next) {
+                if (cb) {
                     cb();
                 }
             });
+
+            q.dequeue('chain');
         },
 
         canceled: function(player_id, game, root) {
