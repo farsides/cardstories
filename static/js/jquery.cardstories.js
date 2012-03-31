@@ -3955,20 +3955,6 @@
             var html = score.html().supplant({'score': player.score_prev});
             score.html(html);
 
-            // Set level bar width.
-            var bar = $('.cardstories_results_level_bar_front', box);
-            var percent = ((player.score_next - player.score_left) / player.score_next) * 100;
-            var width = percent + '%';
-            bar.css({width: width});
-
-            // Set level legend.
-            var level = $('.cardstories_results_level_legend', box);
-            html = level.html().supplant({
-                'level_current': player.level,
-                'level_next': player.level + 1,
-                'score_left': player.score_left});
-            level.html(html);
-
             // Bind clicks on the close button.
             $('.cardstories_results_close', box).unbind('click').click(function() {
                 $this.complete_close_results_box(box, element);
@@ -3995,8 +3981,14 @@
             // Fashionable delay
             $this.delay(q, 400, 'chain');
 
-            // Animate score
+            // Animate score and the level at the same time
             q.queue('chain', function(next) {
+                // Use two deferred objects to be able to run two animations concurrently,
+                // and only proceed once BOTH have finished.
+                var score_deferred = $.Deferred();
+                var level_deferred = $.Deferred();
+
+                // Animate the game score.
                 var timeout = 30;
                 var tmp = player.score_prev;
                 function inc_score() {
@@ -4005,15 +3997,82 @@
                         score.html(tmp);
                         $this.setTimeout(inc_score, timeout);
                     } else {
-                        next();
+                        score_deferred.resolve();
                     }
                 }
                 $this.setTimeout(inc_score, timeout);
-            });
 
-            // Show level
-            q.queue('chain', function(next) {
-                $('.cardstories_results_level_container', box).fadeIn('fast', next);
+                // The level bar and levelup info.
+                // Calculate final level bar width.
+                var bar = $('.cardstories_results_level_bar_front', box);
+                var percent = ((player.score_next - player.score_left) / player.score_next) * 100;
+                var final_width = percent + '%';
+                // Set level legend.
+                var level_legend = $('.cardstories_results_level_legend', box);
+                var level_score_container = $('.cardstories_results_level_left', box);
+                var level_score = $('> span', level_score_container);
+                var html = level_legend.html().supplant({
+                    level_current: player.level,
+                    level_next: player.level + 1,
+                });
+                level_legend.html(html);
+
+                level_score.html(player.score_next);
+                // Hide the level score first (will be shown later during level bar animation).
+                level_score.hide();
+
+                // Hide the star first (will be shown later by animate_scale).
+                star.hide();
+                // Now start with the animation.
+                // Use a seperate queue for the level animations.
+                // Fade the levels in first.
+                q.queue('level', function(next) {
+                    $('.cardstories_results_level_container', box).fadeIn('fast', next);
+                });
+                // Pop in the star.
+                q.queue('level', function(next) {
+                    // Scale it to its original size.
+                    $this.animate_scale(false, 5, 100, star, function() {
+                        // Then immediately scale it up a bit, for a nice effect.
+                        $this.animate_scale(false, 0.75, 100, star, function() {
+                            // Remove inline css added by animate_scale.
+                            star.css({left: '', right: ''});
+                            next();
+                        });
+                    });
+                });
+                // Animate the level bar and level score at the same time.
+                var duration = 1000;
+                q.queue('level', function(next) {
+                    // Show the score.
+                    level_score.show();
+                    var score_diff = player.score_next - player.score_left;
+                    // Start animating the bar width.
+                    bar.animate({width: final_width}, {
+                        duration: duration,
+                        // During every step of the level bar animation, also position the
+                        // level score and set it's contents (counting down from entire score needed
+                        // to reach the next level to the score the player still needs to get there).
+                        step: function(now, fx) {
+                            var score = player.score_next - Math.round(score_diff * now/fx.end);
+                            level_score.html(score);
+                            // Allow the score to scroll most 72% to the right
+                            // (so that it doesn't scroll behind the create button and become invisible).
+                            var left = Math.min(now, 72);
+                            level_score_container.css('left', left + '%');
+                        },
+                        complete: function() {
+                            level_deferred.resolve();
+                            level_score.html(player.score_left);
+                        }
+                    });
+                });
+
+                // Run the level animations.
+                q.dequeue('level');
+
+                // Unqueue next step of the 'chain' after both animations have finished.
+                $.when(score_deferred, level_deferred).then(next);
             });
 
             q.queue('chain', function(next) {

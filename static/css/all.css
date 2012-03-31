@@ -2391,6 +2391,7 @@
     left: 0;
     width: 0;
     height: 100%;
+    overflow: visible !important;
     background: transparent url('images/complete_level_bar_front.png') no-repeat left top;
 }
 
@@ -2404,16 +2405,26 @@
     display: none;
 }
 
-.cardstories .cardstories_complete .cardstories_results .cardstories_results_level_legend {
+.cardstories .cardstories_complete .cardstories_results .cardstories_results_level_legend,
+.cardstories .cardstories_complete .cardstories_results .cardstories_results_level_score {
     position: relative;
+    color: #FFFFFF;
+    font-size: 24px;
+    font-family: "Licon";
+    margin: 0 auto;
+    padding: 0;
+}
+
+.cardstories .cardstories_complete .cardstories_results .cardstories_results_level_legend {
     top: 8px;
     width: 390px;
-    height: 46px;
-    margin: 0 auto;
-    color: #FFFFFF;
-    font-size: 24px; 
-    font-family: "Licon";
+    height: 27px;
     background: transparent url('images/complete_level_arrow.png') no-repeat center 6px;
+}
+
+.cardstories .cardstories_complete .cardstories_results .cardstories_results_level_score {
+    width: 359px;
+    height: 28px;
 }
 
 .cardstories .cardstories_complete .cardstories_results .cardstories_results_level_current {
@@ -2427,8 +2438,8 @@
 .cardstories .cardstories_complete .cardstories_results .cardstories_results_level_left {
     position: absolute;
     bottom: 0;
-    left: 78px;
-    font-size: 17px; 
+    margin-left: -30px;
+    font-size: 17px;
     font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
 }
 

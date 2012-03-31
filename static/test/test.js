@@ -3026,7 +3026,7 @@ asyncTest("complete owner won", 8, function() {
     });
 });
 
-asyncTest("complete", 40, function() {
+asyncTest("complete", 41, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var owner_id = 10;
@@ -3099,9 +3099,10 @@ asyncTest("complete", 40, function() {
         equal($('.cardstories_results.author img.cardstories_results_level_star_lose', element).css('display'), 'none', 'lose star is invisible');
         equal($('.cardstories_results.author .cardstories_results_level_current', element).html(), 'LEVEL '+owner_level, 'author level is visible');
         equal($('.cardstories_results.author .cardstories_results_level_next', element).html(), 'LEVEL '+owner_level_next, 'author next level is visible');
-        equal($('.cardstories_results.author .cardstories_results_level_left', element).html(), owner_score_left+' left', 'author level left is visible');
+        var level_left = $('.cardstories_results.author .cardstories_results_level_left', element);
+        equal($('> span', level_left).html(), owner_score_left, 'author level left score is visible');
+        ok(level_left.position().left > 0, 'level left score is moved towards the right');
 
-        $.cardstories_table = undefined;
         start();
     });
 });
