@@ -1805,6 +1805,57 @@ asyncTest("replay_create_game card set and sentence both set", 23, function() {
     });
 });
 
+asyncTest("replay_create_game modal race condition", 5, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_invitation .cardstories_pick', root);
+    var player1 = 25;
+    var player2 = 26;
+    var player3 = 27;
+    var owner = player1;
+    var game = {
+        state: 'create',
+        owner_id: owner,
+        winner_card: '',
+        sentence: null,
+        ready: false,
+        players: [
+            {id: player1, vote: null, win: 'n', picked: null, cards: []},
+            {id: player2, vote: null, win: 'n', picked: 3, cards: []},
+            {id: player3, vote: null, win: 'n', picked: 7, cards: []}
+        ]
+    };
+
+    element.show().parents().show();
+
+    var wait_for_sentence_modal = $('.cardstories_wait_for_sentence', element);
+    var wait_for_card_modal = $('.cardstories_wait_for_card', element);
+
+    ok(wait_for_card_modal.is(':hidden'), 'wait_for_card dialog is invisible');
+    ok(wait_for_sentence_modal.is(':hidden'), 'wait_for_sentence dialog is invisible');
+
+    var create_deferred = $.Deferred();
+    var invitation_deferred = $.Deferred();
+
+    // The game is in the 'create', the sentence hasn't been set yet.
+    // Call replay_create_game.
+    $.cardstories.replay_create_game(game, element, root, function() { create_deferred.resolve(); });
+    // Without waiting for the previous replay animations to finish,
+    // call replay_create_game again, this time with a game in 'invitation'.
+    // This can happen in real life if the poll returns a moment after replay_create_game
+    // is first called in 'create' state.
+    var new_game = $.extend({}, game, {state: 'invitation', sentence: 'I have been set.'});
+    $.cardstories.replay_create_game(new_game, element, root, function() { invitation_deferred.resolve(); });
+
+    // Wait for both runs of replay_create_game to finish.
+    $.when(create_deferred, invitation_deferred).then(function() {
+        // Make sure that both "Waiting for GM to..." dialogs are hidden.
+        ok(wait_for_card_modal.is(':hidden'), 'wait_for_card dialog is invisible');
+        ok(wait_for_sentence_modal.is(':hidden'), 'wait_for_sentence dialog is invisible');
+        ok($('.cardstories_sentence_box', element).is(':visible'), 'Story is visible');
+        start();
+    });
+});
+
 asyncTest("invitation_pick_deal_helper", 38, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_invitation .cardstories_pick', root);

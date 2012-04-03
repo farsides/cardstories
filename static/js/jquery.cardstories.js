@@ -1936,7 +1936,7 @@
                             // jqDock doesn't provide a hook for when expansion
                             // finishes, so use a timeout to call next().
                             $this.setTimeout(function() {
-                                if (game.winner_card === null) {
+                                if (game.winner_card === null && !wait_for_card_modal.hasClass('cardstories_noop')) {
                                     $this.display_modal(wait_for_card_modal, overlay);
                                 }
                                 next();
@@ -1954,11 +1954,17 @@
                 element.addClass('cardstories_choose_noop');
 
                 // If the wait_for_card modal is displayed, close it first.
-                if (wait_for_card_modal.is(':visible')) {
-                    q.queue('chain', function(next) {
+                q.queue('chain', function(next) {
+                    // Mark the modal with a 'noop' class, to prevent it from being displayed again
+                    // (it could happen when there's multiple concurrently running
+                    // replay_create_game functions).
+                    wait_for_card_modal.addClass('cardstories_noop');
+                    if (wait_for_card_modal.is(':visible')) {
                         $this.close_modal(wait_for_card_modal, overlay, next);
-                    });
-                }
+                    } else {
+                        next();
+                    }
+                });
 
                 // Reposition selected card.
                 var original_pos;
@@ -2043,22 +2049,30 @@
 
                 // Display the wait_for_sentence modal, but only if the sentence hasn't
                 // yet been set.
-                if (game.sentence === null) {
-                    q.queue('chain', function(next) {
+                q.queue('chain', function(next) {
+                    if (game.sentence === null && !wait_for_sentence_modal.hasClass('cardstories_noop')) {
                         $this.display_modal(wait_for_sentence_modal, overlay, next);
-                    });
-                }
+                    } else {
+                        next();
+                    }
+                });
             }
 
             // Show the story.
             // But only do it if the story has already been set.
             if (game.sentence !== null) {
                 // If the wait_for_sentence modal is visible, hide it first.
-                if (wait_for_sentence_modal.is(':visible')) {
-                    q.queue('chain', function(next) {
+                q.queue('chain', function(next) {
+                    // Mark the modal with a 'noop' class, to prevent it from being displayed again
+                    // (it could happen when there's multiple concurrently running
+                    // replay_create_game functions).
+                    wait_for_sentence_modal.addClass('cardstories_noop');
+                    if (wait_for_sentence_modal.is(':visible')) {
                         $this.close_modal(wait_for_sentence_modal, overlay, next);
-                    });
-                }
+                    } else {
+                        next();
+                    }
+                });
 
                 // Show story.
                 q.queue('chain', function(next) {
