@@ -3661,15 +3661,29 @@
                     $this.complete_display_votes(game, element, root, next);
                 });
 
-                // Show results box.
-                q.queue('chain', function(next) {
-                    $this.complete_display_results(player_id, game, element, next);
-                });
+                // Get the player
+                var player;
+                for (var i=0; i < game.players.length; i++) {
+                    if (game.players[i].id == player_id) {
+                        player = game.players[i];
+                    }
+                }
 
-                // Show next game box/button
-                q.queue('chain', function(next) {
-                    $this.complete_display_next_game(player_id, game, element, root, next);
-                });
+                // Only show the results/continue button if this is an active player
+                // (was participating in the game, is not an anonymous viewer)
+                if (player) {
+                    // Show results box, but only if the player voted (or the player is the GM).
+                    if (player.vote !== null || game.owner) {
+                        q.queue('chain', function(next) {
+                            $this.complete_display_results(player, game, element, next);
+                        });
+                    }
+
+                    // Show next game box/button
+                    q.queue('chain', function(next) {
+                        $this.complete_display_next_game(player, game, element, root, next);
+                    });
+                }
 
                 // Resolve deferred.
                 q.queue('chain', function(next) {
@@ -3886,7 +3900,7 @@
             });
         },
 
-        complete_display_results: function(player_id, game, element, cb) {
+        complete_display_results: function(player, game, element, cb) {
             var $this = this;
 
             // Did the owner lose?
@@ -3906,14 +3920,6 @@
                         too_hard = false;
                         break;
                     }
-                }
-            }
-
-            // Get player data
-            var player;
-            for (i=0; i < game.players.length; i++) {
-                if (game.players[i].id == player_id) {
-                    player = game.players[i];
                 }
             }
 
@@ -4098,16 +4104,22 @@
             q.dequeue('chain');
         },
 
-        complete_display_next_game: function(player_id, game, element, root, cb) {
+        complete_display_next_game: function(player, game, element, root, cb) {
             var $this = this;
             var box = $('.cardstories_next_game', element);
             var continue_button = $('.cardstories_complete_continue', element);
             var modal = $('.cardstories_modal', element);
             var overlay = $('.cardstories_modal_overlay', element);
 
+            // Readjust the positioning if player didn't vote
+            if (player.vote === null && !game.owner) {
+                box.addClass('cardstories_didnt_vote');
+                continue_button.addClass('cardstories_didnt_vote');
+            }
+
             // Show who is going to create the next game
-            var next_owner_id = $.cardstories_table.get_next_owner_id(player_id, game.id, root);
-            if (next_owner_id == player_id) {
+            var next_owner_id = $.cardstories_table.get_next_owner_id(player.id, game.id, root);
+            if (next_owner_id == player.id) {
                 $('.cardstories_next_game_author', element).css('display', 'block');
             } else {
                 var next_owner_info = $this.get_player_info_by_id(next_owner_id);
@@ -4119,7 +4131,7 @@
             // Enable "continue" button
             continue_button.unbind('click').click(function() {
                 // Ask the table plugin to switch to the next game as soon as possible
-                var is_ready = $.cardstories_table.load_next_game_when_ready(true, player_id, game.id, root);
+                var is_ready = $.cardstories_table.load_next_game_when_ready(true, player.id, game.id, root);
                 if(!is_ready) {
                     // Waiting message while the next author is creating the story
                     $this.display_modal(modal, overlay);
@@ -4127,17 +4139,17 @@
             });
 
             // Reset - Called when/if the next owner changes
-            $.cardstories_table.on_next_owner_change(player_id, game.id, root, function(next_owner_id) {
-                if(next_owner_id === player_id) {
+            $.cardstories_table.on_next_owner_change(player.id, game.id, root, function(next_owner_id) {
+                if(next_owner_id === player.id) {
                     // Need the player to click on the "continue" button again
                     // to avoid brutally switching to a new game creation without explanation
-                    $.cardstories_table.load_next_game_when_ready(false, player_id, game.id, root);
+                    $.cardstories_table.load_next_game_when_ready(false, player.id, game.id, root);
                     $this.close_modal(modal, overlay);
                     continue_button.fadeIn();
                 }
                 $('.cardstories_next_game_author', element).css('display', 'none');
                 $('.cardstories_next_game_player', element).css('display', 'none');
-                $this.complete_display_next_game(player_id, game, element, root);
+                $this.complete_display_next_game(player, game, element, root);
             });
 
             var q = $({});
@@ -4149,20 +4161,29 @@
                 $this.animate_scale(false, 5, 300, continue_img, next);
             });
 
-            // Slide down the next game info box
-            q.queue('chain', function(next) {
-                var final_bottom = parseInt(box.css('bottom'));
-                // Set initial bottom so that the box is hidden behind the results box.
-                var initial_bottom = final_bottom + box.height();
-                // Animate it to a slightly lower position for a moment, for a nice
-                // "swinging" effect.
-                var min_bottom = 0.8 * final_bottom;
-                box.css('bottom', initial_bottom);
-                box.show();
-                box.animate({bottom: min_bottom}, 300, function() {
-                    box.animate({bottom: final_bottom}, 80, next);
+            // If player voted or is the GM show a fancier animation.
+            if (player.vote !== null || game.owner) {
+                // Slide down the next game info box
+                q.queue('chain', function(next) {
+                    var final_bottom = parseInt(box.css('bottom'));
+                    // Set initial bottom so that the box is hidden behind the results box.
+                    var initial_bottom = final_bottom + box.height();
+                    // Animate it to a slightly lower position for a moment, for a nice
+                    // "swinging" effect.
+                    var min_bottom = 0.8 * final_bottom;
+                    box.css('bottom', initial_bottom);
+                    box.show();
+                    box.animate({bottom: min_bottom}, 300, function() {
+                        box.animate({bottom: final_bottom}, 80, next);
+                    });
                 });
-            });
+            } else {
+                // Player didn't vote, so don't show the fancy animation,
+                // because results box is not visible.
+                q.queue('chain', function(next) {
+                    $this.animate_scale(false, 5, 300, box, next);
+                });
+            }
 
             q.queue('chain', function(next) {
                 if (cb) {

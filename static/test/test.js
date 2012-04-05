@@ -3167,18 +3167,23 @@ asyncTest("complete player didn't vote", 11, function() {
     var player3 = 3;
     var player4 = 4;
     var game = {
-        'owner': false,
-        'owner_id': owner_id,
-        'board': [],
-        'winner_card': 30,
-        'players': [ { 'id': owner_id, 'vote': null, 'win': 'y', 'picked': 30, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
-                     { 'id': player1, 'vote': 30, 'win': 'y', 'picked': 31, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
-                     { 'id': player2, 'vote': 34, 'win': 'n', 'picked': 32, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null }, // Voted for the card of the non voting player.
-                     { 'id': player3, 'vote': 31, 'win': 'n', 'picked': 33, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
-                     { 'id': player4, 'vote': null, 'win': 'n', 'picked': 34, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null } ] // Didn't vote.
+        owner: false,
+        owner_id: owner_id,
+        board: [],
+        winner_card: 30,
+        players: [
+            {id: owner_id, vote: null, win: 'y', picked: 30, cards: [], score: null, level: null, score_next: null, score_left: null},
+            {id: player1, vote: 30, win: 'y', picked: 31, cards: [], score: null, level: null, score_next: null, score_left: null},
+            {id: player2, vote: 34, win: 'n', picked: 32, cards: [], score: null, level: null, score_next: null, score_left: null}, // Voted for the card of the non voting player.
+            {id: player3, vote: 31, win: 'n', picked: 33, cards: [], score: null, level: null, score_next: null, score_left: null},
+            {id: player4, vote: null, win: 'n', picked: 34, cards: [], score: null, level: null, score_next: null, score_left: null} // Didn't vote.
+        ]
     };
-    $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player1; },
-                           'on_next_owner_change': function(player_id, game_id, root, cb) {} };
+
+    $.cardstories_table = {
+        get_next_owner_id: function(player_id, game_id, root) { return player1; },
+        on_next_owner_change: function(player_id, game_id, root, cb) {}
+    };
 
     $.cardstories.complete(player4, game, root).done(function() {
         notEqual($('.cardstories_player_seat_4', element).css('display'), 'none', 'seat 4 is visible');
@@ -3189,14 +3194,49 @@ asyncTest("complete player didn't vote", 11, function() {
         ok(!$('.cardstories_player_seat_4', element).hasClass('cardstories_player_seat_lost'), 'seat 4 did not lose');
         ok(!$('.cardstories_player_seat_4', element).hasClass('cardstories_player_seat_won'), 'seat 4 did not win');
         ok($('.cardstories_master_seat', element).hasClass('cardstories_master_seat_won'), 'the game master won');
-        equal($('.cardstories_results.player img.cardstories_results_banner_win').css('display'), 'none', 'win img is hidden');
-        equal($('.cardstories_results.player img.cardstories_results_banner_lose').css('display'), 'none', 'lost img is hidden');
-        equal($('.cardstories_results p', element).css('display'), 'none', 'result explanation is not visible');
-
-        $.cardstories_table = undefined;
+        // Results aren't displayed.
+        equal($('.cardstories_results.player').css('display'), 'none', 'results box is hidden');
+        // But the continue button is.
+        notEqual($('.cardstories_complete_continue').css('display'), 'none', 'continue button is visible');
+        // And so is the next game info.
+        notEqual($('.cardstories_next_game').css('display'), 'none', 'next game info is visible');
         start();
     });
 });
+
+asyncTest("complete anonymous", 3, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_complete', root);
+    var owner_id = 10;
+    var player1 = 1;
+    var player2 = 2;
+    var visitor = 22;
+    var game = {
+        owner: true,
+        owner_id: owner_id,
+        board: [],
+        winner_card: 30,
+        players: [
+            {id: owner_id, vote: null, win: 'y', picked: 30, cards: [], score: null, level: null, score_next: null, score_left: null},
+            {id: player1, vote: 30, win: 'y', picked: 31, cards: [], score: null, level: null, score_next: null, score_left: null},
+            {id: player2, vote: 31, win: 'n', picked: 32, cards: [], score: null, level: null, score_next: null, score_left: null}
+        ]
+    };
+
+    $.cardstories_table = {
+        get_next_owner_id: function(player_id, game_id, root) { return player1; },
+        on_next_owner_change: function(player_id, game_id, root, cb) {}
+    };
+
+    $.cardstories.complete(visitor, game, root).done(function() {
+        var box = $('.cardstories_results', element);
+        equal(box.css('display'), 'none', 'results box is NOT visible');
+        equal($('.cardstories_complete_continue').css('display'), 'none', 'continue button is NOT visible');
+        equal($('.cardstories_next_game').css('display'), 'none', 'next game info is NOT visible');
+        start();
+    });
+});
+
 
 asyncTest("complete close results box author", 10, function() {
     var root = $('#qunit-fixture .cardstories');

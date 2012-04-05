@@ -2462,6 +2462,11 @@
     text-align: center;
 }
 
+.cardstories .cardstories_complete .cardstories_complete_continue.cardstories_didnt_vote > img {
+    left: 27em;
+    top: 24em;
+}
+
 .cardstories .cardstories_complete .cardstories_next_game {
     display: none;
     position: absolute;
@@ -2471,6 +2476,11 @@
     bottom: 60px;
     font-size: 10px;
     text-align: center;
+}
+
+.cardstories .cardstories_complete .cardstories_next_game img {
+    height: 100%;
+    width: 100%;
 }
 
 .cardstories .cardstories_complete .cardstories_next_game .cardstories_next_game_text {
@@ -2487,6 +2497,23 @@
     margin: 0.25em auto;
     font-size: 1.2em; 
     font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
+}
+
+.cardstories .cardstories_complete .cardstories_next_game.cardstories_didnt_vote {
+    width: 29em;
+    height: 8em;
+    left: 25em;
+    bottom: 36em;
+}
+
+.cardstories .cardstories_complete .cardstories_next_game.cardstories_didnt_vote .cardstories_next_game_text {
+    top: 0;
+    width: auto;
+}
+
+.cardstories .cardstories_complete .cardstories_next_game.cardstories_didnt_vote .cardstories_next_game_text > p {
+    padding: 1.5em;
+    width: auto;
 }
 
 .cardstories .cardstories_complete .cardstories_modal {
