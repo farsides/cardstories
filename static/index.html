@@ -11,7 +11,6 @@
   <script type="text/javascript" src="/static/js/jquery.cookie.js"></script>
   <script type="text/javascript" src="/static/js/jquery.history.js"></script>
   <script type="text/javascript" src="/static/js/jquery.jqDock.min.js"></script>
-  <script type="text/javascript" src="/static/js/jquery.query-2.1.7.js"></script>
   <script type="text/javascript" src="/static/js/jquery.placeholder-1.0.1.js"></script>
   <script type="text/javascript" src="/static/js/jquery.spritely-0.5.js"></script>
   <script type="text/javascript" src="/static/js/jquery.limit-1.2.source.js"></script>
@@ -47,8 +46,10 @@
     <a href="?skin=email">email</a>
     <a href="?skin=create_pick_card">create_pick_card</a>
     <a href="?skin=create_wait_for_card">create_wait_for_card</a>
+    <a href="?skin=create_wait_for_card_anonymous">create_wait_for_card_anonymous</a>
     <a href="?skin=create_write_sentence">create_write_sentence</a>
     <a href="?skin=create_wait_for_sentence">create_wait_for_sentence</a>
+    <a href="?skin=create_wait_for_sentence_anonymous">create_wait_for_sentence_anonymous</a>
     <a href="?skin=invitation_owner">invitation_owner</a>
     <a href="?skin=invitation_anonymous">invitation_anonymous</a>
     <a href="?skin=invitation_owner_ready">invitation_owner_ready</a>
@@ -87,12 +88,12 @@
     $.get("/static/cardstories.html", function(data) {
       var cardstories = $('.cardstories');
       cardstories.html(data);
-      var skin = $.query.get('skin');
+      var skin = $.cardstories.url_param('skin');
       if(skin !== '') {
         $('.cardstories_skin').show();
         $.cardstories.skin(skin, cardstories);
       } else {
-        cardstories.cardstories($.query.get('player_id'), $.query.get('game_id'));
+        cardstories.cardstories($.cardstories.url_param('player_id'), $.cardstories.url_param('game_id'));
       }
     });
   </script>

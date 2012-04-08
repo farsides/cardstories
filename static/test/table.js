@@ -1,5 +1,5 @@
 var selector = '#cardstories_root';
-var default_query_get = $.query.get;
+var default_cardstories_url_param = $.cardstories.url_param;
 var default_cardstories_ajax = $.cardstories.ajax;
 var default_cardstories_reload = $.cardstories.reload;
 var default_cardstories_table_force_state_update = $.cardstories_table.force_state_update;
@@ -14,7 +14,7 @@ function get_keys(obj) {
 function setup() {
     var root = $(selector);
 
-    $.query.get = function() { throw 'Please rebind "$.query.get"'; };
+    $.cardstories.url_param = function() { throw 'Please rebind "url_param"'; };
     $.cardstories.ajax = function() { throw 'Please rebind "ajax"'; };
     $.cardstories.reload = function() { throw 'Please rebind "reload"'; };
 
@@ -27,8 +27,8 @@ test("init_create", 4, function() {
     var root = $(selector);
     var player_id = 1;
 
-    $.query.get = function(param_name) {
-        if(param_name == 'create') { return true; };
+    $.cardstories.url_param = function(param_name) {
+        if (param_name == 'create') { return 1; };
     };
     $.cardstories_table.force_state_update = function(_player_id, _game_id, _root) {
         ok(false, "Plugin shouldn't intervene when a game creation is explicitly requested");

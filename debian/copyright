@@ -79,22 +79,14 @@ static/js/supplant.js:
 
   Douglas Crockford douglas@crockford.com snippet
 
-License: 
-
-  The snippet is not copyrighted because it is trivial.
-
-static/js/jquery.query-2.1.7.js:
-
- Blair Mitchelmore (blair DOT mitchelmore AT gmail DOT com)
-
 License:
 
- WTFPL (http://sam.zoy.org/wtfpl/).
+  The snippet is not copyrighted because it is trivial.
 
 static/js/jquery.jqDock.js:
 static/js/jquery.jqDock.min.js:
 
- copyright 2011 Roger Barrett 
+ copyright 2011 Roger Barrett
  Copyright (c) 2007 Isaac Roca & icon.cat (iroca@icon.cat)
 
 License:

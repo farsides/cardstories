@@ -9,7 +9,6 @@
   <script type="text/javascript" src="/static/js/jquery.metadata.js"></script>
   <script type="text/javascript" src="/static/js/jquery.cookie.js"></script>
   <script type="text/javascript" src="/static/js/jquery.jqDock.min.js"></script>
-  <script type="text/javascript" src="/static/js/jquery.query-2.1.7.js"></script>
   <script type="text/javascript" src="/static/js/jquery.placeholder-1.0.1.js"></script>
   <script type="text/javascript" src="/static/js/jquery.spritely-0.5.js"></script>
   <script type="text/javascript" src="/static/js/jquery.limit-1.2.source.js"></script>
@@ -68,11 +67,11 @@ soundManager.useHTML5Audio = true;
 // Initialize Cardstories
 $.get("/static/cardstories.html", function(data) {
   $('.cardstories').html(data);
-  var skin = $.query.get('skin');
+  var skin = $.cardstories.url_param('skin');
   if(skin !== '') {
     $.cardstories.skin(skin, $('.cardstories'));
   } else {
-    $('.cardstories').cardstories({{ player_id }}, $.query.get('game_id'), '{% url website.cardstories.views.welcome %}', {% if create %}true{% else %}false{% endif %});
+    $('.cardstories').cardstories({{ player_id }}, $.cardstories.url_param('game_id'), '{% url website.cardstories.views.welcome %}', {% if create %}true{% else %}false{% endif %});
   }
 });
 

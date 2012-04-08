@@ -92,6 +92,15 @@ function setup() {
 
 module("cardstories", {setup: setup});
 
+test("url_param", 5, function() {
+    $.cardstories.location = {search: '?player_id=123&game_id=33&anonymous=t&title=Cards%20%26+Stories'};
+    strictEqual($.cardstories.url_param('player_id'), 123, 'parses player_id');
+    strictEqual($.cardstories.url_param('game_id'), 33, 'parses game_id');
+    strictEqual($.cardstories.url_param('anonymous'), 't', 'parses anonymous');
+    strictEqual($.cardstories.url_param('title'), 'Cards & Stories', 'parses title');
+    strictEqual($.cardstories.url_param('idontexist'), null, 'returns null for nonexisting parameters');
+});
+
 test("panic", 5, function() {
     var player_id = 74;
     var game_id = 1023;
@@ -330,27 +339,20 @@ test("log", 1, function() {
 test("reload_link", 4, function() {
     var player_id = 5;
     var game_id = 7;
-    var _query = $.query;
 
     // Without player_id in the URL
-    $.query = {
-        'get': function(attr) {}
-    };
+    $.cardstories.url_param = function(name) { return null; };
+
     equal($.cardstories.reload_link(), '');
     equal($.cardstories.reload_link(game_id), '?game_id=' + game_id);
 
     // With player_id in the URL
-    $.query = {
-        'get': function(attr) {
-            if (attr === 'player_id') {
-                return player_id;
-            }
-        }
+    $.cardstories.url_param = function(name) {
+        if (name === 'player_id') { return player_id; }
     };
+
     equal($.cardstories.reload_link(), '?player_id=' + player_id);
     equal($.cardstories.reload_link(game_id), '?game_id=' + game_id + '&player_id=' + player_id);
-
-    $.query = _query;
 });
 
 asyncTest("set_active", 4, function() {
@@ -806,6 +808,42 @@ test("create owner has card", 5, function() {
     $.cardstories.create(owner_id, game, root);
 });
 
+test("create anonymous", 5, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var game_id = 12;
+    var owner_id = 44;
+    var player_id = 55;
+    var game = {
+        id: game_id,
+        owner_id: owner_id,
+        players: [
+            {id: owner_id, vote: null, picked: null, win: 'n'},
+            {id: 22, vote: null, picked: null, win: 'n'},
+            {id: 23, vote: null, picked: null, win: 'n'}
+        ]
+    };
+
+    $.cardstories.url_param = function(name) {
+        if (name === 'anonymous') { return 1; }
+    };
+
+    $.cardstories.poll_discard = function(_root) {
+        ok(true, 'poll_discard gets called');
+    };
+
+    $.cardstories.poll = function(query, _player_id, _game_id, _root, cb) {
+        equal(_player_id, player_id, 'poll_plugin gets passed the player_id');
+        equal(_game_id, game.id, 'poll_plugin gets passed the game_id');
+    };
+
+    $.cardstories.create_wait_for_story = function(_player_id, _game, _root) {
+        equal(_player_id, player_id, 'create_wait_for_story gets passed the player_id');
+        equal(_game.id, game.id, 'create_wait_for_story gets passed the game');
+    };
+
+    $.cardstories.create(player_id, game, root);
+});
+
 asyncTest("create_pick_card", 12, function() {
     var root = $('#qunit-fixture .cardstories');
     var owner_id = 75;
@@ -1197,7 +1235,7 @@ test("bootstrap", 11, function() {
     // If no game id is provided, and 'create' is not part of the query,
     // player is redirected to an available table/game.
     $.cardstories_table.get_available_game = function(_player_id, _root, cb) {
-        equal(_player_id, player_id, 'get_avaiable_game is passed the player_id');
+        equal(_player_id, player_id, 'get_available_game is passed the player_id');
         cb(game_id);
     };
     $.cardstories.reload = function(_player_id, _game_id, _opts, _root) {
@@ -1210,7 +1248,7 @@ test("bootstrap", 11, function() {
     // If no available table/game exists, the player is redirected to
     // create a new game.
     $.cardstories_table.get_available_game = function(_player_id, _root, cb) {
-        equal(_player_id, player_id, 'get_avaiable_game is passed the player_id');
+        equal(_player_id, player_id, 'get_available_game is passed the player_id');
         cb(undefined);
     };
     $.cardstories.reload = function(_player_id, _game_id, _opts, _root) {
@@ -1225,7 +1263,7 @@ test("bootstrap", 11, function() {
 
     // If game_id is passed explicitly to bootstrap, that game is loaded
     // without any redirection.
-    $.cardstories_table.get_avaiable_game = function(_player_id, _root, cb) {
+    $.cardstories_table.get_available_game = function(_player_id, _root, cb) {
         ok(false, 'get_available_game is NOT called');
     };
     $.cardstories.reload = function(_player_id, _game_id, _opts, _root) {
@@ -1242,12 +1280,11 @@ test("bootstrap", 11, function() {
 
     // If game_id is undefined and 'create' is present in the query,
     // a new game is created without any redirection.
-    var original_query_get = $.query.get;
-    // Stub query to act as if 'create=1' was present in the query string.
-    $.query.get = function(name) {
-        if (name === 'create') { return '1'; }
+    // Stub url_param to act as if 'create=1' was present in the query string.
+    $.cardstories.url_param = function(name) {
+        if (name === 'create') { return 1; }
     };
-    $.cardstories_table.get_avaiable_game = function(_player_id, _root, cb) {
+    $.cardstories_table.get_available_game = function(_player_id, _root, cb) {
         ok(false, 'get_available_game is NOT called');
     };
     $.cardstories.reload = function(_player_id, _game_id, _opts, _root) {
@@ -1260,8 +1297,6 @@ test("bootstrap", 11, function() {
         ok(false, 'game is NOT called');
     };
     $.cardstories.bootstrap(player_id, undefined, null, root);
-    // Unstub query.get.
-    $.query.get = original_query_get;
 });
 
 asyncTest("preload_images", 2, function() {
@@ -2235,30 +2270,24 @@ test("invitation_anonymous", 1, function() {
     var game_id = 101;
     var sentence = 'SENTENCE';
 
-    var _query = $.query;
-
     // Without player_id in the URL
-    $.query = {
-        'get': function(attr) {
-            if (attr === "anonymous") {
-                return "yes";
-            }
-        }
+    $.cardstories.url_param = function(name) {
+        if (name === 'anonymous') { return 1; }
     };
 
     var owner = 10;
     var game = {
-        'id': game_id,
-        'players': [
-            { 'id': owner, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
-            { 'id': 1, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
-            { 'id': 2, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
-            { 'id': 3, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
-            { 'id': 4, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
-            { 'id': 5, 'vote': null, 'win': 'n', 'picked': null, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null }
+        id: game_id,
+        players: [
+            {id: owner, vote: null, win: 'n', picked: null, cards: [], score: null, level: null, score_next: null, score_left: null},
+            {id: 1, vote: null, win: 'n', picked: null, cards: [], score: null, level: null, score_next: null, score_left: null},
+            {id: 2, vote: null, win: 'n', picked: null, cards: [], score: null, level: null, score_next: null, score_left: null},
+            {id: 3, vote: null, win: 'n', picked: null, cards: [], score: null, level: null, score_next: null, score_left: null},
+            {id: 4, vote: null, win: 'n', picked: null, cards: [], score: null, level: null, score_next: null, score_left: null},
+            {id: 5, vote: null, win: 'n', picked: null, cards: [], score: null, level: null, score_next: null, score_left: null}
         ],
-        'owner_id': owner,
-        'sentence': sentence
+        owner_id: owner,
+        sentence: sentence
     };
 
     $.cardstories.poll_ignore = function(_request) {
@@ -2267,9 +2296,6 @@ test("invitation_anonymous", 1, function() {
 
     var element = $('#qunit-fixture .cardstories_invitation .cardstories_invitation_anonymous');
     $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
-
-    // Restore the original query
-    $.query = _query;
 });
 
 test("create_invitation_display_board", 24, function() {
@@ -2355,8 +2381,8 @@ asyncTest("player_participate game full", 8, function() {
 
     $.cardstories.reload = function(_player_id, _game_id, _options, _root) {
         equal(_player_id, player_id, 'reload gets passed the player_id');
-        strictEqual(_game_id, undefined, 'reload is called with game_id set to undefined');
-        ok(_options.force_create, 'reload is called with force_create flag');
+        strictEqual(_game_id, game_id, 'reload is called with game_id');
+        ok(_options.anonymous, 'reload is called with anonymous flag');
         ok(_root.hasClass('cardstories'), 'reload gets passed the root');
         start();
     };

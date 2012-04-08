@@ -51,6 +51,23 @@
 
         noop: function() {},
 
+        // Parses param 'name' out of the query string.
+        // If param 'name' is an integer, calls parseInt on it before returning the result.
+        // If param 'name' is not present in the query string, returns null.
+        url_param: function(name) {
+            var regex = new RegExp(name + '=([^&]*)');
+            var query = this.location.search.substring(1);
+            var match = regex.exec(query);
+            var result = null;
+            if (match) {
+                result = decodeURIComponent(match[1].replace(/\+/g, ' '));
+                if (/^\d+$/.test(result)) {
+                    result = parseInt(result, 10);
+                }
+            }
+            return result;
+        },
+
         log: function(message) {
             var console = this.window.console;
             if (console && console.log) {
@@ -173,9 +190,12 @@
         reload_link: function(game_id, options) {
             var params = {};
 
-            // Options
-            var default_options = {force_create: false,
-                                   previous_game_id: undefined};
+            // Default options
+            var default_options = {
+                force_create: false,
+                previous_game_id: undefined,
+                anonymous: false
+            };
 
             options = $.extend(default_options, options);
 
@@ -186,7 +206,7 @@
 
             // player_id - Only add the player_id to the URL if it already is there (ie when
             // it has been filled manually by the player)
-            var player_id = $.query.get('player_id');
+            var player_id = $.cardstories.url_param('player_id');
             if (player_id) {
                 params.player_id = player_id;
             }
@@ -195,6 +215,12 @@
             // of a new game, rather than letting the game chose a game to join
             if (options.force_create) {
                 params.create = 1;
+            }
+
+            // anonymous - allows players who aren't participating in the game
+            // (ie. because it is full) to observe the game in create/invitation state.
+            if (options.anonymous) {
+                params.anonymous = 1;
             }
 
             // previous_game_id - Allow to link a game being created to a previous game
@@ -248,6 +274,8 @@
                 }
             } else {
                 if (game.self) {
+                    $this.create_wait_for_story(player_id, game, root);
+                } else if ($.cardstories.url_param('anonymous')) {
                     $this.create_wait_for_story(player_id, game, root);
                 } else {
                     inhibit_poll = true;
@@ -1251,7 +1279,7 @@
             if (game.owner) {
                 deferred = this.invitation_owner(player_id, game, root);
             } else {
-                if ($.query.get('anonymous')) {
+                if ($.cardstories.url_param('anonymous')) {
                     deferred = this.invitation_anonymous(player_id, game, root);
                 } else {
                     if (game.self) {
@@ -2427,7 +2455,7 @@
             var onerror = function(error) {
                 if (error.code === 'GAME_FULL') {
                     $this.show_warning('.cardstories_game_full', player_id, game.id, root, function() {
-                        $this.reload(player_id, undefined, {force_create: true}, root);
+                        $this.reload(player_id, game.id, {anonymous: true}, root);
                     });
                 } else {
                     $this.panic(error, player_id, game.id, root);
@@ -2440,12 +2468,51 @@
 
         invitation_anonymous: function(player_id, game, root) {
             var $this = this;
-            var element = $('.cardstories_invitation .cardstories_invitation_anonymous', root);
+            var element = $('.cardstories_invitation .cardstories_pick', root);
             this.set_active('invitation_anonymous', element, root, game);
-            this.display_progress_bar('player', 1, element, root);
+            this.display_progress_bar('player', 2, element, root);
             this.display_master_info($this.get_master_info(game), element);
+            this.init_board_buttons(player_id, element, root);
             this.create_invitation_display_board(player_id, game, element, root, false);
-            return $.Deferred().resolve();
+
+            var deferred = $.Deferred();
+            var q = $({});
+
+            // Only show initial animations once.
+            if (!element.hasClass('cardstories_noop_init')) {
+                element.addClass('cardstories_noop_init');
+
+                // Show a replay of the author picking a card and writing a sentence.
+                q.queue('chain', function(next) {
+                    $this.replay_create_game(game, element, root, next);
+                });
+
+                // Show players being dealt cards.
+                q.queue('chain', function(next) {
+                    $this.invitation_pick_deal_helper(game, element, next);
+                });
+
+                // Move card and sentence box to final positions.
+                q.queue('chain', function(next) {
+                    $this.invitation_pick_card_box_helper(element, root, next);
+                });
+            } else {
+                q.queue('chain', function(next) {
+                    $this.invitation_pick_deal_helper(game, element, next);
+                });
+            }
+
+            q.queue('chain', function(next) {
+                $this.invitation_pick_wait_picked_helper(player_id, game, element, root, next);
+            });
+
+            q.queue('chain', function(next) {
+                deferred.resolve();
+            });
+
+            q.dequeue('chain');
+
+            return deferred;
         },
 
         create_invitation_display_board: function(player_id, game, element, root, set_status) {
@@ -4782,7 +4849,7 @@
                 } else {
                     // If game creation or a specific game aren't explicitly
                     // requested, try to join an active table/game.
-                    if (!game_id && !$.query.get('create')) {
+                    if (!game_id && !$.cardstories.url_param('create')) {
                         $.cardstories_table.get_available_game(player_id, root, function(game_id) {
                             var opts = game_id ? {} : {force_create: true};
                             $this.reload(player_id, game_id, opts, root);

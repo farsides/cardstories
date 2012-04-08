@@ -64,7 +64,23 @@
                     {id: 3, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0}
                 ]
             };
-            $.cardstories.create(3, game, root);
+            $.cardstories.create_wait_for_story(3, game, root);
+        } else if (skin === 'create_wait_for_card_anonymous') {
+            game = {
+                id: 101,
+                owner_id: 1,
+                winner_card: null,
+                sentence: null,
+                self: [null, null, []],
+                players: [
+                    {id: 1, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0},
+                    {id: 2, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0},
+                    {id: 3, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0},
+                    {id: 4, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0},
+                    {id: 5, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0}
+                ]
+            };
+            $.cardstories.create_wait_for_story(42, game, root);
         } else if (skin === 'create_write_sentence') {
             game = {
                 id: 100,
@@ -94,7 +110,23 @@
                     {id: 5, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0}
                 ]
             };
-            $.cardstories.create(2, game, root);
+            $.cardstories.create_wait_for_story(2, game, root);
+        } else if (skin === 'create_wait_for_sentence_anonymous') {
+            game = {
+                id: 101,
+                owner_id: 1,
+                winner_card: '',
+                sentence: null,
+                self: [null, null, []],
+                players: [
+                    {id: 1, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0},
+                    {id: 2, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0},
+                    {id: 3, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0},
+                    {id: 4, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0},
+                    {id: 5, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0}
+                ]
+            };
+            $.cardstories.create_wait_for_story(42, game, root);
         } else if (skin === 'invitation_owner') {
             game = {
                 id: 100,
@@ -158,12 +190,12 @@
                     {id: 10, vote: null, win: 'n', picked: 30, cards: []},
                     {id: 1, vote: null, win: 'n', picked: 31, cards: []},
                     {id: 2, vote: null, win: 'n', picked: 32, cards: []},
-                    {id: 3, vote: null, win: 'n', picked: 33, cards: []},
+                    {id: 3, vote: null, win: 'n', picked: null, cards: []},
                     {id: 4, vote: null, win: 'n', picked: 34, cards: []},
-                    {id: 5, vote: null, win: 'n', picked: 35, cards: []}
+                    {id: 5, vote: null, win: 'n', picked: null, cards: []}
                 ]
             };
-            $.cardstories.invitation_anonymous('', game, root);
+            $.cardstories.invitation_anonymous(42, game, root);
         } else if (skin === 'invitation_pick_wait') {
             game = {
                 id: 100,
