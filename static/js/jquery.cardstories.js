@@ -4030,7 +4030,6 @@
                 banner = $('.cardstories_results_banner_lose', box);
                 star = $('.cardstories_results_level_star_lose', box);
             }
-            star.show();
 
             // Only show banner if player voted.
             if (game.owner || player.vote !== null) {
@@ -4105,11 +4104,7 @@
                 level_legend.html(html);
 
                 level_score.html(player.score_next);
-                // Hide the level score first (will be shown later during level bar animation).
-                level_score.hide();
 
-                // Hide the star first (will be shown later by animate_scale).
-                star.hide();
                 // Now start with the animation.
                 // Use a seperate queue for the level animations.
                 // Fade the levels in first.
@@ -4141,7 +4136,12 @@
                         // level score and set it's contents (counting down from entire score needed
                         // to reach the next level to the score the player still needs to get there).
                         step: function(now, fx) {
-                            var score = player.score_next - Math.round(score_diff * now/fx.end);
+                            var score;
+                            if (fx.end > 0) {
+                                score = player.score_next - Math.round(score_diff * now/fx.end);
+                            } else {
+                                score = player.score_next;
+                            }
                             level_score.html(score);
                             // Allow the score to scroll most 72% to the right
                             // (so that it doesn't scroll behind the create button and become invisible).
