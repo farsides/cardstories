@@ -68,7 +68,7 @@ soundManager.useHTML5Audio = true;
 $.get("/static/cardstories.html", function(data) {
   $('.cardstories').html(data);
   var skin = $.cardstories.url_param('skin');
-  if(skin !== '') {
+  if (skin !== null) {
     $.cardstories.skin(skin, $('.cardstories'));
   } else {
     $('.cardstories').cardstories({{ player_id }}, $.cardstories.url_param('game_id'), '{% url website.cardstories.views.welcome %}', {% if create %}true{% else %}false{% endif %});

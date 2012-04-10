@@ -89,7 +89,7 @@
       var cardstories = $('.cardstories');
       cardstories.html(data);
       var skin = $.cardstories.url_param('skin');
-      if(skin !== '') {
+      if (skin !== null) {
         $('.cardstories_skin').show();
         $.cardstories.skin(skin, cardstories);
       } else {
