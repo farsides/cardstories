@@ -844,6 +844,7 @@ class CardstoriesTest(TestCase):
         
     def test_17append_mtime(self):
         from django.template import Context, Template
+        from django.core.cache import cache
         from time import sleep
 
         # First, check that input = output if file doesn't exist.
@@ -867,16 +868,23 @@ class CardstoriesTest(TestCase):
         rendered1 = t.render(Context())
         self.assertEqual(rendered1, "%s?%s" % (url, os.path.getmtime(full_path)))
 
-        # Check that mtime is updated if file is changed (but sleep a little so
-        # mtime actually changes!)
+        # Update file, but sleep a little so mtime actually changes!)
         sleep(0.1)
         open(full_path, "w").close()
+        
+        # Check that mtime is cached. 
+        rendered2 = t.render(Context())
+        self.assertEqual(rendered1, rendered2)
+        
+        # Check that mtime changes if cache is cleared. 
+        cache.clear()
         rendered2 = t.render(Context())
         self.assertNotEqual(rendered1, rendered2)
         
         # Check that mtime remains the same if file is unchanged.
         sleep(0.1)
         open(full_path, "r").close()
+        cache.clear()
         rendered3 = t.render(Context())
         self.assertEqual(rendered2, rendered3)
 
