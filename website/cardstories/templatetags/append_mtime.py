@@ -21,6 +21,7 @@
 import os
 from django import template
 from django.conf import settings
+from django.core.cache import cache
 
 register = template.Library()
 
@@ -28,17 +29,27 @@ register = template.Library()
 def append_mtime(path):
     """ 
     Appends a query parameter with the file's mtime.  Useful for preventing
-    browser caching.  TODO: cache file mtimes.
+    browser caching.
 
     """
-    stripped_path = path
-    if path.startswith(settings.MEDIA_URL):
-        stripped_path = path[len(settings.MEDIA_URL):]
-    full_path = os.path.abspath(os.path.join(settings.MEDIA_ROOT,
-                                             stripped_path))
-    try:
-        mtime = os.path.getmtime(full_path)
-        return "%s?%s" % (path, mtime)
-    except OSError:
-        # If file wasn't found, just return the original path.
-        return path
+    mtime_cache_key = "mtime_%s" % path
+    mtime = cache.get(mtime_cache_key)
+    if mtime == None:
+        stripped_path = path
+        if path.startswith(settings.MEDIA_URL):
+            stripped_path = path[len(settings.MEDIA_URL):]
+        full_path = os.path.abspath(os.path.join(settings.MEDIA_ROOT,
+                                                 stripped_path))
+        try:
+            mtime = os.path.getmtime(full_path)
+            cache.set(mtime_cache_key, mtime)
+        except OSError:
+            mtime = None
+
+    # Only append mtime if it was successfully retrieved. 
+    if mtime != None:
+        appended_path = "%s?%s" % (path, mtime)
+    else:
+        appended_path = path
+
+    return appended_path

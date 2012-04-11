@@ -153,6 +153,9 @@ COVERAGE_MODULES = ['website.cardstories.views',
                     'website.cardstories.models',
                     'website.cardstories.avatar']
 
+# Cache
+CACHE_BACKEND = 'locmem://?timeout=900'
+
 # Use local settings, if any.
 try:
     from local_settings import *
