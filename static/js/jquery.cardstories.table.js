@@ -80,8 +80,8 @@
                 type: 'table',
                 modified: 0,
                 game_id: game_id,
-                player_id: player_id,
-            }
+                player_id: player_id
+            };
 
             var success = function(data, status) {
                 if ('error' in data) {

@@ -91,7 +91,7 @@
                         tvars = {
                             player_id: player_info.name,
                             sentence: message.sentence
-                        }
+                        };
                         play_pop = true;
                     } else if (message.type === 'notification') {
                         var l = window.location;
@@ -101,7 +101,7 @@
                             href: href,
                             player_id: player_info.name,
                             sentence: message.sentence
-                        }
+                        };
                         play_ring = true;
                     }
                     var div = $this.templates[message.type].supplant(tvars);

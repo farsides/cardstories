@@ -244,7 +244,7 @@
                 owner_id: player_id
             };
             if (previous_game_id) {
-                query.previous_game_id = previous_game_id
+                query.previous_game_id = previous_game_id;
             }
             var success = function(data) {
                 if ('error' in data) {
@@ -3742,7 +3742,7 @@
                     // Show results box, but only if the player voted (or the player is the GM).
                     if (player.vote !== null || game.owner) {
                         q.queue('chain', function(next) {
-                            $this.complete_display_results(player, game, element, next);
+                            $this.complete_display_results(player, game, element, root, next);
                         });
                     }
 
@@ -3967,7 +3967,7 @@
             });
         },
 
-        complete_display_results: function(player, game, element, cb) {
+        complete_display_results: function(player, game, element, root, cb) {
             var $this = this;
 
             // Did the owner lose?
@@ -4020,15 +4020,18 @@
                 }
             }
 
-            // Choose banner and star.
+            // Choose banner, star, and sound.
             var banner;
             var star;
+            var sound_id;
             if (player.win === 'y') {
                 banner = $('.cardstories_results_banner_win', box);
                 star = $('.cardstories_results_level_star_win', box);
+                sound_id = 'score_won';
             } else {
                 banner = $('.cardstories_results_banner_lose', box);
                 star = $('.cardstories_results_level_star_lose', box);
+                sound_id = 'score_lost';
             }
 
             // Only show banner if player voted.
@@ -4050,6 +4053,8 @@
             var q = $({});
             q.queue('chain', function(next) {
                 $this.animate_scale(false, 5, 450, box, next);
+                // Start playing the "xylophone" sound.
+                $.cardstories_audio.play('score_xylophone', root);
             });
 
             // Then fade the explanation in (if the player voted).
@@ -4059,9 +4064,10 @@
                 });
             }
 
-            // Show score
+            // Show score and play the win or lost sound
             q.queue('chain', function(next) {
                 $('.cardstories_results_score_container', box).fadeIn('fast', next);
+                $.cardstories_audio.play(sound_id, root);
             });
 
             // Fashionable delay
@@ -4124,10 +4130,17 @@
                     });
                 });
                 // Animate the level bar and level score at the same time.
-                var duration = 1800;
+                // The duration animation would take when moving from 0 to 100%.
+                var full_duration = 3000;
+                // For animations that don't move the bar 100%, make the duration shorter.
+                // For 0% animations, the duration is half of the full duration, and for other lengths,
+                // the duration scales proprtionally. The actual numbers came from experimentation.
+                var duration = full_duration * (1 - (0.5 * player.score_left/player.score_next));
                 q.queue('level', function(next) {
                     // Show the score.
                     level_score.show();
+                    // Star playing the "pinball" sound.
+                    $.cardstories_audio.play('score_pinball', root);
                     var score_diff = player.score_next - player.score_left;
                     // Start animating the bar width.
                     bar.animate({width: final_width}, {
@@ -4149,8 +4162,12 @@
                             level_score_container.css('left', left + '%');
                         },
                         complete: function() {
-                            level_deferred.resolve();
                             level_score.html(player.score_left);
+                            // Play the "bell" sound.
+                            $.cardstories_audio.play('score_bell', root);
+                            // Stop playing the "pinball" sound.
+                            $.cardstories_audio.stop('score_pinball', root);
+                            level_deferred.resolve();
                         }
                     });
                 });
@@ -4240,6 +4257,8 @@
                     var min_bottom = 0.8 * final_bottom;
                     box.css('bottom', initial_bottom);
                     box.show();
+                    // Play the "echo" sound.
+                    $.cardstories_audio.play('score_echo', root);
                     box.animate({bottom: min_bottom}, 300, function() {
                         box.animate({bottom: final_bottom}, 80, next);
                     });

@@ -33,3 +33,17 @@ asyncTest("play", 1, function() {
         start();
     });
 });
+
+asyncTest("stop", 1, function() {
+    soundManager.onready(function() {
+        var sound = $(root).data('cardstories_audio').sounds['ring'];
+        sound.stop = function() { ok(true, 'stop called'); };
+        $.cardstories_audio.stop('ring', root);
+        try {
+            $.cardstories_audio.stop('ohoh', root);
+        } catch(err) {
+            ok(false, 'this should never happen');
+        }
+        start();
+    });
+});

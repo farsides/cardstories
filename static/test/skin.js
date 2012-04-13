@@ -33,6 +33,9 @@
         var game;
         var old_game;
 
+        // Init the audio plugin.
+        $.cardstories_audio.init(undefined, undefined, root);
+
         // Don't try to resolve player info
         $.cardstories.get_player_info_by_id = function(player_id) {
             return {'name': 'Player ' + player_id + ' Long Last Nameeeeeeeeeee',

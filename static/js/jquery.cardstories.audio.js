@@ -58,6 +58,13 @@
             if (data && data.sounds && data.sounds[sound_id]) {
                 data.sounds[sound_id].play();
             }
+        },
+
+        stop: function(sound_id, root) {
+            var data = $(root).data('cardstories_audio');
+            if (data && data.sounds && data.sounds[sound_id]) {
+                data.sounds[sound_id].stop();
+            }
         }
     };
 

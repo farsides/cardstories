@@ -86,6 +86,7 @@ function setup() {
     };
     $.cardstories_audio = {};
     $.cardstories_audio.play = function(name, root) {};
+    $.cardstories_audio.stop = function(name, root) {};
     $.cardstories_table = {};
     $.cardstories_table.get_available_game = function(player_id, root, cb) { cb(); };
 }
@@ -3002,7 +3003,7 @@ test("vote_owner_results_confirm_only_when_not_all_players_picked", 2, function(
     $.cardstories.vote_owner_results_confirm(player_id, game, element, root);
 });
 
-asyncTest("complete owner lost easy", 8, function() {
+asyncTest("complete owner lost easy", 14, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var owner_id = 10;
@@ -3020,6 +3021,9 @@ asyncTest("complete owner lost easy", 8, function() {
     $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player1; },
                            'on_next_owner_change': function(player_id, game_id, root, cb) {} };
 
+    var sounds_played = [];
+    $.cardstories_audio.play = function(sound_id) { sounds_played.push(sound_id); };
+
     $.cardstories.complete(owner_id, game, root).done(function() {
         var box = $('.cardstories_results', element);
         notEqual(box.css('display'), 'none', 'box is visible');
@@ -3031,11 +3035,18 @@ asyncTest("complete owner lost easy", 8, function() {
         ok($('.cardstories_master_seat', element).hasClass('cardstories_master_seat_lost'), 'the game master lost');
         equal($('.cardstories_master_seat .cardstories_master_status', element).html(), 'LOSES!', 'the game master lost');
 
+        notEqual($.inArray('score_lost', sounds_played), -1, 'The score_lost sound is played');
+        notEqual($.inArray('score_xylophone', sounds_played), -1, 'The score_xylophone sound is played');
+        notEqual($.inArray('score_pinball', sounds_played), -1, 'The score_pinball sound is played');
+        notEqual($.inArray('score_bell', sounds_played), -1, 'The score_bell sound is played');
+        notEqual($.inArray('score_echo', sounds_played), -1, 'The score_echo sound is played');
+        equal(sounds_played.length, 5, 'No other sound is played');
+
         start();
     });
 });
 
-asyncTest("complete owner lost hard", 8, function() {
+asyncTest("complete owner lost hard", 14, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var owner_id = 10;
@@ -3053,6 +3064,9 @@ asyncTest("complete owner lost hard", 8, function() {
     $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player1; },
                            'on_next_owner_change': function(player_id, game_id, root, cb) {} };
 
+    var sounds_played = [];
+    $.cardstories_audio.play = function(sound_id) { sounds_played.push(sound_id); };
+
     $.cardstories.complete(owner_id, game, root).done(function() {
         var box = $('.cardstories_results', element);
         notEqual(box.css('display'), 'none', 'box is visible');
@@ -3063,13 +3077,19 @@ asyncTest("complete owner lost hard", 8, function() {
         equal(box.find('img.cardstories_results_banner_win').css('display'), 'none', 'win img is hidden');
         ok($('.cardstories_master_seat', element).hasClass('cardstories_master_seat_lost'), 'the game master lost');
         equal($('.cardstories_master_seat .cardstories_master_status', element).html(), 'LOSES!', 'the game master lost');
+        notEqual($.inArray('score_lost', sounds_played), -1, 'The score_lost sound is played');
+        notEqual($.inArray('score_xylophone', sounds_played), -1, 'The score_xylophone sound is played');
+        notEqual($.inArray('score_pinball', sounds_played), -1, 'The score_pinball sound is played');
+        notEqual($.inArray('score_bell', sounds_played), -1, 'The score_bell sound is played');
+        notEqual($.inArray('score_echo', sounds_played), -1, 'The score_echo sound is played');
+        equal(sounds_played.length, 5, 'No other sound is played');
 
         $.cardstories_table = undefined;
         start();
     });
 });
 
-asyncTest("complete owner won", 8, function() {
+asyncTest("complete owner won", 14, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var owner_id = 10;
@@ -3087,6 +3107,9 @@ asyncTest("complete owner won", 8, function() {
     $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player1; },
                            'on_next_owner_change': function(player_id, game_id, root, cb) {} };
 
+    var sounds_played = [];
+    $.cardstories_audio.play = function(sound_id) { sounds_played.push(sound_id); };
+
     $.cardstories.complete(owner_id, game, root).done(function() {
         var box = $('.cardstories_results', element);
         notEqual(box.css('display'), 'none', 'box is visible');
@@ -3097,13 +3120,19 @@ asyncTest("complete owner won", 8, function() {
         equal(box.find('img.cardstories_results_banner_lose').css('display'), 'none', 'lost img is invisible');
         ok($('.cardstories_master_seat', element).hasClass('cardstories_master_seat_won'), 'the game master won');
         equal($('.cardstories_master_seat .cardstories_master_status', element).html(), 'WINS!', 'the game master won');
+        notEqual($.inArray('score_won', sounds_played), -1, 'The score_won sound is played');
+        notEqual($.inArray('score_xylophone', sounds_played), -1, 'The score_xylophone sound is played');
+        notEqual($.inArray('score_pinball', sounds_played), -1, 'The score_pinball sound is played');
+        notEqual($.inArray('score_bell', sounds_played), -1, 'The score_bell sound is played');
+        notEqual($.inArray('score_echo', sounds_played), -1, 'The score_echo sound is played');
+        equal(sounds_played.length, 5, 'No other sound is played');
 
         $.cardstories_table = undefined;
         start();
     });
 });
 
-asyncTest("complete", 41, function() {
+asyncTest("complete", 47, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var owner_id = 10;
@@ -3132,6 +3161,9 @@ asyncTest("complete", 41, function() {
     };
     $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player1; },
                            'on_next_owner_change': function(player_id, game_id, root, cb) {} };
+
+    var sounds_played = [];
+    $.cardstories_audio.play = function(sound_id) { sounds_played.push(sound_id); };
 
     equal($('#qunit-fixture .cardstories_complete.cardstories_active').length, 0);
     $.cardstories.complete(owner_id, game, root).done(function() {
@@ -3166,8 +3198,8 @@ asyncTest("complete", 41, function() {
         ok($('.cardstories_votes_5', element).children().length === 0, 'no votes for seat 5');
         ok($('.cardstories_votes_win', element).children().length === 1, '1 winning votes');
         equal($('.cardstories_results.author', element).css('display'), 'block', 'author results is visible');
-        notEqual($('.cardstories_results.author img.cardstories_results_banner_win').css('display'), 'none', 'win img is hidden');
-        equal($('.cardstories_results.author img.cardstories_results_banner_lose').css('display'), 'none', 'lost img is visible');
+        notEqual($('.cardstories_results.author img.cardstories_results_banner_win').css('display'), 'none', 'win img is visible');
+        equal($('.cardstories_results.author img.cardstories_results_banner_lose').css('display'), 'none', 'lost img is hidden');
         equal($('.cardstories_results.author .cardstories_results_score', element).html(), owner_score+'', 'author score is visible');
         var level_bar = $('.cardstories_results.author .cardstories_results_level_bar_front', element);
         level_bar.parents().andSelf().show();
@@ -3179,6 +3211,13 @@ asyncTest("complete", 41, function() {
         var level_left = $('.cardstories_results.author .cardstories_results_level_left', element);
         equal($('> span', level_left).html(), owner_score_left, 'author level left score is visible');
         ok(level_left.position().left > 0, 'level left score is moved towards the right');
+
+        notEqual($.inArray('score_won', sounds_played), -1, 'The score_won sound is played');
+        notEqual($.inArray('score_xylophone', sounds_played), -1, 'The score_xylophone sound is played');
+        notEqual($.inArray('score_pinball', sounds_played), -1, 'The score_pinball sound is played');
+        notEqual($.inArray('score_bell', sounds_played), -1, 'The score_bell sound is played');
+        notEqual($.inArray('score_echo', sounds_played), -1, 'The score_echo sound is played');
+        equal(sounds_played.length, 5, 'No other sound is played');
 
         start();
     });
@@ -3209,6 +3248,10 @@ asyncTest("complete player didn't vote", 11, function() {
     $.cardstories_table = {
         get_next_owner_id: function(player_id, game_id, root) { return player1; },
         on_next_owner_change: function(player_id, game_id, root, cb) {}
+    };
+
+    $.cardstories_audio.play = function(sound_id) {
+        ok(false, 'no sound is played');
     };
 
     $.cardstories.complete(player4, game, root).done(function() {
@@ -3252,6 +3295,10 @@ asyncTest("complete anonymous", 3, function() {
     $.cardstories_table = {
         get_next_owner_id: function(player_id, game_id, root) { return player1; },
         on_next_owner_change: function(player_id, game_id, root, cb) {}
+    };
+
+    $.cardstories_audio.play = function(sound_id) {
+        ok(false, 'no sound is played');
     };
 
     $.cardstories.complete(visitor, game, root).done(function() {
