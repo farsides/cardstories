@@ -913,7 +913,7 @@ test("create_write_sentence", 11, function() {
         players: [
             {id: owner_id, pick: card, vote: null, cards: []},
             {id: 22, pick: null, vote: null, cards: []},
-            {id: 23, pick: null, vote: null, cards: []},
+            {id: 23, pick: null, vote: null, cards: []}
         ]
     };
 
@@ -959,7 +959,7 @@ test("create not owner, not participating", 2, function() {
     $.cardstories.player_participate = function(_player_id, _game, _root) {
         equal(_player_id, player_id, 'participate gets called with the player_id');
         equal(_game.id, game_id, 'participate gets called with the game');
-    }
+    };
 
     $.cardstories.create(player_id, game, root);
 });
@@ -1017,7 +1017,7 @@ test("existing_players_show_helper", 15, function() {
         owner: false,
         self: [null, null, []],
         players: [owner, player1, player2, player4, player5]
-    }
+    };
 
     var seat1 = $('.cardstories_player_seat_1', element);
     var seat2 = $('.cardstories_player_seat_2', element);
@@ -2266,7 +2266,8 @@ asyncTest("invitation_pick_wait_to_vote_voter", 16, function() {
     });
 });
 
-test("invitation_anonymous", 1, function() {
+asyncTest("invitation_anonymous", 3, function() {
+    var root = $('#qunit-fixture .cardstories');
     var player_id = null;
     var game_id = 101;
     var sentence = 'SENTENCE';
@@ -2295,8 +2296,12 @@ test("invitation_anonymous", 1, function() {
         equal(_request.game_id, game_id, 'poll_ignore request game_id');
     };
 
-    var element = $('#qunit-fixture .cardstories_invitation .cardstories_invitation_anonymous');
-    $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
+    var element = $('.cardstories_invitation .cardstories_pick');
+    $.cardstories.invitation(player_id, game, root).done(function() {
+        ok(element.hasClass('cardstories_active'), 'the cardstories_pick element is active');
+        equal($('.cardstories_sentence', element).text(), sentence, 'the sentence is shown');
+        start();
+    });
 });
 
 test("create_invitation_display_board", 24, function() {
@@ -3310,7 +3315,6 @@ asyncTest("complete anonymous", 3, function() {
     });
 });
 
-
 asyncTest("complete close results box author", 10, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
@@ -3506,7 +3510,7 @@ asyncTest("next_game_as_player", 4, function() {
     $.cardstories.display_modal = function(modal, overlay) {
         equal(modal.attr('class'), 'cardstories_modal');
         equal(overlay.attr('class'), 'cardstories_modal_overlay');
-    }
+    };
 
     $.cardstories.complete(player_id, game_author, root).done(function() {
         equal($('.cardstories_next_game_author', next_game_dom).css('display'), 'none');
@@ -3543,25 +3547,25 @@ asyncTest("on_next_owner_change", 9, function() {
     $.cardstories.display_modal = function(modal, overlay) {
         equal(modal.attr('class'), 'cardstories_modal');
         equal(overlay.attr('class'), 'cardstories_modal_overlay');
-    }
+    };
 
     $.cardstories.complete(player_id, game_author, root).done(function() {
         equal($('.cardstories_next_game_author', next_game_dom).css('display'), 'none');
         equal($('.cardstories_next_game_player', next_game_dom).css('display'), 'block');
         play_again_button.click();
-        
+
         // Next owner change to current player
         $.cardstories_table.load_next_game_when_ready = function(ready_for_next_game, player_id, game_id, root) {
             equal(ready_for_next_game, false);
-        }
+        };
         $.cardstories_table.get_next_owner_id = function(player_id, game_id, root) { return player_id; };
         orig_close_modal = $.cardstories.close_modal;
         $.cardstories.close_modal = function(modal, overlay) {
             equal(modal.attr('class'), 'cardstories_modal');
             equal(overlay.attr('class'), 'cardstories_modal_overlay');
-        }
+        };
         owner_change_cb(player_id);
-        
+
         equal($('.cardstories_next_game_author', next_game_dom).css('display'), 'block');
         equal($('.cardstories_next_game_player', next_game_dom).css('display'), 'none');
 
@@ -3571,7 +3575,8 @@ asyncTest("on_next_owner_change", 9, function() {
     });
 });
 
-test("advertise", 11, function() {
+asyncTest("advertise", 12, function() {
+    var root = $('#qunit-fixture .cardstories');
     var owner_id = 15;
     var game_id = 100;
     var element = $('#qunit-fixture .cardstories_invitation .cardstories_owner');
@@ -3586,11 +3591,25 @@ test("advertise", 11, function() {
         ok(options.async === false);
     };
 
+    // The modal should be closed twice:
+    // - after clicking the submit button
+    // - after clicking the close button at the end of this test
+    // Keep a counter to be able to resume the tests after both dialogs have been
+    // asynchronously closed.
+    var close_count = 0;
+    $.cardstories.close_modal = function(modal, overlay) {
+        ok(modal.hasClass('cardstories_advertise'), 'the advertise dialog gets closed');
+        close_count++;
+        if (close_count == 2) {
+            start();
+        }
+    };
+
     // the list of invitations is filled by the user
     $.cookie('CARDSTORIES_INVITATIONS', null);
     var text = " \n \t player1 \n\n   \nplayer2";
     textarea.val(text);
-    $.cardstories.advertise(owner_id, game_id, element);
+    $.cardstories.advertise(owner_id, game_id, element, root);
     submit_button.click();
     equal($.cookie('CARDSTORIES_INVITATIONS'), text);
     equal(feedback.css('display'), 'block', 'Feedback text is visible after submitting');
@@ -3599,12 +3618,12 @@ test("advertise", 11, function() {
 
     // the list of invitations is retrieved from the cookie
     textarea.val('UNEXPECTED');
-    $.cardstories.advertise(owner_id, game_id, element);
+    $.cardstories.advertise(owner_id, game_id, element, root);
     equal(textarea.val(), text);
 
     $.cookie('CARDSTORIES_INVITATIONS', null);
     textarea.val('');
-    $.cardstories.advertise(owner_id, game_id, element);
+    $.cardstories.advertise(owner_id, game_id, element, root);
 
     // button should be enabled only when text is not blank
     text = 'player1';
@@ -3616,11 +3635,12 @@ test("advertise", 11, function() {
     invite_button.click();
     equal(textarea.val(), text);
 
+    // Clicking on the close button closes the dialog.
     $('.cardstories_advertise_close', advertise_dialog).click();
-    equal(advertise_dialog.css('display'), 'none', 'clicking the close button hides the dialog');
 });
 
-test("advertise invitation email separators", 3, function() {
+asyncTest("advertise invitation email separators", 3, function() {
+    var root = $('#qunit-fixture .cardstories');
     var owner_id = 15;
     var game_id = 100;
     var element = $('#qunit-fixture .cardstories_invitation .cardstories_owner');
@@ -3633,6 +3653,8 @@ test("advertise invitation email separators", 3, function() {
         equal(options.url, $.cardstories.url + '?action=invite&owner_id=' + owner_id + '&game_id=' + game_id + '&player_id=player1&player_id=player2');
     };
 
+    $.cardstories.close_modal = function() { start(); };
+
     var text1 = " \n \t player1 \n\n   \nplayer2";
     var text2 = "player1;player2 ";
     var text3 = " player1,  player2;\n";
@@ -3640,7 +3662,7 @@ test("advertise invitation email separators", 3, function() {
     $.each([text1, text2, text3], function(i, text) {
         $.cookie('CARDSTORIES_INVITATIONS', null);
         textarea.val(text);
-        $.cardstories.advertise(owner_id, game_id, element);
+        $.cardstories.advertise(owner_id, game_id, element, root);
         submit_button.click();
     });
 });
