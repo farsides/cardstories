@@ -76,7 +76,11 @@
     <a href="?skin=picked_too_late">picked too late</a>
     <a href="?skin=voted_too_late">voted too late</a>
   </div>
-  <div style="margin-bottom: 60px"></div> <!-- Give space for the "create a game" -->
+  <div href="#" class="cardstories_skin cardstories_skin_table" style="text-align:right; display:none">
+    <a href="#" class="cardstories_owner_change cardstories_owner_change_self">owner_change_self</a>
+    <a href="#" class="cardstories_owner_change">owner_change_other</a>
+  </div>
+  <div class="cardstories_not_skin" style="margin-bottom: 60px"></div> <!-- Give space for the "create a game" -->
   <div class="cardstories" data-sounds='{"ring": "audio/ring.mp3", "pop": "audio/pop.mp3", "join": "audio/join.mp3", "score_lost": "audio/lost.mp3", "score_won": "audio/won.mp3", "score_xylophone": "audio/xylophone.mp3", "score_pinball": "audio/pinball.mp3", "score_bell": "audio/bell.mp3", "score_echo": "audio/echo.mp3"}'></div>
   <script>
     // Path to soundManager SWF files.
@@ -91,6 +95,7 @@
       var skin = $.cardstories.url_param('skin');
       if (skin !== null) {
         $('.cardstories_skin').show();
+        $('.cardstories_not_skin').hide();
         $.cardstories.skin(skin, cardstories);
       } else {
         cardstories.cardstories($.cardstories.url_param('player_id'), $.cardstories.url_param('game_id'));

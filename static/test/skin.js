@@ -16,15 +16,15 @@
 //
 (function($) {
 
-    function stub_service(response, callback) {
-        var original_ajax = $.cardstories.ajax;
-        $.cardstories.ajax = function(opts) {
-            $.cardstories.ajax = original_ajax;
-            opts.success(response);
-        };
-    }
-
     $.cardstories.skin = function(skin, root) {
+        var stub_service = function(response, callback) {
+            var original_ajax = $.cardstories.ajax;
+            $.cardstories.ajax = function(opts) {
+                $.cardstories.ajax = original_ajax;
+                opts.success(response);
+            };
+        };
+
         // Stub out poll to not try to poll non-existing games.
         $.cardstories.poll = function() {};
         $.cardstories.poll_plugin = function() {};
@@ -42,6 +42,37 @@
                     'avatar_url': '/static/css/images/avatars/default/' + player_id % 6 + '.jpg' };
         };
 
+        // Stub the table interactions.
+        var game2table;
+        var orig_on_next_owner_change = $.cardstories_table.on_next_owner_change;
+        var current_player_id;
+        var owner_change_callback;
+        $.cardstories_table.on_next_owner_change = function(player_id, game_id, root, callback) {
+            owner_change_callback = callback;
+            current_player_id = player_id;
+        };
+
+        $('.cardstories_owner_change').unbind('click').click(function() {
+            var next_owner_id;
+            if (owner_change_callback) {
+                if ($(this).hasClass('cardstories_owner_change_self')) {
+                    next_owner_id = current_player_id;
+                } else {
+                    var player_ids = $.map(game.players, function(p) { return p.id; });
+                    // Remove self and current next owner from potential candidates.
+                    player_ids = $.grep(player_ids, function(id) {
+                        return !(id === current_player_id || id === game2table[game.id].next_owner_id);
+                    });
+                    // Return a random candidate.
+                    next_owner_id = player_ids[Math.floor(Math.random() * player_ids.length)];
+
+                }
+                game2table[game.id].next_owner_id = next_owner_id;
+                owner_change_callback();
+            }
+            return false;
+        });
+
         if (skin === 'create_pick_card') {
             game = {
                 id: 100,
@@ -50,7 +81,7 @@
                 sentence: null,
                 players: [
                     {id: 1, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0},
-                    {id: 2, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0},
+                    {id: 2, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0}
                 ]
             };
             $.cardstories.create_pick_card(11, game, root);
@@ -94,7 +125,7 @@
                     {id: 1, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0},
                     {id: 2, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0},
                     {id: 3, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0},
-                    {id: 4, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0},
+                    {id: 4, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0}
                 ]
             };
             $.cardstories.create_write_sentence(11, game, root);
@@ -420,7 +451,7 @@
                            score_prev: null,
                            level_prev: null}]
             };
-            var game2table = {};
+            game2table = {};
             game2table[game_id] = {
                 next_game_id: null,
                 next_owner_id: player_id,
@@ -507,7 +538,7 @@
                            score_prev: null,
                            level_prev: null}]
             };
-            var game2table = {};
+            game2table = {};
             game2table[game_id] = {
                 next_game_id: null,
                 next_owner_id: 2,
@@ -582,7 +613,7 @@
                            score_prev: null,
                            level_prev: null}]
             };
-            var game2table = {};
+            game2table = {};
             game2table[game.id] = {
                 next_game_id: null,
                 next_owner_id: 4,
@@ -667,7 +698,7 @@
                            score_prev: null,
                            level_prev: null}]
             };
-            var game2table = {};
+            game2table = {};
             game2table[game.id] = {
                 next_game_id: null,
                 next_owner_id: 4,
