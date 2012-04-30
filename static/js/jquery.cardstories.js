@@ -3728,29 +3728,10 @@
                     $this.complete_display_votes(game, element, root, next);
                 });
 
-                // Get the player
-                var player;
-                for (var i=0; i < game.players.length; i++) {
-                    if (game.players[i].id == player_id) {
-                        player = game.players[i];
-                    }
-                }
-
-                // Only show the results/continue button if this is an active player
-                // (was participating in the game, is not an anonymous viewer)
-                if (player) {
-                    // Show results box, but only if the player voted (or the player is the GM).
-                    if (player.vote !== null || game.owner) {
-                        q.queue('chain', function(next) {
-                            $this.complete_display_results(player, game, element, root, next);
-                        });
-                    }
-
-                    // Show next game box/button
-                    q.queue('chain', function(next) {
-                        $this.complete_display_next_game(player, game, element, root, next);
-                    });
-                }
+                // Show the results box with next game info.
+                q.queue('chain', function(next) {
+                    $this.complete_display_results_and_next_game(player_id, game, element, root, next);
+                });
 
                 // Resolve deferred.
                 q.queue('chain', function(next) {
@@ -3764,6 +3745,45 @@
             }
 
             return deferred;
+        },
+
+        complete_display_results_and_next_game: function(player_id, game, element, root, cb) {
+            var $this = this;
+
+            // Get the player
+            var player;
+            for (var i=0; i < game.players.length; i++) {
+                if (game.players[i].id == player_id) {
+                    player = game.players[i];
+                }
+            }
+
+            var q = $({});
+
+            // Only show the results/continue button if this is an active player
+            // (was participating in the game, is not an anonymous viewer)
+            if (player) {
+                // Show results box, but only if the player voted (or the player is the GM).
+                var show_results_box = player.vote !== null || game.owner;
+                if (show_results_box) {
+                    q.queue('chain', function(next) {
+                        $this.complete_display_results(player, game, element, root, next);
+                    });
+                }
+
+                // Show next game box/button
+                q.queue('chain', function(next) {
+                    $this.complete_display_next_game(!show_results_box, player_id, game, element, root, next);
+                });
+            }
+
+            q.queue('chain', function(next) {
+                if (cb) {
+                    cb();
+                }
+            });
+
+            q.dequeue('chain');
         },
 
         complete_display_board: function(game, element, root) {
@@ -3928,42 +3948,43 @@
             q.dequeue('chain');
         },
 
-        complete_close_results_box: function(box, element, cb) {
+        complete_fade_out_results_box: function(box, element, cb) {
             var $this = this;
             var continue_btn = $('.cardstories_complete_continue > img', element);
             var next_game = $('.cardstories_next_game', element);
-            var btn_meta = continue_btn.metadata({type: 'attr', name: 'data'});
-            // Save original dimensions and font size of the continue button, to be able
-            // to restore it later.
-            var btn_width = continue_btn.css('width');
-            var btn_height = continue_btn.css('height');
-            var btn_fontsize = continue_btn.css('font-size');
-            var animate_continue_btn = function() {
-                // Animate the button out.
-                $this.animate_scale(true, 5, 500, continue_btn, function() {
-                    // Restore continue button to its original dimensions and move it to
-                    // the center of the screen.
-                    continue_btn.css({
-                        width: btn_width,
-                        height: btn_height,
-                        'font-size': btn_fontsize,
-                        top: btn_meta.center_top,
-                        left: btn_meta.center_left
-                    });
-                    // Animate it back in.
-                    $this.animate_scale(false, 5, 500, continue_btn, cb);
-                });
-            };
-            // Fade box and next_game info panel out. A callback will be invoked twice
-            // (once for each element), so make sure to only call animate_continue_btn()
-            // after the last of the two fadeOut callbacks has fired.
-            var count = 0;
-            box.add(next_game).fadeOut('slow', function() {
+
+            // Mark the element with a cardstories_results_closed class.
+            element.addClass('cardstories_results_closed');
+
+            // Make sure to only start animating the continue button out once both,
+            // the box and the next_game info have finished fading out.
+            var box_deferred = $.Deferred();
+            var next_game_deferred = $.Deferred();
+            box.fadeOut('slow', function() {
                 $(this).hide(); // A workaround for http://bugs.jquery.com/ticket/8892
-                count++;
-                if (count === 2) {
-                    animate_continue_btn();
-                }
+                box_deferred.resolve();
+            });
+            next_game.fadeOut('slow', function() {
+                $(this).hide(); // A workaround for http://bugs.jquery.com/ticket/8892
+                next_game_deferred.resolve();
+            });
+            $.when(box_deferred, next_game_deferred).then(function() {
+                // Animate the button out.
+                $this.animate_scale(true, 5, 500, continue_btn, cb);
+            });
+        },
+
+        complete_close_results_box: function(box, element, cb) {
+            var $this = this;
+            $this.complete_fade_out_results_box(box, element, function() {
+                var continue_btn = $('.cardstories_complete_continue', element);
+                continue_btn.addClass('cardstories_centered');
+                var continue_img = $('> img', continue_btn);
+                // Reset inline styles that might have been left over by
+                // previous animations.
+                continue_img.css({top: '', left: ''});
+                // Animate it in.
+                $this.animate_scale(false, 5, 500, continue_img, cb);
             });
         },
 
@@ -4188,65 +4209,104 @@
             q.dequeue('chain');
         },
 
-        complete_display_next_game: function(player, game, element, root, cb) {
+        complete_update_next_author_info: function(next_owner_id, player_id, element) {
+            var next_owner_info = this.get_player_info_by_id(next_owner_id);
+            // Show who is going to create the next game
+            if (next_owner_id === player_id) {
+                $('.cardstories_next_game_author', element).css('display', 'block');
+            } else {
+                $('.cardstories_next_author_name', element).html(next_owner_info.name);
+                $('.cardstories_next_game_player', element).css('display', 'block');
+            }
+        },
+
+        complete_display_next_game: function(centered, player_id, game, element, root, cb) {
             var $this = this;
             var box = $('.cardstories_next_game', element);
             var continue_button = $('.cardstories_complete_continue', element);
             var modal = $('.cardstories_modal', element);
             var overlay = $('.cardstories_modal_overlay', element);
 
-            // Readjust the positioning if player didn't vote
-            if (player.vote === null && !game.owner) {
-                box.addClass('cardstories_didnt_vote');
-                continue_button.addClass('cardstories_didnt_vote');
+            // If the results have been manually closed by the player,
+            // the next game info should be displayed centered, regardless of what
+            // the actual centered parameter passed to this function was.
+            centered = centered || element.hasClass('cardstories_results_closed');
+
+            // Readjust the positioning if displaying the centered version.
+            if (centered) {
+                box.addClass('cardstories_centered');
+                continue_button.addClass('cardstories_centered');
             }
 
-            // Show who is going to create the next game
-            var next_owner_id = $.cardstories_table.get_next_owner_id(player.id, game.id, root);
-            if (next_owner_id == player.id) {
-                $('.cardstories_next_game_author', element).css('display', 'block');
-            } else {
-                var next_owner_info = $this.get_player_info_by_id(next_owner_id);
-                $('.cardstories_next_author_name', element).html(next_owner_info.name);
-
-                $('.cardstories_next_game_player', element).css('display', 'block');
-            }
+            var next_owner_id = $.cardstories_table.get_next_owner_id(player_id, game.id, root);
+            $this.complete_update_next_author_info(next_owner_id, player_id, element);
 
             // Enable "continue" button
             continue_button.unbind('click').click(function() {
-                // Ask the table plugin to switch to the next game as soon as possible
-                var is_ready = $.cardstories_table.load_next_game_when_ready(true, player.id, game.id, root);
-                if(!is_ready) {
-                    // Waiting message while the next author is creating the story
-                    $this.display_modal(modal, overlay);
+                continue_button.removeClass('cardstories_popped');
+                // Fade out the box and animate the button out.
+                var results_box;
+                if (game.owner) {
+                    results_box = $('.cardstories_results.author', element);
+                } else {
+                    results_box = $('.cardstories_results.player', element);
                 }
+
+                $this.complete_fade_out_results_box(results_box, element, function() {
+                    // Ask the table plugin to switch to the next game as soon as possible
+                    var is_ready = $.cardstories_table.load_next_game_when_ready(true, player_id, game.id, root);
+                    if (!is_ready) {
+                        // Waiting message while the next author is creating the story
+                        $this.display_modal(modal, overlay);
+                    }
+                });
             });
 
             // Reset - Called when/if the next owner changes
-            $.cardstories_table.on_next_owner_change(player.id, game.id, root, function(next_owner_id) {
-                if(next_owner_id === player.id) {
-                    // Need the player to click on the "continue" button again
-                    // to avoid brutally switching to a new game creation without explanation
-                    $.cardstories_table.load_next_game_when_ready(false, player.id, game.id, root);
-                    $this.close_modal(modal, overlay);
-                    continue_button.fadeIn();
-                }
+            $.cardstories_table.on_next_owner_change(player_id, game.id, root, function(next_owner_id) {
                 $('.cardstories_next_game_author', element).css('display', 'none');
                 $('.cardstories_next_game_player', element).css('display', 'none');
-                $this.complete_display_next_game(player, game, element, root);
+                var modal_visible = modal.is(':visible');
+
+                // If the new next owner is the current player, we want him to click on the
+                // "continue" button again to avoid brutally switching to a new game creation
+                // without explanation.
+                if (next_owner_id === player_id) {
+                    var q = $({});
+
+                    if (modal_visible) {
+                        q.queue('chain', function(next) {
+                            $this.close_modal(modal, overlay, next);
+                        });
+                    }
+                    $.cardstories_table.load_next_game_when_ready(false, player_id, game.id, root);
+
+                    q.queue('chain', function(next) {
+                        $this.complete_display_next_game(centered || modal_visible, player_id, game, element, root);
+                    });
+
+                    q.dequeue('chain');
+                // If the next owner is not the current player simply update the next author name.
+                } else {
+                    $this.complete_update_next_author_info(next_owner_id, player_id, element);
+                }
             });
 
             var q = $({});
 
-            // Pop in the continue button
-            q.queue('chain', function(next) {
-                var continue_img = continue_button.find('img');
-                continue_button.show();
-                $this.animate_scale(false, 5, 300, continue_img, next);
-            });
+            // Pop in the continue button, if it hasn't been popped in yet.
+            if (!continue_button.hasClass('cardstories_popped')) {
+                q.queue('chain', function(next) {
+                    var continue_img = continue_button.find('img');
+                    continue_img.css({left: '', top: ''});
+                    continue_button.show();
+                    continue_button.addClass('cardstories_popped');
+                    $this.animate_scale(false, 5, 300, continue_img, next);
+                });
+            }
 
-            // If player voted or is the GM show a fancier animation.
-            if (player.vote !== null || game.owner) {
+            // If not displaying the centered version, show the fancier animation.
+            if (!centered) {
                 // Slide down the next game info box
                 q.queue('chain', function(next) {
                     var final_bottom = parseInt(box.css('bottom'), 10);
@@ -4264,9 +4324,10 @@
                     });
                 });
             } else {
-                // Player didn't vote, so don't show the fancy animation,
-                // because results box is not visible.
+                // Reset the bottom if it has been fiddled with.
+                // Don't show the fancy animation, because results box is not visible.
                 q.queue('chain', function(next) {
+                    box.css('bottom', '');
                     $this.animate_scale(false, 5, 300, box, next);
                 });
             }

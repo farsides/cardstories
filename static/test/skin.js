@@ -37,14 +37,22 @@
         $.cardstories_audio.init(undefined, undefined, root);
 
         // Don't try to resolve player info
+        var rand_last_name = function() {
+            if (Math.random() < 0.5) {
+                return 'Name';
+            } else {
+                return 'Long Last Nameeeeeeeeee'
+            }
+        };
         $.cardstories.get_player_info_by_id = function(player_id) {
-            return {'name': 'Player ' + player_id + ' Long Last Nameeeeeeeeeee',
-                    'avatar_url': '/static/css/images/avatars/default/' + player_id % 6 + '.jpg' };
+            return {
+                name: 'Player ' + player_id + ' ' + rand_last_name(),
+                avatar_url: '/static/css/images/avatars/default/' + player_id % 6 + '.jpg'
+            };
         };
 
         // Stub the table interactions.
         var game2table;
-        var orig_on_next_owner_change = $.cardstories_table.on_next_owner_change;
         var current_player_id;
         var owner_change_callback;
         $.cardstories_table.on_next_owner_change = function(player_id, game_id, root, callback) {
@@ -65,10 +73,9 @@
                     });
                     // Return a random candidate.
                     next_owner_id = player_ids[Math.floor(Math.random() * player_ids.length)];
-
                 }
                 game2table[game.id].next_owner_id = next_owner_id;
-                owner_change_callback();
+                owner_change_callback(next_owner_id);
             }
             return false;
         });

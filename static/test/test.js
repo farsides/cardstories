@@ -1535,7 +1535,7 @@ asyncTest("invitation_owner_go_vote_confirm", 28, function() {
 
         ok(card_1.is(':visible'), 'card 1 is visible after animation');
         ok(card_2.is(':visible'), 'card 2 is visible after animation');
-        ok(card_3.is(':hidden'), 'card 3 is not visible after animation because the player didn not pick a card');
+        ok(card_3.is(':hidden'), 'card 3 is not visible after animation because the player did not pick a card');
 
         notEqual(card_1.position().left, final_left_1, 'card 1 is further from the slot than its final position');
         notEqual(card_2.position().left, final_left_2, 'card 2 is further from the slot than its final position');
@@ -3315,7 +3315,7 @@ asyncTest("complete anonymous", 3, function() {
     });
 });
 
-asyncTest("complete close results box author", 10, function() {
+asyncTest("complete close results box author", 11, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var owner_id = 10;
@@ -3326,9 +3326,11 @@ asyncTest("complete close results box author", 10, function() {
         owner_id: owner_id,
         board: [],
         winner_card: 30,
-        players: [ { 'id': owner_id, 'vote': null, 'win': 'y', 'picked': 30, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
-                     { 'id': player1, 'vote': 30, 'win': 'y', 'picked': 31, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
-                     { 'id': player2, 'vote': 31, 'win': 'n', 'picked': 32, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null } ]
+        players: [
+            {id: owner_id, vote: null, win: 'y', picked: 30, cards: [], score: null, level: null, score_next: null, score_left: null},
+            {id: player1, vote: 30, win: 'y', picked: 31, cards: [], score: null, level: null, score_next: null, score_left: null},
+            {id: player2, vote: 31, win: 'n', picked: 32, cards: [], score: null, level: null, score_next: null, score_left: null}
+        ]
     };
     $.cardstories_table = {
         get_next_owner_id: function(player_id, game_id, root) { return player1; },
@@ -3368,6 +3370,7 @@ asyncTest("complete close results box author", 10, function() {
             notEqual(continue_btn.css('display'), 'none', 'continue button is still visible');
             ok(continue_btn.position().top < initial_top, 'continue button is positioned higher, towards the center');
             ok(continue_btn.position().left < initial_left, 'continue button is positioned more to the left, towards the center');
+            ok(element.hasClass('cardstories_results_closed'), 'the element is marked with the special cardstories_results_closed class');
             start();
         });
     });
@@ -3455,34 +3458,35 @@ test("canceled", 5, function() {
 
 asyncTest("next_game_as_author", 2, function() {
     var player_id = 10;
-    var game_author = {
-        'id': 7,
-        'owner': true,
-        'owner_id': player_id,
-        'state': 'fake_state',
-        'winner_card': 15,
-        'board': [],
-        'players': [{ 'id': player_id, 'vote': null, 'win': 'y', 'picked': 30, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null }]
+    var game = {
+        id: 7,
+        owner: true,
+        owner_id: player_id,
+        state: 'fake_state',
+        winner_card: 15,
+        board: [],
+        players: [
+            {id: player_id, vote: null, win: 'y', picked: 30, cards: [], score: null, level: null, score_next: null, score_left: null}
+        ]
     };
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var next_game_dom = $('.cardstories_next_game', element);
-    var play_again_button = $('.cardstories_play_again', next_game_dom);
-    $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player_id; },
-                           'load_next_game_when_ready': function(ready, player_id, game_id, root) { return true; },
-                           'on_next_owner_change': function(player_id, game_id, root, cb) {} };
+    var continue_button = $('.cardstories_play_again', next_game_dom);
+    $.cardstories_table = {
+        get_next_owner_id: function(player_id, game_id, root) { return player_id; },
+        load_next_game_when_ready: function(ready, player_id, game_id, root) { return true; },
+        on_next_owner_change: function(player_id, game_id, root, cb) {}
+    };
 
-    orig_display_modal = $.cardstories.display_modal;
     $.cardstories.display_modal = function(modal, overlay) {
         ok(false, 'modal should not appear when ready');
     };
 
-    $.cardstories.complete(player_id, game_author, root).done(function() {
+    $.cardstories.complete(player_id, game, root).done(function() {
         equal($('.cardstories_next_game_author', next_game_dom).css('display'), 'block');
         equal($('.cardstories_next_game_player', next_game_dom).css('display'), 'none');
-        play_again_button.click();
-
-        $.cardstories.display_modal = orig_display_modal;
+        continue_button.click();
         start();
     });
 });
@@ -3490,23 +3494,26 @@ asyncTest("next_game_as_author", 2, function() {
 asyncTest("next_game_as_player", 4, function() {
     var player_id = 10;
     var game_author = {
-        'id': 7,
-        'owner': true,
-        'owner_id': player_id,
-        'state': 'fake_state',
-        'winner_card': 15,
-        'board': [],
-        'players': [{ 'id': player_id, 'vote': null, 'win': 'y', 'picked': 30, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null }]
+        id: 7,
+        owner: true,
+        owner_id: player_id,
+        state: 'fake_state',
+        winner_card: 15,
+        board: [],
+        players: [
+            {id: player_id, vote: null, win: 'y', picked: 30, cards: [], score: null, level: null, score_next: null, score_left: null}
+        ]
     };
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var next_game_dom = $('.cardstories_next_game', element);
-    var play_again_button = $('.cardstories_complete_continue', element);
-    $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player_id+1; },
-                           'load_next_game_when_ready': function(ready, player_id, game_id, root) { return false; },
-                           'on_next_owner_change': function(player_id, game_id, root, cb) {} };
+    var continue_button = $('.cardstories_complete_continue', element);
+    $.cardstories_table = {
+        get_next_owner_id: function(player_id, game_id, root) { return player_id+1; },
+        load_next_game_when_ready: function(ready, player_id, game_id, root) { return false; },
+        on_next_owner_change: function(player_id, game_id, root, cb) {}
+    };
 
-    orig_display_modal = $.cardstories.display_modal;
     $.cardstories.display_modal = function(modal, overlay) {
         equal(modal.attr('class'), 'cardstories_modal');
         equal(overlay.attr('class'), 'cardstories_modal_overlay');
@@ -3515,63 +3522,252 @@ asyncTest("next_game_as_player", 4, function() {
     $.cardstories.complete(player_id, game_author, root).done(function() {
         equal($('.cardstories_next_game_author', next_game_dom).css('display'), 'none');
         equal($('.cardstories_next_game_player', next_game_dom).css('display'), 'block');
-        play_again_button.click();
-
-        $.cardstories.display_modal = orig_display_modal;
+        continue_button.click();
         start();
     });
 });
 
-asyncTest("on_next_owner_change", 9, function() {
-    var player_id = 10;
-    var game_author = {
-        'id': 7,
-        'owner': true,
-        'owner_id': player_id,
-        'state': 'fake_state',
-        'winner_card': 15,
-        'board': [],
-        'players': [{ 'id': player_id, 'vote': null, 'win': 'y', 'picked': 30, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null }]
+asyncTest("on_next_owner_change", 35, function() {
+    var this_player_id = 10;
+    var other_player_id = 17;
+    var yet_another_player_id = 18;
+    var game = {
+        id: 7,
+        owner: true,
+        owner_id: this_player_id,
+        state: 'complete',
+        winner_card: 15,
+        board: [],
+        players: [
+            {id: this_player_id, vote: null, win: 'y', picked: 30, cards: [], score: null, level: null, score_next: null, score_left: null},
+            {id: other_player_id, vote: null, win: 'n', picked: 31, cards: [], score: null, level: null, score_next: null, score_left: null},
+            {id: yet_another_player_id, vote: null, win: 'y', picked: 32, cards: [], score: null, level: null, score_next: null, score_left: null}
+        ]
     };
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var next_game_dom = $('.cardstories_next_game', element);
-    var play_again_button = $('.cardstories_complete_continue', element);
-    var owner_change_cb = null;
-    $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player_id+1; },
-                           'load_next_game_when_ready': function(ready, player_id, game_id, root) { return false; },
-                           'on_next_owner_change': function(player_id, game_id, root, cb) { owner_change_cb = cb; } };
+    var next_game_author_div = $('.cardstories_next_game_author', next_game_dom);
+    var next_game_player_div = $('.cardstories_next_game_player', next_game_dom);
+    var continue_button = $('.cardstories_complete_continue', element);
+    var continue_img = continue_button.find('> img');
+    var next_game_modal = $('.cardstories_modal', element);
+    var owner_change_cb;
+    var next_owner_id = other_player_id;
 
-    // First next_owner
-    orig_display_modal = $.cardstories.display_modal;
-    $.cardstories.display_modal = function(modal, overlay) {
-        equal(modal.attr('class'), 'cardstories_modal');
-        equal(overlay.attr('class'), 'cardstories_modal_overlay');
+    $.cardstories_table = {
+        get_next_owner_id: function(player_id, game_id, root) { return next_owner_id; },
+        load_next_game_when_ready: function(ready, player_id, game_id, root) { return false; },
+        on_next_owner_change: function(player_id, game_id, root, cb) { owner_change_cb = cb; }
     };
 
-    $.cardstories.complete(player_id, game_author, root).done(function() {
-        equal($('.cardstories_next_game_author', next_game_dom).css('display'), 'none');
-        equal($('.cardstories_next_game_player', next_game_dom).css('display'), 'block');
-        play_again_button.click();
+    var original_display_modal = $.cardstories.display_modal;
+    $.cardstories.display_modal = function(modal, overlay) {
+        equal(modal.attr('class'), 'cardstories_modal', 'the dialog is displayed');
+        equal(overlay.attr('class'), 'cardstories_modal_overlay', 'the overlay is displayed');
+        original_display_modal.call($.cardstories, modal, overlay);
+    };
 
-        // Next owner change to current player
-        $.cardstories_table.load_next_game_when_ready = function(ready_for_next_game, player_id, game_id, root) {
-            equal(ready_for_next_game, false);
-        };
-        $.cardstories_table.get_next_owner_id = function(player_id, game_id, root) { return player_id; };
-        orig_close_modal = $.cardstories.close_modal;
-        $.cardstories.close_modal = function(modal, overlay) {
-            equal(modal.attr('class'), 'cardstories_modal');
-            equal(overlay.attr('class'), 'cardstories_modal_overlay');
-        };
-        owner_change_cb(player_id);
+    // Make sure element is visible.
+    element.parents().andSelf().show();
 
-        equal($('.cardstories_next_game_author', next_game_dom).css('display'), 'block');
-        equal($('.cardstories_next_game_player', next_game_dom).css('display'), 'none');
+    $.cardstories.complete(this_player_id, game, root).done(function() {
+        equal(next_game_author_div.css('display'), 'none', 'the author text is hidden');
+        notEqual(next_game_player_div.css('display'), 'none', 'the player text is visible');
+        ok(next_game_player_div.text().match('Player ' + other_player_id), "Next owner's name is shown");
+        notEqual(next_game_dom.css('display'), 'none', 'Next game info is visible');
+        notEqual(continue_img.css('display'), 'none', 'Continue button is visible');
+        equal(next_game_modal.css('display'), 'none', 'the please wait dialog is NOT visible');
+        ok(!next_game_dom.hasClass('cardstories_centered'), 'the game info is not centered');
+        ok(!continue_button.hasClass('cardstories_centered'), 'the continue button is not centered');
 
-        $.cardstories.display_modal = orig_display_modal;
-        $.cardstories.close_modal = orig_close_modal;
-        start();
+        // Switch the next owner to self.
+        next_owner_id = this_player_id;
+        owner_change_cb(this_player_id);
+
+        notEqual(next_game_author_div.css('display'), 'none', 'the author text is visible');
+        equal(next_game_player_div.css('display'), 'none', 'the player text is hidden');
+        equal(next_game_modal.css('display'), 'none', 'the please wait dialog is NOT visible');
+
+        // Switch the next owner to back to another player.
+        next_owner_id = other_player_id;
+        owner_change_cb(other_player_id);
+
+        equal(next_game_author_div.css('display'), 'none', 'the author text is hidden');
+        notEqual(next_game_player_div.css('display'), 'none', 'the player text is visible');
+        equal(next_game_modal.css('display'), 'none', 'the please wait dialog is NOT visible');
+        ok(next_game_player_div.text().match('Player ' + other_player_id), "Next owner's name is shown");
+
+        // Click the continue button.
+        continue_button.click();
+
+        setTimeout(function() {
+            // After clicking the continue button, the next game info and the continue button
+            // should be hidden, and a modal 'please wait' dialog should be displayed instead.
+            equal(next_game_author_div.css('display'), 'none', 'the author text is hidden');
+            notEqual(next_game_player_div.css('display'), 'none', 'the player text is visible');
+            equal(continue_img.css('display'), 'none', 'continue button is not visible')
+            notEqual(next_game_modal.css('display'), 'none', 'the please wait dialog is visible');
+            ok(next_game_modal.text().match('Player ' + other_player_id), "Next owner's name is shown");
+
+            // Change owner to another player. Only next owner's name in the dialog
+            // should change.
+            next_owner_id = yet_another_player_id;
+            owner_change_cb(yet_another_player_id);
+
+            equal(next_game_author_div.css('display'), 'none', 'the author text is hidden');
+            notEqual(next_game_player_div.css('display'), 'none', 'the player text is visible');
+            equal(continue_img.css('display'), 'none', 'continue button is not visible')
+            notEqual(next_game_modal.css('display'), 'none', 'the please wait dialog is visible');
+            ok(next_game_modal.text().match('Player ' + yet_another_player_id), "Next owner's name is shown");
+
+            // Change the owner to this player. The next game info and continue button
+            // should be shown again and the dialog should be closed.
+            // The continue button and next game info should be shown centered.
+            var original_close_modal = $.cardstories.close_modal;
+            $.cardstories.close_modal = function(modal, overlay, cb) {
+                equal(modal.attr('class'), 'cardstories_modal', 'the dialog is closed');
+                equal(overlay.attr('class'), 'cardstories_modal_overlay', 'the overlay is closed');
+                original_close_modal.call($.cardstories, modal, overlay, cb);
+            };
+
+            next_owner_id = this_player_id;
+            owner_change_cb(this_player_id);
+
+            notEqual(next_game_author_div.css('display'), 'none', 'the author text is visible');
+            equal(next_game_player_div.css('display'), 'none', 'the player text is hidden');
+            notEqual(continue_img.css('display'), 'none', 'continue button is visible again')
+            equal(next_game_modal.css('display'), 'none', 'the please wait dialog is closed');
+            ok(next_game_dom.hasClass('cardstories_centered'), 'the game info is shown centered');
+            ok(continue_button.hasClass('cardstories_centered'), 'the continue button is shown centered');
+
+            start();
+
+        }, 0);
+    });
+});
+
+asyncTest("on_next_owner_change after closing results", 34, function() {
+    var this_player_id = 10;
+    var other_player_id = 17;
+    var yet_another_player_id = 18;
+    var game = {
+        id: 7,
+        owner: true,
+        owner_id: this_player_id,
+        state: 'complete',
+        winner_card: 15,
+        board: [],
+        players: [
+            {id: this_player_id, vote: null, win: 'y', picked: 30, cards: [], score: null, level: null, score_next: null, score_left: null},
+            {id: other_player_id, vote: null, win: 'n', picked: 31, cards: [], score: null, level: null, score_next: null, score_left: null},
+            {id: yet_another_player_id, vote: null, win: 'y', picked: 32, cards: [], score: null, level: null, score_next: null, score_left: null}
+        ]
+    };
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_complete', root);
+    var next_game_dom = $('.cardstories_next_game', element);
+    var next_game_author_div = $('.cardstories_next_game_author', next_game_dom);
+    var next_game_player_div = $('.cardstories_next_game_player', next_game_dom);
+    var continue_button = $('.cardstories_complete_continue', element);
+    var continue_img = continue_button.find('> img');
+    var next_game_modal = $('.cardstories_modal', element);
+    var owner_change_cb;
+    var next_owner_id = other_player_id;
+
+    $.cardstories_table = {
+        get_next_owner_id: function(player_id, game_id, root) { return next_owner_id; },
+        load_next_game_when_ready: function(ready, player_id, game_id, root) { return false; },
+        on_next_owner_change: function(player_id, game_id, root, cb) { owner_change_cb = cb; }
+    };
+
+    // Make sure element is visible.
+    element.parents().andSelf().show();
+
+    $.cardstories.complete(this_player_id, game, root).done(function() {
+        equal(next_game_author_div.css('display'), 'none', 'the author text is hidden');
+        notEqual(next_game_player_div.css('display'), 'none', 'the player text is visible');
+        ok(next_game_player_div.text().match('Player ' + other_player_id), "Next owner's name is shown");
+        notEqual(next_game_dom.css('display'), 'none', 'Next game info is visible');
+        notEqual(continue_img.css('display'), 'none', 'Continue button is visible');
+        equal(next_game_modal.css('display'), 'none', 'the please wait dialog is NOT visible');
+        ok(!next_game_dom.hasClass('cardstories_centered'), 'the game info is not centered');
+        ok(!continue_button.hasClass('cardstories_centered'), 'the continue button is not centered');
+
+        // Close the results box (closing is by calling the corresponding
+        // function rather than simulating a click on the close button to
+        // be able to hook into its complete callback.
+        var box = $('.cardstories_results.author', element);
+        $.cardstories.complete_close_results_box(box, element, function() {
+            // The next game info should not be visible, neither should be the dialog.
+            equal(next_game_dom.css('display'), 'none', 'Next game info is NOT visible');
+            equal(next_game_modal.css('display'), 'none', 'the please wait dialog is NOT visible');
+            notEqual(continue_img.css('display'), 'none', 'Continue button is visible');
+
+            // Switch the next owner to to another player.
+            // Nothing should change.
+            next_owner_id = other_player_id;
+            owner_change_cb(other_player_id);
+
+            equal(next_game_dom.css('display'), 'none', 'Next game info is NOT visible');
+            equal(next_game_modal.css('display'), 'none', 'the please wait dialog is NOT visible');
+            notEqual(continue_img.css('display'), 'none', 'Continue button is visible');
+
+            // Switch the next owner to this player.
+            // The next game info should become visible.
+            next_owner_id = this_player_id;
+            owner_change_cb(this_player_id);
+
+            notEqual(next_game_dom.css('display'), 'none', 'Next game info is visible');
+            equal(next_game_modal.css('display'), 'none', 'the please wait dialog is NOT visible');
+            notEqual(continue_img.css('display'), 'none', 'Continue button is visible');
+
+            // Click the continue button.
+            continue_button.click();
+
+            setTimeout(function() {
+                // After clicking the continue button, the next game info and the continue button
+                // should be hidden, and a modal 'please wait' dialog should be displayed instead.
+                notEqual(next_game_author_div.css('display'), 'none', 'the author text is visible');
+                equal(next_game_player_div.css('display'), 'none', 'the player text is hidden');
+                equal(continue_img.css('display'), 'none', 'continue button is not visible')
+                notEqual(next_game_modal.css('display'), 'none', 'the please wait dialog is visible');
+
+                // Change owner to another player. Only next owner's name in the dialog
+                // should change.
+                next_owner_id = yet_another_player_id;
+                owner_change_cb(yet_another_player_id);
+
+                equal(next_game_author_div.css('display'), 'none', 'the author text is hidden');
+                notEqual(next_game_player_div.css('display'), 'none', 'the player text is visible');
+                equal(continue_img.css('display'), 'none', 'continue button is not visible')
+                notEqual(next_game_modal.css('display'), 'none', 'the please wait dialog is visible');
+                ok(next_game_modal.text().match('Player ' + yet_another_player_id), "Next owner's name is shown");
+
+                // Change the owner to this player. The next game info and continue button
+                // should be shown again and the dialog should be closed.
+                // The continue button and next game info should be shown centered.
+                var original_close_modal = $.cardstories.close_modal;
+                $.cardstories.close_modal = function(modal, overlay, cb) {
+                    equal(modal.attr('class'), 'cardstories_modal', 'the dialog is closed');
+                    equal(overlay.attr('class'), 'cardstories_modal_overlay', 'the overlay is closed');
+                    original_close_modal.call($.cardstories, modal, overlay, cb);
+                };
+
+                next_owner_id = this_player_id;
+                owner_change_cb(this_player_id);
+
+                notEqual(next_game_author_div.css('display'), 'none', 'the author text is visible');
+                equal(next_game_player_div.css('display'), 'none', 'the player text is hidden');
+                notEqual(continue_img.css('display'), 'none', 'continue button is visible again')
+                equal(next_game_modal.css('display'), 'none', 'the please wait dialog is closed');
+                ok(next_game_dom.hasClass('cardstories_centered'), 'the game info is shown centered');
+                ok(continue_button.hasClass('cardstories_centered'), 'the continue button is shown centered');
+
+                start();
+
+            }, 0);
+        });
     });
 });
 
