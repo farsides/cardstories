@@ -3137,7 +3137,7 @@ asyncTest("complete owner won", 14, function() {
     });
 });
 
-asyncTest("complete", 47, function() {
+asyncTest("complete", 49, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var owner_id = 10;
@@ -3216,6 +3216,8 @@ asyncTest("complete", 47, function() {
         var level_left = $('.cardstories_results.author .cardstories_results_level_left', element);
         equal($('> span', level_left).html(), owner_score_left, 'author level left score is visible');
         ok(level_left.position().left > 0, 'level left score is moved towards the right');
+        ok($('.cardstories_results_score_legend_char', element).length > 0, 'score legend has been tokenized');
+        equal($('.cardstories_results_score_legend_char', element).first().css('left'), '0px', 'score legend characters have moved into final position');
 
         notEqual($.inArray('score_won', sounds_played), -1, 'The score_won sound is played');
         notEqual($.inArray('score_xylophone', sounds_played), -1, 'The score_xylophone sound is played');

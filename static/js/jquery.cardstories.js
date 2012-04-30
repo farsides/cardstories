@@ -4084,10 +4084,80 @@
                     explanation.fadeIn('fast', next);
                 });
             }
+            
+            // Wrap each character of the legend in a <span>, so we can
+            // animate them individually.
+            var score_legend = $('.cardstories_results_score_legend', box);
+            var characters = score_legend.html().split('');
+            var len = characters.length;
+            for (var i = 0; i < len; i++) {
+                characters[i] = '<span class="cardstories_results_score_legend_char">' + characters[i] + '</span>';
+            }
+            var string = characters.join('');
+            score_legend.html(string);
+
+            // Queue each character's animation.
+            $.each($('.cardstories_results_score_legend_char', score_legend), function() {
+                var c = $(this);
+                q.queue('chain', function(next) {
+                    // All characters start at the same position.  To do so, we
+                    // start by storing the character's original distance from
+                    // the left border (which must be calculated because
+                    // positioning is relative).
+                    var left_to_parent = c.position().left;
+
+                    // Then add the starting position class, which defines
+                    // where the characters will start off, in relation to
+                    // top/left of the legend container.
+                    c.addClass('cardstories_results_score_legend_startpos');
+
+                    // However, since positioning for the character is
+                    // relative, we must compensate by subtracting the original
+                    // distance from the left border.
+                    var initial_left = parseInt(c.css('left')) - left_to_parent;
+                    c.css({'left': initial_left});
+
+                    // Store the initial 'top' value.
+                    var initial_top = parseInt(c.css('top'));
+                    
+                    // Now we can make the character visible, and set the
+                    // initial value for "text-indent", which will be hijacked
+                    // to guide the 2-dimensional animation.  This property was
+                    // chosen because it has no effect on the character.
+                    c.css({'visibility': 'visible', 'text-indent': 1});
+
+                    // We animate text-indent from 1 to 0, using default
+                    // easing.  This handily gives us a percentage-complete
+                    // value to apply to the 2 dimensions of the animation, at
+                    // each step, always ending at 0 (which in
+                    // relative-positioning, is the initial position of the
+                    // character).
+                    c.animate({'text-indent': 0}, {duration: 300, step: function(percent_complete) {
+                        // x increases linearly to 0.
+                        var x = initial_left * percent_complete;
+
+                        // y is an inverted parabola which intercepts the
+                        // x-axis a little to the right of the starting left
+                        // position, goes up and then comes down again to meet
+                        // the x-axis at 0, the final position of the
+                        // character: [y = -(x + i) * (x + j)/k], where -i and
+                        // -j are the x-intercepts of the parabola, and k
+                        // "flattens" it proportionately.
+                        var y = -x * (x - initial_left - initial_top)/initial_left;
+
+                        c.css({'left': x, 'top': y});
+                    }});
+
+                    next();
+                });
+
+                // Delay between characters.
+                $this.delay(q, 150, 'chain');
+            });
 
             // Show score and play the win or lost sound
             q.queue('chain', function(next) {
-                $('.cardstories_results_score_container', box).fadeIn('fast', next);
+                $('.cardstories_results_score', box).fadeIn('fast', next);
                 $.cardstories_audio.play(sound_id, root);
             });
 

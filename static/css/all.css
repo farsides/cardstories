@@ -2356,15 +2356,25 @@
     color: #E2D3BC;
     font-size: 7.4em;
     font-family: "Licon";
-    display: none;
 }
 
 .cardstories .cardstories_complete .cardstories_results .cardstories_results_score_container .cardstories_results_score_legend {
     float: left;
 }
 
+.cardstories .cardstories_complete .cardstories_results .cardstories_results_score_container .cardstories_results_score_legend_char {
+    position: relative;
+    visibility: hidden;
+}
+
+.cardstories .cardstories_complete .cardstories_results .cardstories_results_score_container .cardstories_results_score_legend_startpos {
+    top: 50px;
+    left: -80px;
+}
+
 .cardstories .cardstories_complete .cardstories_results .cardstories_results_score_container .cardstories_results_score {
     float: right;
+    display: none;
 }
 
 .cardstories .cardstories_complete .cardstories_results .cardstories_results_level_container {
