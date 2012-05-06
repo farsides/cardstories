@@ -2298,6 +2298,7 @@
     text-align: center;
     display: none;
     overflow: visible !important;
+    z-index: 1;
 }
 
 .cardstories .cardstories_complete .cardstories_results .cardstories_results_back {
@@ -2426,6 +2427,7 @@
 }
 
 .cardstories .cardstories_complete .cardstories_results .cardstories_results_level_legend {
+    display: none;
     top: 8px;
     width: 390px;
     height: 27px;
@@ -2446,6 +2448,7 @@
 }
 
 .cardstories .cardstories_complete .cardstories_results .cardstories_results_level_left {
+    display: none;
     position: absolute;
     bottom: 0;
     margin-left: -30px;
@@ -2455,6 +2458,44 @@
 
 .cardstories .cardstories_complete .cardstories_results .cardstories_play_again a > span {
     top: 0.36em !important;
+}
+
+.cardstories .cardstories_complete .cardstories_results_levelup_stars {
+    background: transparent url('images/complete_levelup_stars.png') no-repeat left top;
+    display: none;
+    position: absolute;
+    top: -12em;
+    left: 7em;
+    width: 432px;
+    height: 126px;
+}
+
+.cardstories .cardstories_complete .cardstories_results_levelup_fireworks_1 {
+    background: transparent url('images/complete_levelup_fireworks_1.png') no-repeat left top;
+    position: absolute;
+    width: 100px;
+    height: 91px;
+    z-index: -1;
+    top: 0;
+    display: none;
+}
+
+.cardstories .cardstories_complete .cardstories_results_levelup_fireworks_1_left {
+    left: 0.5em;
+}
+
+.cardstories .cardstories_complete .cardstories_results_levelup_fireworks_1_right {
+    right: 0.5em;
+}
+
+.cardstories .cardstories_complete .cardstories_results_levelup_fireworks_2 {
+    background: transparent url('images/complete_levelup_fireworks_2.png') no-repeat left top;
+    position: absolute;
+    width: 566px;
+    height: 170px;
+    top: -17em;
+    left: 0;
+    display: none;
 }
 
 .cardstories .cardstories_complete .cardstories_complete_continue {
@@ -2470,6 +2511,7 @@
     left: 49.0em;
     font-size: 10px;
     text-align: center;
+    z-index: 1;
 }
 
 .cardstories .cardstories_complete .cardstories_complete_continue.cardstories_centered > img {

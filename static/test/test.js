@@ -3436,6 +3436,82 @@ asyncTest("complete close results box player", 10, function() {
     });
 });
 
+asyncTest("complete levelup player", 4, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_complete', root);
+    var owner_id = 10;
+    var player1 = 1;
+    var player2 = 2;
+    var game = {
+        owner: false,
+        owner_id: owner_id,
+        board: [],
+        winner_card: 30,
+        players: [
+            {id: owner_id, vote: null, win: 'y', picked: 30, cards: [], level: null, level_prev: null, score_next: null, score_left: null},
+            {id: player1, vote: 30, win: 'y', picked: 31, cards: [], level: null, level_prev: null, score_next: null, score_left: null},
+            {id: player2, vote: 31, win: 'n', picked: 32, cards: [], level: 5, level_prev: 4, score: 368, score_next: 380, score_prev: 370, score_left: 12}
+        ]
+    };
+    $.cardstories_table = {
+        get_next_owner_id: function(player_id, game_id, root) { return player1; },
+        on_next_owner_change: function(player_id, game_id, root, cb) {}
+    };
+
+    // Add the cardstories_results_closed class to prevent the levelup animation going into an endless loop.
+    // This is pretty ugly, but I couldn't come up with a better way to control the loop.
+    element.addClass('cardstories_results_closed');
+
+    $.cardstories.complete(player2, game, root).done(function() {
+        var box = $('.cardstories_results.player', element);
+
+        notEqual(box.css('display'), 'none', 'box is visible');
+        equal($('.cardstories_results_banner_lose', box).css('opacity'), 0, 'the lose banner is hidden');
+        equal($('.cardstories_results_banner_level_up', box).css('opacity'), 1, 'the levelup banner is visible');
+        notEqual($('.cardstories_results_levelup_stars', box).css('display'), 'none', 'the levelup stars are visible');
+
+        start();
+    });
+});
+
+asyncTest("complete levelup owner", 4, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_complete', root);
+    var owner_id = 10;
+    var player1 = 1;
+    var player2 = 2;
+    var game = {
+        owner: true,
+        owner_id: owner_id,
+        board: [],
+        winner_card: 30,
+        players: [
+            {id: owner_id, vote: null, win: 'y', picked: 30, cards: [], level: 77, level_prev: 76, score: 2311, score_next: 2445, score_prev: 2290, score_left: 134},
+            {id: player1, vote: 30, win: 'y', picked: 31, cards: [], level: null, level_prev: null, score: null, score_next: null, score_prev: null, score_left: null},
+            {id: player2, vote: 31, win: 'n', picked: 32, cards: [], level: null, level_prev: null, score: null, score_next: null, score_prev: null, score_left: null}
+        ]
+    };
+    $.cardstories_table = {
+        get_next_owner_id: function(player_id, game_id, root) { return player1; },
+        on_next_owner_change: function(player_id, game_id, root, cb) {}
+    };
+
+    // Add the cardstories_results_closed class to prevent the levelup animation going into an endless loop.
+    // This is pretty ugly, but I couldn't come up with a better way to control the loop.
+    element.addClass('cardstories_results_closed');
+
+    $.cardstories.complete(owner_id, game, root).done(function() {
+        var box = $('.cardstories_results.author', element);
+
+        notEqual(box.css('display'), 'none', 'box is visible');
+        equal($('.cardstories_results_banner_win', box).css('opacity'), 0, 'the win banner is hidden');
+        equal($('.cardstories_results_banner_level_up', box).css('opacity'), 1, 'the levelup banner is visible');
+        notEqual($('.cardstories_results_levelup_stars', box).css('display'), 'none', 'the levelup stars are visible');
+
+        start();
+    });
+});
+
 test("canceled", 5, function() {
     var root = $('#qunit-fixture .cardstories');
     var player_id = 113;

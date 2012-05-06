@@ -271,7 +271,6 @@
             };
             game = $.extend(true, {}, old_game);
             game.players.splice(2,1);
-            game.player_id = 2;
             $.cardstories.invitation_pick_wait(3, old_game, root).done(function() {
                 window.setTimeout(function() {
                     $.cardstories.invitation_pick_wait_to_vote_voter(3, old_game, game, root);
@@ -467,6 +466,63 @@
             };
             $(root).data('cardstories_table', {game2table: game2table});
             $.cardstories.complete_complete(player_id, game, root);
+        } else if (skin === 'complete_levelup') {
+            game_id = 100;
+            owner_id = 1;
+            player_id = 12;
+            game = {
+                id: game_id,
+                owner: false,
+                owner_id: owner_id,
+                player_id: player_id,
+                ready: true,
+                sentence: 'the game sentence',
+                board: [30,31,32,33],
+                self: [31, 30, [1,2,3,4,5,31]],
+                winner_card: 30,
+                players: [{id: owner_id,
+                           vote: null,
+                           win: 'y',
+                           picked: 30,
+                           cards: [],
+                           score: null,
+                           level: null,
+                           score_next: null,
+                           score_left: null,
+                           score_prev: null,
+                           level_prev: null},
+                          {id: 3,
+                           vote: 30,
+                           win: 'y',
+                           picked: 34,
+                           cards: [],
+                           score: null,
+                           level: null,
+                           score_next: null,
+                           score_left: null,
+                           score_prev: null,
+                           level_prev: null},
+                          {id: player_id,
+                           vote: 34,
+                           win: 'n',
+                           picked: 31,
+                           cards: [],
+                           score: 12320,
+                           level: 7,
+                           score_next: 2950,
+                           score_left: 2340,
+                           score_prev: 12300,
+                           level_prev: 6}]
+            };
+            game2table = {};
+            game2table[game_id] = {
+                next_game_id: null,
+                next_owner_id: 2,
+                ready_for_next_game: false,
+                reset_callback: null
+            };
+            $(root).data('cardstories_table', {game2table: game2table});
+            $.cardstories.complete_complete(player_id, game, root);
         } else if (skin === 'complete_owner') {
             game_id = 100;
             owner_id = 1;
@@ -537,6 +593,61 @@
                            vote: 30,
                            win: 'y',
                            picked: 35,
+                           cards: [],
+                           score: null,
+                           level: null,
+                           score_next: null,
+                           score_left: null,
+                           score_prev: null,
+                           level_prev: null}]
+            };
+            game2table = {};
+            game2table[game_id] = {
+                next_game_id: null,
+                next_owner_id: 2,
+                ready_for_next_game: false,
+                reset_callback: null
+            };
+            $(root).data('cardstories_table', {game2table: game2table});
+            $.cardstories.complete_complete(owner_id, game, root);
+        } else if (skin === 'complete_levelup_owner') {
+            game_id = 100;
+            owner_id = 1;
+            game = {
+                id: game_id,
+                owner: true,
+                owner_id: owner_id,
+                ready: true,
+                sentence: 'the game sentence',
+                board: [30,31,32,33],
+                self: [31, 30, [1,2,3,4,5,31]],
+                winner_card: 30,
+                players: [{id: owner_id,
+                           vote: null,
+                           win: 'y',
+                           picked: 30,
+                           cards: [],
+                           score: 13,
+                           level: 3,
+                           score_next: 20,
+                           score_left: 17,
+                           score_prev: 11,
+                           level_prev: 1},
+                          {id: 2,
+                           vote: 30,
+                           win: 'y',
+                           picked: 34,
+                           cards: [],
+                           score: null,
+                           level: null,
+                           score_next: null,
+                           score_left: null,
+                           score_prev: null,
+                           level_prev: null},
+                          {id: 3,
+                           vote: 34,
+                           win: 'n',
+                           picked: 31,
                            cards: [],
                            score: null,
                            level: null,
@@ -734,7 +845,6 @@
                 id: 100,
                 owner: false,
                 owner_id: 10,
-                player_id: 5,
                 sentence: 'long sentence is in the flux',
                 self: [35, null, [11,12,13,14,15,16,17]],
                 players: [

@@ -4084,7 +4084,7 @@
                     explanation.fadeIn('fast', next);
                 });
             }
-            
+
             // Wrap each character of the legend in a <span>, so we can
             // animate them individually.
             var score_legend = $('.cardstories_results_score_legend', box);
@@ -4119,7 +4119,7 @@
 
                     // Store the initial 'top' value.
                     var initial_top = parseInt(c.css('top'));
-                    
+
                     // Now we can make the character visible, and set the
                     // initial value for "text-indent", which will be hijacked
                     // to guide the 2-dimensional animation.  This property was
@@ -4164,6 +4164,9 @@
             // Fashionable delay
             $this.delay(q, 400, 'chain');
 
+            // Did the player just level up?
+            var is_levelup = player.level > player.level_prev;
+
             // Animate score and the level at the same time
             q.queue('chain', function(next) {
                 // Use two deferred objects to be able to run two animations concurrently,
@@ -4185,22 +4188,84 @@
                 }
                 $this.setTimeout(inc_score, timeout);
 
-                // The level bar and levelup info.
-                // Calculate final level bar width.
-                var bar = $('.cardstories_results_level_bar_front', box);
-                var percent = ((player.score_next - player.score_left) / player.score_next) * 100;
-                var final_width = percent + '%';
-                // Set level legend.
                 var level_legend = $('.cardstories_results_level_legend', box);
+                var level_legend_template = level_legend.html();
                 var level_score_container = $('.cardstories_results_level_left', box);
                 var level_score = $('> span', level_score_container);
-                var html = level_legend.html().supplant({
-                    level_current: player.level,
-                    level_next: player.level + 1
-                });
-                level_legend.html(html);
+                var bar = $('.cardstories_results_level_bar_front', box);
 
-                level_score.html(player.score_next);
+                // Function that animates the level progress bar from 0 to
+                // score_left/score_next percent. The third (level) parameter
+                // is the level for which the progress is being shown. This is normally
+                // the current level, except when showing the level up animation.
+                // The function is abstracted out order to be able to animate the level
+                // bar multiple times when leveling up.
+                var animate_level_bar = function(score_left, score_next, level, cb) {
+                    // Set level legend.
+                    var legend_html = level_legend_template.supplant({
+                        level_current: level,
+                        level_next: level + 1
+                    });
+                    level_legend.html(legend_html);
+                    level_legend.show();
+
+                    // Set initial score_next. This is actually not the correct value
+                    // if the player just leveled up, but we currently don't have access
+                    // to the score gap between the previous and current level, only current and next.
+                    // I don't think anybody will notice this, though, so we'll just go with score_next,
+                    // at least for now.
+                    level_score.html(score_next);
+                    level_score_container.show();
+
+                    // The level bar and levelup info.
+                    // Calculate final level bar width.
+                    var percent = ((score_next - score_left) / score_next) * 100;
+                    var final_width = percent + '%';
+
+                    // Animate the level bar and level score at the same time.
+                    // The duration animation would take when moving from 0 to 100%.
+                    var full_duration = 2000;
+                    // For animations that don't move the bar 100%, make the duration shorter.
+                    // For 0% animations, the duration is half of the full duration, and for other lengths,
+                    // the duration scales proprtionally. The actual numbers came from experimentation.
+                    var duration = full_duration * (1 - (0.5 * score_left/score_next));
+
+                    // Reset progress bar width.
+                    bar.css('width', '');
+                    // Star playing the "pinball" sound.
+                    $.cardstories_audio.play('score_pinball', root);
+                    var score_diff = score_next - score_left;
+                    // Start animating the bar width.
+                    bar.animate({width: final_width}, {
+                        duration: duration,
+                        // During every step of the level bar animation, also position the
+                        // level score and set it's contents (counting down from entire score needed
+                        // to reach the next level to the score the player still needs to get there).
+                        step: function(now, fx) {
+                            var score;
+                            if (fx.end > 0) {
+                                score = score_next - Math.round(score_diff * now/fx.end);
+                            } else {
+                                score = score_next;
+                            }
+                            level_score.html(score);
+                            // Allow the score to scroll most 72% to the right
+                            // (so that it doesn't scroll behind the create button and become invisible).
+                            var left = Math.min(now, 72);
+                            level_score_container.css('left', left + '%');
+                        },
+                        complete: function() {
+                            level_score.html(score_left);
+                            // Play the "bell" sound.
+                            $.cardstories_audio.play('score_bell', root);
+                            // Stop playing the "pinball" sound.
+                            $.cardstories_audio.stop('score_pinball', root);
+                            if (cb) {
+                                cb();
+                            }
+                        }
+                    });
+                };
 
                 // Now start with the animation.
                 // Use a seperate queue for the level animations.
@@ -4208,6 +4273,7 @@
                 q.queue('level', function(next) {
                     $('.cardstories_results_level_container', box).fadeIn('fast', next);
                 });
+
                 // Pop in the star.
                 q.queue('level', function(next) {
                     // Scale it to its original size.
@@ -4220,46 +4286,27 @@
                         });
                     });
                 });
-                // Animate the level bar and level score at the same time.
-                // The duration animation would take when moving from 0 to 100%.
-                var full_duration = 3000;
-                // For animations that don't move the bar 100%, make the duration shorter.
-                // For 0% animations, the duration is half of the full duration, and for other lengths,
-                // the duration scales proprtionally. The actual numbers came from experimentation.
-                var duration = full_duration * (1 - (0.5 * player.score_left/player.score_next));
+
+                // If the player leveled up, animate the bar to 100% first
+                // (might need to animate it multiple times if the player advanced
+                // more than one level).
+                if (is_levelup) {
+                    var nr_of_levels = player.level - player.level_prev;
+                    for (var l = nr_of_levels; l > 0; l--) {
+                        (function(l) { // Wrap the queue in a closure to capture the value of l.
+                            q.queue('level', function(next) {
+                                animate_level_bar(0, player.score_next, player.level - l, next);
+                            });
+                        })(l);
+                    }
+                }
+
+                // Now run the "normal" progress bar animation to show how much
+                // points left until the next level.
                 q.queue('level', function(next) {
-                    // Show the score.
-                    level_score.show();
-                    // Star playing the "pinball" sound.
-                    $.cardstories_audio.play('score_pinball', root);
-                    var score_diff = player.score_next - player.score_left;
-                    // Start animating the bar width.
-                    bar.animate({width: final_width}, {
-                        duration: duration,
-                        // During every step of the level bar animation, also position the
-                        // level score and set it's contents (counting down from entire score needed
-                        // to reach the next level to the score the player still needs to get there).
-                        step: function(now, fx) {
-                            var score;
-                            if (fx.end > 0) {
-                                score = player.score_next - Math.round(score_diff * now/fx.end);
-                            } else {
-                                score = player.score_next;
-                            }
-                            level_score.html(score);
-                            // Allow the score to scroll most 72% to the right
-                            // (so that it doesn't scroll behind the create button and become invisible).
-                            var left = Math.min(now, 72);
-                            level_score_container.css('left', left + '%');
-                        },
-                        complete: function() {
-                            level_score.html(player.score_left);
-                            // Play the "bell" sound.
-                            $.cardstories_audio.play('score_bell', root);
-                            // Stop playing the "pinball" sound.
-                            $.cardstories_audio.stop('score_pinball', root);
-                            level_deferred.resolve();
-                        }
+                    animate_level_bar(player.score_left, player.score_next, player.level, function() {
+                        level_deferred.resolve();
+                        next();
                     });
                 });
 
@@ -4269,6 +4316,115 @@
                 // Unqueue next step of the 'chain' after both animations have finished.
                 $.when(score_deferred, level_deferred).then(next);
             });
+
+            // Run the levelup animations if the player just leveled up.
+            if (is_levelup) {
+                q.queue('chain', function(next) {
+                    // Morph the banner to "Level up!".
+                    var levelup_banner = $('.cardstories_results_banner_level_up', box);
+                    levelup_banner.css('opacity', 0);
+                    levelup_banner.show();
+                    var duration = 1200;
+
+                    // Simultaneously start fading the results banner out,
+                    // and the levelup banner in. Proceed only when both animations have finished.
+                    var results_deferred = $.Deferred();
+                    var levelup_deferred = $.Deferred();
+
+                    q.queue('levelup', function(next) {
+                        banner.animate({opacity: 0}, duration, function() {
+                            $(this).hide();
+                            results_deferred.resolve();
+                        });
+                        levelup_banner.animate({opacity: 1}, duration, function() {
+                            $(this).css('opacity', '');
+                            levelup_deferred.resolve();
+                        });
+                        $.when(results_deferred, levelup_deferred).then(next);
+                    });
+
+                    q.queue('levelup', function(next) {
+                        var stars_sprite = $('.cardstories_results_levelup_stars', box);
+                        $this.animate_sprite(stars_sprite, 18, 30, false, next);
+                    });
+
+                    // This function when invoked performs one loop of the levelup animation.
+                    // One loop involves the fireworks going off and the stars fading in and out simoultaneusly.
+                    // The timing is chosen so that three fadeIn/Outs of the stars take the same time as the
+                    // fireworks going off first on the right, then on the left side.
+                    // The loop is stopped if the element has the special cardstories_results_closed marker class.
+                    var levelup_loop = function() {
+                        var fireworks_deferred = $.Deferred();
+                        var stars_deferred = $.Deferred();
+                        var duration = 400;
+
+                        var rising_fireworks = function(side, cb) {
+                            var fireworks = $('.cardstories_results_levelup_fireworks_1_' + side, box);
+                            var final_top = '-' + fireworks.height() + 'px';
+                            fireworks.show();
+                            fireworks.animate({top: final_top}, duration, function() {
+                                fireworks.hide();
+                                fireworks.css('top', ''); // clean up
+                                cb();
+                            });
+                        };
+
+                        var fading_fireworks = function(cb) {
+                            var fireworks = $('.cardstories_results_levelup_fireworks_2', box);
+                            fireworks.show();
+                            fireworks.fadeOut(duration * 2, function() {
+                                fireworks.hide();
+                                cb();
+                            });
+                        };
+
+                        var fading_stars = function(cb) {
+                            var stars = $('.cardstories_results_levelup_stars', box);
+                            var diff = duration / 5;
+                            stars.fadeOut(diff, function() {
+                                stars.fadeIn(duration*2 - diff, cb);
+                            });
+                        };
+
+                        rising_fireworks('right', function() {
+                            fading_fireworks(function() {
+                                rising_fireworks('left', function() {
+                                    fading_fireworks(function() {
+                                        fireworks_deferred.resolve();
+                                    });
+                                });
+                            });
+                        });
+
+                        fading_stars(function() {
+                            fading_stars(function() {
+                                fading_stars(function() {
+                                    stars_deferred.resolve();
+                                });
+                            });
+                        });
+
+                        // Schedule another iteration of the loop, unless it should be stopped.
+                        $.when(fireworks_deferred, stars_deferred).then(function() {
+                            if (!element.hasClass('cardstories_results_closed')) {
+                                levelup_loop();
+                            }
+                        });
+                    };
+
+                    q.queue('levelup', function(next) {
+                        // Start the levelup loop and then proceed immediately.
+                        levelup_loop();
+                        next();
+                    });
+
+                    q.queue('levelup', function() {
+                        next();
+                    });
+
+                    q.dequeue('levelup');
+                });
+            }
 
             q.queue('chain', function(next) {
                 if (cb) {
@@ -4598,6 +4754,7 @@
             'player_return_3.png',
             'player_return_4.png',
             'player_return_5.png',
+            'complete_stars.png',
             'card-back.png',
             'card01.png',
             'card02.png',
