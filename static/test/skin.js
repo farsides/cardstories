@@ -86,6 +86,7 @@
                 owner_id: 11,
                 winner_card: null,
                 sentence: null,
+                self: [null, null, [1, 2, 3, 4, 5, 6]],
                 players: [
                     {id: 1, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0},
                     {id: 2, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0}

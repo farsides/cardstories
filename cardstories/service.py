@@ -144,8 +144,8 @@ class CardstoriesService(service.Service, Observable):
             "  owner_id INTEGER, "
             "  players INTEGER DEFAULT 1, "
             "  sentence TEXT, "
-            "  cards VARCHAR(%d), " % CardstoriesGame.NCARDS +
-            "  board VARCHAR(%d), " % CardstoriesGame.NPLAYERS +
+            "  cards TEXT, "
+            "  board TEXT, "
             "  state VARCHAR(8) DEFAULT 'create', " + # create, invitation, vote, complete
             "  created DATETIME, "
             "  completed DATETIME"
@@ -158,7 +158,7 @@ class CardstoriesService(service.Service, Observable):
             "  serial INTEGER PRIMARY KEY, "
             "  player_id INTEGER, "
             "  game_id INTEGER, "
-            "  cards VARCHAR(%d), " % CardstoriesGame.CARDS_PER_PLAYER +
+            "  cards TEXT, "
             "  picked CHAR(1), "
             "  vote CHAR(1), "
             "  win CHAR(1) DEFAULT 'n' "
@@ -188,18 +188,13 @@ class CardstoriesService(service.Service, Observable):
             "  player_id INTEGER, "
             "  score BIGINTEGER, "
             "  score_prev BIGINTEGER, "
-            "  levelups INTEGER "
+            "  levelups INTEGER, "
+            "  earned_cards TEXT, "
+            "  earned_cards_cur TEXT "
             "); ")
         c.execute(
             "CREATE UNIQUE INDEX players_idx ON players (player_id); "
             )
-        c.execute(
-            "CREATE TABLE player_cards ( "
-            "  id INTEGER PRIMARY KEY, "
-            "  player_id INTEGER, "
-            "  card INTEGER, "
-            "  UNIQUE (\"player_id\", \"card\") "
-            "); ")
 
     def load(self, c):
         c.execute("SELECT id, sentence FROM games WHERE state != 'complete' AND state != 'canceled'")

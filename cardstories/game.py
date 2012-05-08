@@ -35,9 +35,10 @@ class CardstoriesGame(Pollable):
 
     MIN_PICKED = 3 # there needs to be at least 3 cards to move to the voting phase
     MIN_VOTED = 2 # there needs to be at least 2 votes to complete the game
-    NCARDS = 43
+    NCARDS = 36
+    NCARDS_EARNED = 43
     NPLAYERS = 6
-    CARDS_PER_PLAYER = 7
+    CARDS_PER_PLAYER = 6
     DEFAULT_COUNTDOWN_DURATION = 60 # needs to be coordinated with the value on the UI
     POINTS_GM_WON = 10
     POINTS_GM_LOST = 5
@@ -156,22 +157,66 @@ class CardstoriesGame(Pollable):
         defer.returnValue(deleted)
 
     def playerInteraction(self, transaction, player_id):
-        transaction.execute("SELECT player_id, score, score_prev, levelups from players WHERE player_id = ?", [player_id])
+        transaction.execute("SELECT player_id from players WHERE player_id = ?", [player_id])
         rows = transaction.fetchall()
         if not rows:
             transaction.execute("INSERT INTO players (player_id, score, score_prev, levelups) VALUES (?, ?, ?, ?)", [player_id, 0, 0, 0])
 
+    def deal(self, earned_cards, dealt_cards):
+        # Create the base deck, composed of the base cards and the cards the
+        # player earned.
+        deck = [chr(x) for x in range(1, self.NCARDS + 1)]
+        if earned_cards:
+            deck.extend(list(earned_cards))
+
+        # Remove previously dealt cards from the deck.
+        if dealt_cards:
+            dealt_cards = list(dealt_cards)
+        else:
+            dealt_cards = []
+
+        for dealt_card in dealt_cards:
+            try:
+                deck.remove(dealt_card)
+            except ValueError:
+                pass
+
+        # Shuffle it
+        random.shuffle(deck)
+
+        # Deal the player's cards from the beginning of the deck.
+        player_cards = deck[:self.CARDS_PER_PLAYER]
+        dealt_cards.extend(player_cards)
+
+        # Return, converting lists back to strings.
+        return (''.join(player_cards), ''.join(dealt_cards))
+
     def createInteraction(self, transaction, owner_id):
-        transaction.execute("INSERT INTO games (owner_id, cards, board, created) VALUES (?, '', '', datetime('now'))", [owner_id])
+        # Fetch the owner's earned cards.
+        transaction.execute("SELECT earned_cards FROM players WHERE player_id = %d" % owner_id)
+        row = transaction.fetchone()
+        if row:
+            earned_cards = row[0]
+        else:
+            earned_cards = None
+
+        # Deal the initial hand.
+        owner_cards, dealt_cards = self.deal(earned_cards, None)
+
+        # Create the game, storing which cards have already been dealt.
+        transaction.execute("INSERT INTO games (owner_id, cards, board, created) VALUES (?, ?, '', datetime('now'))", [owner_id, dealt_cards])
         game_id = transaction.lastrowid
-        transaction.execute("INSERT INTO player2game (game_id, player_id, cards) VALUES (?, ?, '')", [ game_id, owner_id ])
+
+        # Insert the owner as a player, including his cards.
+        transaction.execute("INSERT INTO player2game (game_id, player_id, cards) VALUES (?, ?, ?)", [game_id, owner_id, owner_cards])
+
         return game_id
 
     @defer.inlineCallbacks
     def create(self, owner_id):
         self.owner_id = owner_id
-        game_id = yield self.service.db.runInteraction(self.createInteraction, self.owner_id)
         yield self.service.db.runInteraction(self.playerInteraction, self.owner_id)
+        game_id = yield self.service.db.runInteraction(self.createInteraction, self.owner_id)
         self.id = game_id
         self.players.append(self.owner_id)
         self.update_timer()
@@ -184,22 +229,8 @@ class CardstoriesGame(Pollable):
             raise Exception, 'Only game owner can set the card.'
         if state != 'create':
             raise CardstoriesWarning('WRONG_STATE_FOR_SETTING_CARD', {'game_id': game_id, 'state': state})
-        transaction.execute("UPDATE player2game SET picked = ?, cards = ? WHERE game_id = ? AND player_id = ?", [ card, card, game_id, player_id ])
-        # Generate a random set of cards (without the chosen card).
-        cards = [ chr(x) for x in range(1, self.NCARDS + 1) ]
-        cards.remove(card)
-        random.shuffle(cards)
-        cards = ''.join(cards)
-        # Update cards for all the players who have already joined the game.
-        transaction.execute("SELECT player_id from player2game WHERE game_id = ? AND player_id != ?", [ game_id, owner_id])
-        rows = transaction.fetchall()
-        for row in rows:
-            player_cards = cards[:self.CARDS_PER_PLAYER]
-            cards = cards[self.CARDS_PER_PLAYER:]
-            transaction.execute("UPDATE player2game SET cards = ? WHERE game_id = ? AND player_id = ?", [ player_cards, game_id, row[0] ])
-        # Finally, update the available cards on the game, left after dealing
-        # each player his set.
-        transaction.execute("UPDATE games SET cards = ?, board = ? WHERE id = ?", [ cards, card, game_id ])
+        transaction.execute("UPDATE player2game SET picked = ? WHERE game_id = ? AND player_id = ?", [ card, game_id, player_id ])
+        transaction.execute("UPDATE games SET board = ? WHERE id = ?", [card, game_id])
 
     @defer.inlineCallbacks
     def set_card(self, player_id, card):
@@ -214,7 +245,7 @@ class CardstoriesGame(Pollable):
             raise Exception, "Only game owner can set the sentence."
         if state != 'create':
             raise CardstoriesWarning('WRONG_STATE_FOR_SETTING_SENTENCE', {'game_id': game_id, 'state': state})
-        transaction.execute("SELECT cards FROM player2game WHERE game_id = %d AND player_id = %d" % (game_id, player_id))
+        transaction.execute("SELECT picked FROM player2game WHERE game_id = %d AND player_id = %d" % (game_id, player_id))
         card = transaction.fetchone()[0]
         if not card:
             raise CardstoriesWarning('CARD_NOT_SET', {'game_id': game_id })
@@ -280,7 +311,8 @@ class CardstoriesGame(Pollable):
                "player2game.win, "
                "players.score, "
                "players.score_prev, "
-               "players.levelups "
+               "players.earned_cards, "
+               "players.earned_cards_cur "
                "FROM player2game LEFT JOIN players "
                "ON player2game.player_id = players.player_id "
                "WHERE game_id = ? ORDER BY serial")
@@ -334,12 +366,20 @@ class CardstoriesGame(Pollable):
             # win
             win = player[4]
 
-            # Set score and level, but only for the requesting player.
+            # Set score, level, and earned cards, but only for the requesting player.
             if player[0] == player_id:
                 score = player[5]
                 score_prev = player[6]
                 level, score_next, score_left = self.calculate_level(score)
                 level_prev, _, _ = self.calculate_level(score_prev)
+                if player[7]:
+                    earned_cards = [ord(c) for c in player[7]]
+                else:
+                    earned_cards = None
+                if player[8]:
+                    earned_cards_cur = [ord(c) for c in player[8]]
+                else:
+                    earned_cards_cur = None
             else:
                 score = None
                 level = None
@@ -347,6 +387,8 @@ class CardstoriesGame(Pollable):
                 score_left = None
                 score_prev = None
                 level_prev = None
+                earned_cards = None
+                earned_cards_cur = None
 
             # players
             players.append({'id': player[0],
@@ -359,7 +401,9 @@ class CardstoriesGame(Pollable):
                             'score_next': score_next,
                             'score_left': score_left,
                             'score_prev': score_prev,
-                            'level_prev': level_prev})
+                            'level_prev': level_prev,
+                            'earned_cards': earned_cards,
+                            'earned_cards_cur': earned_cards_cur})
 
         ready = None
         if state == 'invitation':
@@ -384,20 +428,34 @@ class CardstoriesGame(Pollable):
 
     def participateInteraction(self, transaction, game_id, player_id):
         transaction.execute("SELECT players, cards FROM games WHERE id = %d" % game_id)
-        (players, cards) = transaction.fetchall()[0]
+        players, dealt_cards = transaction.fetchone()
+
+        # Bail out if game is full.
         no_room = CardstoriesWarning('GAME_FULL', {'game_id': game_id, 'player_id': player_id, 'max_players': self.NPLAYERS})
         if players >= self.NPLAYERS:
             raise no_room
-        transaction.execute("UPDATE games SET cards = ?, players = players + 1 WHERE id = %d AND players = %d" % (game_id, players), [ cards[self.CARDS_PER_PLAYER:] ])
+
+        # Fetch the player's earned cards and include them in the deck.
+        transaction.execute("SELECT earned_cards FROM players WHERE player_id = %d" % player_id)
+        row = transaction.fetchone()
+        if row:
+            earned_cards = row[0]
+        else:
+            earned_cards = None
+
+        # Deal the cards
+        player_cards, dealt_cards = self.deal(earned_cards, dealt_cards)
+
+        transaction.execute("UPDATE games SET cards = ?, players = players + 1 WHERE id = ? AND players = ?", (dealt_cards, game_id, players))
         if transaction.rowcount == 0:
             raise no_room
-        transaction.execute("INSERT INTO player2game (game_id, player_id, cards) VALUES (?, ?, ?)", [ game_id, player_id, cards[:self.CARDS_PER_PLAYER] ])
-        transaction.execute("DELETE FROM invitations WHERE game_id = ? AND player_id = ?", [ game_id, player_id ])
+        transaction.execute("INSERT INTO player2game (game_id, player_id, cards) VALUES (?, ?, ?)", [game_id, player_id, player_cards])
+        transaction.execute("DELETE FROM invitations WHERE game_id = ? AND player_id = ?", [game_id, player_id])
 
     @defer.inlineCallbacks
     def participate(self, player_id):
-        yield self.service.db.runInteraction(self.participateInteraction, self.get_id(), player_id)
         yield self.service.db.runInteraction(self.playerInteraction, player_id)
+        yield self.service.db.runInteraction(self.participateInteraction, self.get_id(), player_id)
         if player_id in self.invited:
             self.invited.remove(player_id)
         self.players.append(player_id)
@@ -503,9 +561,9 @@ class CardstoriesGame(Pollable):
         defer.returnValue(result)
 
     def completeInteraction(self, transaction, game_id, owner_id):
-        transaction.execute("SELECT cards FROM player2game WHERE game_id = %d AND player_id = %d" % (game_id, owner_id))
+        transaction.execute("SELECT picked FROM player2game WHERE game_id = ? AND player_id = ?", (game_id, owner_id))
         winner_card = transaction.fetchone()[0]
-        transaction.execute("SELECT vote, picked, player_id FROM player2game WHERE game_id = %d AND player_id != %d AND vote IS NOT NULL" % (game_id, owner_id))
+        transaction.execute("SELECT vote, picked, player_id FROM player2game WHERE game_id = ? AND player_id != ? AND vote IS NOT NULL", (game_id, owner_id))
         players_count = 0
         guessed = []
         failed = []
@@ -552,9 +610,60 @@ class CardstoriesGame(Pollable):
                             "  player_id IN ( %s ) " % ','.join([ str(id) for id in winners ]))
         transaction.execute("UPDATE games SET completed = datetime('now'), state = 'complete' WHERE id = %d" % game_id)
 
-        # Update scores in the database.
         for player_id in score.keys():
-            transaction.execute("UPDATE players SET score_prev = score, score = score + %d WHERE player_id = %s" % (score[player_id], player_id))
+            # Calculate if level needs to be bumped
+            transaction.execute("SELECT score, levelups, earned_cards FROM players WHERE player_id = %s" % player_id)
+            row = transaction.fetchone()
+            if not row:
+                continue
+            score_prev, levelups, earned_cards = row
+
+            level_prev, _, _ = self.calculate_level(score_prev)
+            score_cur = score_prev + score[player_id]
+            level_cur, _, _ = self.calculate_level(score_cur)
+
+            if earned_cards:
+                earned_cards = list(earned_cards)
+            else:
+                earned_cards = []
+            earned_cards_cur = []
+
+            # Only distribute new cards if the player has leveled up during
+            # this game, AND he hasn't already earned a card for this level
+            # (this last check will only fail if the level formula is tuned in
+            # such a way that it becomes harder to level up).
+            if level_prev < level_cur and levelups < level_cur - 1:
+                deck = [chr(x) for x in range(self.NCARDS + 1, self.NCARDS_EARNED + 1)]
+
+                # Take care not to distribute the same card again.
+                for card in earned_cards:
+                    try:
+                        deck.remove(card)
+                    except ValueError:
+                        pass
+
+                # Distribute one card for each level since last levelup.
+                for i in range(levelups, level_cur - 1):
+                    if deck:
+                        card = random.choice(deck)
+                        deck.remove(card)
+                        earned_cards.append(card)
+                        earned_cards_cur.append(card)
+                        levelups += 1
+
+            # Store it
+            transaction.execute("UPDATE players SET "
+                                "score_prev = score, "
+                                "score = ?, "
+                                "levelups = ?, "
+                                "earned_cards = ?, "
+                                "earned_cards_cur = ? "
+                                "WHERE player_id = ?",
+                                (score_cur,
+                                 levelups,
+                                 ''.join(earned_cards),
+                                 ''.join(earned_cards_cur),
+                                 player_id))
 
     @defer.inlineCallbacks
     def complete(self, owner_id):

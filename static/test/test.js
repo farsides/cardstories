@@ -853,6 +853,7 @@ asyncTest("create_pick_card", 12, function() {
         id: game_id,
         owner_id: owner_id,
         owner: true,
+        self: [null, null, [1, 2, 3, 4, 5, 6]],
         players: [
             {id: owner_id, vote: null, picked: null, win: 'n'},
             {id: 22, vote: null, picked: null, win: 'n'},
@@ -3986,6 +3987,7 @@ asyncTest("create_pick_card_animate_fly_to_deck", 23, function() {
         owner: true,
         winner_card: 43,
         sentence: null,
+        self: [43, null, [1, 2, 3, 4, 5, 43]],
         players: [
             {id: owner_id, vote: null, pick: 43, cards: []},
             {id: 22, vote: null, pick: null, cards: []},
@@ -4418,19 +4420,6 @@ asyncTest("select_cards single", 6, function() {
                                 root
                                ).
         done(onReady);
-});
-
-test("create_deck", 29, function() {
-    var deck = $.cardstories.create_deck();
-    var i;
-    equal(deck.length, 7);
-    while(deck.length > 0) {
-        var card = deck.pop();
-        equal(typeof card, "number");
-        for(i = 0; i < deck.length; i++) {
-            ok(deck[i] !== card, 'duplicate of ' + card);
-        }
-    }
 });
 
 test("send_countdown_duration", 8, function() {

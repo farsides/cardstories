@@ -33,8 +33,6 @@
 
         SEATS: 6,
 
-        NB_CARDS: 43,
-
         window: window,
 
         history: window.History,
@@ -306,20 +304,6 @@
             this.replay_create_game(game, element, root);
         },
 
-        create_deck: function() {
-            var deck = [];
-            var $this = this;
-            var i;
-            for(i = 1; i <= $this.NB_CARDS; i++) {
-                deck.push(i);
-            }
-            var cards = [];
-            for(i = 0; i < 7; i++) {
-                cards.push(deck.splice(Math.floor(Math.random() * deck.length), 1)[0]);
-            }
-            return cards;
-        },
-
         animate_progress_bar: function(step, element, cb) {
             var progress = $('.cardstories_progress', element);
             var mark = $('.cardstories_progress_mark', progress);
@@ -441,9 +425,8 @@
             this.display_progress_bar('owner', 1, element, root);
             this.display_master_info($this.get_player_info_by_id(player_id), element);
             this.init_board_buttons(player_id, element, root);
-            var deck = $this.create_deck();
-            var cards = $.map(deck, function(card, index) {
-                return {value: card};
+            var cards = $.map(game.self[2], function(card, index) {
+                return {'value': card};
             });
 
             var deferred = $.Deferred();
@@ -4754,7 +4737,6 @@
             'player_return_3.png',
             'player_return_4.png',
             'player_return_5.png',
-            'complete_stars.png',
             'card-back.png',
             'card01.png',
             'card02.png',
