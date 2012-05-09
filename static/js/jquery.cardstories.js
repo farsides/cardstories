@@ -4471,6 +4471,28 @@
                 });
             }
 
+            // Show earned cards, if any.
+            if (player.earned_cards_cur) {
+                var earned_card = $('.cardstories_results_earned_card', box);
+                var value = player.earned_cards_cur[0];
+                var src = earned_card.metadata({type: 'attr', name: 'data'}).card.supplant({card: value});
+                earned_card.find('.cardstories_card_foreground').attr('src', src);
+
+                // Fade card in.
+                q.queue('chain', function(next) {
+                    earned_card.fadeIn('slow', function() {
+                        earned_card.show();
+                        next();
+                    });
+                });
+
+                // Show squiggle.
+                q.queue('chain', function(next) {
+                    $('.cardstories_results_squiggle', box).show();
+                    next();
+                });
+            }
+
             q.queue('chain', function(next) {
                 if (cb) {
                     cb();

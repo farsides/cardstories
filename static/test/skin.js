@@ -513,7 +513,9 @@
                            score_next: 2950,
                            score_left: 2340,
                            score_prev: 12300,
-                           level_prev: 6}]
+                           level_prev: 6,
+                           earned_cards: [37,38,39,41,43],
+                           earned_cards_cur: [43,41]}]
             };
             game2table = {};
             game2table[game_id] = {

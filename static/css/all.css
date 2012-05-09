@@ -2478,6 +2478,33 @@
     display: none;
 }
 
+.cardstories .cardstories_complete .cardstories_results .cardstories_results_earned_card {
+    position: absolute;
+    width: 100px;
+    height: 138px;
+    top: 138px;
+    left: 37px;
+    display: none;
+}
+
+.cardstories .cardstories_complete .cardstories_results .cardstories_results_earned_card > img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.cardstories .cardstories_complete .cardstories_results .cardstories_results_squiggle {
+    position: absolute;
+    background: transparent url('images/complete_levelup_squiggle.png') no-repeat left top;
+    width: 219px;
+    height: 109px;
+    top: 142px;
+    left: 153px;
+    display: none;
+}
+
 .cardstories .cardstories_complete .cardstories_results .cardstories_results_level_legend,
 .cardstories .cardstories_complete .cardstories_results .cardstories_results_level_score {
     position: relative;

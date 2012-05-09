@@ -3437,7 +3437,7 @@ asyncTest("complete close results box player", 10, function() {
     });
 });
 
-asyncTest("complete levelup player", 9, function() {
+asyncTest("complete levelup player", 11, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var owner_id = 10;
@@ -3451,7 +3451,7 @@ asyncTest("complete levelup player", 9, function() {
         players: [
             {id: owner_id, vote: null, win: 'y', picked: 30, cards: [], level: null, level_prev: null, score_next: null, score_left: null},
             {id: player1, vote: 30, win: 'y', picked: 31, cards: [], level: null, level_prev: null, score_next: null, score_left: null},
-            {id: player2, vote: 31, win: 'n', picked: 32, cards: [], level: 5, level_prev: 4, score: 368, score_next: 380, score_prev: 370, score_left: 12}
+            {id: player2, vote: 31, win: 'n', picked: 32, cards: [], level: 5, level_prev: 4, score: 368, score_next: 380, score_prev: 370, score_left: 12, earned_cards_cur: [41]}
         ]
     };
     $.cardstories_table = {
@@ -3475,12 +3475,14 @@ asyncTest("complete levelup player", 9, function() {
         notEqual($('.cardstories_results_levelup_star_dance', box).css('display'), 'none', 'the star is dancing');
         notEqual($('.cardstories_results_level_slot_container', box).css('display'), 'none', 'level slot container is visible');
         equal($('.cardstories_results_level_slot', box).css('top'), '-' + $('.cardstories_results_level_slot_container', box).css('height'), 'level slot is at "up" position');
+        notEqual($('.cardstories_results_earned_card', box).css('display'), 'none', 'earned card is visible');
+        notEqual($('.cardstories_results_squiggle', box).css('display'), 'none', 'squiggle is visible');
 
         start();
     });
 });
 
-asyncTest("complete levelup owner", 9, function() {
+asyncTest("complete levelup owner", 11, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var owner_id = 10;
@@ -3518,6 +3520,8 @@ asyncTest("complete levelup owner", 9, function() {
         notEqual($('.cardstories_results_levelup_star_dance', box).css('display'), 'none', 'the star is dancing');
         notEqual($('.cardstories_results_level_slot_container', box).css('display'), 'none', 'level slot container is visible');
         equal($('.cardstories_results_level_slot', box).css('top'), '-' + $('.cardstories_results_level_slot_container', box).css('height'), 'level slot is at "up" position');
+        equal($('.cardstories_results_earned_card', box).css('display'), 'none', 'earned card is not visible');
+        equal($('.cardstories_results_squiggle', box).css('display'), 'none', 'squiggle is not visible');
 
         start();
     });
