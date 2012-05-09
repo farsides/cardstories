@@ -3437,7 +3437,7 @@ asyncTest("complete close results box player", 10, function() {
     });
 });
 
-asyncTest("complete levelup player", 7, function() {
+asyncTest("complete levelup player", 9, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var owner_id = 10;
@@ -3473,12 +3473,14 @@ asyncTest("complete levelup player", 7, function() {
         equal($('.cardstories_results_stage', box).css('left'), '-' + $('.cardstories_results_stage', box).css('width'), 'stage is hidden off screen');
         equal($('.cardstories_results_stage', box).css('display'), 'none', 'stage is hidden off screen');
         notEqual($('.cardstories_results_levelup_star_dance', box).css('display'), 'none', 'the star is dancing');
+        notEqual($('.cardstories_results_level_slot_container', box).css('display'), 'none', 'level slot container is visible');
+        equal($('.cardstories_results_level_slot', box).css('top'), '-' + $('.cardstories_results_level_slot_container', box).css('height'), 'level slot is at "up" position');
 
         start();
     });
 });
 
-asyncTest("complete levelup owner", 7, function() {
+asyncTest("complete levelup owner", 9, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var owner_id = 10;
@@ -3514,6 +3516,8 @@ asyncTest("complete levelup owner", 7, function() {
         equal($('.cardstories_results_stage', box).css('left'), '-' + $('.cardstories_results_stage', box).css('width'), 'stage is hidden off screen');
         equal($('.cardstories_results_stage', box).css('display'), 'none', 'stage is hidden off screen');
         notEqual($('.cardstories_results_levelup_star_dance', box).css('display'), 'none', 'the star is dancing');
+        notEqual($('.cardstories_results_level_slot_container', box).css('display'), 'none', 'level slot container is visible');
+        equal($('.cardstories_results_level_slot', box).css('top'), '-' + $('.cardstories_results_level_slot_container', box).css('height'), 'level slot is at "up" position');
 
         start();
     });

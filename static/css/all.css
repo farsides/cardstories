@@ -2435,6 +2435,29 @@
     display: none;
 }
 
+.cardstories .cardstories_complete .cardstories_results .cardstories_results_level_slot_container {
+    position: relative;
+    overflow: hidden;
+    margin: 0 auto;
+    width: 200px;
+    top: 1em;
+    height: 70px;
+    color: #E2D3BC;
+    font-size: 7.4em;
+    font-family: "Licon";
+    display: none;
+}
+
+.cardstories .cardstories_complete .cardstories_results .cardstories_results_level_slot_label {
+    float: left;
+}
+
+.cardstories .cardstories_complete .cardstories_results .cardstories_results_level_slot {
+    position: relative;
+    float: right;
+    width: 60px;
+}
+
 .cardstories .cardstories_complete .cardstories_results .cardstories_results_star_jump {
     background: transparent url('images/complete_levelup_star_jump.png') no-repeat left top;
     position: absolute;

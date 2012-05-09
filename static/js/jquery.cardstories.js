@@ -4428,7 +4428,8 @@
                                    left: star.offset().left - box.offset().left + 2});
                     star_jump.show();
                     star.hide();
-                    star_jump.animate(star_jump_pos, stage_duration);
+                    var duration = 400;
+                    star_jump.animate(star_jump_pos, duration);
                     $this.animate_sprite(star_jump, 18, 10, false, false, function() {
                         var star_dance = $('.cardstories_results_star_dance', box);
                         star_dance.show();
@@ -4437,12 +4438,34 @@
                         star_deferred.resolve();
                     });
 
-                    var stage = $('.cardstories_results_stage', box);
-                    var stage_duration = 400;
-                    stage.animate({left: -stage.width()}, stage_duration, function() {
-                        stage.hide();
-                        stage_deferred.resolve();
+                    q.queue('stage', function(next) {
+                        var stage = $('.cardstories_results_stage', box);
+                        stage.animate({left: -stage.width()}, duration, function() {
+                            stage.hide();
+                            next();
+                        });
                     });
+
+                    var level_slot_container = $('.cardstories_results_level_slot_container', box);
+                    var level_slot = $('.cardstories_results_level_slot', level_slot_container);
+                    var level_slot_html = level_slot.html().supplant({
+                        level_prev: player.level_prev,
+                        level_cur: player.level
+                    });
+                    level_slot.html(level_slot_html);
+                    q.queue('stage', function(next) {
+                        level_slot_container.fadeIn(next);
+                    });
+
+                    q.queue('stage', function(next) {
+                        var height = level_slot_container.height();
+                        level_slot.animate({top: -height}, duration, function() {
+                            stage_deferred.resolve();
+                            next();
+                        });
+                    });
+
+                    q.dequeue('stage');
 
                     $.when(yay_deferred, star_deferred, stage_deferred).then(next);
                 });
