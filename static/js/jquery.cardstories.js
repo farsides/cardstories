@@ -408,11 +408,11 @@
             }
         },
 
-        animate_sprite: function(movie, fps, frames, rewind, cb) {
+        animate_sprite: function(movie, fps, frames, rewind, loop, cb) {
             movie.show().sprite({
                 fps: fps,
                 no_of_frames: frames,
-                play_frames: frames,
+                play_frames: loop ? null : frames,
                 rewind: rewind,
                 oncomplete: cb
             });
@@ -1485,7 +1485,7 @@
                         q.queue(playerq, function(next) {
                             invite_slot.fadeOut();
                             slot.show();
-                            $this.animate_sprite(join_sprite, 18, 18, false, function() {
+                            $this.animate_sprite(join_sprite, 18, 18, false, false, function() {
                                 player_arms.show();
                                 pick_sprite.show();
                                 join_sprite.hide();
@@ -1517,7 +1517,7 @@
                             q.queue(playerq, function(next) {
                                 slot.addClass('cardstories_player_seat_picked');
                                 $('.cardstories_player_status', slot).html('has picked a card!');
-                                $this.animate_sprite(pick_sprite, 18, 7, false, function() {
+                                $this.animate_sprite(pick_sprite, 18, 7, false, false, function() {
                                     pick_sprite.find('.cardstories_card').show();
                                     next();
                                 });
@@ -1612,7 +1612,7 @@
                         $('.cardstories_player_pick_' + slotno, element).addClass('cardstories_no_background');
                         var return_sprite = $('.cardstories_player_return_' + slotno, element);
                         var is_last_slot = slotno === nr_of_slots;
-                        $this.animate_sprite(return_sprite, 18, 18, false, function() {
+                        $this.animate_sprite(return_sprite, 18, 18, false, false, function() {
                             return_sprite.hide();
                             if (is_last_slot) { next(); }
                         });
@@ -1851,7 +1851,7 @@
                 hand2dock_sprite.show();
                 container.hide();
                 overlay.fadeOut('fast');
-                $this.animate_sprite(hand2dock_sprite, 18, 18, true, next);
+                $this.animate_sprite(hand2dock_sprite, 18, 18, true, false, next);
             });
 
             // Move card back and change seat status.
@@ -2129,7 +2129,7 @@
                         delay_next = true;
                         q.queue(playerq, (function(seat, seat_nb) {return function(next) {
                             var join_sprite = $('.cardstories_player_join_' + seat_nb, element);
-                            $this.animate_sprite(join_sprite, 18, 18, false, function() {
+                            $this.animate_sprite(join_sprite, 18, 18, false, false, function() {
                                 $('.cardstories_player_arms_' + seat_nb, element).show();
                                 $('.cardstories_player_pick_' + seat_nb, element).show();
                                 join_sprite.hide();
@@ -2235,7 +2235,7 @@
             q.queue('chain', function(next) {
                 pick_sprite.hide();
                 hand2dock_sprite.show();
-                $this.animate_sprite(hand2dock_sprite, 18, 19, false, next);
+                $this.animate_sprite(hand2dock_sprite, 18, 19, false, false, next);
             });
 
             // Morph cards out, switching image to actual right one.  At the
@@ -2582,7 +2582,7 @@
                                 delay_next = true;
                                 q.queue(playerq, (function(seat, seat_nb, card_img) { return function(next) {
                                     var pick_sprite = $('.cardstories_player_pick_' + seat_nb, element);
-                                    $this.animate_sprite(pick_sprite, 18, 7, false, function() {
+                                    $this.animate_sprite(pick_sprite, 18, 7, false, false, function() {
                                         pick_sprite.find('.cardstories_card').show();
                                         card_img.show();
                                         seat.addClass('cardstories_player_seat_waiting');
@@ -2706,7 +2706,7 @@
                     $('.cardstories_player_pick_' + seat_nb, element).addClass('cardstories_no_background');
                     var return_sprite = $('.cardstories_player_return_' + seat_nb, element);
                     var is_last_seat = i === active_seats.length - 1;
-                    $this.animate_sprite(return_sprite, 18, 18, false, function() {
+                    $this.animate_sprite(return_sprite, 18, 18, false, false, function() {
                         return_sprite.hide();
                         if (is_last_seat) {
                             next();
@@ -4314,23 +4314,18 @@
                     var results_deferred = $.Deferred();
                     var levelup_deferred = $.Deferred();
 
-                    q.queue('levelup', function(next) {
-                        banner.animate({opacity: 0}, duration, function() {
-                            $(this).hide();
-                            results_deferred.resolve();
-                        });
-                        levelup_banner.animate({opacity: 1}, duration, function() {
-                            $(this).css('opacity', '');
-                            levelup_deferred.resolve();
-                        });
-                        $.when(results_deferred, levelup_deferred).then(next);
+                    banner.animate({opacity: 0}, duration, function() {
+                        $(this).hide();
+                        results_deferred.resolve();
                     });
-
-                    q.queue('levelup', function(next) {
-                        var stars_sprite = $('.cardstories_results_levelup_stars', box);
-                        $this.animate_sprite(stars_sprite, 18, 30, false, next);
+                    levelup_banner.animate({opacity: 1}, duration, function() {
+                        $(this).css('opacity', '');
+                        levelup_deferred.resolve();
                     });
+                    $.when(results_deferred, levelup_deferred).then(next);
+                });
 
+                q.queue('chain', function(next) {
                     // This function when invoked performs one loop of the levelup animation.
                     // One loop involves the fireworks going off and the stars fading in and out simoultaneusly.
                     // The timing is chosen so that three fadeIn/Outs of the stars take the same time as the
@@ -4395,17 +4390,61 @@
                         });
                     };
 
-                    q.queue('levelup', function(next) {
+                    q.queue('fireworks', function(next) {
+                        var stars_sprite = $('.cardstories_results_levelup_stars', box);
+                        $this.animate_sprite(stars_sprite, 54, 30, false, false, next);
+                    });
+
+                    q.queue('fireworks', function(next) {
                         // Start the levelup loop and then proceed immediately.
                         levelup_loop();
                         next();
                     });
 
-                    q.queue('levelup', function() {
-                        next();
+                    q.dequeue('fireworks');
+                    next();
+                });
+
+                // Animate things off stage and kick off star loop.
+                q.queue('chain', function(next) {
+                    var yay_deferred = $.Deferred();
+                    var stage_deferred = $.Deferred();
+                    var star_deferred = $.Deferred();
+
+                    var yay = $('.cardstories_levelup_exclamation', box);
+                    explanation.fadeOut(function() {
+                        yay.fadeIn(function() {
+                            yay_deferred.resolve();
+                        });
                     });
 
-                    q.dequeue('levelup');
+                    // Star animation
+                    var star_jump = $('.cardstories_results_star_jump', box);
+                    var star_jump_pos = {top: parseInt(star_jump.css('top')),
+                                         left: parseInt(star_jump.css('left'))};
+                    // The two constants are hard-coded to compensate for the
+                    // star's position in the png sequence, versus the star itself.
+                    star_jump.css({top: star.offset().top - box.offset().top - 36,
+                                   left: star.offset().left - box.offset().left + 2});
+                    star_jump.show();
+                    star.hide();
+                    star_jump.animate(star_jump_pos, stage_duration);
+                    $this.animate_sprite(star_jump, 18, 10, false, false, function() {
+                        var star_dance = $('.cardstories_results_star_dance', box);
+                        star_dance.show();
+                        star_jump.hide();
+                        $this.animate_sprite(star_dance, 18, 24, false, true);
+                        star_deferred.resolve();
+                    });
+
+                    var stage = $('.cardstories_results_stage', box);
+                    var stage_duration = 400;
+                    stage.animate({left: -stage.width()}, stage_duration, function() {
+                        stage.hide();
+                        stage_deferred.resolve();
+                    });
+
+                    $.when(yay_deferred, star_deferred, stage_deferred).then(next);
                 });
             }
 

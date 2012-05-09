@@ -77,7 +77,7 @@ function setup() {
     $.cardstories.ajax = function() { throw 'Please rebind "ajax"'; };
     $.cardstories.reload = function() { throw 'Please rebind "reload"'; };
     $.cardstories.poll_ignore = function() { throw 'Please rebind "poll_ignore"'; };
-    $.cardstories.animate_sprite = function(movie, fps, frames, rewind, cb) { movie.show(); cb(); };
+    $.cardstories.animate_sprite = function(movie, fps, frames, rewind, loop, cb) { movie.show(); if (cb) {cb();}};
     $.cardstories.preload_images = function(root, cb) { cb(); };
     $.cardstories.update_player_info_from_ws = function(player_id) {};
     $.cardstories.get_player_info_by_id = function(player_id) {
@@ -610,7 +610,7 @@ asyncTest("animate_sprite", 3, function() {
     }
 
     $.cardstories.animate_sprite = cardstories_default_animate_sprite;
-    $.cardstories.animate_sprite(movie, frames, frames, false, function() {
+    $.cardstories.animate_sprite(movie, frames, frames, false, false, function() {
         if (movie.css('background-position')) {
             notEqual(movie.css('background-position'), '0% 0%', 'movie is no longer at 0% background position');
         } else {
@@ -1409,7 +1409,7 @@ asyncTest("invitation_owner_join_helper", 43, function() {
     }
 
     // Count how often animate_sprite is called.
-    $.cardstories.animate_sprite = function(movie, fps, frames, rewind, cb) {
+    $.cardstories.animate_sprite = function(movie, fps, frames, rewind, loop, cb) {
         ok(true, 'counting animate_sprite');
         movie.show();
         cb();
@@ -1510,7 +1510,7 @@ asyncTest("invitation_owner_go_vote_confirm", 28, function() {
     var final_left_3 = card_3.metadata({type: 'attr', name: 'data'}).final_left;
 
     // Count how often animate_sprite is called.
-    $.cardstories.animate_sprite = function(movie, fps, frames, rewind, cb) {
+    $.cardstories.animate_sprite = function(movie, fps, frames, rewind, loop, cb) {
         ok(true, 'counting animate_sprite');
         movie.show();
         cb();
@@ -1927,7 +1927,7 @@ asyncTest("invitation_pick_deal_helper", 38, function() {
     }
 
     // Count how often animate_sprite is called.
-    $.cardstories.animate_sprite = function(movie, fps, frames, rewind, cb) {
+    $.cardstories.animate_sprite = function(movie, fps, frames, rewind, loop, cb) {
         ok(true, 'counting animate_sprite');
         movie.show();
         cb();
@@ -2133,7 +2133,7 @@ asyncTest("invitation_pick_wait", 26, function() {
     };
 
     var animations_played = 0;
-    $.cardstories.animate_sprite = function(movie, fps, frames, rewind, cb) {
+    $.cardstories.animate_sprite = function(movie, fps, frames, rewind, loop, cb) {
         animations_played++;
         cb();
     };
@@ -2250,7 +2250,7 @@ asyncTest("invitation_pick_wait_to_vote_voter", 16, function() {
         equal(seat3.css('display'), 'block', 'seat3 is visible initially');
 
         var animations_played = 0;
-        $.cardstories.animate_sprite = function(movie, fps, frames, rewind, cb) {
+        $.cardstories.animate_sprite = function(movie, fps, frames, rewind, loop, cb) {
             animations_played++;
             cb();
         };
@@ -3437,7 +3437,7 @@ asyncTest("complete close results box player", 10, function() {
     });
 });
 
-asyncTest("complete levelup player", 4, function() {
+asyncTest("complete levelup player", 7, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var owner_id = 10;
@@ -3470,12 +3470,15 @@ asyncTest("complete levelup player", 4, function() {
         equal($('.cardstories_results_banner_lose', box).css('opacity'), 0, 'the lose banner is hidden');
         equal($('.cardstories_results_banner_level_up', box).css('opacity'), 1, 'the levelup banner is visible');
         notEqual($('.cardstories_results_levelup_stars', box).css('display'), 'none', 'the levelup stars are visible');
+        equal($('.cardstories_results_stage', box).css('left'), '-' + $('.cardstories_results_stage', box).css('width'), 'stage is hidden off screen');
+        equal($('.cardstories_results_stage', box).css('display'), 'none', 'stage is hidden off screen');
+        notEqual($('.cardstories_results_levelup_star_dance', box).css('display'), 'none', 'the star is dancing');
 
         start();
     });
 });
 
-asyncTest("complete levelup owner", 4, function() {
+asyncTest("complete levelup owner", 7, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var owner_id = 10;
@@ -3508,6 +3511,9 @@ asyncTest("complete levelup owner", 4, function() {
         equal($('.cardstories_results_banner_win', box).css('opacity'), 0, 'the win banner is hidden');
         equal($('.cardstories_results_banner_level_up', box).css('opacity'), 1, 'the levelup banner is visible');
         notEqual($('.cardstories_results_levelup_stars', box).css('display'), 'none', 'the levelup stars are visible');
+        equal($('.cardstories_results_stage', box).css('left'), '-' + $('.cardstories_results_stage', box).css('width'), 'stage is hidden off screen');
+        equal($('.cardstories_results_stage', box).css('display'), 'none', 'stage is hidden off screen');
+        notEqual($('.cardstories_results_levelup_star_dance', box).css('display'), 'none', 'the star is dancing');
 
         start();
     });
