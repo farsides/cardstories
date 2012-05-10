@@ -3437,7 +3437,7 @@ asyncTest("complete close results box player", 10, function() {
     });
 });
 
-asyncTest("complete levelup player", 11, function() {
+asyncTest("complete levelup player", 14, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var owner_id = 10;
@@ -3463,6 +3463,9 @@ asyncTest("complete levelup player", 11, function() {
     // This is pretty ugly, but I couldn't come up with a better way to control the loop.
     element.addClass('cardstories_results_closed');
 
+    var sounds_played = [];
+    $.cardstories_audio.play = function(sound_id) { sounds_played.push(sound_id); };
+
     $.cardstories.complete(player2, game, root).done(function() {
         var box = $('.cardstories_results.player', element);
 
@@ -3478,11 +3481,15 @@ asyncTest("complete levelup player", 11, function() {
         notEqual($('.cardstories_results_earned_card', box).css('display'), 'none', 'earned card is visible');
         notEqual($('.cardstories_results_squiggle', box).css('display'), 'none', 'squiggle is visible');
 
+        notEqual($.inArray('bgm', sounds_played), -1, 'The bgm sound is played');
+        notEqual($.inArray('applause', sounds_played), -1, 'The applause sound is played');
+        notEqual($.inArray('fireworks', sounds_played), -1, 'The fireworks sound is played');
+
         start();
     });
 });
 
-asyncTest("complete levelup owner", 11, function() {
+asyncTest("complete levelup owner", 14, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var owner_id = 10;
@@ -3508,6 +3515,9 @@ asyncTest("complete levelup owner", 11, function() {
     // This is pretty ugly, but I couldn't come up with a better way to control the loop.
     element.addClass('cardstories_results_closed');
 
+    var sounds_played = [];
+    $.cardstories_audio.play = function(sound_id) { sounds_played.push(sound_id); };
+
     $.cardstories.complete(owner_id, game, root).done(function() {
         var box = $('.cardstories_results.author', element);
 
@@ -3522,6 +3532,10 @@ asyncTest("complete levelup owner", 11, function() {
         equal($('.cardstories_results_level_slot', box).css('top'), '-' + $('.cardstories_results_level_slot_container', box).css('height'), 'level slot is at "up" position');
         equal($('.cardstories_results_earned_card', box).css('display'), 'none', 'earned card is not visible');
         equal($('.cardstories_results_squiggle', box).css('display'), 'none', 'squiggle is not visible');
+
+        notEqual($.inArray('bgm', sounds_played), -1, 'The bgm sound is played');
+        notEqual($.inArray('applause', sounds_played), -1, 'The applause sound is played');
+        notEqual($.inArray('fireworks', sounds_played), -1, 'The fireworks sound is played');
 
         start();
     });

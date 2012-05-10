@@ -4391,6 +4391,9 @@
                     };
 
                     q.queue('fireworks', function(next) {
+                        $.cardstories_audio.play('fireworks', root);
+                        $.cardstories_audio.play('applause', root);
+                        $.cardstories_audio.play('bgm', root);
                         var stars_sprite = $('.cardstories_results_levelup_stars', box);
                         $this.animate_sprite(stars_sprite, 54, 30, false, false, next);
                     });
@@ -4536,6 +4539,11 @@
 
             // Enable "continue" button
             continue_button.unbind('click').click(function() {
+                // Stop any running songs.
+                $.cardstories_audio.stop('fireworks', root);
+                $.cardstories_audio.stop('applause', root);
+                $.cardstories_audio.stop('bgm', root);
+
                 continue_button.removeClass('cardstories_popped');
                 // Fade out the box and animate the button out.
                 var results_box;

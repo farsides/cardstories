@@ -34,12 +34,8 @@
             soundManager.onready(function() {
                 // Create SoundManager sound objects.
                 var sounds = {};
-                $.each($root.data('sounds'), function(sound_id, url) {
-                    sounds[sound_id] = soundManager.createSound({
-                        id: sound_id,
-                        url: url,
-                        volume: 25
-                    });
+                $.each($root.data('sounds'), function(i, sound) {
+                    sounds[sound.id] = soundManager.createSound(sound);
                 });
 
                 // Save sound objects for later use.

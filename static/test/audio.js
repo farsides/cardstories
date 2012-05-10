@@ -14,7 +14,7 @@ asyncTest("init", 2, function() {
         // Only the 'ring' sound is defined in the root metadata.
         // Expect a SoundManager sound object to be initialized.
         var sound = initialized_sounds['ring'];
-        equal(sound.url, meta['ring'], 'sets the url from metadata');
+        equal(sound.url, meta[0]['url'], 'sets the url from metadata');
         ok(sound.play, 'initialized object has a "play" method');
         start();
     });
