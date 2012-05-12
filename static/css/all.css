@@ -2442,6 +2442,7 @@
     width: 200px;
     top: 1em;
     height: 70px;
+    line-height: 70px; /* needs to equal the height */
     color: #E2D3BC;
     font-size: 7.4em;
     font-family: "Licon";
