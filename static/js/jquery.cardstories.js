@@ -3973,6 +3973,7 @@
 
         complete_display_results: function(player, game, element, root, cb) {
             var $this = this;
+            var box = $('.cardstories_results', element);
 
             // Did the owner lose?
             var owner_lost = true;
@@ -3994,33 +3995,25 @@
                 }
             }
 
-            // Choose box.
-            var box;
-            if (game.owner) {
-                box = $('.cardstories_results.author', element);
-            } else {
-                box = $('.cardstories_results.player', element);
-            }
-
             // Choose explanation.
             var explanation;
             if (game.owner) {
                 if (!owner_lost) {
-                    explanation = $('.cardstories_won_1', box);
+                    explanation = $('.cardstories_won_1.cardstories_author', box);
                 } else if (!too_hard) {
-                    explanation = $('.cardstories_lost_1', box);
+                    explanation = $('.cardstories_lost_1.cardstories_author', box);
                 } else {
-                    explanation = $('.cardstories_lost_2', box);
+                    explanation = $('.cardstories_lost_2.cardstories_author', box);
                 }
             } else if (player.vote !== null) {
                 if (player.win !== 'y') {
-                    explanation = $('.cardstories_lost_1', box);
+                    explanation = $('.cardstories_lost_1.cardstories_player', box);
                 } else if (!owner_lost) {
-                    explanation = $('.cardstories_won_1', box);
+                    explanation = $('.cardstories_won_1.cardstories_player', box);
                 } else if (!too_hard) {
-                    explanation = $('.cardstories_won_2', box);
+                    explanation = $('.cardstories_won_2.cardstories_player', box);
                 } else {
-                    explanation = $('.cardstories_won_3', box);
+                    explanation = $('.cardstories_won_3.cardstories_player', box);
                 }
             }
 
@@ -4546,13 +4539,7 @@
 
                 continue_button.removeClass('cardstories_popped');
                 // Fade out the box and animate the button out.
-                var results_box;
-                if (game.owner) {
-                    results_box = $('.cardstories_results.author', element);
-                } else {
-                    results_box = $('.cardstories_results.player', element);
-                }
-
+                var results_box = $('.cardstories_results', element);
                 $this.complete_fade_out_results_box(results_box, element, function() {
                     // Ask the table plugin to switch to the next game as soon as possible
                     var is_ready = $.cardstories_table.load_next_game_when_ready(true, player_id, game.id, root);

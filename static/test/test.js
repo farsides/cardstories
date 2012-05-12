@@ -3203,18 +3203,21 @@ asyncTest("complete", 49, function() {
         ok($('.cardstories_votes_4', element).children().length === 1, '1 votes for seat 4');
         ok($('.cardstories_votes_5', element).children().length === 0, 'no votes for seat 5');
         ok($('.cardstories_votes_win', element).children().length === 1, '1 winning votes');
-        equal($('.cardstories_results.author', element).css('display'), 'block', 'author results is visible');
-        notEqual($('.cardstories_results.author img.cardstories_results_banner_win').css('display'), 'none', 'win img is visible');
-        equal($('.cardstories_results.author img.cardstories_results_banner_lose').css('display'), 'none', 'lost img is hidden');
-        equal($('.cardstories_results.author .cardstories_results_score', element).html(), owner_score+'', 'author score is visible');
-        var level_bar = $('.cardstories_results.author .cardstories_results_level_bar_front', element);
+
+        var results_box = $('.cardstories_results', element);
+
+        equal(results_box.css('display'), 'block', 'results is visible');
+        notEqual($('img.cardstories_results_banner_win', results_box).css('display'), 'none', 'win img is visible');
+        equal($('img.cardstories_results_banner_lose', results_box).css('display'), 'none', 'lost img is hidden');
+        equal($('.cardstories_results_score', results_box).html(), owner_score+'', 'author score is visible');
+        var level_bar = $('.cardstories_results_level_bar_front', results_box);
         level_bar.parents().andSelf().show();
         ok(level_bar.width() > 0, 'bar width > 0');
-        notEqual($('.cardstories_results.author img.cardstories_results_level_star_win', element).css('display'), 'none', 'win star is visible');
-        equal($('.cardstories_results.author img.cardstories_results_level_star_lose', element).css('display'), 'none', 'lose star is invisible');
-        equal($('.cardstories_results.author .cardstories_results_level_current', element).html(), 'LEVEL '+owner_level, 'author level is visible');
-        equal($('.cardstories_results.author .cardstories_results_level_next', element).html(), 'LEVEL '+owner_level_next, 'author next level is visible');
-        var level_left = $('.cardstories_results.author .cardstories_results_level_left', element);
+        notEqual($('img.cardstories_results_level_star_win', results_box).css('display'), 'none', 'win star is visible');
+        equal($('img.cardstories_results_level_star_lose', results_box).css('display'), 'none', 'lose star is invisible');
+        equal($('.cardstories_results_level_current', results_box).html(), 'LEVEL '+owner_level, 'author level is visible');
+        equal($('.cardstories_results_level_next', results_box).html(), 'LEVEL '+owner_level_next, 'author next level is visible');
+        var level_left = $('.cardstories_results_level_left', results_box);
         equal($('> span', level_left).html(), owner_score_left, 'author level left score is visible');
         ok(level_left.position().left > 0, 'level left score is moved towards the right');
         ok($('.cardstories_results_score_legend_char', element).length > 0, 'score legend has been tokenized');
@@ -3272,7 +3275,7 @@ asyncTest("complete player didn't vote", 11, function() {
         ok(!$('.cardstories_player_seat_4', element).hasClass('cardstories_player_seat_won'), 'seat 4 did not win');
         ok($('.cardstories_master_seat', element).hasClass('cardstories_master_seat_won'), 'the game master won');
         // Results aren't displayed.
-        equal($('.cardstories_results.player').css('display'), 'none', 'results box is hidden');
+        equal($('.cardstories_results').css('display'), 'none', 'results box is hidden');
         // But the continue button is.
         notEqual($('.cardstories_complete_continue').css('display'), 'none', 'continue button is visible');
         // And so is the next game info.
@@ -3344,7 +3347,7 @@ asyncTest("complete close results box author", 11, function() {
     element.parents().show();
 
     $.cardstories.complete(owner_id, game, root).done(function() {
-        var box = $('.cardstories_results.author', element);
+        var box = $('.cardstories_results', element);
         var close_btn = $('.cardstories_results_close', box);
         var next_game = $('.cardstories_next_game', element);
         var continue_btn = $('.cardstories_complete_continue > img', element);
@@ -3360,7 +3363,7 @@ asyncTest("complete close results box author", 11, function() {
         // Test that the close button is properly bound.
         var orig_close_results_box = $.cardstories.complete_close_results_box;
         $.cardstories.complete_close_results_box = function(_box, _element, cb) {
-            ok(_box.is('.cardstories_results.author'), 'close callback is called with the box');
+            ok(_box.is('.cardstories_results'), 'close callback is called with the box');
             ok(_element.is('.cardstories_complete'), 'close callback is called with the element');
             $.cardstories.complete_close_results_box = orig_close_results_box;
         };
@@ -3403,7 +3406,7 @@ asyncTest("complete close results box player", 10, function() {
     element.parents().show();
 
     $.cardstories.complete(player2, game, root).done(function() {
-        var box = $('.cardstories_results.player', element);
+        var box = $('.cardstories_results', element);
         var close_btn = $('.cardstories_results_close', box);
         var next_game = $('.cardstories_next_game', element);
         var continue_btn = $('.cardstories_complete_continue > img', element);
@@ -3419,7 +3422,7 @@ asyncTest("complete close results box player", 10, function() {
         // Test that the close button is properly bound.
         var orig_close_results_box = $.cardstories.complete_close_results_box;
         $.cardstories.complete_close_results_box = function(_box, _element, cb) {
-            ok(_box.is('.cardstories_results.player'), 'close callback is called with the box');
+            ok(_box.is('.cardstories_results'), 'close callback is called with the box');
             ok(_element.is('.cardstories_complete'), 'close callback is called with the element');
             $.cardstories.complete_close_results_box = orig_close_results_box;
         };
@@ -3467,7 +3470,7 @@ asyncTest("complete levelup player", 14, function() {
     $.cardstories_audio.play = function(sound_id) { sounds_played.push(sound_id); };
 
     $.cardstories.complete(player2, game, root).done(function() {
-        var box = $('.cardstories_results.player', element);
+        var box = $('.cardstories_results', element);
 
         notEqual(box.css('display'), 'none', 'box is visible');
         equal($('.cardstories_results_banner_lose', box).css('opacity'), 0, 'the lose banner is hidden');
@@ -3519,7 +3522,7 @@ asyncTest("complete levelup owner", 14, function() {
     $.cardstories_audio.play = function(sound_id) { sounds_played.push(sound_id); };
 
     $.cardstories.complete(owner_id, game, root).done(function() {
-        var box = $('.cardstories_results.author', element);
+        var box = $('.cardstories_results', element);
 
         notEqual(box.css('display'), 'none', 'box is visible');
         equal($('.cardstories_results_banner_win', box).css('opacity'), 0, 'the win banner is hidden');
@@ -3804,7 +3807,7 @@ asyncTest("on_next_owner_change after closing results", 34, function() {
         // Close the results box (closing is by calling the corresponding
         // function rather than simulating a click on the close button to
         // be able to hook into its complete callback.
-        var box = $('.cardstories_results.author', element);
+        var box = $('.cardstories_results', element);
         $.cardstories.complete_close_results_box(box, element, function() {
             // The next game info should not be visible, neither should be the dialog.
             equal(next_game_dom.css('display'), 'none', 'Next game info is NOT visible');
