@@ -63,7 +63,7 @@ class CardstoriesResource(resource.Resource):
         d.addCallback(self.handle, request)
         # ... post-process the request.
         for plugin in request.site.postprocess:
-            d.addCallback(plugin.postprocess)
+            d.addCallback(plugin.postprocess, request)
 
         # catch errors and dump a trace ...
         def failed(reason):

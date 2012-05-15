@@ -232,7 +232,7 @@ test("closing the currently focused tab when it is the only tab", 7, function() 
     equal($('.cardstories_tab', element).length, 0, 'There are no tabs left');
 });
 
-test("requires_action author", 7, function() {
+test("requires_action author", 12, function() {
     var root = $(selector);
     var player_id = 102;
     var game_id = 1002;
@@ -247,8 +247,8 @@ test("requires_action author", 7, function() {
         return $.cardstories_tabs.requires_action(player_id, game, root);
     }
 
-    // Doesn't require action if game is in the complete state.
-    ok(!does_require_action({state: 'complete'}));
+    // Requires action when in create state.
+    ok(does_require_action({state: 'create'}));
     // Doesn't require action if in invitation state and there are no players
     ok(!does_require_action({state: 'invitation',
                             players: [{player_id: 'the owner'}],
@@ -272,9 +272,27 @@ test("requires_action author", 7, function() {
     // Requires action when game moves into complete state.
     ok(does_require_action({state: 'complete',
                             players: [{player_id: 1}, {player_id: 2}, {player_id: 3}]}));
+    // Doesn't require action if game is in the complete state, but has been there already.
+    ok(!does_require_action({state: 'complete'}));
+    // Requires action when in complete state and player is the next owner.
+    ok(does_require_action({state: 'complete',
+                            next_owner_id: player_id,
+                            self: [31, 33, 'y']}));
+    // Doesn't require action when in complete state and player is not the next owner.
+    ok(!does_require_action({state: 'complete',
+                             next_owner_id: player_id + 1,
+                             self: [31, 33, 'y']}));
+    // Requires action when in complete state and next game is ready.
+    ok(does_require_action({state: 'complete',
+                            next_game_id: game_id + 1,
+                            self: [31, 33, 'y']}));
+    // Does not require action when next_game_id equals current game id.
+    ok(!does_require_action({state: 'complete',
+                             next_game_id: game_id,
+                             self: [31, 33, 'y']}));
 });
 
-test("requires_action player", 6, function() {
+test("requires_action player", 11, function() {
     var root = $(selector);
     var player_id = 102;
     var game_id = 1002;
@@ -289,8 +307,9 @@ test("requires_action player", 6, function() {
         return $.cardstories_tabs.requires_action(player_id, game, root);
     }
 
-    // Doesn't require action if game is in the complete state.
-    ok(!does_require_action({state: 'complete'}));
+    // Doesn't require action in create state (that's the authors responsibility).
+    ok(!does_require_action({state: 'create',
+                             self: [null, null, null]}));
     // Requires action if in invitation state and didn't pick a card yet.
     ok(does_require_action({state: 'invitation',
                             self: [null, null, null]}));
@@ -306,5 +325,23 @@ test("requires_action player", 6, function() {
     // Requires action when game moves into complete state.
     ok(does_require_action({state: 'complete',
                             self: [31, 33, 'y']}));
+    // Doesn't require action if game is in the complete state, but has been there already.
+    ok(!does_require_action({state: 'complete'}));
+    // Requires action when in complete state and player is the next owner.
+    ok(does_require_action({state: 'complete',
+                            next_owner_id: player_id,
+                            self: [31, 33, 'y']}));
+    // Doesn't require action when in complete state and player is not the next owner.
+    ok(!does_require_action({state: 'complete',
+                             next_owner_id: player_id + 1,
+                             self: [31, 33, 'y']}));
+    // Requires action when in complete state and next game is ready.
+    ok(does_require_action({state: 'complete',
+                            next_game_id: game_id + 1,
+                            self: [31, 33, 'y']}));
+    // Does not require action when next_game_id equals current game id.
+    ok(!does_require_action({state: 'complete',
+                             next_game_id: game_id,
+                             self: [31, 33, 'y']}));
 });
 

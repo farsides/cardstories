@@ -446,7 +446,7 @@ class Plugin(Pollable):
     # abort the request and a Server Error (500) will be returned, with the
     # traceback. 
     #
-    def postprocess(self, result):
+    def postprocess(self, result, request):
         if result.has_key('echo') and result['echo'][0] == 'yesX':
             #
             # If the result is an intercepted echo from the preprocess

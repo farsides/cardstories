@@ -28,6 +28,6 @@ class Plugin:
         request.args['preprocess'] = ['PREPROCESS']
         return request.args
 
-    def postprocess(self, result):
+    def postprocess(self, result, request):
         result['postprocess'] = 'POSTPROCESS'
         return result

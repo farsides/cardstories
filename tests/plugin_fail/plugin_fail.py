@@ -27,5 +27,5 @@ class Plugin:
     def preprocess(self, result, request):
         raise UserWarning, 'PREPROCESS'
 
-    def postprocess(self, result):
+    def postprocess(self, result, request):
         raise UserWarning, 'POSTPROCESS'

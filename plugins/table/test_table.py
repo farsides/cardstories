@@ -347,6 +347,34 @@ class TableTest(unittest.TestCase):
                                                             'player_id': player_id})
         self.assertEqual(len(self.table_instance.tables), 0)
 
+    @defer.inlineCallbacks
+    def test04_postprocess(self):
+        game_id = 55
+        player_id = 77
+
+        class MockRequest:
+            pass
+
+        mock_request = MockRequest()
+        args = {'action': ['state'], 'player_id': [player_id], 'game_id': [game_id], 'type': ['tabs']}
+        mock_request.args = args
+
+        response = [{'type': 'tabs',
+                     'games': [{'id': 17, 'state': 'complete'}, {'id': 18, 'state': 'complete'}]}]
+
+        result = yield self.table_instance.postprocess(response, mock_request)
+
+        # During postprocessing, next_owner_id and next_game_id should be added to
+        # the response.
+        self.assertTrue(result[0]['games'][0].has_key('next_owner_id'))
+        self.assertTrue(result[0]['games'][0].has_key('next_game_id'))
+        self.assertTrue(result[0]['games'][1].has_key('next_owner_id'))
+        self.assertTrue(result[0]['games'][1].has_key('next_game_id'))
+
+        # Make sure things don't fail if response is not of the expected shape.
+        yield self.table_instance.postprocess({'type': 'chat'}, mock_request)
+        yield self.table_instance.postprocess([[1, 2, {'this': 'test'}]], mock_request)
+
 
 def Run():
     loader = runner.TestLoader()

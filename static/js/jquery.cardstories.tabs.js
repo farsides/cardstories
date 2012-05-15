@@ -170,6 +170,9 @@
                 }
             }
             if (game.owner) {
+                if (new_state === 'create') {
+                    requires = true; // game is still in create state, owner should finish writing the story
+                }
                 if (new_state === 'invitation') {
                     if (game.ready) { // game can be moved to the voting phase
                         requires = true;
@@ -188,6 +191,15 @@
                     if (game.self && !game.self[1]) { // didn't vote yet
                         requires = true;
                     }
+                }
+            }
+            // Do some table specific tests.
+            if (new_state == 'complete') {
+                if (game.next_owner_id == player_id) { // this player is the next owner
+                    requires = true;
+                }
+                if (game.next_game_id && game.next_game_id != game.id) { // the next game is ready to be joined
+                    requires = true;
                 }
             }
             return requires;

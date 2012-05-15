@@ -260,6 +260,26 @@ class Plugin(Pollable, CardstoriesServiceConnector):
 
         defer.returnValue(best_table)
 
+    @defer.inlineCallbacks
+    def postprocess(self, result, request):
+        """
+        Hooks into the response to add table specific information to any
+        'tabs' type state request.
+        This makes it possible for the tab JS plugin to highlight tabs based
+        on the table next owner/next game info.
+        """
+        if type(result) is list:
+            for state in result:
+                if type(state) is dict:
+                    if state.get('type') == 'tabs':
+                        for game in state['games']:
+                            args = request.args.copy()
+                            args['game_id'] = [game['id']]
+                            table_state, player_ids = yield self.state(args)
+                            game['next_owner_id'] = table_state['next_owner_id']
+                            game['next_game_id'] = table_state['next_game_id']
+        defer.returnValue(result)
+
 
 class Table(Pollable, CardstoriesServiceConnector):
     """
@@ -408,4 +428,3 @@ class Table(Pollable, CardstoriesServiceConnector):
         if self.next_owner_id and self.next_owner_id == player_id:
             self.next_owner_id = None
             yield self.update_next_owner_id()
-

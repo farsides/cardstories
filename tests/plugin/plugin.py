@@ -67,7 +67,7 @@ class Plugin:
         request.preprocess = 'preprocess'
         return result
 
-    def postprocess(self, result):
+    def postprocess(self, result, request):
         result['postprocess'] = self.preprocess
         return result
 
