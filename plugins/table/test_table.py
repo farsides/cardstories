@@ -350,26 +350,37 @@ class TableTest(unittest.TestCase):
     @defer.inlineCallbacks
     def test04_postprocess(self):
         game_id = 55
+        tab1_game_id = 17
+        tab2_game_id = 18
         player_id = 77
 
-        class MockRequest:
-            pass
-
-        mock_request = MockRequest()
-        args = {'action': ['state'], 'player_id': [player_id], 'game_id': [game_id], 'type': ['tabs']}
-        mock_request.args = args
+        mock_request = Mock()
+        mock_request.args = {'action': ['state'], 'player_id': [player_id], 'game_id': [game_id], 'type': ['tabs']}
 
         response = [{'type': 'tabs',
-                     'games': [{'id': 17, 'state': 'complete'}, {'id': 18, 'state': 'complete'}]}]
+                     'games': [{'id': tab1_game_id, 'state': 'complete'}, {'id': tab2_game_id, 'state': 'complete'}]}]
+
+        def mock_state(args):
+            game_id = args['game_id'][0]
+            if game_id == tab1_game_id:
+                next_game_id = 42
+                next_owner_id = player_id
+            elif game_id == tab2_game_id:
+                next_game_id = None
+                next_owner_id = 21
+
+            result = [{'game_id': game_id, 'next_game_id': next_game_id, 'next_owner_id': next_owner_id}, [player_id]]
+            return result
+        self.table_instance.state = mock_state
 
         result = yield self.table_instance.postprocess(response, mock_request)
 
         # During postprocessing, next_owner_id and next_game_id should be added to
         # the response.
-        self.assertTrue(result[0]['games'][0].has_key('next_owner_id'))
-        self.assertTrue(result[0]['games'][0].has_key('next_game_id'))
-        self.assertTrue(result[0]['games'][1].has_key('next_owner_id'))
-        self.assertTrue(result[0]['games'][1].has_key('next_game_id'))
+        self.assertEqual(result[0]['games'][0]['next_owner_id'], player_id)
+        self.assertEqual(result[0]['games'][0]['next_game_id'], 42)
+        self.assertEqual(result[0]['games'][1]['next_owner_id'], 21)
+        self.assertEqual(result[0]['games'][1]['next_game_id'], None)
 
         # Make sure things don't fail if response is not of the expected shape.
         yield self.table_instance.postprocess({'type': 'chat'}, mock_request)
