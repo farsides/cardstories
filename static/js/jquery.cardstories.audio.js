@@ -56,6 +56,21 @@
             }
         },
 
+        loop: function(sound_id, root, limit) {
+            var data = $(root).data('cardstories_audio');
+            if (data && data.sounds && data.sounds[sound_id]) {
+                var i = 0;
+                var loop = function(sound) {
+                    if (!limit || ++i <= limit) {
+                        sound.play({onfinish: function() {
+                            loop(sound);
+                        }});
+                    }
+                }
+                loop(data.sounds[sound_id]);
+            }
+        },
+
         stop: function(sound_id, root) {
             var data = $(root).data('cardstories_audio');
             if (data && data.sounds && data.sounds[sound_id]) {

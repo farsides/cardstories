@@ -4386,7 +4386,7 @@
                     q.queue('fireworks', function(next) {
                         $.cardstories_audio.play('fireworks', root);
                         $.cardstories_audio.play('applause', root);
-                        $.cardstories_audio.play('bgm', root);
+                        $.cardstories_audio.loop('bgm', root);
                         var stars_sprite = $('.cardstories_results_levelup_stars', box);
                         $this.animate_sprite(stars_sprite, 54, 30, false, false, next);
                     });
