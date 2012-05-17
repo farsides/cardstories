@@ -4484,6 +4484,7 @@
 
                 // Show squiggle.
                 q.queue('chain', function(next) {
+                    $('.cardstories_results_earned_text', box).show();
                     $('.cardstories_results_squiggle', box).show();
                     next();
                 });

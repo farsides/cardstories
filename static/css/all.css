@@ -2496,12 +2496,22 @@
     height: 100%;
 }
 
+.cardstories .cardstories_complete .cardstories_results .cardstories_results_earned_text {
+    position: absolute;
+    background: transparent url('images/complete_levelup_earned_text.png') no-repeat left top;
+    width: 224px;
+    height: 54px;
+    top: 142px;
+    left: 163px;
+    display: none;
+}
+
 .cardstories .cardstories_complete .cardstories_results .cardstories_results_squiggle {
     position: absolute;
     background: transparent url('images/complete_levelup_squiggle.png') no-repeat left top;
-    width: 219px;
-    height: 109px;
-    top: 142px;
+    width: 146px;
+    height: 82px;
+    top: 181px;
     left: 153px;
     display: none;
 }
