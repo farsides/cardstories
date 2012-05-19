@@ -41,7 +41,7 @@
             if (Math.random() < 0.5) {
                 return 'Name';
             } else {
-                return 'Long Last Nameeeeeeeeee'
+                return 'Long Last Nameeeeeeeeee';
             }
         };
         $.cardstories.get_player_info_by_id = function(player_id) {
@@ -52,7 +52,7 @@
         };
 
         // Stub the table interactions.
-        var game2table;
+        var table;
         var current_player_id;
         var owner_change_callback;
         $.cardstories_table.on_next_owner_change = function(player_id, game_id, root, callback) {
@@ -64,17 +64,18 @@
             var next_owner_id;
             if (owner_change_callback) {
                 if ($(this).hasClass('cardstories_owner_change_self')) {
+                    console.log("FUU", current_player_id);
                     next_owner_id = current_player_id;
                 } else {
                     var player_ids = $.map(game.players, function(p) { return p.id; });
                     // Remove self and current next owner from potential candidates.
                     player_ids = $.grep(player_ids, function(id) {
-                        return !(id === current_player_id || id === game2table[game.id].next_owner_id);
+                        return !(id === current_player_id || id === table.next_owner_id);
                     });
                     // Return a random candidate.
                     next_owner_id = player_ids[Math.floor(Math.random() * player_ids.length)];
                 }
-                game2table[game.id].next_owner_id = next_owner_id;
+                table.next_owner_id = next_owner_id;
                 owner_change_callback(next_owner_id);
             }
             return false;
@@ -458,14 +459,13 @@
                            score_prev: null,
                            level_prev: null}]
             };
-            game2table = {};
-            game2table[game_id] = {
+            table = {
                 next_game_id: null,
                 next_owner_id: player_id,
                 ready_for_next_game: false,
-                reset_callback: null
+                on_next_owner_change_callback: null
             };
-            $(root).data('cardstories_table', {game2table: game2table});
+            $(root).data('cardstories_table', table);
             $.cardstories.complete_complete(player_id, game, root);
         } else if (skin === 'complete_levelup') {
             game_id = 100;
@@ -517,14 +517,13 @@
                            earned_cards: [37,38,39,41,43],
                            earned_cards_cur: [43,41]}]
             };
-            game2table = {};
-            game2table[game_id] = {
+            table = {
                 next_game_id: null,
                 next_owner_id: 2,
                 ready_for_next_game: false,
-                reset_callback: null
+                on_next_owner_change_callback: null
             };
-            $(root).data('cardstories_table', {game2table: game2table});
+            $(root).data('cardstories_table', table);
             $.cardstories.complete_complete(player_id, game, root);
         } else if (skin === 'complete_owner') {
             game_id = 100;
@@ -604,14 +603,13 @@
                            score_prev: null,
                            level_prev: null}]
             };
-            game2table = {};
-            game2table[game_id] = {
+            table = {
                 next_game_id: null,
                 next_owner_id: 2,
                 ready_for_next_game: false,
-                reset_callback: null
+                on_next_owner_change_callback: null
             };
-            $(root).data('cardstories_table', {game2table: game2table});
+            $(root).data('cardstories_table', table);
             $.cardstories.complete_complete(owner_id, game, root);
         } else if (skin === 'complete_levelup_owner') {
             game_id = 100;
@@ -659,14 +657,13 @@
                            score_prev: null,
                            level_prev: null}]
             };
-            game2table = {};
-            game2table[game_id] = {
+            table = {
                 next_game_id: null,
                 next_owner_id: 2,
                 ready_for_next_game: false,
-                reset_callback: null
+                on_next_owner_change_callback: null
             };
-            $(root).data('cardstories_table', {game2table: game2table});
+            $(root).data('cardstories_table', table);
             $.cardstories.complete_complete(owner_id, game, root);
         } else if (skin === 'complete_didnt_vote') {
             var owner_id = 10;
@@ -734,14 +731,13 @@
                            score_prev: null,
                            level_prev: null}]
             };
-            game2table = {};
-            game2table[game.id] = {
+            table = {
                 next_game_id: null,
                 next_owner_id: 4,
                 ready_for_next_game: false,
-                reset_callback: null
+                on_next_owner_change_callback: null
             };
-            $(root).data('cardstories_table', {game2table: game2table});
+            $(root).data('cardstories_table', table);
             $.cardstories.complete_complete(player3_id, game, root);
         } else if (skin === 'complete_anonymous') {
             var owner_id = 10;
@@ -819,14 +815,13 @@
                            score_prev: null,
                            level_prev: null}]
             };
-            game2table = {};
-            game2table[game.id] = {
+            table = {
                 next_game_id: null,
                 next_owner_id: 4,
                 ready_for_next_game: false,
-                reset_callback: null
+                on_next_owner_change_callback: null
             };
-            $(root).data('cardstories_table', {game2table: game2table});
+            $(root).data('cardstories_table', table);
             $.cardstories.complete_complete(42, game, root);
         } else if (skin === 'email') {
             $.cardstories.email(undefined, root);

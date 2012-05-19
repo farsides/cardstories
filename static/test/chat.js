@@ -29,8 +29,8 @@ test("state", 8, function() {
     var player2 = 2;
     var player3 = 3;
     var sentence1 = 'Hello all!';
-    var sentence2 = 'Goodbye all!'
-    var sentence3 = 'New game.'
+    var sentence2 = 'Goodbye all!';
+    var sentence3 = 'New game.';
     var game1 = 15;
     var messages = [
         {type: 'chat', player_id: player1, sentence: sentence1},

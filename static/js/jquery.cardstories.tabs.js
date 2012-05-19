@@ -61,6 +61,7 @@
             // And repaint them.
             $.each(games, function(i, game) {
                 var tab = $($this.tab_template);
+                tab.data('cardstories_game_id', game.id);
                 var title = $('.cardstories_tab_title', tab);
                 var status = $('.cardstories_tab_status', tab);
                 var close_btn = $('.cardstories_tab_close', tab);
@@ -151,6 +152,16 @@
                     }
                 });
             });
+        },
+
+        remove_tab_for_game: function(game_to_remove_id, player_id, root, cb) {
+            var root_data = $(root).data('cardstories_tabs');
+            var element = root_data.element;
+            var current_game_id = root_data.current_game_id;
+            var tab = element.find('.cardstories_tab').filter(function() {
+                return $(this).data('cardstories_game_id') === game_to_remove_id;
+            });
+            this.remove_tab(tab, player_id, current_game_id, cb);
         },
 
         // Returns true if the game passed in as the second parameter requires action

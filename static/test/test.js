@@ -3024,8 +3024,10 @@ asyncTest("complete owner lost easy", 14, function() {
                      { 'id': player1, 'vote': 30, 'win': 'y', 'picked': 31, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
                      { 'id': player2, 'vote': 30, 'win': 'y', 'picked': 32, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null } ]
     };
-    $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player1; },
-                           'on_next_owner_change': function(player_id, game_id, root, cb) {} };
+    $.cardstories_table = {
+        get_next_owner_id: function(player_id, game_id, root) { return player1; },
+        on_next_owner_change: function(player_id, game_id, root, cb) {}
+    };
 
     var sounds_played = [];
     $.cardstories_audio.play = function(sound_id) { sounds_played.push(sound_id); };
@@ -3067,8 +3069,10 @@ asyncTest("complete owner lost hard", 14, function() {
                      { 'id': player1, 'vote': 32, 'win': 'y', 'picked': 31, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
                      { 'id': player2, 'vote': 31, 'win': 'y', 'picked': 32, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null } ]
     };
-    $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player1; },
-                           'on_next_owner_change': function(player_id, game_id, root, cb) {} };
+    $.cardstories_table = {
+        get_next_owner_id: function(player_id, game_id, root) { return player1; },
+        on_next_owner_change: function(player_id, game_id, root, cb) {}
+    };
 
     var sounds_played = [];
     $.cardstories_audio.play = function(sound_id) { sounds_played.push(sound_id); };
@@ -3110,8 +3114,10 @@ asyncTest("complete owner won", 14, function() {
                      { 'id': player1, 'vote': 30, 'win': 'y', 'picked': 31, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
                      { 'id': player2, 'vote': 31, 'win': 'n', 'picked': 32, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null } ]
     };
-    $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player1; },
-                           'on_next_owner_change': function(player_id, game_id, root, cb) {} };
+    $.cardstories_table = {
+        get_next_owner_id: function(player_id, game_id, root) { return player1; },
+        on_next_owner_change: function(player_id, game_id, root, cb) {}
+    };
 
     var sounds_played = [];
     $.cardstories_audio.play = function(sound_id) { sounds_played.push(sound_id); };
@@ -3165,8 +3171,10 @@ asyncTest("complete", 49, function() {
                     {'id': player3, 'vote': 31, 'win': 'n', 'picked': 33, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null, 'score_prev': null, 'level_prev': null },
                     {'id': player4, 'vote': null, 'win': 'n', 'picked': 34, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null, 'score_prev': null, 'level_prev': null } ]
     };
-    $.cardstories_table = {'get_next_owner_id': function(player_id, game_id, root) { return player1; },
-                           'on_next_owner_change': function(player_id, game_id, root, cb) {} };
+    $.cardstories_table = {
+        get_next_owner_id: function(player_id, game_id, root) { return player1; },
+        on_next_owner_change: function(player_id, game_id, root, cb) {}
+    };
 
     var sounds_played = [];
     $.cardstories_audio.play = function(sound_id) { sounds_played.push(sound_id); };
@@ -3585,7 +3593,7 @@ asyncTest("next_game_as_author", 2, function() {
     var continue_button = $('.cardstories_play_again', next_game_dom);
     $.cardstories_table = {
         get_next_owner_id: function(player_id, game_id, root) { return player_id; },
-        load_next_game_when_ready: function(ready, player_id, game_id, root) { return true; },
+        on_next_game_ready: function(ready, player_id, game_id, root, cb) { return true; },
         on_next_owner_change: function(player_id, game_id, root, cb) {}
     };
 
@@ -3603,7 +3611,7 @@ asyncTest("next_game_as_author", 2, function() {
 
 asyncTest("next_game_as_player", 4, function() {
     var player_id = 10;
-    var game_author = {
+    var game = {
         id: 7,
         owner: true,
         owner_id: player_id,
@@ -3620,7 +3628,7 @@ asyncTest("next_game_as_player", 4, function() {
     var continue_button = $('.cardstories_complete_continue', element);
     $.cardstories_table = {
         get_next_owner_id: function(player_id, game_id, root) { return player_id+1; },
-        load_next_game_when_ready: function(ready, player_id, game_id, root) { return false; },
+        on_next_game_ready: function(ready, player_id, game_id, root, cb) { return false; },
         on_next_owner_change: function(player_id, game_id, root, cb) {}
     };
 
@@ -3629,7 +3637,7 @@ asyncTest("next_game_as_player", 4, function() {
         equal(overlay.attr('class'), 'cardstories_modal_overlay');
     };
 
-    $.cardstories.complete(player_id, game_author, root).done(function() {
+    $.cardstories.complete(player_id, game, root).done(function() {
         equal($('.cardstories_next_game_author', next_game_dom).css('display'), 'none');
         equal($('.cardstories_next_game_player', next_game_dom).css('display'), 'block');
         continue_button.click();
@@ -3667,7 +3675,7 @@ asyncTest("on_next_owner_change", 35, function() {
 
     $.cardstories_table = {
         get_next_owner_id: function(player_id, game_id, root) { return next_owner_id; },
-        load_next_game_when_ready: function(ready, player_id, game_id, root) { return false; },
+        on_next_game_ready: function(ready, player_id, game_id, root, cb) { return false; },
         on_next_owner_change: function(player_id, game_id, root, cb) { owner_change_cb = cb; }
     };
 
@@ -3716,7 +3724,7 @@ asyncTest("on_next_owner_change", 35, function() {
             // should be hidden, and a modal 'please wait' dialog should be displayed instead.
             equal(next_game_author_div.css('display'), 'none', 'the author text is hidden');
             notEqual(next_game_player_div.css('display'), 'none', 'the player text is visible');
-            equal(continue_img.css('display'), 'none', 'continue button is not visible')
+            equal(continue_img.css('display'), 'none', 'continue button is not visible');
             notEqual(next_game_modal.css('display'), 'none', 'the please wait dialog is visible');
             ok(next_game_modal.text().match('Player ' + other_player_id), "Next owner's name is shown");
 
@@ -3727,7 +3735,7 @@ asyncTest("on_next_owner_change", 35, function() {
 
             equal(next_game_author_div.css('display'), 'none', 'the author text is hidden');
             notEqual(next_game_player_div.css('display'), 'none', 'the player text is visible');
-            equal(continue_img.css('display'), 'none', 'continue button is not visible')
+            equal(continue_img.css('display'), 'none', 'continue button is not visible');
             notEqual(next_game_modal.css('display'), 'none', 'the please wait dialog is visible');
             ok(next_game_modal.text().match('Player ' + yet_another_player_id), "Next owner's name is shown");
 
@@ -3746,7 +3754,7 @@ asyncTest("on_next_owner_change", 35, function() {
 
             notEqual(next_game_author_div.css('display'), 'none', 'the author text is visible');
             equal(next_game_player_div.css('display'), 'none', 'the player text is hidden');
-            notEqual(continue_img.css('display'), 'none', 'continue button is visible again')
+            notEqual(continue_img.css('display'), 'none', 'continue button is visible again');
             equal(next_game_modal.css('display'), 'none', 'the please wait dialog is closed');
             ok(next_game_dom.hasClass('cardstories_centered'), 'the game info is shown centered');
             ok(continue_button.hasClass('cardstories_centered'), 'the continue button is shown centered');
@@ -3787,7 +3795,7 @@ asyncTest("on_next_owner_change after closing results", 34, function() {
 
     $.cardstories_table = {
         get_next_owner_id: function(player_id, game_id, root) { return next_owner_id; },
-        load_next_game_when_ready: function(ready, player_id, game_id, root) { return false; },
+        on_next_game_ready: function(ready, player_id, game_id, root, cb) { return false; },
         on_next_owner_change: function(player_id, game_id, root, cb) { owner_change_cb = cb; }
     };
 
@@ -3840,7 +3848,7 @@ asyncTest("on_next_owner_change after closing results", 34, function() {
                 // should be hidden, and a modal 'please wait' dialog should be displayed instead.
                 notEqual(next_game_author_div.css('display'), 'none', 'the author text is visible');
                 equal(next_game_player_div.css('display'), 'none', 'the player text is hidden');
-                equal(continue_img.css('display'), 'none', 'continue button is not visible')
+                equal(continue_img.css('display'), 'none', 'continue button is not visible');
                 notEqual(next_game_modal.css('display'), 'none', 'the please wait dialog is visible');
 
                 // Change owner to another player. Only next owner's name in the dialog
@@ -3850,7 +3858,7 @@ asyncTest("on_next_owner_change after closing results", 34, function() {
 
                 equal(next_game_author_div.css('display'), 'none', 'the author text is hidden');
                 notEqual(next_game_player_div.css('display'), 'none', 'the player text is visible');
-                equal(continue_img.css('display'), 'none', 'continue button is not visible')
+                equal(continue_img.css('display'), 'none', 'continue button is not visible');
                 notEqual(next_game_modal.css('display'), 'none', 'the please wait dialog is visible');
                 ok(next_game_modal.text().match('Player ' + yet_another_player_id), "Next owner's name is shown");
 
@@ -3869,7 +3877,7 @@ asyncTest("on_next_owner_change after closing results", 34, function() {
 
                 notEqual(next_game_author_div.css('display'), 'none', 'the author text is visible');
                 equal(next_game_player_div.css('display'), 'none', 'the player text is hidden');
-                notEqual(continue_img.css('display'), 'none', 'continue button is visible again')
+                notEqual(continue_img.css('display'), 'none', 'continue button is visible again');
                 equal(next_game_modal.css('display'), 'none', 'the please wait dialog is closed');
                 ok(next_game_dom.hasClass('cardstories_centered'), 'the game info is shown centered');
                 ok(continue_button.hasClass('cardstories_centered'), 'the continue button is shown centered');

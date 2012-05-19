@@ -4542,7 +4542,11 @@
                 var results_box = $('.cardstories_results', element);
                 $this.complete_fade_out_results_box(results_box, element, function() {
                     // Ask the table plugin to switch to the next game as soon as possible
-                    var is_ready = $.cardstories_table.load_next_game_when_ready(true, player_id, game.id, root);
+                    var is_ready = $.cardstories_table.on_next_game_ready(true, player_id, game.id, root, function(next_game_id, next_game_opts) {
+                        $.cardstories_tabs.remove_tab_for_game(game.id, player_id, root, function() {
+                            $this.reload(player_id, next_game_id, next_game_opts, root);
+                        });
+                    });
                     if (!is_ready) {
                         // Waiting message while the next author is creating the story
                         $this.display_modal(modal, overlay);
@@ -4567,7 +4571,11 @@
                             $this.close_modal(modal, overlay, next);
                         });
                     }
-                    $.cardstories_table.load_next_game_when_ready(false, player_id, game.id, root);
+                    $.cardstories_table.on_next_game_ready(false, player_id, game.id, root, function(next_game_id, next_game_opts) {
+                        $.cardstories_tabs.remove_tab_for_game(game.id, player_id, root, function() {
+                            $this.reload(player_id, next_game_id, next_game_opts, root);
+                        });
+                    });
 
                     q.queue('chain', function(next) {
                         $this.complete_display_next_game(centered || modal_visible, player_id, game, element, root);

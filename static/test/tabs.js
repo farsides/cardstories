@@ -35,7 +35,7 @@ test("state", 39, function() {
     $.cardstories_tabs.requires_action = function(_player_id, game, _root) {
         equal(_player_id, player_id, 'requires_action gets passed player_id');
         ok(game.state, 'requires_action gets passed the game');
-        equal(_root.attr('id'), 'cardstories_tabs_example', 'requires_action gets passed the root')
+        equal(_root.attr('id'), 'cardstories_tabs_example', 'requires_action gets passed the root');
         return false;
     };
 
@@ -230,6 +230,45 @@ test("closing the currently focused tab when it is the only tab", 7, function() 
     var tab = $('.cardstories_tab', element).last();
     tab.find('.cardstories_tab_close').click();
     equal($('.cardstories_tab', element).length, 0, 'There are no tabs left');
+});
+
+test("remove_tab_for_game", 7, function() {
+    var root = $(selector);
+    var element = $('.cardstories_tabs', root);
+    var player_id = 111;
+    var game_id = 3;
+    var games = [
+        {id: 1, sentence: 'SENTENCE1'},
+        {id: 2, sentence: 'SENTENCE2'},
+        {id: 3, sentence: 'SENTENCE3'}
+    ];
+
+    root.cardstories_tabs(player_id);
+    $.cardstories_tabs.load_game(player_id, game_id, {}, root);
+
+    $.cardstories.send = function(query) {
+        equal(query.action, 'remove_tab', 'remove_tab call is issued');
+        equal(query.player_id, player_id, 'player_id is passed to the service');
+        ok(query.game_id, 'game_id is passed to the service');
+        return $.Deferred().resolve();
+    };
+
+    root.cardstories_tabs(player_id);
+    $.cardstories_tabs.load_game(player_id, game_id, {}, root);
+
+    $.cardstories_tabs.state(player_id, {games: games}, root);
+    equal($('.cardstories_tab', element).length, 3, 'There are three tabs');
+
+    // Remove the tab programmatically by passing the game_id.
+    // The tab should be removed from the DOM and the 'remove_tab' call
+    // issued to the service.
+    var game_to_remove_id = 2;
+    $.cardstories_tabs.remove_tab_for_game(game_to_remove_id, player_id, root, function() {
+        var tabs = $('.cardstories_tab', element);
+        equal(tabs.length, 2, 'There are two tabs left');
+        equal(tabs.eq(0).text(), 'SENTENCE1', 'First game tab exists');
+        equal(tabs.eq(1).text(), 'SENTENCE3', 'Third game tab exists');
+    });
 });
 
 test("requires_action author", 12, function() {
