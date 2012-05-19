@@ -34,6 +34,19 @@ asyncTest("play", 1, function() {
     });
 });
 
+asyncTest("loop", 3, function() {
+    var loops = 3;
+    soundManager.onready(function() {
+        var sound = $(root).data('cardstories_audio').sounds['ring'];
+        sound.play = function(opts) {
+            ok(true, 'play called');
+            opts.onfinish();
+        };
+        $.cardstories_audio.loop('ring', root, loops);
+        start();
+    });
+});
+
 asyncTest("stop", 1, function() {
     soundManager.onready(function() {
         var sound = $(root).data('cardstories_audio').sounds['ring'];
