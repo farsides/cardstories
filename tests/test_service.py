@@ -29,6 +29,7 @@ from twisted.trial import unittest, runner, reporter
 from twisted.internet import defer
 import twisted.web.error
 
+import cardstories.levels
 from cardstories.service import CardstoriesService, CardstoriesServiceConnector
 from cardstories.poll import Pollable
 from cardstories.exceptions import CardstoriesWarning, CardstoriesException
@@ -646,6 +647,13 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         player_id = 20
         player_name = u"pl\xe1y\u1ebdr"
         player_avatar_url = "http://example.com/test.jpg"
+        player_score = 4141
+        player_level, _, _ = cardstories.levels.calculate_level(player_score)
+
+        sql = "INSERT INTO players (player_id, score) VALUES (%d, %d)"
+        c = self.db.cursor()
+        c.execute(sql % (player_id, player_score))
+        self.db.commit()
 
         # Fake calls to auth module
         default_get_player_name = self.service.auth.get_player_name
@@ -662,7 +670,8 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
 
         self.assertEquals(players_info, [{ 'type': 'players_info',
                                            str(player_id): {'name': player_name,
-                                                            'avatar_url': player_avatar_url}
+                                                            'avatar_url': player_avatar_url,
+                                                            'level': player_level}
                                          }])
 
         self.service.auth.get_player_name = default_get_player_name
@@ -721,9 +730,17 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         owner_id = 15
         player_name = u"pl\xe1y\u1ebdr"
         player_avatar_url = "http://example.com/test.jpg"
+        player_score = 711
+        player_level, _, _ = cardstories.levels.calculate_level(player_score)
+
+        sql = "INSERT INTO players (player_id, score) VALUES (%d, %d)"
+        c = self.db.cursor()
+        c.execute(sql % (owner_id, player_score))
+        self.db.commit()
 
         players_info = [{'type': 'players_info', str(owner_id): {'name': player_name,
-                                                                 'avatar_url': player_avatar_url}}]
+                                                                 'avatar_url': player_avatar_url,
+                                                                 'level': player_level}}]
 
         # Fake calls to auth module
         default_get_player_name = self.service.auth.get_player_name

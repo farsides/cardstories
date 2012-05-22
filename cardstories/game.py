@@ -24,12 +24,12 @@
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
 import random
-from math import ceil
 
 from twisted.internet import defer, reactor
 
 from cardstories.poll import Pollable
 from cardstories.exceptions import CardstoriesWarning
+from cardstories.levels import calculate_level
 
 class CardstoriesGame(Pollable):
 
@@ -46,9 +46,6 @@ class CardstoriesGame(Pollable):
     POINTS_P_WON = 5
     POINTS_P_LOST = 1
     POINTS_P_FAILED = 2
-    LEVEL_A = 0.5
-    LEVEL_B = 1.5
-    LEVEL_C = 3.5
 
     def __init__(self, service, id=None):
         self.service = service
@@ -257,34 +254,6 @@ class CardstoriesGame(Pollable):
         result = yield self.touch(type='set_sentence', sentence=sentence)
         defer.returnValue(result)
 
-    def calculate_level(self, score):
-        # Players start with score 0 at level 1, and by convention only
-        # need one point to reach level 2.
-        if not score or score < 0:
-            level = 1 
-            score_next = 1
-            score_left = 1
-
-        # Starting at level 2, levels are defined by a "points to the
-        # next level" formula, tunable using 3 constants.  Precisely
-        # due to this tunable nature, levels are not stored on the
-        # database, but calculated whenever a request is made.
-        else:
-            to_next = lambda l: int(ceil(self.LEVEL_A * l ** 3 + \
-                                         self.LEVEL_B * l ** 2 + \
-                                         self.LEVEL_C * l))
-            level = 2
-            remainder = score - 1
-            score_next = to_next(level)
-            while remainder >= score_next:
-                remainder -= score_next
-                level += 1
-                score_next = to_next(level)
-
-            score_left = score_next - remainder
-
-        return level, score_next, score_left
-
     @defer.inlineCallbacks
     def game(self, player_id):
         db = self.service.db
@@ -370,8 +339,8 @@ class CardstoriesGame(Pollable):
             if player[0] == player_id:
                 score = player[5]
                 score_prev = player[6]
-                level, score_next, score_left = self.calculate_level(score)
-                level_prev, _, _ = self.calculate_level(score_prev)
+                level, score_next, score_left = calculate_level(score)
+                level_prev, _, _ = calculate_level(score_prev)
                 if player[7]:
                     earned_cards = [ord(c) for c in player[7]]
                 else:
@@ -618,9 +587,9 @@ class CardstoriesGame(Pollable):
                 continue
             score_prev, levelups, earned_cards = row
 
-            level_prev, _, _ = self.calculate_level(score_prev)
+            level_prev, _, _ = calculate_level(score_prev)
             score_cur = score_prev + score[player_id]
-            level_cur, _, _ = self.calculate_level(score_cur)
+            level_cur, _, _ = calculate_level(score_cur)
 
             if earned_cards:
                 earned_cards = list(earned_cards)

@@ -1211,7 +1211,7 @@
                         }
 
                         // Store players_info data first
-                        $this.update_players_info(data);
+                        $this.update_players_info(data, player_id, root);
 
                         // Call plugin states.
                         $.each(data, function(i) {
@@ -4710,7 +4710,7 @@
                     }
 
                     // Store players_info data first
-                    $this.update_players_info(data);
+                    $this.update_players_info(data, player_id, root);
 
                     $.each(data, function(i) {
                         var datum = this;
@@ -4928,7 +4928,7 @@
             dst_bar.data('step', step);
         },
 
-        update_players_info: function(request_data) {
+        update_players_info: function(request_data, player_id, root) {
             // Store extra information about individual players_id
             // using data found in a request answer from the webservice
 
@@ -4936,16 +4936,26 @@
             for(var i=0; i<request_data.length; i++) {
                 if(request_data[i].type == 'players_info') {
                     var players_info = request_data[i];
-                    for(var player_id in request_data[i]) {
-                        var player_info = players_info[player_id];
-                        $this.players_info[player_id] = player_info;
+                    for(var pid in request_data[i]) {
+                        var player_info = players_info[pid];
+                        $this.players_info[pid] = player_info;
                     }
                 }
             }
+
+            // Update displayed current player info.
+            this.update_current_player_info(player_id, root);
         },
 
         get_player_info_by_id: function(player_id) {
             return this.players_info[player_id];
+        },
+
+        update_current_player_info: function(player_id, root) {
+            var info_div = $('.cardstories_player_info', root);
+            var player_info = this.get_player_info_by_id(player_id);
+            $('.cardstories_name', info_div).html(player_info.name);
+            $('.cardstories_level', info_div).html(player_info.level);
         },
 
         update_player_info_from_ws: function(player_id, game_id, root) {
@@ -4956,7 +4966,7 @@
                 if('error' in data) {
                     $this.panic(data.error, player_id, game_id, root);
                 } else {
-                    $this.update_players_info(data);
+                    $this.update_players_info(data, player_id, root);
                     deferred.resolve();
                 }
             };

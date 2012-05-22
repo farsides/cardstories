@@ -32,6 +32,7 @@ from twisted.internet import reactor, defer
 from twisted.enterprise import adbapi
 from twisted.python import log
 
+from cardstories.levels import calculate_level
 from cardstories.game import CardstoriesGame
 from cardstories.helpers import Observable
 from cardstories.exceptions import CardstoriesWarning, CardstoriesException
@@ -324,10 +325,22 @@ class CardstoriesService(service.Service, Observable):
     @defer.inlineCallbacks
     def update_players_info(self, players_info, players_id_list):
         '''Add new player ids as key to players_info dict, from players_list'''
+        # Python's DB-API doesn't support interpolating lists into SQL's "WHERE x IN (...)" statements,
+        # so we have to generate the correct number of '?' placeholders programatically.
+        format_strings = ','.join(['?'] * len(players_id_list))
+        sql_statement = 'SELECT player_id, score FROM players WHERE player_id IN (%s)' % format_strings
+        rows = yield self.db.runQuery(sql_statement, players_id_list)
+        # Build up a dict of {player_id: player_level} key-value pairs.
+        levels = {}
+        for row in rows:
+            level, _, _ = calculate_level(row[1])
+            levels[row[0]] = level
 
         for player_id in players_id_list:
             if player_id not in players_info:
                 info = {}
+                if levels.has_key(player_id):
+                    info['level'] = levels[player_id]
                 try:
                     info['name'] = yield self.auth.get_player_name(player_id)
                     info['avatar_url'] = yield self.auth.get_player_avatar_url(player_id)

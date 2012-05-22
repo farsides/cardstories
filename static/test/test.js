@@ -462,17 +462,24 @@ test("update_player_info_from_ws", 2, function() {
     $.cardstories.update_players_info = update_players_info_orig;
 });
 
-test("update_players_info", 1, function() {
+test("update_players_info", 4, function() {
+    var root = $('#qunit-fixture .cardstories');
     var player_id = 4;
-    var player_info = {'name': 'Bogus master name updated'};
-    var data = {'type': 'players_info'};
+    var player_info = {name: 'Bogus master name updated', level: 35};
+    var data = {type: 'players_info'};
     data[player_id] = player_info;
 
-    $.cardstories.update_players_info([data]);
-
     $.cardstories.get_player_info_by_id = cardstories_default_get_player_info_by_id;
+
+    $.cardstories.update_players_info([data], player_id, root);
+
     var result = $.cardstories.get_player_info_by_id(player_id);
     equal(result.name, player_info.name);
+    equal(result.level, player_info.level);
+
+    var info_div = $('.cardstories_player_info', root);
+    equal($('.cardstories_name', info_div).html(), player_info.name, "Player's name is displayed");
+    equal($('.cardstories_level', info_div).html(), player_info.level, "Player's level is displayed");
 });
 
 asyncTest("display_modal", 2, function() {
