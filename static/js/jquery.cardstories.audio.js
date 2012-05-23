@@ -49,6 +49,13 @@
             });
         },
 
+        // Stop any sound currently playing when loading a new game.
+        // Useful when a player switches tabs while the levelup songs
+        // are playing without closing the results box, for example.
+        load_game: function(player_id, game_id, options, root) {
+            this.stop_all();
+        },
+
         play: function(sound_id, root) {
             var data = $(root).data('cardstories_audio');
             if (data && data.sounds && data.sounds[sound_id]) {
@@ -76,6 +83,11 @@
             if (data && data.sounds && data.sounds[sound_id]) {
                 data.sounds[sound_id].stop();
             }
+        },
+
+        // Stops all sounds currently playing.
+        stop_all: function() {
+            soundManager.stopAll();
         }
     };
 

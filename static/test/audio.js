@@ -20,6 +20,16 @@ asyncTest("init", 2, function() {
     });
 });
 
+asyncTest("load_game", 1, function() {
+    soundManager.onready(function() {
+        var orig_stop_all = $.cardstories_audio.stop_all;
+        $.cardstories_audio.stop_all = function() { ok(true, 'stop_all called'); };
+        $.cardstories_audio.load_game(12, 44, {}, root);
+        $.cardstories_audio.stop_all = orig_stop_all;
+        start();
+    });
+});
+
 asyncTest("play", 1, function() {
     soundManager.onready(function() {
         var sound = $(root).data('cardstories_audio').sounds['ring'];
@@ -57,6 +67,16 @@ asyncTest("stop", 1, function() {
         } catch(err) {
             ok(false, 'this should never happen');
         }
+        start();
+    });
+});
+
+asyncTest("stop_all", 1, function() {
+    soundManager.onready(function() {
+        var orig_stopAll = soundManager.stopAll;
+        soundManager.stopAll = function() { ok(true, 'stopAll called'); };
+        $.cardstories_audio.stop_all();
+        soundManager.stopAll = orig_stopAll;
         start();
     });
 });

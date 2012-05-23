@@ -86,6 +86,7 @@ function setup() {
     };
     $.cardstories_audio = {};
     $.cardstories_audio.play = function(name, root) {};
+    $.cardstories_audio.loop = function(name, root, limit) {};
     $.cardstories_audio.stop = function(name, root) {};
     $.cardstories_table = {};
     $.cardstories_table.get_available_game = function(player_id, root, cb) { cb(); };
@@ -3377,7 +3378,7 @@ asyncTest("complete close results box author", 11, function() {
 
         // Test that the close button is properly bound.
         var orig_close_results_box = $.cardstories.complete_close_results_box;
-        $.cardstories.complete_close_results_box = function(_box, _element, cb) {
+        $.cardstories.complete_close_results_box = function(_box, _element, _root, cb) {
             ok(_box.is('.cardstories_results'), 'close callback is called with the box');
             ok(_element.is('.cardstories_complete'), 'close callback is called with the element');
             $.cardstories.complete_close_results_box = orig_close_results_box;
@@ -3385,7 +3386,7 @@ asyncTest("complete close results box author", 11, function() {
         close_btn.click();
 
         // Test that the close handler actually works.
-        $.cardstories.complete_close_results_box(box, element, function(){
+        $.cardstories.complete_close_results_box(box, element, root, function(){
             equal(box.css('display'), 'none', 'box is NOT visible');
             equal(next_game.css('display'), 'none', 'next game info is NOT visible');
             notEqual(continue_btn.css('display'), 'none', 'continue button is still visible');
@@ -3397,7 +3398,7 @@ asyncTest("complete close results box author", 11, function() {
     });
 });
 
-asyncTest("complete close results box player", 10, function() {
+asyncTest("complete close results box player", 14, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var owner_id = 10;
@@ -3436,20 +3437,27 @@ asyncTest("complete close results box player", 10, function() {
 
         // Test that the close button is properly bound.
         var orig_close_results_box = $.cardstories.complete_close_results_box;
-        $.cardstories.complete_close_results_box = function(_box, _element, cb) {
+        $.cardstories.complete_close_results_box = function(_box, _element, _root, cb) {
             ok(_box.is('.cardstories_results'), 'close callback is called with the box');
             ok(_element.is('.cardstories_complete'), 'close callback is called with the element');
             $.cardstories.complete_close_results_box = orig_close_results_box;
         };
         close_btn.click();
 
+        var sounds_stopped = [];
+        $.cardstories_audio.stop = function(sound_id) { sounds_stopped.push(sound_id); };
+
         // Test that the close handler actually works.
-        $.cardstories.complete_close_results_box(box, element, function(){
+        $.cardstories.complete_close_results_box(box, element, root, function(){
             equal(box.css('display'), 'none', 'box is NOT visible');
             equal(next_game.css('display'), 'none', 'next game info is NOT visible');
             notEqual(continue_btn.css('display'), 'none', 'continue button is still visible');
             ok(continue_btn.position().top < initial_top, 'continue button is positioned higher, towards the center');
             ok(continue_btn.position().left < initial_left, 'continue button is positioned more to the left, towards the center');
+            equal(sounds_stopped.length, 3, 'three sounds were stopped');
+            notEqual($.inArray('bgm', sounds_stopped), -1, 'The bgm sound was stopped');
+            notEqual($.inArray('fireworks', sounds_stopped), -1, 'The fireworks sound was stopped');
+            notEqual($.inArray('applause', sounds_stopped), -1, 'The applause sound was stopped');
             start();
         });
     });
@@ -3483,6 +3491,7 @@ asyncTest("complete levelup player", 14, function() {
 
     var sounds_played = [];
     $.cardstories_audio.play = function(sound_id) { sounds_played.push(sound_id); };
+    $.cardstories_audio.loop = function(sound_id) { sounds_played.push(sound_id); };
 
     $.cardstories.complete(player2, game, root).done(function() {
         var box = $('.cardstories_results', element);
@@ -3535,6 +3544,7 @@ asyncTest("complete levelup owner", 14, function() {
 
     var sounds_played = [];
     $.cardstories_audio.play = function(sound_id) { sounds_played.push(sound_id); };
+    $.cardstories_audio.loop = function(sound_id) { sounds_played.push(sound_id); };
 
     $.cardstories.complete(owner_id, game, root).done(function() {
         var box = $('.cardstories_results', element);
@@ -3823,7 +3833,7 @@ asyncTest("on_next_owner_change after closing results", 34, function() {
         // function rather than simulating a click on the close button to
         // be able to hook into its complete callback.
         var box = $('.cardstories_results', element);
-        $.cardstories.complete_close_results_box(box, element, function() {
+        $.cardstories.complete_close_results_box(box, element, root, function() {
             // The next game info should not be visible, neither should be the dialog.
             equal(next_game_dom.css('display'), 'none', 'Next game info is NOT visible');
             equal(next_game_modal.css('display'), 'none', 'the please wait dialog is NOT visible');

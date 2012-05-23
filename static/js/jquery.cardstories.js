@@ -3931,10 +3931,15 @@
             q.dequeue('chain');
         },
 
-        complete_fade_out_results_box: function(box, element, cb) {
+        complete_fade_out_results_box: function(box, element, root, cb) {
             var $this = this;
             var continue_btn = $('.cardstories_complete_continue > img', element);
             var next_game = $('.cardstories_next_game', element);
+
+            // Stop any running levelup sounds.
+            $.cardstories_audio.stop('fireworks', root);
+            $.cardstories_audio.stop('applause', root);
+            $.cardstories_audio.stop('bgm', root);
 
             // Mark the element with a cardstories_results_closed class.
             element.addClass('cardstories_results_closed');
@@ -3957,9 +3962,9 @@
             });
         },
 
-        complete_close_results_box: function(box, element, cb) {
+        complete_close_results_box: function(box, element, root, cb) {
             var $this = this;
-            $this.complete_fade_out_results_box(box, element, function() {
+            $this.complete_fade_out_results_box(box, element, root, function() {
                 var continue_btn = $('.cardstories_complete_continue', element);
                 continue_btn.addClass('cardstories_centered');
                 var continue_img = $('> img', continue_btn);
@@ -4043,7 +4048,7 @@
 
             // Bind clicks on the close button.
             $('.cardstories_results_close', box).unbind('click').click(function() {
-                $this.complete_close_results_box(box, element);
+                $this.complete_close_results_box(box, element, root);
             });
 
             // Animate stuff in, starting with the results box.
@@ -4533,15 +4538,10 @@
 
             // Enable "continue" button
             continue_button.unbind('click').click(function() {
-                // Stop any running songs.
-                $.cardstories_audio.stop('fireworks', root);
-                $.cardstories_audio.stop('applause', root);
-                $.cardstories_audio.stop('bgm', root);
-
                 continue_button.removeClass('cardstories_popped');
                 // Fade out the box and animate the button out.
                 var results_box = $('.cardstories_results', element);
-                $this.complete_fade_out_results_box(results_box, element, function() {
+                $this.complete_fade_out_results_box(results_box, element, root, function() {
                     // Ask the table plugin to switch to the next game as soon as possible
                     var is_ready = $.cardstories_table.on_next_game_ready(true, player_id, game.id, root, function(next_game_id, next_game_opts) {
                         $.cardstories_tabs.remove_tab_for_game(game.id, player_id, root, function() {
