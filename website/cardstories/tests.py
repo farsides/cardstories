@@ -263,8 +263,7 @@ class CardstoriesTest(TestCase):
             return MockMeInvalid()
         facebook.urlopen = mock_me_invalid
         from simplejson import JSONDecodeError
-        with self.assertRaises(JSONDecodeError):
-            response = c.get(url, data)
+        self.assertRaises(JSONDecodeError, c.get, url, data)
 
         # GraphAPI exception
         class MockMeAPIException(object):
@@ -279,8 +278,7 @@ class CardstoriesTest(TestCase):
         def mock_me_exception(url):
             return MockMeAPIException()
         facebook.urlopen = mock_me_exception
-        with self.assertRaises(facebook.GraphAPIError):
-            response = c.get(url, data)
+        self.assertRaises(facebook.GraphAPIError, c.get, url, data)
 
         # No email permission
         class MockMeNoEmail(object):
@@ -487,7 +485,7 @@ class CardstoriesTest(TestCase):
 
         response = c.post(login_url, login_data)
         self.assertEqual(response.status_code, 302)
-        self.assertIsNotNone(c.cookies["sessionid"])
+        self.assertNotEqual(c.cookies["sessionid"], None)
 
         # Store sessionid, but delete the cookie for subsequent requests.
         sessionid = c.cookies["sessionid"].value
@@ -769,8 +767,8 @@ class CardstoriesTest(TestCase):
         
         from website.cardstories.avatar import Avatar
         
-        with self.assertRaises(NotImplementedError):
-            Avatar(None).update()
+        a = Avatar(None)
+        self.assertRaises(NotImplementedError, a.update)
     
     @patch('website.cardstories.avatar.requests')
     def test_15gravatar_avatar_update(self, mock_requests):
@@ -869,7 +867,7 @@ class CardstoriesTest(TestCase):
         self.assertEqual(rendered1, "%s?%s" % (url, os.path.getmtime(full_path)))
 
         # Update file, but sleep a little so mtime actually changes!)
-        sleep(0.1)
+        sleep(1)
         open(full_path, "w").close()
         
         # Check that mtime is cached. 
@@ -877,7 +875,7 @@ class CardstoriesTest(TestCase):
         self.assertEqual(rendered1, rendered2)
         
         # Check that mtime changes if cache is cleared. 
-        cache.clear()
+        cache.delete('mtime_%s' % url)
         rendered2 = t.render(Context())
         self.assertNotEqual(rendered1, rendered2)
         

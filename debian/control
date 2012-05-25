@@ -4,7 +4,7 @@ Priority: optional
 Maintainer: Loic Dachary (OuoU) <loic@debian.org>
 Build-Depends: debhelper (>= 7.0.50~),
                po-debconf,
-               python-all (>= 2.6.6-2~),
+               python,
                python-lxml,
                python-coverage,
                python-twisted-web (>= 10.1),
@@ -15,7 +15,6 @@ Standards-Version: 3.9.2
 Vcs-Git: http://cardstori.es/cardstories.git
 Vcs-Browser: http://cardstori.es/trac/browser
 Homepage: http://cardstori.es/
-X-Python-Version: all
 
 Package: cardstories
 Section: games
@@ -30,6 +29,9 @@ Depends: ${misc:Depends},
          python-twisted-conch,
          python-lxml,
          python-openssl,
+         python-imaging,
+         python-simplejson,
+         python-httplib2,
          ${python:Depends}
 Provides: ${python:Provides}
 Description: multiplayer online card guessing game

@@ -27,12 +27,13 @@ nginx_install() {
 }
 
 apache2_install() {
-    included=/usr/share/cardstories/conf/apache2.conf
-    conf=/etc/apache2/conf.d/cardstories.conf
-    if [ ! -e $conf ] ; then
-        ln -s $included $conf
+    included=/usr/share/cardstories/website/apache/apache2.conf
+    available=/etc/apache2/sites-available/cardstories
+    if [ ! -e $available ] ; then
+        ln -s $included $available
     fi
-    a2enmod proxy proxy_http
+    a2enmod proxy proxy_http wsgi
+    a2ensite cardstories
 }
 
 . /usr/share/debconf/confmodule
@@ -46,6 +47,18 @@ for d in /var/run/cardstories /var/log/cardstories /var/lib/cardstories /etc/car
     chown -R cardstories:nogroup $d
     chmod 755 $d
 done
+
+website_dir=/var/lib/cardstories/website
+mkdir -p $website_dir
+if [ ! -e $website_dir/website.sqlite ]; then
+	/usr/share/cardstories/website/manage.py syncdb --noinput
+fi
+/usr/share/cardstories/website/manage.py migrate
+chown -R www-data $website_dir
+
+avatar_cache=/usr/share/cardstories/static/css/images/avatars/cache
+mkdir -p $avatar_cache
+chown -R www-data $avatar_cache
 
 if [ "$1" = "configure" ]; then
 

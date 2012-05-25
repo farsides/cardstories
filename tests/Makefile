@@ -28,6 +28,7 @@ check:
 	PYTHONPATH=.. ${COVERAGE} -x test_site.py
 	PYTHONPATH=.. ${COVERAGE} -x test_tap.py
 	PYTHONPATH=.. ${COVERAGE} -x test_game.py
+	PYTHONPATH=.. ${COVERAGE} -x test_levels.py
 	PYTHONPATH=.. ${COVERAGE} -x test_poll.py
 	PYTHONPATH=.. ${COVERAGE} -x test_auth.py
 	PYTHONPATH=.. ${COVERAGE} -x test_plugins.py
