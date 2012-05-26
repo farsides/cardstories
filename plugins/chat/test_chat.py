@@ -51,12 +51,10 @@ class ChatTest(unittest.TestCase):
         if os.path.exists(self.database):
             os.unlink(self.database)
 
-        # Make sure the log dir has an empty 'chat/' subdir
+        # Empty 'chat/' subdir
         self.test_logdir = 'test_logdir.tmp'
         if os.path.exists(self.test_logdir):
             shutil.rmtree(self.test_logdir)
-        os.mkdir(self.test_logdir)
-        os.mkdir(os.path.join(self.test_logdir, 'chat'))
 
         self.service = CardstoriesService({'db': self.database,
                                            'plugins-confdir': 'CONFDIR',
@@ -123,6 +121,11 @@ class ChatTest(unittest.TestCase):
                                       'owner_id': [owner_id] })
         self.assertFalse(self.service.games.has_key(game_id))
         defer.returnValue(True)
+
+    def test00_create_logdir(self):
+        chat_instance = Plugin(self.service, [])
+        logdir = os.path.join(self.test_logdir, 'chat')
+        self.assertTrue(os.path.exists(logdir))
 
     @defer.inlineCallbacks
     def test00_preprocess_noop(self):

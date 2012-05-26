@@ -55,6 +55,17 @@ class Plugin(Pollable):
         self.libdir = os.path.join(self.service.settings['plugins-libdir'], self.name())
         self.logdir = os.path.join(self.service.settings['plugins-logdir'], self.name())
 
+        # Initialize logdir, and make sure we have write permissions.
+        # If not, turn off logging.
+        self.logging = True
+        if not os.path.exists(self.logdir):
+            try:
+                os.makedirs(self.logdir)
+            except OSError:
+                self.logging = False
+        elif not os.access(self.logdir, os.W_OK):
+            self.logging = False
+
         # Initialize the pollable using the recommended timeout.
         Pollable.__init__(self, self.service.settings.get('poll-timeout', 30))
 
@@ -88,7 +99,8 @@ class Plugin(Pollable):
         self.messages.append(message)
 
         # Log the message
-        self.log_message(message)
+        if self.logging:
+            self.log_message(message)
 
         # Cull out old messages so we don't leak.
         delmessages = [m for m in self.messages

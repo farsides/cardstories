@@ -74,11 +74,6 @@ service restarted if it's already running):
    * tests/djangoauth/djangoauth.xml
    * tests/mail/mail.xml
 
-If the cardstories web service is not running on port 5000, make sure
-to change the CARDSTORIES_HOST parameter here, and restart the website server:
-
-   * website/settings.py
-
 Create the log folder: 
 
     $ mkdir log/
