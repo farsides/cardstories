@@ -510,6 +510,31 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         yield games[2].touch()
         self.assertTrue(games[2].ok)
 
+    @defer.inlineCallbacks
+    def test08_tab_added_notify(self):
+        sentence = 'SENTENCE'
+        owner_id = 177
+        # Create a game and associate it with the owner in the tabs table.
+        result = yield self.service.create({'owner_id': [owner_id]})
+        game_id = result['game_id']
+
+        self.service.notified = False
+        def callback(result):
+            self.service.notified = True
+            self.assertEquals(result['type'], 'tab_added')
+            self.assertEquals(result['game_id'], game_id)
+            self.assertEquals(result['player_id'], owner_id)
+        self.service.listen().addCallback(callback)
+
+        # Asking for state of a game that isn't associated with the player
+        # in the tabs table yet, should associate it now.
+        state = yield self.service.state({'type': ['tabs'],
+                                          'modified': [0],
+                                          'player_id': [owner_id],
+                                          'game_id': [game_id],
+                                          'game_ids': []})
+
+        self.assertTrue(self.service.notified)
 
     @defer.inlineCallbacks
     def test09_cancel(self):
@@ -722,6 +747,31 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
                                        'game_id': [game_id2]})
 
         self.assertEqual(len(get_player_tabs()), 0)
+
+    @defer.inlineCallbacks
+    def test12_tab_removed_notify(self):
+        player_id = 43
+        game_id = 22
+        # Associate the game with the player in the tabs table.
+        sql = "INSERT INTO tabs (player_id, game_id, created) VALUES (%d, %d, datetime('now'))"
+        c = self.db.cursor()
+        c.execute(sql % (player_id, game_id))
+        self.db.commit()
+
+        self.service.notified = False
+        def callback(result):
+            self.service.notified = True
+            self.assertEquals(result['type'], 'tab_removed')
+            self.assertEquals(result['game_id'], game_id)
+            self.assertEquals(result['player_id'], player_id)
+        self.service.listen().addCallback(callback)
+
+        yield self.service.remove_tab({'action': ['remove_tab'],
+                                       'player_id': [player_id],
+                                       'game_id': [game_id]})
+
+        self.assertTrue(self.service.notified)
+
 
     @defer.inlineCallbacks
     def test12_state(self):

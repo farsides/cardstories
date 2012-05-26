@@ -280,11 +280,13 @@ class CardstoriesService(service.Service, Observable):
         transaction.execute('SELECT game_id from tabs WHERE player_id = ? ORDER BY created ASC', [player_id])
         rows = transaction.fetchall()
         game_ids = [row[0] for row in rows]
+        tab_added = False
         if game_id and game_id not in game_ids:
             sql = "INSERT INTO tabs (player_id, game_id, created) VALUES (?, ?, datetime('now'))"
             transaction.execute(sql, [player_id, game_id])
             game_ids.append(game_id)
-        return game_ids
+            tab_added = True
+        return game_ids, tab_added
 
     @defer.inlineCallbacks
     def get_tab_game_ids(self, args):
@@ -302,7 +304,9 @@ class CardstoriesService(service.Service, Observable):
         except:
             game_id = None
         if player_id:
-            game_ids = yield self.db.runInteraction(self.tabsInteraction, player_id, game_id)
+            game_ids, tab_added = yield self.db.runInteraction(self.tabsInteraction, player_id, game_id)
+            if tab_added:
+                self.notify({'type': 'tab_added', 'player_id': player_id, 'game_id': game_id})
         else:
             game_ids = []
         defer.returnValue(game_ids)
@@ -318,6 +322,7 @@ class CardstoriesService(service.Service, Observable):
         player_id = int(args['player_id'][0])
         d = self.db.runQuery('DELETE FROM tabs WHERE player_id = ? AND game_id = ?', [ player_id, game_id ])
         def success(result):
+            self.notify({'type': 'tab_removed', 'player_id': player_id, 'game_id': game_id})
             return {'type': 'remove_tab'}
         d.addCallback(success)
         return d
