@@ -26,25 +26,35 @@ on a recent installation of Ubuntu or Debian.
 
 First, install the following packages.
 
-$ sudo apt-get install python-twisted python-lxml python-django postfix \
-  python-imaging python-simplejson
+$ sudo apt-get install postfix python-twisted python-lxml \
+  python-imaging python-simplejson python-httplib2 python-pip
 
-Note that Django must be version 1.2.5 or greater, otherwise things will break
-in interesting ways.  If your distribution is too old (or too new), instead of
-python-django install python-pip and then use it to install Django:
+Now install the following with pip:
 
-$ sudo apt-get install python-pip
 $ sudo pip install Django==1.2.5
-
-You will also need the following exta packages:
-
+$ sudo pip install South==0.7.3
 $ sudo pip install mock==0.7.2
 $ sudo pip install requests==0.8.6
-$ sudo pip install South==0.7.3
 
 Now, make sure you are at the root of the cardstories checkout.  At this point,
-create the default database structure for the website (an sqlite database will
-be automatically created at /tmp/cardstories.website):
+create the default database structure for the website, but first, create a
+local configuration file containing the following:
+
+$ vim website/local_settings.py
+-------------------
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': '/tmp/website.sqlite',
+        'USER': '',
+        'PASSWORD': '',
+        'HOST': '',
+        'PORT': '',
+    }
+}
+-------------------
+
+Now, create the database:
 
 $ website/manage.py syncdb
 $ website/manage.py migrate
@@ -63,11 +73,6 @@ service restarted if it's already running):
 
    * tests/djangoauth/djangoauth.xml
    * tests/mail/mail.xml
-
-If the cardstories web service is not running on port 5000, make sure
-to change the CARDSTORIES_HOST parameter here, and restart the website server:
-
-   * website/settings.py
 
 Create the log folder: 
 
@@ -131,11 +136,10 @@ You can then proceed to set up goals in OWA accordingly.
 Deploying cardstories with Apache
 #################################
 
-In order to deploy cardstories with Apache, the following packages must be
-installed:
+In order to deploy cardstories with Apache, the following additional packages
+must be installed:
 
-$ sudo apt-get install python-twisted python-lxml python-django postfix \
-	apache2 libapache2-mod-wsgi
+$ sudo apt-get install apache2 libapache2-mod-wsgi
 
 From the root of your cardstories checkout, install cardstories to the default
 locations with:
@@ -225,7 +229,7 @@ Packaging instructions
 
 To create a source distribution use:
 
-$ v=1.0.5 ; python setup.py sdist --dist-dir .. ; mv ../cardstories-$v.tar.gz ../cardstories_$v.orig.tar.gz
+$ v=2.0.0 ; python setup.py sdist --dist-dir .. ; mv ../cardstories-$v.tar.gz ../cardstories_$v.orig.tar.gz
 
 To create the Debian GNU/Linux package use:
 

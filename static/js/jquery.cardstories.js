@@ -105,7 +105,9 @@
             });
 
             this.poll_discard(root);
-            this.poll_plugin(player_id, game_id, root);
+            if (player_id !== undefined) {
+                this.poll_plugin(player_id, game_id, root);
+            }
             this.display_modal(modal, overlay);
         },
 
@@ -117,7 +119,7 @@
                 // "abort" type errors aren't real errors, since they are caused
                 // by aborting the ajax request inside poll_discard, so just ignore them.
                 if (error !== 'abort') {
-                    $this.panic(error);
+                    $this.panic(error, player_id, game_id, root);
                 }
             } else {
                 // Retry after 100 miliseconds.

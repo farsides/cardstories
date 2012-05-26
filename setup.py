@@ -40,6 +40,14 @@ for dirpath, dirnames, filenames in os.walk('website'):
                 filenames = filter(lambda f: re.match('.*.(py|html)$', f), filenames)
 	        data_files.append(['/usr/share/cardstories/' + dirpath, [os.path.join(dirpath, f) for f in filenames]])
 
+for dirpath, dirnames, filenames in os.walk('migrations'):
+	    # Ignore dirnames that start with '.'
+	    for i, dirname in enumerate(dirnames):
+	        if dirname.startswith('.'): del dirnames[i]
+	    if filenames:
+                filenames = filter(lambda f: re.match('.*.(sql)$', f), filenames)
+	        data_files.append(['/usr/share/cardstories/' + dirpath, [os.path.join(dirpath, f) for f in filenames]])
+
 data_files.append(['/etc/default', ['etc/default/cardstories']])
 data_files.append(['/etc/cardstories/twisted/plugins', ['etc/cardstories/twisted/plugins/twisted_cardstories.py']])
 data_files.append(['/usr/share/cardstories/conf', [ 'conf/nginx.conf' ]])
@@ -50,9 +58,10 @@ data_files.append(['/usr/share/cardstories/website/apache', [ 'website/apache/dj
 # Plugins
 data_files.append(['/usr/share/cardstories/plugins/auth', [ 'plugins/auth/auth.py' ]])
 data_files.append(['/usr/share/cardstories/plugins/djangoauth', [ 'plugins/djangoauth/djangoauth.py' ]])
-data_files.append(['/usr/share/cardstories/plugins/solo', [ 'plugins/solo/solo.py' ]])
 data_files.append(['/usr/share/cardstories/plugins/mail', [ 'plugins/mail/mail.py' ]])
 data_files.append(['/usr/share/cardstories/plugins/chat', [ 'plugins/chat/chat.py' ]])
+data_files.append(['/usr/share/cardstories/plugins/table', [ 'plugins/table/table.py' ]])
+data_files.append(['/usr/share/cardstories/plugins/activity', [ 'plugins/activity/activity.py' ]])
 
 for dirpath, dirnames, filenames in os.walk('plugins/mail/templates'):
 	    # Ignore dirnames that start with '.'
@@ -67,12 +76,12 @@ data_files.append(['/etc/cardstories/plugins/mail', [ 'plugins/mail/mail.xml' ]]
 data_files.append(['/etc/cardstories/plugins/djangoauth', [ 'plugins/djangoauth/djangoauth.xml' ]])
 
 setup(name='cardstories',
-      version='1.0.5',
+      version='2.0.0',
       requires=['twisted (>=10.1.0)'],
       description='Find out a card using a sentence made up by another player',
       author='Loic Dachary',
       author_email='loic@dachary.org',
-      url='http://cardstori.es/',
+      url='http://cardstories.org/',
       license='GNU AGPLv3+',
       data_files=data_files,
       packages=['cardstories'])

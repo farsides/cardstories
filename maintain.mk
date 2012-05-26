@@ -15,23 +15,24 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program in a file in the toplevel directory called
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
-#
+
+plugins = activity auth chat djangoauth example mail table
 
 all:
 
 check:
 	make -C tests check
-	set -e ; for dir in plugins/*/Makefile ; do \
-		make -C `dirname $$dir` check ; \
+	set -e ; for plugin in $(plugins); do \
+		make -C plugins/$$plugin check ; \
 	done
-	jscoverage --no-instrument=js/jquery.placeholder-1.0.1.js --no-instrument=static static-coverage
+	jscoverage --no-instrument=js/jquery.placeholder-1.0.1.js static static-coverage
 	website/manage.py test
 
 clean:
-	for dir in plugins/*/Makefile ; do \
-		make -C `dirname $$dir` clean ; \
+	set -e ; for plugin in $(plugins); do \
+		make -C plugins/$$plugin clean ; \
 	done
-	rm -f plugins/{solo,auth}.py 
+	rm -f plugins/auth.py 
 	make -C tests clean
 	find . -name '*,cover' | xargs rm -f
 	rm -fr static-coverage

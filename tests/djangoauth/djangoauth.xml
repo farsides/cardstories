@@ -1,1 +1,1 @@
-<djangoauth host="local.cardstories.org" />
+<djangoauth host="localhost" />

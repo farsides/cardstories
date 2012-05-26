@@ -1174,7 +1174,7 @@ class CardstoriesGameTest(unittest.TestCase):
     def test16_timeout(self):
         sentence = 'SENTENCE'
         owner_id = 15
-        self.game.settings['game-timeout'] = 0.1
+        self.game.settings['game-timeout'] = 0.5
         game_id, winner_card = yield self.create_game(owner_id, sentence)
         d = self.game.poll({'modified': [self.game.get_modified()]})
         def check(result):

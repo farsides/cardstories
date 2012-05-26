@@ -31,5 +31,3 @@ override_dh_clean:
 override_dh_auto_build:
 	dh_auto_build
 	make -f maintain.mk check
-
-

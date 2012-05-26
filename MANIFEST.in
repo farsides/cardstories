@@ -1,7 +1,9 @@
 recursive-include static *.html *.js *.css *.png *.jpg *.gif *.svg Makefile
-recursive-include plugins *.html *.png *.jpg *.gif Makefile *.py *.xml
+recursive-include plugins *.html *.png *.jpg *.gif Makefile *.py *.xml *.txt *.json *.sample
 recursive-include etc/cardstories *.py
 recursive-include tests *.xml *.py Makefile
+recursive-include bin *.py
+recursive-include website *.py *.html *.json
 include etc/default/cardstories
 include conf/*.conf
 include maintain.mk
@@ -12,3 +14,5 @@ include ChangeLog
 include MANIFEST
 include MANIFEST.in
 include artwork/*.ai
+include AGPLv3
+include GPLv3

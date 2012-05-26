@@ -40,7 +40,7 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': '/tmp/cardstories.website',
+        'NAME': '/var/lib/cardstories/website/website.sqlite',
         'USER': '',
         'PASSWORD': '',
         'HOST': '',

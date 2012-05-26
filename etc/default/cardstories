@@ -23,17 +23,20 @@ GAME_TIMEOUT=86400
 # White space separated list of plugins to load.
 # The order matters.
 #
-#PLUGINS="auth solo mail"
-PLUGINS="auth solo"
+#PLUGINS="djangoauth chat activity table mail"
+PLUGINS="djangoauth chat activity table mail"
+
 
 #
 # White space separated list of plugins that will transform
 # the incoming HTTP request, in the order they show.
 #
-PLUGINS_PRE_PROCESS="auth solo"
+#PLUGINS_PRE_PROCESS="djangoauth chat"
+PLUGINS_PRE_PROCESS="djangoauth chat"
+
 
 #
 # White space separated list of plugins that will transform
 # the JSON result, in the order they show.
 #
-PLUGINS_POST_PROCESS="auth"
+PLUGINS_POST_PROCESS=""
