@@ -49,7 +49,7 @@ test("state", 8, function() {
 });
 
 test("pressing enter inside input field", 2, function() {
-    $.cardstories_chat.send = function(player_id, line) {
+    $.cardstories_chat.send = function(line, player_id, game_id, root) {
         equal(line, 'I pressed enter!');
     };
 

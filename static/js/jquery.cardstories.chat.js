@@ -60,7 +60,7 @@
                 if (event.which === 13) {
                     var sentence = input.val();
                     if ($.trim(sentence) && sentence !== input.attr('placeholder')) {
-                        $this.send(player_id, sentence);
+                        $this.send(sentence, player_id, game_id, root);
                     }
                     input.val('');
                 }
@@ -68,12 +68,12 @@
         },
 
         // Sends message to the server.
-        send: function(player_id, sentence) {
+        send: function(sentence, player_id, game_id, root) {
             $.cardstories.send({
                 action: 'message',
                 player_id: player_id,
                 sentence: sentence
-            });
+            }, null, player_id, game_id, root);
         },
 
         // Receives state data from the server. If there are messages, append
