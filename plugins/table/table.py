@@ -85,10 +85,13 @@ class Plugin(Pollable, CardstoriesServiceConnector):
 
         d = defer.succeed(True)
 
-        if changes != None and changes['type'] == 'change':
-            details = changes['details']
-            if details['type'] == 'create':
-                d = self.on_new_game(changes['game'], details)
+        if changes != None:
+            if changes['type'] == 'change':
+                details = changes['details']
+                if details['type'] == 'create':
+                    d = self.on_new_game(changes['game'], details)
+            elif changes['type'] == 'tab_removed':
+                d = self.on_tab_closed(changes['player_id'], changes['game_id'])
 
         self.service.listen().addCallback(self.on_service_notification)
         return d
@@ -149,6 +152,14 @@ class Plugin(Pollable, CardstoriesServiceConnector):
         return d
 
     @defer.inlineCallbacks
+    def on_tab_closed(self, player_id, game_id):
+        """Called every time a player closes a tab."""
+        table = self.game2table[game_id]
+        yield table.on_tab_closed(player_id)
+
+        defer.returnValue(True)
+
+    @defer.inlineCallbacks
     def on_player_disconnecting(self, player_id):
         """
         Called every time a player disconnects.
@@ -159,8 +170,8 @@ class Plugin(Pollable, CardstoriesServiceConnector):
         for table in self.tables[:]: # self.tables can be altered
             yield table.on_player_disconnecting(player_id)
 
-            online_players, offline_players = yield table.get_online_players()
-            if len(online_players) < 1:
+            active_players, inactive_players = yield table.get_active_players()
+            if len(active_players) < 1:
                 self.delete_table(table)
                 log.msg('Table deleted (game_ids = %s)' % table.games_ids)
 
@@ -252,11 +263,11 @@ class Plugin(Pollable, CardstoriesServiceConnector):
         for table in self.tables:
             game = yield table.get_current_game()
             if game['state'] in ['create', 'invitation']:
-                online_players, offline_players = yield table.get_online_players()
-                if len(online_players) > max_players \
-                        and len(online_players) + len(offline_players) < CardstoriesGame.NPLAYERS:
+                active_players, inactive_players = yield table.get_active_players()
+                if len(active_players) > max_players \
+                        and len(active_players) + len(inactive_players) < CardstoriesGame.NPLAYERS:
                     best_table = table
-                    max_players = online_players
+                    max_players = active_players
 
         defer.returnValue(best_table)
 
@@ -376,12 +387,13 @@ class Table(Pollable, CardstoriesServiceConnector):
                            players_ids])
 
     @defer.inlineCallbacks
-    def get_online_players(self):
+    def get_active_players(self):
         """
         Returns the id of all players participating to the current active game for this table,
-        separated in two lists, depending on their online status.
-        
-        Format: [online_players_ids, offline_players_ids]
+        separated in two lists, depending on their online status, and whether or not they have
+        a tab with the game corresponding to this table.
+
+        Format: [active_players_ids, inactive_players_ids]
         """
 
         current_game_id = self.get_current_game_id()
@@ -389,7 +401,16 @@ class Table(Pollable, CardstoriesServiceConnector):
         online_players_ids = [ x for x in players_ids if self.activity_plugin.is_player_online(x) ]
         offline_players_ids = [ x for x in players_ids if not self.activity_plugin.is_player_online(x) ]
 
-        defer.returnValue([online_players_ids, offline_players_ids])
+        active_players_ids = []
+        inactive_players_ids = offline_players_ids
+        for player_id in online_players_ids:
+            tab_game_ids = yield self.service.get_tab_game_ids({'player_id': [player_id]})
+            if current_game_id in tab_game_ids:
+                active_players_ids.append(player_id)
+            else:
+                inactive_players_ids.append(player_id)
+
+        defer.returnValue([active_players_ids, inactive_players_ids])
 
     @defer.inlineCallbacks
     def update_next_owner_id(self):
@@ -400,16 +421,16 @@ class Table(Pollable, CardstoriesServiceConnector):
         """
 
         if self.next_owner_id is None:
-            online_players_ids, offline_players_ids = yield self.get_online_players()
-            if len(online_players_ids) >= 1:
+            active_players_ids, inactive_players_ids = yield self.get_active_players()
+            if len(active_players_ids) >= 1:
                 # Take the player who was owner the longest ago (or never)
                 for owner_id in self.last_owners_ids:
-                    if len(online_players_ids) == 1:
+                    if len(active_players_ids) == 1:
                         break
-                    elif owner_id in online_players_ids:
-                        online_players_ids.remove(owner_id)
+                    elif owner_id in active_players_ids:
+                        active_players_ids.remove(owner_id)
 
-                self.next_owner_id = online_players_ids[0]
+                self.next_owner_id = active_players_ids[0]
 
                 # Let clients know that the next owner has been chosen
                 self.touch({})
@@ -419,7 +440,7 @@ class Table(Pollable, CardstoriesServiceConnector):
     @defer.inlineCallbacks
     def on_player_disconnecting(self, player_id):
         """
-        Called every time a player disconnects 
+        Called every time a player disconnects
         (not necessarily an active player from the current table game)
         
         Change the next owner when he disconnects
@@ -428,3 +449,15 @@ class Table(Pollable, CardstoriesServiceConnector):
         if self.next_owner_id and self.next_owner_id == player_id:
             self.next_owner_id = None
             yield self.update_next_owner_id()
+
+    @defer.inlineCallbacks
+    def on_tab_closed(self, player_id):
+        """
+        Called every time a player closes the tab holding
+        the game corresponding to this table.
+        Change the next owner if it was this player's turn.
+        """
+
+        # The action taken should be the same as when a player
+        # disconnects, so just delegate to the on_player_disconnecting method.
+        yield self.on_player_disconnecting(player_id)

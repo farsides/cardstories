@@ -121,10 +121,16 @@ class TableTest(unittest.TestCase):
         self.mock_activity_instance.is_player_online.return_value = True
 
         # Poll to know when a table gets available
-        poll = self.start_table_poll('undefined', modified=0)
-        modified = self.check_poll(poll, returned=True)
-        poll = self.start_table_poll('undefined', modified=modified)
-        self.check_poll(poll, returned=False)
+        poll = self.table_instance.poll({'game_id': ['undefined'],
+                                         'modified': [0]})
+        result = yield poll
+        modified = result['modified'][0]
+        # Start a new poll immediately.
+        poll = self.table_instance.poll({'game_id': ['undefined'],
+                                         'modified': [modified]})
+        # Make sure it doesn't return at once.
+        self.assertFalse(poll.called)
+
         self.assertEqual(modified, self.table_instance.get_modified({'game_id': ['undefined']}))
 
         # Create first game
@@ -133,7 +139,13 @@ class TableTest(unittest.TestCase):
         game_id = response['game_id']
 
         # Poll must return to inform players waiting for an available table
-        modified = self.check_poll(poll, returned=True)
+        result = yield poll
+        modified = result['modified'][0]
+
+        # Associate all players with the game in the tabs db table.
+        sql = "INSERT INTO tabs (player_id, game_id, created) VALUES (%d, %d, datetime('now'))"
+        for player_id in [player1, player2, player3]:
+            yield self.service.db.runQuery(sql % (player_id, game_id))
 
         state = yield self.table_instance.state({'type': ['table'],
                                                  'game_id': ['undefined'],
@@ -153,10 +165,14 @@ class TableTest(unittest.TestCase):
                                  []])
 
         # Start a poll on this table to know when the next game will be available there
-        poll = self.start_table_poll(game_id, modified=0)
-        modified = self.check_poll(poll, returned=True)
-        poll = self.start_table_poll(game_id, modified=modified)
-        self.check_poll(poll, returned=False)
+        poll = self.table_instance.poll({'game_id': [game_id],
+                                         'modified': [0]})
+        result = yield poll
+        modified = result['modified'][0]
+
+        poll = self.table_instance.poll({'game_id': [game_id],
+                                         'modified': [modified]})
+        self.assertFalse(poll.called)
         self.assertEqual(modified, self.table_instance.get_modified({'game_id': [game_id]}))
 
         # Complete first game
@@ -170,9 +186,12 @@ class TableTest(unittest.TestCase):
                                  [player2]])
 
         # Poll must return to announce the next owner
-        modified = self.check_poll(poll, returned=True)
-        poll = self.start_table_poll(game_id, modified=modified)
-        self.check_poll(poll, returned=False)
+        result = yield poll
+        modified = result['modified'][0]
+
+        poll = self.table_instance.poll({'game_id': [game_id],
+                                         'modified': [modified]})
+        self.assertFalse(poll.called)
 
         # Next owner disconnects before creating the game - should chose another player
         def is_player_online(*args, **kw):
@@ -192,9 +211,34 @@ class TableTest(unittest.TestCase):
                                  [player3]])
 
         # Poll must return to announce the next owner
-        modified = self.check_poll(poll, returned=True)
-        poll = self.start_table_poll(game_id, modified=modified)
-        self.check_poll(poll, returned=False)
+        result = yield poll
+        modified = result['modified'][0]
+
+        poll = self.table_instance.poll({'game_id': [game_id],
+                                         'modified': [modified]})
+        self.assertFalse(poll.called)
+
+
+        # Next owner closes the tab before creating the game - should chose another player
+        yield self.service.remove_tab({'action': ['remove_tab'],
+                                       'player_id': [player3],
+                                       'game_id': [game_id]})
+
+        # Poll must return to announce the next owner
+        result = yield poll
+        modified = result['modified'][0]
+
+        poll = self.table_instance.poll({'game_id': [game_id],
+                                         'modified': [modified]})
+        self.assertFalse(poll.called)
+
+        state = yield self.table_instance.state({'type': ['table'],
+                                                 'game_id': [game_id],
+                                                 'player_id': [player1]})
+        self.assertEqual(state, [{'game_id': game_id,
+                                  'next_game_id': None,
+                                  'next_owner_id': player1},
+                                 [player1]])
 
         # Create second game
         response = yield self.service.handle([], {'action': ['create'],
@@ -213,7 +257,8 @@ class TableTest(unittest.TestCase):
                                  [player2]])
 
         # Poll must return to announce the new game
-        modified = self.check_poll(poll, returned=True)
+        result = yield poll
+        modified = result['modified'][0]
 
         # All players quit - deletes the table
         self.mock_activity_instance.is_player_online.return_value = False
@@ -229,25 +274,6 @@ class TableTest(unittest.TestCase):
                                   'next_game_id': None,
                                   'next_owner_id': player1},
                                  [player1]])
-
-    def start_table_poll(self, game_id, modified=0):
-        poll = self.table_instance.poll({'game_id': [game_id],
-                                         'modified': [modified]})
-
-        mock_poll_cb = Mock()
-        poll.addCallback(mock_poll_cb)
-
-        return mock_poll_cb
-
-    def check_poll(self, mock_poll_cb, returned=True):
-        if returned:
-            self.assertEqual(mock_poll_cb.call_count, 1)
-            modified = mock_poll_cb.call_args_list[0][0][0]['modified'][0]
-            return modified
-
-        else:
-            self.assertEqual(mock_poll_cb.call_count, 0)
-            return False
 
     @defer.inlineCallbacks
     def complete_game(self, game_id, owner, player1, player2):
