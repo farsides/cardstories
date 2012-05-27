@@ -90,7 +90,7 @@ class Plugin(Pollable, CardstoriesServiceConnector):
                 details = changes['details']
                 if details['type'] == 'create':
                     d = self.on_new_game(changes['game'], details)
-            elif changes['type'] == 'tab_removed':
+            elif changes['type'] == 'tab_closed':
                 d = self.on_tab_closed(changes['player_id'], changes['game_id'])
 
         self.service.listen().addCallback(self.on_service_notification)
@@ -404,7 +404,7 @@ class Table(Pollable, CardstoriesServiceConnector):
         active_players_ids = []
         inactive_players_ids = offline_players_ids
         for player_id in online_players_ids:
-            tab_game_ids = yield self.service.get_tab_game_ids({'player_id': [player_id]})
+            tab_game_ids = yield self.service.get_opened_tabs(player_id)
             if current_game_id in tab_game_ids:
                 active_players_ids.append(player_id)
             else:

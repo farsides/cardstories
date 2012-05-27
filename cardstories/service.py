@@ -260,7 +260,7 @@ class CardstoriesService(service.Service, Observable):
         # two async operations: fetching game ids from the DB, and waiting in a poll.
         # The outer callback fires when the game ids are fetched from the DB, while the
         # inner one fires when one of the polled games has been modified, causing poll to return.
-        outer_deferred = self.get_tab_game_ids(args)
+        outer_deferred = self.get_opened_tabs_from_args(args)
         def outer_callback(result):
             game_deferreds = []
             for game_id in result:
@@ -276,20 +276,8 @@ class CardstoriesService(service.Service, Observable):
         outer_deferred.addCallback(outer_callback)
         return outer_deferred
 
-    def tabsInteraction(self, transaction, player_id, game_id):
-        transaction.execute('SELECT game_id from tabs WHERE player_id = ? ORDER BY created ASC', [player_id])
-        rows = transaction.fetchall()
-        game_ids = [row[0] for row in rows]
-        tab_added = False
-        if game_id and game_id not in game_ids:
-            sql = "INSERT INTO tabs (player_id, game_id, created) VALUES (?, ?, datetime('now'))"
-            transaction.execute(sql, [player_id, game_id])
-            game_ids.append(game_id)
-            tab_added = True
-        return game_ids, tab_added
-
     @defer.inlineCallbacks
-    def get_tab_game_ids(self, args):
+    def get_opened_tabs_from_args(self, args):
         """
         Expects 'player_id' and optionally a 'game_id' in the args.
         If there is a 'game_id' in the args and that game_id is not yet associated
@@ -304,12 +292,69 @@ class CardstoriesService(service.Service, Observable):
         except:
             game_id = None
         if player_id:
-            game_ids, tab_added = yield self.db.runInteraction(self.tabsInteraction, player_id, game_id)
-            if tab_added:
-                self.notify({'type': 'tab_added', 'player_id': player_id, 'game_id': game_id})
+            # Try to associate current game with the player in the tabs table.
+            # This wont't do any harm if current game is already opened in a tab.
+            if game_id:
+                yield self.open_tab(player_id, game_id)
+            game_ids = yield self.get_opened_tabs(player_id)
         else:
             game_ids = []
         defer.returnValue(game_ids)
+
+    @defer.inlineCallbacks
+    def get_opened_tabs(self, player_id):
+        """
+        Returns a deferred which results in a list of game_ids of games
+        which the player keeps open in tabs.
+        """
+        sql = 'SELECT game_id from tabs WHERE player_id = ? ORDER BY created ASC'
+        rows = yield self.db.runQuery(sql, [player_id])
+        game_ids = []
+        for row in rows: game_ids.append(row[0])
+        defer.returnValue(game_ids)
+
+    def openTabInteraction(self, transaction, player_id, game_id):
+        transaction.execute('SELECT * FROM tabs WHERE player_id = ? AND game_id = ?', [player_id, game_id])
+        rows = transaction.fetchall()
+        inserted = False
+        if not len(rows):
+            sql = "INSERT INTO tabs (player_id, game_id, created) VALUES (?, ?, datetime('now'))"
+            transaction.execute(sql, [player_id, game_id])
+            inserted = True
+        return inserted
+
+    def closeTabInteraction(self, transaction, player_id, game_id):
+        transaction.execute('SELECT * FROM tabs WHERE player_id = ? AND game_id = ?', [player_id, game_id])
+        rows = transaction.fetchall()
+        deleted = False
+        if len(rows):
+            transaction.execute('DELETE FROM tabs WHERE player_id = ? AND game_id = ?', [player_id, game_id])
+            deleted = True
+        return deleted
+
+    @defer.inlineCallbacks
+    def open_tab(self, player_id, game_id):
+        """
+        Associates game_id with player_id in the tabs table, if they are not already
+        associated, and returns True.
+        If they are already assiociated, doesn't do anything and returns False.
+        """
+        inserted = yield self.db.runInteraction(self.openTabInteraction, player_id, game_id)
+        if inserted:
+            self.notify({'type': 'tab_opened', 'player_id': player_id, 'game_id': game_id})
+        defer.returnValue(inserted)
+
+    @defer.inlineCallbacks
+    def close_tab(self, player_id, game_id):
+        """
+        Removes the association between player_id and game_id from the tabs table
+        and return True.
+        If player_id and game_id weren't associated, doesn't do anything and return False.
+        """
+        deleted = yield self.db.runInteraction(self.closeTabInteraction, player_id, game_id)
+        if deleted:
+            self.notify({'type': 'tab_closed', 'player_id': player_id, 'game_id': game_id})
+        defer.returnValue(deleted)
 
     def remove_tab(self, args):
         """
@@ -320,9 +365,8 @@ class CardstoriesService(service.Service, Observable):
         self.required(args, 'remove_tab', 'player_id')
         game_id = self.required_game_id(args)
         player_id = int(args['player_id'][0])
-        d = self.db.runQuery('DELETE FROM tabs WHERE player_id = ? AND game_id = ?', [ player_id, game_id ])
+        d = self.close_tab(player_id, game_id)
         def success(result):
-            self.notify({'type': 'tab_removed', 'player_id': player_id, 'game_id': game_id})
             return {'type': 'remove_tab'}
         d.addCallback(success)
         return d
@@ -383,7 +427,7 @@ class CardstoriesService(service.Service, Observable):
             yield self.update_players_info(players_info, players_id_list)
 
         if 'tabs' in args['type']:
-            game_ids = yield self.get_tab_game_ids(args)
+            game_ids = yield self.get_opened_tabs_from_args(args)
             tabs = {'type': 'tabs', 'games': []}
             player_id = args.get('player_id')
             max_modified = 0

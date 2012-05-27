@@ -464,12 +464,12 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
             game_id = result['game_id']
             game_ids.append(game_id)
 
-        # Stub out the get_tab_game_ids to return the tree games created above.
-        def fake_get_tab_game_ids(args):
+        # Stub out the get_opened_tabs_from_args to return the tree games created above.
+        def fake_get_opened_tabs_from_args(args):
             d = defer.Deferred()
             d.callback(game_ids)
             return d
-        self.service.get_tab_game_ids = fake_get_tab_game_ids
+        self.service.get_opened_tabs_from_args = fake_get_opened_tabs_from_args
 
         games = map(lambda gid: self.service.games[gid], game_ids)
         max_modified = games[2].modified
@@ -518,12 +518,9 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         result = yield self.service.create({'owner_id': [owner_id]})
         game_id = result['game_id']
 
-        self.service.notified = False
+        self.service.notification = None
         def callback(result):
-            self.service.notified = True
-            self.assertEquals(result['type'], 'tab_added')
-            self.assertEquals(result['game_id'], game_id)
-            self.assertEquals(result['player_id'], owner_id)
+            self.service.notification = result
         self.service.listen().addCallback(callback)
 
         # Asking for state of a game that isn't associated with the player
@@ -534,7 +531,10 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
                                           'game_id': [game_id],
                                           'game_ids': []})
 
-        self.assertTrue(self.service.notified)
+        self.assertTrue(self.service.notification is not None)
+        self.assertEquals(self.service.notification['type'], 'tab_opened')
+        self.assertEquals(self.service.notification['game_id'], game_id)
+        self.assertEquals(self.service.notification['player_id'], owner_id)
 
     @defer.inlineCallbacks
     def test09_cancel(self):
@@ -758,19 +758,19 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         c.execute(sql % (player_id, game_id))
         self.db.commit()
 
-        self.service.notified = False
+        self.service.notification = None
         def callback(result):
-            self.service.notified = True
-            self.assertEquals(result['type'], 'tab_removed')
-            self.assertEquals(result['game_id'], game_id)
-            self.assertEquals(result['player_id'], player_id)
+            self.service.notification = result
         self.service.listen().addCallback(callback)
 
         yield self.service.remove_tab({'action': ['remove_tab'],
                                        'player_id': [player_id],
                                        'game_id': [game_id]})
 
-        self.assertTrue(self.service.notified)
+        self.assertTrue(self.service.notification is not None)
+        self.assertEquals(self.service.notification['type'], 'tab_closed')
+        self.assertEquals(self.service.notification['game_id'], game_id)
+        self.assertEquals(self.service.notification['player_id'], player_id)
 
 
     @defer.inlineCallbacks
