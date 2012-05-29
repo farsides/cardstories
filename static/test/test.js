@@ -3024,13 +3024,15 @@ asyncTest("complete owner lost easy", 14, function() {
     var player1 = 1;
     var player2 = 2;
     var game = {
-        'owner': true,
-        'owner_id': owner_id,
-        'board': [],
-        'winner_card': 30,
-        'players': [ { 'id': owner_id, 'vote': null, 'win': 'n', 'picked': 30, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
-                     { 'id': player1, 'vote': 30, 'win': 'y', 'picked': 31, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null },
-                     { 'id': player2, 'vote': 30, 'win': 'y', 'picked': 32, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null } ]
+        owner: true,
+        owner_id: owner_id,
+        board: [],
+        winner_card: 30,
+        players: [
+            {id: owner_id, vote: null, win: 'n', picked: 30, cards: [], score: 18, score_prev: 10, level: 1, level_prev: 1, score_next: 21, score_left: 3},
+            {id: player1, vote: 30, win: 'y', picked: 31, cards: [], score: null, score_prev: null, level: null, level_prev: null, score_next: null, score_left: null},
+            {id: player2, vote: 30, win: 'y', picked: 32, cards: [], score: null, score_prev: null, level: null, level_prev: null, score_next: null, score_left: null}
+        ]
     };
     $.cardstories_table = {
         get_next_owner_id: function(player_id, game_id, root) { return player1; },

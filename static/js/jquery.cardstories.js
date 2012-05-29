@@ -4157,6 +4157,8 @@
                 var score_deferred = $.Deferred();
                 var level_deferred = $.Deferred();
 
+                // Star playing the "pinball" sound.
+                $.cardstories_audio.play('score_pinball', root);
                 // Animate the game score.
                 var timeout = 30;
                 var tmp = player.score_prev;
@@ -4215,12 +4217,12 @@
 
                     // Reset progress bar width.
                     bar.css('width', '');
-                    // Star playing the "pinball" sound.
-                    $.cardstories_audio.play('score_pinball', root);
                     var score_diff = score_next - score_left;
+                    var end_sound_played = false;
                     // Start animating the bar width.
                     bar.animate({width: final_width}, {
                         duration: duration,
+                        easing: 'linear',
                         // During every step of the level bar animation, also position the
                         // level score and set it's contents (counting down from entire score needed
                         // to reach the next level to the score the player still needs to get there).
@@ -4236,13 +4238,21 @@
                             // (so that it doesn't scroll behind the create button and become invisible).
                             var left = Math.min(now, 72);
                             level_score_container.css('left', left + '%');
+
+                            // Play the end (bell) sound if the bar already almost
+                            // hit the end. Doing this in the complete callback is too late,
+                            // because by the time the end sound is played, the bar has already
+                            // started animating the second "round".
+                            if (!end_sound_played && (fx.end === 0 || now/fx.end > 0.95)) {
+                                end_sound_played = true;
+                                $.cardstories_audio.play('score_bell', root);
+                            }
                         },
                         complete: function() {
                             level_score.html(score_left);
-                            // Play the "bell" sound.
-                            $.cardstories_audio.play('score_bell', root);
-                            // Stop playing the "pinball" sound.
-                            $.cardstories_audio.stop('score_pinball', root);
+                            if (!end_sound_played) {
+                                $.cardstories_audio.play('score_bell', root);
+                            }
                             if (cb) {
                                 cb();
                             }
@@ -4289,6 +4299,8 @@
                 q.queue('level', function(next) {
                     animate_level_bar(player.score_left, player.score_next, player.level, function() {
                         level_deferred.resolve();
+                        // Stop playing the "pinball" sound.
+                        $.cardstories_audio.stop('score_pinball', root);
                         next();
                     });
                 });
