@@ -35,6 +35,7 @@
                 // Create SoundManager sound objects.
                 var sounds = {};
                 $.each($root.data('sounds'), function(i, sound) {
+                    sound.autoLoad = true;
                     sounds[sound.id] = soundManager.createSound(sound);
                 });
 
