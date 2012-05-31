@@ -678,7 +678,7 @@ asyncTest("send", 4, function() {
         equal(options.url, $.cardstories.url + '?player_id=' + player_id + '&game_id=' + game_id);
         equal(options.async, false);
         options.success({error: 'OOPS'}); // Should trigger passed-in onerror callback.
-        options.success({}, 'status');
+        options.success({}, 'status'); // Triggers the success callback.
         return 'result of $.cardstories.ajax';
     };
 
@@ -686,17 +686,38 @@ asyncTest("send", 4, function() {
         player_id: player_id,
         game_id: game_id
     };
-    var callback = function() {
-        ok(onerror_called, 'onerror gets called');
-        start();
-    };
     var opts = {
         async: false,
         onerror: onerror
     };
+    var callback = function() {
+        ok(onerror_called, 'onerror gets called');
+        start();
+    };
 
     var result = $.cardstories.send(query, callback, player_id, game_id, root, opts);
     equal(result, 'result of $.cardstories.ajax', 'passes on the promise object as returned from $.cardstories.ajax');
+});
+
+test("send without callback", 1, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var player_id = 15;
+    var game_id = 101;
+
+    $.cardstories.ajax = function(options) {
+        equal(options.url, $.cardstories.url + '?player_id=' + player_id + '&game_id=' + game_id);
+        options.success({}, 'status'); // Triggers the success callback.
+        return 'result of $.cardstories.ajax';
+    };
+
+    var query = {
+        player_id: player_id,
+        game_id: game_id
+    };
+
+    // The main thing we are interested here is that the
+    // function doesn't throw an exception.
+    $.cardstories.send(query, undefined, player_id, game_id, root);
 });
 
 test("send_game on error", 1, function() {

@@ -4675,7 +4675,7 @@
             var success = function(data, status) {
                 if ('error' in data) {
                     onerror(data.error);
-                } else {
+                } else if (callback) {
                     $this.setTimeout(callback, 30);
                 }
             };

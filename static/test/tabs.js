@@ -84,7 +84,7 @@ test("Tabs are links to games", 2, function() {
     ok(tabs.eq(0).attr('href').match('game_id=' + tab_game_id), 'tab contains link to game');
 });
 
-test("closing an unfocused tab", 5, function() {
+test("closing an unfocused tab", 7, function() {
     var root = $(selector);
     var element = $('.cardstories_tabs', root);
     var player_id = 111;
@@ -102,7 +102,9 @@ test("closing an unfocused tab", 5, function() {
     // Click the close button.
     // The tab should be removed from the DOM and the 'remove_tab' call
     // issued to the service.
-    $.cardstories.send = function(query) {
+    $.cardstories.send = function(query, cb, _player_id, _game_id, root, opts) {
+        equal(_player_id, player_id, 'player_id is passed to the send function');
+        equal(_game_id, game_id, 'game_id is passed to the send function');
         equal(query.action, 'remove_tab', 'remove_tab call is issued');
         equal(query.player_id, player_id, 'player_id is passed to the service');
         equal(query.game_id, games[0].id, 'game_id is passed to the service');
@@ -113,7 +115,7 @@ test("closing an unfocused tab", 5, function() {
     equal($('.cardstories_tab', element).length, 1, 'There is one tab left');
 });
 
-test("closing the currently focused tab with tabs to the right", 7, function() {
+test("closing the currently focused tab with tabs to the right", 9, function() {
     var root = $(selector);
     var element = $('.cardstories_tabs', root);
     var player_id = 111;
@@ -126,7 +128,9 @@ test("closing the currently focused tab with tabs to the right", 7, function() {
         {id: 5, sentence: 'SENTENCE5'}
     ];
 
-    $.cardstories.send = function(query) {
+    $.cardstories.send = function(query, cb, _player_id, _game_id, root, opts) {
+        equal(_player_id, player_id, 'player_id is passed to the send function');
+        equal(_game_id, game_id, 'game_id is passed to the send function');
         equal(query.action, 'remove_tab', 'remove_tab call is issued');
         equal(query.player_id, player_id, 'player_id is passed to the service');
         ok(query.game_id, 'game_id is passed to the service');
@@ -153,7 +157,7 @@ test("closing the currently focused tab with tabs to the right", 7, function() {
     equal($('.cardstories_tab', element).length, 4, 'There are four tabs');
 });
 
-test("closing the currently focused tab with tabs to the left", 7, function() {
+test("closing the currently focused tab with tabs to the left", 9, function() {
     var root = $(selector);
     var element = $('.cardstories_tabs', root);
     var player_id = 111;
@@ -167,7 +171,9 @@ test("closing the currently focused tab with tabs to the left", 7, function() {
     root.cardstories_tabs(player_id);
     $.cardstories_tabs.load_game(player_id, game_id, {}, root);
 
-    $.cardstories.send = function(query) {
+    $.cardstories.send = function(query, cb, _player_id, _game_id, root, opts) {
+        equal(_player_id, player_id, 'player_id is passed to the send function');
+        equal(_game_id, game_id, 'game_id is passed to the send function');
         equal(query.action, 'remove_tab', 'remove_tab call is issued');
         equal(query.player_id, player_id, 'player_id is passed to the service');
         ok(query.game_id, 'game_id is passed to the service');
@@ -194,7 +200,7 @@ test("closing the currently focused tab with tabs to the left", 7, function() {
     equal($('.cardstories_tab', element).length, 2, 'There are two tabs left');
 });
 
-test("closing the currently focused tab when it is the only tab", 7, function() {
+test("closing the currently focused tab when it is the only tab", 9, function() {
     var root = $(selector);
     var element = $('.cardstories_tabs', root);
     var player_id = 111;
@@ -206,7 +212,9 @@ test("closing the currently focused tab when it is the only tab", 7, function() 
     root.cardstories_tabs(player_id);
     $.cardstories_tabs.load_game(player_id, game_id, {}, root);
 
-    $.cardstories.send = function(query) {
+    $.cardstories.send = function(query, cb, _player_id, _game_id, root, opts) {
+        equal(_player_id, player_id, 'player_id is passed to the send function');
+        equal(_game_id, game_id, 'game_id is passed to the send function');
         equal(query.action, 'remove_tab', 'remove_tab call is issued');
         equal(query.player_id, player_id, 'player_id is passed to the service');
         ok(query.game_id, 'game_id is passed to the service');
@@ -232,7 +240,7 @@ test("closing the currently focused tab when it is the only tab", 7, function() 
     equal($('.cardstories_tab', element).length, 0, 'There are no tabs left');
 });
 
-test("remove_tab_for_game", 7, function() {
+test("remove_tab_for_game", 9, function() {
     var root = $(selector);
     var element = $('.cardstories_tabs', root);
     var player_id = 111;
@@ -246,7 +254,9 @@ test("remove_tab_for_game", 7, function() {
     root.cardstories_tabs(player_id);
     $.cardstories_tabs.load_game(player_id, game_id, {}, root);
 
-    $.cardstories.send = function(query) {
+    $.cardstories.send = function(query, cb, _player_id, _game_id, root, opts) {
+        equal(_player_id, player_id, 'player_id is passed to the send function');
+        equal(_game_id, game_id, 'game_id is passed to the send function');
         equal(query.action, 'remove_tab', 'remove_tab call is issued');
         equal(query.player_id, player_id, 'player_id is passed to the service');
         ok(query.game_id, 'game_id is passed to the service');

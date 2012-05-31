@@ -61,18 +61,17 @@
             // And repaint them.
             $.each(games, function(i, game) {
                 var tab = $($this.tab_template);
-                tab.data('cardstories_game_id', game.id);
                 var title = $('.cardstories_tab_title', tab);
                 var status = $('.cardstories_tab_status', tab);
                 var close_btn = $('.cardstories_tab_close', tab);
                 var is_current = game.id === current_game_id;
+                tab.data('cardstories_game_id', game.id);
 
                 if (!game.sentence) {
                     title.text('New game');
                 } else {
                     title.text(game.sentence.substring(0, 15));
                 }
-                tab.data('game_id', game.id);
 
                 if (is_current) {
                     tab.addClass('cardstories_selected');
@@ -86,7 +85,7 @@
                         return false;
                     });
                     close_btn.click(function() {
-                        $this.remove_tab(tab, player_id, game.id);
+                        $this.remove_tab(tab, player_id, current_game_id, root);
                     });
 
                     if ($this.requires_action(player_id, game, root)) {
@@ -124,24 +123,24 @@
             var next_tab = tab.next('.cardstories_tab');
             var prev_tab = tab.prev('.cardstories_tab');
             if (next_tab.length) {
-                next_game_id = next_tab.data('game_id');
+                next_game_id = next_tab.data('cardstories_game_id');
             } else if (prev_tab.length) {
-                next_game_id = prev_tab.data('game_id');
+                next_game_id = prev_tab.data('cardstories_game_id');
             }
 
-            this.remove_tab(tab, player_id, game_id, function() {
+            this.remove_tab(tab, player_id, game_id, root, function() {
                 $.cardstories.reload(player_id, next_game_id, {}, root);
             });
         },
 
         // Removes the tab from the page, and issues an ajax call to remove
         // the tab on the webservice.
-        remove_tab: function(tab, player_id, game_id, cb) {
+        remove_tab: function(tab, player_id, game_id, root, cb) {
             var promise = $.cardstories.send({
                 action: 'remove_tab',
-                game_id: game_id,
+                game_id: tab.data('cardstories_game_id'),
                 player_id: player_id
-            });
+            }, null, player_id, game_id, root);
 
             // remove the tab from the DOM.
             tab.fadeOut(function() {
@@ -161,7 +160,7 @@
             var tab = element.find('.cardstories_tab').filter(function() {
                 return $(this).data('cardstories_game_id') === game_to_remove_id;
             });
-            this.remove_tab(tab, player_id, current_game_id, cb);
+            this.remove_tab(tab, player_id, current_game_id, root, cb);
         },
 
         // Returns true if the game passed in as the second parameter requires action
