@@ -4519,11 +4519,16 @@
         },
 
         complete_update_next_author_info: function(next_owner_id, player_id, element) {
-            var next_owner_info = this.get_player_info_by_id(next_owner_id);
             // Show who is going to create the next game
             if (next_owner_id === player_id) {
                 $('.cardstories_next_game_author', element).css('display', 'block');
             } else {
+                var next_owner_info = this.get_player_info_by_id(next_owner_id);
+                // Trying to find the cause of issue #927.  Theory: the table
+                // plugin is returning a bogus next_owner_id.
+                if (next_owner_info === undefined) {
+                    throw 'issue #927, complete_update_next_author_info(): Undefined next_owner_info';
+                }
                 $('.cardstories_next_author_name', element).html(next_owner_info.name);
                 $('.cardstories_next_game_player', element).css('display', 'block');
             }
@@ -4548,6 +4553,11 @@
             }
 
             var next_owner_id = $.cardstories_table.get_next_owner_id(player_id, game.id, root);
+            // Trying to find the cause of issue #927.  Theory: the table
+            // plugin is not returning a next_owner_id.
+            if (next_owner_id === undefined) {
+                throw 'issue #927, complete_display_next_game(): Undefined next_owner_id';
+            }
             $this.complete_update_next_author_info(next_owner_id, player_id, element);
 
             // Enable "continue" button
