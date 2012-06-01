@@ -479,8 +479,10 @@ test("update_players_info", 4, function() {
     equal(result.level, player_info.level);
 
     var info_div = $('.cardstories_player_info', root);
-    equal($('.cardstories_name', info_div).html(), player_info.name, "Player's name is displayed");
-    equal($('.cardstories_level', info_div).html(), player_info.level, "Player's level is displayed");
+    // Long names get truncated to 15 chars + 3 dots max.
+    var cropped_name = 'Bogus master na...';
+    equal($('.cardstories_name', info_div).html(), cropped_name, "Player's name is displayed");
+    equal($('.cardstories_level_nr', info_div).html(), player_info.level, "Player's level is displayed");
 });
 
 asyncTest("display_modal", 2, function() {

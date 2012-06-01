@@ -4968,8 +4968,17 @@
         update_current_player_info: function(player_id, root) {
             var info_div = $('.cardstories_player_info', root);
             var player_info = this.get_player_info_by_id(player_id);
-            $('.cardstories_name', info_div).html(player_info.name);
-            $('.cardstories_level', info_div).html(player_info.level);
+            if (player_info) {
+                // If name is longer than 16 characters,
+                // truncate it to first 15 characters plus three dots,
+                // to not overflow the player info container.
+                var name = player_info.name;
+                if (name.length > 16) {
+                    name = name.substr(0, 15) + '...';
+                }
+                $('.cardstories_name', info_div).html(name);
+                $('.cardstories_level_nr', info_div).html(player_info.level);
+            }
         },
 
         update_player_info_from_ws: function(player_id, game_id, root) {

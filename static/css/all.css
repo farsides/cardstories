@@ -861,6 +861,7 @@
 }
 
 .cardstories .cardstories_deck { 
+    position: relative;
     background: transparent url('images/card_deck_base.png') no-repeat left top;
     width: 216px;
     height: 217px;
@@ -910,6 +911,39 @@
 
 .cardstories .cardstories_deck .cardstories_card_6 {
     z-index: 6;
+}
+
+.cardstories .cardstories_deck .cardstories_player_info {
+    font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
+    font-size: 12px;
+    line-height: 31px;
+    padding: 0 10px;
+    height: 31px;
+    width: 192px;
+    position: absolute;
+    left: 8px;
+    bottom: 6px;
+    background: url('images/level-info-bg.png') no-repeat left top;
+}
+
+.cardstories .cardstories_deck .cardstories_player_info .cardstories_name,
+.cardstories .cardstories_deck .cardstories_player_info .cardstories_level {
+    display: block;
+    white-space: nowrap;
+    float: left;
+    height: 31px;
+}
+.cardstories .cardstories_deck .cardstories_player_info .cardstories_name {
+    color: #f4efda;
+    width: 98px;
+    margin-right: 4px;
+    overflow: hidden;
+}
+
+.cardstories .cardstories_deck .cardstories_player_info .cardstories_level {
+    font-weight: bold;
+    width: 85px;
+    text-align: center;
 }
 
 .cardstories_master_seat {
