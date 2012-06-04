@@ -2350,12 +2350,12 @@
                 $('.cardstories_card_confirm_ok', confirm).unbind('click').click(function() {
                     $this.animate_scale(true, 5, 300, confirm, function() {
                         ok(card, index);
-                        nudge();
+                        nudge(true);
                     });
                 });
                 $('.cardstories_card_confirm_cancel', confirm).unbind('click').click(function() {
                     $this.animate_scale(true, 5, 300, confirm, function() {
-                        nudge();
+                        nudge(false);
                     });
                 });
             };
@@ -2425,10 +2425,10 @@
                             if(!$('a.cardstories_card', element).hasClass('cardstories_card_selected')) {
                                 link.addClass('cardstories_card_selected');
                                 link.css({zIndex: 200});
-                                var nudge = function() {
-                                    // In 'create_pick_card', we don't want the dock restored,
-                                    // so omit these steps.
-                                    if (id !== 'create_pick_card') {
+                                var nudge = function(confirmed) {
+                                    // In 'create_pick_card', we don't want the dock restored
+                                    // after confirming the card, so omit these steps in that case.
+                                    if (!(confirmed && id === 'create_pick_card')) {
                                         link.removeClass('cardstories_card_selected');
                                         link.css({zIndex: zindex});
                                         if (has_bg) {

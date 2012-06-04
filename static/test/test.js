@@ -877,7 +877,7 @@ test("create anonymous", 5, function() {
     $.cardstories.create(player_id, game, root);
 });
 
-asyncTest("create_pick_card", 12, function() {
+asyncTest("create_pick_card", 15, function() {
     var root = $('#qunit-fixture .cardstories');
     var owner_id = 75;
     var game_id = 111;
@@ -924,8 +924,16 @@ asyncTest("create_pick_card", 12, function() {
         ok(element.hasClass('cardstories_active'), 'element active');
         equal($('.cardstories_write_sentence.cardstories_active', element).length, 0, 'sentence not active');
         var first_card = $('.cardstories_cards_hand .cardstories_card:nth(0)', element);
-        winner_card = first_card.metadata({type: "attr", name: "data"}).card;
+        var second_card = $('.cardstories_cards_hand .cardstories_card:nth(1)', element);
+        // CLick the second cards first, but change mind.
+        second_card.click();
+        ok(second_card.hasClass('cardstories_card_selected'), 'second card is selected');
+        $('.cardstories_card_confirm_cancel', element).find('a').click();
+        ok(!second_card.hasClass('cardstories_card_selected'), 'second card was deselected');
+        // Should be able to switch to first card now.
         first_card.click();
+        ok(first_card.hasClass('cardstories_card_selected'), 'first card is selected');
+        winner_card = first_card.metadata({type: "attr", name: "data"}).card;
         $('.cardstories_card_confirm_ok', element).find('a').click();
     });
 });
