@@ -63,6 +63,12 @@
                         $this.send(sentence, player_id, game_id, root);
                     }
                     input.val('');
+                    // Without returning false, in IE, the event is somehow propagated
+                    // somewhere so that the Facebook Social Plugin login popup pops up
+                    // every single time when posting a chat message :-/.
+                    // I couldn't figure out why that happens, but this "return false" seems
+                    // to prevent that from happening.
+                    return false;
                 }
             });
         },
