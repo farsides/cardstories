@@ -73,7 +73,7 @@ function setup() {
 
     // Stub out some functions.
     $.cardstories.setTimeout = function(cb, delay) { return window.setTimeout(cb, 0); };
-    $.cardstories.delay = function(o, delay, qname) { return; };
+    $.cardstories.delay = function(root, delay, qname) { return; };
     $.cardstories.ajax = function() { throw 'Please rebind "ajax"'; };
     $.cardstories.reload = function() { throw 'Please rebind "reload"'; };
     $.cardstories.poll_ignore = function() { throw 'Please rebind "poll_ignore"'; };
@@ -171,17 +171,18 @@ test("setTimeout", 2, function() {
 });
 
 asyncTest("delay", 1, function() {
+    var root = $('#qunit-fixture .cardstories');
     $.cardstories.delay = cardstories_default_delay;
     var starttime = new Date();
-    var q = $({});
-    $.cardstories.delay(q, 100, 'chain');
-    q.queue('chain', function() {
+    var q = 'coconut';
+    $.cardstories.delay(root, 100, q);
+    root.queue(q, function() {
         var endtime = new Date();
         var elapsed = endtime.getTime() - starttime.getTime();
         ok(elapsed > 50, 'elapsed time');
         start();
     });
-    q.dequeue('chain');
+    root.dequeue(q);
 });
 
 test("ajax", 13, function() {
@@ -1964,7 +1965,7 @@ asyncTest("invitation_pick_deal_helper", 38, function() {
         cb();
     };
 
-    $.cardstories.invitation_pick_deal_helper(state1, element, function() {
+    $.cardstories.invitation_pick_deal_helper(state1, element, root, function() {
         var i;
         for (i=1; i<=2; i++) {
             ok($('.cardstories_player_arms_' + i, element).is(':visible'), 'arm ' + i + ' is visible');
@@ -1978,7 +1979,7 @@ asyncTest("invitation_pick_deal_helper", 38, function() {
         // Call it again: animate_sprite should only be called again when
         // necessary and the number of expected assertions should reflect this.
         $.cardstories.create_invitation_display_board(player1, state2, element, root);
-        $.cardstories.invitation_pick_deal_helper(state2, element, function() {
+        $.cardstories.invitation_pick_deal_helper(state2, element, root, function() {
             for (i=1; i<=3; i++) {
                 ok($('.cardstories_player_arms_' + i, element).is(':visible'), 'arm ' + i + ' is visible');
                 ok($('.cardstories_player_pick_' + i, element).is(':visible'), 'pick ' + i + ' is visible');
@@ -2811,7 +2812,7 @@ test("vote_flip_card", 4, function() {
 
     notEqual(front.css('display'), 'none', 'Template is visible');
     equal(back.css('display'), 'none', 'Card is invisible');
-    $.cardstories.vote_flip_card(front, back, function () {
+    $.cardstories.vote_flip_card(front, back, root, function () {
         equal(front.css('display'), 'none', 'Template is invisible');
         notEqual(back.css('display'), 'none', 'Card is visible');
     });
@@ -2837,7 +2838,7 @@ test("vote_shuffle_cards", 7, function() {
     var card4_l = $('.cardstories_card_4', element).show().position().left;
     var card5_l = $('.cardstories_card_5', element).show().position().left;
     var card6_l = $('.cardstories_card_6', element).show().position().left;
-    $.cardstories.vote_shuffle_cards(game, element, function() {
+    $.cardstories.vote_shuffle_cards(game, element, root, function() {
         // Check that the sentence box was moved into position.
         var sentence = $('.cardstories_sentence_box', element);
         var sentence_final_left = sentence.metadata({type: "attr", name: "data"}).fl;
@@ -4084,7 +4085,7 @@ asyncTest("create_pick_card_animate_fly_to_deck", 23, function() {
             equal($(this).css('display'), 'none', 'Deck cards are hidden after dock is created');
         });
 
-        $.cardstories.create_pick_card_animate_fly_to_deck(card_index, element, function() {
+        $.cardstories.create_pick_card_animate_fly_to_deck(card_index, element, root, function() {
             board_cards.each(function(i) {
                 var card = $(this);
                 var display = card.hasClass('cardstories_card_selected') ? 'block' : 'none';
