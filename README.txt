@@ -224,6 +224,29 @@ Extra plugins
     - See ./plugins/bot/README.txt for installation instructions
 
 
+#################
+Running the tests
+#################
+
+First install the dependencies:
+
+$ sudo apt-get install python-coverage jscoverage
+
+Running the Python tests (Twisted and Django):
+
+$ make -f maintain.mk clean
+$ make -f maintain.mk check
+
+Running the Javascript tests - using your browser, go to:
+
+- http://local.cardstories.org:8000/static/test/index.html
+- http://local.cardstories.org:8000/static/test/audio.html
+- http://local.cardstories.org:8000/static/test/chat.html
+- http://local.cardstories.org:8000/static/test/owa.html
+- http://local.cardstories.org:8000/static/test/table.html
+- http://local.cardstories.org:8000/static/test/tabs.html
+
+
 ######################
 Packaging instructions
 ######################
