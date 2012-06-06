@@ -27,7 +27,7 @@ on a recent installation of Ubuntu or Debian.
 First, install the following packages.
 
 $ sudo apt-get install postfix python-twisted python-lxml \
-  python-imaging python-simplejson python-httplib2 python-pip
+  python-imaging python-simplejson python-httplib2 python-pip sqlite3
 
 Now install the following with pip:
 
@@ -92,6 +92,7 @@ $ PYTHONPATH=.:etc/cardstories twistd --nodaemon cardstories \
 	--plugins-confdir tests \
 	--plugins 'djangoauth chat activity table mail' \
 	--plugins-pre-process 'djangoauth chat'
+	--plugins-post-process 'table'
 
 On a second terminal window, still from the root of the checkout, run the
 website development server, which by default binds to localhost and port 8000.
