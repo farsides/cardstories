@@ -54,18 +54,21 @@ test("pressing enter inside input field", 2, function() {
     };
 
     var input = $(selector).find('.cardstories_chat_input');
-    var event = $.Event('keydown');
-    event.which = 13; // Enter key
+    var make_keydown = function() {
+        var e = $.Event('keydown');
+        e.which = 13; // Enter key
+        return e;
+    };
 
     // It shouldn't call plugin_send when input value is blank.
     input.val('  ');
-    input.trigger(event);
+    input.trigger(make_keydown());
     // It shouldn't call plugin_send when input value equals the placeholder.
     input.val(input.attr('placeholder'));
-    input.trigger(event);
+    input.trigger(make_keydown());
     // This, however, should work.
     input.val('I pressed enter!');
-    input.trigger(event);
+    input.trigger(make_keydown());
     equal(input.val(), '', 'The input value should be emptied after enter is pressed');
 });
 
