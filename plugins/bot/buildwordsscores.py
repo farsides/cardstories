@@ -47,7 +47,7 @@ def build_words_scores_file():
     """Produces JSON-encoded ranked words lists for each of the game's cards"""
 
     words_scores = {}
-    for card in xrange(1, CardstoriesGame.NCARDS + 1):
+    for card in xrange(1, CardstoriesGame.NCARDS_EARNED + 1):
         raw_text = get_card_sentences(card)
         words_scores[card] = get_words_scores(raw_text)
 

@@ -52,7 +52,7 @@ class BuildWordsScoresTest(unittest.TestCase):
 
         with open(buildwordsscores.get_cards_words_scores_filepath()) as f:
             result = json.load(f)
-            self.assertEqual(result["1"], {"test": 3, "again": 1, "hello": 2, "tester": 1})
+            self.assertEqual(result["1"], {u'again': 1, u'hello': 2, u'test': 2, u'tester': 1, u'test\xe9': 1})
 
 # Main #####################################################################
 

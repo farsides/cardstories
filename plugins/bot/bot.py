@@ -284,7 +284,7 @@ class Brain(object):
 
     def create_zero_cards_scores_dict(self):
         cards_scores = {}
-        for card_id in xrange(1, CardstoriesGame.NCARDS + 1):
+        for card_id in xrange(1, CardstoriesGame.NCARDS_EARNED + 1):
             cards_scores[card_id] = 0
         return cards_scores
 
