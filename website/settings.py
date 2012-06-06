@@ -34,6 +34,7 @@ TEMPLATE_DEBUG = DEBUG
 ADMINS = (
     # ('Your Name', 'your_email@domain.com'),
 )
+DEFAULT_FROM_EMAIL='Card Stories <feedback@farsides.com>'
 
 MANAGERS = ADMINS
 
