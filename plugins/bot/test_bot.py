@@ -31,6 +31,7 @@ from twisted.trial import unittest, runner, reporter
 from twisted.internet import defer
 
 from cardstories.service import CardstoriesService
+from cardstories.game import CardstoriesGame
 from plugins.bot import bot
 
 
@@ -174,8 +175,12 @@ class BotTest(unittest.TestCase):
         bot_plugin = bot.Plugin(self.service, [])
         brain = bot.NLWordMatcherBrain(bot_plugin)
 
-        ranked_cards = yield brain.sort_cards_by_ranking_for_sentence("word", [1, 2, 3])
-        self.assertEquals(ranked_cards, [(3, 3), (2, 2), (1, 1)])
+        # Make sure we can record scores for cards that are earned (card # > NCARDS)
+        max_cards = 42
+        assert CardstoriesGame.NCARDS < max_cards <= CardstoriesGame.NCARDS_EARNED
+
+        ranked_cards = yield brain.sort_cards_by_ranking_for_sentence("word", [1, 2, 3, 42])
+        self.assertEquals(ranked_cards, [(3, 4), (2, 3), (1, 2), (max_cards, 1)])
 
 
 # Main #####################################################################
