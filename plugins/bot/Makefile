@@ -1,5 +1,8 @@
 #
-# Copyright (C) 2011 Chris McCormick <chris@mccormickit.com>
+# Copyright (C) 2011 Farsides <contact@farsides.com>
+#
+# Authors:
+#          Xavier Antoviaque <xavier@antoviaque.org>
 #
 # This software's license gives you freedom; you can copy, convey,
 # propagate, redistribute and/or modify this program under the terms of
