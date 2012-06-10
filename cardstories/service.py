@@ -196,6 +196,20 @@ class CardstoriesService(service.Service, Observable):
         c.execute(
             "CREATE UNIQUE INDEX players_idx ON players (player_id); "
             )
+        c.execute(
+            "CREATE TABLE event_logs ( "
+            "  player_id INTEGER, "
+            "  game_id INTEGER, "
+            "  event_type SMALLINT, "
+            "  data TEXT, "
+            "  timestamp DATETIME "
+            "); ")
+        c.execute(
+            "CREATE INDEX eventlogs_player_idx ON event_logs (player_id, timestamp); "
+            )
+        c.execute(
+            "CREATE INDEX eventlogs_game_idx ON event_logs (game_id, timestamp); "
+            )
 
     def load(self, c):
         c.execute("SELECT id, sentence FROM games WHERE state != 'complete' AND state != 'canceled'")

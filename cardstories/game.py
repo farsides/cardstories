@@ -27,6 +27,7 @@ import random
 
 from twisted.internet import defer, reactor
 
+import cardstories.event_log as event_log
 from cardstories.poll import Pollable
 from cardstories.exceptions import CardstoriesWarning
 from cardstories.levels import calculate_level
@@ -125,6 +126,7 @@ class CardstoriesGame(Pollable):
     def cancel(self):
         yield self.service.db.runOperation("UPDATE games SET state = 'canceled' WHERE id = ?", [ self.get_id() ])
         yield self.cancelInvitations()
+        event_log.game_canceled(self.service.db, self.get_id(), self.get_owner_id())
         self.destroy() # notify before altering the in core representation
         self.invited = []
         defer.returnValue({})
@@ -146,12 +148,14 @@ class CardstoriesGame(Pollable):
 
     @defer.inlineCallbacks
     def leave(self, player_ids):
-        deleted = 0
+        count = 0
         for player_id in player_ids:
             self.players.remove(int(player_id))
-            count = yield self.service.db.runInteraction(self.leaveInteraction, self.get_id(), int(player_id))
-            deleted += count
-        defer.returnValue(deleted)
+            deleted = yield self.service.db.runInteraction(self.leaveInteraction, self.get_id(), int(player_id))
+            if deleted:
+                count += 1
+                event_log.player_left(self.service.db, self.get_id(), int(player_id))
+        defer.returnValue(count)
 
     def playerInteraction(self, transaction, player_id):
         transaction.execute("SELECT player_id from players WHERE player_id = ?", [player_id])
@@ -217,6 +221,7 @@ class CardstoriesGame(Pollable):
         self.id = game_id
         self.players.append(self.owner_id)
         self.update_timer()
+        event_log.game_created(self.service.db, game_id, self.owner_id);
         defer.returnValue(game_id)
 
     def setCardInteraction(self, transaction, game_id, player_id, card):
@@ -233,6 +238,7 @@ class CardstoriesGame(Pollable):
     def set_card(self, player_id, card):
         yield self.service.db.runInteraction(self.setCardInteraction, self.get_id(), player_id, chr(card))
         result = yield self.touch(type='set_card', player_id=player_id, card=card)
+        event_log.owner_chose_card(self.service.db, self.get_id(), player_id, card)
         defer.returnValue(result)
 
     def setSentenceInteraction(self, transaction, player_id, game_id, sentence):
@@ -252,6 +258,7 @@ class CardstoriesGame(Pollable):
     def set_sentence(self, player_id, sentence):
         yield self.service.db.runInteraction(self.setSentenceInteraction, player_id, self.id, sentence)
         result = yield self.touch(type='set_sentence', sentence=sentence)
+        event_log.owner_wrote_story(self.service.db, self.get_id(), player_id, sentence)
         defer.returnValue(result)
 
     @defer.inlineCallbacks
@@ -429,6 +436,7 @@ class CardstoriesGame(Pollable):
             self.invited.remove(player_id)
         self.players.append(player_id)
         result = yield self.touch(type='participate', player_id=player_id)
+        event_log.player_joined(self.service.db, self.get_id(), player_id)
         defer.returnValue(result)
 
     @defer.inlineCallbacks
@@ -449,6 +457,7 @@ class CardstoriesGame(Pollable):
         yield self.cancelInvitations()
         self.invited = []
         result = yield self.touch(type='voting')
+        event_log.game_moved_to_voting(self.service.db, self.get_id(), self.get_owner_id())
         defer.returnValue(result)
 
     @defer.inlineCallbacks
@@ -510,6 +519,7 @@ class CardstoriesGame(Pollable):
         if count[0][0] >= self.MIN_PICKED and not self.is_countdown_active():
             self.start_countdown()
         result = yield self.touch(type='pick', player_id=player_id, card=card)
+        event_log.player_picked_card(self.service.db, self.get_id(), player_id, card)
         defer.returnValue(result)
 
     def voteInteraction(self, transaction, game_id, player_id, vote):
@@ -527,6 +537,7 @@ class CardstoriesGame(Pollable):
         if count[0][0] >= self.MIN_VOTED and not self.is_countdown_active():
             self.start_countdown()
         result = yield self.touch(type='vote', player_id=player_id, vote=vote)
+        event_log.player_voted(self.service.db, self.get_id(), player_id, vote)
         defer.returnValue(result)
 
     def completeInteraction(self, transaction, game_id, owner_id):
@@ -640,6 +651,7 @@ class CardstoriesGame(Pollable):
         game, players_id_list = yield self.game(self.get_owner_id())
         yield self.service.db.runInteraction(self.completeInteraction, self.get_id(), owner_id)
         result = yield self.touch(type='complete')
+        event_log.game_completed(self.service.db, self.get_id(), owner_id)
         self.destroy()
         defer.returnValue(result)
 
@@ -653,6 +665,7 @@ class CardstoriesGame(Pollable):
             if player_id not in self.invited:
                 invited.append(player_id)
                 yield self.service.db.runQuery("INSERT INTO invitations (player_id, game_id) VALUES (?, ?)", [ player_id, self.get_id() ])
+                event_log.player_invited(self.service.db, self.get_id(), self.get_owner_id(), player_id)
         self.invited += invited
         result = yield self.touch(type='invite', invited=invited)
         defer.returnValue(result)
