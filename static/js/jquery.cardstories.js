@@ -4484,7 +4484,7 @@
                         var star_dance = $('.cardstories_results_star_dance', box);
                         star_dance.show();
                         star_jump.hide();
-                        $this.animate_sprite(star_dance, 18, 24, false, true);
+                        $this.animate_sprite(star_dance, 3, 4, false, true);
                         star_deferred.resolve();
                     });
 
