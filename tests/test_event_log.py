@@ -27,6 +27,8 @@ sys.path.insert(0, os.path.abspath("..")) # so that for M-x pdb works
 import sqlite3
 import time
 
+from datetime import datetime, timedelta
+
 from twisted.internet import defer
 from twisted.trial import unittest, runner, reporter
 
@@ -141,7 +143,7 @@ class CardstoriesEventLogTest(unittest.TestCase):
         c.close()
 
     @defer.inlineCallbacks
-    def test01_log_canceled_game_events(self):
+    def test02_log_canceled_game_events(self):
         owner_id = 4
         player_id = 8
         sentence = 'Some Sentence.'
@@ -185,6 +187,80 @@ class CardstoriesEventLogTest(unittest.TestCase):
         self.assertEqual((event_log.GAME_CANCELED, owner_id, None), rows[5])
 
         c.close()
+
+    def test03_log_query_functions(self):
+        c = self.db.cursor()
+        game1 = 99
+        game2 = 199
+        player1 = 11
+        player2 = 12
+        invitee = 878
+
+        # Define some datetimes.
+        now = datetime.now()
+        an_hour_ago = now - timedelta(hours=1)
+        six_hours_ago = now - timedelta(hours=6)
+        yesterday = now - timedelta(days=1)
+        two_days_ago = now - timedelta(days=2)
+
+        # Fill in some log data.
+        data = [
+            # Game 1
+            [game1, two_days_ago, event_log.GAME_CREATED, player1, ''],
+            [game1, two_days_ago, event_log.OWNER_CHOSE_CARD, player1, 22],
+            [game1, two_days_ago, event_log.OWNER_WROTE_STORY, player1, 'This story'],
+            [game1, six_hours_ago, event_log.PLAYER_JOINED, player2, 33],
+            [game1, now, event_log.PLAYER_VOTED, player2, 33],
+            # Game 2
+            [game2, yesterday, event_log.GAME_CREATED, player1, ''],
+            [game2, yesterday, event_log.OWNER_CHOSE_CARD, player1, 34],
+            [game2, six_hours_ago, event_log.OWNER_WROTE_STORY, player1, 'The Story'],
+            [game2, an_hour_ago, event_log.PLAYER_INVITED, player1, invitee],
+            [game2, an_hour_ago, event_log.PLAYER_JOINED, invitee, ''],
+            [game2, now, event_log.PLAYER_PICKED_CARD, invitee, 23]
+        ]
+        for d in data:
+            c.execute('INSERT INTO event_logs (game_id, timestamp, event_type, player_id, data) VALUES (?, ?, ?, ?, ?)', d)
+
+        # Player's last activity.
+        result = event_log.get_players_last_activity(c, player1)
+        self.assertEquals(result['timestamp'], str(an_hour_ago))
+        self.assertEquals(result['game_id'], game2)
+        self.assertEquals(result['event_type'], event_log.PLAYER_INVITED)
+        self.assertEquals(result['data'], invitee)
+
+        result = event_log.get_players_last_activity(c, player2)
+        self.assertEquals(result['timestamp'], str(now))
+        self.assertEquals(result['game_id'], game1)
+        self.assertEquals(result['event_type'], event_log.PLAYER_VOTED)
+        self.assertEquals(result['data'], 33)
+
+        result = event_log.get_players_last_activity(c, invitee)
+        self.assertEquals(result['timestamp'], str(now))
+        self.assertEquals(result['game_id'], game2)
+        self.assertEquals(result['event_type'], event_log.PLAYER_PICKED_CARD)
+        self.assertEquals(result['data'], 23)
+
+        # Game activities.
+        result = event_log.get_game_activities(c, game1, since=yesterday)
+        self.assertEquals(len(result), 2)
+        self.assertEquals(result[0]['event_type'], event_log.PLAYER_JOINED)
+        self.assertEquals(result[0]['timestamp'], str(six_hours_ago))
+        self.assertEquals(result[1]['event_type'], event_log.PLAYER_VOTED)
+        self.assertEquals(result[1]['player_id'], player2)
+
+        result = event_log.get_game_activities(c, game1, since=an_hour_ago)
+        self.assertEquals(len(result), 1)
+        self.assertEquals(result[0]['event_type'], event_log.PLAYER_VOTED)
+        self.assertEquals(result[0]['player_id'], player2)
+
+        result = event_log.get_game_activities(c, game2, since=two_days_ago)
+        self.assertEquals(len(result), 6)
+        self.assertEquals(result[5]['event_type'], event_log.PLAYER_PICKED_CARD)
+        self.assertEquals(result[5]['timestamp'], str(now))
+        self.assertEquals(result[5]['player_id'], invitee)
+
+
 
 # Main ########################################################################
 
