@@ -26,8 +26,9 @@ all:
 
 check:
 	${COVERAGE} -e
+	PYTHONPATH=.. ${COVERAGE} -x test_aggregate.py
 	PYTHONPATH=.. ${COVERAGE} -x test_send.py
-	${COVERAGE} -m -a -r send.py
+	${COVERAGE} -m -a -r aggregate.py send.py
 
 clean:
 	rm -fr .coverage _trial_temp*
