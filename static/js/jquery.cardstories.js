@@ -1355,9 +1355,11 @@
             var deferred = $.Deferred();
             var q = $this.create_queue(root);
 
-            // Display the modal.
+            // Display the advertise modal.
             $(root).queue(q, function(next) {
-                $this.invitation_owner_modal_helper($('.cardstories_info', element), $('.cardstories_modal_overlay', element), next);
+                $.cookie('CARDSTORIES_INVITATIONS', null);
+                $this.advertise(player_id, game.id, element, root);
+                next();
             });
 
             // Then the invite friend buttons.
@@ -1378,17 +1380,6 @@
             $(root).dequeue(q);
 
             return deferred;
-        },
-
-        invitation_owner_modal_helper: function(modal, overlay, cb_open, cb_close) {
-            if (modal.hasClass('cardstories_noop')) {
-                if (cb_open) {
-                    cb_open();
-                }
-            } else {
-                modal.addClass('cardstories_noop');
-                this.display_modal(modal, overlay, cb_open, cb_close);
-            }
         },
 
         invitation_owner_slots_helper: function(slots, player_id, game_id, element, root, cb) {
@@ -1471,10 +1462,6 @@
                     // also in parallel, and hide the modal, if it's visible.
                     if (!go_vote.hasClass('cardstories_noop_show')) {
                         go_vote.addClass('cardstories_noop_show');
-                        var modal = $('.cardstories_info', element);
-                        if (modal.css('display') == 'block') {
-                            modal.find('a').click();
-                        }
                         $(root).queue(playerq, function(next) {
                             $this.animate_scale(false, 5, 300, go_vote);
                             next();

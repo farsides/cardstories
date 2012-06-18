@@ -1364,29 +1364,6 @@ asyncTest("preload_images", 2, function() {
     $.cardstories.preload_images(root, cb);
 });
 
-asyncTest("invitation_owner_modal_helper", 4, function() {
-    var root = $('#qunit-fixture .cardstories');
-    var element = $('.cardstories_invitation .cardstories_owner', root);
-    var modal = $('.cardstories_info', element);
-    var overlay = $('.cardstories_modal_overlay', element);
-
-    var on_open = function() {
-        equal(modal.css('display'), 'block', 'Modal is shown on first run');
-        modal.find('a').click();
-    };
-
-    var on_close = function() {
-        equal(modal.css('display'), 'none', 'Modal is closed');
-        $.cardstories.invitation_owner_modal_helper(modal, overlay, function() {
-            equal(modal.css('display'), 'none', 'Modal continues closed on second run.');
-            start();
-        });
-    };
-
-    equal(modal.css('display'), 'none', 'Modal starts hidden');
-    $.cardstories.invitation_owner_modal_helper(modal, overlay, on_open, on_close);
-});
-
 test("invitation_owner_slots_helper", 15, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_invitation .cardstories_owner', root);
@@ -1459,8 +1436,6 @@ asyncTest("invitation_owner_join_helper", 43, function() {
     $.cardstories_audio.play = function(name, root) {
         equal(name, 'join');
     };
-
-    $.cardstories.display_modal($('.cardstories_info', element), $('.cardstories_modal_overlay', element));
 
     $.cardstories.start_countdown = function() {
         ok(false, 'countdown should not be started yet (game not ready)');
@@ -1682,7 +1657,7 @@ test("invitation_owner_invite_more", 6, function() {
     notEqual(advertise_dialog.css('display'), 'none', 'clicking the invite button shows the dialog again');
 });
 
-asyncTest("invitation_owner", 9, function() {
+asyncTest("invitation_owner", 10, function() {
     var player1 = 1;
     var player2 = 2;
     var player3 = 3;
@@ -1722,6 +1697,7 @@ asyncTest("invitation_owner", 9, function() {
     ok(!element.hasClass('cardstories_active'), 'invitation owner is not active');
     $.cardstories.invitation(owner_id, game, root);
     equal($('.cardstories_sentence', element).text(), sentence);
+    equal($('.cardstories_advertise', element).css('display'), 'block', 'Adverstise modal is visible');
 
     // Check that countdown select is bound to send_countdown_duration.
     var countdown_duration_val = '3600';
