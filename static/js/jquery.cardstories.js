@@ -4583,6 +4583,7 @@
                 $this.complete_fade_out_results_box(results_box, element, root, function() {
                     // Ask the table plugin to switch to the next game as soon as possible
                     var is_ready = $.cardstories_table.on_next_game_ready(true, player_id, game.id, root, function(next_game_id, next_game_opts) {
+                        $this.poll_discard(root);
                         $.cardstories_tabs.remove_tab_for_game(game.id, player_id, root, function() {
                             $this.reload(player_id, next_game_id, next_game_opts, root);
                         });
@@ -4611,11 +4612,6 @@
                             $this.close_modal(modal, overlay, next);
                         });
                     }
-                    $.cardstories_table.on_next_game_ready(false, player_id, game.id, root, function(next_game_id, next_game_opts) {
-                        $.cardstories_tabs.remove_tab_for_game(game.id, player_id, root, function() {
-                            $this.reload(player_id, next_game_id, next_game_opts, root);
-                        });
-                    });
 
                     $(root).queue(q, function(next) {
                         $this.complete_display_next_game(centered || modal_visible, player_id, game, element, root);

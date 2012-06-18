@@ -90,6 +90,8 @@ function setup() {
     $.cardstories_audio.stop = function(name, root) {};
     $.cardstories_table = {};
     $.cardstories_table.get_available_game = function(player_id, root, cb) { cb(); };
+    $.cardstories_tabs = {};
+    $.cardstories_tabs.remove_tab_for_game = function(game_id, player_id, root, cb) { cb(); };
 }
 
 module("cardstories", {setup: setup});
@@ -3601,7 +3603,7 @@ test("canceled", 5, function() {
     modal.find('a').click();
 });
 
-asyncTest("next_game_as_author", 2, function() {
+asyncTest("next_game_as_author", 4, function() {
     var player_id = 10;
     var game = {
         id: 7,
@@ -3617,11 +3619,26 @@ asyncTest("next_game_as_author", 2, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var next_game_dom = $('.cardstories_next_game', element);
-    var continue_button = $('.cardstories_play_again', next_game_dom);
+    var continue_button = $('.cardstories_complete_continue', element);
     $.cardstories_table = {
         get_next_owner_id: function(player_id, game_id, root) { return player_id; },
-        on_next_game_ready: function(ready, player_id, game_id, root, cb) { return true; },
-        on_next_owner_change: function(player_id, game_id, root, cb) {}
+        on_next_owner_change: function(player_id, game_id, root, cb) {},
+        on_next_game_ready: function(ready, player_id, game_id, root, cb) {
+            $.cardstories.setTimeout(function() {
+                var poll_discarded = false;
+                $.cardstories.poll_discard = function() {
+                    poll_discarded = true;
+                };
+                var next_game_id = 21234;
+                $.cardstories.reload = function(_player_id, _next_game_id, _next_game_opts, _root) {
+                    ok(poll_discarded, 'poll_discard was called');
+                    equal(_next_game_id, next_game_id, 'relaod is called with next game id');
+                    start();
+                };
+                cb(next_game_id, {});
+            }, 0);
+            return true;
+        }
     };
 
     $.cardstories.display_modal = function(modal, overlay) {
@@ -3632,7 +3649,6 @@ asyncTest("next_game_as_author", 2, function() {
         equal($('.cardstories_next_game_author', next_game_dom).css('display'), 'block');
         equal($('.cardstories_next_game_player', next_game_dom).css('display'), 'none');
         continue_button.click();
-        start();
     });
 });
 
@@ -3655,8 +3671,23 @@ asyncTest("next_game_as_player", 4, function() {
     var continue_button = $('.cardstories_complete_continue', element);
     $.cardstories_table = {
         get_next_owner_id: function(player_id, game_id, root) { return player_id+1; },
-        on_next_game_ready: function(ready, player_id, game_id, root, cb) { return false; },
-        on_next_owner_change: function(player_id, game_id, root, cb) {}
+        on_next_owner_change: function(player_id, game_id, root, cb) {},
+        on_next_game_ready: function(ready, player_id, game_id, root, cb) {
+            $.cardstories.setTimeout(function() {
+                var poll_discarded = false;
+                $.cardstories.poll_discard = function() {
+                    poll_discarded = true;
+                };
+                var next_game_id = 234;
+                $.cardstories.reload = function(_player_id, _next_game_id, _next_game_opts, _root) {
+                    ok(poll_discarded, 'poll_discard was called');
+                    equal(_next_game_id, next_game_id, 'relaod is called with next game id');
+                    start();
+                };
+                cb(next_game_id, {});
+            }, 0);
+            return true;
+        }
     };
 
     $.cardstories.display_modal = function(modal, overlay) {
@@ -3668,7 +3699,6 @@ asyncTest("next_game_as_player", 4, function() {
         equal($('.cardstories_next_game_author', next_game_dom).css('display'), 'none');
         equal($('.cardstories_next_game_player', next_game_dom).css('display'), 'block');
         continue_button.click();
-        start();
     });
 });
 
