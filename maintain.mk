@@ -16,7 +16,7 @@
 # along with this program in a file in the toplevel directory called
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 
-plugins = activity auth chat djangoauth example mail table
+plugins = activity auth chat djangoauth example mail table bot
 
 all:
 
@@ -25,6 +25,7 @@ check:
 	set -e ; for plugin in $(plugins); do \
 		make -C plugins/$$plugin check ; \
 	done
+	make -C mailing check
 	jscoverage --no-instrument=js/jquery.placeholder-1.0.1.js static static-coverage
 	website/manage.py test
 

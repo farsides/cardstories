@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2011 Farsides <contact@farsides.com>
+# Copyright (C) 2012 Farsides <contact@farsides.com>
 #
 # Authors:
 #          Xavier Antoviaque <xavier@antoviaque.org>
@@ -19,19 +19,15 @@
 # along with this program in a file in the toplevel directory called
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
+
 export COVERAGE=$(shell which coverage || which python-coverage)
 
 all:
 
 check:
 	${COVERAGE} -e
-	PYTHONPATH=../.. ${COVERAGE} -x test_bot.py
-	PYTHONPATH=../.. ${COVERAGE} -x test_buildwordsscores.py
-	${COVERAGE} -m -a -r bot.py buildwordsscores.py
+	PYTHONPATH=.. ${COVERAGE} -x test_send.py
+	${COVERAGE} -m -a -r send.py
 
 clean:
-	rm -f fixture2/bot/cards_words_scores.json
 	rm -fr .coverage _trial_temp*
-	rm -f *,cover
-	rm -f *.pyc
-
