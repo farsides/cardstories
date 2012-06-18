@@ -1714,7 +1714,7 @@
 
                 // Show players being dealt cards.
                 $(root).queue(q, function(next) {
-                    $this.invitation_pick_deal_helper(game, element, next);
+                    $this.invitation_pick_deal_helper(game, element, root, next);
                 });
 
                 // Move card and sentence box to final positions.
