@@ -90,6 +90,8 @@ function setup() {
     $.cardstories_audio.stop = function(name, root) {};
     $.cardstories_table = {};
     $.cardstories_table.get_available_game = function(player_id, root, cb) { cb(); };
+    $.cardstories_tabs = {};
+    $.cardstories_tabs.remove_tab_for_game = function(game_id, player_id, root, cb) { cb(); };
 }
 
 module("cardstories", {setup: setup});
@@ -1364,29 +1366,6 @@ asyncTest("preload_images", 2, function() {
     $.cardstories.preload_images(root, cb);
 });
 
-asyncTest("invitation_owner_modal_helper", 4, function() {
-    var root = $('#qunit-fixture .cardstories');
-    var element = $('.cardstories_invitation .cardstories_owner', root);
-    var modal = $('.cardstories_info', element);
-    var overlay = $('.cardstories_modal_overlay', element);
-
-    var on_open = function() {
-        equal(modal.css('display'), 'block', 'Modal is shown on first run');
-        modal.find('a').click();
-    };
-
-    var on_close = function() {
-        equal(modal.css('display'), 'none', 'Modal is closed');
-        $.cardstories.invitation_owner_modal_helper(modal, overlay, function() {
-            equal(modal.css('display'), 'none', 'Modal continues closed on second run.');
-            start();
-        });
-    };
-
-    equal(modal.css('display'), 'none', 'Modal starts hidden');
-    $.cardstories.invitation_owner_modal_helper(modal, overlay, on_open, on_close);
-});
-
 test("invitation_owner_slots_helper", 15, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_invitation .cardstories_owner', root);
@@ -1459,8 +1438,6 @@ asyncTest("invitation_owner_join_helper", 43, function() {
     $.cardstories_audio.play = function(name, root) {
         equal(name, 'join');
     };
-
-    $.cardstories.display_modal($('.cardstories_info', element), $('.cardstories_modal_overlay', element));
 
     $.cardstories.start_countdown = function() {
         ok(false, 'countdown should not be started yet (game not ready)');
@@ -1682,7 +1659,7 @@ test("invitation_owner_invite_more", 6, function() {
     notEqual(advertise_dialog.css('display'), 'none', 'clicking the invite button shows the dialog again');
 });
 
-asyncTest("invitation_owner", 9, function() {
+asyncTest("invitation_owner", 10, function() {
     var player1 = 1;
     var player2 = 2;
     var player3 = 3;
@@ -1722,6 +1699,7 @@ asyncTest("invitation_owner", 9, function() {
     ok(!element.hasClass('cardstories_active'), 'invitation owner is not active');
     $.cardstories.invitation(owner_id, game, root);
     equal($('.cardstories_sentence', element).text(), sentence);
+    equal($('.cardstories_advertise', element).css('display'), 'block', 'Adverstise modal is visible');
 
     // Check that countdown select is bound to send_countdown_duration.
     var countdown_duration_val = '3600';
@@ -3625,7 +3603,7 @@ test("canceled", 5, function() {
     modal.find('a').click();
 });
 
-asyncTest("next_game_as_author", 2, function() {
+asyncTest("next_game_as_author", 4, function() {
     var player_id = 10;
     var game = {
         id: 7,
@@ -3641,11 +3619,26 @@ asyncTest("next_game_as_author", 2, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_complete', root);
     var next_game_dom = $('.cardstories_next_game', element);
-    var continue_button = $('.cardstories_play_again', next_game_dom);
+    var continue_button = $('.cardstories_complete_continue', element);
     $.cardstories_table = {
         get_next_owner_id: function(player_id, game_id, root) { return player_id; },
-        on_next_game_ready: function(ready, player_id, game_id, root, cb) { return true; },
-        on_next_owner_change: function(player_id, game_id, root, cb) {}
+        on_next_owner_change: function(player_id, game_id, root, cb) {},
+        on_next_game_ready: function(ready, player_id, game_id, root, cb) {
+            $.cardstories.setTimeout(function() {
+                var poll_discarded = false;
+                $.cardstories.poll_discard = function() {
+                    poll_discarded = true;
+                };
+                var next_game_id = 21234;
+                $.cardstories.reload = function(_player_id, _next_game_id, _next_game_opts, _root) {
+                    ok(poll_discarded, 'poll_discard was called');
+                    equal(_next_game_id, next_game_id, 'relaod is called with next game id');
+                    start();
+                };
+                cb(next_game_id, {});
+            }, 0);
+            return true;
+        }
     };
 
     $.cardstories.display_modal = function(modal, overlay) {
@@ -3656,7 +3649,6 @@ asyncTest("next_game_as_author", 2, function() {
         equal($('.cardstories_next_game_author', next_game_dom).css('display'), 'block');
         equal($('.cardstories_next_game_player', next_game_dom).css('display'), 'none');
         continue_button.click();
-        start();
     });
 });
 
@@ -3679,8 +3671,23 @@ asyncTest("next_game_as_player", 4, function() {
     var continue_button = $('.cardstories_complete_continue', element);
     $.cardstories_table = {
         get_next_owner_id: function(player_id, game_id, root) { return player_id+1; },
-        on_next_game_ready: function(ready, player_id, game_id, root, cb) { return false; },
-        on_next_owner_change: function(player_id, game_id, root, cb) {}
+        on_next_owner_change: function(player_id, game_id, root, cb) {},
+        on_next_game_ready: function(ready, player_id, game_id, root, cb) {
+            $.cardstories.setTimeout(function() {
+                var poll_discarded = false;
+                $.cardstories.poll_discard = function() {
+                    poll_discarded = true;
+                };
+                var next_game_id = 234;
+                $.cardstories.reload = function(_player_id, _next_game_id, _next_game_opts, _root) {
+                    ok(poll_discarded, 'poll_discard was called');
+                    equal(_next_game_id, next_game_id, 'relaod is called with next game id');
+                    start();
+                };
+                cb(next_game_id, {});
+            }, 0);
+            return true;
+        }
     };
 
     $.cardstories.display_modal = function(modal, overlay) {
@@ -3692,7 +3699,6 @@ asyncTest("next_game_as_player", 4, function() {
         equal($('.cardstories_next_game_author', next_game_dom).css('display'), 'none');
         equal($('.cardstories_next_game_player', next_game_dom).css('display'), 'block');
         continue_button.click();
-        start();
     });
 });
 

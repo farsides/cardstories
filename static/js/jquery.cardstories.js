@@ -1355,9 +1355,11 @@
             var deferred = $.Deferred();
             var q = $this.create_queue(root);
 
-            // Display the modal.
+            // Display the advertise modal.
             $(root).queue(q, function(next) {
-                $this.invitation_owner_modal_helper($('.cardstories_info', element), $('.cardstories_modal_overlay', element), next);
+                $.cookie('CARDSTORIES_INVITATIONS', null);
+                $this.advertise(player_id, game.id, element, root);
+                next();
             });
 
             // Then the invite friend buttons.
@@ -1378,17 +1380,6 @@
             $(root).dequeue(q);
 
             return deferred;
-        },
-
-        invitation_owner_modal_helper: function(modal, overlay, cb_open, cb_close) {
-            if (modal.hasClass('cardstories_noop')) {
-                if (cb_open) {
-                    cb_open();
-                }
-            } else {
-                modal.addClass('cardstories_noop');
-                this.display_modal(modal, overlay, cb_open, cb_close);
-            }
         },
 
         invitation_owner_slots_helper: function(slots, player_id, game_id, element, root, cb) {
@@ -1471,10 +1462,6 @@
                     // also in parallel, and hide the modal, if it's visible.
                     if (!go_vote.hasClass('cardstories_noop_show')) {
                         go_vote.addClass('cardstories_noop_show');
-                        var modal = $('.cardstories_info', element);
-                        if (modal.css('display') == 'block') {
-                            modal.find('a').click();
-                        }
                         $(root).queue(playerq, function(next) {
                             $this.animate_scale(false, 5, 300, go_vote);
                             next();
@@ -1727,7 +1714,7 @@
 
                 // Show players being dealt cards.
                 $(root).queue(q, function(next) {
-                    $this.invitation_pick_deal_helper(game, element, next);
+                    $this.invitation_pick_deal_helper(game, element, root, next);
                 });
 
                 // Move card and sentence box to final positions.
@@ -4596,6 +4583,7 @@
                 $this.complete_fade_out_results_box(results_box, element, root, function() {
                     // Ask the table plugin to switch to the next game as soon as possible
                     var is_ready = $.cardstories_table.on_next_game_ready(true, player_id, game.id, root, function(next_game_id, next_game_opts) {
+                        $this.poll_discard(root);
                         $.cardstories_tabs.remove_tab_for_game(game.id, player_id, root, function() {
                             $this.reload(player_id, next_game_id, next_game_opts, root);
                         });
@@ -4624,11 +4612,6 @@
                             $this.close_modal(modal, overlay, next);
                         });
                     }
-                    $.cardstories_table.on_next_game_ready(false, player_id, game.id, root, function(next_game_id, next_game_opts) {
-                        $.cardstories_tabs.remove_tab_for_game(game.id, player_id, root, function() {
-                            $this.reload(player_id, next_game_id, next_game_opts, root);
-                        });
-                    });
 
                     $(root).queue(q, function(next) {
                         $this.complete_display_next_game(centered || modal_visible, player_id, game, element, root);
