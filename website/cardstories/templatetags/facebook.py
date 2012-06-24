@@ -25,7 +25,3 @@ register = template.Library()
 @register.simple_tag
 def fb_perms():
     return ",".join(getattr(settings, 'FACEBOOK_PERMS', []))
-
-@register.simple_tag
-def fb_like():
-    return '<iframe src="//www.facebook.com/plugins/like.php?href=http%3A%2F%2Ffacebook.com%2Fcardstories&amp;send=false&amp;layout=button_count&amp;width=90&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;font=arial&amp;height=21&amp;appId=280081805344240" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:90px; height:21px;" allowTransparency="true"></iframe>'

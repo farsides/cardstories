@@ -20,6 +20,7 @@
 #
 from urllib import quote, urlencode, urlopen
 from urlparse import parse_qs
+from simplejson import loads
 
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseNotFound, \
@@ -39,6 +40,25 @@ from django.shortcuts import redirect
 from forms import RegistrationForm, LoginForm
 
 from avatar import Avatar, GravatarAvatar, FacebookAvatar
+
+def get_game_info(request):
+    game_info = {}
+    game_id = request.GET.get('game_id', '')
+    if game_id != '':
+        params = {'action': 'state',
+                  'type': 'game',
+                  'modified': 0,
+                  'game_id': game_id}
+        url = 'http://%s/resource?%s' % (settings.CARDSTORIES_HOST,
+                                         urlencode(params))
+        data = urlopen(url).read()
+        response = loads(data)
+        try:
+            game_info = response[0]
+        except KeyError:
+            pass
+
+    return game_info
 
 def get_gameid_query(request):
     query = ''
@@ -76,6 +96,7 @@ def common_variables(request):
 
     """
     return {'gameid_query': get_gameid_query(request),
+            'game_info': get_game_info(request),
             'fb_redirect_uri': get_facebook_redirect_uri(request),
             'fb_app_id': settings.FACEBOOK_APP_ID,
             'owa_enable': settings.OWA_ENABLE,

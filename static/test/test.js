@@ -1618,7 +1618,7 @@ test("invitation_owner_confirm_only_when_not_all_players_picked", 2, function() 
     $.cardstories.invitation_owner_go_vote_confirm(player_id, game, element, root);
 });
 
-test("invitation_owner_invite_more", 6, function() {
+test("invitation_owner_invite_more", 5, function() {
     var player1 = 1;
     var card1 = 5;
     var player2 = 2;
@@ -1639,7 +1639,6 @@ test("invitation_owner_invite_more", 6, function() {
     var element = $('#qunit-fixture .cardstories_invitation .cardstories_owner');
     var invite_button = $('.cardstories_player_invite', element).first();
     var advertise_dialog = $('.cardstories_advertise', element);
-    var textarea = $('.cardstories_advertise_input textarea', advertise_dialog);
 
     $.cardstories.poll_ignore = function(_request) {};
     $.cardstories.ajax = function(options) {};
@@ -1647,10 +1646,8 @@ test("invitation_owner_invite_more", 6, function() {
     ok(!element.hasClass('cardstories_active'));
     $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
     ok(element.hasClass('cardstories_active'));
-    $.cookie('CARDSTORIES_INVITATIONS', 'UNEXPECTED');
     invite_button.click();
     equal(advertise_dialog.css('display'), 'block');
-    equal(textarea.val(), textarea.attr('placeholder'));
     // Close the dialog.
     $('.cardstories_advertise_close', advertise_dialog).click();
     equal(advertise_dialog.css('display'), 'none', 'clicking the close button hides the dialog');
@@ -3946,96 +3943,32 @@ asyncTest("on_next_owner_change after closing results", 34, function() {
     });
 });
 
-asyncTest("advertise", 12, function() {
+asyncTest("advertise", 2, function() {
     var root = $('#qunit-fixture .cardstories');
     var owner_id = 15;
     var game_id = 100;
     var element = $('#qunit-fixture .cardstories_invitation .cardstories_owner');
     var invite_button = $('.cardstories_player_invite:first', element);
     var advertise_dialog = $('.cardstories_advertise', element);
-    var textarea = $('.cardstories_advertise_input textarea', advertise_dialog);
-    var submit_button = $('.cardstories_send_invitation', advertise_dialog);
-    var feedback = $('.cardstories_advertise_feedback', advertise_dialog);
+    var copy_url = $('.cardstories_copy_url', advertise_dialog);
 
-    $.cardstories.ajax = function(options, _player_id, _game_id, _root) {
-        equal(options.url, $.cardstories.url + '?action=invite&owner_id=' + owner_id + '&game_id=' + game_id + '&player_id=player1&player_id=player2');
-        ok(options.async === false);
-    };
-
-    // The modal should be closed twice:
-    // - after clicking the submit button
-    // - after clicking the close button at the end of this test
-    // Keep a counter to be able to resume the tests after both dialogs have been
-    // asynchronously closed.
-    var close_count = 0;
     $.cardstories.close_modal = function(modal, overlay) {
         ok(modal.hasClass('cardstories_advertise'), 'the advertise dialog gets closed');
-        close_count++;
-        if (close_count == 2) {
-            start();
-        }
+        start();
     };
 
-    // the list of invitations is filled by the user
-    $.cookie('CARDSTORIES_INVITATIONS', null);
-    var text = " \n \t player1 \n\n   \nplayer2";
-    textarea.val(text);
+    // Set fake location
+    var location = $.cardstories.location;
+    $.cardstories.location = {protocol: 'http:', host: 'fake.href'};
+
     $.cardstories.advertise(owner_id, game_id, element, root);
-    submit_button.click();
-    equal($.cookie('CARDSTORIES_INVITATIONS'), text);
-    equal(feedback.css('display'), 'block', 'Feedback text is visible after submitting');
-    equal(textarea.css('display'), 'none', 'Textarea is not visible after submitting');
-    equal(submit_button.css('display'), 'none', 'Submit button is not visible after submitting');
+    equal($('.cardstories_copy_url', advertise_dialog).val(), 'http://fake.href/?game_id=100');
 
-    // the list of invitations is retrieved from the cookie
-    textarea.val('UNEXPECTED');
-    $.cardstories.advertise(owner_id, game_id, element, root);
-    equal(textarea.val(), text);
-
-    $.cookie('CARDSTORIES_INVITATIONS', null);
-    textarea.val('');
-    $.cardstories.advertise(owner_id, game_id, element, root);
-
-    // button should be enabled only when text is not blank
-    text = 'player1';
-    ok(submit_button.hasClass('cardstories_button_disabled'), 'button should be disabled');
-    textarea.val(text).keyup();
-    ok(!submit_button.hasClass('cardstories_button_disabled'), 'button should be enabled');
-
-    // clicking on invite friend button again doesn't do any harm.
-    invite_button.click();
-    equal(textarea.val(), text);
-
-    // Clicking on the close button closes the dialog.
+    // Reset fake location
+    $.cardstories.location = location;
+    
+    // Close the dialog.
     $('.cardstories_advertise_close', advertise_dialog).click();
-});
-
-asyncTest("advertise invitation email separators", 3, function() {
-    var root = $('#qunit-fixture .cardstories');
-    var owner_id = 15;
-    var game_id = 100;
-    var element = $('#qunit-fixture .cardstories_invitation .cardstories_owner');
-    var advertise = $('.cardstories_advertise', element);
-    var textarea = $('.cardstories_advertise_input textarea', advertise);
-    var submit_button = $('.cardstories_send_invitation', advertise);
-    var feedback = $('.cardstories_advertise_feedback', advertise);
-
-    $.cardstories.ajax = function(options, _player_id, _game_id, _root) {
-        equal(options.url, $.cardstories.url + '?action=invite&owner_id=' + owner_id + '&game_id=' + game_id + '&player_id=player1&player_id=player2');
-    };
-
-    $.cardstories.close_modal = function() { start(); };
-
-    var text1 = " \n \t player1 \n\n   \nplayer2";
-    var text2 = "player1;player2 ";
-    var text3 = " player1,  player2;\n";
-
-    $.each([text1, text2, text3], function(i, text) {
-        $.cookie('CARDSTORIES_INVITATIONS', null);
-        textarea.val(text);
-        $.cardstories.advertise(owner_id, game_id, element, root);
-        submit_button.click();
-    });
 });
 
 asyncTest("create_pick_card_animate", 30, function() {
