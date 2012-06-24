@@ -173,6 +173,8 @@
                 root.append(dom_clone);
                 // Re-init cardstories.
                 deferred = this.load_game(data.player_id, data.game_id, data.options, root);
+                // Re-init Facebook SDK with the new DOM.
+                FB.XFBML.parse();
             } else {
                 deferred = $.Deferred().resolve();
             }
