@@ -1080,8 +1080,9 @@ class CardstoriesGameTest(unittest.TestCase):
         self.assertEquals([ player['id'] for player in game_info['players']], [owner_id] + players)
         d = self.game.poll({'modified':[self.game.get_modified()]})
         def check(result):
+            self.assertEqual(result['type'], 'cancel')
+            self.assertEqual(result['modified'], [self.game.modified])
             self.game.canceled = True
-            self.assertEqual(result, None)
         d.addCallback(check)
         result = yield self.game.cancel()
         self.assertTrue(self.game.canceled)
@@ -1179,11 +1180,13 @@ class CardstoriesGameTest(unittest.TestCase):
         d = self.game.poll({'modified': [self.game.get_modified()]})
         def check(result):
             self.assertEqual(self.game.get_players(), [owner_id])
-            self.assertEqual(result, None)
+            self.assertEqual(result['type'], 'cancel')
+            self.assertEqual(result['modified'], [self.game.modified])
+            self.game.timedout = True
             return result
         d.addCallback(check)
         result = yield d
-        self.assertEqual(result, None)
+        self.assertTrue(self.game.timedout)
 
     @defer.inlineCallbacks
     def test17_nonexistent_game(self):

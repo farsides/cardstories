@@ -127,6 +127,7 @@ class CardstoriesGame(Pollable):
         yield self.service.db.runOperation("UPDATE games SET state = 'canceled' WHERE id = ?", [ self.get_id() ])
         yield self.cancelInvitations()
         event_log.game_canceled(self.service.db, self.get_id(), self.get_owner_id())
+        yield self.touch(type='cancel')
         self.destroy() # notify before altering the in core representation
         self.invited = []
         defer.returnValue({})

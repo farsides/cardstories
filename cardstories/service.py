@@ -282,7 +282,8 @@ class CardstoriesService(service.Service, Observable):
                     game_deferreds.append(self.games[game_id].poll(args))
             def inner_callback(result):
                 # Make the tabs poll always return just the arguments with updated timestamp.
-                args['modified'] = result[0]['modified']
+                if result[0] != None:
+                    args['modified'] = result[0]['modified']
                 return args
             inner_deferred = defer.DeferredList(game_deferreds, fireOnOneCallback=True)
             inner_deferred.addCallback(inner_callback)

@@ -495,7 +495,6 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
 
         # Touch third game.
         max_modified = games[0].modified # first game has just been touched, so it's the last one modified.
-        ready = defer.Deferred()
         d = self.service.poll({'action': ['poll'],
                                'type': ['tabs'],
                                'modified': [max_modified],
@@ -509,6 +508,29 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         d.addCallback(check3)
         yield games[2].touch()
         self.assertTrue(games[2].ok)
+
+        # Canceling a game should also make the poll return.
+        max_modified = games[2].modified
+        d = self.service.poll({'action': ['poll'],
+                               'type': ['tabs'],
+                               'modified': [max_modified],
+                               'player_id': [owner_id],
+                               'game_id': [game_ids[1]]})
+        def check4(result):
+            self.assertEquals(games[1].modified, result['modified'][0])
+            games[1].ok = True
+            return result
+        d.addCallback(check4)
+        yield games[1].cancel()
+        self.assertTrue(games[1].ok)
+
+        # Destroying a game shouldn't throw errors.
+        d = self.service.poll({'action': ['poll'],
+                               'type': ['tabs'],
+                               'modified': [max_modified],
+                               'player_id': [owner_id],
+                               'game_id': [game_ids[1]]})
+        games[0].destroy()
 
     @defer.inlineCallbacks
     def test08_tab_added_notify(self):
