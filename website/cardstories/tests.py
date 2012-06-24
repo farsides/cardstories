@@ -888,3 +888,35 @@ class CardstoriesTest(TestCase):
 
         # Clean up
         os.remove(full_path)
+
+    def test_18get_game_info(self):
+        """
+        Test the get_game_info view method.
+
+        """
+        from website.cardstories import views
+
+        # Test if the service spits an error.
+        class MockCardstoriesServiceError(object):
+            """Pretends to be the CS webservice. """
+            def read(self):
+                return '{"error": {"code": "GAME_DOES_NOT_EXIST"}}'
+        def mock_cardstories_service_error(url):
+            return MockCardstoriesServiceError()
+        views.urlopen = mock_cardstories_service_error
+        c = self.client
+        url = "/?game_id=123"
+        response = c.get(url)
+
+        # Test if game exists and returns.
+        class MockCardstoriesService(object):
+            """Pretends to be the CS webservice. """
+            def read(self):
+                return '[{"sentence": "Bogus sentence."}]'
+        def mock_cardstories_service(url):
+            return MockCardstoriesService()
+        views.urlopen = mock_cardstories_service
+        c = self.client
+        url = "/?game_id=456"
+        response = c.get(url)
+        self.assertTrue('Bogus sentence' in response.content)

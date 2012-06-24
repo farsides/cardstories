@@ -74,11 +74,11 @@
 .frame .row .like {
     position:absolute;
     top:30px;
-    left: 20px;
+    left: 10px;
     margin:0;
     padding:0;
     list-style:none;
-    width:200px;
+    width:210px;
 }
 
 /* Chat */
@@ -1820,62 +1820,16 @@
     width: 10em;
 }
 
-.cardstories .cardstories_advertise .cardstories_advertise_input { 
-    position: relative;
-    font-size: 1em;
-    width: 21.8em;
-    height: 10.5em;
-}
-
-.cardstories .cardstories_advertise .cardstories_advertise_input > textarea {
-    position: relative;
-    display: block;
-    top: 10%;
-    margin: 0 auto;
-    width: 90%;
-    height: 75%;
-    font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
-    font-size: 1.1em;
-    color: #7A7A7A;
-    background-color: #E0E2E2;
-    border: none;
-}
-
-.cardstories .cardstories_advertise .cardstories_advertise_feedback {
-    display: none;
-    font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
-    font-size: 1.2em;
-    margin-top: 20%;
-    text-align: center;
-}
-
-.cardstories .cardstories_advertise .cardstories_send_invitation {
-    position: absolute;
-    top: auto;
-    bottom: 0.5em;
-    right: 1.5em;
-    margin: 0 auto;
-    font-size: 1.6em;
-    width: 6.5em;
-    height: 1.7em;
-    color: #FFFFFF;
-    text-align: center;
-}
-
-.cardstories .cardstories_advertise .cardstories_send_invitation.cardstories_button_disabled a {
-    color: #868889;
-}
-
-.cardstories .cardstories_advertise .cardstories_send_invitation > a > span {
-    top: 0.25em;
-}
-
 .cardstories .cardstories_advertise .cardstories_advertise_right {
     float: right;
     width: 22em;
     height: 100%;
     padding-left: 1.25em;
     border-left: 1px solid #999999;
+}
+
+.cardstories .cardstories_advertise input.cardstories_copy_url {
+    width: 95%;
 }
 
 .cardstories .cardstories_advertise .fb-like {

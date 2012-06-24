@@ -20,6 +20,7 @@
 #
 from urllib import quote, urlencode, urlopen
 from urlparse import parse_qs
+from simplejson import loads
 
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseNotFound, \
@@ -40,6 +41,29 @@ from forms import RegistrationForm, LoginForm
 
 from avatar import Avatar, GravatarAvatar, FacebookAvatar
 
+def get_base_url(request):
+    domain = Site.objects.get_current().domain
+    return 'http://%s' % domain
+
+def get_game_info(request):
+    game_info = {}
+    game_id = request.GET.get('game_id', '')
+    if game_id != '':
+        params = {'action': 'state',
+                  'type': 'game',
+                  'modified': 0,
+                  'game_id': game_id}
+        url = 'http://%s/resource?%s' % (settings.CARDSTORIES_HOST,
+                                         urlencode(params))
+        data = urlopen(url).read()
+        response = loads(data)
+        try:
+            game_info = response[0]
+        except KeyError:
+            pass
+
+    return game_info
+
 def get_gameid_query(request):
     query = ''
     if request.GET.get('game_id', '') != '':
@@ -47,13 +71,17 @@ def get_gameid_query(request):
 
     return query
 
+def get_game_url(request):
+    return "%s/%s" % (get_base_url(request), get_gameid_query(request))
+
 def get_facebook_redirect_uri(request, encode=True):
     """
     Returns the urllib.quoted facebook redirection URI.
 
     """
-    domain = Site.objects.get_current().domain
-    uri = 'http://%s%s%s' % (domain, reverse(facebook), get_gameid_query(request))
+    uri = '%s%s%s' % (get_base_url(request),
+                      reverse(facebook),
+                      get_gameid_query(request))
 
     if encode:
         uri = quote(uri, '')
@@ -75,7 +103,10 @@ def common_variables(request):
     Common template variables.
 
     """
-    return {'gameid_query': get_gameid_query(request),
+    return {'base_url': get_base_url(request),
+            'gameid_query': get_gameid_query(request),
+            'game_info': get_game_info(request),
+            'game_url': get_game_url(request),
             'fb_redirect_uri': get_facebook_redirect_uri(request),
             'fb_app_id': settings.FACEBOOK_APP_ID,
             'owa_enable': settings.OWA_ENABLE,
