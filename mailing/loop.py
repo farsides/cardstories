@@ -26,6 +26,12 @@
 
 import os, sys
 import sqlite3
+
+# Allow to reference the root dir
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.dirname(CURRENT_DIR)
+sys.path.insert(0, ROOT_DIR)
+
 from mailing import send, aggregate
 
 
@@ -42,10 +48,12 @@ def get_context(cursor, player_id, last_active):
     game_activities = aggregate.get_game_activities(cursor, game_ids, player_id, happened_since=last_active)
     available_games = aggregate.get_available_games(cursor, created_since=last_active, exclude_game_ids=game_ids)
     completed_games = aggregate.get_completed_games(cursor, completed_since=last_active, exclude_game_ids=game_ids)
+    unsubscribe_url = aggregate.get_unsubscribe_url(player_id);
 
     context = {'game_activities': game_activities,
                'available_games': available_games,
-               'completed_games': completed_games}
+               'completed_games': completed_games,
+               'unsubscribe_url': unsubscribe_url}
 
     return context
 
@@ -57,6 +65,7 @@ def loop(ws_db_path, django_db_path):
     cursor.close()
     django_conn.close()
 
+    smtp = send.smtp_open()
     ws_conn = sqlite3.connect(ws_db_path)
     cursor = ws_conn.cursor()
 
@@ -65,12 +74,13 @@ def loop(ws_db_path, django_db_path):
         last_active = aggregate.get_players_last_activity(cursor, id)
         if should_send(id, last_active):
             context = get_context(cursor, id, last_active)
-            # TODO: Make send_mail work something like this:
-            send.send_mail(email, name, context)
+            print 'Sending email to %s' % email
+            send.send_mail(smtp, email, context)
             count += 1
 
     cursor.close()
     ws_conn.close()
+    smtp.close()
 
     return count
 

@@ -36,6 +36,8 @@ ADMINS = (
 )
 DEFAULT_FROM_EMAIL='Card Stories <feedback@farsides.com>'
 
+BASE_URL='http://cardstories.org'
+
 MANAGERS = ADMINS
 
 DATABASES = {

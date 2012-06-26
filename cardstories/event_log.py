@@ -120,7 +120,7 @@ def get_players_last_activity(cursor, player_id):
                ORDER BY timestamp DESC LIMIT 1"""
     cursor.execute(sql, [player_id])
     row = cursor.fetchone()
-    if row[0]:
+    if row and row[0]:
         result = {'timestamp': row[0],
                   'game_id': row[1],
                   'event_type': row[2],

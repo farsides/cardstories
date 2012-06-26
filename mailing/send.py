@@ -1,4 +1,3 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
 # Copyright (C) 2012 Farsides <contact@farsides.com>
@@ -25,51 +24,62 @@
 # Imports ####################################################################
 
 import os, sys
+import re
+import datetime
 
-from django.core.mail import EmailMultiAlternatives, get_connection
-from django.template.loader import get_template
-from django.template import Context
-
-
-# Django environment #########################################################
-
-sth=os.path.abspath('..')
-sys.path.append(sth)
+## Django environment
 os.environ['DJANGO_SETTINGS_MODULE'] = 'website.settings'
 
-TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), 'templates')
+from django.core.mail import get_connection
+from django.template.loader import get_template
+from django.template import Context
+from django.conf import settings
 
+from mailing.multirelated import EmailMultiRelated 
+
+TEMPLATES_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 
 # Functions ##################################################################
 
-def send_mailing():
-    # SMTP begin
+def smtp_open():
+    """
+    Opens a connection to the SMTP server
+    Returns the connection object (Django)
+    """
     smtp = get_connection(fail_silently=False)
     smtp.open()
+    return smtp
 
-    # Headers
+def send_mail(smtp, email, context):
+    """
+    Formats an activity notification email based on a game activity context,
+    and sends to the provided email through an open smtp connection
+    """
+
+    # Headers & templates
+    subject = 'Activity on Card Stories! (%s)' % datetime.date.today()
     from_email = 'Card Stories <feedback@farsides.com>'
-    to_emails = ['xavier@antoviaque.org']
-    subject = 'Test templating'
+    to_emails = [email]
+    text_template = get_template('mail/email_activity.txt')
+    html_template = get_template('mail/email_activity.html')
 
-    # Body templates
-    d = Context({ 'username': 'Mr Test' })
-    text_content = get_template('mail/email_activity.txt').render(d)
-    html_content = get_template('mail/email_activity.html').render(d)
+    context['base_url'] = settings.BASE_URL
+    d = Context(context)
+    text_content = text_template.render(d)
+    html_content = html_template.render(d)
 
     # MIME
-    msg = EmailMultiAlternatives(subject, text_content, from_email, to_emails,
-                                 headers = { 'Reply-To': 'another@example.com' })
+    msg = EmailMultiRelated(subject, text_content, from_email, to_emails)
     msg.attach_alternative(html_content, "text/html")
-    msg.attach_file(os.path.join(TEMPLATES_DIR, 'test.jpg'))
 
-    # SMTP end
+    # Inline images
+    images_filenames = [file for file in os.listdir(TEMPLATES_DIR) 
+                        if file.lower().endswith('.png') or
+                           file.lower().endswith('.jpg') or
+                           file.lower().endswith('.gif')]
+    for image_filename in images_filenames:
+        msg.attach_related_file(os.path.join(TEMPLATES_DIR, image_filename))
+    
     smtp.send_messages([msg])
-    smtp.close()
 
-
-# Main #######################################################################
-
-if __name__ == '__main__':
-    send_mailing()
 

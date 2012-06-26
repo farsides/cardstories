@@ -44,6 +44,10 @@ def get_all_players(cursor):
         result.append((id, email, name,))
     return result
 
+def get_unsubscribe_url(player_id):
+    # TODO: Get URL from Django
+    return 'http://cardstories.org/'
+
 def seed_playerid2name(players_list):
     '''
     This function needs to be called in order to seed the playerid2game dict

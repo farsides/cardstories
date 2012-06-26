@@ -1,0 +1,4 @@
+Send the mailing:
+
+    $ ./loop.py /path/to/twisted_db.sqlite /path/to/django_db.sqlite
+
