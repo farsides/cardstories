@@ -173,6 +173,8 @@
                 root.append(dom_clone);
                 // Re-init cardstories.
                 deferred = this.load_game(data.player_id, data.game_id, data.options, root);
+                // Re-init Facebook SDK with the new DOM.
+                FB.XFBML.parse();
             } else {
                 deferred = $.Deferred().resolve();
             }
@@ -1054,85 +1056,19 @@
             var $this = this;
             var box = $('.cardstories_advertise', element);
             var overlay = $('.cardstories_owner .cardstories_modal_overlay', root);
-            if (box.is(':visible')) { return; }
-
-            var text = $.cookie('CARDSTORIES_INVITATIONS');
-            var textarea = $('.cardstories_advertise_input textarea', box);
-            if (text) {
-                textarea.val(text);
+            if (box.is(':visible')) {
+                return;
             }
-            textarea.placeholder();
 
-            var background = $('.cardstories_advertise_input img', box);
-            var feedback = $('.cardstories_advertise_feedback', box);
-            var submit_button = $('.cardstories_send_invitation', box);
+            // Set game copy URL
+            var input = $('.cardstories_copy_url', element)
+            var url = $this.location.protocol + '//' + $this.location.host + '/?game_id=' + game_id;
+            input.val(url);
 
-            var toggle_feedback = function(showOrHide) {
-                feedback.toggle(showOrHide);
-                background.toggle(!showOrHide);
-                textarea.toggle(!showOrHide);
-                submit_button.toggle(!showOrHide);
-            };
-            toggle_feedback(false);
-
-            var tokenize_invitations = function(value) {
-                // Treat commas and semicolons as whitespace.
-                var normalized_value = value.replace(/,|;/g, ' ');
-                var tokens = $.grep(normalized_value.split(/\s+/), function(token) {
-                    return token !== '';
-                });
-                return tokens;
-            };
-
-            var is_invitation_valid = function(value) {
-                var trimmed = $.trim(value);
-                return trimmed && trimmed != textarea.attr('placeholder');
-            };
-
-            textarea.unbind('keyup click change').bind('keyup click change', function() {
-                var val = textarea.val();
-                submit_button.toggleClass('cardstories_button_disabled', !is_invitation_valid(val));
-            }).change();
-
-            submit_button.unbind('click').click(function() {
-                var val = textarea.val();
-                if (is_invitation_valid(val)) {
-                    $.cookie('CARDSTORIES_INVITATIONS', val);
-                    var invites = $.map(tokenize_invitations(val), function(invite) {
-                        return encodeURIComponent(invite);
-                    });
-                    var query = {
-                        action: 'invite',
-                        owner_id: owner_id,
-                        game_id: game_id,
-                        player_id: invites
-                    };
-                    var callback = function() {
-                        $this.game(owner_id, game_id, root);
-                    };
-                    // Use a synchronous request; because this is user-initiated,
-                    // we can afford it since the user won't be surprised by
-                    // the browser blocking.
-                    $this.send(query, callback, owner_id, game_id, root, {async: false});
-
-                    toggle_feedback(true);
-                    textarea.val('');
-
-                    // Delay closing the modal a bit, so that confirmation is visible.
-                    $this.setTimeout(function() {
-                        $this.close_modal(box, overlay);
-                    }, 700);
-                }
+            // Select all when clicked.
+            input.unbind('click').click(function() {
+                $(this).select();
             });
-
-            // Facebook button loading (code snippet)
-            var js, fjs = document.getElementsByTagName('script')[0];
-            if (!document.getElementById('facebook-jssdk')) {
-                js = document.createElement('script');
-                js.id = 'facebook-jssdk';
-                js.src = "//connect.facebook.net/en_US/all.js#appId=280081805344240&xfbml=1";
-                fjs.parentNode.insertBefore(js, fjs);
-            }
 
             this.display_modal(box, overlay);
         },
@@ -1357,7 +1293,6 @@
 
             // Display the advertise modal.
             $(root).queue(q, function(next) {
-                $.cookie('CARDSTORIES_INVITATIONS', null);
                 $this.advertise(player_id, game.id, element, root);
                 next();
             });
@@ -1406,7 +1341,6 @@
 
                         // Bind click behavior.
                         slot.unbind('click').click(function() {
-                            $.cookie('CARDSTORIES_INVITATIONS', null);
                             $this.advertise(player_id, game_id, element, root);
                         });
 

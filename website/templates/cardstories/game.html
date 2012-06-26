@@ -38,7 +38,7 @@
         <div class="row">
           <div class="like">
             <div><g:plusone size="medium" href="http://cardstories.org"></g:plusone></div>
-            <div>{% fb_like %}</div>
+            <div><div class="fb-like" data-send="false" data-layout="button_count" data-width="75" data-show-faces="false"></div></div>
           </div>
         </div>
         <div class="container">
@@ -74,12 +74,5 @@ $.get("/static/cardstories.html", function(data) {
     $('.cardstories').cardstories({{ player_id }}, $.cardstories.url_param('game_id'), '{% url website.cardstories.views.welcome %}', {% if create %}true{% else %}false{% endif %});
   }
 });
-
-// Initialize Google+ button
-(function() {
-  var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
-  po.src = 'https://apis.google.com/js/plusone.js';
-  var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
-})();
 </script>
 {% endblock %}

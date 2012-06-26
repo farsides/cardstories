@@ -21,9 +21,39 @@
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
 
+# Imports ###################################################################
+
 from datetime import datetime, timedelta
-import cardstories.event_log as event_log
+from cardstories import event_log
 from cardstories.game import CardstoriesGame
+
+# Functions ##################################################################
+
+playerid2name = {}
+
+def get_all_players(cursor):
+    '''
+    Fetches all players from the django db. Returns a list of 3-element
+    tuples containing id, email and name of each player in the django database.
+    '''
+    cursor.execute("SELECT id, username, first_name FROM auth_user")
+    result = []
+    for row in iter(cursor.next, None):
+        id, email, name = row
+        name = name and name.strip() or email.split('@')[0].strip()
+        result.append((id, email, name,))
+    return result
+
+def seed_playerid2name(players_list):
+    '''
+    This function needs to be called in order to seed the playerid2game dict
+    with data, so that get_player_name function can use it foor looking up player names.
+    It expects a list of 3-element tuples, as returned by get_all_players().
+    '''
+    global playerid2name
+    playerid2name = {}
+    for id, _email, name in players_list:
+        playerid2name[id] = name
 
 def get_player_name(player_id, current_player_id=None):
     '''
@@ -34,8 +64,7 @@ def get_player_name(player_id, current_player_id=None):
     if player_id == current_player_id:
         return 'You'
     else:
-        # TODO: Implement this!
-        return 'John Johnson'
+        return playerid2name[player_id]
 
 def yesterday():
     'Helper function that returns a datetime of 24 hours ago.'
@@ -74,6 +103,16 @@ def get_event_description(event, player_id):
         desc = '%s voted' % player_name()
 
     return desc
+
+def get_players_last_activity(cursor, player_id):
+    '''
+    Returns the time of player's last logged activity as a datetime object.
+    '''
+    last_activity = event_log.get_players_last_activity(cursor, player_id)
+    if last_activity:
+        return last_activity['timestamp']
+    else:
+        return None
 
 def get_player_game_ids(cursor, player_id):
     '''
@@ -127,7 +166,7 @@ def get_available_games(cursor, created_since=None, exclude_game_ids=None):
                FROM games
              WHERE state = 'invitation'
                AND players < ?
-               AND created >= ?
+               AND created > ?
                AND id NOT IN (%s)""" % ','.join([str(id) for id in exclude_game_ids])
     cursor.execute(sql, [CardstoriesGame.NPLAYERS, created_since])
     rows = cursor.fetchall()
@@ -153,7 +192,7 @@ def get_completed_games(cursor, completed_since=None, exclude_game_ids=None):
     sql = """SELECT id, owner_id, sentence
                FROM games
              WHERE state = 'complete'
-               AND created >= ?
+               AND created > ?
                AND id NOT IN (%s)""" % ','.join([str(id) for id in exclude_game_ids])
     cursor.execute(sql, [completed_since])
     rows = cursor.fetchall()

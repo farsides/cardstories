@@ -2,9 +2,21 @@
 <html>
 <head>
   <title>{% block title %}Card Stories (Card Game) - A Creative Game of Imagination{% endblock %}</title>
-  <meta http-equiv="Content-type" content="text/html;charset=UTF-8">
-  <meta name="Description" content="Play with your imagination, write creative stories and guess your friends cards - without letting them find yours.">
-
+  <meta http-equiv="Content-type" content="text/html;charset=UTF-8" />
+  {% block meta %}
+  <meta name="Description" content="Play with your imagination, write creative stories and guess your friends cards - without letting them find yours." />
+  {% if game_info.sentence %}
+  <meta property="og:title" content="Pick a card for my story: '{{ game_info.sentence }}'" />
+  {% else %}
+  <meta property="og:title" content="Play with your imagination, write creative stories and guess your friends cards - without letting them find yours." />
+  {% endif %}
+  <meta property="og:type" content="game" />
+  <meta property="og:image" content="{{ base_url }}/static/css/images/card_deck.png" />
+  <meta property="og:site_name" content="Card Stories (Card Game)" />
+  <meta property="og:url" content="{{ game_url }}" />
+  <meta property="og:description" content="Everyone picks a card.  Then guess which card is mine!" />
+  <meta property="fb:app_id" content="{{ fb_app_id }}" />
+  {% endblock %}
   <script type="text/javascript" src="/static/js/jquery/jquery-1.7.1.js"></script>
   {% block head_script %}
   <script type="text/javascript" src="/static/js/video.js"></script>
@@ -18,14 +30,8 @@
   <link rel="stylesheet" href="/static/css/video-js-vim.css" type="text/css" media="screen" />
   <link rel="stylesheet" href="/static/css/home.css" type="text/css" media="screen" />
   {% endblock %}
-  {% block open_graph %}
-  <meta property="og:title" content="Play with your imagination, write creative stories and guess your friends cards - without letting them find yours." />
-  <meta property="og:image" content="/static/css/images/card_deck.png" />
-  <meta property="og:site_name" content="Card Stories (Card Game)" />
-  {% endblock %}
 </head>
 <body>
-  <div id="fb-root"></div>
   <div id="contactable"></div>
   {% block content %}
   <div id="header">
@@ -175,6 +181,22 @@
   {% endblock %}
   {% block body_script %}
   <script type="text/javascript">
+    // Initialize Facebook SDK
+    (function(d, s, id) {
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId={{ fb_app_id }}";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+
+    // Initialize Google+ button
+    (function() {
+      var po = document.createElement('script'); po.type = 'text/javascript'; po.async = true;
+      po.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(po, s);
+    })();
+
     // Initialize VideoJS
     VideoJS.setupAllWhenReady({playerFallbackOrder: ["html5", "flash"]});
 

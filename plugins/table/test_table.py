@@ -412,6 +412,14 @@ class TableTest(unittest.TestCase):
         yield self.table_instance.postprocess({'type': 'chat'}, mock_request)
         yield self.table_instance.postprocess([[1, 2, {'this': 'test'}]], mock_request)
 
+    @defer.inlineCallbacks
+    def test05_close_tab_with_nonexisting_table(self):
+        player_id = 43
+        game_id = 1123321
+        self.assertEqual(len(self.table_instance.tables), 0)
+        result = yield self.table_instance.on_tab_closed(player_id, game_id)
+        self.assertEqual(result, True)
+
 
 def Run():
     loader = runner.TestLoader()

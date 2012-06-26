@@ -154,8 +154,9 @@ class Plugin(Pollable, CardstoriesServiceConnector):
     @defer.inlineCallbacks
     def on_tab_closed(self, player_id, game_id):
         """Called every time a player closes a tab."""
-        table = self.game2table[game_id]
-        yield table.on_tab_closed(player_id)
+        if game_id in self.game2table:
+            table = self.game2table[game_id]
+            yield table.on_tab_closed(player_id)
 
         defer.returnValue(True)
 

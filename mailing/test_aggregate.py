@@ -30,7 +30,7 @@ from datetime import datetime, timedelta
 
 from twisted.trial import unittest, runner, reporter
 from cardstories.service import CardstoriesService
-import cardstories.event_log as event_log
+from cardstories import event_log
 from mailing import aggregate
 
 
@@ -107,7 +107,14 @@ class AggregateTest(unittest.TestCase):
         ]
         for d in data:
             c.execute('INSERT INTO event_logs (game_id, timestamp, event_type, player_id, data) VALUES (?, ?, ?, ?, ?)', d)
-        player_id = 1231
+
+        # Seed the playerid2name data.
+        aggregate.seed_playerid2name([
+            (player1, 'player1@email.com', 'John Johnson'),
+            (player2, 'player2@email.com', 'Bob Bobbson'),
+            (invitee, 'invitee@email.com', 'Mr. Invitee')
+        ])
+
 
         result = aggregate.get_game_activities(c, [game1], player1, happened_since=three_days_ago)
         self.assertEquals(len(result), 1)
@@ -119,8 +126,8 @@ class AggregateTest(unittest.TestCase):
         self.assertEquals(events[0], 'You created the game')
         self.assertEquals(events[1], 'You chose the card')
         self.assertEquals(events[2], 'You wrote the story')
-        self.assertEquals(events[3], 'John Johnson joined the game')
-        self.assertEquals(events[4], 'John Johnson voted')
+        self.assertEquals(events[3], 'Bob Bobbson joined the game')
+        self.assertEquals(events[4], 'Bob Bobbson voted')
 
         since = six_hours_ago - timedelta(seconds=1)
         result = aggregate.get_game_activities(c, [game1, game2], invitee, happened_since=since)
@@ -130,8 +137,8 @@ class AggregateTest(unittest.TestCase):
         self.assertEquals(result[0]['owner_name'], 'John Johnson')
         events1 = result[0]['events']
         self.assertEquals(len(events1), 2)
-        self.assertEquals(events1[0], 'John Johnson joined the game')
-        self.assertEquals(events1[1], 'John Johnson voted')
+        self.assertEquals(events1[0], 'Bob Bobbson joined the game')
+        self.assertEquals(events1[1], 'Bob Bobbson voted')
         events2 = result[1]['events']
         self.assertEquals(len(events2), 4)
         self.assertEquals(events2[0], 'John Johnson wrote the story')
@@ -149,6 +156,7 @@ class AggregateTest(unittest.TestCase):
         yesterday = now - timedelta(days=1)
         two_days_ago = now - timedelta(days=2)
         three_days_ago = now - timedelta(days=3)
+        sec = timedelta(seconds=1)
 
         # Create some games.
         sql = 'INSERT INTO games (id, owner_id, state, sentence, created) VALUES (?, ?, ?, ?, ?)'
@@ -164,8 +172,11 @@ class AggregateTest(unittest.TestCase):
         for game in games:
             c.execute(sql, [game[0], owner_id, game[1], game[2], game[3]])
 
+        # Seed the playerid2name data.
+        aggregate.seed_playerid2name([(owner_id, 'john@johnson.com', 'John Johnson')])
+
         # Fetching all available games since two days ago should yeild two results.
-        result = aggregate.get_available_games(c, two_days_ago)
+        result = aggregate.get_available_games(c, two_days_ago - sec)
         self.assertEquals(len(result), 2)
         self.assertEquals(result[0]['game_id'], 2)
         self.assertEquals(result[0]['owner_name'], 'John Johnson')
@@ -177,14 +188,14 @@ class AggregateTest(unittest.TestCase):
         # Fetching all available games since three days ago should yeild three results,
         # but we are excluding three of them with the third optional parameter,
         # so there should be only one game in the result.
-        result = aggregate.get_available_games(c, three_days_ago, [2, 7, 888])
+        result = aggregate.get_available_games(c, three_days_ago - sec, [2, 7, 888])
         self.assertEquals(len(result), 1)
         self.assertEquals(result[0]['game_id'], 1)
         self.assertEquals(result[0]['owner_name'], 'John Johnson')
         self.assertEquals(result[0]['sentence'], 'Story 1')
 
 
-    def test03_get_completed_games(self):
+    def test04_get_completed_games(self):
         c = self.db.cursor()
         owner_id = 42
 
@@ -194,6 +205,9 @@ class AggregateTest(unittest.TestCase):
         yesterday = now - timedelta(days=1)
         two_days_ago = now - timedelta(days=2)
         three_days_ago = now - timedelta(days=3)
+
+        # Seed the playerid2name data.
+        aggregate.seed_playerid2name([(owner_id, 'john@johnson.com', 'John Johnson')])
 
         # Create some games.
         sql = 'INSERT INTO games (id, owner_id, state, sentence, created) VALUES (?, ?, ?, ?, ?)'
@@ -228,6 +242,52 @@ class AggregateTest(unittest.TestCase):
         self.assertEquals(result[0]['owner_name'], 'John Johnson')
         self.assertEquals(result[0]['sentence'], 'Story 7')
 
+
+    def test05_get_all_players(self):
+        # Fake out the django table in our test db.
+        c = self.db.cursor()
+        c.execute(
+            "CREATE TABLE auth_user ( "
+            "  id INTEGER PRIMARY KEY, "
+            "  username VARCHAR(255), "
+            "  first_name VARCHAR(255) "
+            "); ")
+
+        players = [
+            (1, 'john@johnson.com', 'John Johnson'),
+            (2, 'bill@billson.com', 'Bill Billson'),
+            (88, 'bigjoe99@gmail.com', None)
+        ]
+
+        for player in players:
+            c.execute('INSERT INTO auth_user (id, username, first_name) VALUES (?, ?, ?)', player)
+
+        result = aggregate.get_all_players(c)
+        self.assertEquals(len(result), 3)
+        self.assertEquals(result[0], players[0])
+        self.assertEquals(result[1], players[1])
+        # For players without first name present in the database, it shouold return
+        # the part of the email before the '@' character in place of the name.
+        self.assertEquals(result[2], (88, 'bigjoe99@gmail.com', 'bigjoe99'))
+        c.close()
+
+
+    def test06_get_player_name(self):
+        players = [
+            (1, 'john@johnson.com', 'John Johnson'),
+            (2, 'bob@bobbson.com', 'Bob Bobbson'),
+            (42, 'bigjoe99@gmail.com', 'bigjoe99')
+        ]
+
+        aggregate.seed_playerid2name(players)
+
+        self.assertEquals(aggregate.get_player_name(1, 42), 'John Johnson')
+        self.assertEquals(aggregate.get_player_name(2, 1), 'Bob Bobbson')
+        self.assertEquals(aggregate.get_player_name(42, 2), 'bigjoe99')
+        # Should return 'You' when current_player_id equals the requested player.
+        self.assertEquals(aggregate.get_player_name(1, 1), 'You')
+        self.assertEquals(aggregate.get_player_name(2, 2), 'You')
+        self.assertEquals(aggregate.get_player_name(42, 42), 'You')
 
 # Main #####################################################################
 
