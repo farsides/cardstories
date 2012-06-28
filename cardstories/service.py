@@ -488,9 +488,14 @@ class CardstoriesService(service.Service, Observable):
         # the functions being notified must not change the game state
         # because the behavior in this case is undefined
         #
-        assert game.get_modified() == modified
-        d = game.wait(args)
-        d.addCallback(self.game_notify, game_id)
+        try:
+            # Raise an AssertionError in this case (which really shouldn't happen).
+            assert game.get_modified() == modified
+        finally:
+            # But don't stop listening to game notifications under any circumatance
+            # as that can lead to a broken service.
+            d = game.wait(args)
+            d.addCallback(self.game_notify, game_id)
         defer.returnValue(True)
 
     @defer.inlineCallbacks
