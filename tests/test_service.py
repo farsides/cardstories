@@ -533,6 +533,30 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         games[0].destroy()
 
     @defer.inlineCallbacks
+    def test08_unknown_game_in_tabs_poll(self):
+        player_id = 12
+        unexisting_game_id = 123123
+
+        self.service.notified = False
+        def callback(result):
+            self.service.notified = True
+        self.service.listen().addCallback(callback)
+
+        # Destroying a game shouldn't throw errors.
+        yield self.service.state({'type': ['tabs'],
+                                  'modified': [0],
+                                  'player_id': [player_id],
+                                  'game_id': [unexisting_game_id],
+                                  'game_ids': []})
+
+        self.assertFalse(self.service.notified)
+
+        c = self.db.cursor()
+        c.execute('SELECT * FROM tabs WHERE player_id = ? AND game_id = ?', [player_id, unexisting_game_id])
+        rows = c.fetchall()
+        self.assertEquals(len(rows), 0)
+
+    @defer.inlineCallbacks
     def test08_tab_added_notify(self):
         sentence = 'SENTENCE'
         owner_id = 177

@@ -329,13 +329,18 @@ class CardstoriesService(service.Service, Observable):
         defer.returnValue(game_ids)
 
     def openTabInteraction(self, transaction, player_id, game_id):
-        transaction.execute('SELECT * FROM tabs WHERE player_id = ? AND game_id = ?', [player_id, game_id])
-        rows = transaction.fetchall()
         inserted = False
-        if not len(rows):
-            sql = "INSERT INTO tabs (player_id, game_id, created) VALUES (?, ?, datetime('now'))"
-            transaction.execute(sql, [player_id, game_id])
-            inserted = True
+        # Make sure the game exists before trying to associate it with the player.
+        transaction.execute('SELECT id FROM games WHERE id = ?', [game_id])
+        rows = transaction.fetchall()
+        if len(rows):
+            # Make sure the game isn't already associated with the player.
+            transaction.execute('SELECT * FROM tabs WHERE player_id = ? AND game_id = ?', [player_id, game_id])
+            rows = transaction.fetchall()
+            if not len(rows):
+                sql = "INSERT INTO tabs (player_id, game_id, created) VALUES (?, ?, datetime('now'))"
+                transaction.execute(sql, [player_id, game_id])
+                inserted = True
         return inserted
 
     def closeTabInteraction(self, transaction, player_id, game_id):
