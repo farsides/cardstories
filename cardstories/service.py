@@ -497,7 +497,7 @@ class CardstoriesService(service.Service, Observable):
             # Raise an AssertionError in this case (which really shouldn't happen).
             assert game.get_modified() == modified
         finally:
-            # But don't stop listening to game notifications under any circumatance
+            # But don't stop listening to game notifications under any circumstance
             # as that can lead to a broken service.
             d = game.wait(args)
             d.addCallback(self.game_notify, game_id)
