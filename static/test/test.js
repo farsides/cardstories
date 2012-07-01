@@ -1618,7 +1618,7 @@ test("invitation_owner_confirm_only_when_not_all_players_picked", 2, function() 
     $.cardstories.invitation_owner_go_vote_confirm(player_id, game, element, root);
 });
 
-test("invitation_owner_invite_more", 5, function() {
+test("invitation_owner_invite_more", 3, function() {
     var player1 = 1;
     var card1 = 5;
     var player2 = 2;
@@ -1646,17 +1646,10 @@ test("invitation_owner_invite_more", 5, function() {
     ok(!element.hasClass('cardstories_active'));
     $.cardstories.invitation(player_id, game, $('#qunit-fixture .cardstories'));
     ok(element.hasClass('cardstories_active'));
-    invite_button.click();
-    equal(advertise_dialog.css('display'), 'block');
-    // Close the dialog.
-    $('.cardstories_advertise_close', advertise_dialog).click();
-    equal(advertise_dialog.css('display'), 'none', 'clicking the close button hides the dialog');
-    // clicking an invite button should bring up the dialog again.
-    invite_button.click();
-    notEqual(advertise_dialog.css('display'), 'none', 'clicking the invite button shows the dialog again');
+    ok($('.cardstories_advertise_close', advertise_dialog).hasClass('cardstories_button_disabled'), 'cannot close dialog with only 2 players');
 });
 
-asyncTest("invitation_owner", 10, function() {
+asyncTest("invitation_owner", 11, function() {
     var player1 = 1;
     var player2 = 2;
     var player3 = 3;
@@ -1697,6 +1690,7 @@ asyncTest("invitation_owner", 10, function() {
     $.cardstories.invitation(owner_id, game, root);
     equal($('.cardstories_sentence', element).text(), sentence);
     equal($('.cardstories_advertise', element).css('display'), 'block', 'Adverstise modal is visible');
+    ok(!$('.cardstories_advertise_close', element).hasClass('cardstories_button_disabled'), 'Adverstise modal can be closed with 3+ players');
 
     // Check that countdown select is bound to send_countdown_duration.
     var countdown_duration_val = '3600';
@@ -3968,6 +3962,7 @@ asyncTest("advertise", 2, function() {
     $.cardstories.location = location;
     
     // Close the dialog.
+    $('.cardstories_advertise_close', advertise_dialog).removeClass('cardstories_button_disabled');
     $('.cardstories_advertise_close', advertise_dialog).click();
 });
 
