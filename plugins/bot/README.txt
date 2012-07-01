@@ -50,6 +50,7 @@ If you don't have game data to feed the bots, a sample file is included:
 Add the 'bot' plugin to the command-line used to start the webservice, and restart it:
 
     ... \
-    --plugins 'auth chat bot' \
+    --plugins 'auth chat activity table mail bot' \
+    --plugins-pre-process 'auth chat bot'
     ...
     
