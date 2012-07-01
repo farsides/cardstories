@@ -1783,8 +1783,10 @@
     top: 145px;
     left: 175px;
     width: 417px;
-    height: 234px;
+    height: 260px;
     color: #484C4E;
+    font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
+    font-size: 10px;
 }
 
 .cardstories .cardstories_advertise .cardstories_advertise_close { 
@@ -1798,8 +1800,10 @@
 }
 
 .cardstories .cardstories_advertise .cardstories_modal_h1 { 
+    font-family: "Licon";
     font-size: 4.4em;
-    margin: 0.15em 0 !important;
+    margin-left: 0.7em !important;
+    text-align: left;
 }
 
 .cardstories .cardstories_advertise .cardstories_modal_h2 { 
@@ -1807,34 +1811,103 @@
 }
 
 .cardstories .cardstories_advertise .cardstories_advertise_inner { 
-    width: 34em;
-    height: 15em;
+    width: 30em;
+    height: 9em;
     margin: 0 auto;
     text-align: left;
+    font-size: 1.2em;
 }
 
 .cardstories .cardstories_advertise .cardstories_advertise_left { 
-    position: relative;
+    display: inline-block;
+    vertical-align: top;
+    width: 12.25em;
     height: 100%;
-    float: left;
-    width: 10em;
+    padding: 0;
+    background: transparent url('images/arrow1.png') no-repeat 5em 4em;
 }
 
-.cardstories .cardstories_advertise .cardstories_advertise_right {
-    float: right;
-    width: 22em;
+.cardstories .cardstories_advertise .cardstories_advertise_middle {
+    display: inline-block;
+    vertical-align: top;
+    width: 5.25em;
     height: 100%;
-    padding-left: 1.25em;
-    border-left: 1px solid #999999;
-}
-
-.cardstories .cardstories_advertise input.cardstories_copy_url {
-    width: 95%;
 }
 
 .cardstories .cardstories_advertise .fb-like {
-    margin-left: 2.5em;
-    margin-top: 2em;
+    margin-left: 0.6em;
+}
+
+.cardstories .cardstories_advertise .cardstories_advertise_right {
+    display: inline-block;
+    vertical-align: top;
+    width: 10.5em;
+    height: 100%;
+    padding-left: 1.5em;
+}
+
+.cardstories .cardstories_advertise .cardstories_advertise_url {
+    position: relative;
+    width: 32em;
+    height: 2.5em;
+    margin: 0 auto;
+    text-align: center;
+    font-size: 1.2em;
+}
+
+.cardstories .cardstories_advertise .cardstories_advertise_url div {
+    display: inline-block;
+    height: 100%;
+}
+
+.cardstories .cardstories_advertise .cardstories_advertise_url_label {
+    position: relative;
+    width: 16.8em;
+}
+
+.cardstories .cardstories_advertise .cardstories_advertise_url_input {
+    position: relative;
+    width: 14.24em;
+}
+
+.cardstories .cardstories_advertise .cardstories_advertise_url_input img {
+    position: absolute;
+    top: -0.55em;
+    left: 0;
+}
+
+.cardstories .cardstories_advertise .cardstories_advertise_url_input input {
+    border: none;
+    background: transparent;
+    font: inherit;
+    width: 90%;
+}
+
+.cardstories .cardstories_advertise .cardstories_advertise_bots {
+    margin-top: 0.5em;
+    font-size: 1.2em;
+}
+
+.cardstories .cardstories_advertise .cardstories_advertise_next {
+    position: absolute;
+    width: 2.4em;
+    height: 1em;
+    top: 9.25em;
+    right: 1em;
+}
+
+.cardstories .cardstories_advertise .cardstories_advertise_next.cardstories_button_disabled {
+    display: none;
+}
+
+.cardstories .cardstories_advertise .cardstories_advertise_next a {
+    font-family: "Licon";
+    color: white;
+    font-size: 0.8em;
+}
+
+.cardstories .cardstories_advertise .cardstories_advertise_next a > span {
+    top: 0.1em;
 }
 
 .cardstories .cardstories_invitation .cardstories_owner .cardstories_write {

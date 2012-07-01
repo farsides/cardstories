@@ -3944,7 +3944,7 @@ asyncTest("advertise", 2, function() {
     var element = $('#qunit-fixture .cardstories_invitation .cardstories_owner');
     var invite_button = $('.cardstories_player_invite:first', element);
     var advertise_dialog = $('.cardstories_advertise', element);
-    var copy_url = $('.cardstories_copy_url', advertise_dialog);
+    var copy_url = $('input.cardstories_copy_url', advertise_dialog);
 
     $.cardstories.close_modal = function(modal, overlay) {
         ok(modal.hasClass('cardstories_advertise'), 'the advertise dialog gets closed');
@@ -3956,7 +3956,7 @@ asyncTest("advertise", 2, function() {
     $.cardstories.location = {protocol: 'http:', host: 'fake.href'};
 
     $.cardstories.advertise(owner_id, game_id, element, root);
-    equal($('.cardstories_copy_url', advertise_dialog).val(), 'http://fake.href/?game_id=100');
+    equal($('input.cardstories_copy_url', advertise_dialog).val(), 'http://fake.href/?game_id=100');
 
     // Reset fake location
     $.cardstories.location = location;
