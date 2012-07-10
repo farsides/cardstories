@@ -1,3 +1,25 @@
-Hello {{ username }}
+{% if game_activities %}= Activity on your games =
+{% for game in game_activities %}
+    * "{{ game.sentence }}" (Game Master: {{ game.owner_name }}, State: {{ game.state }})
+{% for event in game.events %}        - {{ event }}
+{% endfor %}          {{ base_url }}/?game_id={{ game.game_id }}
+{% endfor %}
 
-Welcome!
+{% endif %}{% if available_games %}= New games to play =
+{% for game in available_games %}
+    * "{{ game.sentence }}" (Game Master: {{ game.owner_name }}) 
+      {{ base_url }}/?game_id={{ game.game_id }}
+{% endfor %}
+
+{% endif %}{% if completed_games %}= Games you missed =
+{% for game in completed_games %}
+    * "{{ game.sentence }}" (Game Master: {{ game.owner_name }})
+      {{ base_url }}/?game_id={{ game.game_id }}
+{% endfor %}
+
+{% endif %}
+Card Stories is a game created by Farsides: http://farsides.com/
+
+To instantly unsubscribe from activity notifications: 
+{{ unsubscribe_url }}
+

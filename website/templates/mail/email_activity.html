@@ -1,3 +1,198 @@
-<p>Hello <b>{{ username }}</b></p>
+<html>
+<head>
+    <style type="text/css">  
+        body {
+            background-image: url('bg.jpg');
+            background-repeat: repeat-y repeat-x;
+            background-color: #ebeff0;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body margin="0" padding="0" background="bg.jpg" bgcolor="#F5F5F5" width="100%">
 
-<p>Welcome!</p>
+<table width="100%" background="bg.jpg" style="font-family: Helvetica, Arial;">  
+    <tr>  
+        <td>  
+            <table width="135" align="center" border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td><a href="http://cardstories.org/">
+                        <img src="logo.png" alt="Card Stories" border="0" style="display: block;" />
+                    </a></td>
+                </tr>
+            </table>
+
+            {% if game_activities %}
+            
+            <table width="400" align="center" border="0" cellpadding="0" cellspacing="0">
+                <tr height="20">
+                    <td width="20" height="20"><img src="border_top_left.png" height="20" alt="" style="display: block;" /></td>
+                    <td width="360" height="20" bgcolor="#ffffff"></td>
+                    <td width="20" height="20"><img src="border_top_right.png" height="20" alt="" style="display: block;" /></td>
+                </tr>
+                <tr>
+                    <td width="20" bgcolor="#ffffff">&nbsp;</td>
+                    <td width="360" bgcolor="#ffffff" style="font-size: 21px; color: #B14A5D;">Activity on your games</td>
+                    <td width="20" bgcolor="#ffffff">&nbsp;</td>
+                </tr>
+                {% for game in game_activities %}
+                <tr>
+                    <td width="20" bgcolor="#ffffff">&nbsp;</td>
+                    <td width="360" bgcolor="#ffffff">&nbsp;</td>
+                    <td width="20" bgcolor="#ffffff">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td width="20" bgcolor="#ffffff">&nbsp;</td>
+                    <td width="360" bgcolor="#ffffff">
+                        <p style="font-size: 11px; color: black;">
+                            <a href="{{ base_url }}/?game_id={{ game.game_id }}" style="font-size: 12px; color: #465761; font-weight: bold;">"{{ game.sentence }}"</a>
+                            <span style="font-size: 10px; color: #A1A1A1;">(Game Master: <span style="font-weight: bold; color: #E5952E;">{{ game.owner_name }}</span>, State: <span style="color: #636363; font-weight: bold;">{{ game.state }}</span>)</span>
+                        </p>
+                        <p style="font-size: 10px; color: #636363;">
+                            {% for event in game.events %}
+                                {{ event }}<br />
+                            {% endfor %}
+                        </p>
+                    </td>
+                    <td width="20" bgcolor="#ffffff">&nbsp;</td>
+                </tr>
+                {% endfor %}
+                <tr height="20">
+                    <td width="20"><img src="border_bottom_left.png" alt="" style="display: block;" /></td>
+                    <td width="360" bgcolor="#ffffff">&nbsp;</td>
+                    <td width="20"><img src="border_bottom_right.png" alt="" style="display: block;" /></td>
+                </tr>
+            </table>
+
+            {% endif %}
+
+            <table width="46" align="center" border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td height="5"></td>
+                </tr>
+                <tr>
+                    <td><img src="umbrella.png" alt="" style="display: block;" /></td>
+                </tr>
+                <tr>
+                    <td height="5"></td>
+                </tr>
+            </table>
+            
+            {% if available_games %}
+            
+            <table width="400" align="center" border="0" cellpadding="0" cellspacing="0">
+                <tr height="20">
+                    <td width="20" height="20"><img src="border_top_left.png" height="20" alt="" style="display: block;" /></td>
+                    <td width="360" height="20" bgcolor="#ffffff"></td>
+                    <td width="20" height="20"><img src="border_top_right.png" height="20" alt="" style="display: block;" /></td>
+                </tr>
+                <tr>
+                    <td width="20" bgcolor="#ffffff">&nbsp;</td>
+                    <td width="360" bgcolor="#ffffff" style="font-size: 21px; color: #E5952E;">New games to play</td>
+                    <td width="20" bgcolor="#ffffff">&nbsp;</td>
+                </tr>
+                {% for game in available_games %}
+                <tr>
+                    <td width="20" bgcolor="#ffffff">&nbsp;</td>
+                    <td width="360" bgcolor="#ffffff">&nbsp;</td>
+                    <td width="20" bgcolor="#ffffff">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td width="20" bgcolor="#ffffff">&nbsp;</td>
+                    <td width="360" bgcolor="#ffffff" style="font-size: 11px; color: black;">
+                            <a href="{{ base_url }}/?game_id={{ game.game_id }}" style="font-size: 12px; color: #465761; font-weight: bold;">"{{ game.sentence }}"</a>
+                            <span style="font-size: 10px; color: #6C6A58;">(Game Master: <span style="font-weight: bold">{{ game.owner_name }}</span></span>)</span>
+                    </td>
+                    <td width="20" bgcolor="#ffffff">&nbsp;</td>
+                </tr>
+                {% endfor %}
+                <tr height="20">
+                    <td width="20"><img src="border_bottom_left.png" alt="" style="display: block;" /></td>
+                    <td width="360" bgcolor="#ffffff">&nbsp;</td>
+                    <td width="20"><img src="border_bottom_right.png" alt="" style="display: block;" /></td>
+                </tr>
+            </table>
+            
+            {% endif %}
+
+            <table width="81" align="center" border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td height="5"></td>
+                </tr>
+                <tr>
+                    <td><img src="clouds.png" alt="" style="display: block;" /></td>
+                </tr>
+                <tr>
+                    <td height="5"></td>
+                </tr>
+            </table>
+            
+            {% if completed_games %}
+            
+            <table width="400" align="center" border="0" cellpadding="0" cellspacing="0">
+                <tr height="20">
+                    <td width="20" height="20"><img src="border_top_left.png" height="20" alt="" style="display: block;" /></td>
+                    <td width="360" height="20" bgcolor="#ffffff"></td>
+                    <td width="20" height="20"><img src="border_top_right.png" height="20" alt="" style="display: block;" /></td>
+                </tr>
+                <tr>
+                    <td width="20" bgcolor="#ffffff">&nbsp;</td>
+                    <td width="360" bgcolor="#ffffff" style="font-size: 21px; color: #A4848B;">Games you missed</td>
+                    <td width="20" bgcolor="#ffffff">&nbsp;</td>
+                </tr>
+                {% for game in completed_games %}
+                <tr>
+                    <td width="20" bgcolor="#ffffff">&nbsp;</td>
+                    <td width="360" bgcolor="#ffffff">&nbsp;</td>
+                    <td width="20" bgcolor="#ffffff">&nbsp;</td>
+                </tr>
+                <tr>
+                    <td width="20" bgcolor="#ffffff">&nbsp;</td>
+                    <td width="360" bgcolor="#ffffff" style="font-size: 11px; color: black;">
+                            <a href="{{ base_url }}/?game_id={{ game.game_id }}" style="font-size: 12px; color: #465761; font-weight: bold;">"{{ game.sentence }}"</a>
+                            <span style="font-size: 10px; color: #6C6A58;">(Game Master: <span style="font-weight: bold; color: #6C6A58;">{{ game.owner_name }}</span>)</span>
+                    </td>
+                    <td width="20" bgcolor="#ffffff">&nbsp;</td>
+                </tr>
+                {% endfor %}
+                <tr height="20">
+                    <td width="20"><img src="border_bottom_left.png" alt="" style="display: block;" /></td>
+                    <td width="360" bgcolor="#ffffff">&nbsp;</td>
+                    <td width="20"><img src="border_bottom_right.png" alt="" style="display: block;" /></td>
+                </tr>
+            </table>
+            
+            {% endif %}
+
+            <table width="102" align="center" border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td height="5"></td>
+                </tr>
+                <tr>
+                    <td><a href="http://farsides.com/"><img src="farsides.png" alt="" border="0" style="display: block;" /></a></td>
+                </tr>
+                <tr>
+                    <td height="5"></td>
+                </tr>
+            </table>
+            
+            <table width="290" align="center" border="0" cellpadding="0" cellspacing="0">
+                <tr>
+                    <td height="5"></td>
+                </tr>
+                <tr>
+                    <td style="font-size: 10px; color: #426675;">To instantly unsubscribe from activity notifications, click <a href="{{ unsubscribe_url }}">here</a>.</td>
+                </tr>
+                <tr>
+                    <td height="5"></td>
+                </tr>
+            </table>
+            
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

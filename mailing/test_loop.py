@@ -155,8 +155,7 @@ class LoopTest(unittest.TestCase):
         self.assertEquals(len(calls), 3)
 
         # For player1:
-        self.assertEquals(calls[0][0], 'john@johnson.com')
-        self.assertEquals(calls[0][1], 'John Johnson')
+        self.assertEquals(calls[0][1], 'john@johnson.com')
         # No completed games:
         self.assertEquals(len(calls[0][2]['completed_games']), 0)
         # One available game (game3 by player2):
@@ -178,8 +177,7 @@ class LoopTest(unittest.TestCase):
         self.assertEquals(activity['events'][1], 'Bill Billson voted')
 
         # For player2:
-        self.assertEquals(calls[1][0], 'bill@billson.com')
-        self.assertEquals(calls[1][1], 'Bill Billson')
+        self.assertEquals(calls[1][1], 'bill@billson.com')
         # Player2 has last been active 'now', not much has happened since 'now', obviously.
         # No completed games:
         self.assertEquals(len(calls[1][2]['completed_games']), 0)
@@ -189,8 +187,7 @@ class LoopTest(unittest.TestCase):
         self.assertEquals(len(calls[1][2]['game_activities']), 0)
 
         # For player3:
-        self.assertEquals(calls[2][0], 'bigjoe99@gmail.com')
-        self.assertEquals(calls[2][1], 'bigjoe99')
+        self.assertEquals(calls[2][1], 'bigjoe99@gmail.com')
         # No completed games:
         self.assertEquals(len(calls[2][2]['completed_games']), 0)
         # One available game (game3 by player2):
