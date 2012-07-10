@@ -54,6 +54,14 @@ class LoopTest(unittest.TestCase):
             "  first_name VARCHAR(255) "
             "); ")
         c.close()
+        # Mock out send.smtp_open() and
+        # smtp.close() calls.
+        class FakeSmtp(object):
+            def close(self):
+                pass
+        def fake_smtp_open():
+            return FakeSmtp()
+        send.smtp_open = fake_smtp_open
 
     def tearDown(self):
         self.db.close()
@@ -67,6 +75,13 @@ class LoopTest(unittest.TestCase):
         game1 = 111
         game2 = 122
         game3 = 133
+
+        # Mock out should_send_email to always return True,
+        # we'll test that function separately.
+        original_should_send_email = loop.should_send_email
+        def always_true(last_active, game_activities_24h):
+            return True
+        loop.should_send_email = always_true
 
         now = datetime.now()
         yesterday = now - timedelta(days=1)
@@ -183,7 +198,7 @@ class LoopTest(unittest.TestCase):
         self.assertEquals(len(calls[1][2]['completed_games']), 0)
         # No available games:
         self.assertEquals(len(calls[1][2]['available_games']), 0)
-        # No game acitvities:
+        # No game activities:
         self.assertEquals(len(calls[1][2]['game_activities']), 0)
 
         # For player3:
@@ -195,9 +210,39 @@ class LoopTest(unittest.TestCase):
         self.assertEquals(game['game_id'], game3)
         self.assertEquals(game['owner_name'], 'Bill Billson')
         self.assertEquals(game['sentence'], 'Sentence 3')
-        # No game acitvities - player3 has less been active two days ago, but he has only
+        # No game activities - player3 has less been active two days ago, but he has only
         # participated in game2 which hasn't seen any activity since then:
         self.assertEquals(len(calls[2][2]['game_activities']), 0)
+
+        loop.should_send_email = original_should_send_email
+
+    def test02_should_send_email(self):
+        def to_iso_string(datetime):
+            return datetime.strftime('%Y-%m-%d %H:%M:%S.%f')
+
+        now = datetime.now()
+
+        # Should always send if player's last activity was less than 24 hours ago.
+        self.assertTrue(loop.should_send_email(to_iso_string(now), []))
+        self.assertTrue(loop.should_send_email(to_iso_string(now - timedelta(hours=12)), []))
+        self.assertTrue(loop.should_send_email(to_iso_string(now - timedelta(hours=22)), []))
+        # Should always send if player's last activity was 7 days ago.
+        self.assertTrue(loop.should_send_email(to_iso_string(now - timedelta(days=7)), []))
+        self.assertTrue(loop.should_send_email(to_iso_string(now - timedelta(days=7, hours=5)), []))
+        self.assertTrue(loop.should_send_email(to_iso_string(now - timedelta(days=7, hours=23)), []))
+        # Should always send if player's last activity was 30, 60, 90, ... days ago.
+        self.assertTrue(loop.should_send_email(to_iso_string(now - timedelta(days=30)), []))
+        self.assertTrue(loop.should_send_email(to_iso_string(now - timedelta(days=60, hours=5)), []))
+        self.assertTrue(loop.should_send_email(to_iso_string(now - timedelta(days=90, hours=23)), []))
+        # Should NOT send otherwise if there's no recent activities on player's games.
+        self.assertFalse(loop.should_send_email(to_iso_string(now - timedelta(days=2)), []))
+        self.assertFalse(loop.should_send_email(to_iso_string(now - timedelta(days=26, hours=5)), []))
+        self.assertFalse(loop.should_send_email(to_iso_string(now - timedelta(days=6, hours=23)), []))
+        # Should still send if there were recent activities on player's games.
+        fake_activity = [{'game_id': 42, 'state': 'vote', 'events': []}]
+        self.assertTrue(loop.should_send_email(to_iso_string(now - timedelta(days=2)), [fake_activity]))
+        self.assertTrue(loop.should_send_email(to_iso_string(now - timedelta(days=26, hours=5)), [fake_activity]))
+        self.assertTrue(loop.should_send_email(to_iso_string(now - timedelta(days=6, hours=23)), [fake_activity]))
 
 # Main #####################################################################
 
