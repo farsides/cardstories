@@ -86,6 +86,13 @@ def get_context(cursor, player_id, game_ids, last_active):
 
     return context
 
+def is_context_empty(context):
+    '''Returns False if there isn't any valuable information in the context.'''
+    for key in ['game_activities', 'available_games', 'completed_games']:
+        if len(context[key]) > 0:
+            return False
+    return True
+
 def loop(ws_db_path, django_db_path, verbose=False):
     django_conn = sqlite3.connect(django_db_path)
     cursor = django_conn.cursor()
@@ -110,10 +117,12 @@ def loop(ws_db_path, django_db_path, verbose=False):
         # TODO: Only send if the player didn't opt out.
         if should_send:
             context = get_context(cursor, id, game_ids, last_active)
-            if verbose:
-                print 'Sending email to %s' % email
-            send.send_mail(smtp, email, context)
-            count += 1
+            # Don't send if there isn't any new info in the context.
+            if not is_context_empty(context):
+                if verbose:
+                    print 'Sending email to %s' % email
+                send.send_mail(smtp, email, context)
+                count += 1
 
     cursor.close()
     ws_conn.close()

@@ -163,11 +163,13 @@ class LoopTest(unittest.TestCase):
         send.send_mail = mock_send_mail
 
         count = loop.loop(self.database, self.database)
-        # Should send out three emails (for each of the three players in the db).
-        self.assertEquals(count, 3)
+        # Should send out two emails (for player1 and player 3).
+        # The email shouldn't be sent to player2 because he was last active 'now',
+        # and nothing has happened since now (a blank email such as that shouldn't be sent).
+        self.assertEquals(count, 2)
 
         # Let's see what send_mail has been called with.
-        self.assertEquals(len(calls), 3)
+        self.assertEquals(len(calls), 2)
 
         # For player1:
         self.assertEquals(calls[0][1], 'john@johnson.com')
@@ -191,28 +193,18 @@ class LoopTest(unittest.TestCase):
         self.assertEquals(activity['events'][0], 'Bill Billson joined the game')
         self.assertEquals(activity['events'][1], 'Bill Billson voted')
 
-        # For player2:
-        self.assertEquals(calls[1][1], 'bill@billson.com')
-        # Player2 has last been active 'now', not much has happened since 'now', obviously.
+        # For player3:
+        self.assertEquals(calls[1][1], 'bigjoe99@gmail.com')
         # No completed games:
         self.assertEquals(len(calls[1][2]['completed_games']), 0)
-        # No available games:
-        self.assertEquals(len(calls[1][2]['available_games']), 0)
-        # No game activities:
-        self.assertEquals(len(calls[1][2]['game_activities']), 0)
-
-        # For player3:
-        self.assertEquals(calls[2][1], 'bigjoe99@gmail.com')
-        # No completed games:
-        self.assertEquals(len(calls[2][2]['completed_games']), 0)
         # One available game (game3 by player2):
-        self.assertEquals(len(calls[2][2]['available_games']), 1)
+        self.assertEquals(len(calls[1][2]['available_games']), 1)
         self.assertEquals(game['game_id'], game3)
         self.assertEquals(game['owner_name'], 'Bill Billson')
         self.assertEquals(game['sentence'], 'Sentence 3')
         # No game activities - player3 has less been active two days ago, but he has only
         # participated in game2 which hasn't seen any activity since then:
-        self.assertEquals(len(calls[2][2]['game_activities']), 0)
+        self.assertEquals(len(calls[1][2]['game_activities']), 0)
 
         loop.should_send_email = original_should_send_email
 
@@ -234,11 +226,11 @@ class LoopTest(unittest.TestCase):
         self.assertTrue(loop.should_send_email(to_iso_string(now - timedelta(days=30)), []))
         self.assertTrue(loop.should_send_email(to_iso_string(now - timedelta(days=60, hours=5)), []))
         self.assertTrue(loop.should_send_email(to_iso_string(now - timedelta(days=90, hours=23)), []))
-        # Should NOT send otherwise if there's no recent activities on player's games.
+        # Should NOT send otherwise, if there's no recent activities on player's games.
         self.assertFalse(loop.should_send_email(to_iso_string(now - timedelta(days=2)), []))
         self.assertFalse(loop.should_send_email(to_iso_string(now - timedelta(days=26, hours=5)), []))
         self.assertFalse(loop.should_send_email(to_iso_string(now - timedelta(days=6, hours=23)), []))
-        # Should still send if there were recent activities on player's games.
+        # Should still send, if there were recent activities on player's games.
         fake_activity = [{'game_id': 42, 'state': 'vote', 'events': []}]
         self.assertTrue(loop.should_send_email(to_iso_string(now - timedelta(days=2)), [fake_activity]))
         self.assertTrue(loop.should_send_email(to_iso_string(now - timedelta(days=26, hours=5)), [fake_activity]))
