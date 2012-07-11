@@ -93,7 +93,7 @@ def is_context_empty(context):
             return False
     return True
 
-def loop(ws_db_path, django_db_path, verbose=False):
+def loop(ws_db_path, django_db_path, email_list=None, verbose=False):
     django_conn = sqlite3.connect(django_db_path)
     cursor = django_conn.cursor()
     players_list = aggregate.get_all_players(cursor)
@@ -108,6 +108,8 @@ def loop(ws_db_path, django_db_path, verbose=False):
     count = 0
 
     for id, email, name in players_list:
+        if email_list and not email in email_list:
+            continue
         game_ids = aggregate.get_player_game_ids(cursor, id)
         last_active = aggregate.get_players_last_activity(cursor, id)
         yesterday = datetime.now() - timedelta(days=1)
@@ -134,8 +136,12 @@ def loop(ws_db_path, django_db_path, verbose=False):
 # Main #######################################################################
 
 if __name__ == '__main__':
-    if not len(sys.argv) == 3:
-        sys.exit('USAGE: python loop.py path/to/wsdb.sqlite path/to/djangodb.sqlite')
+    if not len(sys.argv) in [3, 4]:
+        sys.exit('USAGE: python loop.py path/to/wsdb.sqlite path/to/djangodb.sqlite [path/to/filter.txt]')
+    if len(sys.argv) == 4:
+        email_list = open(sys.argv[3]).read().splitlines()
+    else:
+        email_list = None
     print 'Sending emails...'
-    count = loop(sys.argv[1], sys.argv[2], True)
+    count = loop(sys.argv[1], sys.argv[2], email_list=email_list, verbose=True)
     print 'Done!', 'Nr. of emails sent: %d' % count
