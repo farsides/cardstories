@@ -26,15 +26,17 @@ on a recent installation of Ubuntu or Debian.
 
 First, install the following packages.
 
-$ sudo apt-get install postfix python-twisted python-lxml \
-  python-imaging python-simplejson python-httplib2 python-pip sqlite3
+    $ sudo apt-get install postfix python-twisted python-lxml \
+      python-httplib2 python-pip sqlite3
 
-Now install the following with pip:
+[Optional] Create a virtual environment for Card Stories, to avoid
+dependencies conflict with other software installed on your system:
 
-$ sudo pip install Django==1.2.5
-$ sudo pip install South==0.7.3
-$ sudo pip install mock==0.7.2
-$ sudo pip install requests==0.8.6
+    $ mkvirtualenv cardstories
+
+Now install the remaining python dependencies with pip:
+
+    $ pip install -r requirements.txt
 
 Now, make sure you are at the root of the cardstories checkout.  At this point,
 create the default database structure for the website, but first, create a
