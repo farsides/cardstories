@@ -31,6 +31,7 @@ from twisted.python import log
 
 from cardstories.game import CardstoriesGame
 from cardstories.service import CardstoriesServiceConnector
+from cardstories.poll import Pollable
 from plugins.bot import buildwordsscores
 
 
@@ -51,7 +52,7 @@ def call_later(delay_dict, *args, **kwargs):
 
 # Classes #################################################################
 
-class Plugin(CardstoriesServiceConnector):
+class Plugin(Pollable, CardstoriesServiceConnector):
     """
     Bots who join games when there isn't enough players, and try to take a good guess
     at the cards, using data from previous games.
@@ -80,6 +81,12 @@ class Plugin(CardstoriesServiceConnector):
             elif node.tag == "botinstance":
                 bot = Bot(self, brain, int(node.get('player_id')))
                 self.bots.append(bot)
+
+        # Store enable_join per game.
+        self.enable_join = {}
+
+        # Initialize the pollable using the recommended timeout.
+        Pollable.__init__(self, self.service.settings.get('poll-timeout', 30))
 
     def name(self):
         """
@@ -120,9 +127,12 @@ class Plugin(CardstoriesServiceConnector):
         Make bots join it if there isn't enough players"""
 
         game, players_ids = yield self.get_game_by_id(game_id)
+        
+        # Get enable join setting
+        enable_join = self.enable_join.get(game_id, False)
 
         # Does the game still need players?
-        if game['state'] == 'invitation' and len(players_ids) < CardstoriesGame.NPLAYERS:
+        if enable_join and game['state'] == 'invitation' and len(players_ids) < CardstoriesGame.NPLAYERS:
             for bot in self.bots:
                 if bot.player_id not in players_ids:
                     yield bot.join(game_id)
@@ -143,6 +153,45 @@ class Plugin(CardstoriesServiceConnector):
                 call_later(self.delays['vote'], bot.vote, game.id)
 
         defer.returnValue(True)
+
+    def preprocess(self, result, request):
+        """ 
+        Here we are looking for the 'bot' action and we will change
+        settings accordingly.
+
+        """
+        if 'action' in request.args \
+                and request.args['action'][0] == 'bot' \
+                and request.args.get('game_id'):
+
+            # Remove the message action so it does not flow through.
+            del request.args['action']
+
+            # Parse args
+            enable_join = request.args['enable_join'][0] == 'true'
+            game_id = int(request.args['game_id'][0])
+
+            # Schedule a check for new players, if enabling.
+            # There's no need to do anything if disabling, as that situation
+            # will be handled by check_need_player itself.
+            if enable_join and not self.enable_join.get(game_id, False):
+                call_later(self.delays['join'], self.check_need_player, game_id)
+
+            # Store the value.
+            self.enable_join[game_id] = enable_join
+
+            return defer.succeed(request.args)
+        else:
+            # Just pass the result forward.
+            return defer.succeed(result)
+
+    def state(self, args):
+        """
+        Tells the client about the current state.
+
+        """
+        game_id = self.get_game_id_from_args(args)
+        return defer.succeed([{"enable_join": self.enable_join.get(game_id, False)}, []])
 
 
 class Bot(CardstoriesServiceConnector):

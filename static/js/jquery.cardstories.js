@@ -1061,7 +1061,7 @@
             }
 
             // Set game copy URL
-            var input = $('.cardstories_copy_url', element)
+            var input = $('input.cardstories_copy_url', element)
             var url = $this.location.protocol + '//' + $this.location.host + '/?game_id=' + game_id;
             input.val(url);
 
@@ -1070,7 +1070,11 @@
                 $(this).select();
             });
 
-            this.display_modal(box, overlay);
+            // Show FB only after zooming in.
+            var fb = $('.fb-like', box).hide();
+            this.display_modal(box, overlay, function() {
+                fb.show();
+            });
         },
 
         poll_timeout: 30 * 1000, // must be identical to the --poll-timeout value
@@ -1270,9 +1274,18 @@
             var src = picked_card.metadata({type: 'attr', name: 'data'}).card.supplant({card: game.winner_card});
             picked_card.find('.cardstories_card_foreground').attr('src', src);
             var go_vote = $('.cardstories_go_vote', element);
+            var advertise = $('.cardstories_advertise', element);
+            var advertise_close = $('.cardstories_advertise_close', advertise);
+            var advertise_next = $('.cardstories_advertise_next', advertise);
 
             // Immediately display seats for players who have already joined the game previously.
             this.existing_players_show_helper(existing_players, game, element, root);
+
+            // Enable closing the advertise box after 2 players join.
+            if (game.players.length > 2 && advertise_close.hasClass('cardstories_button_disabled')) {
+                advertise_close.removeClass('cardstories_button_disabled');
+                advertise_next.removeClass('cardstories_button_disabled');
+            }
 
             // Bind countdown select.
             $('.cardstories_countdown_select', go_vote).unbind('change').change(function() {
@@ -1288,14 +1301,24 @@
                 });
             }
 
+            // Mark advertise box as manually closed and hide FB like.
+            var close_advertise = function() {
+                advertise.addClass('cardstories_advertise_closed');
+                $('.fb-like', advertise).hide();
+            }
+            advertise_close.click(close_advertise);
+            advertise_next.click(close_advertise);
+
             var deferred = $.Deferred();
             var q = $this.create_queue(root);
 
-            // Display the advertise modal.
-            $(root).queue(q, function(next) {
-                $this.advertise(player_id, game.id, element, root);
-                next();
-            });
+            // Display the advertise modal automatically, if it wasn't manually closed.
+            if (!advertise.hasClass('cardstories_advertise_closed')) {
+                $(root).queue(q, function(next) {
+                    $this.advertise(player_id, game.id, element, root);
+                    next();
+                });
+            }
 
             // Then the invite friend buttons.
             $(root).queue(q, function(next) {

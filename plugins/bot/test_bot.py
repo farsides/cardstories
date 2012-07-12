@@ -37,6 +37,13 @@ from plugins.bot import bot
 
 # Classes ##################################################################
 
+# fake a request object holding the arguments we specify
+class Request:
+
+    def __init__(self, **kwargs):
+        self.args = kwargs
+
+
 class BotTest(unittest.TestCase):
 
     # initialise our test with a service that we can use during testing and a testing database
@@ -113,12 +120,21 @@ class BotTest(unittest.TestCase):
         game, players_ids = yield bots[0].get_game_by_id(game_id)
         self.assertEqual(len(game['players']), 1)
 
-        # Bots join
+        # Bots don't join by default
+        yield bot_plugin.check_need_player(game_id)
+        self.assertEqual(len(mock_reactor.callLater.call_args_list), 0)
+
+        # Enable joining
+        request = Request(action=['bot'], enable_join=['true'], game_id=[str(game_id)])
+        result = yield bot_plugin.preprocess(True, request)
+        self.assertFalse(request.args.has_key('action'))
+        self.assertTrue(bot_plugin.enable_join[game_id])
+        mock_reactor.reset_mock()
+
+        # Bots join after enabling it
         for i in xrange(2):
             yield bot_plugin.check_need_player(game_id)
-            self.assertEqual(mock_reactor.callLater.call_args_list,
-                             [((2, bots[i].pick, game_id), {}),
-                              ((1, bot_plugin.check_need_player, game_id), {})])
+            self.assertEqual(len(mock_reactor.callLater.call_args_list), 2)
             mock_reactor.reset_mock()
 
             game, player_ids = yield bots[i].get_game_by_id(game_id)

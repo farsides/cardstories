@@ -533,6 +533,30 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         games[0].destroy()
 
     @defer.inlineCallbacks
+    def test08_unknown_game_in_tabs_poll(self):
+        player_id = 12
+        unexisting_game_id = 123123
+
+        self.service.notified = False
+        def callback(result):
+            self.service.notified = True
+        self.service.listen().addCallback(callback)
+
+        # Destroying a game shouldn't throw errors.
+        yield self.service.state({'type': ['tabs'],
+                                  'modified': [0],
+                                  'player_id': [player_id],
+                                  'game_id': [unexisting_game_id],
+                                  'game_ids': []})
+
+        self.assertFalse(self.service.notified)
+
+        c = self.db.cursor()
+        c.execute('SELECT * FROM tabs WHERE player_id = ? AND game_id = ?', [player_id, unexisting_game_id])
+        rows = c.fetchall()
+        self.assertEquals(len(rows), 0)
+
+    @defer.inlineCallbacks
     def test08_tab_added_notify(self):
         sentence = 'SENTENCE'
         owner_id = 177
@@ -1074,6 +1098,52 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
 
         state, player_id_list = yield self.service.games[game_id].game(owner_id)
         self.assertEquals(sentence, state['sentence'])
+
+    @defer.inlineCallbacks
+    def test17_notify_modify(self):
+        # The bad 'notify_bomb' callback bellow causes service.game_notify
+        # to throw an assertion error. Wrap game_notify in another function
+        # to be able to ignore the error that is raised during tests.
+        orig_game_notify = self.service.game_notify
+        def wrapped_game_notify(args, game_id):
+            d = orig_game_notify(args, game_id)
+            def errback(reason):
+                pass
+            d.addErrback(errback)
+        self.service.game_notify = wrapped_game_notify
+
+        game_dict = yield self.service.create({'owner_id': [42]})
+        game = self.service.games[game_dict['game_id']]
+
+        # Test a good callback first, it should be called.
+        def notify_good_1(changes):
+            self.service.notify_good_1_called = True
+        self.service.listen().addCallback(notify_good_1)
+
+        # Touching the game should invoke the callback.
+        yield game.touch(type='test')
+        self.assertTrue(self.service.notify_good_1_called)
+
+        # Now add a callback that modifies the 'modified' flag,
+        # which it shouldn't do.
+        def notify_bomb(changes):
+            game.modified += 1
+            self.service.notify_bomb_called = True
+        self.service.listen().addCallback(notify_bomb)
+
+        # Touching the game will invoke the bad callback.
+        yield game.touch(type='test')
+        self.assertTrue(self.service.notify_bomb_called)
+
+        # The bad callback shouldn't have broken the service notification system,
+        # so adding a new callback should work seamlessly.
+        def notify_good_2(changes):
+            self.service.notify_good_2_called = True
+        self.service.listen().addCallback(notify_good_2)
+
+        yield game.touch(type='test')
+        self.assertTrue(self.service.notify_good_2_called)
+
 
 class CardstoriesConnectorTest(CardstoriesServiceTestBase):
 

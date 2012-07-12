@@ -26,6 +26,7 @@
 
 import os, sys
 import sqlite3
+from datetime import datetime, timedelta
 
 # Allow to reference the root dir
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -37,18 +38,46 @@ from mailing import send, aggregate
 
 # Functions ##################################################################
 
-def should_send(player_id, last_active):
-    # TODO: Only send if the player didn't opt out.
-    # TODO: Only send if player satisfies one of the conditions listed in:
-    #       http://tickets.farsides.com/issues/942
-    return True
+def iso_to_datetime(iso_string):
+    '''
+    Parses datetime string in ISO(?) format as returned by the sqlite module
+    and returns a datetime object.
+    '''
+    return datetime.strptime(iso_string, '%Y-%m-%d %H:%M:%S.%f')
 
-def get_context(cursor, player_id, last_active):
-    game_ids = aggregate.get_player_game_ids(cursor, player_id)
+def should_send_email(last_active, game_activities_24h):
+    '''
+    Returns True if email should be sent to player who was last active
+    `last_active` time ago and whose games have seen activities gathered
+    in `game_activities_24h` during the last 24 hours.
+    '''
+
+    now = datetime.now()
+    # Number of days since the player has been last active:
+    active_days_ago = (now - iso_to_datetime(last_active)).days
+
+    # If the user was last active within 24 hours, or 7 days ago,
+    # we want to send him an email.
+    if active_days_ago in [0, 7]:
+        should_send = True
+    # We also want to send an email every 30 days since he was last active.
+    elif active_days_ago % 30 == 0:
+        should_send = True
+    # If none of the above is true, we still want to send him an email
+    # if there was any activity on any of his games within the last 24 hours.
+    elif len(game_activities_24h) > 0:
+        should_send = True
+    # Else just don't send an email today.
+    else:
+        should_send = False
+
+    return should_send
+
+def get_context(cursor, player_id, game_ids, last_active):
     game_activities = aggregate.get_game_activities(cursor, game_ids, player_id, happened_since=last_active)
     available_games = aggregate.get_available_games(cursor, created_since=last_active, exclude_game_ids=game_ids)
     completed_games = aggregate.get_completed_games(cursor, completed_since=last_active, exclude_game_ids=game_ids)
-    unsubscribe_url = aggregate.get_unsubscribe_url(player_id);
+    unsubscribe_url = aggregate.get_unsubscribe_url(player_id)
 
     context = {'game_activities': game_activities,
                'available_games': available_games,
@@ -57,7 +86,14 @@ def get_context(cursor, player_id, last_active):
 
     return context
 
-def loop(ws_db_path, django_db_path):
+def is_context_empty(context):
+    '''Returns False if there isn't any valuable information in the context.'''
+    for key in ['game_activities', 'available_games', 'completed_games']:
+        if len(context[key]) > 0:
+            return False
+    return True
+
+def loop(ws_db_path, django_db_path, email_list=None, verbose=False):
     django_conn = sqlite3.connect(django_db_path)
     cursor = django_conn.cursor()
     players_list = aggregate.get_all_players(cursor)
@@ -70,13 +106,25 @@ def loop(ws_db_path, django_db_path):
     cursor = ws_conn.cursor()
 
     count = 0
+
     for id, email, name in players_list:
+        if email_list and not email in email_list:
+            continue
+        game_ids = aggregate.get_player_game_ids(cursor, id)
         last_active = aggregate.get_players_last_activity(cursor, id)
-        if should_send(id, last_active):
-            context = get_context(cursor, id, last_active)
-            print 'Sending email to %s' % email
-            send.send_mail(smtp, email, context)
-            count += 1
+        yesterday = datetime.now() - timedelta(days=1)
+        recent_game_activities = aggregate.get_game_activities(cursor, game_ids, id, happened_since=yesterday)
+
+        should_send = should_send_email(last_active, recent_game_activities)
+        # TODO: Only send if the player didn't opt out.
+        if should_send:
+            context = get_context(cursor, id, game_ids, last_active)
+            # Don't send if there isn't any new info in the context.
+            if not is_context_empty(context):
+                if verbose:
+                    print 'Sending email to %s' % email
+                send.send_mail(smtp, email, context)
+                count += 1
 
     cursor.close()
     ws_conn.close()
@@ -88,8 +136,12 @@ def loop(ws_db_path, django_db_path):
 # Main #######################################################################
 
 if __name__ == '__main__':
-    if not len(sys.argv) == 3:
-        sys.exit('USAGE: python loop.py path/to/wsdb.sqlite path/to/djangodb.sqlite')
+    if not len(sys.argv) in [3, 4]:
+        sys.exit('USAGE: python loop.py path/to/wsdb.sqlite path/to/djangodb.sqlite [path/to/filter.txt]')
+    if len(sys.argv) == 4:
+        email_list = open(sys.argv[3]).read().splitlines()
+    else:
+        email_list = None
     print 'Sending emails...'
-    count = loop(sys.argv[1], sys.argv[2])
+    count = loop(sys.argv[1], sys.argv[2], email_list=email_list, verbose=True)
     print 'Done!', 'Nr. of emails sent: %d' % count

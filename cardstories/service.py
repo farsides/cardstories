@@ -329,13 +329,18 @@ class CardstoriesService(service.Service, Observable):
         defer.returnValue(game_ids)
 
     def openTabInteraction(self, transaction, player_id, game_id):
-        transaction.execute('SELECT * FROM tabs WHERE player_id = ? AND game_id = ?', [player_id, game_id])
-        rows = transaction.fetchall()
         inserted = False
-        if not len(rows):
-            sql = "INSERT INTO tabs (player_id, game_id, created) VALUES (?, ?, datetime('now'))"
-            transaction.execute(sql, [player_id, game_id])
-            inserted = True
+        # Make sure the game exists before trying to associate it with the player.
+        transaction.execute('SELECT id FROM games WHERE id = ?', [game_id])
+        rows = transaction.fetchall()
+        if len(rows):
+            # Make sure the game isn't already associated with the player.
+            transaction.execute('SELECT * FROM tabs WHERE player_id = ? AND game_id = ?', [player_id, game_id])
+            rows = transaction.fetchall()
+            if not len(rows):
+                sql = "INSERT INTO tabs (player_id, game_id, created) VALUES (?, ?, datetime('now'))"
+                transaction.execute(sql, [player_id, game_id])
+                inserted = True
         return inserted
 
     def closeTabInteraction(self, transaction, player_id, game_id):
@@ -488,9 +493,14 @@ class CardstoriesService(service.Service, Observable):
         # the functions being notified must not change the game state
         # because the behavior in this case is undefined
         #
-        assert game.get_modified() == modified
-        d = game.wait(args)
-        d.addCallback(self.game_notify, game_id)
+        try:
+            # Raise an AssertionError in this case (which really shouldn't happen).
+            assert game.get_modified() == modified
+        finally:
+            # But don't stop listening to game notifications under any circumstance
+            # as that can lead to a broken service.
+            d = game.wait(args)
+            d.addCallback(self.game_notify, game_id)
         defer.returnValue(True)
 
     @defer.inlineCallbacks
