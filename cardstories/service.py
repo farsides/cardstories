@@ -107,7 +107,6 @@ class CardstoriesService(service.Service, Observable):
     def __init__(self, settings):
         self.settings = settings
         self.games = {}
-        self.players = {}
         self.observers = []
         self.pollable_plugins = []
         self.auth = Auth() # to be overriden by an auth plugin (contains unimplemented interfaces)
@@ -132,10 +131,6 @@ class CardstoriesService(service.Service, Observable):
         yield self.notify({'type': 'stop'})
         for game in self.games.values():
             game.destroy()
-        for player in self.players.values():
-            if player.timer.active():
-                player.timer.cancel()
-            player.destroy()
         defer.returnValue(None)
 
     def create_base(self, c):
@@ -483,24 +478,14 @@ class CardstoriesService(service.Service, Observable):
             defer.returnValue(False)
 
         game = self.games[game_id]
-        modified = game.get_modified()
+        d = game.wait(args)
+        d.addCallback(self.game_notify, game_id)
+
+        # Start listenning for new game events before asynchronously
+        # yielding, to not miss any game notifications.
+
         yield self.notify({'type': 'change', 'game': game, 'details': args})
 
-        for player_id in game.get_players():
-            if self.players.has_key(player_id):
-                yield self.players[player_id].touch(args)
-        #
-        # the functions being notified must not change the game state
-        # because the behavior in this case is undefined
-        #
-        try:
-            # Raise an AssertionError in this case (which really shouldn't happen).
-            assert game.get_modified() == modified
-        finally:
-            # But don't stop listening to game notifications under any circumstance
-            # as that can lead to a broken service.
-            d = game.wait(args)
-            d.addCallback(self.game_notify, game_id)
         defer.returnValue(True)
 
     @defer.inlineCallbacks

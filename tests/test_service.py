@@ -34,21 +34,12 @@ from cardstories.service import CardstoriesService, CardstoriesServiceConnector
 from cardstories.poll import Pollable
 from cardstories.exceptions import CardstoriesWarning, CardstoriesException
 
-from twisted.internet import base
+from twisted.internet import base, reactor, defer
 base.DelayedCall.debug = True
 
 class CardstoriesServiceTestNotify(unittest.TestCase):
 
-    def test00_notify(self):
-        service = CardstoriesService({})
-        d = service.listen()
-        def check(result):
-            self.assertTrue(result)
-            service.checked = True
-            return result
-        d.addCallback(check)
-        service.notify({'type': 'test'})
-        self.assertTrue(service.checked)
+
 
     def test01_notify_recursive(self):
         service = CardstoriesService({})
@@ -396,6 +387,55 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         #
         result = yield self.service.game_notify({}, 200)
         self.assertFalse(result)
+
+    @defer.inlineCallbacks
+    def test07_game_notify_concurrency(self):
+        #
+        # No events should be dropped
+        #
+        owner_id = 11
+        result = yield self.service.create({'owner_id': [owner_id]})
+        game = self.service.games[result['game_id']]
+
+        # Create a deferred that will be resolved after the listeners have
+        # all been done processing the notification.
+        listener_deferreds = []
+
+        game.test_done = False
+        game.slow_listener_count = 0
+
+        def slow_listener(event):
+            d = defer.Deferred()
+            listener_deferreds.append(d)
+            def increment():
+                game.slow_listener_count += 1
+                d.callback(True)
+            # Beside the events we invoke intentionally, there is also a destroy
+            # event that's dispatched when the test's teardown stage, when the service is stopped.
+            # Don't schedule any more callLater calls after our test is done to not dirty
+            # the reactor.
+            if not game.test_done:
+                # Reinsert this listener.
+                self.service.listen().addCallback(slow_listener)
+                reactor.callLater(0.1, increment)
+            else:
+                d.callback(True)
+            return d
+
+        self.service.listen().addCallback(slow_listener)
+        # Call game.touch() five times in succession, without blocking.
+        # ALL events should be dispatched.
+        game.touch()
+        game.touch()
+        game.touch()
+        game.touch()
+        game.touch()
+
+        # Block on listeners until they are done.
+        yield defer.DeferredList(listener_deferreds)
+        game.test_done = True
+
+        self.assertEquals(game.slow_listener_count, 5)
 
     @defer.inlineCallbacks
     def test08_poll(self):
@@ -1098,51 +1138,6 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
 
         state, player_id_list = yield self.service.games[game_id].game(owner_id)
         self.assertEquals(sentence, state['sentence'])
-
-    @defer.inlineCallbacks
-    def test17_notify_modify(self):
-        # The bad 'notify_bomb' callback bellow causes service.game_notify
-        # to throw an assertion error. Wrap game_notify in another function
-        # to be able to ignore the error that is raised during tests.
-        orig_game_notify = self.service.game_notify
-        def wrapped_game_notify(args, game_id):
-            d = orig_game_notify(args, game_id)
-            def errback(reason):
-                pass
-            d.addErrback(errback)
-        self.service.game_notify = wrapped_game_notify
-
-        game_dict = yield self.service.create({'owner_id': [42]})
-        game = self.service.games[game_dict['game_id']]
-
-        # Test a good callback first, it should be called.
-        def notify_good_1(changes):
-            self.service.notify_good_1_called = True
-        self.service.listen().addCallback(notify_good_1)
-
-        # Touching the game should invoke the callback.
-        yield game.touch(type='test')
-        self.assertTrue(self.service.notify_good_1_called)
-
-        # Now add a callback that modifies the 'modified' flag,
-        # which it shouldn't do.
-        def notify_bomb(changes):
-            game.modified += 1
-            self.service.notify_bomb_called = True
-        self.service.listen().addCallback(notify_bomb)
-
-        # Touching the game will invoke the bad callback.
-        yield game.touch(type='test')
-        self.assertTrue(self.service.notify_bomb_called)
-
-        # The bad callback shouldn't have broken the service notification system,
-        # so adding a new callback should work seamlessly.
-        def notify_good_2(changes):
-            self.service.notify_good_2_called = True
-        self.service.listen().addCallback(notify_good_2)
-
-        yield game.touch(type='test')
-        self.assertTrue(self.service.notify_good_2_called)
 
 
 class CardstoriesConnectorTest(CardstoriesServiceTestBase):
