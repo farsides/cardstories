@@ -79,6 +79,9 @@ class TableTest(unittest.TestCase):
         # Fake an activity plugin to which the table plugin should listen
         self.mock_activity_instance = Mock()
         self.mock_activity_instance.name.return_value = 'activity'
+        # Show all players as online
+        self.mock_activity_instance.is_player_online.return_value = True
+
         self.table_instance = table.Plugin(self.service, [self.mock_activity_instance])
 
         self.mock_activity_instance.listen.assert_called_once_with()
@@ -116,9 +119,6 @@ class TableTest(unittest.TestCase):
         player1 = 12
         player2 = 78
         player3 = 98
-
-        # Show all players as online
-        self.mock_activity_instance.is_player_online.return_value = True
 
         # Poll to know when a table gets available
         poll = self.table_instance.poll({'game_id': ['undefined'],
@@ -217,7 +217,6 @@ class TableTest(unittest.TestCase):
         poll = self.table_instance.poll({'game_id': [game_id],
                                          'modified': [modified]})
         self.assertFalse(poll.called)
-
 
         # Next owner closes the tab before creating the game - should chose another player
         yield self.service.remove_tab({'action': ['remove_tab'],
@@ -336,7 +335,6 @@ class TableTest(unittest.TestCase):
         """
 
         player_id = 12
-        self.mock_activity_instance.is_player_online.return_value = True
 
         # Create two tables
         self.assertEqual(len(self.table_instance.tables), 0)
@@ -419,6 +417,145 @@ class TableTest(unittest.TestCase):
         self.assertEqual(len(self.table_instance.tables), 0)
         result = yield self.table_instance.on_tab_closed(player_id, game_id)
         self.assertEqual(result, True)
+
+    @defer.inlineCallbacks
+    def test06_next_game_timeout(self):
+        owner = 98
+        player1 = 12
+        player2 = 78
+
+        # Create game
+        response = yield self.service.handle([], {'action': ['create'],
+                                                  'owner_id': [owner]})
+        game_id = response['game_id']
+
+        sql = "INSERT INTO tabs (player_id, game_id, created) VALUES (%d, %d, datetime('now'))"
+        for player_id in [owner, player1, player2]:
+            yield self.service.db.runQuery(sql % (player_id, game_id))
+
+        # Change the next game timeout from the default to 0.1 seconds for the test.
+        table = self.table_instance.game2table[game_id]
+        table.NEXT_GAME_TIMEOUT = 0.1
+
+        # Complete the game
+        yield self.complete_game(game_id, owner, player1, player2)
+
+        state = yield self.table_instance.state({'type': ['table'],
+                                                 'game_id': [game_id],
+                                                 'player_id': [player1]})
+        self.assertEqual(state, [{'game_id': game_id,
+                                  'next_game_id': None,
+                                  'next_owner_id': player1},
+                                 [player1]])
+
+        game, players = yield self.table_instance.get_game_by_id(game_id)
+        modified = game['modified']
+
+        # Start a poll on this table to know when the next owner will change.
+        poll = self.table_instance.poll({'game_id': [game_id],
+                                         'modified': [modified]})
+        result = yield poll
+        state = yield self.table_instance.state({'type': ['table'],
+                                                 'game_id': [game_id],
+                                                 'player_id': [player1]})
+        # Next owner took too long to create the game,
+        # so player2 was chosen as the "new" next owner.
+        self.assertEqual(state, [{'game_id': game_id,
+                                  'next_game_id': None,
+                                  'next_owner_id': player2},
+                                 [player2]])
+
+        # Cancel the timers, so that the test runner doesn't complain
+        # about a "dirty" reactor.
+        table.stop_timer(table.next_game_timer)
+        table.stop_timer(table.current_game_timer)
+
+    @defer.inlineCallbacks
+    def test07_current_game_timeout(self):
+        owner = 57
+        player1 = 123
+        player2 = 334
+
+        @defer.inlineCallbacks
+        def add_players_to_game(game_id, player_ids):
+            sql = "INSERT INTO tabs (player_id, game_id, created) VALUES (%d, %d, datetime('now'))"
+            for player_id in player_ids:
+                yield self.service.db.runQuery(sql % (player_id, game_id))
+
+        # Create first game
+        response = yield self.service.handle([], {'action': ['create'],
+                                                  'owner_id': [owner]})
+        game_id = response['game_id']
+
+        add_players_to_game(game_id, [owner, player1, player2])
+
+        # Change the next game timeout from the default to 0.1 seconds for the test.
+        table = self.table_instance.game2table[game_id]
+        table.CURRENT_GAME_TIMEOUT = 0.1
+
+        # Complete the game
+        yield self.complete_game(game_id, owner, player1, player2)
+
+        state = yield self.table_instance.state({'type': ['table'],
+                                                 'game_id': [game_id],
+                                                 'player_id': [player1]})
+        self.assertEqual(state, [{'game_id': game_id,
+                                  'next_game_id': None,
+                                  'next_owner_id': player1},
+                                 [player1]])
+
+        # player1 is the next owner, let him create the next game.
+        # We will let him wait long enough so that the timer kicks in and
+        # the game is discarded as the next game of the table.
+        response = yield self.service.handle([], {'action': ['create'],
+                                                  'owner_id': [player1],
+                                                  'previous_game_id': [game_id]})
+        new_game_id = response['game_id']
+
+        add_players_to_game(new_game_id, [owner, player1, player2])
+
+        # Start a poll on this table to know when this game is discarded.
+        # Not sure why I need to yield on the poll twice :-(
+        poll = self.table_instance.poll({'game_id': [new_game_id],
+                                         'modified': [0]})
+        result = yield poll
+        modified = result['modified'][0]
+        poll = self.table_instance.poll({'game_id': [new_game_id],
+                                         'modified': [modified]})
+        result = yield poll
+        state = yield self.table_instance.state({'type': ['table'],
+                                                 'game_id': [new_game_id],
+                                                 'player_id': [owner]})
+
+        # Next owner took too long to create the game,
+        # so player2 was chosen as the "new" next owner.
+        self.assertEqual(state, [{'game_id': new_game_id,
+                                  'next_game_id': None, # player 2 didn't create the next game yet, so it is None
+                                  'next_owner_id': player2}, # player2 is now the next owner
+                                 [player2]])
+
+        # Player 2 creates a new game
+        response = yield self.service.handle([], {'action': ['create'],
+                                                  'owner_id': [player2],
+                                                  'previous_game_id': [new_game_id]})
+        newest_game_id = response['game_id']
+
+        # Check the state now - it should be pointing to the newest game.
+        state = yield self.table_instance.state({'type': ['table'],
+                                                 'game_id': [new_game_id],
+                                                 'player_id': [owner]})
+
+        # Next owner took too long to create the game,
+        # so player2 was chosen as the "new" next owner.
+        self.assertEqual(state, [{'game_id': new_game_id,
+                                  'next_game_id': newest_game_id,
+                                  'next_owner_id': player2},
+                                 [player2]])
+
+        # Cancel the current game timer, so that the test runner doesn't complain
+        # about a "dirty" reactor.
+        table.stop_timer(table.current_game_timer)
+
 
 
 def Run():
