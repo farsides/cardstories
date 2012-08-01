@@ -45,7 +45,6 @@
             $(root).data('cardstories_table', {
                 next_game_id: null,
                 next_owner_id: null,
-                ready_for_next_game: false,
                 on_next_owner_change_callback: null
             });
         },
@@ -125,9 +124,9 @@
             var table = $(root).data('cardstories_table');
             var callback = table.on_next_game_ready_callback;
 
-            if (table.ready_for_next_game) {
+            if (callback) {
                 // Next game is ready to be joined
-                if(table.next_game_id && table.next_game_id !== game_id) {
+                if (table.next_game_id && table.next_game_id !== game_id) {
                     callback(table.next_game_id, {});
                     return true;
                 }
@@ -145,10 +144,9 @@
             return false;
         },
 
-        // Invoke the callback as soon as the game is created if ready_for_next_game is true
-        on_next_game_ready: function(ready_for_next_game, player_id, game_id, root, callback) {
+        // Invoke the callback as soon as the game is created
+        on_next_game_ready: function(player_id, game_id, root, callback) {
             var table = $(root).data('cardstories_table');
-            table.ready_for_next_game = ready_for_next_game;
             table.on_next_game_ready_callback = callback;
             var is_ready = this.check_next_game(player_id, game_id, root, callback);
 
@@ -162,7 +160,7 @@
         },
 
         // Returns the player_id of the player who should create the next game
-        get_next_owner_id: function(player_id, game_id, root) {
+        get_next_owner_id: function(game_id, root) {
             var table = $(root).data('cardstories_table');
             return table.next_owner_id;
         }

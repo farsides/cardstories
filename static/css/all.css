@@ -1343,6 +1343,20 @@
     display: block;
 }
 
+.cardstories .cardstories_create .cardstories_pick_card .cardstories_next_game_ready,
+.cardstories .cardstories_create .cardstories_write_sentence .cardstories_next_game_ready {
+    left: 180px;
+    top: 100px;
+    height: 165px;
+    width: 401px;
+}
+
+.cardstories .cardstories_create .cardstories_pick_card .cardstories_next_game_ready .cardstories_modal_h2,
+.cardstories .cardstories_create .cardstories_write_sentence .cardstories_next_game_ready .cardstories_modal_h2 {
+    margin: 1em auto 0.5em;
+    width: 90%;
+}
+
 .cardstories .cardstories_create .cardstories_info {
     left: 230px;
     top: 90px;
@@ -1932,11 +1946,19 @@
     display: block;
 }
 
-.cardstories .cardstories_invitation .cardstories_pick .cardstories_info { 
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_info {
     left: 220px;
     top: 100px;
     height: 165px;
     width: 361px;
+}
+
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_next_game_ready,
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_next_owner_change {
+    left: 180px;
+    top: 100px;
+    height: 165px;
+    width: 401px;
 }
 
 .cardstories .cardstories_invitation .cardstories_pick .cardstories_wait_for_card,
@@ -1947,12 +1969,14 @@
     width: 341px;
 }
 
-.cardstories .cardstories_invitation .cardstories_pick .cardstories_info .cardstories_modal_h2 { 
-    margin-top: 1em;
-    margin-bottom: 0.5em;
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_info .cardstories_modal_h2,
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_next_game_ready .cardstories_modal_h2,
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_next_owner_change .cardstories_modal_h2 {
+    margin: 1em auto 0.5em;
+    width: 90%;
 }
 
-.cardstories .cardstories_invitation .cardstories_pick .cardstories_info .cardstories_modal_h2.cardstories_hint { 
+.cardstories .cardstories_invitation .cardstories_pick .cardstories_info .cardstories_modal_h2.cardstories_hint {
     font-style: italic;
     font-weight: normal;
 }

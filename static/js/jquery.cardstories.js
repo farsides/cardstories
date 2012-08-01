@@ -269,18 +269,19 @@
         create: function(player_id, game, root) {
             var $this = this;
             var inhibit_poll = false;
+            var deferred;
 
             if (game.owner) {
                 if (game.winner_card) {
-                    $this.create_write_sentence(player_id, game, root);
+                    deferred = $this.create_write_sentence(player_id, game, root);
                 } else {
-                    $this.create_pick_card(player_id, game, root);
+                    deferred = $this.create_pick_card(player_id, game, root);
                 }
             } else {
                 if (game.self) {
-                    $this.create_wait_for_story(player_id, game, root);
+                    deferred = $this.create_wait_for_story(player_id, game, root);
                 } else if ($.cardstories.url_param('anonymous')) {
-                    $this.create_wait_for_story(player_id, game, root);
+                    deferred = $this.create_wait_for_story(player_id, game, root);
                 } else {
                     inhibit_poll = true;
                     $this.player_participate(player_id, game, root);
@@ -297,6 +298,51 @@
                     $this.game(player_id, game.id, root);
                 });
             }
+
+            return deferred;
+        },
+
+        create_setup_next_owner_change_handler: function(player_id, game, element, root) {
+            var $this = this;
+            $.cardstories_table.on_next_owner_change(player_id, game.id, root, function(next_owner_id) {
+                var modal = $('.cardstories_next_owner_change', element);
+                var overlay = $('.cardstories_modal_overlay', element);
+
+                // If this player is the next owner, notify him,
+                // otherwise close the dialog if it is opened.
+                if (player_id === next_owner_id) {
+                    var player_name = $('.cardstories_player_name', modal);
+
+                    player_name.html($this.get_player_info_by_id(next_owner_id).name);
+                    $this.display_modal(modal, overlay, null, function() {
+                        $this.poll_discard(root);
+                        $this.reload(player_id, undefined, {force_create: true}, root);
+                    });
+                } else if (modal.css('display') !== 'none') {
+                    $this.close_modal(modal, overlay);
+                }
+            });
+        },
+
+        create_setup_next_game_ready_handler: function(player_id, game, element, root) {
+            var $this = this;
+            $.cardstories_table.on_next_game_ready(player_id, game.id, root, function(next_game_id, next_game_opts) {
+                var next_owner_id = $.cardstories_table.get_next_owner_id(game.id, root);
+
+                // If this is the player who created the next game, then there's no
+                // point in showing him the message as he must be well aware of the fact.
+                if (player_id !== next_owner_id) {
+                    var modal = $('.cardstories_next_game_ready', element);
+                    var overlay = $('.cardstories_modal_overlay', element);
+                    var player_name = $('.cardstories_player_name', modal);
+
+                    player_name.html($this.get_player_info_by_id(next_owner_id).name);
+                    $this.display_modal(modal, overlay, null, function() {
+                        $this.poll_discard(root);
+                        $this.reload(player_id, next_game_id, next_game_opts, root);
+                    });
+                }
+            });
         },
 
         create_wait_for_story: function(player_id, game, root) {
@@ -306,8 +352,18 @@
             this.display_master_info(this.get_master_info(game), element);
             this.init_board_buttons(player_id, element, root);
 
+            if (game.self) {
+                this.create_setup_next_owner_change_handler(player_id, game, element, root);
+                this.create_setup_next_game_ready_handler(player_id, game, element, root);
+            }
+
             this.create_invitation_display_board(player_id, game, element, root, false);
-            this.replay_create_game(game, element, root);
+
+            var deferred = $.Deferred();
+            this.replay_create_game(game, element, root, function() {
+                deferred.resolve();
+            });
+            return deferred;
         },
 
         animate_progress_bar: function(step, element, cb) {
@@ -452,6 +508,7 @@
             this.display_progress_bar('owner', 1, element, root);
             this.display_master_info($this.get_player_info_by_id(player_id), element);
             this.init_board_buttons(player_id, element, root);
+            this.create_setup_next_game_ready_handler(player_id, game, element, root);
             var cards = $.map(game.self[2], function(card, index) {
                 return {'value': card};
             });
@@ -982,7 +1039,9 @@
             this.display_progress_bar('owner', 2, element, root);
             this.display_master_info($this.get_player_info_by_id(player_id), element);
             this.init_board_buttons(player_id, element, root);
+            this.create_setup_next_game_ready_handler(player_id, game, element, root);
             $('.cardstories_card', element).attr('class', 'cardstories_card cardstories_card' + card + ' {card:' + card + '}');
+
 
             // Immediately display seats for players who have already joined the game previously.
             this.existing_players_show_helper(existing_players, game, element, root);
@@ -4529,7 +4588,7 @@
                 continue_button.addClass('cardstories_centered');
             }
 
-            var next_owner_id = $.cardstories_table.get_next_owner_id(player_id, game.id, root);
+            var next_owner_id = $.cardstories_table.get_next_owner_id(game.id, root);
             $this.complete_update_next_author_info(next_owner_id, player_id, element);
 
             // Enable "continue" button
@@ -4539,7 +4598,7 @@
                 var results_box = $('.cardstories_results', element);
                 $this.complete_fade_out_results_box(results_box, element, root, function() {
                     // Ask the table plugin to switch to the next game as soon as possible
-                    var is_ready = $.cardstories_table.on_next_game_ready(true, player_id, game.id, root, function(next_game_id, next_game_opts) {
+                    var is_ready = $.cardstories_table.on_next_game_ready(player_id, game.id, root, function(next_game_id, next_game_opts) {
                         $this.poll_discard(root);
                         $.cardstories_tabs.remove_tab_for_game(game.id, player_id, root, function() {
                             $this.reload(player_id, next_game_id, next_game_opts, root);

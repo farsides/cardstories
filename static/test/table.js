@@ -16,7 +16,7 @@ function setup() {
 
 module("cardstories_table", {setup: setup});
 
-test("init_create", 3, function() {
+test("init_create", 2, function() {
     var root = $(selector);
     var player_id = 1;
 
@@ -32,10 +32,9 @@ test("init_create", 3, function() {
 
     equal($(root).data('cardstories_table').next_game_id, null);
     equal($(root).data('cardstories_table').next_owner_id, null);
-    equal($(root).data('cardstories_table').ready_for_next_game, false);
 });
 
-test("init", 3, function() {
+test("init", 2, function() {
     var root = $(selector);
     var player_id = 1;
     var game_id = 30;
@@ -45,7 +44,6 @@ test("init", 3, function() {
 
     equal($(root).data('cardstories_table').next_game_id, null);
     equal($(root).data('cardstories_table').next_owner_id, null);
-    equal($(root).data('cardstories_table').ready_for_next_game, false);
 });
 
 // Init the table plugin without triggering reload.
@@ -113,7 +111,7 @@ test("force_state_update", 2, function() {
     $.cardstories_table.force_state_update(player_id, game_id, root);
 });
 
-test("state_next_as_author", 8, function() {
+test("state_next_as_author", 6, function() {
     var root = $(selector);
     var player_id = 1;
     var game_id = 15;
@@ -129,7 +127,6 @@ test("state_next_as_author", 8, function() {
     $.cardstories_table.state(player_id, data, root);
     equal($(root).data('cardstories_table').next_game_id, null);
     equal($(root).data('cardstories_table').next_owner_id, player_id);
-    equal($(root).data('cardstories_table').ready_for_next_game, false);
 
     // The callback is invoked with new game options when new game is ready.
     var cb = function(next_game_id, reload_options) {
@@ -138,13 +135,12 @@ test("state_next_as_author", 8, function() {
         equal(reload_options.force_create, true);
     };
 
-    $.cardstories_table.on_next_game_ready(true, player_id, game_id, root, cb);
+    $.cardstories_table.on_next_game_ready(player_id, game_id, root, cb);
 
-    equal($(root).data('cardstories_table').ready_for_next_game, true);
-    equal($.cardstories_table.get_next_owner_id(player_id, game_id, root), player_id);
+    equal($.cardstories_table.get_next_owner_id(game_id, root), player_id);
 });
 
-test("state_next_as_player", 7, function() {
+test("state_next_as_player", 5, function() {
     var root = $(selector);
     var player1 = 10;
     var player2 = 12;
@@ -160,9 +156,7 @@ test("state_next_as_player", 7, function() {
     };
 
     // Ready before receiving next game data - wait
-    equal($(root).data('cardstories_table').ready_for_next_game, false);
-    $.cardstories_table.on_next_game_ready(true, player1, game1, root, cb);
-    equal($(root).data('cardstories_table').ready_for_next_game, true);
+    $.cardstories_table.on_next_game_ready(player1, game1, root, cb);
 
     var data = {type: 'table',
                 player_id: player1,
@@ -173,7 +167,7 @@ test("state_next_as_player", 7, function() {
     equal($(root).data('cardstories_table').next_game_id, game2);
     equal($(root).data('cardstories_table').next_owner_id, player2);
 
-    equal($.cardstories_table.get_next_owner_id(player1, game1, root), player2);
+    equal($.cardstories_table.get_next_owner_id(game1, root), player2);
 });
 
 test("on_next_owner_change", 4, function() {
