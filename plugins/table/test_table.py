@@ -616,19 +616,22 @@ class TableTest(unittest.TestCase):
                                   'next_game_id': None,
                                   'next_owner_id': None},
                                  []])
+        # The game should still be part of the same old table.
+        table2 = self.table_instance.game2table[new_game_id]
+        self.assertEqual(table2, table)
 
-        # Looking from player2's game, which was discarded from this table:
+        # Looking from player2's game, which was discarded from this table,
+        # the game should be spun off into a totally new table.
         state = yield self.table_instance.state({'type': ['table'],
                                                  'game_id': [newest_game_id],
                                                  'player_id': [owner]})
         self.assertEqual(state, [{'game_id': newest_game_id,
-                                  'next_game_id': new_game_id,
-                                  'next_owner_id': player1},
-                                 [player1]])
-
-        # Cancel the next game timer, so that the test runner doesn't complain
-        # about a "dirty" reactor.
-        table.stop_timer(table.next_game_timer)
+                                  'next_game_id': None,
+                                  'next_owner_id': None},
+                                 []])
+        # The game should be part of its own brand new table.
+        table3 = self.table_instance.game2table[newest_game_id]
+        self.assertNotEqual(table3, table)
 
 
 

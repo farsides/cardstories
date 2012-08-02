@@ -1339,7 +1339,7 @@
 
 /* state create_pick_card */
 
-.cardstories .cardstories_create .cardstories_modal_overlay {
+.cardstories .cardstories_create .cardstories_pick_card .cardstories_modal_overlay {
     display: block;
 }
 

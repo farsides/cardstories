@@ -119,8 +119,7 @@ class Plugin(Pollable, CardstoriesServiceConnector):
         if not previous_game_id \
                 or previous_game_id not in self.game2table:
             # Register new table
-            table = Table(self)
-            self.tables.append(table)
+            table = self.create_new_table()
             log.msg('New table created for game %d' % game.id)
         else:
             # Register new game in existing table
@@ -133,6 +132,12 @@ class Plugin(Pollable, CardstoriesServiceConnector):
         self.touch({})
 
         defer.returnValue(True)
+
+    def create_new_table(self):
+        """Creates a new table and associates it with this plugin."""
+        table = Table(self)
+        self.tables.append(table)
+        return table
 
     def on_playable_game(self, game, details):
         """
@@ -382,11 +387,12 @@ class Table(Pollable, CardstoriesServiceConnector):
         if game_id not in self.games_ids:
             for pending_game in self.pending_games:
                 if pending_game.id != game_id:
-                    # TODO: spin the game off into its own table.
-                    pass
+                    table = self.table_plugin.create_new_table()
+                    table.register_new_game(pending_game)
+                    self.table_plugin.game2table[pending_game.id] = table
 
-            self.games_ids.append(game_id)
             self.pending_games = []
+            self.games_ids.append(game_id)
             self.stop_timer(self.next_game_timer)
             self.next_owner_id = None
 
@@ -442,7 +448,7 @@ class Table(Pollable, CardstoriesServiceConnector):
                 next_game_id = None
                 next_owner_id = self.next_owner_id
             # Player is either inquiring from the previous game (in complete state),
-            # or from a previously pending game that was discarded.
+            # or from a previously pending game that was promoted.
             # In both cases, notify the player about the new game.
             else:
                 next_game_id = table_game_id
