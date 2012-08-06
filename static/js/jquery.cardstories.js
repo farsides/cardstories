@@ -122,17 +122,29 @@
                     $this.panic(error, player_id, game_id, root);
                 }
             } else {
-                // Retry after 100 miliseconds.
+                // Retry after 1 second.
                 $this.setTimeout(function() {
                     $this.ajax(ajax_request, player_id, game_id, root);
-                }, 100);
+                }, 1000);
             }
         },
 
-        setTimeout: function(cb, delay) { return $.cardstories.window.setTimeout(cb, delay); },
+        setTimeout: function(cb, delay) {
+            return $.cardstories.window.setTimeout(cb, delay);
+        },
+
+        animationTimeout: function(cb, delay) {
+            if (this.animations_off()) { delay = 0; }
+            return this.setTimeout(cb, delay);
+        },
 
         delay: function(root, delay, q) {
+            if (this.animations_off()) { delay = 0; }
             return $(root).delay(delay, q);
+        },
+
+        animations_off: function() {
+            return this.url_param('animations') === 'off';
         },
 
         ajax: function(options, player_id, game_id, root) {
@@ -230,6 +242,12 @@
             // previous_game_id - Allow to link a game being created to a previous game
             if (options.previous_game_id) {
                 params.previous_game_id = options.previous_game_id;
+            }
+
+            // Add animations param, but only if already present.
+            var animations = $.cardstories.url_param('animations');
+            if (animations) {
+                params.animations = animations;
             }
 
             var search = '';
@@ -409,7 +427,9 @@
         // absolutely, and its children must be sized and positioned relatively
         // (i.e., "em" instead of "px", percentages for widths and heights).
         animate_scale: function(reverse, factor, duration, el, cb) {
-            el.show();
+            // Show self and all parents first, so that the measurements
+            // give correct results.
+            el.parents().andSelf().show();
             var big_top = el.position().top;
             var big_left = el.position().left;
             var big_width = el.width();
@@ -471,13 +491,24 @@
         },
 
         animate_sprite: function(movie, fps, frames, rewind, loop, cb) {
-            movie.show().sprite({
-                fps: fps,
-                no_of_frames: frames,
-                play_frames: loop ? null : frames,
-                rewind: rewind,
-                oncomplete: cb
-            });
+            if (this.animations_off()) {
+                  // Show the last frame immediately.
+                movie.show().sprite({
+                    fps: fps,
+                    rewind: !rewind,
+                    no_of_frames: frames,
+                    play_frames: 1,
+                    oncomplete: cb
+                });
+            } else {
+                movie.show().sprite({
+                    fps: fps,
+                    no_of_frames: frames,
+                    play_frames: loop ? null : frames,
+                    rewind: rewind,
+                    oncomplete: cb
+                });
+            }
         },
 
         clear_queues: function(root) {
@@ -554,7 +585,7 @@
 
                         // Delay the appearance of the modal box artificially, since
                         // jqDock doesn't provide a hook for when expansion finishes.
-                        $this.setTimeout(function() {
+                        $this.animationTimeout(function() {
                             var modal = $('.cardstories_info', element);
                             var overlay = $('.cardstories_modal_overlay', element);
                             $this.display_modal(modal, overlay, function() {
@@ -1978,7 +2009,7 @@
                             active_card.jqDock('expand');
                             // jqDock doesn't provide a hook for when expansion
                             // finishes, so use a timeout to call next().
-                            $this.setTimeout(function() {
+                            $this.animationTimeout(function() {
                                 if (game.winner_card === null && !wait_for_card_modal.hasClass('cardstories_noop')) {
                                     $this.display_modal(wait_for_card_modal, overlay);
                                 }
@@ -4193,7 +4224,7 @@
                 var score_deferred = $.Deferred();
                 var level_deferred = $.Deferred();
 
-                // Star playing the "pinball" sound.
+                // Start playing the "pinball" sound.
                 $.cardstories_audio.play('score_pinball', root);
                 // Animate the game score.
                 var timeout = 30;
@@ -4202,12 +4233,12 @@
                     tmp++;
                     if (tmp <= player.score) {
                         score.html(tmp);
-                        $this.setTimeout(inc_score, timeout);
+                        $this.animationTimeout(inc_score, timeout);
                     } else {
                         score_deferred.resolve();
                     }
                 }
-                $this.setTimeout(inc_score, timeout);
+                $this.animationTimeout(inc_score, timeout);
 
                 var level_legend = $('.cardstories_results_level_legend', box);
                 var level_legend_template = level_legend.html();
@@ -4433,7 +4464,7 @@
 
                         // Schedule another iteration of the loop, unless it should be stopped.
                         $.when(fireworks_deferred, stars_deferred).then(function() {
-                            if (!element.hasClass('cardstories_results_closed')) {
+                            if (!element.hasClass('cardstories_results_closed') && !$this.animations_off()) {
                                 levelup_loop();
                             }
                         });
@@ -5280,6 +5311,10 @@
             root.addClass('cardstories_root');
             root.data('polling', false);
             root.data('dom_clone', root.html());
+
+            if ($this.animations_off()) {
+                $.fx.off = true;
+            }
 
             $($this.window).bind('statechange', function() {
                 $this.onstatechange(root);

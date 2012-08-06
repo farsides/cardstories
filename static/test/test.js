@@ -174,6 +174,26 @@ test("setTimeout", 2, function() {
     $.cardstories.window.setTimeout = setTimeout;
 });
 
+test("animationTimeout", 4, function() {
+    var fake_cb = function() { return 42; };
+
+    // When animations are on, pass the original delay on to setTimeout.
+    $.cardstories.animations_off = function() { return false; };
+    $.cardstories.setTimeout = function(cb, delay) {
+        equal(cb, fake_cb, 'setTimeout is called with the callback');
+        equal(delay, 350, 'setTimeout is called with the delay');
+    };
+    $.cardstories.animationTimeout(fake_cb, 350);
+
+    // But when animations are off, call setTimeout with the delay of zero.
+    $.cardstories.animations_off = function() { return true; };
+    $.cardstories.setTimeout = function(cb, delay) {
+        equal(cb, fake_cb, 'setTimeout is called with the callback');
+        equal(delay, 0, 'setTimeout is called with a zero delay');
+    };
+    $.cardstories.animationTimeout(fake_cb, 350);
+});
+
 asyncTest("delay", 1, function() {
     var root = $('#qunit-fixture .cardstories');
     $.cardstories.delay = cardstories_default_delay;
@@ -550,7 +570,7 @@ asyncTest("animate_scale", 7, function() {
 
     // Grab initial position.
     element.show();
-    el.show();
+    el.parents().andSelf().show();
     var orig_top = el.position().top;
     var orig_left = el.position().left;
     var orig_width = el.width();
@@ -666,9 +686,13 @@ test("widget subscribe", 3, function() {
 });
 
 test("login_url", 1, function() {
+    $.cookie('CARDSTORIES_ID', null);
     var location = $.cardstories.location;
     var login_url = '/';
-    $.cardstories.location = {href: 'http://fake.href'};
+    $.cardstories.location = {
+        href: 'http://fake.href',
+        search: ''
+    };
     $('#qunit-fixture .cardstories').cardstories(undefined, undefined, login_url);
     equal($.cardstories.location.href, login_url);
     $.cardstories.location = location;
