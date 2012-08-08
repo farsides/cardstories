@@ -91,6 +91,67 @@ class TableTest(unittest.TestCase):
         # kill the service we started before the test
         return self.service.stopService()
 
+
+    @defer.inlineCallbacks
+    def add_players_to_game(self, game_id, player_ids):
+        sql = "INSERT INTO tabs (player_id, game_id, created) VALUES (%d, %d, datetime('now'))"
+        for player_id in player_ids:
+            yield self.service.db.runQuery(sql % (player_id, game_id))
+
+    @defer.inlineCallbacks
+    def complete_game(self, game_id, owner, player1, player2):
+        # Set card
+        yield self.service.handle([], {'action': ['set_card'],
+                                       'card': [1],
+                                       'game_id': [game_id],
+                                       'player_id': [owner]})
+        # Set sentence
+        yield self.service.handle([], {'action': ['set_sentence'],
+                                       'sentence': ['SENTENCE'],
+                                       'game_id': [game_id],
+                                       'player_id': [owner]})
+        # Join
+        yield self.service.handle([], {'action': ['participate'],
+                                       'game_id': [game_id],
+                                       'player_id': [player1]})
+        yield self.service.handle([], {'action': ['participate'],
+                                       'game_id': [game_id],
+                                       'player_id': [player2]})
+
+        # Pick
+        game, players_ids = yield self.table_instance.get_game_by_id(game_id, player1)
+        yield self.service.handle([], {'action': ['pick'],
+                                       'game_id': [game_id],
+                                       'player_id': [player1],
+                                       'card': [game['self'][2][0]]})
+        game, players_ids = yield self.table_instance.get_game_by_id(game_id, player2)
+        yield self.service.handle([], {'action': ['pick'],
+                                       'game_id': [game_id],
+                                       'player_id': [player2],
+                                       'card': [game['self'][2][0]]})
+
+        # Vote
+        yield self.service.handle([], {'action': ['voting'],
+                                       'game_id': [game_id],
+                                       'owner_id': [game['owner_id']]})
+
+        @defer.inlineCallbacks
+        def player_vote(player_id):
+            game, players_ids = yield self.table_instance.get_game_by_id(game_id, player_id)
+            my_card = game['self'][0]
+            board = [x for x in game['board'] if x != my_card]
+            yield self.service.handle([], {'action': ['vote'],
+                                           'game_id': [game_id],
+                                           'player_id': [player_id],
+                                           'card': [board[0]]})
+        yield player_vote(player1)
+        yield player_vote(player2)
+
+        # Complete
+        yield self.service.handle([], {'action': ['complete'],
+                                       'game_id': [game_id],
+                                       'owner_id': [game['owner_id']]})
+
     @defer.inlineCallbacks
     def test01_no_table(self):
         player_id = 12
@@ -274,59 +335,6 @@ class TableTest(unittest.TestCase):
                                   'next_owner_id': player1},
                                  [player1]])
 
-    @defer.inlineCallbacks
-    def complete_game(self, game_id, owner, player1, player2):
-        # Set card
-        yield self.service.handle([], {'action': ['set_card'],
-                                       'card': [1],
-                                       'game_id': [game_id],
-                                       'player_id': [owner]})
-        # Set sentence
-        yield self.service.handle([], {'action': ['set_sentence'],
-                                       'sentence': ['SENTENCE'],
-                                       'game_id': [game_id],
-                                       'player_id': [owner]})
-        # Join
-        yield self.service.handle([], {'action': ['participate'],
-                                       'game_id': [game_id],
-                                       'player_id': [player1]})
-        yield self.service.handle([], {'action': ['participate'],
-                                       'game_id': [game_id],
-                                       'player_id': [player2]})
-
-        # Pick
-        game, players_ids = yield self.table_instance.get_game_by_id(game_id, player1)
-        yield self.service.handle([], {'action': ['pick'],
-                                       'game_id': [game_id],
-                                       'player_id': [player1],
-                                       'card': [game['self'][2][0]]})
-        game, players_ids = yield self.table_instance.get_game_by_id(game_id, player2)
-        yield self.service.handle([], {'action': ['pick'],
-                                       'game_id': [game_id],
-                                       'player_id': [player2],
-                                       'card': [game['self'][2][0]]})
-
-        # Vote
-        yield self.service.handle([], {'action': ['voting'],
-                                       'game_id': [game_id],
-                                       'owner_id': [game['owner_id']]})
-
-        @defer.inlineCallbacks
-        def player_vote(player_id):
-            game, players_ids = yield self.table_instance.get_game_by_id(game_id, player_id)
-            my_card = game['self'][0]
-            board = [x for x in game['board'] if x != my_card]
-            yield self.service.handle([], {'action': ['vote'],
-                                           'game_id': [game_id],
-                                           'player_id': [player_id],
-                                           'card': [board[0]]})
-        yield player_vote(player1)
-        yield player_vote(player2)
-
-        # Complete
-        yield self.service.handle([], {'action': ['complete'],
-                                       'game_id': [game_id],
-                                       'owner_id': [game['owner_id']]})
 
     @defer.inlineCallbacks
     def test03_disconnect_with_two_tables(self):
@@ -448,13 +456,12 @@ class TableTest(unittest.TestCase):
                                   'next_owner_id': player1},
                                  [player1]])
 
-        game, players = yield self.table_instance.get_game_by_id(game_id)
-        modified = game['modified']
-
         # Start a poll on this table to know when the next owner will change.
         poll = self.table_instance.poll({'game_id': [game_id],
-                                         'modified': [modified]})
+                                         'modified': [table.get_modified()]})
+
         result = yield poll
+
         state = yield self.table_instance.state({'type': ['table'],
                                                  'game_id': [game_id],
                                                  'player_id': [player1]})
@@ -475,18 +482,12 @@ class TableTest(unittest.TestCase):
         player1 = 123
         player2 = 334
 
-        @defer.inlineCallbacks
-        def add_players_to_game(game_id, player_ids):
-            sql = "INSERT INTO tabs (player_id, game_id, created) VALUES (%d, %d, datetime('now'))"
-            for player_id in player_ids:
-                yield self.service.db.runQuery(sql % (player_id, game_id))
-
         # Create first game
         response = yield self.service.handle([], {'action': ['create'],
                                                   'owner_id': [owner]})
         game_id = response['game_id']
 
-        add_players_to_game(game_id, [owner, player1, player2])
+        self.add_players_to_game(game_id, [owner, player1, player2])
 
         # Change the next game timeout from the default to 0.2 seconds for the test.
         table = self.table_instance.game2table[game_id]
@@ -511,7 +512,7 @@ class TableTest(unittest.TestCase):
                                                   'previous_game_id': [game_id]})
         new_game_id = response['game_id']
 
-        add_players_to_game(new_game_id, [owner, player1, player2])
+        self.add_players_to_game(new_game_id, [owner, player1, player2])
 
         # Start a poll on this table to know when another player is chosen.
         # Not sure why I need to yield on the poll twice :-(
@@ -633,6 +634,56 @@ class TableTest(unittest.TestCase):
         table3 = self.table_instance.game2table[newest_game_id]
         self.assertNotEqual(table3, table)
 
+
+    @defer.inlineCallbacks
+    def test09_next_owner_id_race_condition(self):
+        owner = 11
+        player1 = 12
+        player2 = 13
+
+        # Create the game.
+        response = yield self.service.handle([], {'action': ['create'],
+                                                  'owner_id': [owner]})
+        game_id = response['game_id']
+        self.add_players_to_game(game_id, [owner, player1, player2])
+        # Complete the game.
+        yield self.complete_game(game_id, owner, player1, player2)
+
+        table = self.table_instance.game2table[game_id]
+
+        self.test_done = False
+
+        self.counter = 0
+
+        def listener(args):
+            if not self.test_done:
+                self.counter += 1
+                modified = args['modified'][0]
+                table.poll({'modified': [modified]}).addCallback(listener)
+            return args
+
+        modified = table.get_modified()
+        poll = table.poll({'modified': [modified]}).addCallback(listener)
+
+        d1 = table.update_next_owner_id()
+        d2 = table.update_next_owner_id()
+        d3 = table.update_next_owner_id()
+
+        d = defer.DeferredList([d1, d2, d3])
+
+        # Wait for all three update operations to finish...
+        yield d
+        # ...and then wait for the next_owner change to be dispatched by the poll.
+        yield poll
+
+        self.assertEquals(self.counter, 1)
+
+        # Break the listen loop so that the test runner doesn't complain
+        # about a dirty reactor.
+        self.test_done = True
+        table.touch({})
+        # For the same reason cancel the next_game_timer.
+        table.stop_timer(table.next_game_timer)
 
 
 def Run():

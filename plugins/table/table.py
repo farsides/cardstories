@@ -340,6 +340,16 @@ class Table(Pollable, CardstoriesServiceConnector):
         self.chosen_owners_ids = []
         # The ID of the player who is currently chosen as the next owner.
         self.next_owner_id = None
+        # If self.next_owner_id is currently (asynchonously) being updated,
+        # self.next_owner_deferred is set to a deferred that will fire once the update_next_owner_id
+        # operation completes. Set to None when no next_owner update is in progress.
+        self._next_owner_deferred = None
+        # update_next_owner_id is asynchronous because its waiting for results of get_active_players
+        # operation. We store this as an attribute of the table, so that we are able to cancel the
+        # deferred attached to the get_active_players result and start a new one in case a new
+        # update_next_owner_id request is made before the one already in progress completes.
+        # This is an implementation detail.
+        self._active_players_deferred = None
         # Timer that keeps track of how long it takes the next_owner to create the next
         # game and make it "playable" (move it into invitation state). If the next owner
         # doesn't manage to do that in under NEXT_GAME_TIMEOUT seconds, another next_owner
@@ -509,7 +519,6 @@ class Table(Pollable, CardstoriesServiceConnector):
 
         defer.returnValue([active_players_ids, inactive_players_ids])
 
-    @defer.inlineCallbacks
     def update_next_owner_id(self):
         """
         Chose the next player who will create a game on this table, if necessary.
@@ -517,31 +526,60 @@ class Table(Pollable, CardstoriesServiceConnector):
         Returns the name of the player, and sets the self.owner_id attribute.
         """
 
-        active_players_ids, inactive_players_ids = yield self.get_active_players()
-        if len(active_players_ids) >= 1:
-            # Take the player who was a game owner the longest ago (or never).
-            # This is to try to evenly distribute game ownership among players,
-            # so that it's not always the same player who gets to be the GM.
-            for owner_id in self.chosen_owners_ids:
-                if len(active_players_ids) == 1:
-                    break
-                elif owner_id in active_players_ids:
-                    active_players_ids.remove(owner_id)
+        if self._next_owner_deferred is None:
+            self._next_owner_deferred = defer.Deferred()
 
-            self.next_owner_id = active_players_ids[0]
-            self.register_chosen_owner(self.next_owner_id)
+        # If an active_players_deferred is currently running, cancel it and start another one.
+        if self._active_players_deferred:
+            self._active_players_deferred.cancel()
+        self._active_players_deferred = self.get_active_players()
 
-            self.stop_timer(self.next_game_timer)
-            self.next_game_timer = self.start_timer(
-                self.NEXT_GAME_TIMEOUT,
-                self.update_next_owner_if_no_game,
-                self.get_current_game_id()
-            )
+        # Store current value of next_owner_id to be able to compare later.
+        previous_next_owner_id = self.next_owner_id
 
-            # Let clients know that the next owner has been chosen
-            self.touch({})
+        def success(result):
+            active_players_ids, inactive_players_ids = result
+            if len(active_players_ids) >= 1:
+                # Take the player who was a game owner the longest ago (or never).
+                # This is to try to evenly distribute game ownership among players,
+                # so that it's not always the same player who gets to be the GM.
+                for owner_id in self.chosen_owners_ids:
+                    if len(active_players_ids) == 1:
+                        break
+                    elif owner_id in active_players_ids:
+                        active_players_ids.remove(owner_id)
 
-            defer.returnValue(self.next_owner_id)
+                self.next_owner_id = active_players_ids[0]
+                self.register_chosen_owner(self.next_owner_id)
+
+                self.stop_timer(self.next_game_timer)
+                self.next_game_timer = self.start_timer(
+                    self.NEXT_GAME_TIMEOUT,
+                    self.update_next_owner_if_no_game,
+                    self.get_current_game_id()
+                )
+
+
+            next_owner_deferred = self._next_owner_deferred
+            self._next_owner_deferred = None
+            self._active_players_deferred = None
+
+            # Let clients know if the next owner has been chosen.
+            if self.next_owner_id != previous_next_owner_id:
+                self.touch({})
+
+            # Finally, fire the deferred that the caller of this method is holding on to.
+            next_owner_deferred.callback({})
+
+        def error(reason):
+            # If the error is result of cancelling the deffered, just ignore it,
+            # otherwise let it propagate.
+            if not reason.check(defer.CancelledError):
+                return reason
+
+        self._active_players_deferred.addCallbacks(success, error)
+
+        return self._next_owner_deferred
 
     @defer.inlineCallbacks
     def update_next_owner_if_no_game(self, game_id):
@@ -571,7 +609,6 @@ class Table(Pollable, CardstoriesServiceConnector):
 
         Change the next owner when he disconnects
         """
-
         yield self.discard_player_as_next_owner(player_id)
 
     @defer.inlineCallbacks
