@@ -334,7 +334,7 @@
                     player_name.html($this.get_player_info_by_id(next_owner_id).name);
                     $this.display_modal(modal, overlay, null, function() {
                         $this.poll_discard(root);
-                        $this.reload(player_id, undefined, {force_create: true}, root);
+                        $this.reload(player_id, undefined, {force_create: true, previous_game_id: game.id}, root);
                     });
                 } else if (modal.css('display') !== 'none') {
                     $this.close_modal(modal, overlay);

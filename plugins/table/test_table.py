@@ -288,10 +288,6 @@ class TableTest(unittest.TestCase):
         result = yield poll
         modified = result['modified'][0]
 
-        poll = self.table_instance.poll({'game_id': [game_id],
-                                         'modified': [modified]})
-        self.assertFalse(poll.called)
-
         state = yield self.table_instance.state({'type': ['table'],
                                                  'game_id': [game_id],
                                                  'player_id': [player1]})
@@ -299,24 +295,6 @@ class TableTest(unittest.TestCase):
                                   'next_game_id': None,
                                   'next_owner_id': player1},
                                  [player1]])
-
-        # Create second game
-        response = yield self.service.handle([], {'action': ['create'],
-                                                  'owner_id': [player2],
-                                                  'previous_game_id': [game_id]})
-        game2_id = response['game_id']
-
-        state = yield self.table_instance.state({'type': ['table'],
-                                                 'game_id': [game_id],
-                                                 'player_id': [player1]})
-        self.assertEqual(state, [{'game_id': game_id,
-                                  'next_game_id': game2_id,
-                                  'next_owner_id': player2},
-                                 [player2]])
-
-        # Poll must return to announce the new game
-        result = yield poll
-        modified = result['modified'][0]
 
         # All players quit - deletes the table
         # Clear the side_effect which otherwise takes precedence over return_value.
@@ -536,15 +514,14 @@ class TableTest(unittest.TestCase):
                                   'next_owner_id': player2}, # player2 is now the next owner
                                  [player2]])
 
-        # At this time, when inquiring about the table from the old (previous) game,
-        # the table should still point the user to the pending game.
+        # The same result should be seen when inquiring about the table from the old (previous) game,
         state = yield self.table_instance.state({'type': ['table'],
                                                  'game_id': [game_id],
                                                  'player_id': [player2]})
         self.assertEqual(state, [{'game_id': game_id,
-                                  'next_game_id': new_game_id,
-                                  'next_owner_id': player1},
-                                 [player1]])
+                                  'next_game_id': None,
+                                  'next_owner_id': player2},
+                                 [player2]])
 
         # Player 2 creates a new game
         response = yield self.service.handle([], {'action': ['create'],

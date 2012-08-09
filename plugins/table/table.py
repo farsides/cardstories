@@ -440,6 +440,7 @@ class Table(Pollable, CardstoriesServiceConnector):
                  "type": "table"}
         """
 
+        player_id = args['player_id'][0]
         player_game_id = self.get_game_id_from_args(args)
         table_game_id = self.get_current_game_id()
         table_game = yield self.get_current_game()
@@ -465,19 +466,20 @@ class Table(Pollable, CardstoriesServiceConnector):
                 next_owner_id = table_game['owner_id']
 
         # Player is asking from the current table game.
-        # If table is in complete state, and we have pending games,
-        # redirect the player to the newest pending game.
+        # Show him the current next_owner_id and id of the corresponding
+        # pending game (if it was already created).
         else:
             if table_game['state'] in ['complete', 'canceled']:
                 if self.next_owner_id is None:
                     yield self.update_next_owner_id()
-                if len(self.pending_games):
-                    pending_game = self.pending_games[-1]
-                    next_game_id = pending_game.id
-                    next_owner_id = pending_game.owner_id
-                else:
-                    next_game_id = None
-                    next_owner_id = self.next_owner_id
+
+                next_owner_id = self.next_owner_id
+                next_game_id = None
+
+                for game in self.pending_games:
+                    if game.owner_id == self.next_owner_id:
+                        next_game_id = game.id
+                        break
             else:
                 next_game_id = None
                 next_owner_id = self.next_owner_id

@@ -1225,7 +1225,7 @@ asyncTest("create player, next owner, another game ready", 5, function() {
     equal(modal.css('display'), 'none', 'Next game ready modal is STILL not visible.');
 });
 
-asyncTest("create player, next owner change", 10, function() {
+asyncTest("create player, next owner change", 11, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_invitation .cardstories_pick', root);
     var owner_id = 77;
@@ -1280,6 +1280,7 @@ asyncTest("create player, next owner change", 10, function() {
         equal(_player_id, player_id, 'reload is called with player_id');
         equal(_game_id, undefined, 'reload is called with "undefined" for game_id');
         ok(options.force_create, 'reload is called with the force_create option');
+        equal(options.previous_game_id, game_id, 'reload is called with the previous_game_id option properly set');
     };
     // Click it now.
     $('.cardstories_modal_button', modal).click();
