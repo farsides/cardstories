@@ -45,7 +45,8 @@
             $(root).data('cardstories_table', {
                 next_game_id: null,
                 next_owner_id: null,
-                on_next_owner_change_callback: null
+                on_next_owner_change_callback: null,
+                on_next_game_ready_callback: null
             });
         },
 

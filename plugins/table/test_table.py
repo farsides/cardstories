@@ -275,27 +275,6 @@ class TableTest(unittest.TestCase):
         result = yield poll
         modified = result['modified'][0]
 
-        poll = self.table_instance.poll({'game_id': [game_id],
-                                         'modified': [modified]})
-        self.assertFalse(poll.called)
-
-        # Next owner closes the tab before creating the game - should choose another player
-        yield self.service.remove_tab({'action': ['remove_tab'],
-                                       'player_id': [player3],
-                                       'game_id': [game_id]})
-
-        # Poll must return to announce the next owner
-        result = yield poll
-        modified = result['modified'][0]
-
-        state = yield self.table_instance.state({'type': ['table'],
-                                                 'game_id': [game_id],
-                                                 'player_id': [player1]})
-        self.assertEqual(state, [{'game_id': game_id,
-                                  'next_game_id': None,
-                                  'next_owner_id': player1},
-                                 [player1]])
-
         # All players quit - deletes the table
         # Clear the side_effect which otherwise takes precedence over return_value.
         self.mock_activity_instance.is_player_online.side_effect = None
@@ -312,50 +291,6 @@ class TableTest(unittest.TestCase):
                                   'next_game_id': None,
                                   'next_owner_id': player1},
                                  [player1]])
-
-
-    @defer.inlineCallbacks
-    def test03_disconnect_with_two_tables(self):
-        """
-        Bug #797 - ValueError: list.remove(x): x not in list (table.py, delete_table)
-        """
-
-        player_id = 12
-
-        # Create two tables
-        self.assertEqual(len(self.table_instance.tables), 0)
-
-        response = yield self.service.handle([], {'action': ['create'],
-                                                  'owner_id': [player_id],})
-        game1_id = response['game_id']
-        yield self.service.handle([], {'action': ['set_card'],
-                                       'card': [1],
-                                       'player_id': [player_id],
-                                       'game_id': [game1_id]})
-        yield self.service.handle([], {'action': ['set_sentence'],
-                                       'sentence': ['sentence'],
-                                       'player_id': [player_id],
-                                       'game_id': [game1_id]})
-
-        response = yield self.service.handle([], {'action': ['create'],
-                                       'owner_id': [player_id],})
-        game2_id = response['game_id']
-        yield self.service.handle([], {'action': ['set_card'],
-                                       'card': [1],
-                                       'player_id': [player_id],
-                                       'game_id': [game2_id]})
-        yield self.service.handle([], {'action': ['set_sentence'],
-                                       'sentence': ['sentence'],
-                                       'player_id': [player_id],
-                                       'game_id': [game2_id]})
-
-        self.assertEqual(len(self.table_instance.tables), 2)
-
-        # Players quits - deletes the two tables simulteanously
-        self.mock_activity_instance.is_player_online.return_value = False
-        yield self.table_instance.on_activity_notification({'type': 'player_disconnecting',
-                                                            'player_id': player_id})
-        self.assertEqual(len(self.table_instance.tables), 0)
 
     @defer.inlineCallbacks
     def test04_postprocess(self):
@@ -395,14 +330,6 @@ class TableTest(unittest.TestCase):
         # Make sure things don't fail if response is not of the expected shape.
         yield self.table_instance.postprocess({'type': 'chat'}, mock_request)
         yield self.table_instance.postprocess([[1, 2, {'this': 'test'}]], mock_request)
-
-    @defer.inlineCallbacks
-    def test05_close_tab_with_nonexisting_table(self):
-        player_id = 43
-        game_id = 1123321
-        self.assertEqual(len(self.table_instance.tables), 0)
-        result = yield self.table_instance.on_tab_closed(player_id, game_id)
-        self.assertEqual(result, True)
 
     @defer.inlineCallbacks
     def test06_next_game_timeout(self):
@@ -493,13 +420,8 @@ class TableTest(unittest.TestCase):
         self.add_players_to_game(new_game_id, [owner, player1, player2])
 
         # Start a poll on this table to know when another player is chosen.
-        # Not sure why I need to yield on the poll twice :-(
         poll = self.table_instance.poll({'game_id': [new_game_id],
-                                         'modified': [0]})
-        result = yield poll
-        modified = result['modified'][0]
-        poll = self.table_instance.poll({'game_id': [new_game_id],
-                                         'modified': [modified]})
+                                         'modified': [table.get_modified()]})
         result = yield poll
         state = yield self.table_instance.state({'type': ['table'],
                                                  'game_id': [new_game_id],
@@ -598,16 +520,29 @@ class TableTest(unittest.TestCase):
         table2 = self.table_instance.game2table[new_game_id]
         self.assertEqual(table2, table)
 
-        # Looking from player2's game, which was discarded from this table,
-        # the game should be spun off into a totally new table.
+        # Looking from player2's game, which is still in the pending state,
+        # the player should be pointed to the promoted game.
         state = yield self.table_instance.state({'type': ['table'],
                                                  'game_id': [newest_game_id],
                                                  'player_id': [owner]})
         self.assertEqual(state, [{'game_id': newest_game_id,
-                                  'next_game_id': None,
-                                  'next_owner_id': None},
-                                 []])
-        # The game should be part of its own brand new table.
+                                  'next_game_id': new_game_id,
+                                  'next_owner_id': player1},
+                                 [player1]])
+
+        # Now let's move player2's game into 'invitation' state - this should
+        # trigger it to be detached from the current table, and put into
+        # its own, brand new table.
+        # Set card
+        yield self.service.handle([], {'action': ['set_card'],
+                                       'card': [10],
+                                       'game_id': [newest_game_id],
+                                       'player_id': [player2]})
+        # Set sentence
+        yield self.service.handle([], {'action': ['set_sentence'],
+                                       'sentence': ['The Real Sentence'],
+                                       'game_id': [newest_game_id],
+                                       'player_id': [player2]})
         table3 = self.table_instance.game2table[newest_game_id]
         self.assertNotEqual(table3, table)
 

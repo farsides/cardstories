@@ -4770,6 +4770,12 @@
             var $this = this;
 
             var success = function(data, status) {
+                // Reset table callbacks, so that they don't stick around forever.
+                // If the callbacks are needed, they will be rebound by the current
+                // state function.
+                $.cardstories_table.on_next_owner_change(player_id, game_id, root, null);
+                $.cardstories_table.on_next_game_ready(player_id, game_id, root, null);
+
                 if ('error' in data) {
                     var error = data.error;
                     if (error.code === 'GAME_DOES_NOT_EXIST') {

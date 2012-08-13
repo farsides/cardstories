@@ -90,9 +90,9 @@ class Plugin(Pollable, CardstoriesServiceConnector):
                 if details['type'] == 'create':
                     d = self.on_new_game(changes['game'], details)
                 elif details['type'] == 'set_sentence':
-                    d = self.on_playable_game(changes['game'], details)
-            elif changes['type'] == 'tab_closed':
-                d = self.on_tab_closed(changes['player_id'], changes['game_id'])
+                    d = self.on_game_sentence_set(changes['game'], details)
+                elif details['type'] == 'complete':
+                    d = self.on_game_complete(changes['game'], details)
 
         self.service.listen().addCallback(self.on_service_notification)
         return d
@@ -139,17 +139,25 @@ class Plugin(Pollable, CardstoriesServiceConnector):
         self.tables.append(table)
         return table
 
-    def on_playable_game(self, game, details):
+    def on_game_sentence_set(self, game, details):
         """
-        Invoked when one of the games is made "playable" - meaning that it has
-        the card and sentence both set and has entered the 'invitation' state.
-        If the game belongs to a table, promotes the game to be the new current game
-        of the table.
+        Invoked when one of the gamesgets its sentence set, moving into 'invitation' state.
+        Delegates to the game's table, if it exists.
         """
 
         table = self.game2table.get(game.id)
         if table:
-            table.promote_game(game.id)
+            table.on_game_sentence_set(game.id)
+
+    def on_game_complete(self, game, details):
+        """
+        Invoked when one of the games is completed.
+        Delegates to the game's table, if it exists.
+        """
+
+        table = self.game2table.get(game.id)
+        if table:
+            table.on_game_complete(game.id)
 
     def on_activity_notification(self, changes):
         """
@@ -166,15 +174,6 @@ class Plugin(Pollable, CardstoriesServiceConnector):
 
         self.activity_plugin.listen().addCallback(self.on_activity_notification)
         return d
-
-    @defer.inlineCallbacks
-    def on_tab_closed(self, player_id, game_id):
-        """Called every time a player closes a tab."""
-        if game_id in self.game2table:
-            table = self.game2table[game_id]
-            yield table.on_tab_closed(player_id)
-
-        defer.returnValue(True)
 
     @defer.inlineCallbacks
     def on_player_disconnecting(self, player_id):
@@ -340,6 +339,14 @@ class Table(Pollable, CardstoriesServiceConnector):
         self.chosen_owners_ids = []
         # The ID of the player who is currently chosen as the next owner.
         self.next_owner_id = None
+        # Timer that keeps track of how long it takes the next_owner to create the next
+        # game and make it "playable" (move it into invitation state). If the next owner
+        # doesn't manage to do that in under NEXT_GAME_TIMEOUT seconds, another next_owner
+        # is chosen instead.
+        self.next_game_timer = None
+        # When current game is completed, self.next_game_promoted is set to False until one
+        # of the pending games that get created is promoted to be the new current game.
+        self.next_game_promoted = None
         # If self.next_owner_id is currently (asynchonously) being updated,
         # self.next_owner_deferred is set to a deferred that will fire once the update_next_owner_id
         # operation completes. Set to None when no next_owner update is in progress.
@@ -350,11 +357,6 @@ class Table(Pollable, CardstoriesServiceConnector):
         # update_next_owner_id request is made before the one already in progress completes.
         # This is an implementation detail.
         self._active_players_deferred = None
-        # Timer that keeps track of how long it takes the next_owner to create the next
-        # game and make it "playable" (move it into invitation state). If the next owner
-        # doesn't manage to do that in under NEXT_GAME_TIMEOUT seconds, another next_owner
-        # is chosen instead.
-        self.next_game_timer = None
 
         Pollable.__init__(self, self.service.settings.get('poll - timeout', 30))
 
@@ -367,7 +369,7 @@ class Table(Pollable, CardstoriesServiceConnector):
         # in the pending_games array. Pending games will be promoted to the current game
         # status only after they reach the 'invitation' state.
         if len(self.games_ids) == 0:
-            self.games_ids.append(game.id)
+            self.promote_game(game.id)
         else:
             self.pending_games.append(game)
 
@@ -388,26 +390,61 @@ class Table(Pollable, CardstoriesServiceConnector):
         if timer and timer.active():
             timer.cancel()
 
+    def on_game_sentence_set(self, game_id):
+        """
+        When one of the games of the table moves into 'invitation' state,
+        promote to be the next_game, if none has been promoted yet for this game cycle,
+        otherwise if it was one of the pending games that entered 'invitation' state,
+        detach it from this table.
+        """
+
+        # We already promoted our next game, so if the game who had its
+        # sentence set is still pending, detach it from this table.
+        if self.next_game_promoted:
+            for pending_game in self.pending_games:
+                if pending_game.id == game_id:
+                    self.detach_game(pending_game)
+        # We didn't promote a game yet, looks like we got a suitable candidate now!
+        else:
+            if game_id not in self.games_ids:
+                self.promote_game(game_id)
+
+    def on_game_complete(self, game_id):
+        """
+        When the current game of the table reaches 'complete' state,
+        All games still pending from the previous cycle are detached.
+        """
+
+        if game_id == self.games_ids[-1]:
+            for pending_game in self.pending_games:
+                self.detach_game(pending_game)
+            self.next_game_promoted = False
+
+    def detach_game(self, game):
+        """
+        Spins the game off into its own table, completely detaching
+        it from this table.
+        """
+
+        self.pending_games = filter(lambda g: g.id != game.id, self.pending_games)
+        table = self.table_plugin.create_new_table()
+        table.register_new_game(game)
+        self.table_plugin.game2table[game.id] = table
+
     def promote_game(self, game_id):
         """
         Promotes the game from the pending state to be the next game of this table,
         spinning other pending games off into their own tables.
         """
 
-        if game_id not in self.games_ids:
-            for pending_game in self.pending_games:
-                if pending_game.id != game_id:
-                    table = self.table_plugin.create_new_table()
-                    table.register_new_game(pending_game)
-                    self.table_plugin.game2table[pending_game.id] = table
+        self.pending_games = filter(lambda g: g.id != game_id, self.pending_games)
+        self.games_ids.append(game_id)
+        self.next_game_promoted = True
+        self.stop_timer(self.next_game_timer)
+        self.next_owner_id = None
 
-            self.pending_games = []
-            self.games_ids.append(game_id)
-            self.stop_timer(self.next_game_timer)
-            self.next_owner_id = None
-
-            # Let clients know that the next game is available
-            self.touch({})
+        # Let clients know that the next game is available
+        self.touch({})
 
     @defer.inlineCallbacks
     def get_current_game(self):
@@ -446,21 +483,25 @@ class Table(Pollable, CardstoriesServiceConnector):
         table_game = yield self.get_current_game()
 
         # Player is asking from another game - this can happen for three reasons:
-        # - the next game of the table was created and player is inquiring about it
-        #   from the previous game (in complete state);
-        # - the next game was created (and joined by the player), but the owner didn't yet set
-        #   the card and sentence, so the game is still in pending state;
-        # - the next game was created (and joined by the player), but the owner didn't set
-        #   the card and sentence in time, and another game was promoted to be the next game of the table.
+        # 1) the next game of the table was created and promoted, and player is inquiring about it
+        #    from the previous game (in complete state);
+        # 2) the next game was created (and joined by the player), but the owner didn't yet set
+        #    the card and sentence, so the game is still in pending state, and there is no next game yet;
+        # 3) the next game was created (and joined by the player), but the owner didn't set
+        #    the card and sentence in time, and another game was promoted to be the next game of the table.
         if player_game_id != table_game_id:
-            # The game is still pending. Need to wait until it is either
-            # promoted or discarded. Until then, only notify about next owner changes.
             if len(filter(lambda g: g.id == player_game_id, self.pending_games)):
-                next_game_id = None
-                next_owner_id = self.next_owner_id
-            # Player is either inquiring from the previous game (in complete state),
-            # or from a previously pending game that was promoted.
-            # In both cases, notify the player about the new game.
+                # Player is inquring from a pending game. Did we get the next game
+                # of the table yet?
+                if table_game['state'] == 'complete':
+                    # Nope, not yet (bullet 2).
+                    next_game_id = None
+                    next_owner_id = self.next_owner_id
+                else:
+                    # Yes, we've got the next game! (bullet 3)
+                    next_game_id = table_game_id
+                    next_owner_id = table_game['owner_id']
+            # Player is either inquiring from the previous game in complete state (bullet 1).
             else:
                 next_game_id = table_game_id
                 next_owner_id = table_game['owner_id']
@@ -594,16 +635,6 @@ class Table(Pollable, CardstoriesServiceConnector):
             yield self.update_next_owner_id()
 
     @defer.inlineCallbacks
-    def discard_player_as_next_owner(self, player_id):
-        """
-        If `player_id` is the current next_game_owner,
-        discards him as the next owner and choses another player instead.
-        """
-
-        if self.next_owner_id and self.next_owner_id == player_id:
-            yield self.update_next_owner_id()
-
-    @defer.inlineCallbacks
     def on_player_disconnecting(self, player_id):
         """
         Called every time a player disconnects
@@ -611,14 +642,5 @@ class Table(Pollable, CardstoriesServiceConnector):
 
         Change the next owner when he disconnects
         """
-        yield self.discard_player_as_next_owner(player_id)
-
-    @defer.inlineCallbacks
-    def on_tab_closed(self, player_id):
-        """
-        Called every time a player closes the tab holding
-        the game corresponding to this table.
-        Change the next owner if it was this player's turn.
-        """
-
-        yield self.discard_player_as_next_owner(player_id)
+        if self.next_owner_id and self.next_owner_id == player_id:
+            yield self.update_next_owner_id()

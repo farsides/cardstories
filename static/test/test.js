@@ -3938,6 +3938,27 @@ asyncTest("next_game_as_player", 4, function() {
     });
 });
 
+test("table plugin callbacks", 2, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var player_id = 87;
+    var game_id = 88;
+
+    // Make sure that on_next_owner_change and on_next_game_ready are
+    // reset after every 'game' call.
+    $.cardstories.ajax = function(options, player_id, game_id, root) {
+        options.success([]);
+    };
+
+    $.cardstories_table.on_next_owner_change = function(player_id, game_id, root, cb) {
+        equal(cb, null, 'next_owner_change callback is reset to null');
+    };
+    $.cardstories_table.on_next_game_ready = function(player_id, game_id, root, cb) {
+        equal(cb, null, 'next_game_ready callback is reset to null');
+    };
+
+    $.cardstories.game(player_id, game_id, root, {});
+});
+
 asyncTest("on_next_owner_change", 35, function() {
     var this_player_id = 10;
     var other_player_id = 17;
