@@ -84,6 +84,54 @@ test("Tabs are links to games", 2, function() {
     ok(tabs.eq(0).attr('href').match('game_id=' + tab_game_id), 'tab contains link to game');
 });
 
+test("get_opened_game_ids", 12, function() {
+    var root = $(selector);
+    var element = $('.cardstories_tabs', root);
+    var player_id = 499;
+    var game_id = 52;
+
+    $.cardstories_tabs.requires_action = function(player_id, game, root) { return false; };
+
+    root.cardstories_tabs(player_id);
+    $.cardstories_tabs.load_game(player_id, game_id, {}, root);
+
+    equal($.cardstories_tabs.get_opened_game_ids(root).length, 0, 'There are no opened tabs initially');
+
+    var games = [
+        {id: 101, sentence: 'SENTENCE1', state: 'invitation'},
+        {id: 102, sentence: 'SENTENCE2', state: 'vote'},
+        {id: 103, sentence: null, state: 'create'},
+        {id: 104, sentence: 'SENTENCE4', state: 'pick'},
+        {id: 105, sentence: null, state: 'canceled'},
+        {id: 106, sentence: 'SENTENCE6', state: 'canceled'}
+    ];
+    var tabs;
+
+    $.cardstories_tabs.state(player_id, {games: games}, root);
+    var game_ids = $.cardstories_tabs.get_opened_game_ids(root);
+    equal(game_ids.length, 6, 'Six games are opened in tabs');
+    equal(game_ids[0], 101);
+    equal(game_ids[1], 102);
+    equal(game_ids[2], 103);
+    equal(game_ids[3], 104);
+    equal(game_ids[4], 105);
+    equal(game_ids[5], 106);
+
+    // Call state again without some of the games.
+    games = [
+        {id: 101, sentence: 'SENTENCE1', state: 'invitation'},
+        {id: 103, sentence: null, state: 'create'},
+        {id: 104, sentence: 'SENTENCE4', state: 'pick'}
+    ];
+
+    $.cardstories_tabs.state(player_id, {games: games}, root);
+    var game_ids = $.cardstories_tabs.get_opened_game_ids(root);
+    equal(game_ids.length, 3, 'Three games are opened in tabs');
+    equal(game_ids[0], 101);
+    equal(game_ids[1], 103);
+    equal(game_ids[2], 104);
+});
+
 test("closing an unfocused tab", 7, function() {
     var root = $(selector);
     var element = $('.cardstories_tabs', root);

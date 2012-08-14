@@ -51,6 +51,9 @@
             };
         };
 
+        // Stub the tabs interaction.
+        $.cardstories_tabs.get_opened_game_ids = function(root) { return []; };
+
         // Stub the table interactions.
         var table;
         var current_player_id;

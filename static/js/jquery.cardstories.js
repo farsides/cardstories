@@ -326,9 +326,11 @@
                 var modal = $('.cardstories_next_owner_change', element);
                 var overlay = $('.cardstories_modal_overlay', element);
 
-                // If this player is the next owner, notify him,
+                // If this player is the next owner, notify him
+                // (unless next_game_id isn't null, which means he already created the next game),
                 // otherwise close the dialog if it is opened.
-                if (player_id === next_owner_id) {
+                var next_game = $.cardstories_table.get_next_game_id(game.id, root);
+                if (player_id === next_owner_id && !next_game) {
                     var player_name = $('.cardstories_player_name', modal);
 
                     player_name.html($this.get_player_info_by_id(next_owner_id).name);
@@ -346,12 +348,14 @@
             var $this = this;
             $.cardstories_table.on_next_game_ready(player_id, game.id, root, function(next_game_id, next_game_opts) {
                 var next_owner_id = $.cardstories_table.get_next_owner_id(game.id, root);
+                var modal = $('.cardstories_next_game_ready', element);
+                var overlay = $('.cardstories_modal_overlay', element);
 
-                // If this is the player who created the next game, then there's no
-                // point in showing him the message as he must be well aware of the fact.
-                if (player_id !== next_owner_id) {
-                    var modal = $('.cardstories_next_game_ready', element);
-                    var overlay = $('.cardstories_modal_overlay', element);
+                // If the player already has the game opened in a tab,
+                // there's no need to show him the message.
+                var opened_game_ids = $.cardstories_tabs.get_opened_game_ids(root);
+                var is_game_opened = $.inArray(next_game_id, opened_game_ids) > -1;
+                if (!(is_game_opened || player_id === next_owner_id)) {
                     var player_name = $('.cardstories_player_name', modal);
 
                     player_name.html($this.get_player_info_by_id(next_owner_id).name);
@@ -359,6 +363,8 @@
                         $this.poll_discard(root);
                         $this.reload(player_id, next_game_id, next_game_opts, root);
                     });
+                } else if (modal.css('display') !== 'none') {
+                    $this.close_modal(modal, overlay);
                 }
             });
         },

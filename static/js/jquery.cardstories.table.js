@@ -164,6 +164,12 @@
         get_next_owner_id: function(game_id, root) {
             var table = $(root).data('cardstories_table');
             return table.next_owner_id;
+        },
+
+        // Returns the player_id of the player who should create the next game
+        get_next_game_id: function(game_id, root) {
+            var table = $(root).data('cardstories_table');
+            return table.next_game_id;
         }
     };
 

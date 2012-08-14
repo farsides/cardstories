@@ -213,6 +213,15 @@
                 }
             }
             return requires;
+        },
+
+        get_opened_game_ids: function(root) {
+            var element = $(root).data('cardstories_tabs').element;
+            var game_ids = [];
+            element.find('.cardstories_tab').each(function() {
+                game_ids.push($(this).data('cardstories_game_id'));
+            });
+            return game_ids;
         }
     };
 
