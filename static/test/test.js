@@ -1237,7 +1237,7 @@ asyncTest("create player, next owner, another game ready", 5, function() {
     equal(modal.css('display'), 'none', 'Next game ready modal is STILL not visible.');
 });
 
-asyncTest("create player, next owner change", 14, function() {
+asyncTest("create player, next owner change", 15, function() {
     var root = $('#qunit-fixture .cardstories');
     var element = $('.cardstories_invitation .cardstories_pick', root);
     var owner_id = 77;
@@ -1284,6 +1284,9 @@ asyncTest("create player, next owner change", 14, function() {
     // Switch back to current player to bring back the dialog.
     next_owner_cb(player_id);
     notEqual(modal.css('display'), 'none', 'Next owner change modal IS visible.');
+    // Current game owner's name should be visible on the dialog.
+    var player_name = $('.cardstories_player_name', modal);
+    equal(player_name.text(), 'Player ' + owner_id, "Current game owner's name is visible on the modal");
 
     // Pretend the player already created the next game. The dialog should close.
     $.cardstories_table.get_next_game_id = function(game_id, root) { return game_id + 22; };

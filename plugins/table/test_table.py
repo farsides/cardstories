@@ -364,7 +364,6 @@ class TableTest(unittest.TestCase):
         # Start a poll on this table to know when the next owner will change.
         poll = self.table_instance.poll({'game_id': [game_id],
                                          'modified': [table.get_modified()]})
-
         result = yield poll
 
         state = yield self.table_instance.state({'type': ['table'],
@@ -445,6 +444,42 @@ class TableTest(unittest.TestCase):
                                   'next_owner_id': player2},
                                  [player2]])
 
+        # ----
+        # Since player1 already started creating the next game, he should never
+        # again be chosen as the next owner for this round, we can see that by
+        # checking that next_owner_id only alternates between player2 and the
+        # original game's owner.
+        # First change:
+        yield self.table_instance.poll({'game_id': [new_game_id],
+                                        'modified': [table.get_modified()]})
+        state = yield self.table_instance.state({'type': ['table'],
+                                                 'game_id': [new_game_id],
+                                                 'player_id': [owner]})
+        self.assertEqual(state[0]['next_owner_id'], owner)
+        # Second change:
+        yield self.table_instance.poll({'game_id': [new_game_id],
+                                        'modified': [table.get_modified()]})
+        state = yield self.table_instance.state({'type': ['table'],
+                                                 'game_id': [new_game_id],
+                                                 'player_id': [owner]})
+        self.assertEqual(state[0]['next_owner_id'], player2)
+        # Third change, we're back to the owner:
+        yield self.table_instance.poll({'game_id': [new_game_id],
+                                        'modified': [table.get_modified()]})
+        state = yield self.table_instance.state({'type': ['table'],
+                                                 'game_id': [new_game_id],
+                                                 'player_id': [owner]})
+        self.assertEqual(state[0]['next_owner_id'], owner)
+        # And fourth change - back to player2:
+        yield self.table_instance.poll({'game_id': [new_game_id],
+                                        'modified': [table.get_modified()]})
+        state = yield self.table_instance.state({'type': ['table'],
+                                                 'game_id': [new_game_id],
+                                                 'player_id': [owner]})
+        self.assertEqual(state[0]['next_owner_id'], player2)
+
+        # ----
+
         # Player 2 creates a new game
         response = yield self.service.handle([], {'action': ['create'],
                                                   'owner_id': [player2],
@@ -487,7 +522,7 @@ class TableTest(unittest.TestCase):
 
         # Let player1 finish creating the game now by setting the card and sentence.
         # player1's game should be promoted as the next game of the table and every
-        # of the above requests should not point to it.
+        # of the above requests should now point to it.
         # Set card
         yield self.service.handle([], {'action': ['set_card'],
                                        'card': [1],

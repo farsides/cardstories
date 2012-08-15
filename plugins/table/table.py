@@ -548,14 +548,11 @@ class Table(Pollable, CardstoriesServiceConnector):
 
         current_game_id = self.get_current_game_id()
         players_ids = yield self.get_players_by_game_id(current_game_id)
-        online_players_ids = [ x for x in players_ids if self.activity_plugin.is_player_online(x) ]
-        offline_players_ids = [ x for x in players_ids if not self.activity_plugin.is_player_online(x) ]
 
         active_players_ids = []
-        inactive_players_ids = offline_players_ids
-        for player_id in online_players_ids:
-            tab_game_ids = yield self.service.get_opened_tabs(player_id)
-            if current_game_id in tab_game_ids:
+        inactive_players_ids = []
+        for player_id in players_ids:
+            if self.activity_plugin.is_player_online(player_id):
                 active_players_ids.append(player_id)
             else:
                 inactive_players_ids.append(player_id)
@@ -582,17 +579,21 @@ class Table(Pollable, CardstoriesServiceConnector):
 
         def success(result):
             active_players_ids, inactive_players_ids = result
-            if len(active_players_ids) >= 1:
+            # Filter out all players who already created next games (that are currently pending).
+            pending_game_owners_ids = [g.owner_id for g in self.pending_games]
+            owner_candidates_ids = [pid for pid in active_players_ids if pid not in pending_game_owners_ids]
+
+            if len(owner_candidates_ids) >= 1:
                 # Take the player who was a game owner the longest ago (or never).
                 # This is to try to evenly distribute game ownership among players,
                 # so that it's not always the same player who gets to be the GM.
                 for owner_id in self.chosen_owners_ids:
-                    if len(active_players_ids) == 1:
+                    if len(owner_candidates_ids) == 1:
                         break
-                    elif owner_id in active_players_ids:
-                        active_players_ids.remove(owner_id)
+                    elif owner_id in owner_candidates_ids:
+                        owner_candidates_ids.remove(owner_id)
 
-                self.next_owner_id = active_players_ids[0]
+                self.next_owner_id = owner_candidates_ids[0]
                 self.register_chosen_owner(self.next_owner_id)
 
                 self.stop_timer(self.next_game_timer)
