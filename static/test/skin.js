@@ -52,7 +52,7 @@
         };
 
         // Stub the tabs interaction.
-        $.cardstories_tabs.get_opened_game_ids = function(root) { return []; };
+        $.cardstories_tabs.get_open_game_ids = function(root) { return []; };
 
         // Stub the table interactions.
         var table;

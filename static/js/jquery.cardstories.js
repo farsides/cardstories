@@ -328,7 +328,7 @@
 
                 // If this player is the next owner, notify him
                 // (unless next_game_id isn't null, which means he already created the next game),
-                // otherwise close the dialog if it is opened.
+                // otherwise close the dialog if it is open.
                 var next_game = $.cardstories_table.get_next_game_id(game.id, root);
                 if (player_id === next_owner_id && !next_game) {
                     var player_name = $('.cardstories_player_name', modal);
@@ -351,11 +351,11 @@
                 var modal = $('.cardstories_next_game_ready', element);
                 var overlay = $('.cardstories_modal_overlay', element);
 
-                // If the player already has the game opened in a tab,
+                // If the player already has the game open in a tab,
                 // there's no need to show him the message.
-                var opened_game_ids = $.cardstories_tabs.get_opened_game_ids(root);
-                var is_game_opened = $.inArray(next_game_id, opened_game_ids) > -1;
-                if (!(is_game_opened || player_id === next_owner_id)) {
+                var open_game_ids = $.cardstories_tabs.get_open_game_ids(root);
+                var is_game_open = $.inArray(next_game_id, open_game_ids) > -1;
+                if (!(is_game_open || player_id === next_owner_id)) {
                     var player_name = $('.cardstories_player_name', modal);
 
                     player_name.html($this.get_player_info_by_id(next_owner_id).name);
@@ -4637,7 +4637,7 @@
                     // Ask the table plugin to switch to the next game as soon as possible
                     var is_ready = $.cardstories_table.on_next_game_ready(player_id, game.id, root, function(next_game_id, next_game_opts) {
                         $this.poll_discard(root);
-                        $.cardstories_tabs.remove_tab_for_game(game.id, player_id, root, function() {
+                        $.cardstories_tabs.close_tab_for_game(game.id, player_id, root, function() {
                             $this.reload(player_id, next_game_id, next_game_opts, root);
                         });
                     });

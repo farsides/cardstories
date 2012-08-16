@@ -94,8 +94,8 @@ function setup() {
     $.cardstories_table.on_next_game_ready = function(player_id, game_id, root, cb) {};
     $.cardstories_table.get_next_game_id = function(game_id, root) { return null; };
     $.cardstories_tabs = {};
-    $.cardstories_tabs.remove_tab_for_game = function(game_id, player_id, root, cb) { cb(); };
-    $.cardstories_tabs.get_opened_game_ids = function(root) { return []; };
+    $.cardstories_tabs.close_tab_for_game = function(game_id, player_id, root, cb) { cb(); };
+    $.cardstories_tabs.get_open_game_ids = function(root) { return []; };
 }
 
 module("cardstories", {setup: setup});
@@ -1114,11 +1114,11 @@ asyncTest("create owner, another game ready", 13, function() {
 
     // Pretend for a moment that the player already opened the new game.
     // The dialog should close in that case.
-    $.cardstories_tabs.get_opened_game_ids = function(root) { return [game_id, next_game_id]; };
+    $.cardstories_tabs.get_open_game_ids = function(root) { return [game_id, next_game_id]; };
     next_game_cb(next_game_id, {});
     equal(modal.css('display'), 'none', 'Next game ready modal is not visible.');
     // Stop pretending.
-    $.cardstories_tabs.get_opened_game_ids = function(root) { return [game_id]; };
+    $.cardstories_tabs.get_open_game_ids = function(root) { return [game_id]; };
     next_game_cb(next_game_id, {});
     notEqual(modal.css('display'), 'none', 'Next game ready modal IS visible.');
 

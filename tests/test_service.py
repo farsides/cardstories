@@ -504,12 +504,12 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
             game_id = result['game_id']
             game_ids.append(game_id)
 
-        # Stub out the get_opened_tabs_from_args to return the tree games created above.
-        def fake_get_opened_tabs_from_args(args):
+        # Stub out the get_open_tabs to return the tree games created above.
+        def fake_get_open_tabs(args):
             d = defer.Deferred()
             d.callback(game_ids)
             return d
-        self.service.get_opened_tabs_from_args = fake_get_opened_tabs_from_args
+        self.service.get_open_tabs = fake_get_open_tabs
 
         games = map(lambda gid: self.service.games[gid], game_ids)
         max_modified = games[2].modified
@@ -789,7 +789,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         self.service.auth.get_player_avatar_url = default_get_player_avatar_url
 
     @defer.inlineCallbacks
-    def test12_remove_tab(self):
+    def test12_close_tab_action(self):
         player_id = 21
         game_id1 = 121
         game_id2 = 122
@@ -809,18 +809,18 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
 
         self.assertEqual(len(get_player_tabs()), 2)
 
-        yield self.service.remove_tab({'action': ['remove_tab'],
-                                       'player_id': [player_id],
-                                       'game_id': [game_id1]})
+        yield self.service.close_tab_action({'action': ['close_tab_action'],
+                                             'player_id': [player_id],
+                                             'game_id': [game_id1]})
 
         game_ids = get_player_tabs()
         self.assertEqual(len(game_ids), 1)
         self.assertEqual(game_ids[0][0], game_id2)
 
         # Trying to delete the same game again shouldn't do any harm.
-        yield self.service.remove_tab({'action': ['remove_tab'],
-                                       'player_id': [player_id],
-                                       'game_id': [game_id1]})
+        yield self.service.close_tab_action({'action': ['close_tab_action'],
+                                             'player_id': [player_id],
+                                             'game_id': [game_id1]})
 
         game_ids = get_player_tabs()
         self.assertEqual(len(game_ids), 1)
@@ -828,9 +828,9 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
 
         # Delete the second game, too.
         # Trying to delete the same game again shouldn't do any harm.
-        yield self.service.remove_tab({'action': ['remove_tab'],
-                                       'player_id': [player_id],
-                                       'game_id': [game_id2]})
+        yield self.service.close_tab_action({'action': ['close_tab_action'],
+                                             'player_id': [player_id],
+                                             'game_id': [game_id2]})
 
         self.assertEqual(len(get_player_tabs()), 0)
 
@@ -849,9 +849,9 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
             self.service.notification = result
         self.service.listen().addCallback(callback)
 
-        yield self.service.remove_tab({'action': ['remove_tab'],
-                                       'player_id': [player_id],
-                                       'game_id': [game_id]})
+        yield self.service.close_tab_action({'action': ['close_tab_action'],
+                                             'player_id': [player_id],
+                                             'game_id': [game_id]})
 
         self.assertTrue(self.service.notification is not None)
         self.assertEquals(self.service.notification['type'], 'tab_closed')

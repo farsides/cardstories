@@ -85,7 +85,7 @@
                         return false;
                     });
                     close_btn.click(function() {
-                        $this.remove_tab(tab, player_id, current_game_id, root);
+                        $this.close_tab(tab, player_id, current_game_id, root);
                     });
 
                     if ($this.requires_action(player_id, game, root)) {
@@ -128,16 +128,16 @@
                 next_game_id = prev_tab.data('cardstories_game_id');
             }
 
-            this.remove_tab(tab, player_id, game_id, root, function() {
+            this.close_tab(tab, player_id, game_id, root, function() {
                 $.cardstories.reload(player_id, next_game_id, {}, root);
             });
         },
 
         // Removes the tab from the page, and issues an ajax call to remove
         // the tab on the webservice.
-        remove_tab: function(tab, player_id, game_id, root, cb) {
+        close_tab: function(tab, player_id, game_id, root, cb) {
             var promise = $.cardstories.send({
-                action: 'remove_tab',
+                action: 'close_tab_action',
                 game_id: tab.data('cardstories_game_id'),
                 player_id: player_id
             }, null, player_id, game_id, root);
@@ -153,14 +153,14 @@
             });
         },
 
-        remove_tab_for_game: function(game_to_remove_id, player_id, root, cb) {
+        close_tab_for_game: function(game_to_remove_id, player_id, root, cb) {
             var root_data = $(root).data('cardstories_tabs');
             var element = root_data.element;
             var current_game_id = root_data.current_game_id;
             var tab = element.find('.cardstories_tab').filter(function() {
                 return $(this).data('cardstories_game_id') === game_to_remove_id;
             });
-            this.remove_tab(tab, player_id, current_game_id, root, cb);
+            this.close_tab(tab, player_id, current_game_id, root, cb);
         },
 
         // Returns true if the game passed in as the second parameter requires action
@@ -215,7 +215,7 @@
             return requires;
         },
 
-        get_opened_game_ids: function(root) {
+        get_open_game_ids: function(root) {
             var element = $(root).data('cardstories_tabs').element;
             var game_ids = [];
             element.find('.cardstories_tab').each(function() {
