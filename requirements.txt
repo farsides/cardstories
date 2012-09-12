@@ -11,3 +11,4 @@ simplejson==2.6.0
 virtualenv==1.7.1.2
 virtualenvwrapper==3.3
 wsgiref==0.1.2
+-e git://github.com/dcramer/django-paypal.git@11835ce17e855200fc4b523c659f34f1d472b5d6#egg=django-paypal
