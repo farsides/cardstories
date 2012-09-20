@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Card Stories (Card Game) - A Creative Game of Imagination{% endblock %}
+
+{% block head_script %}{{ block.super }}
+  <script type="text/javascript" src="/static/js/jquery.owa.js"></script>
+  <style type="text/css">
+    #extra-cards { text-align: center; }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <div id="extra-cards">
+    <h1>Get extra cards!</h1>
+    <p>Buy a pack of extra cards for 2.99 USD.</p>
+    {% if form %}
+      {{ form.sandbox }}
+    {% else %}
+      Please <a href="..">log in</a> to buy cards.
+    {% endif %}
+  </div>
+{% endblock %}
+
+{% block footer %}{% endblock %}

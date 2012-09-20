@@ -21,6 +21,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
+from paypal.standard.ipn.signals import payment_was_successful
 
 
 class UserProfile(models.Model):
@@ -42,6 +43,13 @@ def create_user_profile(sender, instance, created, **kwargs):
     if created:
         UserProfile.objects.create(user=instance)
 
+def grant_user_bought_cards(sender, **kwargs):
+    ipn_obj = sender
+    print 'USER BOUGHT CARDS!!', ipn_obj
+    # TODO: Do something.
+
 
 # Registers creation of user profile on post_save signal.
 post_save.connect(create_user_profile, sender=User)
+# Registers Paypal's IPN signals.
+payment_was_successful.connect(grant_user_bought_cards)
