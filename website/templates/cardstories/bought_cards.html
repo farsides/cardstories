@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Card Stories (Card Game) - A Creative Game of Imagination{% endblock %}
+
+{% block head_script %}{{ block.super }}
+  <script type="text/javascript" src="/static/js/jquery.owa.js"></script>
+  <style type="text/css">
+    #bought-cards { text-align: center; }
+    #bought-cards table { margin: 0 auto; }
+    #bought-cards table th { text-align: right; padding: 2px 5px; }
+    #bought-cards table td { text-align: left; }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <div id="bought-cards">
+    {% ifequal pdt_obj.st 'SUCCESS' %}
+    <h1>Transaction complete!</h1>
+    <p>Thank you for your payment.</p>
+    <p>Please note that it might take a couple of minutes before the cards show in your account.</p>
+
+    <table>
+      <tr><th>Payer:</th><td>{{ pdt_obj.first_name }} {{ pdt_obj.last_name }} </td></tr>
+      <tr><th>Payer Email:</th><td>{{ pdt_obj.payer_email }}</td></tr>
+      <tr><th>Amount:</th><td>{{ pdt_obj.mc_currency }} {{ pdt_obj.mc_gross }}</td></tr>
+      <tr><th>Reference:</th><td>{{ pdt_obj.txn_id }}</td></tr>
+    </table>
+
+    {% else %}
+    <h1>Transaction Failed</h1>
+    <p>Sorry transaction failed, please try a different form of payment.</p>
+    {% endifequal %}
+  </div>
+{% endblock %}
+
+{% block footer %}{% endblock %}
