@@ -90,8 +90,12 @@ function setup() {
     $.cardstories_audio.stop = function(name, root) {};
     $.cardstories_table = {};
     $.cardstories_table.get_available_game = function(player_id, root, cb) { cb(); };
+    $.cardstories_table.on_next_owner_change = function(player_id, game_id, root, cb) {};
+    $.cardstories_table.on_next_game_ready = function(player_id, game_id, root, cb) {};
+    $.cardstories_table.get_next_game_id = function(game_id, root) { return null; };
     $.cardstories_tabs = {};
-    $.cardstories_tabs.remove_tab_for_game = function(game_id, player_id, root, cb) { cb(); };
+    $.cardstories_tabs.close_tab_for_game = function(game_id, player_id, root, cb) { cb(); };
+    $.cardstories_tabs.get_open_game_ids = function(root) { return []; };
 }
 
 module("cardstories", {setup: setup});
@@ -170,6 +174,26 @@ test("setTimeout", 2, function() {
 
     $.cardstories.setTimeout('a function', 42);
     $.cardstories.window.setTimeout = setTimeout;
+});
+
+test("animationTimeout", 4, function() {
+    var fake_cb = function() { return 42; };
+
+    // When animations are on, pass the original delay on to setTimeout.
+    $.cardstories.animations_off = function() { return false; };
+    $.cardstories.setTimeout = function(cb, delay) {
+        equal(cb, fake_cb, 'setTimeout is called with the callback');
+        equal(delay, 350, 'setTimeout is called with the delay');
+    };
+    $.cardstories.animationTimeout(fake_cb, 350);
+
+    // But when animations are off, call setTimeout with the delay of zero.
+    $.cardstories.animations_off = function() { return true; };
+    $.cardstories.setTimeout = function(cb, delay) {
+        equal(cb, fake_cb, 'setTimeout is called with the callback');
+        equal(delay, 0, 'setTimeout is called with a zero delay');
+    };
+    $.cardstories.animationTimeout(fake_cb, 350);
 });
 
 asyncTest("delay", 1, function() {
@@ -548,7 +572,7 @@ asyncTest("animate_scale", 7, function() {
 
     // Grab initial position.
     element.show();
-    el.show();
+    el.parents().andSelf().show();
     var orig_top = el.position().top;
     var orig_left = el.position().left;
     var orig_width = el.width();
@@ -664,9 +688,13 @@ test("widget subscribe", 3, function() {
 });
 
 test("login_url", 1, function() {
+    $.cookie('CARDSTORIES_ID', null);
     var location = $.cardstories.location;
     var login_url = '/';
-    $.cardstories.location = {href: 'http://fake.href'};
+    $.cardstories.location = {
+        href: 'http://fake.href',
+        search: ''
+    };
     $('#qunit-fixture .cardstories').cardstories(undefined, undefined, login_url);
     equal($.cardstories.location.href, login_url);
     $.cardstories.location = location;
@@ -1017,7 +1045,6 @@ asyncTest("create not owner, already participating", 4, function() {
         id: game_id,
         owner_id: owner_id,
         owner: false,
-        sentence: 'THE Sentence',
         self: [null, null, []],
         players: [
             {id: owner_id, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0},
@@ -1041,6 +1068,250 @@ asyncTest("create not owner, already participating", 4, function() {
 
     $.cardstories.create(player_id, game, root);
 });
+
+asyncTest("create owner, another game ready", 13, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_create .cardstories_pick_card', root);
+    var owner_id = 77;
+    var game_id = 215;
+    var game = {
+        id: game_id,
+        owner_id: owner_id,
+        owner: true,
+        self: [null, null, [1, 2, 3, 4, 5, 6]],
+        players: [
+            {id: owner_id, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0}
+        ]
+    };
+
+    $.cardstories.poll = function(query, player_id, game_id, root, cb) {};
+
+    var next_owner_id = 117;
+    var next_game_id = game_id + 1;
+    var next_game_cb;
+
+    $.cardstories_table.on_next_game_ready = function(_player_id, _game_id, root, cb) {
+        equal(_player_id, owner_id, 'on_next_game_ready gets passed the player_id');
+        equal(_game_id, game_id, 'on_next_game_ready gets passed the game_id');
+        next_game_cb = cb;
+    };
+    $.cardstories_table.get_next_owner_id = function(_game_id, root) {
+        equal(_game_id, game_id, 'get_next_owner_id is called with current game id');
+        return next_owner_id;
+    };
+
+    $.cardstories.create(owner_id, game, root).then(start);
+
+    var modal = $('.cardstories_next_game_ready', element);
+    equal(modal.css('display'), 'none', 'Next game ready modal is not visible initially.');
+
+    // Invoke the next game callback (simulate next game being ready).
+    next_game_cb(next_game_id, {});
+
+    notEqual(modal.css('display'), 'none', 'Next game ready modal IS visible.');
+    var player_name = $('.cardstories_player_name', modal);
+    equal(player_name.text(), 'Player ' + next_owner_id, 'Name of next owner is shown on the modal');
+
+    // Pretend for a moment that the player already opened the new game.
+    // The dialog should close in that case.
+    $.cardstories_tabs.get_open_game_ids = function(root) { return [game_id, next_game_id]; };
+    next_game_cb(next_game_id, {});
+    equal(modal.css('display'), 'none', 'Next game ready modal is not visible.');
+    // Stop pretending.
+    $.cardstories_tabs.get_open_game_ids = function(root) { return [game_id]; };
+    next_game_cb(next_game_id, {});
+    notEqual(modal.css('display'), 'none', 'Next game ready modal IS visible.');
+
+    // Will click the button on the dialog now, but first stub out some functions.
+    $.cardstories.poll_discard = function(root) {
+        ok(true, 'poll was discarded');
+    };
+    $.cardstories.reload = function(_player_id, _game_id, options, root) {
+        equal(_player_id, owner_id, 'reload is called with player_id');
+        equal(_game_id, next_game_id, 'reload is called with next game id');
+    };
+    // Click it now.
+    $('.cardstories_modal_button', modal).click();
+});
+
+asyncTest("create player, not next owner, another game ready", 9, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_invitation .cardstories_pick', root);
+    var owner_id = 77;
+    var player_id = 15;
+    var game_id = 215;
+    var game = {
+        id: game_id,
+        owner_id: owner_id,
+        owner: false,
+        self: [null, null, []],
+        players: [
+            {id: owner_id, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0},
+            {id: player_id, vote: null, win: 'n', picked: 4, cards: [], score: 0, levelups: 0}
+        ]
+    };
+
+    $.cardstories.poll = function(query, player_id, game_id, root, cb) {};
+
+    var next_owner_id = 117;
+    var next_game_id = game_id + 1;
+    var next_game_cb;
+
+    $.cardstories_table.on_next_game_ready = function(_player_id, _game_id, root, cb) {
+        equal(_player_id, player_id, 'on_next_game_ready gets passed the player_id');
+        equal(_game_id, game_id, 'on_next_game_ready gets passed the game_id');
+        next_game_cb = cb;
+    };
+    $.cardstories_table.get_next_owner_id = function(_game_id, root) {
+        equal(_game_id, game_id, 'get_next_owner_id is called with current game id');
+        return next_owner_id;
+    };
+
+    $.cardstories.create(player_id, game, root).then(start);
+
+    var modal = $('.cardstories_next_game_ready', element);
+    equal(modal.css('display'), 'none', 'Next game ready modal is not visible initially.');
+
+    // Invoke the next game callback (simulate next game being ready).
+    next_game_cb(next_game_id, {});
+
+    notEqual(modal.css('display'), 'none', 'Next game ready modal IS visible.');
+    var player_name = $('.cardstories_player_name', modal);
+    equal(player_name.text(), 'Player ' + next_owner_id, 'Name of next owner is shown on the modal');
+
+    // Will click the button on the dialog now, but first stub out some functions.
+    $.cardstories.poll_discard = function(root) {
+        ok(true, 'poll was discarded');
+    };
+    $.cardstories.reload = function(_player_id, _game_id, options, root) {
+        equal(_player_id, player_id, 'reload is called with player_id');
+        equal(_game_id, next_game_id, 'reload is called with next game id');
+    };
+    // Click it now.
+    $('.cardstories_modal_button', modal).click();
+});
+
+asyncTest("create player, next owner, another game ready", 5, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_invitation .cardstories_pick', root);
+    var owner_id = 77;
+    var player_id = 15;
+    var game_id = 215;
+    var game = {
+        id: game_id,
+        owner_id: owner_id,
+        owner: false,
+        self: [null, null, []],
+        players: [
+            {id: owner_id, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0},
+            {id: player_id, vote: null, win: 'n', picked: 4, cards: [], score: 0, levelups: 0}
+        ]
+    };
+
+    $.cardstories.poll = function(query, player_id, game_id, root, cb) {};
+
+    var next_owner_id = player_id; // This player is the owner of the next game.
+    var next_game_id = game_id + 1;
+    var next_game_cb;
+
+    $.cardstories_table.on_next_game_ready = function(_player_id, _game_id, root, cb) {
+        equal(_player_id, player_id, 'on_next_game_ready gets passed the player_id');
+        equal(_game_id, game_id, 'on_next_game_ready gets passed the game_id');
+        next_game_cb = cb;
+    };
+    $.cardstories_table.get_next_owner_id = function(_game_id, root) {
+        equal(_game_id, game_id, 'get_next_owner_id is called with current game id');
+        return next_owner_id;
+    };
+
+    $.cardstories.create(player_id, game, root).then(start);
+
+    var modal = $('.cardstories_next_game_ready', element);
+    equal(modal.css('display'), 'none', 'Next game ready modal is not visible initially.');
+
+    // Invoke the next game callback (simulate next game being ready).
+    next_game_cb(next_game_id, {});
+
+    // Because this time it's this player who is the next owner,
+    // the dialog should not be shown and nothing should really happen.
+    equal(modal.css('display'), 'none', 'Next game ready modal is STILL not visible.');
+});
+
+asyncTest("create player, next owner change", 15, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var element = $('.cardstories_invitation .cardstories_pick', root);
+    var owner_id = 77;
+    var player_id = 15;
+    var game_id = 215;
+    var game = {
+        id: game_id,
+        owner_id: owner_id,
+        owner: false,
+        self: [null, null, []],
+        players: [
+            {id: owner_id, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0},
+            {id: player_id, vote: null, win: 'n', picked: 4, cards: [], score: 0, levelups: 0}
+        ]
+    };
+
+    $.cardstories.poll = function(query, player_id, game_id, root, cb) {};
+
+    var next_owner_cb;
+    $.cardstories_table.on_next_owner_change = function(_player_id, _game_id, root, cb) {
+        equal(_player_id, player_id, 'on_next_owner_change gets passed the player_id');
+        equal(_game_id, game_id, 'on_next_owner_change gets passed the game_id');
+        next_owner_cb = cb;
+    };
+
+    $.cardstories.create(player_id, game, root).then(start);
+
+    var modal = $('.cardstories_next_owner_change', element);
+    equal(modal.css('display'), 'none', 'Next owner change modal is not visible initially.');
+    // Invoke the next game callback, make some other player the next owner.
+    next_owner_cb(player_id + 22);
+    // Nothing should happen - player's shouldn't care about an owner change, unless they
+    // are the next owner.
+    equal(modal.css('display'), 'none', 'Next owner change modal is still not visible.');
+    // Make next owner switch to this player now.
+    next_owner_cb(player_id);
+    // The modal should now be visible.
+    notEqual(modal.css('display'), 'none', 'Next owner change modal IS visible.');
+    // Switch to another owner again
+    next_owner_cb(player_id + 11);
+    // Dialog should hide again.
+    equal(modal.css('display'), 'none', 'Next owner change modal should NOT be visible anymore.');
+
+    // Switch back to current player to bring back the dialog.
+    next_owner_cb(player_id);
+    notEqual(modal.css('display'), 'none', 'Next owner change modal IS visible.');
+    // Current game owner's name should be visible on the dialog.
+    var player_name = $('.cardstories_player_name', modal);
+    equal(player_name.text(), 'Player ' + owner_id, "Current game owner's name is visible on the modal");
+
+    // Pretend the player already created the next game. The dialog should close.
+    $.cardstories_table.get_next_game_id = function(game_id, root) { return game_id + 22; };
+    next_owner_cb(player_id);
+    equal(modal.css('display'), 'none', 'Next owner change modal is not visible.');
+    // Stop pretending and bring back the dialog.
+    $.cardstories_table.get_next_game_id = function(game_id, root) { return null; };
+    next_owner_cb(player_id);
+    notEqual(modal.css('display'), 'none', 'Next owner change modal IS visible.');
+
+    // Make the player click the "create game" button on the dialog,
+    // but first stub out some functions.
+    $.cardstories.poll_discard = function(root) {
+        ok(true, 'poll was discarded');
+    };
+    $.cardstories.reload = function(_player_id, _game_id, options, root) {
+        equal(_player_id, player_id, 'reload is called with player_id');
+        equal(_game_id, undefined, 'reload is called with "undefined" for game_id');
+        ok(options.force_create, 'reload is called with the force_create option');
+        equal(options.previous_game_id, game_id, 'reload is called with the previous_game_id option properly set');
+    };
+    // Click it now.
+    $('.cardstories_modal_button', modal).click();
+});
+
 
 test("existing_players_show_helper", 15, function() {
     var root = $('#qunit-fixture .cardstories');
@@ -3036,7 +3307,7 @@ asyncTest("complete owner lost easy", 14, function() {
         ]
     };
     $.cardstories_table = {
-        get_next_owner_id: function(player_id, game_id, root) { return player1; },
+        get_next_owner_id: function(game_id, root) { return player1; },
         on_next_owner_change: function(player_id, game_id, root, cb) {}
     };
 
@@ -3081,7 +3352,7 @@ asyncTest("complete owner lost hard", 14, function() {
                      { 'id': player2, 'vote': 31, 'win': 'y', 'picked': 32, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null } ]
     };
     $.cardstories_table = {
-        get_next_owner_id: function(player_id, game_id, root) { return player1; },
+        get_next_owner_id: function(game_id, root) { return player1; },
         on_next_owner_change: function(player_id, game_id, root, cb) {}
     };
 
@@ -3126,7 +3397,7 @@ asyncTest("complete owner won", 14, function() {
                      { 'id': player2, 'vote': 31, 'win': 'n', 'picked': 32, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null } ]
     };
     $.cardstories_table = {
-        get_next_owner_id: function(player_id, game_id, root) { return player1; },
+        get_next_owner_id: function(game_id, root) { return player1; },
         on_next_owner_change: function(player_id, game_id, root, cb) {}
     };
 
@@ -3183,7 +3454,7 @@ asyncTest("complete", 49, function() {
                     {'id': player4, 'vote': null, 'win': 'n', 'picked': 34, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null, 'score_prev': null, 'level_prev': null } ]
     };
     $.cardstories_table = {
-        get_next_owner_id: function(player_id, game_id, root) { return player1; },
+        get_next_owner_id: function(game_id, root) { return player1; },
         on_next_owner_change: function(player_id, game_id, root, cb) {}
     };
 
@@ -3276,7 +3547,7 @@ asyncTest("complete player didn't vote", 11, function() {
     };
 
     $.cardstories_table = {
-        get_next_owner_id: function(player_id, game_id, root) { return player1; },
+        get_next_owner_id: function(game_id, root) { return player1; },
         on_next_owner_change: function(player_id, game_id, root, cb) {}
     };
 
@@ -3323,7 +3594,7 @@ asyncTest("complete anonymous", 3, function() {
     };
 
     $.cardstories_table = {
-        get_next_owner_id: function(player_id, game_id, root) { return player1; },
+        get_next_owner_id: function(game_id, root) { return player1; },
         on_next_owner_change: function(player_id, game_id, root, cb) {}
     };
 
@@ -3358,7 +3629,7 @@ asyncTest("complete close results box author", 11, function() {
         ]
     };
     $.cardstories_table = {
-        get_next_owner_id: function(player_id, game_id, root) { return player1; },
+        get_next_owner_id: function(game_id, root) { return player1; },
         on_next_owner_change: function(player_id, game_id, root, cb) {}
     };
 
@@ -3417,7 +3688,7 @@ asyncTest("complete close results box player", 14, function() {
                      { 'id': player2, 'vote': 31, 'win': 'n', 'picked': 32, 'cards': [], 'score': null, 'level': null, 'score_next': null, 'score_left': null } ]
     };
     $.cardstories_table = {
-        get_next_owner_id: function(player_id, game_id, root) { return player1; },
+        get_next_owner_id: function(game_id, root) { return player1; },
         on_next_owner_change: function(player_id, game_id, root, cb) {}
     };
 
@@ -3484,7 +3755,7 @@ asyncTest("complete levelup player", 14, function() {
         ]
     };
     $.cardstories_table = {
-        get_next_owner_id: function(player_id, game_id, root) { return player1; },
+        get_next_owner_id: function(game_id, root) { return player1; },
         on_next_owner_change: function(player_id, game_id, root, cb) {}
     };
 
@@ -3537,7 +3808,7 @@ asyncTest("complete levelup owner", 14, function() {
         ]
     };
     $.cardstories_table = {
-        get_next_owner_id: function(player_id, game_id, root) { return player1; },
+        get_next_owner_id: function(game_id, root) { return player1; },
         on_next_owner_change: function(player_id, game_id, root, cb) {}
     };
 
@@ -3612,9 +3883,9 @@ asyncTest("next_game_as_author", 4, function() {
     var next_game_dom = $('.cardstories_next_game', element);
     var continue_button = $('.cardstories_complete_continue', element);
     $.cardstories_table = {
-        get_next_owner_id: function(player_id, game_id, root) { return player_id; },
+        get_next_owner_id: function(game_id, root) { return player_id; },
         on_next_owner_change: function(player_id, game_id, root, cb) {},
-        on_next_game_ready: function(ready, player_id, game_id, root, cb) {
+        on_next_game_ready: function(player_id, game_id, root, cb) {
             $.cardstories.setTimeout(function() {
                 var poll_discarded = false;
                 $.cardstories.poll_discard = function() {
@@ -3661,9 +3932,9 @@ asyncTest("next_game_as_player", 4, function() {
     var next_game_dom = $('.cardstories_next_game', element);
     var continue_button = $('.cardstories_complete_continue', element);
     $.cardstories_table = {
-        get_next_owner_id: function(player_id, game_id, root) { return player_id+1; },
+        get_next_owner_id: function(game_id, root) { return player_id+1; },
         on_next_owner_change: function(player_id, game_id, root, cb) {},
-        on_next_game_ready: function(ready, player_id, game_id, root, cb) {
+        on_next_game_ready: function(player_id, game_id, root, cb) {
             $.cardstories.setTimeout(function() {
                 var poll_discarded = false;
                 $.cardstories.poll_discard = function() {
@@ -3691,6 +3962,27 @@ asyncTest("next_game_as_player", 4, function() {
         equal($('.cardstories_next_game_player', next_game_dom).css('display'), 'block');
         continue_button.click();
     });
+});
+
+test("table plugin callbacks", 2, function() {
+    var root = $('#qunit-fixture .cardstories');
+    var player_id = 87;
+    var game_id = 88;
+
+    // Make sure that on_next_owner_change and on_next_game_ready are
+    // reset after every 'game' call.
+    $.cardstories.ajax = function(options, player_id, game_id, root) {
+        options.success([]);
+    };
+
+    $.cardstories_table.on_next_owner_change = function(player_id, game_id, root, cb) {
+        equal(cb, null, 'next_owner_change callback is reset to null');
+    };
+    $.cardstories_table.on_next_game_ready = function(player_id, game_id, root, cb) {
+        equal(cb, null, 'next_game_ready callback is reset to null');
+    };
+
+    $.cardstories.game(player_id, game_id, root, {});
 });
 
 asyncTest("on_next_owner_change", 35, function() {
@@ -3722,8 +4014,8 @@ asyncTest("on_next_owner_change", 35, function() {
     var next_owner_id = other_player_id;
 
     $.cardstories_table = {
-        get_next_owner_id: function(player_id, game_id, root) { return next_owner_id; },
-        on_next_game_ready: function(ready, player_id, game_id, root, cb) { return false; },
+        get_next_owner_id: function(game_id, root) { return next_owner_id; },
+        on_next_game_ready: function(player_id, game_id, root, cb) { return false; },
         on_next_owner_change: function(player_id, game_id, root, cb) { owner_change_cb = cb; }
     };
 
@@ -3842,8 +4134,8 @@ asyncTest("on_next_owner_change after closing results", 34, function() {
     var next_owner_id = other_player_id;
 
     $.cardstories_table = {
-        get_next_owner_id: function(player_id, game_id, root) { return next_owner_id; },
-        on_next_game_ready: function(ready, player_id, game_id, root, cb) { return false; },
+        get_next_owner_id: function(game_id, root) { return next_owner_id; },
+        on_next_game_ready: function(player_id, game_id, root, cb) { return false; },
         on_next_owner_change: function(player_id, game_id, root, cb) { owner_change_cb = cb; }
     };
 

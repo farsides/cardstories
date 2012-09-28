@@ -51,6 +51,9 @@
             };
         };
 
+        // Stub the tabs interaction.
+        $.cardstories_tabs.get_open_game_ids = function(root) { return []; };
+
         // Stub the table interactions.
         var table;
         var current_player_id;
@@ -59,12 +62,19 @@
             owner_change_callback = callback;
             current_player_id = player_id;
         };
+        var next_game_ready_callback;
+        $.cardstories_table.on_next_game_ready = function(player_id, game_id, root, callback) {
+            next_game_ready_callback = callback;
+            current_player_id = player_id;
+        };
+        $.cardstories_table.get_next_owner_id = function(game_id, root) {
+            return table.next_owner_id;
+        };
 
         $('.cardstories_owner_change').unbind('click').click(function() {
             var next_owner_id;
             if (owner_change_callback) {
                 if ($(this).hasClass('cardstories_owner_change_self')) {
-                    console.log("FUU", current_player_id);
                     next_owner_id = current_player_id;
                 } else {
                     var player_ids = $.map(game.players, function(p) { return p.id; });
@@ -77,6 +87,22 @@
                 }
                 table.next_owner_id = next_owner_id;
                 owner_change_callback(next_owner_id);
+            }
+            return false;
+        });
+        $('.cardstories_next_game_ready').unbind('click').click(function() {
+            if (next_game_ready_callback) {
+                var opts;
+                if ($(this).hasClass('cardstories_next_game_ready_self')) {
+                    table.next_owner_id = current_player_id;
+                    table.next_game_id = undefined;
+                    opts = {force_create: true};
+                } else {
+                    table.next_owner_id = 42;
+                    table.next_game_id = 4242;
+                    opts = {};
+                }
+                next_game_ready_callback(table.next_game_id, opts);
             }
             return false;
         });
@@ -93,6 +119,12 @@
                     {id: 2, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0}
                 ]
             };
+            table = {
+                next_game_id: null,
+                next_owner_id: null,
+                on_next_owner_change_callback: null
+            };
+            $(root).data('cardstories_table', table);
             $.cardstories.create_pick_card(11, game, root);
         } else if (skin === 'create_wait_for_card') {
             game = {
@@ -107,6 +139,12 @@
                     {id: 3, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0}
                 ]
             };
+            table = {
+                next_game_id: null,
+                next_owner_id: null,
+                on_next_owner_change_callback: null
+            };
+            $(root).data('cardstories_table', table);
             $.cardstories.create_wait_for_story(3, game, root);
         } else if (skin === 'create_wait_for_card_anonymous') {
             game = {
@@ -123,6 +161,12 @@
                     {id: 5, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0}
                 ]
             };
+            table = {
+                next_game_id: null,
+                next_owner_id: null,
+                on_next_owner_change_callback: null
+            };
+            $(root).data('cardstories_table', table);
             $.cardstories.create_wait_for_story(42, game, root);
         } else if (skin === 'create_write_sentence') {
             game = {
@@ -137,6 +181,12 @@
                     {id: 4, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0}
                 ]
             };
+            table = {
+                next_game_id: null,
+                next_owner_id: null,
+                on_next_owner_change_callback: null
+            };
+            $(root).data('cardstories_table', table);
             $.cardstories.create_write_sentence(11, game, root);
         } else if (skin === 'create_wait_for_sentence') {
             game = {
@@ -153,6 +203,12 @@
                     {id: 5, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0}
                 ]
             };
+            table = {
+                next_game_id: null,
+                next_owner_id: null,
+                on_next_owner_change_callback: null
+            };
+            $(root).data('cardstories_table', table);
             $.cardstories.create_wait_for_story(2, game, root);
         } else if (skin === 'create_wait_for_sentence_anonymous') {
             game = {
@@ -169,6 +225,12 @@
                     {id: 5, vote: null, win: 'n', picked: null, cards: [], score: 0, levelups: 0}
                 ]
             };
+            table = {
+                next_game_id: null,
+                next_owner_id: null,
+                on_next_owner_change_callback: null
+            };
+            $(root).data('cardstories_table', table);
             $.cardstories.create_wait_for_story(42, game, root);
         } else if (skin === 'invitation_owner') {
             game = {
@@ -462,7 +524,6 @@
             table = {
                 next_game_id: null,
                 next_owner_id: player_id,
-                ready_for_next_game: false,
                 on_next_owner_change_callback: null
             };
             $(root).data('cardstories_table', table);
@@ -520,7 +581,6 @@
             table = {
                 next_game_id: null,
                 next_owner_id: 2,
-                ready_for_next_game: false,
                 on_next_owner_change_callback: null
             };
             $(root).data('cardstories_table', table);
@@ -606,7 +666,6 @@
             table = {
                 next_game_id: null,
                 next_owner_id: 2,
-                ready_for_next_game: false,
                 on_next_owner_change_callback: null
             };
             $(root).data('cardstories_table', table);
@@ -660,7 +719,6 @@
             table = {
                 next_game_id: null,
                 next_owner_id: 2,
-                ready_for_next_game: false,
                 on_next_owner_change_callback: null
             };
             $(root).data('cardstories_table', table);
@@ -734,7 +792,6 @@
             table = {
                 next_game_id: null,
                 next_owner_id: 4,
-                ready_for_next_game: false,
                 on_next_owner_change_callback: null
             };
             $(root).data('cardstories_table', table);
@@ -818,7 +875,6 @@
             table = {
                 next_game_id: null,
                 next_owner_id: 4,
-                ready_for_next_game: false,
                 on_next_owner_change_callback: null
             };
             $(root).data('cardstories_table', table);

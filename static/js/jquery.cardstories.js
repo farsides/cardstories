@@ -122,17 +122,29 @@
                     $this.panic(error, player_id, game_id, root);
                 }
             } else {
-                // Retry after 100 miliseconds.
+                // Retry after 1 second.
                 $this.setTimeout(function() {
                     $this.ajax(ajax_request, player_id, game_id, root);
-                }, 100);
+                }, 1000);
             }
         },
 
-        setTimeout: function(cb, delay) { return $.cardstories.window.setTimeout(cb, delay); },
+        setTimeout: function(cb, delay) {
+            return $.cardstories.window.setTimeout(cb, delay);
+        },
+
+        animationTimeout: function(cb, delay) {
+            if (this.animations_off()) { delay = 0; }
+            return this.setTimeout(cb, delay);
+        },
 
         delay: function(root, delay, q) {
+            if (this.animations_off()) { delay = 0; }
             return $(root).delay(delay, q);
+        },
+
+        animations_off: function() {
+            return this.url_param('animations') === 'off';
         },
 
         ajax: function(options, player_id, game_id, root) {
@@ -232,6 +244,12 @@
                 params.previous_game_id = options.previous_game_id;
             }
 
+            // Add animations param, but only if already present.
+            var animations = $.cardstories.url_param('animations');
+            if (animations) {
+                params.animations = animations;
+            }
+
             var search = '';
             var encoded_params = $.param(params);
             if (encoded_params) {
@@ -269,18 +287,19 @@
         create: function(player_id, game, root) {
             var $this = this;
             var inhibit_poll = false;
+            var deferred;
 
             if (game.owner) {
                 if (game.winner_card) {
-                    $this.create_write_sentence(player_id, game, root);
+                    deferred = $this.create_write_sentence(player_id, game, root);
                 } else {
-                    $this.create_pick_card(player_id, game, root);
+                    deferred = $this.create_pick_card(player_id, game, root);
                 }
             } else {
                 if (game.self) {
-                    $this.create_wait_for_story(player_id, game, root);
+                    deferred = $this.create_wait_for_story(player_id, game, root);
                 } else if ($.cardstories.url_param('anonymous')) {
-                    $this.create_wait_for_story(player_id, game, root);
+                    deferred = $this.create_wait_for_story(player_id, game, root);
                 } else {
                     inhibit_poll = true;
                     $this.player_participate(player_id, game, root);
@@ -297,6 +316,57 @@
                     $this.game(player_id, game.id, root);
                 });
             }
+
+            return deferred;
+        },
+
+        create_setup_next_owner_change_handler: function(player_id, game, element, root) {
+            var $this = this;
+            $.cardstories_table.on_next_owner_change(player_id, game.id, root, function(next_owner_id) {
+                var modal = $('.cardstories_next_owner_change', element);
+                var overlay = $('.cardstories_modal_overlay', element);
+
+                // If this player is the next owner, notify him
+                // (unless next_game_id isn't null, which means he already created the next game),
+                // otherwise close the dialog if it is open.
+                var next_game = $.cardstories_table.get_next_game_id(game.id, root);
+                if (player_id === next_owner_id && !next_game) {
+                    var player_name = $('.cardstories_player_name', modal);
+
+                    player_name.html($this.get_player_info_by_id(game.owner_id).name);
+                    $this.display_modal(modal, overlay, null, function() {
+                        $this.poll_discard(root);
+                        $this.reload(player_id, undefined, {force_create: true, previous_game_id: game.id}, root);
+                    });
+                } else if (modal.css('display') !== 'none') {
+                    $this.close_modal(modal, overlay);
+                }
+            });
+        },
+
+        create_setup_next_game_ready_handler: function(player_id, game, element, root) {
+            var $this = this;
+            $.cardstories_table.on_next_game_ready(player_id, game.id, root, function(next_game_id, next_game_opts) {
+                var next_owner_id = $.cardstories_table.get_next_owner_id(game.id, root);
+                var modal = $('.cardstories_next_game_ready', element);
+                var overlay = $('.cardstories_modal_overlay', element);
+
+                // If the player already has the game open in a tab,
+                // there's no need to show him the message.
+                var open_game_ids = $.cardstories_tabs.get_open_game_ids(root);
+                var is_game_open = $.inArray(next_game_id, open_game_ids) > -1;
+                if (!(is_game_open || player_id === next_owner_id)) {
+                    var player_name = $('.cardstories_player_name', modal);
+
+                    player_name.html($this.get_player_info_by_id(next_owner_id).name);
+                    $this.display_modal(modal, overlay, null, function() {
+                        $this.poll_discard(root);
+                        $this.reload(player_id, next_game_id, next_game_opts, root);
+                    });
+                } else if (modal.css('display') !== 'none') {
+                    $this.close_modal(modal, overlay);
+                }
+            });
         },
 
         create_wait_for_story: function(player_id, game, root) {
@@ -306,8 +376,18 @@
             this.display_master_info(this.get_master_info(game), element);
             this.init_board_buttons(player_id, element, root);
 
+            if (game.self) {
+                this.create_setup_next_owner_change_handler(player_id, game, element, root);
+                this.create_setup_next_game_ready_handler(player_id, game, element, root);
+            }
+
             this.create_invitation_display_board(player_id, game, element, root, false);
-            this.replay_create_game(game, element, root);
+
+            var deferred = $.Deferred();
+            this.replay_create_game(game, element, root, function() {
+                deferred.resolve();
+            });
+            return deferred;
         },
 
         animate_progress_bar: function(step, element, cb) {
@@ -353,7 +433,9 @@
         // absolutely, and its children must be sized and positioned relatively
         // (i.e., "em" instead of "px", percentages for widths and heights).
         animate_scale: function(reverse, factor, duration, el, cb) {
-            el.show();
+            // Show self and all parents first, so that the measurements
+            // give correct results.
+            el.parents().andSelf().show();
             var big_top = el.position().top;
             var big_left = el.position().left;
             var big_width = el.width();
@@ -415,13 +497,24 @@
         },
 
         animate_sprite: function(movie, fps, frames, rewind, loop, cb) {
-            movie.show().sprite({
-                fps: fps,
-                no_of_frames: frames,
-                play_frames: loop ? null : frames,
-                rewind: rewind,
-                oncomplete: cb
-            });
+            if (this.animations_off()) {
+                  // Show the last frame immediately.
+                movie.show().sprite({
+                    fps: fps,
+                    rewind: !rewind,
+                    no_of_frames: frames,
+                    play_frames: 1,
+                    oncomplete: cb
+                });
+            } else {
+                movie.show().sprite({
+                    fps: fps,
+                    no_of_frames: frames,
+                    play_frames: loop ? null : frames,
+                    rewind: rewind,
+                    oncomplete: cb
+                });
+            }
         },
 
         clear_queues: function(root) {
@@ -452,6 +545,7 @@
             this.display_progress_bar('owner', 1, element, root);
             this.display_master_info($this.get_player_info_by_id(player_id), element);
             this.init_board_buttons(player_id, element, root);
+            this.create_setup_next_game_ready_handler(player_id, game, element, root);
             var cards = $.map(game.self[2], function(card, index) {
                 return {'value': card};
             });
@@ -497,7 +591,7 @@
 
                         // Delay the appearance of the modal box artificially, since
                         // jqDock doesn't provide a hook for when expansion finishes.
-                        $this.setTimeout(function() {
+                        $this.animationTimeout(function() {
                             var modal = $('.cardstories_info', element);
                             var overlay = $('.cardstories_modal_overlay', element);
                             $this.display_modal(modal, overlay, function() {
@@ -982,7 +1076,9 @@
             this.display_progress_bar('owner', 2, element, root);
             this.display_master_info($this.get_player_info_by_id(player_id), element);
             this.init_board_buttons(player_id, element, root);
+            this.create_setup_next_game_ready_handler(player_id, game, element, root);
             $('.cardstories_card', element).attr('class', 'cardstories_card cardstories_card' + card + ' {card:' + card + '}');
+
 
             // Immediately display seats for players who have already joined the game previously.
             this.existing_players_show_helper(existing_players, game, element, root);
@@ -1919,7 +2015,7 @@
                             active_card.jqDock('expand');
                             // jqDock doesn't provide a hook for when expansion
                             // finishes, so use a timeout to call next().
-                            $this.setTimeout(function() {
+                            $this.animationTimeout(function() {
                                 if (game.winner_card === null && !wait_for_card_modal.hasClass('cardstories_noop')) {
                                     $this.display_modal(wait_for_card_modal, overlay);
                                 }
@@ -4134,7 +4230,7 @@
                 var score_deferred = $.Deferred();
                 var level_deferred = $.Deferred();
 
-                // Star playing the "pinball" sound.
+                // Start playing the "pinball" sound.
                 $.cardstories_audio.play('score_pinball', root);
                 // Animate the game score.
                 var timeout = 30;
@@ -4143,12 +4239,12 @@
                     tmp++;
                     if (tmp <= player.score) {
                         score.html(tmp);
-                        $this.setTimeout(inc_score, timeout);
+                        $this.animationTimeout(inc_score, timeout);
                     } else {
                         score_deferred.resolve();
                     }
                 }
-                $this.setTimeout(inc_score, timeout);
+                $this.animationTimeout(inc_score, timeout);
 
                 var level_legend = $('.cardstories_results_level_legend', box);
                 var level_legend_template = level_legend.html();
@@ -4374,7 +4470,7 @@
 
                         // Schedule another iteration of the loop, unless it should be stopped.
                         $.when(fireworks_deferred, stars_deferred).then(function() {
-                            if (!element.hasClass('cardstories_results_closed')) {
+                            if (!element.hasClass('cardstories_results_closed') && !$this.animations_off()) {
                                 levelup_loop();
                             }
                         });
@@ -4529,7 +4625,7 @@
                 continue_button.addClass('cardstories_centered');
             }
 
-            var next_owner_id = $.cardstories_table.get_next_owner_id(player_id, game.id, root);
+            var next_owner_id = $.cardstories_table.get_next_owner_id(game.id, root);
             $this.complete_update_next_author_info(next_owner_id, player_id, element);
 
             // Enable "continue" button
@@ -4539,9 +4635,9 @@
                 var results_box = $('.cardstories_results', element);
                 $this.complete_fade_out_results_box(results_box, element, root, function() {
                     // Ask the table plugin to switch to the next game as soon as possible
-                    var is_ready = $.cardstories_table.on_next_game_ready(true, player_id, game.id, root, function(next_game_id, next_game_opts) {
+                    var is_ready = $.cardstories_table.on_next_game_ready(player_id, game.id, root, function(next_game_id, next_game_opts) {
                         $this.poll_discard(root);
-                        $.cardstories_tabs.remove_tab_for_game(game.id, player_id, root, function() {
+                        $.cardstories_tabs.close_tab_for_game(game.id, player_id, root, function() {
                             $this.reload(player_id, next_game_id, next_game_opts, root);
                         });
                     });
@@ -4680,6 +4776,12 @@
             var $this = this;
 
             var success = function(data, status) {
+                // Reset table callbacks, so that they don't stick around forever.
+                // If the callbacks are needed, they will be rebound by the current
+                // state function.
+                $.cardstories_table.on_next_owner_change(player_id, game_id, root, null);
+                $.cardstories_table.on_next_game_ready(player_id, game_id, root, null);
+
                 if ('error' in data) {
                     var error = data.error;
                     if (error.code === 'GAME_DOES_NOT_EXIST') {
@@ -5221,6 +5323,10 @@
             root.addClass('cardstories_root');
             root.data('polling', false);
             root.data('dom_clone', root.html());
+
+            if ($this.animations_off()) {
+                $.fx.off = true;
+            }
 
             $($this.window).bind('statechange', function() {
                 $this.onstatechange(root);

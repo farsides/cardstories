@@ -120,6 +120,8 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.admin',
     'south',
+    'paypal.standard.ipn',
+    'paypal.standard.pdt',
     'website.cardstories',
     'website.util',
 )
@@ -146,6 +148,12 @@ FACEBOOK_PERMS = ['email']
 OWA_ENABLE = False
 OWA_URL = ''
 OWA_SITE_ID = ''
+
+# Paypal integration
+PAYPAL_RECEIVER_EMAIL = 'paypal@cardstories.org'
+PAYPAL_IPN_PATH = 'paypal/ipn/'
+PAYPAL_PDT_PATH = 'paypal/pdt/'
+PAYPAL_IDENTITY_TOKEN = 'hOLmlj16HX-J1WtvBVKzu8YdsD2zbGCRKW7b3kLFGvvg0UAN6oPJG171xVC'
 
 # Enables code coverage
 TEST_RUNNER = 'tests.run_tests_with_coverage'

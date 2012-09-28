@@ -20,7 +20,7 @@
 #
 from urllib import quote, urlencode, urlopen
 from urlparse import parse_qs
-from simplejson import loads
+from simplejson import loads, dumps
 
 from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseNotFound, \
@@ -36,6 +36,9 @@ from django.template import RequestContext
 from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.shortcuts import redirect
+
+import paypal.standard.pdt.views
+from paypal.standard.forms import PayPalPaymentsForm
 
 from forms import RegistrationForm, LoginForm
 
@@ -352,3 +355,31 @@ def get_loggedin_player_id(request, session_key):
 
     response = HttpResponse(user.id, mimetype="text/plain")
     return response
+
+def get_extra_cards_form(request):
+    """
+    Displays a HTML view with a form where the user can buy a pack of
+    extra cards via paypal.
+    """
+    if request.user.is_authenticated():
+        custom_data = {'user_id': request.user.id}
+
+        paypal_dict = {
+            'business': settings.PAYPAL_RECEIVER_EMAIL,
+            'amount': '2.99',
+            'item_name': 'CardStories Extra Cards',
+            'item_number': 'CardPack1',
+            'notify_url': '%s/%s' % (settings.BASE_URL, settings.PAYPAL_IPN_PATH),
+            'cancel_return': settings.BASE_URL,
+            'custom':  dumps(custom_data),
+        }
+
+        form = PayPalPaymentsForm(initial=paypal_dict)
+        context = {'form': form}
+    else:
+        context = {'form': None}
+
+    return render_to_response('cardstories/get_extra_cards.html', context)
+
+def bought_cards(request):
+    return paypal.standard.pdt.views.pdt(request, template='cardstories/bought_cards.html')

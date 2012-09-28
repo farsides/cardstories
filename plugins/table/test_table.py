@@ -91,6 +91,67 @@ class TableTest(unittest.TestCase):
         # kill the service we started before the test
         return self.service.stopService()
 
+
+    @defer.inlineCallbacks
+    def add_players_to_game(self, game_id, player_ids):
+        sql = "INSERT INTO tabs (player_id, game_id, created) VALUES (%d, %d, datetime('now'))"
+        for player_id in player_ids:
+            yield self.service.db.runQuery(sql % (player_id, game_id))
+
+    @defer.inlineCallbacks
+    def complete_game(self, game_id, owner, player1, player2):
+        # Set card
+        yield self.service.handle([], {'action': ['set_card'],
+                                       'card': [1],
+                                       'game_id': [game_id],
+                                       'player_id': [owner]})
+        # Set sentence
+        yield self.service.handle([], {'action': ['set_sentence'],
+                                       'sentence': ['SENTENCE'],
+                                       'game_id': [game_id],
+                                       'player_id': [owner]})
+        # Join
+        yield self.service.handle([], {'action': ['participate'],
+                                       'game_id': [game_id],
+                                       'player_id': [player1]})
+        yield self.service.handle([], {'action': ['participate'],
+                                       'game_id': [game_id],
+                                       'player_id': [player2]})
+
+        # Pick
+        game, players_ids = yield self.table_instance.get_game_by_id(game_id, player1)
+        yield self.service.handle([], {'action': ['pick'],
+                                       'game_id': [game_id],
+                                       'player_id': [player1],
+                                       'card': [game['self'][2][0]]})
+        game, players_ids = yield self.table_instance.get_game_by_id(game_id, player2)
+        yield self.service.handle([], {'action': ['pick'],
+                                       'game_id': [game_id],
+                                       'player_id': [player2],
+                                       'card': [game['self'][2][0]]})
+
+        # Vote
+        yield self.service.handle([], {'action': ['voting'],
+                                       'game_id': [game_id],
+                                       'owner_id': [game['owner_id']]})
+
+        @defer.inlineCallbacks
+        def player_vote(player_id):
+            game, players_ids = yield self.table_instance.get_game_by_id(game_id, player_id)
+            my_card = game['self'][0]
+            board = [x for x in game['board'] if x != my_card]
+            yield self.service.handle([], {'action': ['vote'],
+                                           'game_id': [game_id],
+                                           'player_id': [player_id],
+                                           'card': [board[0]]})
+        yield player_vote(player1)
+        yield player_vote(player2)
+
+        # Complete
+        yield self.service.handle([], {'action': ['complete'],
+                                       'game_id': [game_id],
+                                       'owner_id': [game['owner_id']]})
+
     @defer.inlineCallbacks
     def test01_no_table(self):
         player_id = 12
@@ -214,52 +275,9 @@ class TableTest(unittest.TestCase):
         result = yield poll
         modified = result['modified'][0]
 
-        poll = self.table_instance.poll({'game_id': [game_id],
-                                         'modified': [modified]})
-        self.assertFalse(poll.called)
-
-        # Next owner closes the tab before creating the game - should chose another player
-        yield self.service.remove_tab({'action': ['remove_tab'],
-                                       'player_id': [player3],
-                                       'game_id': [game_id]})
-
-        # Poll must return to announce the next owner
-        result = yield poll
-        modified = result['modified'][0]
-
-        poll = self.table_instance.poll({'game_id': [game_id],
-                                         'modified': [modified]})
-        self.assertFalse(poll.called)
-
-        state = yield self.table_instance.state({'type': ['table'],
-                                                 'game_id': [game_id],
-                                                 'player_id': [player1]})
-        self.assertEqual(state, [{'game_id': game_id,
-                                  'next_game_id': None,
-                                  'next_owner_id': player1},
-                                 [player1]])
-
-        # Create second game
-        response = yield self.service.handle([], {'action': ['create'],
-                                                  'owner_id': [player2],
-                                                  'card': [1],
-                                                  'previous_game_id': [game_id],
-                                                  'sentence': ['sentence']})
-        game2_id = response['game_id']
-
-        state = yield self.table_instance.state({'type': ['table'],
-                                                 'game_id': [game_id],
-                                                 'player_id': [player1]})
-        self.assertEqual(state, [{'game_id': game_id,
-                                  'next_game_id': game2_id,
-                                  'next_owner_id': player2},
-                                 [player2]])
-
-        # Poll must return to announce the new game
-        result = yield poll
-        modified = result['modified'][0]
-
         # All players quit - deletes the table
+        # Clear the side_effect which otherwise takes precedence over return_value.
+        self.mock_activity_instance.is_player_online.side_effect = None
         self.mock_activity_instance.is_player_online.return_value = False
         yield self.table_instance.on_activity_notification({'type': 'player_disconnecting',
                                                             'player_id': player1})
@@ -273,103 +291,6 @@ class TableTest(unittest.TestCase):
                                   'next_game_id': None,
                                   'next_owner_id': player1},
                                  [player1]])
-
-    @defer.inlineCallbacks
-    def complete_game(self, game_id, owner, player1, player2):
-        # Set card
-        yield self.service.handle([], {'action': ['set_card'],
-                                       'card': [1],
-                                       'game_id': [game_id],
-                                       'player_id': [owner]})
-        # Set sentence
-        yield self.service.handle([], {'action': ['set_sentence'],
-                                       'sentence': ['SENTENCE'],
-                                       'game_id': [game_id],
-                                       'player_id': [owner]})
-        # Join
-        yield self.service.handle([], {'action': ['participate'],
-                                       'game_id': [game_id],
-                                       'player_id': [player1]})
-        yield self.service.handle([], {'action': ['participate'],
-                                       'game_id': [game_id],
-                                       'player_id': [player2]})
-
-        # Pick
-        game, players_ids = yield self.table_instance.get_game_by_id(game_id, player1)
-        yield self.service.handle([], {'action': ['pick'],
-                                       'game_id': [game_id],
-                                       'player_id': [player1],
-                                       'card': [game['self'][2][0]]})
-        game, players_ids = yield self.table_instance.get_game_by_id(game_id, player2)
-        yield self.service.handle([], {'action': ['pick'],
-                                       'game_id': [game_id],
-                                       'player_id': [player2],
-                                       'card': [game['self'][2][0]]})
-
-        # Vote
-        yield self.service.handle([], {'action': ['voting'],
-                                       'game_id': [game_id],
-                                       'owner_id': [game['owner_id']]})
-
-        @defer.inlineCallbacks
-        def player_vote(player_id):
-            game, players_ids = yield self.table_instance.get_game_by_id(game_id, player_id)
-            my_card = game['self'][0]
-            board = [x for x in game['board'] if x != my_card]
-            yield self.service.handle([], {'action': ['vote'],
-                                           'game_id': [game_id],
-                                           'player_id': [player_id],
-                                           'card': [board[0]]})
-        yield player_vote(player1)
-        yield player_vote(player2)
-
-        # Complete
-        yield self.service.handle([], {'action': ['complete'],
-                                       'game_id': [game_id],
-                                       'owner_id': [game['owner_id']]})
-
-    @defer.inlineCallbacks
-    def test03_disconnect_with_two_tables(self):
-        """
-        Bug #797 - ValueError: list.remove(x): x not in list (table.py, delete_table)
-        """
-
-        player_id = 12
-
-        # Create two tables
-        self.assertEqual(len(self.table_instance.tables), 0)
-
-        response = yield self.service.handle([], {'action': ['create'],
-                                                  'owner_id': [player_id],})
-        game1_id = response['game_id']
-        yield self.service.handle([], {'action': ['set_card'],
-                                       'card': [1],
-                                       'player_id': [player_id],
-                                       'game_id': [game1_id]})
-        yield self.service.handle([], {'action': ['set_sentence'],
-                                       'sentence': ['sentence'],
-                                       'player_id': [player_id],
-                                       'game_id': [game1_id]})
-
-        response = yield self.service.handle([], {'action': ['create'],
-                                       'owner_id': [player_id],})
-        game2_id = response['game_id']
-        yield self.service.handle([], {'action': ['set_card'],
-                                       'card': [1],
-                                       'player_id': [player_id],
-                                       'game_id': [game2_id]})
-        yield self.service.handle([], {'action': ['set_sentence'],
-                                       'sentence': ['sentence'],
-                                       'player_id': [player_id],
-                                       'game_id': [game2_id]})
-
-        self.assertEqual(len(self.table_instance.tables), 2)
-
-        # Players quits - deletes the two tables simulteanously
-        self.mock_activity_instance.is_player_online.return_value = False
-        yield self.table_instance.on_activity_notification({'type': 'player_disconnecting',
-                                                            'player_id': player_id})
-        self.assertEqual(len(self.table_instance.tables), 0)
 
     @defer.inlineCallbacks
     def test04_postprocess(self):
@@ -411,14 +332,6 @@ class TableTest(unittest.TestCase):
         yield self.table_instance.postprocess([[1, 2, {'this': 'test'}]], mock_request)
 
     @defer.inlineCallbacks
-    def test05_close_tab_with_nonexisting_table(self):
-        player_id = 43
-        game_id = 1123321
-        self.assertEqual(len(self.table_instance.tables), 0)
-        result = yield self.table_instance.on_tab_closed(player_id, game_id)
-        self.assertEqual(result, True)
-
-    @defer.inlineCallbacks
     def test06_next_game_timeout(self):
         owner = 98
         player1 = 12
@@ -433,9 +346,9 @@ class TableTest(unittest.TestCase):
         for player_id in [owner, player1, player2]:
             yield self.service.db.runQuery(sql % (player_id, game_id))
 
-        # Change the next game timeout from the default to 0.1 seconds for the test.
+        # Change the next game timeout from the default to 0.2 seconds for the test.
         table = self.table_instance.game2table[game_id]
-        table.NEXT_GAME_TIMEOUT = 0.1
+        table.NEXT_GAME_TIMEOUT = 0.2
 
         # Complete the game
         yield self.complete_game(game_id, owner, player1, player2)
@@ -448,13 +361,11 @@ class TableTest(unittest.TestCase):
                                   'next_owner_id': player1},
                                  [player1]])
 
-        game, players = yield self.table_instance.get_game_by_id(game_id)
-        modified = game['modified']
-
         # Start a poll on this table to know when the next owner will change.
         poll = self.table_instance.poll({'game_id': [game_id],
-                                         'modified': [modified]})
+                                         'modified': [table.get_modified()]})
         result = yield poll
+
         state = yield self.table_instance.state({'type': ['table'],
                                                  'game_id': [game_id],
                                                  'player_id': [player1]})
@@ -468,30 +379,23 @@ class TableTest(unittest.TestCase):
         # Cancel the timers, so that the test runner doesn't complain
         # about a "dirty" reactor.
         table.stop_timer(table.next_game_timer)
-        table.stop_timer(table.current_game_timer)
 
     @defer.inlineCallbacks
-    def test07_current_game_timeout(self):
+    def test07_next_game_timeout_after_game_created(self):
         owner = 57
         player1 = 123
         player2 = 334
-
-        @defer.inlineCallbacks
-        def add_players_to_game(game_id, player_ids):
-            sql = "INSERT INTO tabs (player_id, game_id, created) VALUES (%d, %d, datetime('now'))"
-            for player_id in player_ids:
-                yield self.service.db.runQuery(sql % (player_id, game_id))
 
         # Create first game
         response = yield self.service.handle([], {'action': ['create'],
                                                   'owner_id': [owner]})
         game_id = response['game_id']
 
-        add_players_to_game(game_id, [owner, player1, player2])
+        self.add_players_to_game(game_id, [owner, player1, player2])
 
-        # Change the next game timeout from the default to 0.1 seconds for the test.
+        # Change the next game timeout from the default to 0.2 seconds for the test.
         table = self.table_instance.game2table[game_id]
-        table.CURRENT_GAME_TIMEOUT = 0.1
+        table.NEXT_GAME_TIMEOUT = 0.2
 
         # Complete the game
         yield self.complete_game(game_id, owner, player1, player2)
@@ -506,22 +410,17 @@ class TableTest(unittest.TestCase):
 
         # player1 is the next owner, let him create the next game.
         # We will let him wait long enough so that the timer kicks in and
-        # the game is discarded as the next game of the table.
+        # gives another player a chance to be next owner.
         response = yield self.service.handle([], {'action': ['create'],
                                                   'owner_id': [player1],
                                                   'previous_game_id': [game_id]})
         new_game_id = response['game_id']
 
-        add_players_to_game(new_game_id, [owner, player1, player2])
+        self.add_players_to_game(new_game_id, [owner, player1, player2])
 
-        # Start a poll on this table to know when this game is discarded.
-        # Not sure why I need to yield on the poll twice :-(
+        # Start a poll on this table to know when another player is chosen.
         poll = self.table_instance.poll({'game_id': [new_game_id],
-                                         'modified': [0]})
-        result = yield poll
-        modified = result['modified'][0]
-        poll = self.table_instance.poll({'game_id': [new_game_id],
-                                         'modified': [modified]})
+                                         'modified': [table.get_modified()]})
         result = yield poll
         state = yield self.table_instance.state({'type': ['table'],
                                                  'game_id': [new_game_id],
@@ -529,10 +428,57 @@ class TableTest(unittest.TestCase):
 
         # Next owner took too long to create the game,
         # so player2 was chosen as the "new" next owner.
+        # This can be seen when inquiring about table
+        # from the new, pending game.
         self.assertEqual(state, [{'game_id': new_game_id,
                                   'next_game_id': None, # player 2 didn't create the next game yet, so it is None
                                   'next_owner_id': player2}, # player2 is now the next owner
                                  [player2]])
+
+        # The same result should be seen when inquiring about the table from the old (previous) game,
+        state = yield self.table_instance.state({'type': ['table'],
+                                                 'game_id': [game_id],
+                                                 'player_id': [player2]})
+        self.assertEqual(state, [{'game_id': game_id,
+                                  'next_game_id': None,
+                                  'next_owner_id': player2},
+                                 [player2]])
+
+        # ----
+        # Since player1 already started creating the next game, he should never
+        # again be chosen as the next owner for this round, we can see that by
+        # checking that next_owner_id only alternates between player2 and the
+        # original game's owner.
+        # First change:
+        yield self.table_instance.poll({'game_id': [new_game_id],
+                                        'modified': [table.get_modified()]})
+        state = yield self.table_instance.state({'type': ['table'],
+                                                 'game_id': [new_game_id],
+                                                 'player_id': [owner]})
+        self.assertEqual(state[0]['next_owner_id'], owner)
+        # Second change:
+        yield self.table_instance.poll({'game_id': [new_game_id],
+                                        'modified': [table.get_modified()]})
+        state = yield self.table_instance.state({'type': ['table'],
+                                                 'game_id': [new_game_id],
+                                                 'player_id': [owner]})
+        self.assertEqual(state[0]['next_owner_id'], player2)
+        # Third change, we're back to the owner:
+        yield self.table_instance.poll({'game_id': [new_game_id],
+                                        'modified': [table.get_modified()]})
+        state = yield self.table_instance.state({'type': ['table'],
+                                                 'game_id': [new_game_id],
+                                                 'player_id': [owner]})
+        self.assertEqual(state[0]['next_owner_id'], owner)
+        # And fourth change - back to player2:
+        yield self.table_instance.poll({'game_id': [new_game_id],
+                                        'modified': [table.get_modified()]})
+        state = yield self.table_instance.state({'type': ['table'],
+                                                 'game_id': [new_game_id],
+                                                 'player_id': [owner]})
+        self.assertEqual(state[0]['next_owner_id'], player2)
+
+        # ----
 
         # Player 2 creates a new game
         response = yield self.service.handle([], {'action': ['create'],
@@ -540,22 +486,151 @@ class TableTest(unittest.TestCase):
                                                   'previous_game_id': [new_game_id]})
         newest_game_id = response['game_id']
 
-        # Check the state now - it should be pointing to the newest game.
-        state = yield self.table_instance.state({'type': ['table'],
-                                                 'game_id': [new_game_id],
-                                                 'player_id': [owner]})
+        # Check the state now.
+        # At this point, player1's and player2's games are both pending.
+        # Depending on from which game you inquire about it, you should see
+        # different results.
 
-        # Next owner took too long to create the game,
-        # so player2 was chosen as the "new" next owner.
-        self.assertEqual(state, [{'game_id': new_game_id,
+        # Looking from the first (and still current) game, the user should be
+        # pointed to the newest pending game:
+        state = yield self.table_instance.state({'type': ['table'],
+                                                 'game_id': [game_id],
+                                                 'player_id': [owner]})
+        self.assertEqual(state, [{'game_id': game_id,
                                   'next_game_id': newest_game_id,
                                   'next_owner_id': player2},
                                  [player2]])
 
-        # Cancel the current game timer, so that the test runner doesn't complain
-        # about a "dirty" reactor.
-        table.stop_timer(table.current_game_timer)
+        # Looking from player1's pending game, the table should report the
+        # new owner (player2), but not the new game yet, because it's still pending:
+        state = yield self.table_instance.state({'type': ['table'],
+                                                 'game_id': [new_game_id],
+                                                 'player_id': [owner]})
+        self.assertEqual(state, [{'game_id': new_game_id,
+                                  'next_game_id': None,
+                                  'next_owner_id': player2},
+                                 [player2]])
 
+        # Looking from player2's pending game, we should see the same results:
+        state = yield self.table_instance.state({'type': ['table'],
+                                                 'game_id': [newest_game_id],
+                                                 'player_id': [owner]})
+        self.assertEqual(state, [{'game_id': newest_game_id,
+                                  'next_game_id': None,
+                                  'next_owner_id': player2},
+                                 [player2]])
+
+        # Let player1 finish creating the game now by setting the card and sentence.
+        # player1's game should be promoted as the next game of the table and every
+        # of the above requests should now point to it.
+        # Set card
+        yield self.service.handle([], {'action': ['set_card'],
+                                       'card': [1],
+                                       'game_id': [new_game_id],
+                                       'player_id': [player1]})
+        # Set sentence
+        yield self.service.handle([], {'action': ['set_sentence'],
+                                       'sentence': ['SENTENCE'],
+                                       'game_id': [new_game_id],
+                                       'player_id': [player1]})
+
+        # Looking from previous game:
+        state = yield self.table_instance.state({'type': ['table'],
+                                                 'game_id': [game_id],
+                                                 'player_id': [owner]})
+        self.assertEqual(state, [{'game_id': game_id,
+                                  'next_game_id': new_game_id,
+                                  'next_owner_id': player1},
+                                 [player1]])
+
+        # Looking from player1's game, which was promoted:
+        state = yield self.table_instance.state({'type': ['table'],
+                                                 'game_id': [new_game_id],
+                                                 'player_id': [owner]})
+        self.assertEqual(state, [{'game_id': new_game_id,
+                                  'next_game_id': None,
+                                  'next_owner_id': None},
+                                 []])
+        # The game should still be part of the same old table.
+        table2 = self.table_instance.game2table[new_game_id]
+        self.assertEqual(table2, table)
+
+        # Looking from player2's game, which is still in the pending state,
+        # the player should be pointed to the promoted game.
+        state = yield self.table_instance.state({'type': ['table'],
+                                                 'game_id': [newest_game_id],
+                                                 'player_id': [owner]})
+        self.assertEqual(state, [{'game_id': newest_game_id,
+                                  'next_game_id': new_game_id,
+                                  'next_owner_id': player1},
+                                 [player1]])
+
+        # Now let's move player2's game into 'invitation' state - this should
+        # trigger it to be detached from the current table, and put into
+        # its own, brand new table.
+        # Set card
+        yield self.service.handle([], {'action': ['set_card'],
+                                       'card': [10],
+                                       'game_id': [newest_game_id],
+                                       'player_id': [player2]})
+        # Set sentence
+        yield self.service.handle([], {'action': ['set_sentence'],
+                                       'sentence': ['The Real Sentence'],
+                                       'game_id': [newest_game_id],
+                                       'player_id': [player2]})
+        table3 = self.table_instance.game2table[newest_game_id]
+        self.assertNotEqual(table3, table)
+
+
+    @defer.inlineCallbacks
+    def test09_next_owner_id_race_condition(self):
+        owner = 11
+        player1 = 12
+        player2 = 13
+
+        # Create the game.
+        response = yield self.service.handle([], {'action': ['create'],
+                                                  'owner_id': [owner]})
+        game_id = response['game_id']
+        self.add_players_to_game(game_id, [owner, player1, player2])
+        # Complete the game.
+        yield self.complete_game(game_id, owner, player1, player2)
+
+        table = self.table_instance.game2table[game_id]
+
+        self.test_done = False
+
+        self.counter = 0
+
+        def listener(args):
+            if not self.test_done:
+                self.counter += 1
+                modified = args['modified'][0]
+                table.poll({'modified': [modified]}).addCallback(listener)
+            return args
+
+        modified = table.get_modified()
+        poll = table.poll({'modified': [modified]}).addCallback(listener)
+
+        d1 = table.update_next_owner_id()
+        d2 = table.update_next_owner_id()
+        d3 = table.update_next_owner_id()
+
+        d = defer.DeferredList([d1, d2, d3])
+
+        # Wait for all three update operations to finish...
+        yield d
+        # ...and then wait for the next_owner change to be dispatched by the poll.
+        yield poll
+
+        self.assertEquals(self.counter, 1)
+
+        # Break the listen loop so that the test runner doesn't complain
+        # about a dirty reactor.
+        self.test_done = True
+        table.touch({})
+        # For the same reason cancel the next_game_timer.
+        table.stop_timer(table.next_game_timer)
 
 
 def Run():

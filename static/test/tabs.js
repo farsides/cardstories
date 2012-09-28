@@ -84,6 +84,54 @@ test("Tabs are links to games", 2, function() {
     ok(tabs.eq(0).attr('href').match('game_id=' + tab_game_id), 'tab contains link to game');
 });
 
+test("get_open_game_ids", 12, function() {
+    var root = $(selector);
+    var element = $('.cardstories_tabs', root);
+    var player_id = 499;
+    var game_id = 52;
+
+    $.cardstories_tabs.requires_action = function(player_id, game, root) { return false; };
+
+    root.cardstories_tabs(player_id);
+    $.cardstories_tabs.load_game(player_id, game_id, {}, root);
+
+    equal($.cardstories_tabs.get_open_game_ids(root).length, 0, 'There are no open tabs initially');
+
+    var games = [
+        {id: 101, sentence: 'SENTENCE1', state: 'invitation'},
+        {id: 102, sentence: 'SENTENCE2', state: 'vote'},
+        {id: 103, sentence: null, state: 'create'},
+        {id: 104, sentence: 'SENTENCE4', state: 'pick'},
+        {id: 105, sentence: null, state: 'canceled'},
+        {id: 106, sentence: 'SENTENCE6', state: 'canceled'}
+    ];
+    var tabs;
+
+    $.cardstories_tabs.state(player_id, {games: games}, root);
+    var game_ids = $.cardstories_tabs.get_open_game_ids(root);
+    equal(game_ids.length, 6, 'Six games are open in tabs');
+    equal(game_ids[0], 101);
+    equal(game_ids[1], 102);
+    equal(game_ids[2], 103);
+    equal(game_ids[3], 104);
+    equal(game_ids[4], 105);
+    equal(game_ids[5], 106);
+
+    // Call state again without some of the games.
+    games = [
+        {id: 101, sentence: 'SENTENCE1', state: 'invitation'},
+        {id: 103, sentence: null, state: 'create'},
+        {id: 104, sentence: 'SENTENCE4', state: 'pick'}
+    ];
+
+    $.cardstories_tabs.state(player_id, {games: games}, root);
+    var game_ids = $.cardstories_tabs.get_open_game_ids(root);
+    equal(game_ids.length, 3, 'Three games are open in tabs');
+    equal(game_ids[0], 101);
+    equal(game_ids[1], 103);
+    equal(game_ids[2], 104);
+});
+
 test("closing an unfocused tab", 7, function() {
     var root = $(selector);
     var element = $('.cardstories_tabs', root);
@@ -100,12 +148,12 @@ test("closing an unfocused tab", 7, function() {
     equal($('.cardstories_tab', element).length, 2, 'There are two tabs');
 
     // Click the close button.
-    // The tab should be removed from the DOM and the 'remove_tab' call
+    // The tab should be removed from the DOM and the 'close_tab_action' call
     // issued to the service.
     $.cardstories.send = function(query, cb, _player_id, _game_id, root, opts) {
         equal(_player_id, player_id, 'player_id is passed to the send function');
         equal(_game_id, game_id, 'game_id is passed to the send function');
-        equal(query.action, 'remove_tab', 'remove_tab call is issued');
+        equal(query.action, 'close_tab_action', 'close_tab_action call is issued');
         equal(query.player_id, player_id, 'player_id is passed to the service');
         equal(query.game_id, games[0].id, 'game_id is passed to the service');
         return $.Deferred().resolve();
@@ -131,7 +179,7 @@ test("closing the currently focused tab with tabs to the right", 9, function() {
     $.cardstories.send = function(query, cb, _player_id, _game_id, root, opts) {
         equal(_player_id, player_id, 'player_id is passed to the send function');
         equal(_game_id, game_id, 'game_id is passed to the send function');
-        equal(query.action, 'remove_tab', 'remove_tab call is issued');
+        equal(query.action, 'close_tab_action', 'close_tab_action call is issued');
         equal(query.player_id, player_id, 'player_id is passed to the service');
         ok(query.game_id, 'game_id is passed to the service');
         return $.Deferred().resolve();
@@ -146,7 +194,7 @@ test("closing the currently focused tab with tabs to the right", 9, function() {
     equal($('.cardstories_tab', element).length, 5, 'There are five tabs');
 
     // Click the close button.
-    // The tab should be removed from the DOM, the 'remove_tab' call
+    // The tab should be removed from the DOM, the 'close_tab_action' call
     // issued to the service, and game nr. 4 loaded.
     $.cardstories.reload = function(_player_id, _game_id, _options, _root) {
         equal(_player_id, player_id, 'reload gets passed the player_id');
@@ -174,7 +222,7 @@ test("closing the currently focused tab with tabs to the left", 9, function() {
     $.cardstories.send = function(query, cb, _player_id, _game_id, root, opts) {
         equal(_player_id, player_id, 'player_id is passed to the send function');
         equal(_game_id, game_id, 'game_id is passed to the send function');
-        equal(query.action, 'remove_tab', 'remove_tab call is issued');
+        equal(query.action, 'close_tab_action', 'close_tab_action call is issued');
         equal(query.player_id, player_id, 'player_id is passed to the service');
         ok(query.game_id, 'game_id is passed to the service');
         return $.Deferred().resolve();
@@ -189,7 +237,7 @@ test("closing the currently focused tab with tabs to the left", 9, function() {
     equal($('.cardstories_tab', element).length, 3, 'There are three tabs');
 
     // Click the close button.
-    // The tab should be removed from the DOM, the 'remove_tab' call
+    // The tab should be removed from the DOM, the 'close_tab_action' call
     // issued to the service, and game nr. 2 loaded.
     $.cardstories.reload = function(_player_id, _game_id, _options, _root) {
         equal(_player_id, player_id, 'reload gets passed the player_id');
@@ -215,7 +263,7 @@ test("closing the currently focused tab when it is the only tab", 9, function() 
     $.cardstories.send = function(query, cb, _player_id, _game_id, root, opts) {
         equal(_player_id, player_id, 'player_id is passed to the send function');
         equal(_game_id, game_id, 'game_id is passed to the send function');
-        equal(query.action, 'remove_tab', 'remove_tab call is issued');
+        equal(query.action, 'close_tab_action', 'close_tab_action call is issued');
         equal(query.player_id, player_id, 'player_id is passed to the service');
         ok(query.game_id, 'game_id is passed to the service');
         return $.Deferred().resolve();
@@ -229,7 +277,7 @@ test("closing the currently focused tab when it is the only tab", 9, function() 
     equal($('.cardstories_tab', element).length, 1, 'There is one tab');
 
     // Click the close button.
-    // The tab should be removed from the DOM, the 'remove_tab' call
+    // The tab should be removed from the DOM, the 'close_tab_action' call
     // issued to the service, and 'New game' tab loaded.
     $.cardstories.reload = function(_player_id, _game_id, _options, _root) {
         equal(_player_id, player_id, 'reload gets passed the player_id');
@@ -240,7 +288,7 @@ test("closing the currently focused tab when it is the only tab", 9, function() 
     equal($('.cardstories_tab', element).length, 0, 'There are no tabs left');
 });
 
-test("remove_tab_for_game", 9, function() {
+test("close_tab_for_game", 9, function() {
     var root = $(selector);
     var element = $('.cardstories_tabs', root);
     var player_id = 111;
@@ -257,7 +305,7 @@ test("remove_tab_for_game", 9, function() {
     $.cardstories.send = function(query, cb, _player_id, _game_id, root, opts) {
         equal(_player_id, player_id, 'player_id is passed to the send function');
         equal(_game_id, game_id, 'game_id is passed to the send function');
-        equal(query.action, 'remove_tab', 'remove_tab call is issued');
+        equal(query.action, 'close_tab_action', 'close_tab_action call is issued');
         equal(query.player_id, player_id, 'player_id is passed to the service');
         ok(query.game_id, 'game_id is passed to the service');
         return $.Deferred().resolve();
@@ -270,10 +318,10 @@ test("remove_tab_for_game", 9, function() {
     equal($('.cardstories_tab', element).length, 3, 'There are three tabs');
 
     // Remove the tab programmatically by passing the game_id.
-    // The tab should be removed from the DOM and the 'remove_tab' call
+    // The tab should be removed from the DOM and the 'close_tab_action' call
     // issued to the service.
     var game_to_remove_id = 2;
-    $.cardstories_tabs.remove_tab_for_game(game_to_remove_id, player_id, root, function() {
+    $.cardstories_tabs.close_tab_for_game(game_to_remove_id, player_id, root, function() {
         var tabs = $('.cardstories_tab', element);
         equal(tabs.length, 2, 'There are two tabs left');
         equal(tabs.eq(0).text(), 'SENTENCE1', 'First game tab exists');

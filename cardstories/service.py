@@ -102,7 +102,7 @@ class CardstoriesService(service.Service, Observable):
 
     ACTIONS_GAME = ('set_card', 'set_sentence', 'participate', 'voting', 'pick', 'vote',
                     'complete', 'invite', 'set_countdown')
-    ACTIONS = ACTIONS_GAME + ('create', 'poll', 'state', 'player_info', 'remove_tab')
+    ACTIONS = ACTIONS_GAME + ('create', 'poll', 'state', 'player_info', 'close_tab_action')
 
     def __init__(self, settings):
         self.settings = settings
@@ -269,7 +269,7 @@ class CardstoriesService(service.Service, Observable):
         # two async operations: fetching game ids from the DB, and waiting in a poll.
         # The outer callback fires when the game ids are fetched from the DB, while the
         # inner one fires when one of the polled games has been modified, causing poll to return.
-        outer_deferred = self.get_opened_tabs_from_args(args)
+        outer_deferred = self.get_open_tabs(args)
         def outer_callback(result):
             game_deferreds = []
             for game_id in result:
@@ -287,7 +287,7 @@ class CardstoriesService(service.Service, Observable):
         return outer_deferred
 
     @defer.inlineCallbacks
-    def get_opened_tabs_from_args(self, args):
+    def get_open_tabs(self, args):
         """
         Expects 'player_id' and optionally a 'game_id' in the args.
         If there is a 'game_id' in the args and that game_id is not yet associated
@@ -303,16 +303,16 @@ class CardstoriesService(service.Service, Observable):
             game_id = None
         if player_id:
             # Try to associate current game with the player in the tabs table.
-            # This wont't do any harm if current game is already opened in a tab.
+            # This wont't do any harm if current game is already open in a tab.
             if game_id:
                 yield self.open_tab(player_id, game_id)
-            game_ids = yield self.get_opened_tabs(player_id)
+            game_ids = yield self.get_tabs_for_player(player_id)
         else:
             game_ids = []
         defer.returnValue(game_ids)
 
     @defer.inlineCallbacks
-    def get_opened_tabs(self, player_id):
+    def get_tabs_for_player(self, player_id):
         """
         Returns a deferred which results in a list of game_ids of games
         which the player keeps open in tabs.
@@ -363,26 +363,26 @@ class CardstoriesService(service.Service, Observable):
     def close_tab(self, player_id, game_id):
         """
         Removes the association between player_id and game_id from the tabs table
-        and return True.
-        If player_id and game_id weren't associated, doesn't do anything and return False.
+        and returns True.
+        If player_id and game_id weren't associated, doesn't do anything and returns False.
         """
         deleted = yield self.db.runInteraction(self.closeTabInteraction, player_id, game_id)
         if deleted:
             self.notify({'type': 'tab_closed', 'player_id': player_id, 'game_id': game_id})
         defer.returnValue(deleted)
 
-    def remove_tab(self, args):
+    def close_tab_action(self, args):
         """
         Processes requests to remove game from player's list of tabs.
         Expects 'player_id' and 'game_id' to be present in the args.
         Removes association between player and game from the tabs table.
         """
-        self.required(args, 'remove_tab', 'player_id')
+        self.required(args, 'close_tab_action', 'player_id')
         game_id = self.required_game_id(args)
         player_id = int(args['player_id'][0])
         d = self.close_tab(player_id, game_id)
         def success(result):
-            return {'type': 'remove_tab'}
+            return {'type': 'close_tab_action'}
         d.addCallback(success)
         return d
 
@@ -442,7 +442,7 @@ class CardstoriesService(service.Service, Observable):
             yield self.update_players_info(players_info, players_id_list)
 
         if 'tabs' in args['type']:
-            game_ids = yield self.get_opened_tabs_from_args(args)
+            game_ids = yield self.get_open_tabs(args)
             tabs = {'type': 'tabs', 'games': []}
             player_id = args.get('player_id')
             max_modified = 0
