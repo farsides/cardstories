@@ -362,13 +362,14 @@ def get_extra_cards_form(request):
     extra cards via paypal.
     """
     if request.user.is_authenticated():
-        custom_data = {'user_id': request.user.id}
+        custom_data = {'player_id': request.user.id}
 
         paypal_dict = {
             'business': settings.PAYPAL_RECEIVER_EMAIL,
-            'amount': '2.99',
-            'item_name': 'CardStories Extra Cards',
-            'item_number': 'CardPack1',
+            'amount': settings.CS_EXTRA_CARD_PACK_PRICE,
+            'currency_code': settings.CS_EXTRA_CARD_PACK_CURRENCY,
+            'item_name': 'CardStories Extra Card Pack',
+            'item_number': settings.CS_EXTRA_CARD_PACK_ITEM_ID,
             'notify_url': '%s/%s' % (settings.BASE_URL, settings.PAYPAL_IPN_PATH),
             'cancel_return': settings.BASE_URL,
             'custom':  dumps(custom_data),
@@ -381,5 +382,5 @@ def get_extra_cards_form(request):
 
     return render_to_response('cardstories/get_extra_cards.html', context)
 
-def bought_cards(request):
-    return paypal.standard.pdt.views.pdt(request, template='cardstories/bought_cards.html')
+def after_bought_cards(request):
+    return paypal.standard.pdt.views.pdt(request, template='cardstories/after_bought_cards.html')

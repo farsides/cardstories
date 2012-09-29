@@ -154,6 +154,11 @@ PAYPAL_RECEIVER_EMAIL = 'paypal@cardstories.org'
 PAYPAL_IPN_PATH = 'paypal/ipn/'
 PAYPAL_PDT_PATH = 'paypal/pdt/'
 PAYPAL_IDENTITY_TOKEN = 'hOLmlj16HX-J1WtvBVKzu8YdsD2zbGCRKW7b3kLFGvvg0UAN6oPJG171xVC'
+# Cardstories specific
+CS_EXTRA_CARD_PACK_PRICE = '2.99'
+CS_EXTRA_CARD_PACK_CURRENCY = 'USD'
+CS_EXTRA_CARD_PACK_ITEM_ID = 'CardPack1'
+CS_EXTRA_CARD_PACK_CARD_IDS = [37, 38, 39, 40, 41, 41, 43]
 
 # Enables code coverage
 TEST_RUNNER = 'tests.run_tests_with_coverage'

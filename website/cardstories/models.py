@@ -18,6 +18,10 @@
 # along with this program in a file in the toplevel directory called
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
+import simplejson
+from urllib import urlopen, urlencode
+
+from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
@@ -43,10 +47,55 @@ def create_user_profile(sender, instance, created, **kwargs):
     if created:
         UserProfile.objects.create(user=instance)
 
+# TODO: Add some logging.
 def grant_user_bought_cards(sender, **kwargs):
+    """
+    This is a paypal IPN handler.
+    Whenever an IPN request comes in, it validates it and grants the
+    player who made the purchase the cards the he bought.
+    """
+
     ipn_obj = sender
-    print 'USER BOUGHT CARDS!!', ipn_obj
-    # TODO: Do something.
+
+    valid = True
+
+    # Make sure the money goes to us!
+    if ipn_obj['business'] != settings.PAYPAL_RECEIVER_EMAIL:
+        valid = False
+
+    # Make sure the transaction was completed:
+    if ipn_obj['payment_status'] != 'Completed':
+        valid = False
+
+    # Make sure the amount is correct:
+    if ipn_obj['mc_gross'] != settings.CS_EXTRA_CARD_PACK_PRICE:
+        valid = False
+
+    # Make sure the currency is correct:
+    if ipn_obj['mc_currency'] != settings.CS_EXTRA_CARD_PACK_CURRENCY:
+        valid = False
+
+    # If everything seems correct, grant player the cards.
+    if valid:
+        # Wow, that was a tough test, but it looks like we have a winner!
+        # Grant player the cards:
+        player_id = simplejson.loads(ipn_obj['custom'])['player_id']
+
+        params = {'action': 'grant_cards_to_player',
+                  'player_id': player_id,
+                  'card_ids': settings.CS_EXTRA_CARD_PACK_CARD_IDS}
+
+        url = 'http://%s/resource?%s' % (settings.CARDSTORIES_HOST,
+                                         urlencode(params, True))
+        data = urlopen(url).read()
+        response = simplejson.loads(data)
+
+        if response['status'] != 'success':
+            return False
+        else:
+            return True
+    else:
+        return False
 
 
 # Registers creation of user profile on post_save signal.

@@ -920,3 +920,90 @@ class CardstoriesTest(TestCase):
         url = "/?game_id=456"
         response = c.get(url)
         self.assertTrue('Bogus sentence' in response.content)
+
+    def test_19grant_user_bought_cards(self):
+        """
+        Test the paypal IPN handler.
+        """
+        from website.cardstories import models
+
+        ipn_obj = {
+            'business': settings.PAYPAL_RECEIVER_EMAIL,
+            'payment_status': 'Completed',
+            'mc_gross': settings.CS_EXTRA_CARD_PACK_PRICE,
+            'mc_currency': settings.CS_EXTRA_CARD_PACK_CURRENCY,
+            'custom': '{"player_id":12}'
+        }
+
+        # IPN requests with invalid data shouldn't succeed.
+
+        obj = ipn_obj.copy()
+        obj['business'] = 'hahaha@fmail.com'
+        self.assertFalse(models.grant_user_bought_cards(obj))
+
+        obj = ipn_obj.copy()
+        obj['payment_status'] = 'Pending'
+        self.assertFalse(models.grant_user_bought_cards(obj))
+
+        obj = ipn_obj.copy()
+        obj['mc_gross'] = '0.01'
+        self.assertFalse(models.grant_user_bought_cards(obj))
+
+        obj = ipn_obj.copy()
+        obj['mc_currency'] = 'THB'
+        self.assertFalse(models.grant_user_bought_cards(obj))
+
+        # Hits the webservice if IPN request is valid.
+        class MockCardstoriesService(object):
+            """Pretends to be the CS webservice."""
+            def __init__(self, status):
+                self.status = status
+            def read(self):
+                return '{"status":"%s"}' % self.status
+        def mock_cardstories_successful_service(url):
+            self.assertTrue('player_id=12' in url)
+            return MockCardstoriesService('success')
+        models.urlopen = mock_cardstories_successful_service
+
+        self.assertTrue(models.grant_user_bought_cards(ipn_obj.copy()))
+
+        # Returns False if WS request doesn't succeed.
+        def mock_cardstories_fail_service(url):
+            return MockCardstoriesService('fail')
+        models.urlopen = mock_cardstories_fail_service
+
+        self.assertFalse(models.grant_user_bought_cards(ipn_obj.copy()))
+
+    def test_20get_extra_cards_form(self):
+        c = self.client
+        # When user is not logged in, he should not see the form.
+        response = c.get('/get-extra-cards/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue('log in' in response.content)
+        self.assertFalse('<form ' in response.content)
+        # When logged in, should see the form with the buy now button.
+        c.login(username='testuser1@email.com', password='abc!@#')
+        response = c.get('/get-extra-cards/')
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse('log in' in response.content)
+        self.assertTrue('<form ' in response.content)
+        self.assertTrue(settings.CS_EXTRA_CARD_PACK_PRICE in response.content)
+        self.assertTrue('Buy' in response.content)
+
+    def test_21after_bought_cards(self):
+        from website.cardstories import views
+        import paypal.standard.pdt.views
+
+        self.pdt_template = None
+        self.pdt_request = None
+
+        # Stub out the django-paypal PDT handler:
+        def fake_pdt(req, **kwargs):
+            self.pdt_template = kwargs['template']
+            self.pdt_request = req
+        paypal.standard.pdt.views.pdt = fake_pdt
+
+        fake_request = object()
+        views.after_bought_cards(fake_request)
+        self.assertEqual(self.pdt_template, 'cardstories/after_bought_cards.html')
+        self.assertEqual(self.pdt_request, fake_request)
