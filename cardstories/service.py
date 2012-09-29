@@ -102,7 +102,8 @@ class CardstoriesService(service.Service, Observable):
 
     ACTIONS_GAME = ('set_card', 'set_sentence', 'participate', 'voting', 'pick', 'vote',
                     'complete', 'invite', 'set_countdown')
-    ACTIONS = ACTIONS_GAME + ('create', 'poll', 'state', 'player_info', 'close_tab_action')
+    ACTIONS = ACTIONS_GAME + ('create', 'poll', 'state', 'player_info', 'close_tab_action',
+                              'grant_cards_to_player')
 
     def __init__(self, settings):
         self.settings = settings
