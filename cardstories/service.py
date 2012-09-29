@@ -616,6 +616,28 @@ class CardstoriesService(service.Service, Observable):
         game_id = self.required_game_id(args)
         return self.game_method(game_id, args['action'][0], duration)
 
+    def grantCardsInteraction(self, transaction, player_id, card_ids):
+        cards = [chr(i) for i in card_ids]
+        transaction.execute('SELECT earned_cards FROM players WHERE player_id = ?', [player_id])
+        earned_cards = list(transaction.fetchall()[0])
+        for card in cards:
+            if card not in earned_cards:
+                earned_cards.append(card)
+        transaction.execute('UPDATE players SET '
+                            'earned_cards = ? '
+                            'WHERE player_id = ?',
+                            (''.join(earned_cards),
+                             player_id))
+
+    @defer.inlineCallbacks
+    def grant_cards_to_player(self, args):
+        self.required(args, 'grant_cards_to_player', 'player_id', 'card_ids')
+        player_id = int(args['player_id'][0])
+        card_ids = [int(i) for i in args['card_ids']]
+        yield self.db.runInteraction(self.grantCardsInteraction, player_id, card_ids)
+        defer.returnValue({'status': 'success'})
+
+
     def handle(self, result, args):
         if not args.has_key('action'):
             return defer.succeed(result)

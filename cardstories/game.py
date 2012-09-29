@@ -38,6 +38,7 @@ class CardstoriesGame(Pollable):
     MIN_VOTED = 2 # there needs to be at least 2 votes to complete the game
     NCARDS = 36
     NCARDS_EARNED = 43
+    CARDS_FOR_SELL = [44, 45, 46, 47, 48, 49, 50, 51, 52, 53] # these cards can only be bought, not earned
     NPLAYERS = 6
     CARDS_PER_PLAYER = 6
     DEFAULT_COUNTDOWN_DURATION = 60 # needs to be coordinated with the value on the UI
@@ -615,19 +616,16 @@ class CardstoriesGame(Pollable):
             # such a way that it becomes harder to level up).
             if level_prev < level_cur and levelups < level_cur - 1:
                 deck = [chr(x) for x in range(self.NCARDS + 1, self.NCARDS_EARNED + 1)]
-
-                # Take care not to distribute the same card again.
-                for card in earned_cards:
-                    try:
-                        deck.remove(card)
-                    except ValueError:
-                        pass
+                # Take care not to distribute a card that the player already owns,
+                # or a card that is marked for sell only.
+                cards_to_remove = set(earned_cards) | set([chr(x) for x in self.CARDS_FOR_SELL])
+                clean_deck = [c for c in deck if c not in cards_to_remove]
 
                 # Distribute one card for each level since last levelup.
                 for i in range(levelups, level_cur - 1):
-                    if deck:
-                        card = random.choice(deck)
-                        deck.remove(card)
+                    if clean_deck:
+                        card = random.choice(clean_deck)
+                        clean_deck.remove(card)
                         earned_cards.append(card)
                         earned_cards_cur.append(card)
                         levelups += 1
