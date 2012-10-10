@@ -1,36 +1,36 @@
-{% extends "base.html" %}
+{% extends "cardstories/extra_cards_base.html" %}
 
-{% block title %}Card Stories (Card Game) - A Creative Game of Imagination{% endblock %}
-
-{% block head_script %}{{ block.super }}
-  <script type="text/javascript" src="/static/js/jquery.owa.js"></script>
-  <style type="text/css">
-    #bought-cards { text-align: center; }
-    #bought-cards table { margin: 0 auto; }
-    #bought-cards table th { text-align: right; padding: 2px 5px; }
-    #bought-cards table td { text-align: left; }
-  </style>
+{% block stylesheets %}{{ block.super }}
+  {% ifequal pdt_obj.st 'SUCCESS' %}
+    <style type="text/css">
+      #logo { margin: 50px auto 0; background: url(/static/css/images/extra-cards-success-logo.png); background-repeat: no-repeat; width: 900px; height: 337px; }
+      #logo img { display: none; }
+      #bought-success { width: 567px; margin: -125px auto 0; padding-left: 90px; }
+      #bought-success img { float: left; }
+      #continue-btn { float: left; width: 200px; margin-top: 180px; }
+      #continue-btn img { width: 200px; }
+    </style>
+  {% else %}
+    <style type="text/css">
+      #bought-fail { width: 504px; margin: 60px auto; position: relative; }
+    </style>
+  {% endifequal %}
 {% endblock %}
 
-{% block content %}
-  <div id="bought-cards">
-    {% ifequal pdt_obj.st 'SUCCESS' %}
-    <h1>Transaction complete!</h1>
-    <p>Thank you for your payment.</p>
-    <p>Please note that it might take a couple of minutes before the cards show in your account.</p>
-
-    <table>
-      <tr><th>Payer:</th><td>{{ pdt_obj.first_name }} {{ pdt_obj.last_name }} </td></tr>
-      <tr><th>Payer Email:</th><td>{{ pdt_obj.payer_email }}</td></tr>
-      <tr><th>Amount:</th><td>{{ pdt_obj.mc_currency }} {{ pdt_obj.mc_gross }}</td></tr>
-      <tr><th>Reference:</th><td>{{ pdt_obj.txn_id }}</td></tr>
-    </table>
-
-    {% else %}
-    <h1>Transaction Failed</h1>
-    <p>Sorry transaction failed, please try a different form of payment.</p>
-    {% endifequal %}
-  </div>
+{% block main %}
+<div id="bought-cards">
+  {% ifequal pdt_obj.st 'SUCCESS' %}
+    <div id="bought-success">
+      <img src="/static/css/images/extra-cards-success-star.png" alt="Success!" />
+      <a id="continue-btn" href="/" ><img src="/static/css/images/complete_continue.png" alt="Continue" /></a>
+    </div>
+  {% else %}
+    <div id="bought-fail">
+      <a href="/get-extra-cards/">
+        <img src="/static/css/images/extra-cards-fail.png" alt="Try again!" />
+      </a>
+    </div>
+  {% endifequal %}
+  <br style="clear:both;" />
+</div>
 {% endblock %}
-
-{% block footer %}{% endblock %}

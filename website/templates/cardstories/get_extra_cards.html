@@ -1,24 +1,25 @@
-{% extends "base.html" %}
+{% extends "cardstories/extra_cards_base.html" %}
 
-{% block title %}Card Stories (Card Game) - A Creative Game of Imagination{% endblock %}
+{% block main %}
+<div class="seo" style="display:none;">
+  <h1 class="hidden">Get extra cards!</h1>
+  <p>Buy a pack of extra cards for 4.50 EUR.</p>
+</div>
 
-{% block head_script %}{{ block.super }}
-  <script type="text/javascript" src="/static/js/jquery.owa.js"></script>
-  <style type="text/css">
-    #extra-cards { text-align: center; }
-  </style>
-{% endblock %}
-
-{% block content %}
-  <div id="extra-cards">
-    <h1>Get extra cards!</h1>
-    <p>Buy a pack of extra cards for 2.99 USD.</p>
+<div id="cards-presentation">
+  <img id="cards-price" src="/static/css/images/extra-cards-star-price.png" alt="Buy 10 exclusive cards for 4.50 EUR" />
+  <div id="card-imgs">
+    <img src="/static/css/images/extra-cards-pack.png" alt="Exclusive cards" />
     {% if form %}
-      {{ form.sandbox }}
+      <div id="buy-form">
+        {{ form.sandbox }}
+      </div>
     {% else %}
-      Please <a href="..">log in</a> to buy cards.
+      <div id="please-log-in">
+        Please <a href="/">log in</a> to buy cards.
+      </div>
     {% endif %}
   </div>
+  <br style="clear:both;"/>
+</div>
 {% endblock %}
-
-{% block footer %}{% endblock %}

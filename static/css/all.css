@@ -913,6 +913,24 @@
     z-index: 6;
 }
 
+.cardstories .cardstories_deck .cardstories_buy_more {
+    display: block;
+    position: absolute;
+    left: 30px;
+    bottom: 43px;
+    width: 159px;
+    height: 24px;
+    padding-top: 15px;
+    line-height: 24px;
+    text-align: center;
+    text-decoration: none;
+    background: url('images/buy-more-bg.png') no-repeat left top;
+    font-size: 10pt;
+    font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
+    color: black;
+    z-index: 999;
+}
+
 .cardstories .cardstories_deck .cardstories_player_info {
     font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;
     font-size: 12px;
@@ -1226,7 +1244,6 @@
 .cardstories .cardstories_sentence_box .cardstories_sentence {
     margin: 10px;
     height: 36px;
-    color: #4D4D4F;
     font-size: 10pt;
     text-align: center;
     font-family: Helvetica,Arial,FreeSans,"Nimbus Sans L",Malayalam,sans-serif;

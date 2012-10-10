@@ -160,6 +160,9 @@ CS_EXTRA_CARD_PACK_CURRENCY = 'USD'
 CS_EXTRA_CARD_PACK_ITEM_ID = 'CardPack1'
 CS_EXTRA_CARD_PACK_CARD_IDS = [37, 38, 39, 40, 41, 41, 43]
 
+PAYPAL_IMAGE = "https://www.paypal.com/en_US/i/btn/btn_paynow_LG.gif"
+PAYPAL_SANDBOX_IMAGE = "https://www.sandbox.paypal.com/en_US/i/btn/btn_buynow_LG.gif"
+
 # Enables code coverage
 TEST_RUNNER = 'tests.run_tests_with_coverage'
 COVERAGE_MODULES = ['website.cardstories.views',
