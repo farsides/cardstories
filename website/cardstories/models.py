@@ -38,6 +38,16 @@ class UserProfile(models.Model):
     # Facebook user id.
     facebook_id = models.BigIntegerField(null=True, blank=True)
 
+class Purchase(models.Model):
+    """
+    Represents a purchase of an item by a user.
+
+    """
+    user = models.ForeignKey(User)
+
+    item_code = models.CharField(max_length=32, null=False, blank=False)
+    purchased_at = models.DateTimeField(auto_now_add=True)
+
 
 def create_user_profile(sender, instance, created, **kwargs):
     """
@@ -90,10 +100,11 @@ def grant_user_bought_cards(sender, **kwargs):
         data = urlopen(url).read()
         response = simplejson.loads(data)
 
-        if response['status'] != 'success':
-            return False
-        else:
+        if response['status'] == 'success':
+            Purchase.objects.create(user_id=player_id, item_code=settings.CS_EXTRA_CARD_PACK_ITEM_ID)
             return True
+        else:
+            return False
     else:
         return False
 

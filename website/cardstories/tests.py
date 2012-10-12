@@ -965,14 +965,30 @@ class CardstoriesTest(TestCase):
             return MockCardstoriesService('success')
         models.urlopen = mock_cardstories_successful_service
 
-        self.assertTrue(models.grant_user_bought_cards(ipn_obj.copy()))
+        # After IPN request is successfully handled, a new Purchase object
+        # associated with the player should be created.
+        # None of the IPN requests have been successful so far, so no purchase
+        # object should exist at this point yet.
+        self.assertEquals(models.Purchase.objects.filter(user=12, item_code=settings.CS_EXTRA_CARD_PACK_ITEM_ID).count(), 0)
+
+        # Now perform a successful IPN request.
+        success = models.grant_user_bought_cards(ipn_obj.copy())
+        self.assertTrue(success)
+
+        # A purchase item should be created.
+        self.assertEquals(models.Purchase.objects.filter(user=12, item_code=settings.CS_EXTRA_CARD_PACK_ITEM_ID).count(), 1)
 
         # Returns False if WS request doesn't succeed.
         def mock_cardstories_fail_service(url):
             return MockCardstoriesService('fail')
         models.urlopen = mock_cardstories_fail_service
 
-        self.assertFalse(models.grant_user_bought_cards(ipn_obj.copy()))
+        success = models.grant_user_bought_cards(ipn_obj.copy())
+        self.assertFalse(success)
+
+        # Since the IPN handler didn't succeed this time, we should still be left
+        # with only one Purchase object by this user.
+        self.assertEquals(models.Purchase.objects.filter(user=12, item_code=settings.CS_EXTRA_CARD_PACK_ITEM_ID).count(), 1)
 
     def test_20get_extra_cards_form(self):
         c = self.client
