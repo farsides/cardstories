@@ -361,6 +361,7 @@ def get_extra_cards_form(request):
     Displays a HTML view with a form where the user can buy a pack of
     extra cards via paypal.
     """
+    price = '%s %s' % (settings.CS_EXTRA_CARD_PACK_PRICE, settings.CS_EXTRA_CARD_PACK_CURRENCY)
     if request.user.is_authenticated():
         custom_data = {'player_id': request.user.id}
 
@@ -376,9 +377,9 @@ def get_extra_cards_form(request):
         }
 
         form = PayPalPaymentsForm(initial=paypal_dict)
-        context = {'form': form}
+        context = {'form': form, 'price': price}
     else:
-        context = {'form': None}
+        context = {'form': None, 'price': price}
 
     return render_to_response('cardstories/get_extra_cards.html', context)
 

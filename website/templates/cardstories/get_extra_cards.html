@@ -3,11 +3,11 @@
 {% block main %}
 <div class="seo" style="display:none;">
   <h1 class="hidden">Get extra cards!</h1>
-  <p>Buy a pack of extra cards for 4.50 EUR.</p>
+  <p>Buy a pack of extra cards for {{ price }}.</p>
 </div>
 
 <div id="cards-presentation">
-  <img id="cards-price" src="/static/css/images/extra-cards-star-price.png" alt="Buy 10 exclusive cards for 4.50 EUR" />
+  <img id="cards-price" src="/static/css/images/extra-cards-star-price.png" alt="Buy 10 exclusive cards for {{ price }}." />
   <div id="card-imgs">
     <img src="/static/css/images/extra-cards-pack.png" alt="Exclusive cards" />
     {% if form %}
