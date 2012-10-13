@@ -125,8 +125,10 @@ def welcome(request):
 
     if request.user.is_authenticated():
         template = 'cardstories/game.html'
+        card_purchases = request.user.purchase_set.filter(item_code=settings.CS_EXTRA_CARD_PACK_ITEM_ID)
         context = {'create': request.session.get('create', False),
-                   'player_id': request.user.id}
+                   'player_id': request.user.id,
+                   'player_bought_cards': card_purchases.count() > 0}
         request.session['create'] = False
     else:
         context = {'registration_form': RegistrationForm(),

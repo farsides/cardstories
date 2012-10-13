@@ -37,10 +37,30 @@ class CardstoriesTest(TestCase):
 
     def test_00welcome(self):
         c = self.client
+        # When anonymous:
         response = c.get("/")
         self.assertEqual(response.status_code, 200)
         self.assertTrue('registration_form' in response.context)
         self.assertTrue('login_form' in response.context)
+        self.assertFalse('jquery.cardstories.js' in response.content)
+        # When logged in:
+        c.login(username='testuser1@email.com', password='abc!@#')
+        response = c.get("/")
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse('registration_form' in response.context)
+        self.assertFalse('login_form' in response.context)
+        self.assertTrue('jquery.cardstories.js' in response.content)
+
+    def test_00welcome(self):
+        from website.cardstories.models import Purchase
+        c = self.client
+        c.login(username='testuser1@email.com', password='abc!@#')
+        response = c.get('/')
+        self.assertFalse(response.context['player_bought_cards'])
+        # Assign a purchase to the logged in user.
+        Purchase.objects.create(user_id=1, item_code=settings.CS_EXTRA_CARD_PACK_ITEM_ID)
+        response = c.get('/')
+        self.assertTrue(response.context['player_bought_cards'])
 
     @patch('website.cardstories.views.GravatarAvatar')
     def test_01registration(self, MockGravatarAvatar):
