@@ -41,7 +41,7 @@ import paypal.standard.pdt.views
 from paypal.standard.forms import PayPalPaymentsForm
 
 from forms import RegistrationForm, LoginForm
-
+from models import Purchase
 from avatar import Avatar, GravatarAvatar, FacebookAvatar
 
 def get_base_url(request):
@@ -363,23 +363,28 @@ def get_extra_cards_form(request):
     """
     price = '%s %s' % (settings.CS_EXTRA_CARD_PACK_PRICE, settings.CS_EXTRA_CARD_PACK_CURRENCY)
     if request.user.is_authenticated():
-        custom_data = {'player_id': request.user.id}
+        # Perhaps this user already bought the pack?
+        purchases = request.user.purchase_set.filter(item_code=settings.CS_EXTRA_CARD_PACK_ITEM_ID)
+        if purchases.count() > 0:
+            context = {'form': None, 'price': price, 'problem': 'ALREADY_BOUGHT'}
+        else:
+            custom_data = {'player_id': request.user.id}
 
-        paypal_dict = {
-            'business': settings.PAYPAL_RECEIVER_EMAIL,
-            'amount': settings.CS_EXTRA_CARD_PACK_PRICE,
-            'currency_code': settings.CS_EXTRA_CARD_PACK_CURRENCY,
-            'item_name': 'CardStories Extra Card Pack',
-            'item_number': settings.CS_EXTRA_CARD_PACK_ITEM_ID,
-            'notify_url': '%s/%s' % (settings.BASE_URL, settings.PAYPAL_IPN_PATH),
-            'cancel_return': settings.BASE_URL,
-            'custom':  dumps(custom_data),
-        }
+            paypal_dict = {
+                'business': settings.PAYPAL_RECEIVER_EMAIL,
+                'amount': settings.CS_EXTRA_CARD_PACK_PRICE,
+                'currency_code': settings.CS_EXTRA_CARD_PACK_CURRENCY,
+                'item_name': 'CardStories Extra Card Pack',
+                'item_number': settings.CS_EXTRA_CARD_PACK_ITEM_ID,
+                'notify_url': '%s/%s' % (settings.BASE_URL, settings.PAYPAL_IPN_PATH),
+                'cancel_return': settings.BASE_URL,
+                'custom':  dumps(custom_data),
+            }
 
-        form = PayPalPaymentsForm(initial=paypal_dict)
-        context = {'form': form, 'price': price}
+            form = PayPalPaymentsForm(initial=paypal_dict)
+            context = {'form': form, 'price': price}
     else:
-        context = {'form': None, 'price': price}
+        context = {'form': None, 'price': price, 'problem': 'ANONYMOUS'}
 
     return render_to_response('cardstories/get_extra_cards.html', context)
 

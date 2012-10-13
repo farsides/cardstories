@@ -15,8 +15,14 @@
         {{ form.sandbox }}
       </div>
     {% else %}
-      <div id="please-log-in">
-        Please <a href="/">log in</a> to buy cards.
+      <div id="buy-problem">
+        {% ifequal problem 'ANONYMOUS' %}
+          Please <a href="/">log in</a> to buy the cards.
+        {% endifequal %}
+        {% ifequal problem 'ALREADY_BOUGHT' %}
+          You already bought the cards!<br/>
+          Thanks but we can't let you buy the same pack again :)
+        {% endifequal %}
       </div>
     {% endif %}
   </div>

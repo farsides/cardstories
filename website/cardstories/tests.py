@@ -991,13 +991,15 @@ class CardstoriesTest(TestCase):
         self.assertEquals(models.Purchase.objects.filter(user=12, item_code=settings.CS_EXTRA_CARD_PACK_ITEM_ID).count(), 1)
 
     def test_20get_extra_cards_form(self):
+        from website.cardstories import models
         c = self.client
         # When user is not logged in, he should not see the form.
         response = c.get('/get-extra-cards/')
         self.assertEqual(response.status_code, 200)
         self.assertTrue('log in' in response.content)
         self.assertFalse('<form ' in response.content)
-        # When logged in, should see the form with the buy now button.
+        # When logged in, but didn't buy the cards yet,
+        # he should see the form with the buy now button.
         c.login(username='testuser1@email.com', password='abc!@#')
         response = c.get('/get-extra-cards/')
         self.assertEqual(response.status_code, 200)
@@ -1005,6 +1007,13 @@ class CardstoriesTest(TestCase):
         self.assertTrue('<form ' in response.content)
         self.assertTrue(settings.CS_EXTRA_CARD_PACK_PRICE in response.content)
         self.assertTrue('Buy' in response.content)
+        # When logged in, but already bought the cards,
+        # he should not see the form anymore.
+        models.Purchase.objects.create(user_id=1, item_code=settings.CS_EXTRA_CARD_PACK_ITEM_ID)
+        response = c.get('/get-extra-cards/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue('already bought' in response.content)
+        self.assertFalse('<form ' in response.content)
 
     def test_21after_bought_cards(self):
         from website.cardstories import views
