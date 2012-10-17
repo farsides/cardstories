@@ -158,7 +158,8 @@ PAYPAL_IDENTITY_TOKEN = 'hOLmlj16HX-J1WtvBVKzu8YdsD2zbGCRKW7b3kLFGvvg0UAN6oPJG17
 CS_EXTRA_CARD_PACK_PRICE = '4.50'
 CS_EXTRA_CARD_PACK_CURRENCY = 'EUR'
 CS_EXTRA_CARD_PACK_ITEM_ID = 'CardPack1'
-CS_EXTRA_CARD_PACK_CARD_IDS = [37, 38, 39, 40, 41, 41, 43]
+# Keep this in sync with the settings on the service (inside game.py).
+CS_EXTRA_CARD_PACK_CARD_IDS = [44, 45, 46, 47, 48, 49, 50, 51, 52, 53]
 
 PAYPAL_IMAGE = "https://www.paypal.com/en_US/i/btn/btn_paynow_LG.gif"
 PAYPAL_SANDBOX_IMAGE = "https://www.sandbox.paypal.com/en_US/i/btn/btn_buynow_LG.gif"

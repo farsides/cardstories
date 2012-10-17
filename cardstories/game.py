@@ -37,7 +37,8 @@ class CardstoriesGame(Pollable):
     MIN_PICKED = 3 # there needs to be at least 3 cards to move to the voting phase
     MIN_VOTED = 2 # there needs to be at least 2 votes to complete the game
     NCARDS = 36
-    NCARDS_EARNED = 43
+    NCARDS_EARNED = 53
+    # Keep this in sync with the django CS_EXTRA_CARD_PACK_CARD_IDS setting.
     CARDS_FOR_SELL = [44, 45, 46, 47, 48, 49, 50, 51, 52, 53] # these cards can only be bought, not earned
     NPLAYERS = 6
     CARDS_PER_PLAYER = 6
