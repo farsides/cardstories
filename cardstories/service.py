@@ -620,10 +620,16 @@ class CardstoriesService(service.Service, Observable):
     def grantCardsInteraction(self, transaction, player_id, card_ids):
         cards = [chr(i) for i in card_ids]
         transaction.execute('SELECT earned_cards FROM players WHERE player_id = ?', [player_id])
-        earned_cards = list(transaction.fetchall()[0])
+        earned_cards = transaction.fetchone()[0]
+        if earned_cards is None:
+            earned_cards = []
+        else:
+            earned_cards = list(earned_cards)
+
         for card in cards:
             if card not in earned_cards:
                 earned_cards.append(card)
+
         transaction.execute('UPDATE players SET '
                             'earned_cards = ? '
                             'WHERE player_id = ?',

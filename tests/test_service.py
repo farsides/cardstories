@@ -1165,6 +1165,28 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         new_earned_card_ids = [ord(c) for c in list(new_earned_cards)]
         self.assertEquals(set(new_earned_card_ids), set(old_earned_card_ids) | set(bought_card_ids))
 
+    @defer.inlineCallbacks
+    def test18_grant_cards_to_player_for_player_without_earned_cards(self):
+        player_id = 44
+        # Cards the player is about to be granted.
+        bought_card_ids = [10, 11, 12, 13]
+
+        c = self.db.cursor()
+        c.execute("INSERT INTO players (player_id) VALUES (?)", [player_id])
+        self.db.commit()
+
+        result = yield self.service.grant_cards_to_player({'player_id': [player_id],
+                                                           'card_ids': bought_card_ids})
+
+        self.assertEquals(result['status'], 'success')
+
+        c.execute('SELECT earned_cards FROM players WHERE player_id = ?', [player_id])
+        earned_cards = c.fetchone()[0]
+        c.close()
+
+        earned_card_ids = [ord(c) for c in list(earned_cards)]
+        self.assertEquals(set(earned_card_ids), set(bought_card_ids))
+
 
 class CardstoriesConnectorTest(CardstoriesServiceTestBase):
 
