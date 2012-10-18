@@ -117,7 +117,7 @@ def grant_user_bought_cards(sender, **kwargs):
 
 def log_flagged_buy_cards_payment(sender, **kwargs):
     logger = logging.getLogger('cardstories.paypal')
-    logger.error("Paypal Payment Failed! %r; %r" % (sender, kwargs))
+    logger.error("Paypal Payment Failed! %r; %r" % (sender.flag_code, sender.flag_info))
 
 
 # Registers creation of user profile on post_save signal.
