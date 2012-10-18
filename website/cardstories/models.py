@@ -26,7 +26,7 @@ from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
-from paypal.standard.ipn.signals import payment_was_successful
+from paypal.standard.ipn.signals import payment_was_successful, payment_was_flagged
 
 
 class UserProfile(models.Model):
@@ -115,8 +115,13 @@ def grant_user_bought_cards(sender, **kwargs):
     else:
         return False
 
+def log_flagged_buy_cards_payment(sender, **kwargs):
+    logger = logging.getLogger('cardstories.paypal')
+    logger.error("Paypal Payment Failed! %r; %r" % (sender, kwargs))
+
 
 # Registers creation of user profile on post_save signal.
 post_save.connect(create_user_profile, sender=User)
 # Registers Paypal's IPN signals.
 payment_was_successful.connect(grant_user_bought_cards)
+payment_was_flagged.connect(log_flagged_buy_cards_payment)
