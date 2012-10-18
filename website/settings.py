@@ -22,6 +22,7 @@
 #
 import os
 import sys
+import logging, logging.handlers
 
 # Shortcuts to the real site directory and its parent.
 spath = lambda x: os.path.join(os.path.dirname(__file__), x)
@@ -154,6 +155,7 @@ PAYPAL_RECEIVER_EMAIL = 'paypal@cardstories.org'
 PAYPAL_IPN_PATH = 'paypal/ipn/'
 PAYPAL_PDT_PATH = 'paypal/pdt/'
 PAYPAL_IDENTITY_TOKEN = 'hOLmlj16HX-J1WtvBVKzu8YdsD2zbGCRKW7b3kLFGvvg0UAN6oPJG171xVC'
+PAYPAL_LOG_FILE = ppath('log/paypal/paypal.log')
 # Cardstories specific
 CS_EXTRA_CARD_PACK_PRICE = '4.50'
 CS_EXTRA_CARD_PACK_CURRENCY = 'EUR'
@@ -181,3 +183,9 @@ try:
     from local_settings import *
 except ImportError, e:
     pass
+
+# Configure the paypal logger
+logger = logging.getLogger('cardstories.paypal')
+handler = logging.handlers.RotatingFileHandler(PAYPAL_LOG_FILE, maxBytes=10**7, backupCount=20, mode='a')
+handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(message)s'))
+logger.addHandler(handler)

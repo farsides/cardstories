@@ -19,6 +19,7 @@
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
 import simplejson
+import logging
 from urllib import urlopen, urlencode
 
 from django.conf import settings
@@ -57,7 +58,6 @@ def create_user_profile(sender, instance, created, **kwargs):
     if created:
         UserProfile.objects.create(user=instance)
 
-# TODO: Add some logging.
 def grant_user_bought_cards(sender, **kwargs):
     """
     This is a paypal IPN handler.
@@ -67,22 +67,27 @@ def grant_user_bought_cards(sender, **kwargs):
 
     ipn_obj = sender
 
+    logger = logging.getLogger('cardstories.paypal')
     valid = True
 
     # Make sure the money goes to us!
     if ipn_obj['business'] != settings.PAYPAL_RECEIVER_EMAIL:
+        logger.error("Wrong 'business' param in IPN request: %r" % ipn_obj['business'])
         valid = False
 
     # Make sure the transaction was completed:
     if ipn_obj['payment_status'] != 'Completed':
+        logger.error("Wrong 'payment_status' param in IPN request: %r" % ipn_obj['payment_status'])
         valid = False
 
     # Make sure the amount is correct:
     if ipn_obj['mc_gross'] != settings.CS_EXTRA_CARD_PACK_PRICE:
+        logger.error("Wrong 'mc_gross' param in IPN request: %r" % ipn_obj['mc_gross'])
         valid = False
 
     # Make sure the currency is correct:
     if ipn_obj['mc_currency'] != settings.CS_EXTRA_CARD_PACK_CURRENCY:
+        logger.error("Wrong 'mc_currency' param in IPN request: %r" % ipn_obj['mc_currency'])
         valid = False
 
     # If everything seems correct, grant player the cards.
@@ -102,8 +107,10 @@ def grant_user_bought_cards(sender, **kwargs):
 
         if response['status'] == 'success':
             Purchase.objects.create(user_id=player_id, item_code=settings.CS_EXTRA_CARD_PACK_ITEM_ID)
+            logger.info("Successfuly granted bought cards to player: %r" % player_id)
             return True
         else:
+            logger.error("Failed granting bought cards to player: %r; response: %r" % (player_id, response))
             return False
     else:
         return False
