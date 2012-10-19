@@ -946,31 +946,36 @@ class CardstoriesTest(TestCase):
         Test the paypal IPN handler.
         """
         from website.cardstories import models
+        from django.contrib.auth.models import User
+        from paypal.standard.ipn.models import PayPalIPN
 
-        ipn_obj = {
-            'business': settings.PAYPAL_RECEIVER_EMAIL,
-            'payment_status': 'Completed',
-            'mc_gross': settings.CS_EXTRA_CARD_PACK_PRICE,
-            'mc_currency': settings.CS_EXTRA_CARD_PACK_CURRENCY,
-            'custom': '{"player_id":12}'
-        }
+        user = User.objects.create(username='hithere@farsides.com')
+        user_id = user.id
+
+        def ipn_object():
+            """Returns a valid IPN object."""
+            return PayPalIPN(business = settings.PAYPAL_RECEIVER_EMAIL,
+                             payment_status = 'Completed',
+                             mc_gross = settings.CS_EXTRA_CARD_PACK_PRICE,
+                             mc_currency = settings.CS_EXTRA_CARD_PACK_CURRENCY,
+                             custom = '{"player_id":%d}' % user.id)
 
         # IPN requests with invalid data shouldn't succeed.
 
-        obj = ipn_obj.copy()
-        obj['business'] = 'hahaha@fmail.com'
+        obj = ipn_object()
+        obj.business = 'hahaha@fmail.com'
         self.assertFalse(models.grant_user_bought_cards(obj))
 
-        obj = ipn_obj.copy()
-        obj['payment_status'] = 'Pending'
+        obj = ipn_object()
+        obj.payment_status = 'Pending'
         self.assertFalse(models.grant_user_bought_cards(obj))
 
-        obj = ipn_obj.copy()
-        obj['mc_gross'] = '0.01'
+        obj = ipn_object()
+        obj.mc_gross = '0.01'
         self.assertFalse(models.grant_user_bought_cards(obj))
 
-        obj = ipn_obj.copy()
-        obj['mc_currency'] = 'THB'
+        obj = ipn_object()
+        obj.mc_currency = 'THB'
         self.assertFalse(models.grant_user_bought_cards(obj))
 
         # Hits the webservice if IPN request is valid.
@@ -981,7 +986,7 @@ class CardstoriesTest(TestCase):
             def read(self):
                 return '{"status":"%s"}' % self.status
         def mock_cardstories_successful_service(url):
-            self.assertTrue('player_id=12' in url)
+            self.assertTrue('player_id=%d' % user_id in url)
             return MockCardstoriesService('success')
         models.urlopen = mock_cardstories_successful_service
 
@@ -989,26 +994,26 @@ class CardstoriesTest(TestCase):
         # associated with the player should be created.
         # None of the IPN requests have been successful so far, so no purchase
         # object should exist at this point yet.
-        self.assertEquals(models.Purchase.objects.filter(user=12, item_code=settings.CS_EXTRA_CARD_PACK_ITEM_ID).count(), 0)
+        self.assertEquals(user.purchase_set.filter(item_code=settings.CS_EXTRA_CARD_PACK_ITEM_ID).count(), 0)
 
         # Now perform a successful IPN request.
-        success = models.grant_user_bought_cards(ipn_obj.copy())
+        success = models.grant_user_bought_cards(ipn_object())
         self.assertTrue(success)
 
         # A purchase item should be created.
-        self.assertEquals(models.Purchase.objects.filter(user=12, item_code=settings.CS_EXTRA_CARD_PACK_ITEM_ID).count(), 1)
+        self.assertEquals(user.purchase_set.filter(item_code=settings.CS_EXTRA_CARD_PACK_ITEM_ID).count(), 1)
 
         # Returns False if WS request doesn't succeed.
         def mock_cardstories_fail_service(url):
             return MockCardstoriesService('fail')
         models.urlopen = mock_cardstories_fail_service
 
-        success = models.grant_user_bought_cards(ipn_obj.copy())
+        success = models.grant_user_bought_cards(ipn_object())
         self.assertFalse(success)
 
         # Since the IPN handler didn't succeed this time, we should still be left
         # with only one Purchase object by this user.
-        self.assertEquals(models.Purchase.objects.filter(user=12, item_code=settings.CS_EXTRA_CARD_PACK_ITEM_ID).count(), 1)
+        self.assertEquals(user.purchase_set.filter(item_code=settings.CS_EXTRA_CARD_PACK_ITEM_ID).count(), 1)
 
     def test_20get_extra_cards_form(self):
         from website.cardstories import models

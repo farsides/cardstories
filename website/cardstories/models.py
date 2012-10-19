@@ -20,6 +20,7 @@
 #
 import simplejson
 import logging
+import traceback
 from urllib import urlopen, urlencode
 
 from django.conf import settings
@@ -58,43 +59,41 @@ def create_user_profile(sender, instance, created, **kwargs):
     if created:
         UserProfile.objects.create(user=instance)
 
-def grant_user_bought_cards(sender, **kwargs):
+def grant_user_bought_cards(ipn_obj):
     """
     This is a paypal IPN handler.
     Whenever an IPN request comes in, it validates it and grants the
     player who made the purchase the cards the he bought.
     """
 
-    ipn_obj = sender
-
     logger = logging.getLogger('cardstories.paypal')
     valid = True
 
     # Make sure the money goes to us!
-    if ipn_obj['business'] != settings.PAYPAL_RECEIVER_EMAIL:
-        logger.error("Wrong 'business' param in IPN request: %r" % ipn_obj['business'])
+    if ipn_obj.business != settings.PAYPAL_RECEIVER_EMAIL:
+        logger.error("Wrong 'business' param in IPN request: %r" % ipn_obj.business)
         valid = False
 
     # Make sure the transaction was completed:
-    if ipn_obj['payment_status'] != 'Completed':
-        logger.error("Wrong 'payment_status' param in IPN request: %r" % ipn_obj['payment_status'])
+    if ipn_obj.payment_status != 'Completed':
+        logger.error("Wrong 'payment_status' param in IPN request: %r" % ipn_obj.payment_status)
         valid = False
 
     # Make sure the amount is correct:
-    if ipn_obj['mc_gross'] != settings.CS_EXTRA_CARD_PACK_PRICE:
-        logger.error("Wrong 'mc_gross' param in IPN request: %r" % ipn_obj['mc_gross'])
+    if ipn_obj.mc_gross != settings.CS_EXTRA_CARD_PACK_PRICE:
+        logger.error("Wrong 'mc_gross' param in IPN request: %r" % ipn_obj.mc_gross)
         valid = False
 
     # Make sure the currency is correct:
-    if ipn_obj['mc_currency'] != settings.CS_EXTRA_CARD_PACK_CURRENCY:
-        logger.error("Wrong 'mc_currency' param in IPN request: %r" % ipn_obj['mc_currency'])
+    if ipn_obj.mc_currency != settings.CS_EXTRA_CARD_PACK_CURRENCY:
+        logger.error("Wrong 'mc_currency' param in IPN request: %r" % ipn_obj.mc_currency)
         valid = False
 
     # If everything seems correct, grant player the cards.
     if valid:
         # Wow, that was a tough test, but it looks like we have a winner!
         # Grant player the cards:
-        player_id = simplejson.loads(ipn_obj['custom'])['player_id']
+        player_id = simplejson.loads(ipn_obj.custom)['player_id']
 
         params = {'action': 'grant_cards_to_player',
                   'player_id': player_id,
@@ -115,7 +114,21 @@ def grant_user_bought_cards(sender, **kwargs):
     else:
         return False
 
-def log_flagged_buy_cards_payment(sender, **kwargs):
+def paypal_payment_was_successful_handler(sender, **kwargs):
+    """
+    Handles paypal IPN requests.
+    Calls grant_user_bought_cards, wrapped in some logging.
+
+    """
+    logger = logging.getLogger('cardstories.paypal')
+    logger.info("Handling transaction from: %r" % sender.payer_email)
+    try:
+        grant_user_bought_cards(sender)
+    except:
+        logger.error("Error handling transaction from %r" % sender.payer_email)
+        logger.error('-'*60 + '\n' + traceback.format_exc() + '\n' + '-'*60)
+
+def paypal_payment_was_flagged_handler(sender, **kwargs):
     logger = logging.getLogger('cardstories.paypal')
     logger.error("Paypal Payment Failed! %r; %r" % (sender.flag_code, sender.flag_info))
 
@@ -123,5 +136,5 @@ def log_flagged_buy_cards_payment(sender, **kwargs):
 # Registers creation of user profile on post_save signal.
 post_save.connect(create_user_profile, sender=User)
 # Registers Paypal's IPN signals.
-payment_was_successful.connect(grant_user_bought_cards)
-payment_was_flagged.connect(log_flagged_buy_cards_payment)
+payment_was_successful.connect(paypal_payment_was_successful_handler)
+payment_was_flagged.connect(paypal_payment_was_flagged_handler)
