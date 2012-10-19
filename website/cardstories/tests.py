@@ -945,6 +945,7 @@ class CardstoriesTest(TestCase):
         """
         Test the paypal IPN handler.
         """
+        from decimal import Decimal
         from website.cardstories import models
         from django.contrib.auth.models import User
         from paypal.standard.ipn.models import PayPalIPN
@@ -956,7 +957,7 @@ class CardstoriesTest(TestCase):
             """Returns a valid IPN object."""
             return PayPalIPN(business = settings.PAYPAL_RECEIVER_EMAIL,
                              payment_status = 'Completed',
-                             mc_gross = settings.CS_EXTRA_CARD_PACK_PRICE,
+                             mc_gross = Decimal(settings.CS_EXTRA_CARD_PACK_PRICE),
                              mc_currency = settings.CS_EXTRA_CARD_PACK_CURRENCY,
                              custom = '{"player_id":%d}' % user.id)
 
@@ -971,7 +972,7 @@ class CardstoriesTest(TestCase):
         self.assertFalse(models.grant_user_bought_cards(obj))
 
         obj = ipn_object()
-        obj.mc_gross = '0.01'
+        obj.mc_gross = Decimal('0.01')
         self.assertFalse(models.grant_user_bought_cards(obj))
 
         obj = ipn_object()

@@ -21,6 +21,8 @@
 import simplejson
 import logging
 import traceback
+
+from decimal import Decimal
 from urllib import urlopen, urlencode
 
 from django.conf import settings
@@ -80,7 +82,7 @@ def grant_user_bought_cards(ipn_obj):
         valid = False
 
     # Make sure the amount is correct:
-    if ipn_obj.mc_gross != settings.CS_EXTRA_CARD_PACK_PRICE:
+    if ipn_obj.mc_gross != Decimal(settings.CS_EXTRA_CARD_PACK_PRICE):
         logger.error("Wrong 'mc_gross' param in IPN request: %r" % ipn_obj.mc_gross)
         valid = False
 
