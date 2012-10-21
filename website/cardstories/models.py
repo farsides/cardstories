@@ -104,6 +104,7 @@ def grant_user_bought_cards(ipn_obj):
         url = 'http://%s/resource?%s' % (settings.CARDSTORIES_HOST,
                                          urlencode(params, True))
         data = urlopen(url).read()
+        logger.info("The webservice responded with: %r" % data)
         response = simplejson.loads(data)
 
         if response['status'] == 'success':
