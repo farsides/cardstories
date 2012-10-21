@@ -107,7 +107,7 @@ def grant_user_bought_cards(ipn_obj):
         logger.info("The webservice responded with: %r" % data)
         response = simplejson.loads(data)
 
-        if response['status'] == 'success':
+        if response.get('status') == 'success':
             Purchase.objects.create(user_id=player_id, item_code=settings.CS_EXTRA_CARD_PACK_ITEM_ID)
             logger.info("Successfuly granted bought cards to player: %r" % player_id)
             return True
