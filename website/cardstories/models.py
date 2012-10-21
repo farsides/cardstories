@@ -98,7 +98,7 @@ def grant_user_bought_cards(ipn_obj):
         player_id = simplejson.loads(ipn_obj.custom)['player_id']
 
         params = {'action': 'grant_cards_to_player',
-                  'player_id': player_id,
+                  'user_id': player_id,
                   'card_ids': settings.CS_EXTRA_CARD_PACK_CARD_IDS}
 
         url = 'http://%s/resource?%s' % (settings.CARDSTORIES_HOST,

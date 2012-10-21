@@ -987,7 +987,7 @@ class CardstoriesTest(TestCase):
             def read(self):
                 return '{"status":"%s"}' % self.status
         def mock_cardstories_successful_service(url):
-            self.assertTrue('player_id=%d' % user_id in url)
+            self.assertTrue('user_id=%d' % user_id in url)
             return MockCardstoriesService('success')
         models.urlopen = mock_cardstories_successful_service
 
