@@ -25,8 +25,9 @@ from django.test import TestCase
 from django.conf import settings
 
 from website.util.helpers import mkdir_p
-        
+
 import shutil, os
+import logging
 from mock import Mock, patch
 
 
@@ -34,6 +35,10 @@ from mock import Mock, patch
 
 class CardstoriesTest(TestCase):
     fixtures = ['users.json']
+
+    def setUp(self):
+        # Silence logging during tests.
+        logging.disable(logging.CRITICAL)
 
     def test_00welcome(self):
         c = self.client
@@ -941,7 +946,7 @@ class CardstoriesTest(TestCase):
         response = c.get(url)
         self.assertTrue('Bogus sentence' in response.content)
 
-    def test_19grant_user_bought_cards(self):
+    def test_19paypal_payment_was_successful_handler(self):
         """
         Test the paypal IPN handler.
         """
@@ -962,22 +967,26 @@ class CardstoriesTest(TestCase):
                              custom = '{"player_id":%d}' % user.id)
 
         # IPN requests with invalid data shouldn't succeed.
-
         obj = ipn_object()
         obj.business = 'hahaha@fmail.com'
-        self.assertFalse(models.grant_user_bought_cards(obj))
+        self.assertFalse(models.paypal_payment_was_successful_handler(obj))
 
         obj = ipn_object()
         obj.payment_status = 'Pending'
-        self.assertFalse(models.grant_user_bought_cards(obj))
+        self.assertFalse(models.paypal_payment_was_successful_handler(obj))
 
         obj = ipn_object()
         obj.mc_gross = Decimal('0.01')
-        self.assertFalse(models.grant_user_bought_cards(obj))
+        self.assertFalse(models.paypal_payment_was_successful_handler(obj))
 
         obj = ipn_object()
         obj.mc_currency = 'THB'
-        self.assertFalse(models.grant_user_bought_cards(obj))
+        self.assertFalse(models.paypal_payment_was_successful_handler(obj))
+
+        obj = ipn_object()
+        obj.custom = "ohOh {I am a baaaad JSON]"
+        self.assertFalse(models.paypal_payment_was_successful_handler(obj))
+
 
         # Hits the webservice if IPN request is valid.
         class MockCardstoriesService(object):
@@ -998,7 +1007,7 @@ class CardstoriesTest(TestCase):
         self.assertEquals(user.purchase_set.filter(item_code=settings.CS_EXTRA_CARD_PACK_ITEM_ID).count(), 0)
 
         # Now perform a successful IPN request.
-        success = models.grant_user_bought_cards(ipn_object())
+        success = models.paypal_payment_was_successful_handler(ipn_object())
         self.assertTrue(success)
 
         # A purchase item should be created.
@@ -1009,7 +1018,17 @@ class CardstoriesTest(TestCase):
             return MockCardstoriesService('fail')
         models.urlopen = mock_cardstories_fail_service
 
-        success = models.grant_user_bought_cards(ipn_object())
+        success = models.paypal_payment_was_successful_handler(ipn_object())
+        self.assertFalse(success)
+
+        # Returns False if WS reqeuest acts weird.
+        def MockCardstoriesDrunkService(object):
+            """Pretends to be the CS webservice on vodka"""
+            def read(self):
+                return "]]] lolzzz} cAts!11!!!"
+        models.urlopen = lambda url: MockCardstoriesDrunkService()
+
+        success = models.paypal_payment_was_successful_handler(ipn_object())
         self.assertFalse(success)
 
         # Since the IPN handler didn't succeed this time, we should still be left
@@ -1058,3 +1077,11 @@ class CardstoriesTest(TestCase):
         views.after_bought_cards(fake_request)
         self.assertEqual(self.pdt_template, 'cardstories/after_bought_cards.html')
         self.assertEqual(self.pdt_request, fake_request)
+
+    def test_22paypal_payment_was_flagged_handler(self):
+        from website.cardstories import models
+        class FakeIPN(object):
+            flag_code = 12
+            flag_info = 'The info'
+
+        models.paypal_payment_was_flagged_handler(FakeIPN())

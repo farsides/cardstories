@@ -126,10 +126,11 @@ def paypal_payment_was_successful_handler(sender, **kwargs):
     logger = logging.getLogger('cardstories.paypal')
     logger.info("Handling transaction from: %r" % sender.payer_email)
     try:
-        grant_user_bought_cards(sender)
+        return grant_user_bought_cards(sender)
     except:
         logger.error("Error handling transaction from %r" % sender.payer_email)
         logger.error('-'*60 + '\n' + traceback.format_exc() + '\n' + '-'*60)
+        return False
 
 def paypal_payment_was_flagged_handler(sender, **kwargs):
     logger = logging.getLogger('cardstories.paypal')
