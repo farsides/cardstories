@@ -639,8 +639,8 @@ class CardstoriesService(service.Service, Observable):
 
     @defer.inlineCallbacks
     def grant_cards_to_player(self, args):
-        self.required(args, 'grant_cards_to_player', 'user_id', 'card_ids')
-        player_id = int(args['user_id'][0])
+        self.required(args, 'grant_cards_to_player', 'player_id', 'card_ids')
+        player_id = int(args['player_id'][0])
         card_ids = [int(i) for i in args['card_ids']]
         yield self.db.runInteraction(self.grantCardsInteraction, player_id, card_ids)
         defer.returnValue({'status': 'success'})

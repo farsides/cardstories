@@ -1153,7 +1153,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         c.execute(sql % (player_id, ''.join(old_earned_cards)))
         self.db.commit()
 
-        result = yield self.service.grant_cards_to_player({'user_id': [player_id],
+        result = yield self.service.grant_cards_to_player({'player_id': [player_id],
                                                            'card_ids': bought_card_ids})
 
         self.assertEquals(result['status'], 'success')
@@ -1175,7 +1175,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         c.execute("INSERT INTO players (player_id) VALUES (?)", [player_id])
         self.db.commit()
 
-        result = yield self.service.grant_cards_to_player({'user_id': [player_id],
+        result = yield self.service.grant_cards_to_player({'player_id': [player_id],
                                                            'card_ids': bought_card_ids})
 
         self.assertEquals(result['status'], 'success')
@@ -1199,7 +1199,7 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
 
         # Should not get in through the public handler.
         args = {'action': ['grant_cards_to_player'],
-                'user_id': [player_id],
+                'player_id': [player_id],
                 'card_ids': [10, 11, 12]}
         result = yield self.service.handle(defer.succeed(True), args, internal_request=False)
 
