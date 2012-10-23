@@ -1187,6 +1187,31 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         earned_card_ids = [ord(c) for c in list(earned_cards)]
         self.assertEquals(set(earned_card_ids), set(bought_card_ids))
 
+    @defer.inlineCallbacks
+    def test19_grant_cards_to_player_only_available_through_internal_resourc(self):
+        player_id = 44
+        # Cards the player is about to be granted.
+        bought_card_ids = [10, 11, 12, 13]
+
+        c = self.db.cursor()
+        c.execute("INSERT INTO players (player_id) VALUES (?)", [player_id])
+        self.db.commit()
+
+        # Should not get in through the public handler.
+        args = {'action': ['grant_cards_to_player'],
+                'user_id': [player_id],
+                'card_ids': [10, 11, 12]}
+        result = yield self.service.handle(defer.succeed(True), args, internal_request=False)
+
+        self.assertTrue('error' in result)
+
+        # An error should be logged to the Twisted log:
+        self.assertEquals(len(self.flushLoggedErrors()), 1)
+
+        # Should work through the internal handler.
+        result = yield self.service.handle(defer.succeed(True), args, internal_request=True)
+        self.assertEquals(result['status'], 'success')
+
 
 class CardstoriesConnectorTest(CardstoriesServiceTestBase):
 

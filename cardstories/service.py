@@ -102,8 +102,9 @@ class CardstoriesService(service.Service, Observable):
 
     ACTIONS_GAME = ('set_card', 'set_sentence', 'participate', 'voting', 'pick', 'vote',
                     'complete', 'invite', 'set_countdown')
-    ACTIONS = ACTIONS_GAME + ('create', 'poll', 'state', 'player_info', 'close_tab_action',
-                              'grant_cards_to_player')
+    ACTIONS = ACTIONS_GAME + ('create', 'poll', 'state', 'player_info', 'close_tab_action')
+
+    ACTIONS_INTERNAL = ('grant_cards_to_player')
 
     def __init__(self, settings):
         self.settings = settings
@@ -645,12 +646,12 @@ class CardstoriesService(service.Service, Observable):
         defer.returnValue({'status': 'success'})
 
 
-    def handle(self, result, args):
+    def handle(self, result, args, internal_request=False):
         if not args.has_key('action'):
             return defer.succeed(result)
         try:
             action = args['action'][0]
-            if action in self.ACTIONS:
+            if action in self.ACTIONS or (internal_request and action in self.ACTIONS_INTERNAL):
                 d = getattr(self, action)(args)
                 def error(reason):
                     error = reason.value
