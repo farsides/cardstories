@@ -1080,8 +1080,21 @@ class CardstoriesTest(TestCase):
 
     def test_22paypal_payment_was_flagged_handler(self):
         from website.cardstories import models
+
         class FakeIPN(object):
             flag_code = 12
             flag_info = 'The info'
 
+        logger = logging.getLogger('cardstories.paypal')
+        messages = []
+        def fake_error(msg):
+            messages.append(msg)
+
+        orig_error = logger.error
+        logger.error = fake_error
+
         models.paypal_payment_was_flagged_handler(FakeIPN())
+
+        self.assertEquals(len(messages), 1)
+
+        logger.error = orig_error
