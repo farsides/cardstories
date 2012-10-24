@@ -151,6 +151,7 @@ OWA_URL = ''
 OWA_SITE_ID = ''
 
 # Paypal integration
+PAYPAL_TEST = True
 PAYPAL_RECEIVER_EMAIL = 'paypal@cardstories.org'
 PAYPAL_IPN_PATH = 'paypal/ipn/'
 PAYPAL_PDT_PATH = 'paypal/pdt/'

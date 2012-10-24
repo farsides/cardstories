@@ -1052,6 +1052,16 @@ class CardstoriesTest(TestCase):
         self.assertTrue('<form ' in response.content)
         self.assertTrue(settings.CS_EXTRA_CARD_PACK_PRICE in response.content)
         self.assertTrue('Buy' in response.content)
+        # When using sandbox, the form should point to the paypal sandbox.
+        settings.PAYPAL_TEST = True
+        response = c.get('/get-extra-cards/')
+        self.assertTrue('action="https://www.sandbox.paypal.com' in response.content)
+        self.assertFalse('action="https://www.paypal.com' in response.content)
+        # When not using the sandbox, the form should point to the real thing.
+        settings.PAYPAL_TEST = False
+        response = c.get('/get-extra-cards/')
+        self.assertTrue('action="https://www.paypal.com' in response.content)
+        self.assertFalse('action="https://www.sandbox.paypal.com' in response.content)
         # When logged in, but already bought the cards,
         # he should not see the form anymore.
         models.Purchase.objects.create(user_id=1, item_code=settings.CS_EXTRA_CARD_PACK_ITEM_ID)

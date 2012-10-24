@@ -384,7 +384,7 @@ def get_extra_cards_form(request):
             }
 
             form = PayPalPaymentsForm(initial=paypal_dict)
-            context = {'form': form, 'price': price}
+            context = {'form': form, 'price': price, 'use_sandbox': settings.PAYPAL_TEST}
     else:
         context = {'form': None, 'price': price, 'problem': 'ANONYMOUS'}
 

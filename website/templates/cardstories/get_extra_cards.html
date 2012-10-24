@@ -12,7 +12,11 @@
     <img src="/static/css/images/extra-cards-pack.png" alt="Exclusive cards" />
     {% if form %}
       <div id="buy-form">
-        {{ form.sandbox }}
+        {% if use_sandbox %}
+          {{ form.sandbox }}
+        {% else %}
+          {{ form.render }}
+        {% endif %}
       </div>
     {% else %}
       <div id="buy-problem">
