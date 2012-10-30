@@ -151,21 +151,22 @@ OWA_URL = ''
 OWA_SITE_ID = ''
 
 # Paypal integration
-PAYPAL_TEST = True
+PAYPAL_TEST = True   # Due to django-paypal's weird implementation, both of these need to
+PAYPAL_DEBUG = True  # be set to False when using the live paypal version (not sandbox).
 PAYPAL_RECEIVER_EMAIL = 'paypal@cardstories.org'
 PAYPAL_IPN_PATH = 'paypal/ipn/'
 PAYPAL_PDT_PATH = 'paypal/pdt/'
 PAYPAL_IDENTITY_TOKEN = 'hOLmlj16HX-J1WtvBVKzu8YdsD2zbGCRKW7b3kLFGvvg0UAN6oPJG171xVC'
+PAYPAL_IMAGE = "https://www.paypal.com/en_US/i/btn/btn_paynow_LG.gif"
+PAYPAL_SANDBOX_IMAGE = "https://www.sandbox.paypal.com/en_US/i/btn/btn_buynow_LG.gif"
 PAYPAL_LOG_FILE = ppath('log/paypal/paypal.log')
+
 # Cardstories specific
 CS_EXTRA_CARD_PACK_PRICE = '4.50'
 CS_EXTRA_CARD_PACK_CURRENCY = 'EUR'
 CS_EXTRA_CARD_PACK_ITEM_ID = 'CardPack1'
 # Keep this in sync with the settings on the service (inside game.py).
 CS_EXTRA_CARD_PACK_CARD_IDS = [44, 45, 46, 47, 48, 49, 50, 51, 52, 53]
-
-PAYPAL_IMAGE = "https://www.paypal.com/en_US/i/btn/btn_paynow_LG.gif"
-PAYPAL_SANDBOX_IMAGE = "https://www.sandbox.paypal.com/en_US/i/btn/btn_buynow_LG.gif"
 
 # Enables code coverage
 TEST_RUNNER = 'tests.run_tests_with_coverage'
