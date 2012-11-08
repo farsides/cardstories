@@ -950,6 +950,7 @@ class CardstoriesTest(TestCase):
         """
         Test the paypal IPN handler.
         """
+        from django.core import mail
         from decimal import Decimal
         from website.cardstories import models
         from django.contrib.auth.models import User
@@ -1013,6 +1014,12 @@ class CardstoriesTest(TestCase):
         # A purchase item should be created.
         self.assertEquals(user.purchase_set.filter(item_code=settings.CS_EXTRA_CARD_PACK_ITEM_ID).count(), 1)
 
+        # An confirmation email should have been sent.
+        self.assertEquals(len(mail.outbox), 1)
+        self.assertEquals('Thank you for purchasing a deck of cards!', mail.outbox[0].subject)
+        self.assertEquals(mail.outbox[0].recipients(), ['hithere@farsides.com'])
+        self.assertTrue('extra 10 cards have been added to your deck' in str(mail.outbox[0].message()))
+
         # Returns False if WS request doesn't succeed.
         def mock_cardstories_fail_service(url):
             return MockCardstoriesService('fail')
@@ -1034,6 +1041,52 @@ class CardstoriesTest(TestCase):
         # Since the IPN handler didn't succeed this time, we should still be left
         # with only one Purchase object by this user.
         self.assertEquals(user.purchase_set.filter(item_code=settings.CS_EXTRA_CARD_PACK_ITEM_ID).count(), 1)
+
+    def test_19paypal_payment_was_successful_email_error(self):
+        """
+        Test that the error is logged when mail sending fails,
+        but cards are still successfully granted.
+        """
+        from django.core import mail
+        from decimal import Decimal
+        from website.cardstories import models
+        from django.contrib.auth.models import User
+        from paypal.standard.ipn.models import PayPalIPN
+
+        user = User.objects.create(username='hithere@farsides.com')
+        user_id = user.id
+
+        def ipn_object():
+            """Returns a valid IPN object."""
+            return PayPalIPN(business = settings.PAYPAL_RECEIVER_EMAIL,
+                             payment_status = 'Completed',
+                             mc_gross = Decimal(settings.CS_EXTRA_CARD_PACK_PRICE),
+                             mc_currency = settings.CS_EXTRA_CARD_PACK_CURRENCY,
+                             custom = '{"player_id":%d}' % user.id)
+
+        class MockCardstoriesService(object):
+            """Pretends to be the CS webservice."""
+            def read(self):
+                return '{"status":"success"}'
+        def mock_cardstories_successful_service(url):
+            return MockCardstoriesService()
+        models.urlopen = mock_cardstories_successful_service
+
+        # Mock out the mail sending function to fail with an error.
+        orig_send_bought_cards_confirmation_mail = models.send_bought_cards_confirmation_mail
+        def fail_send_bought_cards_confirmation_mail(player_id):
+            raise Exception('Oh noes!')
+        models.send_bought_cards_confirmation_mail = fail_send_bought_cards_confirmation_mail
+
+        success = models.paypal_payment_was_successful_handler(ipn_object())
+        # Even though mail sending fails, the handler should still report success.
+        self.assertTrue(success)
+        # A purchase item should still be created.
+        self.assertEquals(user.purchase_set.filter(item_code=settings.CS_EXTRA_CARD_PACK_ITEM_ID).count(), 1)
+        # No mail should have been sent.
+        self.assertEquals(len(mail.outbox), 0)
+
+        models.send_bought_cards_confirmation_mail = orig_send_bought_cards_confirmation_mail
 
     def test_20get_extra_cards_form(self):
         from website.cardstories import models

@@ -1,0 +1,23 @@
+We have received your payment of 4.50 EUR for 10 extra cards.
+
+Thank you for your purchase! You get a whole new set of possibilities for your next games, and you also help Card Stories by financing future developments.
+
+
+# How does it work?
+
+The extra 10 cards have been added to your deck, you should start seeing them during your next games.
+
+They will appear randomly when you create a new game or when you originally chose a card in someone else's game - just like any card you can get in the game when you level up.
+
+
+# Any questions?
+
+Just reply to this email or write to feedback@farsides.com, we'll be glad to answer you!
+
+Thanks again : )
+
+
+------
+
+{{ base_url }}
+Card Stories is a game created by Farsides: http://farsides.com/

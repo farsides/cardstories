@@ -18,6 +18,7 @@
 # along with this program in a file in the toplevel directory called
 # "AGPLv3".  If not, see <http://www.gnu.org/licenses/>.
 #
+import os, sys
 import simplejson
 import logging
 import traceback
@@ -29,7 +30,18 @@ from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
+from django.core.mail import get_connection
+from django.template.loader import get_template
+from django.template import Context
+
 from paypal.standard.ipn.signals import payment_was_successful, payment_was_flagged
+
+# Add the root folder to the load path to allow us to import
+# the mailing.message module.
+root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.append(root_dir)
+
+import mailing.message
 
 
 class UserProfile(models.Model):
@@ -110,6 +122,13 @@ def grant_user_bought_cards(ipn_obj):
         if response.get('status') == 'success':
             Purchase.objects.create(user_id=player_id, item_code=settings.CS_EXTRA_CARD_PACK_ITEM_ID)
             logger.info("Successfuly granted bought cards to player: %r" % player_id)
+            try:
+                logger.info("Sending confirmation mail to player: %r" % player_id)
+                send_bought_cards_confirmation_mail(player_id)
+                logger.info("Successfully sent confirmation mail to player: %r" % player_id)
+            except:
+                logger.error("Failed sending comfirmation mail to player: %r" % player_id)
+                logger.error('-'*60 + '\n' + traceback.format_exc() + '\n' + '-'*60)
             return True
         else:
             logger.error("Failed granting bought cards to player: %r; response: %r" % (player_id, response))
@@ -136,6 +155,22 @@ def paypal_payment_was_flagged_handler(sender, **kwargs):
     logger = logging.getLogger('cardstories.paypal')
     logger.error("Paypal Payment Failed! %r; %r" % (sender.flag_code, sender.flag_info))
 
+def send_bought_cards_confirmation_mail(user_id):
+    """
+    Builds and sends the 'Thank you for buying cards' email
+    to user specified by `user_id`.
+
+    """
+    user = User.objects.get(id=user_id)
+    email = user.username
+    template = 'bought_cards_confirmation'
+    subject = 'Thank you for purchasing a deck of cards!'
+    message = mailing.message.build_mail(template, subject, email)
+
+    smtp = get_connection(fail_silently=False)
+    smtp.open()
+    smtp.send_messages([message])
+    smtp.close()
 
 # Registers creation of user profile on post_save signal.
 post_save.connect(create_user_profile, sender=User)
