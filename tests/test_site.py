@@ -272,20 +272,40 @@ class CardstoriesInternalResourceTest(unittest.TestCase):
         if hasattr(self, 'site'):
             self.site.stopFactory()
 
+    @defer.inlineCallbacks
     def test04_handle_internal(self):
         def mock_handle(result, args, internal_request=False):
             return internal_request
         self.service.handle = mock_handle
 
+        self.service.settings['internal-secret'] = 'secret thing'
+
         resource = CardstoriesInternalResource(self.service)
         self.site = CardstoriesSite(resource, {}, [])
+
+        # Works with good secret param.
         request = server.Request(self.Channel(self.site), True)
-
         request.method = 'GET'
+        request.args = {'secret': ['secret thing']}
         self.assertEquals(True, resource.handle(True, request))
 
+        request = server.Request(self.Channel(self.site), True)
         request.method = 'POST'
+        request.args = {'secret': ['secret thing']}
         self.assertEquals(True, resource.handle(True, request))
+
+        # Fails when secret param is bad or doesn't exists.
+        request = server.Request(self.Channel(self.site), True)
+        request.method = 'GET'
+        request.args = {'secret': ['hahahahaha']}
+        result = yield resource.handle(True, request)
+        self.assertEquals({'error': {'code': 'UNAUTHORIZED'}}, result)
+
+        request = server.Request(self.Channel(self.site), True)
+        request.method = 'POST'
+        request.args = None
+        result = yield resource.handle(True, request)
+        self.assertEquals({'error': {'code': 'UNAUTHORIZED'}}, result)
 
 
 class AGPLResourceTest(unittest.TestCase):

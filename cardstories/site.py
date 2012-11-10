@@ -103,7 +103,8 @@ class CardstoriesInternalResource(CardstoriesResource):
     """
     Resource used for internal reqeusts only (WS <-> django).
     The same as the "regular" CardstoriesResource except that
-    it doesn't use plugins and signals to the service that the
+    it makes sure that incoming requests contain a shared secret param,
+    it doesn't use plugins, and it signals to the service that the
     request is coming from an internal resource.
 
     """
@@ -114,7 +115,11 @@ class CardstoriesInternalResource(CardstoriesResource):
         pass
 
     def handle(self, result, request):
-        return self.service.handle(result, request.args, internal_request=True)
+        secret = request.args and request.args.get('secret')
+        if secret and secret[0] == self.service.settings['internal-secret']:
+            return self.service.handle(result, request.args, internal_request=True)
+        else:
+            return defer.succeed({'error': {'code': 'UNAUTHORIZED'}})
 
 import os
 import glob

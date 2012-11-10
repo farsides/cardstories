@@ -988,6 +988,9 @@ class CardstoriesTest(TestCase):
         obj.custom = "ohOh {I am a baaaad JSON]"
         self.assertFalse(models.paypal_payment_was_successful_handler(obj))
 
+        default_webservice_internal_secret = settings.WEBSERVICE_INTERNAL_SECRET
+        fake_secret = 'ohMySecret123'
+        settings.WEBSERVICE_INTERNAL_SECRET = fake_secret
 
         # Hits the webservice if IPN request is valid.
         class MockCardstoriesService(object):
@@ -998,6 +1001,8 @@ class CardstoriesTest(TestCase):
                 return '{"status":"%s"}' % self.status
         def mock_cardstories_successful_service(url):
             self.assertTrue('player_id=%d' % user_id in url)
+            self.assertTrue('secret=%s' % fake_secret in url)
+            settings.WEBSERVICE_INTERNAL_SECRET = default_webservice_internal_secret
             return MockCardstoriesService('success')
         models.urlopen = mock_cardstories_successful_service
 

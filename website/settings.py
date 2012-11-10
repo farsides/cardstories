@@ -139,6 +139,7 @@ AUTH_PROFILE_MODULE = 'cardstories.UserProfile'
 # Cardstories settings
 CARDSTORIES_HOST = 'localhost:5000'
 WEBSERVICE_IP = '127.0.0.1'
+WEBSERVICE_INTERNAL_SECRET = 'TheSecret'
 
 # Facebook settings.
 FACEBOOK_APP_ID = ''

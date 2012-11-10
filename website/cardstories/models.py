@@ -111,7 +111,8 @@ def grant_user_bought_cards(ipn_obj):
 
         params = {'action': 'grant_cards_to_player',
                   'player_id': player_id,
-                  'card_ids': settings.CS_EXTRA_CARD_PACK_CARD_IDS}
+                  'card_ids': settings.CS_EXTRA_CARD_PACK_CARD_IDS,
+                  'secret': settings.WEBSERVICE_INTERNAL_SECRET}
 
         url = 'http://%s/internal?%s' % (settings.CARDSTORIES_HOST,
                                          urlencode(params, True))
