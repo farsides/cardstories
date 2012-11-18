@@ -161,7 +161,7 @@ class CardstoriesTest(TestCase):
         # Dont' try to update the avatar
         mock_avatar = Mock()
         MockGravatarAvatar.return_value = mock_avatar
-        
+
         # Empty get.
         response = c.get(url)
         self.assertEqual(response.status_code, 200)
@@ -201,12 +201,23 @@ class CardstoriesTest(TestCase):
         self.assertTrue('_auth_user_id' in c.session)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response['Location'], 'http://testserver/' + query)
-        
+
         # Check that the avatar is retreived
         from django.contrib.auth.models import User
         user = User.objects.get(username=valid_data['username'])
         MockGravatarAvatar.assert_called_once_with(user)
         mock_avatar.update.assert_called_once_with()
+
+    def test_02login_with_return_to_param(self):
+        # Test redirection with return_to param after successful login.
+        import urllib
+        data = {'username': 'testuser1@email.com',
+                'password': 'abc!@#',
+                'return_to': '/some/path'}
+        response = self.client.post('/login/', data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response['Location'], 'http://testserver/some/path')
+
 
     def test_02logout(self):
         '''
@@ -1166,3 +1177,39 @@ class CardstoriesTest(TestCase):
         self.assertEquals(len(messages), 1)
 
         logger.error = orig_error
+
+    def test_23activity_notifications_unsubscribe(self):
+        url = '/activity-notifications/unsubscribe/'
+        c = self.client
+
+        # When user is not authenticated, should ask him to log in.
+        response = c.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue('log in' in response.content)
+        login_url = '/login/?return_to=%2Factivity-notifications%2Funsubscribe%2F'
+        self.assertTrue(login_url in response.content)
+        self.assertEqual(response.context['login_url'], login_url)
+
+        # Now log in.
+        c.login(username='testuser1@email.com', password='abc!@#')
+
+        # Now should see the question and confirmation button.
+        response = c.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue('log in' not in response.content)
+        self.assertTrue('Are you sure' in response.content)
+        self.assertTrue('<form' in response.content)
+        self.assertTrue('method="post"' in response.content)
+        self.assertTrue('action="' + url in response.content)
+
+        # Make sure this user hasn't unsubscribed yet.
+        from django.contrib.auth.models import User
+        user = User.objects.get(username='testuser1@email.com')
+        self.assertFalse(user.userprofile.activity_notifications_disabled)
+
+        # Submit the form.
+        response = c.post(url)
+        self.assertTrue('unsubscribed' in response.content)
+        # Reload user from the db.
+        user = User.objects.get(username='testuser1@email.com')
+        self.assertTrue(user.userprofile.activity_notifications_disabled)

@@ -196,13 +196,15 @@ def login(request):
             GravatarAvatar(form.auth_user).update()
 
             # Redirect maintaining game_id, if set.
-            url = '%s%s' % (reverse(welcome), get_gameid_query(request))
+            url = request.POST.get('return_to') or \
+                '%s%s' % (reverse(welcome), get_gameid_query(request))
             return redirect(url);
     else:
-        form = LoginForm()
+        form = LoginForm({'return_to': request.GET.get('return_to')})
 
     context = {'registration_form': RegistrationForm(),
                'login_form': form}
+
     return render_to_response('cardstories/welcome.html', context,
                               context_instance=RequestContext(request,
                               processors=[common_variables]))
@@ -357,6 +359,25 @@ def get_loggedin_player_id(request, session_key):
 
     response = HttpResponse(user.id, mimetype="text/plain")
     return response
+
+def activity_notifications_unsubscribe(request):
+    if request.user.is_authenticated():
+        if request.method == 'POST':
+            user_profile = request.user.userprofile
+            user_profile.activity_notifications_disabled = True
+            user_profile.save()
+            return HttpResponse('You have been unsubscribed successfully.', mimetype='text/plain')
+        else:
+            context = {'logged_in': True,
+                       'unsubscribe_url': reverse(activity_notifications_unsubscribe),
+                       'game_url': reverse(welcome)}
+            return render_to_response('cardstories/activity_notifications_unsubscribe.html', context,
+                                      context_instance=RequestContext(request, processors=[common_variables]))
+    else:
+        return_to_query = urlencode({'return_to': reverse(activity_notifications_unsubscribe)})
+        login_url = '%s?%s' % (reverse(login), return_to_query)
+        context = {'logged_in': False, 'login_url': login_url}
+        return render_to_response('cardstories/activity_notifications_unsubscribe.html', context)
 
 def get_extra_cards_form(request):
     """

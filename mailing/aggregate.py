@@ -36,17 +36,15 @@ def get_all_players(cursor):
     Fetches all players from the django db. Returns a list of 3-element
     tuples containing id, email and name of each player in the django database.
     '''
-    cursor.execute("SELECT id, username, first_name FROM auth_user")
+    cursor.execute("""SELECT auth_user.id, username, first_name, activity_notifications_disabled
+                        FROM auth_user JOIN cardstories_userprofile
+                          ON cardstories_userprofile.user_id = auth_user.id""")
     result = []
     for row in iter(cursor.next, None):
-        id, email, name = row
+        id, email, name, unsubscribed = row
         name = name and name.strip() or email.split('@')[0].strip()
-        result.append((id, email, name,))
+        result.append((id, email, name, unsubscribed,))
     return result
-
-def get_unsubscribe_url(player_id):
-    # TODO: Get URL from Django
-    return 'http://cardstories.org/'
 
 def seed_playerid2name(players_list):
     '''
@@ -56,7 +54,7 @@ def seed_playerid2name(players_list):
     '''
     global playerid2name
     playerid2name = {}
-    for id, _email, name in players_list:
+    for id, _email, name, _unsubscribed in players_list:
         playerid2name[id] = name
 
 def get_player_name(player_id, current_player_id=None):

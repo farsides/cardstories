@@ -1,0 +1,29 @@
+{% extends "cardstories/extra_cards_base.html" %}
+
+{% block stylesheets %}{{ block.super }}
+  <style type="text/css">
+    #activity-unsubscribe { width: 500px; margin: 60px auto; text-align: center; color: #444 }
+    #activity-unsubscribe p { font-size: 1.25em; }
+    #activity-unsubscribe form input { float: none; margin-right: 0.5em; }
+    #activity-unsubscribe form a { float: none; font-size: 1em; text-decoration: underline; }
+  </style>
+{% endblock %}
+
+{% block main %}
+  <div id="activity-unsubscribe">
+  {% if logged_in %}
+      <p>
+        Are you sure you want to unsubscribe from activity notifications?
+      </p>
+      <form method="post" action="{{ unsubscribe_url }}">
+        {% csrf_token %}
+        <input type="submit" value="Yes, very sure" />
+        <a href="{{ game_url }}">No, take me out of here</a>
+      </form>
+  {% else %}
+    <p>
+      Please <a href="{{ login_url }}">log in</a> to unsubscribe from activity notifications.
+    </p>
+  {% endif %}
+  </div>
+{% endblock %}

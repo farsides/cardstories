@@ -52,7 +52,7 @@ class MailingTest(unittest.TestCase):
                 'available_games': [{'game_id': 6161, 'owner_name': u'david', 'sentence': u'this is an available story çà'}], 
                 'completed_games': [{'game_id': 6162, 'owner_name': u'goliath', 'sentence': u'this is a completed story éè'}], 
                 'game_activities': [{'game_id': 6159, 'state': u'vote', 'owner_name': 'You', 'events': [u'emzie3001 voted', u'Cathy Jewson voted', u'Kazzi voted', u'nara voted', u'Matjaz voted'], 'sentence': u'story with activity ù'}], 
-                'unsubscribe_url': 'http://cardstories.org/unsub'
+                'unsubscribe_path': '/unsubscribe-path'
             }
 
         send.send_mail(mock_smtp, 'test@example.com', context)
@@ -74,7 +74,7 @@ class MailingTest(unittest.TestCase):
         self.assertTrue("/?game_id=3D6161" in msg_formatted)
         self.assertTrue("/?game_id=3D6162" in msg_formatted)
         self.assertTrue("/?game_id=3D6159" in msg_formatted)
-        self.assertTrue("http://cardstories.org/unsub" in msg_formatted)
+        self.assertTrue("/unsubscribe-path" in msg_formatted)
 
 # Main #####################################################################
 

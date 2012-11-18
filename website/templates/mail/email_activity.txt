@@ -7,7 +7,7 @@
 
 {% endif %}{% if available_games %}= New games to play =
 {% for game in available_games %}
-    * "{{ game.sentence }}" (Game Master: {{ game.owner_name }}) 
+    * "{{ game.sentence }}" (Game Master: {{ game.owner_name }})
       {{ base_url }}/?game_id={{ game.game_id }}
 {% endfor %}
 
@@ -20,6 +20,6 @@
 {% endif %}
 Card Stories is a game created by Farsides: http://farsides.com/
 
-To instantly unsubscribe from activity notifications: 
-{{ unsubscribe_url }}
+To instantly unsubscribe from activity notifications:
+{{ base_url }}{{ unsubscribe_path }}
 

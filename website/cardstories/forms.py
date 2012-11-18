@@ -115,6 +115,7 @@ class LoginForm(CardstoriesForm):
         widget=forms.TextInput(attrs={'class': 'username default'}))
     password = forms.CharField(required=True,
         widget=forms.PasswordInput(attrs={'class': 'password'}))
+    return_to = forms.CharField(required=False, widget=forms.HiddenInput())
 
     # The following field is simply a way to have a default value as a field
     # label, which will later be handled appropriately by some Javascript

@@ -53,6 +53,7 @@ class UserProfile(models.Model):
 
     # Facebook user id.
     facebook_id = models.BigIntegerField(null=True, blank=True)
+    activity_notifications_disabled = models.BooleanField(default=False)
 
 class Purchase(models.Model):
     """

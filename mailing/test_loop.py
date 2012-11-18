@@ -53,6 +53,11 @@ class LoopTest(unittest.TestCase):
             "  username VARCHAR(255), "
             "  first_name VARCHAR(255) "
             "); ")
+        c.execute(
+            "CREATE TABLE cardstories_userprofile ( "
+            "  user_id INTEGER UNIQUE, "
+            "  activity_notifications_disabled BOOL NOT NULL DEFAULT False "
+            "); ")
         c.close()
         # Mock out send.smtp_open() and
         # smtp.close() calls.
@@ -72,6 +77,7 @@ class LoopTest(unittest.TestCase):
         player1 = 1
         player2 = 2
         player3 = 88
+        player4 = 122
         game1 = 111
         game2 = 122
         game3 = 133
@@ -95,12 +101,15 @@ class LoopTest(unittest.TestCase):
         # ------------------------------------------------------------
         # 1. auth_user
         auth_user_fixtures = [
-            (player1, 'john@johnson.com', 'John Johnson'),
-            (player2, 'bill@billson.com', 'Bill Billson'),
-            (player3, 'bigjoe99@gmail.com', None)
+            (player1, 'john@johnson.com', 'John Johnson', False),
+            (player2, 'bill@billson.com', 'Bill Billson', False),
+            (player3, 'bigjoe99@gmail.com', None, False),
+            (player4, 'mr.unsubscriber@email.com', None, True)
         ]
         for player in auth_user_fixtures:
-            c.execute('INSERT INTO auth_user (id, username, first_name) VALUES (?, ?, ?)', player)
+            c.execute('INSERT INTO auth_user (id, username, first_name) VALUES (?, ?, ?)', player[:3])
+            c.execute('INSERT INTO cardstories_userprofile (user_id, activity_notifications_disabled) VALUES (?, ?)', (player[0], player[3]))
+
 
         # 2. games
         games_fixtures = [
@@ -140,6 +149,7 @@ class LoopTest(unittest.TestCase):
             [game2, two_days_ago, event_log.PLAYER_PICKED_CARD,   player3, 23],
             [game2, two_days_ago, event_log.PLAYER_JOINED,        player2, ''],
             [game2, two_days_ago, event_log.PLAYER_PICKED_CARD,   player2, 24],
+            [game2, two_days_ago, event_log.PLAYER_JOINED,        player4, ''],
             [game2, two_days_ago, event_log.GAME_MOVED_TO_VOTING, player1, ''],
             [game2, two_days_ago, event_log.PLAYER_VOTED,         player2, 44],
             [game2, two_days_ago, event_log.PLAYER_VOTED,         player3, 45],
@@ -166,6 +176,7 @@ class LoopTest(unittest.TestCase):
         # Should send out two emails (for player1 and player 3).
         # The email shouldn't be sent to player2 because he was last active 'now',
         # and nothing has happened since now (a blank email such as that shouldn't be sent).
+        # The email shouldn't be sent to player4 because he has unsubscribed from the emails.
         self.assertEquals(count, 2)
 
         # Let's see what send_mail has been called with.
@@ -210,7 +221,7 @@ class LoopTest(unittest.TestCase):
 
     def test02_should_send_email(self):
         def to_iso_string(datetime):
-            return datetime.strftime('%Y-%m-%d %H:%M:%S.%f')
+            return datetime.strftime('%Y-%m-%d %H:%M:%S')
 
         now = datetime.now()
 

@@ -82,6 +82,7 @@
                   {{ login_form.password_clear }}
                 </div>
                 <div class="row">
+                  {{ login_form.return_to }}
                   <a href="{% url auth_password_reset %}">Forgot your password?</a>
                   <input type="submit" value="LOG IN" class="button" />
                 </div>
