@@ -25,8 +25,9 @@ from django.test import TestCase
 from django.conf import settings
 
 from website.util.helpers import mkdir_p
-        
+
 import shutil, os
+import logging
 from mock import Mock, patch
 
 
@@ -35,12 +36,36 @@ from mock import Mock, patch
 class CardstoriesTest(TestCase):
     fixtures = ['users.json']
 
+    def setUp(self):
+        # Silence logging during tests.
+        logging.disable(logging.CRITICAL)
+
     def test_00welcome(self):
         c = self.client
+        # When anonymous:
         response = c.get("/")
         self.assertEqual(response.status_code, 200)
         self.assertTrue('registration_form' in response.context)
         self.assertTrue('login_form' in response.context)
+        self.assertFalse('jquery.cardstories.js' in response.content)
+        # When logged in:
+        c.login(username='testuser1@email.com', password='abc!@#')
+        response = c.get("/")
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse('registration_form' in response.context)
+        self.assertFalse('login_form' in response.context)
+        self.assertTrue('jquery.cardstories.js' in response.content)
+
+    def test_00welcome(self):
+        from website.cardstories.models import Purchase
+        c = self.client
+        c.login(username='testuser1@email.com', password='abc!@#')
+        response = c.get('/')
+        self.assertFalse(response.context['player_bought_cards'])
+        # Assign a purchase to the logged in user.
+        Purchase.objects.create(user_id=1, item_code=settings.CS_EXTRA_CARD_PACK_ITEM_ID)
+        response = c.get('/')
+        self.assertTrue(response.context['player_bought_cards'])
 
     @patch('website.cardstories.views.GravatarAvatar')
     def test_01registration(self, MockGravatarAvatar):
@@ -136,7 +161,7 @@ class CardstoriesTest(TestCase):
         # Dont' try to update the avatar
         mock_avatar = Mock()
         MockGravatarAvatar.return_value = mock_avatar
-        
+
         # Empty get.
         response = c.get(url)
         self.assertEqual(response.status_code, 200)
@@ -176,12 +201,23 @@ class CardstoriesTest(TestCase):
         self.assertTrue('_auth_user_id' in c.session)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response['Location'], 'http://testserver/' + query)
-        
+
         # Check that the avatar is retreived
         from django.contrib.auth.models import User
         user = User.objects.get(username=valid_data['username'])
         MockGravatarAvatar.assert_called_once_with(user)
         mock_avatar.update.assert_called_once_with()
+
+    def test_02login_with_return_to_param(self):
+        # Test redirection with return_to param after successful login.
+        import urllib
+        data = {'username': 'testuser1@email.com',
+                'password': 'abc!@#',
+                'return_to': '/some/path'}
+        response = self.client.post('/login/', data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response['Location'], 'http://testserver/some/path')
+
 
     def test_02logout(self):
         '''
@@ -920,3 +956,260 @@ class CardstoriesTest(TestCase):
         url = "/?game_id=456"
         response = c.get(url)
         self.assertTrue('Bogus sentence' in response.content)
+
+    def test_19paypal_payment_was_successful_handler(self):
+        """
+        Test the paypal IPN handler.
+        """
+        from django.core import mail
+        from decimal import Decimal
+        from website.cardstories import models
+        from django.contrib.auth.models import User
+        from paypal.standard.ipn.models import PayPalIPN
+
+        user = User.objects.create(username='hithere@farsides.com')
+        user_id = user.id
+
+        def ipn_object():
+            """Returns a valid IPN object."""
+            return PayPalIPN(business = settings.PAYPAL_RECEIVER_EMAIL,
+                             payment_status = 'Completed',
+                             mc_gross = Decimal(settings.CS_EXTRA_CARD_PACK_PRICE),
+                             mc_currency = settings.CS_EXTRA_CARD_PACK_CURRENCY,
+                             custom = '{"player_id":%d}' % user.id)
+
+        # IPN requests with invalid data shouldn't succeed.
+        obj = ipn_object()
+        obj.business = 'hahaha@fmail.com'
+        self.assertFalse(models.paypal_payment_was_successful_handler(obj))
+
+        obj = ipn_object()
+        obj.payment_status = 'Pending'
+        self.assertFalse(models.paypal_payment_was_successful_handler(obj))
+
+        obj = ipn_object()
+        obj.mc_gross = Decimal('0.01')
+        self.assertFalse(models.paypal_payment_was_successful_handler(obj))
+
+        obj = ipn_object()
+        obj.mc_currency = 'THB'
+        self.assertFalse(models.paypal_payment_was_successful_handler(obj))
+
+        obj = ipn_object()
+        obj.custom = "ohOh {I am a baaaad JSON]"
+        self.assertFalse(models.paypal_payment_was_successful_handler(obj))
+
+        default_webservice_internal_secret = settings.WEBSERVICE_INTERNAL_SECRET
+        fake_secret = 'ohMySecret123'
+        settings.WEBSERVICE_INTERNAL_SECRET = fake_secret
+
+        # Hits the webservice if IPN request is valid.
+        class MockCardstoriesService(object):
+            """Pretends to be the CS webservice."""
+            def __init__(self, status):
+                self.status = status
+            def read(self):
+                return '{"status":"%s"}' % self.status
+        def mock_cardstories_successful_service(url):
+            self.assertTrue('player_id=%d' % user_id in url)
+            self.assertTrue('secret=%s' % fake_secret in url)
+            settings.WEBSERVICE_INTERNAL_SECRET = default_webservice_internal_secret
+            return MockCardstoriesService('success')
+        models.urlopen = mock_cardstories_successful_service
+
+        # After IPN request is successfully handled, a new Purchase object
+        # associated with the player should be created.
+        # None of the IPN requests have been successful so far, so no purchase
+        # object should exist at this point yet.
+        self.assertEquals(user.purchase_set.filter(item_code=settings.CS_EXTRA_CARD_PACK_ITEM_ID).count(), 0)
+
+        # Now perform a successful IPN request.
+        success = models.paypal_payment_was_successful_handler(ipn_object())
+        self.assertTrue(success)
+
+        # A purchase item should be created.
+        self.assertEquals(user.purchase_set.filter(item_code=settings.CS_EXTRA_CARD_PACK_ITEM_ID).count(), 1)
+
+        # An confirmation email should have been sent.
+        self.assertEquals(len(mail.outbox), 1)
+        self.assertEquals('Thank you for purchasing a deck of cards!', mail.outbox[0].subject)
+        self.assertEquals(mail.outbox[0].recipients(), ['hithere@farsides.com'])
+        self.assertTrue('extra 10 cards have been added to your deck' in str(mail.outbox[0].message()))
+
+        # Returns False if WS request doesn't succeed.
+        def mock_cardstories_fail_service(url):
+            return MockCardstoriesService('fail')
+        models.urlopen = mock_cardstories_fail_service
+
+        success = models.paypal_payment_was_successful_handler(ipn_object())
+        self.assertFalse(success)
+
+        # Returns False if WS reqeuest acts weird.
+        def MockCardstoriesDrunkService(object):
+            """Pretends to be the CS webservice on vodka"""
+            def read(self):
+                return "]]] lolzzz} cAts!11!!!"
+        models.urlopen = lambda url: MockCardstoriesDrunkService()
+
+        success = models.paypal_payment_was_successful_handler(ipn_object())
+        self.assertFalse(success)
+
+        # Since the IPN handler didn't succeed this time, we should still be left
+        # with only one Purchase object by this user.
+        self.assertEquals(user.purchase_set.filter(item_code=settings.CS_EXTRA_CARD_PACK_ITEM_ID).count(), 1)
+
+    def test_19paypal_payment_was_successful_email_error(self):
+        """
+        Test that the error is logged when mail sending fails,
+        but cards are still successfully granted.
+        """
+        from django.core import mail
+        from decimal import Decimal
+        from website.cardstories import models
+        from django.contrib.auth.models import User
+        from paypal.standard.ipn.models import PayPalIPN
+
+        user = User.objects.create(username='hithere@farsides.com')
+        user_id = user.id
+
+        def ipn_object():
+            """Returns a valid IPN object."""
+            return PayPalIPN(business = settings.PAYPAL_RECEIVER_EMAIL,
+                             payment_status = 'Completed',
+                             mc_gross = Decimal(settings.CS_EXTRA_CARD_PACK_PRICE),
+                             mc_currency = settings.CS_EXTRA_CARD_PACK_CURRENCY,
+                             custom = '{"player_id":%d}' % user.id)
+
+        class MockCardstoriesService(object):
+            """Pretends to be the CS webservice."""
+            def read(self):
+                return '{"status":"success"}'
+        def mock_cardstories_successful_service(url):
+            return MockCardstoriesService()
+        models.urlopen = mock_cardstories_successful_service
+
+        # Mock out the mail sending function to fail with an error.
+        orig_send_bought_cards_confirmation_mail = models.send_bought_cards_confirmation_mail
+        def fail_send_bought_cards_confirmation_mail(player_id):
+            raise Exception('Oh noes!')
+        models.send_bought_cards_confirmation_mail = fail_send_bought_cards_confirmation_mail
+
+        success = models.paypal_payment_was_successful_handler(ipn_object())
+        # Even though mail sending fails, the handler should still report success.
+        self.assertTrue(success)
+        # A purchase item should still be created.
+        self.assertEquals(user.purchase_set.filter(item_code=settings.CS_EXTRA_CARD_PACK_ITEM_ID).count(), 1)
+        # No mail should have been sent.
+        self.assertEquals(len(mail.outbox), 0)
+
+        models.send_bought_cards_confirmation_mail = orig_send_bought_cards_confirmation_mail
+
+    def test_20get_extra_cards_form(self):
+        from website.cardstories import models
+        c = self.client
+        # When user is not logged in, he should not see the form.
+        response = c.get('/get-extra-cards/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue('log in' in response.content)
+        self.assertFalse('<form ' in response.content)
+        # When logged in, but didn't buy the cards yet,
+        # he should see the form with the buy now button.
+        c.login(username='testuser1@email.com', password='abc!@#')
+        response = c.get('/get-extra-cards/')
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse('log in' in response.content)
+        self.assertTrue('<form ' in response.content)
+        self.assertTrue(settings.CS_EXTRA_CARD_PACK_PRICE in response.content)
+        self.assertTrue('Buy' in response.content)
+        # When using sandbox, the form should point to the paypal sandbox.
+        settings.PAYPAL_TEST = True
+        response = c.get('/get-extra-cards/')
+        self.assertTrue('action="https://www.sandbox.paypal.com' in response.content)
+        self.assertFalse('action="https://www.paypal.com' in response.content)
+        # When not using the sandbox, the form should point to the real thing.
+        settings.PAYPAL_TEST = False
+        response = c.get('/get-extra-cards/')
+        self.assertTrue('action="https://www.paypal.com' in response.content)
+        self.assertFalse('action="https://www.sandbox.paypal.com' in response.content)
+        # When logged in, but already bought the cards,
+        # he should not see the form anymore.
+        models.Purchase.objects.create(user_id=1, item_code=settings.CS_EXTRA_CARD_PACK_ITEM_ID)
+        response = c.get('/get-extra-cards/')
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue('already bought' in response.content)
+        self.assertFalse('<form ' in response.content)
+
+    def test_21after_bought_cards(self):
+        from website.cardstories import views
+        import paypal.standard.pdt.views
+
+        self.pdt_template = None
+        self.pdt_request = None
+
+        # Stub out the django-paypal PDT handler:
+        def fake_pdt(req, **kwargs):
+            self.pdt_template = kwargs['template']
+            self.pdt_request = req
+        paypal.standard.pdt.views.pdt = fake_pdt
+
+        fake_request = object()
+        views.after_bought_cards(fake_request)
+        self.assertEqual(self.pdt_template, 'cardstories/after_bought_cards.html')
+        self.assertEqual(self.pdt_request, fake_request)
+
+    def test_22paypal_payment_was_flagged_handler(self):
+        from website.cardstories import models
+
+        class FakeIPN(object):
+            flag_code = 12
+            flag_info = 'The info'
+
+        logger = logging.getLogger('cardstories.paypal')
+        messages = []
+        def fake_error(msg):
+            messages.append(msg)
+
+        orig_error = logger.error
+        logger.error = fake_error
+
+        models.paypal_payment_was_flagged_handler(FakeIPN())
+
+        self.assertEquals(len(messages), 1)
+
+        logger.error = orig_error
+
+    def test_23activity_notifications_unsubscribe(self):
+        url = '/activity-notifications/unsubscribe/'
+        c = self.client
+
+        # When user is not authenticated, should ask him to log in.
+        response = c.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue('log in' in response.content)
+        login_url = '/login/?return_to=%2Factivity-notifications%2Funsubscribe%2F'
+        self.assertTrue(login_url in response.content)
+        self.assertEqual(response.context['login_url'], login_url)
+
+        # Now log in.
+        c.login(username='testuser1@email.com', password='abc!@#')
+
+        # Now should see the question and confirmation button.
+        response = c.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue('log in' not in response.content)
+        self.assertTrue('Are you sure' in response.content)
+        self.assertTrue('<form' in response.content)
+        self.assertTrue('method="post"' in response.content)
+        self.assertTrue('action="' + url in response.content)
+
+        # Make sure this user hasn't unsubscribed yet.
+        from django.contrib.auth.models import User
+        user = User.objects.get(username='testuser1@email.com')
+        self.assertFalse(user.userprofile.activity_notifications_disabled)
+
+        # Submit the form.
+        response = c.post(url)
+        self.assertTrue('unsubscribed' in response.content)
+        # Reload user from the db.
+        user = User.objects.get(username='testuser1@email.com')
+        self.assertTrue(user.userprofile.activity_notifications_disabled)

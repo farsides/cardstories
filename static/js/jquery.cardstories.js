@@ -4965,7 +4965,17 @@
             'card040.png',
             'card041.png',
             'card042.png',
-            'card043.png'
+            'card043.png',
+            'card044.png',
+            'card045.png',
+            'card046.png',
+            'card047.png',
+            'card048.png',
+            'card049.png',
+            'card050.png',
+            'card051.png',
+            'card052.png',
+            'card053.png'
         ],
 
         unset_active: function(root) {

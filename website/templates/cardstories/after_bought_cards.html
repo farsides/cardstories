@@ -1,0 +1,36 @@
+{% extends "cardstories/extra_cards_base.html" %}
+
+{% block stylesheets %}{{ block.super }}
+  {% ifequal pdt_obj.st 'SUCCESS' %}
+    <style type="text/css">
+      #logo { margin: 50px auto 0; background: url(/static/css/images/extra-cards-success-logo.png); background-repeat: no-repeat; width: 900px; height: 337px; }
+      #logo img { display: none; }
+      #bought-success { width: 567px; margin: -125px auto 0; padding-left: 90px; }
+      #bought-success img { float: left; }
+      #continue-btn { float: left; width: 200px; margin-top: 180px; }
+      #continue-btn img { width: 200px; }
+    </style>
+  {% else %}
+    <style type="text/css">
+      #bought-fail { width: 504px; margin: 60px auto; position: relative; }
+    </style>
+  {% endifequal %}
+{% endblock %}
+
+{% block main %}
+<div id="bought-cards">
+  {% ifequal pdt_obj.st 'SUCCESS' %}
+    <div id="bought-success">
+      <img src="/static/css/images/extra-cards-success-star.png" alt="Success!" />
+      <a id="continue-btn" href="/" ><img src="/static/css/images/complete_continue.png" alt="Continue" /></a>
+    </div>
+  {% else %}
+    <div id="bought-fail">
+      <a href="/get-extra-cards/">
+        <img src="/static/css/images/extra-cards-fail.png" alt="Try again!" />
+      </a>
+    </div>
+  {% endifequal %}
+  <br style="clear:both;" />
+</div>
+{% endblock %}

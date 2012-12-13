@@ -28,14 +28,15 @@ from twisted.python import filepath
 from twisted.web.test.test_web import DummyRequest
 from twisted.web.test._util import _render
 
-from cardstories.site import CardstoriesResource, CardstoriesTree, AGPLResource, CardstoriesSite
+from cardstories.site import CardstoriesResource, CardstoriesInternalResource
+from cardstories.site import CardstoriesTree, AGPLResource, CardstoriesSite
 from cardstories.plugins import CardstoriesPlugins
 
 class CardstoriesServiceMockup:
     def __init__(self):
         self.settings = {'static': os.getcwd()}
 
-    def handle(self, result, args):
+    def handle(self, result, args, internal_request=False):
         return 'handle'
 
 class CardstoriesSiteTest(unittest.TestCase):
@@ -231,6 +232,82 @@ class CardstoriesResourceTest(unittest.TestCase):
         request.method = 'POST'
         self.assertEquals('handle', resource.handle(True, request))
 
+    def test04_handle_non_internal(self):
+        def mock_handle(result, args, internal_request=False):
+            return internal_request
+        self.service.handle = mock_handle
+
+        resource = CardstoriesResource(self.service)
+        self.site = CardstoriesSite(resource, {}, [])
+        request = server.Request(self.Channel(self.site), True)
+
+        request.method = 'GET'
+        self.assertEquals(False, resource.handle(True, request))
+
+        request.method = 'POST'
+        self.assertEquals(False, resource.handle(True, request))
+
+class CardstoriesInternalResourceTest(unittest.TestCase):
+
+    class Transport:
+        host = None
+
+        def getPeer(self):
+            return None
+        def getHost(self):
+            return self.host
+
+    class Channel:
+        def __init__(self, site):
+            self.transport = CardstoriesInternalResourceTest.Transport()
+            self.site = site
+
+        def requestDone(self, request):
+            pass
+
+    def setUp(self):
+        self.service = CardstoriesServiceMockup()
+
+    def tearDown(self):
+        if hasattr(self, 'site'):
+            self.site.stopFactory()
+
+    @defer.inlineCallbacks
+    def test04_handle_internal(self):
+        def mock_handle(result, args, internal_request=False):
+            return internal_request
+        self.service.handle = mock_handle
+
+        self.service.settings['internal-secret'] = 'secret thing'
+
+        resource = CardstoriesInternalResource(self.service)
+        self.site = CardstoriesSite(resource, {}, [])
+
+        # Works with good secret param.
+        request = server.Request(self.Channel(self.site), True)
+        request.method = 'GET'
+        request.args = {'secret': ['secret thing']}
+        self.assertEquals(True, resource.handle(True, request))
+
+        request = server.Request(self.Channel(self.site), True)
+        request.method = 'POST'
+        request.args = {'secret': ['secret thing']}
+        self.assertEquals(True, resource.handle(True, request))
+
+        # Fails when secret param is bad or doesn't exists.
+        request = server.Request(self.Channel(self.site), True)
+        request.method = 'GET'
+        request.args = {'secret': ['hahahahaha']}
+        result = yield resource.handle(True, request)
+        self.assertEquals({'error': {'code': 'UNAUTHORIZED'}}, result)
+
+        request = server.Request(self.Channel(self.site), True)
+        request.method = 'POST'
+        request.args = None
+        result = yield resource.handle(True, request)
+        self.assertEquals({'error': {'code': 'UNAUTHORIZED'}}, result)
+
+
 class AGPLResourceTest(unittest.TestCase):
 
     def setUp(self):
@@ -269,6 +346,7 @@ def Run():
     suite = loader.suiteFactory()
     suite.addTest(loader.loadClass(CardstoriesSiteTest))
     suite.addTest(loader.loadClass(CardstoriesResourceTest))
+    suite.addTest(loader.loadClass(CardstoriesInternalResourceTest))
     suite.addTest(loader.loadClass(AGPLResourceTest))
 
     return runner.TrialRunner(

@@ -29,6 +29,11 @@
   <link rel="stylesheet" href="{% append_mtime '/static/css/all.css' %}" type="text/css" media="screen" />
   <link rel="stylesheet" href="{% append_mtime '/static/css/images.css' %}" type="text/css" media="screen" />
   <link rel="stylesheet" href="{% append_mtime '/static/css/credits.css' %}" type="text/css" media="screen" />
+  {% if player_bought_cards %}
+  <style type="text/css">
+    .cardstories .cardstories_deck .cardstories_buy_more { display: none; }
+  </style>
+  {% endif %}
 {% endblock %}
 
 {% block content %}

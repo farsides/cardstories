@@ -52,6 +52,7 @@ class Options(usage.Options):
          ["poll-timeout", "", 30, "Number of seconds before a long poll timeout - see http://tools.ietf.org/html/draft-loreto-http-bidirectional-07#section-5.5", int],
          ["game-timeout", "", (7 * 24 * 60 * 60), "Number of seconds before a game in progress timesout", int],
          ["static", "", "/usr/share/cardstories", "directory where /static files will be fetched", str],
+         ["internal-secret", "", "MySecret", "internal secret key shared with the django app", str],
          ["plugins-libdir", "", "/var/lib/cardstories/plugins", "plugins storage directory", str],
          ["plugins-confdir", "", "/etc/cardstories/plugins", "plugins configuration directory", str],
          ["plugins-dir", "", "/usr/share/cardstories/plugins", "plugins directory", str],

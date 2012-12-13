@@ -28,11 +28,14 @@ import os, sys
 import sqlite3
 from datetime import datetime, timedelta
 
+from django.core.urlresolvers import reverse
+
 # Allow to reference the root dir
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(CURRENT_DIR)
 sys.path.insert(0, ROOT_DIR)
 
+import website.cardstories.views
 from mailing import send, aggregate
 
 
@@ -43,7 +46,7 @@ def iso_to_datetime(iso_string):
     Parses datetime string in ISO(?) format as returned by the sqlite module
     and returns a datetime object.
     '''
-    return datetime.strptime(iso_string, '%Y-%m-%d %H:%M:%S.%f')
+    return datetime.strptime(iso_string, '%Y-%m-%d %H:%M:%S')
 
 def should_send_email(last_active, game_activities_24h):
     '''
@@ -77,12 +80,12 @@ def get_context(cursor, player_id, game_ids, last_active):
     game_activities = aggregate.get_game_activities(cursor, game_ids, player_id, happened_since=last_active)
     available_games = aggregate.get_available_games(cursor, created_since=last_active, exclude_game_ids=game_ids)
     completed_games = aggregate.get_completed_games(cursor, completed_since=last_active, exclude_game_ids=game_ids)
-    unsubscribe_url = aggregate.get_unsubscribe_url(player_id)
+    unsubscribe_path = reverse(website.cardstories.views.activity_notifications_unsubscribe)
 
     context = {'game_activities': game_activities,
                'available_games': available_games,
                'completed_games': completed_games,
-               'unsubscribe_url': unsubscribe_url}
+               'unsubscribe_path': unsubscribe_path}
 
     return context
 
@@ -107,8 +110,10 @@ def loop(ws_db_path, django_db_path, email_list=None, verbose=False):
 
     count = 0
 
-    for id, email, name in players_list:
+    for id, email, name, unsubscribed in players_list:
         if email_list and not email in email_list:
+            continue
+        if unsubscribed:
             continue
         game_ids = aggregate.get_player_game_ids(cursor, id)
         last_active = aggregate.get_players_last_activity(cursor, id)
@@ -116,7 +121,6 @@ def loop(ws_db_path, django_db_path, email_list=None, verbose=False):
         recent_game_activities = aggregate.get_game_activities(cursor, game_ids, id, happened_since=yesterday)
 
         should_send = should_send_email(last_active, recent_game_activities)
-        # TODO: Only send if the player didn't opt out.
         if should_send:
             context = get_context(cursor, id, game_ids, last_active)
             # Don't send if there isn't any new info in the context.

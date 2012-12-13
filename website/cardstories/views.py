@@ -41,7 +41,7 @@ import paypal.standard.pdt.views
 from paypal.standard.forms import PayPalPaymentsForm
 
 from forms import RegistrationForm, LoginForm
-
+from models import Purchase
 from avatar import Avatar, GravatarAvatar, FacebookAvatar
 
 def get_base_url(request):
@@ -125,8 +125,10 @@ def welcome(request):
 
     if request.user.is_authenticated():
         template = 'cardstories/game.html'
+        card_purchases = request.user.purchase_set.filter(item_code=settings.CS_EXTRA_CARD_PACK_ITEM_ID)
         context = {'create': request.session.get('create', False),
-                   'player_id': request.user.id}
+                   'player_id': request.user.id,
+                   'player_bought_cards': card_purchases.count() > 0}
         request.session['create'] = False
     else:
         context = {'registration_form': RegistrationForm(),
@@ -194,13 +196,15 @@ def login(request):
             GravatarAvatar(form.auth_user).update()
 
             # Redirect maintaining game_id, if set.
-            url = '%s%s' % (reverse(welcome), get_gameid_query(request))
+            url = request.POST.get('return_to') or \
+                '%s%s' % (reverse(welcome), get_gameid_query(request))
             return redirect(url);
     else:
-        form = LoginForm()
+        form = LoginForm({'return_to': request.GET.get('return_to')})
 
     context = {'registration_form': RegistrationForm(),
                'login_form': form}
+
     return render_to_response('cardstories/welcome.html', context,
                               context_instance=RequestContext(request,
                               processors=[common_variables]))
@@ -356,30 +360,56 @@ def get_loggedin_player_id(request, session_key):
     response = HttpResponse(user.id, mimetype="text/plain")
     return response
 
+def activity_notifications_unsubscribe(request):
+    if request.user.is_authenticated():
+        if request.method == 'POST':
+            user_profile = request.user.userprofile
+            user_profile.activity_notifications_disabled = True
+            user_profile.save()
+            return HttpResponse('You have been unsubscribed successfully.', mimetype='text/plain')
+        else:
+            context = {'logged_in': True,
+                       'unsubscribe_url': reverse(activity_notifications_unsubscribe),
+                       'game_url': reverse(welcome)}
+            return render_to_response('cardstories/activity_notifications_unsubscribe.html', context,
+                                      context_instance=RequestContext(request, processors=[common_variables]))
+    else:
+        return_to_query = urlencode({'return_to': reverse(activity_notifications_unsubscribe)})
+        login_url = '%s?%s' % (reverse(login), return_to_query)
+        context = {'logged_in': False, 'login_url': login_url}
+        return render_to_response('cardstories/activity_notifications_unsubscribe.html', context)
+
 def get_extra_cards_form(request):
     """
     Displays a HTML view with a form where the user can buy a pack of
     extra cards via paypal.
     """
+    price = '%s %s' % (settings.CS_EXTRA_CARD_PACK_PRICE, settings.CS_EXTRA_CARD_PACK_CURRENCY)
     if request.user.is_authenticated():
-        custom_data = {'user_id': request.user.id}
+        # Perhaps this user already bought the pack?
+        purchases = request.user.purchase_set.filter(item_code=settings.CS_EXTRA_CARD_PACK_ITEM_ID)
+        if purchases.count() > 0:
+            context = {'form': None, 'price': price, 'problem': 'ALREADY_BOUGHT'}
+        else:
+            custom_data = {'player_id': request.user.id}
 
-        paypal_dict = {
-            'business': settings.PAYPAL_RECEIVER_EMAIL,
-            'amount': '2.99',
-            'item_name': 'CardStories Extra Cards',
-            'item_number': 'CardPack1',
-            'notify_url': '%s/%s' % (settings.BASE_URL, settings.PAYPAL_IPN_PATH),
-            'cancel_return': settings.BASE_URL,
-            'custom':  dumps(custom_data),
-        }
+            paypal_dict = {
+                'business': settings.PAYPAL_RECEIVER_EMAIL,
+                'amount': settings.CS_EXTRA_CARD_PACK_PRICE,
+                'currency_code': settings.CS_EXTRA_CARD_PACK_CURRENCY,
+                'item_name': 'CardStories Extra Card Pack',
+                'item_number': settings.CS_EXTRA_CARD_PACK_ITEM_ID,
+                'notify_url': '%s/%s' % (settings.BASE_URL, settings.PAYPAL_IPN_PATH),
+                'cancel_return': settings.BASE_URL,
+                'custom':  dumps(custom_data),
+            }
 
-        form = PayPalPaymentsForm(initial=paypal_dict)
-        context = {'form': form}
+            form = PayPalPaymentsForm(initial=paypal_dict)
+            context = {'form': form, 'price': price, 'use_sandbox': settings.PAYPAL_TEST}
     else:
-        context = {'form': None}
+        context = {'form': None, 'price': price, 'problem': 'ANONYMOUS'}
 
     return render_to_response('cardstories/get_extra_cards.html', context)
 
-def bought_cards(request):
-    return paypal.standard.pdt.views.pdt(request, template='cardstories/bought_cards.html')
+def after_bought_cards(request):
+    return paypal.standard.pdt.views.pdt(request, template='cardstories/after_bought_cards.html')

@@ -110,9 +110,9 @@ class AggregateTest(unittest.TestCase):
 
         # Seed the playerid2name data.
         aggregate.seed_playerid2name([
-            (player1, 'player1@email.com', 'John Johnson'),
-            (player2, 'player2@email.com', 'Bob Bobbson'),
-            (invitee, 'invitee@email.com', 'Mr. Invitee')
+            (player1, 'player1@email.com', 'John Johnson', False),
+            (player2, 'player2@email.com', 'Bob Bobbson', False),
+            (invitee, 'invitee@email.com', 'Mr. Invitee', False)
         ])
 
 
@@ -173,7 +173,7 @@ class AggregateTest(unittest.TestCase):
             c.execute(sql, [game[0], owner_id, game[1], game[2], game[3]])
 
         # Seed the playerid2name data.
-        aggregate.seed_playerid2name([(owner_id, 'john@johnson.com', 'John Johnson')])
+        aggregate.seed_playerid2name([(owner_id, 'john@johnson.com', 'John Johnson', False)])
 
         # Fetching all available games since two days ago should yeild two results.
         result = aggregate.get_available_games(c, two_days_ago - sec)
@@ -207,7 +207,7 @@ class AggregateTest(unittest.TestCase):
         three_days_ago = now - timedelta(days=3)
 
         # Seed the playerid2name data.
-        aggregate.seed_playerid2name([(owner_id, 'john@johnson.com', 'John Johnson')])
+        aggregate.seed_playerid2name([(owner_id, 'john@johnson.com', 'John Johnson', False)])
 
         # Create some games.
         sql = 'INSERT INTO games (id, owner_id, state, sentence, created) VALUES (?, ?, ?, ?, ?)'
@@ -252,15 +252,21 @@ class AggregateTest(unittest.TestCase):
             "  username VARCHAR(255), "
             "  first_name VARCHAR(255) "
             "); ")
+        c.execute(
+            "CREATE TABLE cardstories_userprofile ( "
+            "  user_id INTEGER, "
+            "  activity_notifications_disabled BOOL NOT NULL DEFAULT False "
+            "); ")
 
         players = [
-            (1, 'john@johnson.com', 'John Johnson'),
-            (2, 'bill@billson.com', 'Bill Billson'),
-            (88, 'bigjoe99@gmail.com', None)
+            (1, 'john@johnson.com', 'John Johnson', False),
+            (2, 'bill@billson.com', 'Bill Billson', True),
+            (88, 'bigjoe99@gmail.com', None, False)
         ]
 
         for player in players:
-            c.execute('INSERT INTO auth_user (id, username, first_name) VALUES (?, ?, ?)', player)
+            c.execute('INSERT INTO auth_user (id, username, first_name) VALUES (?, ?, ?)', (player[0], player[1], player[2]))
+            c.execute('INSERT INTO cardstories_userprofile (user_id, activity_notifications_disabled) VALUES (?, ?)', (player[0], player[3]))
 
         result = aggregate.get_all_players(c)
         self.assertEquals(len(result), 3)
@@ -268,15 +274,15 @@ class AggregateTest(unittest.TestCase):
         self.assertEquals(result[1], players[1])
         # For players without first name present in the database, it shouold return
         # the part of the email before the '@' character in place of the name.
-        self.assertEquals(result[2], (88, 'bigjoe99@gmail.com', 'bigjoe99'))
+        self.assertEquals(result[2], (88, 'bigjoe99@gmail.com', 'bigjoe99', False))
         c.close()
 
 
     def test06_get_player_name(self):
         players = [
-            (1, 'john@johnson.com', 'John Johnson'),
-            (2, 'bob@bobbson.com', 'Bob Bobbson'),
-            (42, 'bigjoe99@gmail.com', 'bigjoe99')
+            (1, 'john@johnson.com', 'John Johnson', False),
+            (2, 'bob@bobbson.com', 'Bob Bobbson', False),
+            (42, 'bigjoe99@gmail.com', 'bigjoe99', False)
         ]
 
         aggregate.seed_playerid2name(players)

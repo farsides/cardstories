@@ -1139,6 +1139,79 @@ class CardstoriesServiceTest(CardstoriesServiceTestBase):
         state, player_id_list = yield self.service.games[game_id].game(owner_id)
         self.assertEquals(sentence, state['sentence'])
 
+    @defer.inlineCallbacks
+    def test17_grant_cards_to_player(self):
+        player_id = 44
+        # Cards the player is about to be granted.
+        bought_card_ids = [10, 11, 12, 13]
+        old_earned_card_ids = [3, 5, 11, 2, 14, 19]
+        # Cards the player has already earned (note card 11 appears in both lists).
+        old_earned_cards = [chr(x) for x in old_earned_card_ids]
+
+        sql = "INSERT INTO players (player_id, earned_cards) VALUES (%d, '%s')"
+        c = self.db.cursor()
+        c.execute(sql % (player_id, ''.join(old_earned_cards)))
+        self.db.commit()
+
+        result = yield self.service.grant_cards_to_player({'player_id': [player_id],
+                                                           'card_ids': bought_card_ids})
+
+        self.assertEquals(result['status'], 'success')
+
+        c.execute('SELECT earned_cards FROM players WHERE player_id = ?', [player_id])
+        new_earned_cards = c.fetchone()[0]
+        c.close()
+
+        new_earned_card_ids = [ord(c) for c in list(new_earned_cards)]
+        self.assertEquals(set(new_earned_card_ids), set(old_earned_card_ids) | set(bought_card_ids))
+
+    @defer.inlineCallbacks
+    def test18_grant_cards_to_player_for_player_without_earned_cards(self):
+        player_id = 44
+        # Cards the player is about to be granted.
+        bought_card_ids = [10, 11, 12, 13]
+
+        c = self.db.cursor()
+        c.execute("INSERT INTO players (player_id) VALUES (?)", [player_id])
+        self.db.commit()
+
+        result = yield self.service.grant_cards_to_player({'player_id': [player_id],
+                                                           'card_ids': bought_card_ids})
+
+        self.assertEquals(result['status'], 'success')
+
+        c.execute('SELECT earned_cards FROM players WHERE player_id = ?', [player_id])
+        earned_cards = c.fetchone()[0]
+        c.close()
+
+        earned_card_ids = [ord(c) for c in list(earned_cards)]
+        self.assertEquals(set(earned_card_ids), set(bought_card_ids))
+
+    @defer.inlineCallbacks
+    def test19_grant_cards_to_player_only_available_through_internal_resourc(self):
+        player_id = 44
+        # Cards the player is about to be granted.
+        bought_card_ids = [10, 11, 12, 13]
+
+        c = self.db.cursor()
+        c.execute("INSERT INTO players (player_id) VALUES (?)", [player_id])
+        self.db.commit()
+
+        # Should not get in through the public handler.
+        args = {'action': ['grant_cards_to_player'],
+                'player_id': [player_id],
+                'card_ids': [10, 11, 12]}
+        result = yield self.service.handle(defer.succeed(True), args, internal_request=False)
+
+        self.assertTrue('error' in result)
+
+        # An error should be logged to the Twisted log:
+        self.assertEquals(len(self.flushLoggedErrors()), 1)
+
+        # Should work through the internal handler.
+        result = yield self.service.handle(defer.succeed(True), args, internal_request=True)
+        self.assertEquals(result['status'], 'success')
+
 
 class CardstoriesConnectorTest(CardstoriesServiceTestBase):
 

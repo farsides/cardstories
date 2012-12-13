@@ -67,6 +67,7 @@ class CardstoriesServerTest(unittest.TestCase):
         pem = 'cert.pem'
         db = 'base.sqlite'
         ssl_port = '8080'
+        internal_secret = 'My Most Secret Key'
         plugins = 'P1 P2 P3'
         plugins_dir = 'PLUGINDIR'
         plugins_libdir = 'PLUGINDIR/LIB'
@@ -79,6 +80,7 @@ class CardstoriesServerTest(unittest.TestCase):
                                '--ssl-pem', pem,
                                '--verbose',
                                '--db', db,
+                               '--internal-secret', internal_secret,
                                '--plugins', plugins,
                                '--plugins-dir', plugins_dir,
                                '--plugins-libdir', plugins_libdir,
@@ -90,6 +92,7 @@ class CardstoriesServerTest(unittest.TestCase):
         self.assertEquals(pem, settings['ssl-pem'])
         self.assertEquals(1, settings['verbose'])
         self.assertEquals(db, settings['db'])
+        self.assertEquals(internal_secret, settings['internal-secret'])
         self.assertEquals(plugins, settings['plugins'])
         self.assertEquals(plugins_dir, settings['plugins-dir'])
         self.assertEquals(plugins_libdir, settings['plugins-libdir'])

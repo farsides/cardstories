@@ -27,6 +27,7 @@
 # Imports #####################################################################
 
 import sys, os.path, re
+from datetime import datetime, timedelta
 
 
 # Main ########################################################################
@@ -40,24 +41,35 @@ if not os.path.exists(sys.argv[1]):
     sys.exit('ERROR: Log file %s was not found!' % sys.argv[1])
 
 LOG_FILE = sys.argv[1]
-
+# Don't look for tracebacks older than one day.
+SINCE_DATETIME = datetime.now() - timedelta(1)
 
 ## Print out tracebacks ##
 
 tracebacks = ""
 in_traceback = False
+timestamp = None
 
 with open(LOG_FILE) as f:
     for line in f:
-        if re.search(r'Traceback', line):
-            in_traceback = True
-        elif in_traceback and (re.match(r'\t$', line) or re.match(r'[^ ]+ [^ ]+ \[[^\]]+\] [^ -]+', line)):
-            tracebacks += "\n==================\n\n"
-            in_traceback = False
+        if re.match(r'\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d', line):
+            timestamp = datetime.strptime(line[:19], '%Y-%m-%d %H:%M:%S')
 
-        if in_traceback:
-            tracebacks += line
+
+        if timestamp >= SINCE_DATETIME:
+            if re.search(r'Traceback', line):
+                tracebacks += timestamp.strftime("--- %Y-%m-%d %H:%M:%S ---\n\n")
+                in_traceback = True
+            elif in_traceback and \
+                    (re.match(r'\t$', line) or re.match(r'[^ ]+ [^ ]+ \[[^\]]+\] [^ -]+', line)) and not \
+                    (re.search('Failure', line) or re.search('Error', line)):
+                tracebacks += "\n==================\n\n"
+                in_traceback = False
+
+            if in_traceback:
+                tracebacks += line
+
+if not tracebacks:
+    tracebacks = "No errors today, good job! : )\n"
 
 print tracebacks
-
-

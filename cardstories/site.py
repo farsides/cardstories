@@ -57,13 +57,11 @@ class CardstoriesResource(resource.Resource):
         d = defer.succeed(True)
 
         # pre-process the request ...
-        for plugin in request.site.preprocess:
-            d.addCallback(plugin.preprocess, request)
+        self.preprocess(d, request)
         # ... process the request ...
         d.addCallback(self.handle, request)
         # ... post-process the request.
-        for plugin in request.site.postprocess:
-            d.addCallback(plugin.postprocess, request)
+        self.postprocess(d, request)
 
         # catch errors and dump a trace ...
         def failed(reason):
@@ -90,8 +88,38 @@ class CardstoriesResource(resource.Resource):
 
         return d
 
+    def preprocess(self, d, request):
+        for plugin in request.site.preprocess:
+            d.addCallback(plugin.preprocess, request)
+
+    def postprocess(self, d, request):
+        for plugin in request.site.postprocess:
+            d.addCallback(plugin.postprocess, request)
+
     def handle(self, result, request):
         return self.service.handle(result, request.args)
+
+class CardstoriesInternalResource(CardstoriesResource):
+    """
+    Resource used for internal reqeusts only (WS <-> django).
+    The same as the "regular" CardstoriesResource except that
+    it makes sure that incoming requests contain a shared secret param,
+    it doesn't use plugins, and it signals to the service that the
+    request is coming from an internal resource.
+
+    """
+    def preprocess(self, d, request):
+        pass
+
+    def postprocess(self, d, request):
+        pass
+
+    def handle(self, result, request):
+        secret = request.args and request.args.get('secret')
+        if secret and secret[0] == self.service.settings['internal-secret']:
+            return self.service.handle(result, request.args, internal_request=True)
+        else:
+            return defer.succeed({'error': {'code': 'UNAUTHORIZED'}})
 
 import os
 import glob
@@ -123,6 +151,7 @@ class CardstoriesTree(resource.Resource):
         resource.Resource.__init__(self)
         self.service = service
         self.putChild("resource", CardstoriesResource(self.service))
+        self.putChild("internal", CardstoriesInternalResource(self.service))
         self.putChild("static", static.File(service.settings['static']))
         import cardstories
         self.putChild("agpl", AGPLResource(service.settings['static'], cardstories))
